@@ -1,0 +1,6 @@
+{
+    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
+    "files.associations": {
+        "algorithm": "cpp"
+    }
+}
