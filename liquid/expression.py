@@ -7,13 +7,17 @@ from typing import Union, List, Optional, Any, Iterator
 
 from liquid.context import Context
 from liquid.token import Token
-from liquid.exceptions import LiquidTypeError, Error
+from liquid.exceptions import LiquidTypeError, Error, LiquidKeyError
+from liquid.code import Opcode
+from liquid.compiler import Compiler
 
 Number = Union[int, float]
 
 
 class Expression(ABC):
     __slots__ = ("tok",)
+
+    expression_statement = True
 
     def __init__(self, tok: Token):
         self.tok = tok
@@ -24,6 +28,13 @@ class Expression(ABC):
 
     def token(self):
         return self.tok
+
+    def compile_expression(self, compiler: Compiler):
+        raise NotImplementedError(":(")
+
+    def compile(self, compiler: Compiler):
+        # XXX: Just in case we need to hook in to the compile method later.
+        self.compile_expression(compiler)
 
 
 class Boolean(Expression):
@@ -45,6 +56,12 @@ class Boolean(Expression):
     def evaluate(self, context: Context) -> bool:
         return self.value
 
+    def compile_expression(self, compiler: Compiler):
+        if self.value:
+            compiler.emit(Opcode.TRUE)
+        else:
+            compiler.emit(Opcode.FALSE)
+
 
 class Nil(Expression):
     __slots__ = ("tok",)
@@ -60,6 +77,9 @@ class Nil(Expression):
 
     def evaluate(self, context: Context) -> None:
         return None
+
+    def compile_expression(self, compiler: Compiler):
+        compiler.emit(Opcode.NIL)
 
 
 class Empty(Expression):
@@ -81,13 +101,29 @@ class Empty(Expression):
     def evaluate(self, context: Context) -> Empty:
         return self
 
+    def compile_expression(self, compiler: Compiler):
+        compiler.emit(Opcode.EMPTY)
 
-class StringLiteral(Expression):
+
+class Literal(Expression):
     __slots__ = ("tok", "value")
 
-    def __init__(self, tok: Token, value: str):
+    def __init__(self, tok: Token, value: Any):
         super().__init__(tok)
         self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+    def evaluate(self, context: Context) -> Any:
+        return self.value
+
+    def compile_expression(self, compiler: Compiler):
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.value))
+
+
+class StringLiteral(Literal):
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, StringLiteral) and self.value == other.value
@@ -95,19 +131,9 @@ class StringLiteral(Expression):
     def __repr__(self):  # pragma: no cover
         return f"StringLiteral(tok={self.tok}, value='{self.value}')"
 
-    def __str__(self):
-        return repr(self.value)
 
-    def evaluate(self, context: Context) -> str:
-        return self.value
-
-
-class IntegerLiteral(Expression):
-    __slots__ = ("tok", "value")
-
-    def __init__(self, tok: Token, value: int):
-        super().__init__(tok)
-        self.value = value
+class IntegerLiteral(Literal):
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, IntegerLiteral) and self.value == other.value
@@ -115,31 +141,15 @@ class IntegerLiteral(Expression):
     def __repr__(self):  # pragma: no cover
         return f"IntegerLiteral(tok={self.tok}, value={self.value})"
 
-    def __str__(self):
-        return str(self.value)
 
-    def evaluate(self, context: Context) -> int:
-        return self.value
-
-
-class FloatLiteral(Expression):
-    __slots__ = ("tok", "value")
-
-    def __init__(self, tok: Token, value: float):
-        super().__init__(tok)
-        self.value = value
+class FloatLiteral(Literal):
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, FloatLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
         return f"FloatLiteral(tok={self.tok}, value={self.value})"
-
-    def __str__(self):
-        return str(self.value)
-
-    def evaluate(self, context: Context) -> float:
-        return self.value
 
 
 class IdentifierPathElement(Expression):
@@ -161,6 +171,8 @@ class IdentifierPathElement(Expression):
     def evaluate(self, context: Context) -> Union[str, int]:
         return self.value
 
+
+# XXX:
 
 IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
 
@@ -187,6 +199,14 @@ class Identifier(Expression):
     def evaluate(self, context: Context) -> Any:
         path: List[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
+
+    def compile_expression(self, compiler: Compiler):
+        name = self.path[0].value
+        try:
+            symbol = compiler.symbol_table.resolve(name)
+            compiler.emit(Opcode.GETLOCAL, symbol.index)  # XXX: Resolve
+        except KeyError as err:
+            raise LiquidKeyError(f"undefined variable {name}") from err
 
 
 class PrefixExpression(Expression):
@@ -222,6 +242,14 @@ class PrefixExpression(Expression):
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
 
+    def compile_expression(self, compiler: Compiler):
+        self.right.compile(compiler)
+
+        if self.operator == "-":
+            compiler.emit(Opcode.MINUS)
+        else:
+            raise LiquidTypeError(f"unknown operator {self.operator}")
+
 
 class InfixExpression(Expression):
     __slots__ = ("tok", "left", "operator", "right")
@@ -253,7 +281,7 @@ class InfixExpression(Expression):
 
     def evaluate(self, context: Context):
         """
-        
+
         1 == 1.0 --> true
 
         Liquid does not coerce left or right operands when types don't match. So
@@ -289,6 +317,38 @@ class InfixExpression(Expression):
         raise LiquidTypeError(
             f"unknown operator: {type(left)} {self.operator} {type(right)}"
         )
+
+    def compile_expression(self, compiler: Compiler):
+        if self.operator == "<":
+            # Swap left and right, making "<" a ">"
+            self.right.compile(compiler)
+            self.left.compile(compiler)
+            compiler.emit(Opcode.GT)
+        elif self.operator == "<=":
+            # Swap left and right, making "<=" a ">="
+            self.right.compile(compiler)
+            self.left.compile(compiler)
+            compiler.emit(Opcode.GE)
+        else:
+            self.left.compile(compiler)
+            self.right.compile(compiler)
+
+            if self.operator == ">":
+                compiler.emit(Opcode.GT)
+            elif self.operator == "==":
+                compiler.emit(Opcode.EQ)
+            elif self.operator == "!=" or self.operator == "<>":
+                compiler.emit(Opcode.NE)
+            elif self.operator == ">=":
+                compiler.emit(Opcode.GE)
+            elif self.operator == "contains":
+                compiler.emit(Opcode.CONTAINS)
+            elif self.operator == "and":
+                compiler.emit(Opcode.AND)
+            elif self.operator == "or":
+                compiler.emit(Opcode.OR)
+            else:
+                raise LiquidTypeError(f"unknown operator: {self.operator}")
 
 
 class Filter:
@@ -340,6 +400,9 @@ class BooleanExpression(Expression):
             return False
         return True
 
+    def compile_expression(self, compiler: Compiler):
+        self.expression.compile(compiler)
+
 
 class FilteredExpression(Expression):
     __slots__ = ("expression", "filters")
@@ -383,6 +446,10 @@ class FilteredExpression(Expression):
 
         return result
 
+    def compile_expression(self, compiler: Compiler):
+        # TODO: Filter funcs
+        self.expression.compile(compiler)
+
 
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
@@ -415,6 +482,12 @@ class AssignmentExpression(Expression):
         result = self.expression.evaluate(context)
         context.assign(key=name, val=result)
         return ""
+
+    def compile_expression(self, compiler: Compiler):
+        self.expression.compile(compiler)
+        name = self.name.path[0].value
+        symbol = compiler.symbol_table.define(name)
+        compiler.emit(Opcode.SETLOCAL, symbol.index)
 
 
 class LoopExpression(Expression):
@@ -535,6 +608,9 @@ class LoopExpression(Expression):
             loop_iter = reversed(list(loop_iter))
 
         return loop_iter
+
+
+# TODO: Test shopify for <int> and <int>
 
 
 def eval_number_expression(

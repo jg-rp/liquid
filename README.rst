@@ -95,7 +95,12 @@ Known Issues
 
 - Error handling. Python Liquid might not handle syntax or type errors in the same
   way as the reference implementation. We might fail earlier or later, and will 
-  almost certainly produce a differed error message.
+  almost certainly produce a different error message.
+
+- Expression keywords. Output statement expressions and all built-in tag expressions
+  share the same expression lexer, which references a single map of reserved keywords.
+  So, if a keyword is reserved for one built-in tag, it must not be used as an identifier
+  in any expression.
 
 TODO
 

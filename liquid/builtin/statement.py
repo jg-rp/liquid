@@ -5,9 +5,10 @@ from liquid.token import Token, TOKEN_STATEMENT
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream
 from liquid.parse import parse_filtered_expression, expect
 from liquid.expression import Expression
+from liquid.compiler import Compiler
 
 
 class StatementNode(ast.Node):
@@ -37,6 +38,9 @@ class StatementNode(ast.Node):
             val = str(val)
 
         buffer.write(val)
+
+    def compile_node(self, compiler: Compiler):
+        self.expression.compile(compiler)
 
 
 class Statement(Tag):

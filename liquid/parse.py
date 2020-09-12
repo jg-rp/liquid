@@ -487,7 +487,7 @@ def parse_boolean_expression(stream) -> expression.Expression:
     )
 
 
-def parse_assignment_expression(stream) -> expression.Expression:
+def parse_assignment_expression(stream) -> expression.AssignmentExpression:
     """Parse a liquid assignment expression, as one might find in an `assign` tag.
 
     This is essentially the same as a parse_filtered_expression, but with
@@ -504,7 +504,7 @@ def parse_assignment_expression(stream) -> expression.Expression:
         path=[expression.IdentifierPathElement(stream.current, stream.current.value)],
     )
     stream.next_token()
-    stream.next_token()  # Eat ASSIGN TOKEN_
+    stream.next_token()  # Eat ASSIGN TOKEN
     expr = parse_filtered_expression(stream)
 
     return expression.AssignmentExpression(tok=name.tok, name=name, expression=expr)

@@ -42,7 +42,6 @@ RE_QUOTE = re.compile("\"|'")
 RE_ENDRAW = re.compile(r"{%-?\s*endraw\s*-?%}")
 
 
-# pylint: disable=too-many-instance-attributes
 class Lexer(ABC):
     """Base lexer."""
 
@@ -440,7 +439,7 @@ class RangeLexer(Lexer):
                     yield RangeToken(TokType.LITERAL, pos, end)
                     pos = end
             else:
-                # A tempalte literal
+                # A template literal
                 match = self.literal_end_re.search(source, pos)
                 if match:
                     end = match.start()
@@ -458,42 +457,47 @@ class RangeLexer(Lexer):
 
     def tokeniter(self, source: str, linenum: int = 1) -> Iterator[Token]:
 
+        # TODO: Better.
         lstrip = False
         rstrip = False
 
-        for tok in self._scan(source):
-            val = source[tok.start : tok.end]
+        try:
+            for tok in self._scan(source):
+                val = source[tok.start : tok.end]
 
-            if tok.type == TokType.STATEMENT:
-                yield Token(linenum, TOKEN_STATEMENT, val.strip())
-            elif tok.type == TokType.TAG:
-                _val = val.strip()
-                if " " in _val:
-                    name, expr = _val.split(None, 1)
-                    yield Token(linenum, TOKEN_TAG_NAME, name)
-                    yield Token(linenum, TOKEN_EXPRESSION, expr.lstrip())
-                else:
-                    yield Token(linenum, TOKEN_TAG_NAME, _val)
-            elif tok.type == TokType.LSTRIP:
-                lstrip = True
-            elif tok.type == TokType.RSTRIP:
-                rstrip = True
-            else:
-                if lstrip and rstrip:
+                if tok.type == TokType.STATEMENT:
+                    yield Token(linenum, TOKEN_STATEMENT, val.strip())
+                elif tok.type == TokType.TAG:
                     _val = val.strip()
-                elif lstrip:
-                    _val = val.lstrip()
-                elif rstrip:
-                    _val = val.rstrip()
+                    if " " in _val:
+                        name, expr = _val.split(None, 1)
+                        yield Token(linenum, TOKEN_TAG_NAME, name)
+                        yield Token(linenum, TOKEN_EXPRESSION, expr.lstrip())
+                    else:
+                        yield Token(linenum, TOKEN_TAG_NAME, _val)
+                elif tok.type == TokType.LSTRIP:
+                    lstrip = True
+                elif tok.type == TokType.RSTRIP:
+                    rstrip = True
                 else:
-                    _val = val
+                    if lstrip and rstrip:
+                        _val = val.strip()
+                    elif lstrip:
+                        _val = val.lstrip()
+                    elif rstrip:
+                        _val = val.rstrip()
+                    else:
+                        _val = val
 
-                lstrip = False
-                rstrip = False
-                if _val:
-                    yield Token(linenum, TOKEN_LITERAL, _val)
+                    lstrip = False
+                    rstrip = False
+                    if _val:
+                        yield Token(linenum, TOKEN_LITERAL, _val)
 
-            linenum += val.count("\n")
+                linenum += val.count("\n")
+        except LiquidSyntaxError as err:
+            err.linenum = linenum
+            raise
 
         yield Token(linenum, TOKEN_EOF, "")
 

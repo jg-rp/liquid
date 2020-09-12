@@ -28,6 +28,10 @@ class LiquidTypeError(Error):
     """Exception raised when an error occurs at render time."""
 
 
+class LiquidKeyError(Error):
+    """Exception raised when an undefined variable is accessed."""
+
+
 class DisabledTagError(Error):
     """Exception raised when an attempt is made to render a disabled tag."""
 
@@ -75,6 +79,14 @@ class LiquidTypeWarning(LiquidWarning):
 
 class FilterWarning(LiquidWarning):
     """Replaces filter exceptions when in WARN mode."""
+
+
+class OpcodeError(Error):
+    """Exceptions raised when there is an opcode definition error."""
+
+
+class StackOverflow(Error):
+    """Exception raised when the stack is full."""
 
 
 WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {

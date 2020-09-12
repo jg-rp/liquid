@@ -7,8 +7,9 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
-from liquid.expression import Expression
+from liquid.expression import AssignmentExpression
 from liquid.parse import expect, parse_assignment_expression
+from liquid.compiler import Compiler
 
 TAG_ASSIGN = sys.intern("assign")
 
@@ -16,7 +17,9 @@ TAG_ASSIGN = sys.intern("assign")
 class AssignNode(ast.Node):
     __slots__ = ("tok", "expression")
 
-    def __init__(self, tok: Token, expression: Expression):
+    statement = False
+
+    def __init__(self, tok: Token, expression: AssignmentExpression):
         self.tok = tok
         self.expression = expression
 
@@ -25,6 +28,9 @@ class AssignNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         self.expression.evaluate(context)
+
+    def compile_node(self, compiler: Compiler):
+        self.expression.compile(compiler)
 
 
 class AssignTag(Tag):
@@ -43,4 +49,7 @@ class AssignTag(Tag):
 
         expect(stream, TOKEN_EXPRESSION)
         expr_iter = lexer.tokenize(stream.current.value)
-        return AssignNode(tok, parse_assignment_expression(expr_iter),)
+        return AssignNode(
+            tok,
+            parse_assignment_expression(expr_iter),
+        )

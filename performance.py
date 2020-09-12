@@ -311,14 +311,14 @@ def benchmark(search_path: str, number: int = 100):
         )
     )
 
-    # print(
-    #     timeit.repeat(
-    #         "parse(env, templates)",
-    #         setup="env, templates = setup_parse(search_path)",
-    #         globals={**globals(), "search_path": search_path},
-    #         number=number,
-    #     )
-    # )
+    print(
+        timeit.repeat(
+            "parse(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+        )
+    )
 
     # print(
     #     timeit.repeat(
@@ -350,8 +350,8 @@ def main():
     elif n_args == 1 and args[0] == "--profile":
         # profile_render(search_path)
         # profile_parse_and_render(search_path)
-        # profile_parse(search_path)
-        profile_lex(search_path)
+        profile_parse(search_path)
+        # profile_lex(search_path)
     else:
         sys.stderr.write("usage: python performance.py [--profile]\n")
         sys.exit(1)
