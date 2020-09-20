@@ -9,7 +9,7 @@ from liquid.symbol import SymbolTable
 
 # TODO:
 # - Compilation scopes for "capture" and "inline render" support
-# - Stack frames for adding locals to block tags
+# - Stack frames for adding locals to block tags and executing "capture"
 # - "locals" are variables defined with "assign" or "capture"
 # - `case` gets compiled to `if else..`
 # - `unless` gets compiled to `if else ..`
@@ -34,6 +34,8 @@ class EmittedInstruction(NamedTuple):
 
 @dataclass
 class CompilationScope:
+    """Compile blocks independently"""
+
     instructions: code.Instructions
     last_instruction: EmittedInstruction
     previous_instruction: EmittedInstruction
@@ -47,7 +49,7 @@ class Compiler:
         self.symbol_table = symbol_table or SymbolTable()
 
         main_scope = CompilationScope(
-            instructions=code.Instructions(),
+            instructions=[],
             last_instruction=EmittedInstruction(opcode=Opcode.NOP, position=-1),
             previous_instruction=EmittedInstruction(opcode=Opcode.NOP, position=-1),
         )
@@ -68,8 +70,11 @@ class Compiler:
 
     def add_constant(self, obj: Any) -> int:
         """Add the given object to the constant pool."""
-        self.constants.append(obj)
-        return len(self.constants) - 1
+        try:
+            return self.constants.index(obj)
+        except ValueError:
+            self.constants.append(obj)
+            return len(self.constants) - 1
 
     def emit(self, op: code.Opcode, *operands: int) -> int:
         """Emit an instruction from the given opcode and operands."""
@@ -98,7 +103,7 @@ class Compiler:
         old = self.current_instructions()
         new = old[: last.position]
 
-        self.scopes[self.scope_idx].instructions = code.Instructions(new)
+        self.scopes[self.scope_idx].instructions = new
         self.scopes[self.scope_idx].last_instruction = prev
 
     def set_last_instruction(self, op: Opcode, pos: int):
@@ -114,7 +119,27 @@ class Compiler:
         for i, byte in enumerate(new_instruction):
             ins[pos + i] = byte
 
-    def change_operand(self, pos: int, operand: int):
+    def change_operand(self, pos: int, *operand: int):
         op = Opcode(self.current_instructions()[pos])
-        ins = code.make(op, operand)
+        ins = code.make(op, *operand)
         self.replace_instruction(pos, ins)
+
+    def enter_scope(self):
+        scope = CompilationScope(
+            instructions=[],
+            last_instruction=EmittedInstruction(opcode=Opcode.NOP, position=-1),
+            previous_instruction=EmittedInstruction(opcode=Opcode.NOP, position=-1),
+        )
+
+        self.scopes.append(scope)
+        self.scope_idx += 1
+        self.symbol_table = SymbolTable(outer=self.symbol_table)
+
+    def leave_scope(self) -> code.Instructions:
+        ins = self.current_instructions()
+
+        self.scopes.pop()
+        self.scope_idx -= 1
+        self.symbol_table = self.symbol_table.outer
+
+        return ins

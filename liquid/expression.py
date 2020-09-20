@@ -7,9 +7,10 @@ from typing import Union, List, Optional, Any, Iterator
 
 from liquid.context import Context
 from liquid.token import Token
-from liquid.exceptions import LiquidTypeError, Error, LiquidKeyError
+from liquid.exceptions import LiquidTypeError, Error
 from liquid.code import Opcode
 from liquid.compiler import Compiler
+from liquid import hash_identifier
 
 Number = Union[int, float]
 
@@ -171,6 +172,9 @@ class IdentifierPathElement(Expression):
     def evaluate(self, context: Context) -> Union[str, int]:
         return self.value
 
+    def compile_expression(self, compiler: Compiler):
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.value))
+
 
 # XXX:
 
@@ -201,12 +205,23 @@ class Identifier(Expression):
         return context.get(path)
 
     def compile_expression(self, compiler: Compiler):
-        name = self.path[0].value
+        name, items = self.path[0], self.path[1:]
+
+        # XXX: These should be asserted in the parser.
+        assert isinstance(name, IdentifierPathElement)
+        assert isinstance(name.value, str)
+
         try:
-            symbol = compiler.symbol_table.resolve(name)
-            compiler.emit(Opcode.GETLOCAL, symbol.index)  # XXX: Resolve
-        except KeyError as err:
-            raise LiquidKeyError(f"undefined variable {name}") from err
+            symbol = compiler.symbol_table.resolve(name.value)
+            compiler.emit(Opcode.GETLOCAL, symbol.index)
+        except KeyError:
+            # Not a locally defined variable. Might be in context at render time.
+            name.compile(compiler)
+            compiler.emit(Opcode.RESOLVE)
+
+            for item in items:
+                item.compile(compiler)
+                compiler.emit(Opcode.GETITEM)
 
 
 class PrefixExpression(Expression):
@@ -373,6 +388,10 @@ class Filter:
     def evaluate_args(self, context: Context):
         return [arg.evaluate(context) for arg in self.args]
 
+    def compile_args(self, compiler: Compiler):
+        for arg in reversed(self.args):
+            arg.compile(compiler)
+
 
 class BooleanExpression(Expression):
     __slots__ = ("expression",)
@@ -401,6 +420,7 @@ class BooleanExpression(Expression):
         return True
 
     def compile_expression(self, compiler: Compiler):
+        # The VM has an `ìs_truthy` function.
         self.expression.compile(compiler)
 
 
@@ -447,8 +467,13 @@ class FilteredExpression(Expression):
         return result
 
     def compile_expression(self, compiler: Compiler):
-        # TODO: Filter funcs
         self.expression.compile(compiler)
+
+        for fltr in self.filters:
+            fltr.compile_args(compiler)
+
+            fltr_id = hash_identifier(fltr.name)
+            compiler.emit(Opcode.FIL, fltr_id, len(fltr.args))
 
 
 class AssignmentExpression(Expression):
@@ -485,8 +510,12 @@ class AssignmentExpression(Expression):
 
     def compile_expression(self, compiler: Compiler):
         self.expression.compile(compiler)
-        name = self.name.path[0].value
-        symbol = compiler.symbol_table.define(name)
+        name = self.name.path[0]
+
+        assert isinstance(name, IdentifierPathElement)
+        assert isinstance(name.value, str)
+
+        symbol = compiler.symbol_table.define(name.value)
         compiler.emit(Opcode.SETLOCAL, symbol.index)
 
 
@@ -513,7 +542,7 @@ class LoopExpression(Expression):
 
     def __init__(
         self,
-        name: Identifier,
+        name: str,
         identifier: Optional[Identifier] = None,
         start: Optional[Union[IntegerLiteral, Identifier]] = None,
         stop: Optional[Union[IntegerLiteral, Identifier]] = None,
@@ -608,6 +637,32 @@ class LoopExpression(Expression):
             loop_iter = reversed(list(loop_iter))
 
         return loop_iter
+
+    def compile_expression(self, compiler: Compiler):
+        if self.reversed:
+            compiler.emit(Opcode.TRUE)
+        else:
+            compiler.emit(Opcode.FALSE)
+
+        if self.offset:
+            self.offset.compile(compiler)
+        else:
+            compiler.emit(Opcode.NIL)
+
+        if self.limit:
+            self.limit.compile(compiler)
+        else:
+            compiler.emit(Opcode.NIL)
+
+        if self.identifier:
+            # For each loop
+            compiler.emit(Opcode.NIL)
+            self.identifier.compile(compiler)
+
+        else:
+            # Range loop
+            self.stop.compile(compiler)
+            self.start.compile(compiler)
 
 
 # TODO: Test shopify for <int> and <int>

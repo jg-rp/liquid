@@ -118,10 +118,14 @@ class RenderTestCases(unittest.TestCase):
                     expect="hello",
                 ),
                 Case(
-                    description="integer literal", template=r"{{ 123 }}", expect="123",
+                    description="integer literal",
+                    template=r"{{ 123 }}",
+                    expect="123",
                 ),
                 Case(
-                    description="float literal", template=r"{{ 1.23 }}", expect="1.23",
+                    description="float literal",
+                    template=r"{{ 1.23 }}",
+                    expect="1.23",
                 ),
                 Case(
                     description="global identifier",
@@ -358,7 +362,10 @@ class RenderTestCases(unittest.TestCase):
                 description="nested condition in the consequence block",
                 template=r"{% if product %}{% if title == 'Hello' %}baz{% endif %}{% endif %}",
                 expect="baz",
-                globals={"product": {"title": "foo"}, "title": "Hello",},
+                globals={
+                    "product": {"title": "foo"},
+                    "title": "Hello",
+                },
             ),
             Case(
                 description="nested condition, alternative in the consequence block",
@@ -375,7 +382,9 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}, "title": "Hello"},
             ),
             Case(
-                description="false", template=r"{% if false %}{% endif %}", expect="",
+                description="false",
+                template=r"{% if false %}{% endif %}",
+                expect="",
             ),
             Case(
                 description="contains condition",
@@ -623,6 +632,11 @@ class RenderTestCases(unittest.TestCase):
                     r"{% cycle '1', '2', '3' %}"
                 ),
                 expect="112",
+            ),
+            Case(
+                description="integers",
+                template=(r"{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}"),
+                expect="123",
             ),
         ]
 
@@ -901,7 +915,16 @@ class RenderTestCases(unittest.TestCase):
                     '<td class="col4">tag4</td>'
                     "</tr>"
                 ),
-                globals={"collection": {"tags": ["tag1", "tag2", "tag3", "tag4",]}},
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
             ),
             Case(
                 description="two columns",
@@ -916,7 +939,16 @@ class RenderTestCases(unittest.TestCase):
                     '<td class="col2">tag4</td>'
                     "</tr>"
                 ),
-                globals={"collection": {"tags": ["tag1", "tag2", "tag3", "tag4",]}},
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
             ),
             Case(
                 description="two column range",
@@ -1041,22 +1073,30 @@ class RenderTestCases(unittest.TestCase):
                 template=r"{% include 'product-title' with collection.products[1] %}",
                 expect="car",
                 globals={
-                    "collection": {"products": [{"title": "bike"}, {"title": "car"}],}
+                    "collection": {
+                        "products": [{"title": "bike"}, {"title": "car"}],
+                    }
                 },
-                partials={"product-title": r"{{ product-title.title }}",},
+                partials={
+                    "product-title": r"{{ product-title.title }}",
+                },
             ),
             Case(
                 description="bound variable does not exist",
                 template=r"{% include 'product-title' with no.such.thing %}",
                 expect="",
-                partials={"product-title": r"{{ product-title.title }}",},
+                partials={
+                    "product-title": r"{{ product-title.title }}",
+                },
             ),
             Case(
                 description="bound array variable",
                 template=r"{% include 'prod' for collection.products %}",
                 expect="bikecar",
                 globals={
-                    "collection": {"products": [{"title": "bike"}, {"title": "car"}],}
+                    "collection": {
+                        "products": [{"title": "bike"}, {"title": "car"}],
+                    }
                 },
                 partials={"prod": r"{{ prod.title }}"},
             ),
@@ -1065,7 +1105,9 @@ class RenderTestCases(unittest.TestCase):
                 template=r"{% include 'product-alias' with collection.products[1] as product %}",
                 expect="car",
                 globals={
-                    "collection": {"products": [{"title": "bike"}, {"title": "car"}],}
+                    "collection": {
+                        "products": [{"title": "bike"}, {"title": "car"}],
+                    }
                 },
                 partials={"product-alias": r"{{ product.title }}"},
             ),
@@ -1200,14 +1242,18 @@ class RenderTestCases(unittest.TestCase):
                 globals={
                     "collection": {"products": [{"title": "bike"}, {"title": "car"}]}
                 },
-                partials={"product-alias": r"{{ product.title }}",},
+                partials={
+                    "product-alias": r"{{ product.title }}",
+                },
             ),
             Case(
                 description="some keyword arguments",
                 template=r"{% render 'product-args', foo: 'hello', bar: 'there' %}",
                 expect="hello there",
                 globals={},
-                partials={"product-args": r"{{ foo }} {{ bar }}",},
+                partials={
+                    "product-args": r"{{ foo }} {{ bar }}",
+                },
             ),
             Case(
                 description="some keyword arguments no leading coma",
@@ -1321,7 +1367,9 @@ class RenderTestCases(unittest.TestCase):
                 template=r"{% render 'loop-for' for loop as value %}",
                 expect="123",
                 globals={"loop": MockIterableDrop()},
-                partials={"loop-for": r"{{ value.foo }}",},
+                partials={
+                    "loop-for": r"{{ value.foo }}",
+                },
             ),
             Case(
                 description="with drop",

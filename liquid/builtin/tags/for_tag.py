@@ -1,6 +1,6 @@
 import collections.abc
 import sys
-from typing import Optional, Any, List, TextIO
+from typing import Optional, Any, List, TextIO, Union
 
 from liquid.token import Token, TOKEN_EXPRESSION, TOKEN_TAG_NAME
 from liquid.parse import get_parser, expect, parse_loop_expression
@@ -10,6 +10,8 @@ from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import LoopExpression
 from liquid.exceptions import BreakLoop, ContinueLoop
+from liquid.compiler import Compiler
+from liquid.code import Opcode
 
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
@@ -38,7 +40,8 @@ class ForLoop(collections.abc.Mapping):
         "keys",
     )
 
-    def __init__(self, name: str, length: int):
+    # TODO: Change `name` to `id` because it could be an int?
+    def __init__(self, name: Union[str, int], length: int):
         self.name = name
         self.length = length
 
@@ -100,7 +103,7 @@ class ForLoopDrop(collections.abc.Mapping):
 
     __slots__ = ("forloop", "name")
 
-    def __init__(self, name: str, length: int):
+    def __init__(self, name: Union[str, int], length: int):
         self.name = name
         self.forloop = ForLoop(name, length)
 
@@ -133,6 +136,8 @@ class ForNode(ast.Node):
     """A parse tree node representing a for loop tag block."""
 
     __slots__ = ("tok", "expression", "block", "default")
+
+    statement = False
 
     def __init__(
         self,
@@ -185,6 +190,33 @@ class ForNode(ast.Node):
             if self.default:
                 self.default.render(context, buffer)
 
+    def compile_node(self, compiler: Compiler):
+        symbol = compiler.symbol_table.define(self.expression.name)
+        self.expression.compile(compiler)
+
+        for_pos = compiler.emit(Opcode.FOR, symbol.index, 9999, 9999)
+
+        # Jump to default if empty iterator
+        jump_to_default_pos = compiler.emit(Opcode.JIE, 9999, symbol.index)
+
+        top_of_loop = compiler.emit(Opcode.JSI, 9999, symbol.index)  # Jump past default
+        self.block.compile(compiler)
+
+        compiler.emit(Opcode.STE, symbol.index)
+        compiler.emit(Opcode.JMP, top_of_loop)
+
+        after_loop_block_pos = len(compiler.current_instructions())
+        compiler.change_operand(jump_to_default_pos, after_loop_block_pos, symbol.index)
+
+        if self.default:
+            self.default.compile(compiler)
+        else:
+            compiler.emit(Opcode.NOP)
+
+        after_default_pos = len(compiler.current_instructions())
+        compiler.change_operand(top_of_loop, after_default_pos, symbol.index)
+        compiler.change_operand(for_pos, symbol.index, top_of_loop, after_default_pos)
+
 
 class BreakNode(ast.Node):
     __slots__ = ("tok",)
@@ -198,6 +230,9 @@ class BreakNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         raise BreakLoop("break")
 
+    def compile_node(self, compiler: Compiler):
+        compiler.emit(Opcode.BRK)
+
 
 class ContinueNode(ast.Node):
     __slots__ = ("tok",)
@@ -210,6 +245,9 @@ class ContinueNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         raise ContinueLoop("continue")
+
+    def compile_node(self, compiler: Compiler):
+        compiler.emit(Opcode.CON)
 
 
 class ForTag(Tag):

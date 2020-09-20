@@ -1,6 +1,7 @@
-""""""
+"""Tag and tree node defninition for the "unless" tag."""
+
 import sys
-from typing import Optional, TextIO
+from typing import TextIO
 
 from liquid.token import Token, TOKEN_EOF, TOKEN_EXPRESSION, TOKEN_TAG_NAME
 from liquid.parse import get_parser, expect, parse_boolean_expression
@@ -9,6 +10,8 @@ from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import Expression
+from liquid.compiler import Compiler
+from liquid.code import Opcode
 
 TAG_UNLESS = sys.intern("unless")
 TAG_ENDUNLESS = sys.intern("endunless")
@@ -17,14 +20,11 @@ ENDUNLESSBLOCK = (TAG_ENDUNLESS, TOKEN_EOF)
 
 
 class UnlessNode(ast.Node):
+    """Parse tree node for an "unless" template tag."""
+
     __slots__ = ("tok", "condition", "consequence")
 
-    def __init__(
-        self,
-        tok: Token,
-        condition: Expression,
-        consequence: Optional[ast.BlockNode] = None,
-    ):
+    def __init__(self, tok: Token, condition: Expression, consequence: ast.BlockNode):
         self.tok = tok
         self.condition = condition
         self.consequence = consequence
@@ -36,8 +36,21 @@ class UnlessNode(ast.Node):
         if not self.condition.evaluate(context):
             self.consequence.render(context, buffer)
 
+    def compile_node(self, compiler: Compiler):
+        self.condition.compile(compiler)
+        jump_if_position = compiler.emit(Opcode.JIF, 9999)
+
+        self.consequence.compile(compiler)
+
+        if compiler.last_instruction_is(Opcode.POP):
+            compiler.remove_last_pop()
+
+        after_consequence_position = len(compiler.current_instructions())
+        compiler.change_operand(jump_if_position, after_consequence_position)
+
 
 class UnlessTag(Tag):
+    """"""
 
     name = TAG_UNLESS
     end = TAG_ENDUNLESS
@@ -54,9 +67,8 @@ class UnlessTag(Tag):
         expr_iter = lexer.tokenize(stream.current.value)
         expr = parse_boolean_expression(expr_iter)
 
-        tag = UnlessNode(tok, condition=expr)
         stream.next_token()
-        tag.consequence = parser.parse_block(stream, ENDUNLESSBLOCK)
+        consequence = parser.parse_block(stream, ENDUNLESSBLOCK)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_ENDUNLESS)
-        return tag
+        return UnlessNode(tok, condition=expr, consequence=consequence)

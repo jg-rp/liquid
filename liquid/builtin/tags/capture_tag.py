@@ -9,6 +9,8 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream
+from liquid.compiler import Compiler
+from liquid.code import Opcode
 
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
@@ -19,9 +21,11 @@ ENDCAPTUREBLOCK = (TAG_ENDCAPTURE, TOKEN_EOF)
 class CaptureNode(ast.Node):
     __slots__ = ("tok", "identifier", "block")
 
+    statement = False
+
     def __init__(self, tok: Token, identifier: str, block: ast.BlockNode = None):
         self.tok = tok
-        self.identifier = identifier
+        self.identifier = identifier  # TODO: Validate identifier
         self.block = block
 
     def __str__(self) -> str:
@@ -34,6 +38,15 @@ class CaptureNode(ast.Node):
         buf = StringIO()
         self.block.render(context, buf)
         context.assign(str(self.identifier), buf.getvalue())
+
+    def compile_node(self, compiler: Compiler):
+        symbol = compiler.symbol_table.define(self.identifier)
+
+        compiler.emit(Opcode.CAPTURE)
+        self.block.compile(compiler)
+        compiler.emit(Opcode.SETCAPTURE, symbol.index)
+
+        # XXX: Can one "assign" from inside a capture?
 
 
 class CaptureTag(Tag):

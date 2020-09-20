@@ -822,10 +822,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array",
                 "product in collection.products",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -839,10 +836,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with integer literal limit",
                 "product in collection.products limit:5",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -857,10 +851,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with identifier limit",
                 "product in collection.products limit:max",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -877,10 +868,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with integer literal offset",
                 "product in collection.products offset:2",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -895,10 +883,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with integer literal offset and limit",
                 "product in collection.products limit:5 offset:2",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -914,10 +899,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with integer literal offset and limit out of order",
                 "product in collection.products offset:2 limit:5",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -933,10 +915,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array reversed",
                 "product in collection.products reversed",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -951,10 +930,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in array with all options",
                 "product in collection.products offset:2 limit:5 reversed",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     identifier=Identifier(
                         MockToken,
                         path=[
@@ -971,10 +947,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in range with integer literal start and stop",
                 "product in (1..10)",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     start=IntegerLiteral(MockToken, 1),
                     stop=IntegerLiteral(MockToken, 10),
                 ),
@@ -983,10 +956,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in range with integer literal start and identifier stop",
                 "product in (1..collection.products.size)",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     start=IntegerLiteral(MockToken, 1),
                     stop=Identifier(
                         MockToken,
@@ -1002,10 +972,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in range with integer identifier start and stop",
                 "product in (num..collection.products.size)",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     start=Identifier(
                         MockToken, path=[IdentifierPathElement(MockToken, "num")]
                     ),
@@ -1023,10 +990,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "item in range with options",
                 "product in (1..10) offset:2 limit:5 reversed",
                 LoopExpression(
-                    name=Identifier(
-                        tok=MockToken,
-                        path=[IdentifierPathElement(MockToken, "product")],
-                    ),
+                    name="product",
                     start=IntegerLiteral(MockToken, 1),
                     stop=IntegerLiteral(MockToken, 10),
                     limit=IntegerLiteral(MockToken, 5),

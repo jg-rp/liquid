@@ -12,6 +12,9 @@ from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import LoopExpression
 from liquid.parse import expect, parse_loop_expression, get_parser
 
+from liquid import Compiler
+from liquid import Opcode
+
 
 TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
@@ -153,7 +156,10 @@ class TablerowNode(ast.Node):
     __slots__ = ("tok", "expression", "block")
 
     def __init__(
-        self, tok: Token, expression: LoopExpression, block: ast.BlockNode,
+        self,
+        tok: Token,
+        expression: LoopExpression,
+        block: ast.BlockNode,
     ):
         self.tok = tok
         self.expression = expression
@@ -173,7 +179,7 @@ class TablerowNode(ast.Node):
             cols = 1
             loop_iter = (loop_items,)
 
-        tablerow = TableRow(str(self.expression.name), len(loop_items), cols)
+        tablerow = TableRow(self.expression.name, len(loop_items), cols)
         drop = TableRowDrop(tablerow)
         ctx = context.extend(drop)
 
@@ -185,6 +191,30 @@ class TablerowNode(ast.Node):
                 self.block.render(context=ctx, buffer=buffer)
                 buffer.write("</td>")
             buffer.write("</tr>")
+
+    def compile_node(self, compiler: Compiler):
+        symbol = compiler.symbol_table.define(self.expression.name)
+
+        if self.expression.cols:
+            self.expression.cols.compile(compiler)
+        else:
+            compiler.emit(Opcode.NOP)
+
+        self.expression.compile(compiler)
+
+        for_pos = compiler.emit(Opcode.FOR, symbol.index, 9999, 9999)
+
+        # XXX: Should JSI be accepting an index to check or should it be on the stack?
+        top_of_loop = compiler.emit(Opcode.JSI, 9999, symbol.index)
+
+        self.block.compile(compiler)
+
+        compiler.emit(Opcode.STE, symbol.index)
+        compiler.emit(Opcode.JMP, top_of_loop)
+
+        after_loop_pos = len(compiler.current_instructions())
+        compiler.change_operand(top_of_loop, after_loop_pos, symbol.index)
+        compiler.change_operand(for_pos, symbol.index, top_of_loop, after_loop_pos)
 
 
 class TablerowTag(Tag):

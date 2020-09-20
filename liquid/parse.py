@@ -519,16 +519,11 @@ def parse_loop_expression(stream) -> expression.LoopExpression:
     expect(stream, TOKEN_IDENTIFIER)
     expect_peek(stream, TOKEN_IN)
 
-    expr = expression.LoopExpression(
-        name=expression.Identifier(
-            tok=stream.current,
-            path=[
-                expression.IdentifierPathElement(stream.current, stream.current.value)
-            ],
-        )
-    )
+    # FIXME: Validate identifier
+    expr = expression.LoopExpression(name=stream.current.value)
+
     stream.next_token()
-    stream.next_token()  # Eat IN TOKEN_
+    stream.next_token()  # Eat TOKEN_IN
 
     if stream.current.type == TOKEN_IDENTIFIER:
         # Identifier should resolve to an array or hash/map at render time.
@@ -543,7 +538,7 @@ def parse_loop_expression(stream) -> expression.LoopExpression:
         expect_peek(stream, TOKEN_RANGE)
 
         stream.next_token()
-        stream.next_token()  # Eat RANGE TOKEN_
+        stream.next_token()  # Eat TOKEN_RANGE
         stop = parse_range_argument(stream)
 
         # assert stream.peek.type == TOKEN_RPAREN
@@ -553,7 +548,7 @@ def parse_loop_expression(stream) -> expression.LoopExpression:
         expr.stop = stop
 
         stream.next_token()
-        stream.next_token()  # Eat RPAREN TOKEN_
+        stream.next_token()  # Eat TOKEN_RPAREN
     else:
         raise LiquidSyntaxError("invalid range expression")
 

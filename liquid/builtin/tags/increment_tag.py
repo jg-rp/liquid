@@ -8,6 +8,8 @@ from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream
 from liquid.parse import expect
+from liquid.compiler import Compiler
+from liquid.code import Opcode
 
 TAG_INCREMENT = sys.intern("increment")
 
@@ -25,10 +27,14 @@ class IncrementNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         buffer.write(str(context.increment(self.identifier)))
 
+    def compile_node(self, compiler: Compiler):
+        symbol = compiler.symbol_table.define_counter(self.identifier)
+        compiler.emit(Opcode.INC, symbol.index)
+
 
 class IncrementTag(Tag):
     """
-    
+
     Increment and decrement tags share a namespace.
     """
 

@@ -5,6 +5,7 @@ from liquid import Environment
 from liquid import code
 from liquid.code import Opcode
 from liquid.compiler import Compiler
+from liquid import hash_identifier
 
 
 class Case(NamedTuple):
@@ -31,13 +32,14 @@ class CompilerTestCase(unittest.TestCase):
                 self._test_instructions(
                     case.expected_instructions, bytecode.instructions
                 )
-                self._test_constants(case.expected_constants, bytecode.constants)
+                self._test_constants(bytecode.constants, case.expected_constants)
 
     def _test_instructions(self, expected, actual):
-        # print("---")
-        # print(actual, "\n\n")
-        # print(expected)
-        # print("---")
+        print("---")
+        print(code.string(actual))
+        print("\n\n")
+        print(code.string(expected))
+        print("---")
 
         self.assertEqual(len(expected), len(actual), msg="instruction length mismatch")
 
@@ -45,12 +47,17 @@ class CompilerTestCase(unittest.TestCase):
             got, want = pair
             self.assertEqual(got, want, msg=f"wrong instruction at {i}")
 
-    def _test_constants(self, expected, actual):
+    def _test_constants(self, actual, expected):
         self.assertEqual(len(expected), len(actual), msg="constants length mismatch")
 
         for i, pair in enumerate(zip(actual, expected)):
             got, want = pair
             self.assertEqual(got, want, msg=f"constants do not match at {i}")
+
+    def _test_compiled_capture_constants(self, actual, expected):
+        for i, pair in enumerate(zip(actual, expected)):
+            got, want = pair
+            self.assertEqual(got, want, msg=f"captured constants do not match at {i}")
 
     def test_literals(self):
         """Test that we can compile literals."""
@@ -59,7 +66,7 @@ class CompilerTestCase(unittest.TestCase):
                 description="integer literal",
                 source="{{ 1 }}",
                 expected_constants=[1],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0), code.make(Opcode.POP)
                 ),
             ),
@@ -67,7 +74,7 @@ class CompilerTestCase(unittest.TestCase):
                 description="float literal",
                 source="{{ 1.2 }}",
                 expected_constants=[1.2],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0), code.make(Opcode.POP)
                 ),
             ),
@@ -75,7 +82,7 @@ class CompilerTestCase(unittest.TestCase):
                 description="string literal",
                 source="{{ 'hello' }}",
                 expected_constants=["hello"],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0), code.make(Opcode.POP)
                 ),
             ),
@@ -83,7 +90,7 @@ class CompilerTestCase(unittest.TestCase):
                 description="template literal",
                 source="hello",
                 expected_constants=["hello"],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0), code.make(Opcode.POP)
                 ),
             ),
@@ -91,7 +98,7 @@ class CompilerTestCase(unittest.TestCase):
                 description="negative integer literal",
                 source="{{ -1 }}",
                 expected_constants=[1],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.MINUS),
                     code.make(Opcode.POP),
@@ -106,25 +113,25 @@ class CompilerTestCase(unittest.TestCase):
         test_cases = [
             Case(
                 description="literal true",
-                source="{{ true }}",
+                source=r"{{ true }}",
                 expected_constants=[],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.TRUE), code.make(Opcode.POP)
                 ),
             ),
             Case(
                 description="literal false",
-                source="{{ false }}",
+                source=r"{{ false }}",
                 expected_constants=[],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.FALSE), code.make(Opcode.POP)
                 ),
             ),
             Case(
                 description="greater than",
-                source="{{ 1 > 2 }}",
+                source=r"{{ 1 > 2 }}",
                 expected_constants=[1, 2],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.CONSTANT, 1),
                     code.make(Opcode.GT),
@@ -133,9 +140,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="less than",
-                source="{{ 1 < 2 }}",
+                source=r"{{ 1 < 2 }}",
                 expected_constants=[2, 1],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.CONSTANT, 1),
                     code.make(Opcode.GT),
@@ -144,9 +151,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="euqals",
-                source="{{ 1 == 2 }}",
+                source=r"{{ 1 == 2 }}",
                 expected_constants=[1, 2],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.CONSTANT, 1),
                     code.make(Opcode.EQ),
@@ -155,9 +162,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="not equals",
-                source="{{ 1 != 2 }}",
+                source=r"{{ 1 != 2 }}",
                 expected_constants=[1, 2],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.CONSTANT, 1),
                     code.make(Opcode.NE),
@@ -166,9 +173,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="boolean and",
-                source="{{ true and false }}",
+                source=r"{{ true and false }}",
                 expected_constants=[],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.TRUE),
                     code.make(Opcode.FALSE),
                     code.make(Opcode.AND),
@@ -177,9 +184,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="boolean or",
-                source="{{ true or false }}",
+                source=r"{{ true or false }}",
                 expected_constants=[],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.TRUE),
                     code.make(Opcode.FALSE),
                     code.make(Opcode.OR),
@@ -195,13 +202,13 @@ class CompilerTestCase(unittest.TestCase):
         test_cases = [
             Case(
                 description="if true no alternative",
-                source="{% if true %}10{% endif %}3333",
+                source=r"{% if true %}10{% endif %}3333",
                 expected_constants=["10", "3333"],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.TRUE),
-                    code.make(Opcode.JUMPIFNOT, 10),
+                    code.make(Opcode.JIN, 10),
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.JUMP, 11),
+                    code.make(Opcode.JMP, 11),
                     code.make(Opcode.NOP),
                     code.make(Opcode.POP),
                     code.make(Opcode.CONSTANT, 1),
@@ -210,13 +217,13 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="if true with alternative",
-                source="{% if true %}10{% else %}20{% endif %}3333",
+                source=r"{% if true %}10{% else %}20{% endif %}3333",
                 expected_constants=["10", "20", "3333"],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.TRUE),  # 0000
-                    code.make(Opcode.JUMPIFNOT, 10),  # 0001
+                    code.make(Opcode.JIN, 10),  # 0001
                     code.make(Opcode.CONSTANT, 0),  # 0004
-                    code.make(Opcode.JUMP, 13),  # 0007
+                    code.make(Opcode.JMP, 13),  # 0007
                     code.make(Opcode.CONSTANT, 1),  # 0010
                     code.make(Opcode.POP),  # 0013
                     code.make(Opcode.CONSTANT, 2),  # 0014
@@ -225,21 +232,41 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="false condition, true conditional alternative",
-                source="{% if false %}10{% elsif true %}20{% else %}30{% endif %}3333",
+                source=r"{% if false %}10{% elsif true %}20{% else %}30{% endif %}3333",
                 expected_constants=["10", "20", "30", "3333"],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.FALSE),  # 0000
-                    code.make(Opcode.JUMPIFNOT, 10),  # 0001 Jump to next alternative
+                    code.make(Opcode.JIN, 10),  # 0001 Jump to next alternative
                     code.make(Opcode.CONSTANT, 0),  # 0004
-                    code.make(Opcode.JUMP, 23),  # 0007 Jump to end of condition
+                    code.make(Opcode.JMP, 23),  # 0007 Jump to end of condition
                     code.make(Opcode.TRUE),  # 0010
-                    code.make(Opcode.JUMPIFNOT, 20),  # 0011 Jump to next alternative
+                    code.make(Opcode.JIN, 20),  # 0011 Jump to next alternative
                     code.make(Opcode.CONSTANT, 1),  # 0014
-                    code.make(Opcode.JUMP, 23),  # 0017 Jump to end of condition
+                    code.make(Opcode.JMP, 23),  # 0017 Jump to end of condition
                     code.make(Opcode.CONSTANT, 2),  # 0020
                     code.make(Opcode.POP),  # 0023
                     code.make(Opcode.CONSTANT, 3),  # 0024
                     code.make(Opcode.POP),  # 0027
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_unless(self):
+        """Test that we can compile "unless" tags."""
+        test_cases = [
+            Case(
+                description="literal false",
+                source=r"{% unless false %}10{% endunless %}3333",
+                expected_constants=["10", "3333"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.FALSE),
+                    code.make(Opcode.JIF, 7),
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.POP),
                 ),
             ),
         ]
@@ -251,9 +278,9 @@ class CompilerTestCase(unittest.TestCase):
         test_cases = [
             Case(
                 description="simple assigns",
-                source="{% assign one = 1 %}{% assign two = 2 %}",
+                source=r"{% assign one = 1 %}{% assign two = 2 %}",
                 expected_constants=[1, 2],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.SETLOCAL, 0),
                     code.make(Opcode.CONSTANT, 1),
@@ -262,9 +289,9 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="assign and resolve",
-                source="{% assign one = 1 %}{{ one }}",
+                source=r"{% assign one = 1 %}{{ one }}",
                 expected_constants=[1],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.SETLOCAL, 0),
                     code.make(Opcode.GETLOCAL, 0),
@@ -273,14 +300,315 @@ class CompilerTestCase(unittest.TestCase):
             ),
             Case(
                 description="assign from identifier",
-                source="{% assign one = 1 %}{% assign two = one %}{{ two }}",
+                source=r"{% assign one = 1 %}{% assign two = one %}{{ two }}",
                 expected_constants=[1],
-                expected_instructions=code.Instructions(
+                expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.SETLOCAL, 0),
                     code.make(Opcode.GETLOCAL, 0),
                     code.make(Opcode.SETLOCAL, 1),
                     code.make(Opcode.GETLOCAL, 1),
+                    code.make(Opcode.POP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_capture(self):
+        """Test that we can compile capture tags."""
+        test_cases = [
+            Case(
+                description="simple capture",
+                source=r"{% capture some %}foo{% endcapture %}",
+                expected_constants=[
+                    "foo",
+                ],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CAPTURE),
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.SETCAPTURE, 0),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_case_when(self):
+        """Test that we can compile "case" tags."""
+        test_cases = [
+            Case(
+                description="simple case",
+                source=r"{% case true %}{% when false %}foo{% when true %}bar{% endcase %}3333",
+                expected_constants=["foo", "bar", "3333"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.TRUE),  # 0000
+                    code.make(Opcode.FALSE),  # 0001
+                    code.make(Opcode.EQ),  # 0002
+                    code.make(Opcode.JIN, 12),  # 0003
+                    code.make(Opcode.CONSTANT, 0),  # 0006
+                    code.make(Opcode.JMP, 25),  # 0009
+                    code.make(Opcode.TRUE),  # 0012
+                    code.make(Opcode.TRUE),  # 0013
+                    code.make(Opcode.EQ),  # 0014
+                    code.make(Opcode.JIN, 24),  # 0015
+                    code.make(Opcode.CONSTANT, 1),  # 0018
+                    code.make(Opcode.JMP, 25),  # 0021
+                    code.make(Opcode.NOP),  # 0024
+                    code.make(Opcode.POP),  # 0025
+                    code.make(Opcode.CONSTANT, 2),  # 0026
+                    code.make(Opcode.POP),  # 0029
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_resolve(self):
+        """Test that we can compile global identifiers."""
+        test_cases = [
+            Case(
+                description="not a local identifier",
+                source=r"{{ product }}",
+                expected_constants=["product"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="chained global identifier",
+                source=r"{{ product.title }}",
+                expected_constants=["product", "title"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.GETITEM),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="get attribute from identifier",
+                source=r"{{ collections[product.collection_name] }}",
+                expected_constants=["collections", "product", "collection_name"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.CONSTANT, 2),
+                    code.make(Opcode.GETITEM),
+                    code.make(Opcode.GETITEM),
+                    code.make(Opcode.POP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_decrement(self):
+        """Test that we can compile "decrement" tags."""
+        test_cases = [
+            Case(
+                description="new decrement",
+                source=r"{% decrement foo %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.DEC, 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="existing decrement",
+                source=r"{% decrement foo %}{% decrement foo %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.DEC, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.DEC, 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="distinct decrements",
+                source=r"{% decrement foo %}{% decrement bar %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.DEC, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.DEC, 1),
+                    code.make(Opcode.POP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_increment(self):
+        """Test that we can compile "increment" tags."""
+        test_cases = [
+            Case(
+                description="new increment",
+                source=r"{% increment foo %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.INC, 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="existing increment",
+                source=r"{% increment foo %}{% increment foo %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.INC, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.INC, 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="distinct increment",
+                source=r"{% increment foo %}{% increment bar %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.INC, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.INC, 1),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="increment then decrement",
+                source=r"{% increment foo %}{% decrement foo %}",
+                expected_constants=[],
+                expected_instructions=code.chain(
+                    code.make(Opcode.INC, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.DEC, 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_cycle(self):
+        """Test that we can compile "cycle" tags."""
+        test_cases = [
+            Case(
+                description="default group",
+                source=r"{% cycle 'a', 'b', 'c' %}",
+                expected_constants=["c", "b", "a", ""],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.CONSTANT, 2),
+                    code.make(Opcode.CONSTANT, 3),
+                    code.make(Opcode.CYC, 3),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="named group",
+                source=r"{% cycle 'foo': 'a', 'b', 'c' %}",
+                expected_constants=["c", "b", "a", "foo"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.CONSTANT, 2),
+                    code.make(Opcode.CONSTANT, 3),
+                    code.make(Opcode.CYC, 3),
+                    code.make(Opcode.POP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_for(self):
+        """Test that we can compile "for" tags."""
+        test_cases = [
+            Case(
+                description="literal range with no args",
+                source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
+                expected_constants=[3, 0],
+                expected_instructions=code.chain(
+                    code.make(Opcode.FALSE),  # reverse
+                    code.make(Opcode.NIL),  # offset
+                    code.make(Opcode.NIL),  # limit
+                    code.make(Opcode.CONSTANT, 0),  # range stop
+                    code.make(Opcode.CONSTANT, 1),  # range start
+                    code.make(Opcode.FOR, 0, 21, 37),  # index of loop var
+                    code.make(Opcode.JIE, 36, 0),
+                    code.make(Opcode.JSI, 37, 0),
+                    code.make(Opcode.GETLOCAL, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.STE, 0),
+                    code.make(Opcode.JMP, 21),
+                    code.make(Opcode.NOP),
+                ),
+            ),
+            Case(
+                description="literal range with limit",
+                source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
+                expected_constants=[2, 3, 0],
+                expected_instructions=code.chain(
+                    code.make(Opcode.FALSE),  # reverse
+                    code.make(Opcode.NIL),  # offset
+                    code.make(Opcode.CONSTANT, 0),  # limit
+                    code.make(Opcode.CONSTANT, 1),  # range stop
+                    code.make(Opcode.CONSTANT, 2),  # range start
+                    code.make(Opcode.FOR, 0, 23, 39),  # index of loop var
+                    code.make(Opcode.JIE, 38, 0),
+                    code.make(Opcode.JSI, 39, 0),
+                    code.make(Opcode.GETLOCAL, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.STE, 0),
+                    code.make(Opcode.JMP, 23),
+                    code.make(Opcode.NOP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_filter(self):
+        """Test that we can compile filtered expressions."""
+
+        test_cases = [
+            Case(
+                description="no arg filter",
+                source=r"{{ 'hello' | upcase }}",
+                expected_constants=["hello"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.FIL, hash_identifier("upcase"), 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="chained no arg filters",
+                source=r"{{ 'hello' | upcase | lstrip }}",
+                expected_constants=["hello"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.FIL, hash_identifier("upcase"), 0),
+                    code.make(Opcode.FIL, hash_identifier("lstrip"), 0),
+                    code.make(Opcode.POP),
+                ),
+            ),
+            Case(
+                description="one arg filter",
+                source=r"{{ 'there' | prepend: 'hello ' }}",
+                expected_constants=["there", "hello "],
+                expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
+                    code.make(Opcode.CONSTANT, 1),
+                    code.make(Opcode.FIL, hash_identifier("prepend"), 1),
                     code.make(Opcode.POP),
                 ),
             ),

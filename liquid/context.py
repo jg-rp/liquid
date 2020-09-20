@@ -14,6 +14,7 @@ from typing import Any, Union, Callable, Optional, List, Mapping, Iterable, Iter
 
 from liquid.exceptions import NoSuchFilterFunc, ContextDepthError
 from liquid.filter import Filter
+from liquid import hash_identifier
 
 MAX_CONTEXT_DEPTH = 30
 
@@ -44,8 +45,17 @@ class ReadOnlyChainMap(collections.abc.Mapping):
     def __len__(self):
         return sum(len(map) for map in self._maps)
 
-    def push(self, namespace: Mapping[str, Any]):
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def push(self, namespace: Mapping[Any, Any]):
         self._maps.appendleft(namespace)
+
+    def pop(self) -> Mapping[Any, Any]:
+        return self._maps.popleft()
 
 
 # pylint: disable=too-many-instance-attributes
@@ -54,12 +64,13 @@ class Context:
 
     __slots__ = (
         "_builtin",
-        "_locals",
-        "_globals",
+        "locals",
+        "globals",
         "scopes",
         "_filters",
-        "_cycles",
-        "_counters",
+        "_filters_by_hash",
+        "cycles",
+        "counters",
         "_disabled_tags",
         "outer",
         "block_scope",
@@ -80,26 +91,30 @@ class Context:
 
         # The namespace for local variables. Those that are bound with `assign`
         # or `capture`.
-        self._locals = {}
+        self.locals = {}
 
         # Read only namespace containing globally available variables. Usually
         # passed down from the environment.
-        self._globals = global_objects or {}
+        self.globals = global_objects or {}
 
         # Namespace order of resolution. The local namespace is checked before the
         # global namespace, potentially overriding names in the global namespace.
-        self.scopes = ReadOnlyChainMap(self._locals, self._globals, self._builtin)
+        self.scopes = ReadOnlyChainMap(self.locals, self.globals, self._builtin)
 
         # Map of filter names to filter functions.
         self._filters = filters or {}
+        # FIXME: Don't really want to do this for every context
+        self._filters_by_hash = {
+            hash_identifier(k): v for k, v in self._filters.items()
+        }
 
         # A distinct namespace for cycle tags. The cycle tag render function
         # manages the getting and setting of itertools.cycle instances.
-        self._cycles = {}
+        self.cycles = {}
 
         # A namespace for simple integer counters. The built in increment and decrement
         # tags share this namespace.
-        self._counters = {}
+        self.counters = {}
 
         # A list of tags names that will raise an exception if an associated node
         # is rendered in this context.
@@ -124,7 +139,7 @@ class Context:
         if self.outer and not self.block_scope:
             self.outer.assign(key, val)
         else:
-            self._locals[key] = val
+            self.locals[key] = val
 
     def get(self, path: Union[str, List[Union[str, int]]], default: Any = None) -> Any:
         """Return the value at path `path` if it is in scope, else default."""
@@ -162,21 +177,35 @@ class Context:
 
         return filter_func
 
-    def increment(self, name: str) -> int:
-        val = self._counters.get(name, -1) + 1
-        self._counters[name] = val
+    def resolve_filter(self, ident: int) -> Callable:
+        filter_func = self._filters_by_hash.get(ident)
+        if not filter_func and self.outer:
+            filter_func = self.outer.resolve_filter(ident)
+
+        if not filter_func:
+            raise NoSuchFilterFunc(ident)
+
+        if isinstance(filter_func, Filter) and filter_func.with_context:
+            # FIXME: self is not currently holding locals for compiled templates.
+            return functools.partial(filter_func, context=self)
+
+        return filter_func
+
+    def increment(self, name: Union[str, int]) -> int:
+        val = self.counters.get(name, -1) + 1
+        self.counters[name] = val
         return val
 
-    def decrement(self, name: str) -> int:
-        val = self._counters.get(name, 0) - 1
-        self._counters[name] = val
+    def decrement(self, name: Union[str, int]) -> int:
+        val = self.counters.get(name, 0) - 1
+        self.counters[name] = val
         return val
 
     def cycle(self, group_name, args) -> Iterator[Any]:
         key = f"{group_name}:{''.join([str(arg) for arg in args])}"
-        if key not in self._cycles:
-            self._cycles[key] = cycle(args)
-        return self._cycles[key]
+        if key not in self.cycles:
+            self.cycles[key] = cycle(args)
+        return self.cycles[key]
 
     def extend(self, namespace: Mapping[str, Any]):
         if self._depth > MAX_CONTEXT_DEPTH:
@@ -190,7 +219,7 @@ class Context:
     ) -> Context:
         """Return a copy of this context without any local variables."""
         return Context(
-            global_objects=ReadOnlyChainMap(namespace, self._globals),
+            global_objects=ReadOnlyChainMap(namespace, self.globals),
             filters=self._filters,
             disabled_tags=disabled_tags,
         )

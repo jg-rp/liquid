@@ -59,20 +59,22 @@ class CodeTestCase(unittest.TestCase):
 
     def test_instruction_string(self):
         """Test that we can pretty print instructions."""
-        instructions = code.Instructions(
+        instructions = code.chain(
             code.make(Opcode.CONSTANT, 2),
             code.make(Opcode.CONSTANT, 65535),
         )
 
         expected = "0000 OpConstant 2\n0003 OpConstant 65535"
-        self.assertEqual(str(instructions), expected, msg="bad instruction formatting")
+        self.assertEqual(
+            code.string(instructions), expected, msg="bad instruction formatting"
+        )
 
     def test_read_operands(self):
         """Test that we can read back operands from a byte code instruction."""
         test_cases = [
             OperandsCase(
                 description="one one-byte operand",
-                op=Opcode.CALLFILTER,
+                op=Opcode.CYC,
                 operands=[254],
                 read=1,
             ),

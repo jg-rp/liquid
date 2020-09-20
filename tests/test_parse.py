@@ -293,7 +293,7 @@ class ParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, raw_tag.RawNode)
+        self._test(test_cases, literal.LiteralNode)
 
     def test_capture_tag(self):
         """Test that we can parse capture tags."""
@@ -332,7 +332,11 @@ class ParserTestCase(unittest.TestCase):
     def test_assign_tag(self):
         """Test that we can parse assign tags."""
         test_cases = [
-            Case("assign a string", '{% assign foo = "some" %}', "var (foo = 'some')",),
+            Case(
+                "assign a string",
+                '{% assign foo = "some" %}',
+                "var (foo = 'some')",
+            ),
         ]
 
         self._test(test_cases, assign_tag.AssignNode)
@@ -340,7 +344,11 @@ class ParserTestCase(unittest.TestCase):
     def test_increment_tag(self):
         """Test that we can parse increment tags."""
         test_cases = [
-            Case("increment a named counter", "{% increment foo %}", "foo += 1",),
+            Case(
+                "increment a named counter",
+                "{% increment foo %}",
+                "foo += 1",
+            ),
         ]
 
         self._test(test_cases, increment_tag.IncrementNode)
@@ -348,7 +356,11 @@ class ParserTestCase(unittest.TestCase):
     def test_decrement_tag(self):
         """Test that we can parse decrement tags."""
         test_cases = [
-            Case("decrement a named counter", "{% decrement foo %}", "foo -= 1",),
+            Case(
+                "decrement a named counter",
+                "{% decrement foo %}",
+                "foo -= 1",
+            ),
         ]
 
         self._test(test_cases, decrement_tag.DecrementNode)

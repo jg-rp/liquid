@@ -91,13 +91,13 @@ class IfNode(ast.Node):
         jump_positions = []
 
         self.condition.compile(compiler)
-        jump_if_not_position = compiler.emit(Opcode.JUMPIFNOT, 9999)
+        jump_if_not_position = compiler.emit(Opcode.JIN, 9999)
         self.consequence.compile(compiler)
 
         if compiler.last_instruction_is(Opcode.POP):
             compiler.remove_last_pop()
 
-        jump_positions.append(compiler.emit(Opcode.JUMP, 9999))
+        jump_positions.append(compiler.emit(Opcode.JMP, 9999))
 
         after_consequence_pos = len(compiler.current_instructions())
         compiler.change_operand(jump_if_not_position, after_consequence_pos)
@@ -106,13 +106,13 @@ class IfNode(ast.Node):
         # each alternative condition and block.
         for alt in self.conditional_alternatives:
             alt.condition.compile(compiler)
-            jump_if_not_position = compiler.emit(Opcode.JUMPIFNOT, 9999)
+            jump_if_not_position = compiler.emit(Opcode.JIN, 9999)
             alt.block.compile(compiler)
 
             if compiler.last_instruction_is(Opcode.POP):
                 compiler.remove_last_pop()
 
-            jump_positions.append(compiler.emit(Opcode.JUMP, 9999))
+            jump_positions.append(compiler.emit(Opcode.JMP, 9999))
 
             after_conditional_alternative_pos = len(compiler.current_instructions())
             compiler.change_operand(
@@ -124,6 +124,7 @@ class IfNode(ast.Node):
             compiler.emit(Opcode.NOP)
         else:
             self.alternative.compile(compiler)
+
             if compiler.last_instruction_is(Opcode.POP):
                 compiler.remove_last_pop()
 

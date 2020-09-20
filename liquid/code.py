@@ -1,7 +1,7 @@
 """Opcode definitions and helpers."""
-
+from __future__ import annotations
 from enum import IntEnum, auto
-from itertools import chain
+import itertools
 from typing import List, NamedTuple, Dict, Tuple
 
 from liquid.exceptions import OpcodeError
@@ -9,6 +9,7 @@ from liquid.exceptions import OpcodeError
 # We're going to work with bytes in their decimal representation. We'll just
 # have to write extra tests to ensure each byte is within bounds.
 Instruction = List[int]
+Instructions = List[int]
 
 
 class Opcode(IntEnum):
@@ -34,29 +35,38 @@ class Opcode(IntEnum):
 
     MINUS = auto()
 
-    JUMPIFNOT = auto()
-    JUMP = auto()
-    NOP = auto()
+    JIF = auto()  # Jump IF truthy
+    JIN = auto()  # Jump If Not truthy
+    JIE = auto()  # Jump If Empty
+    JSI = auto()  # Jump Stop Iteration
+    JMP = auto()  # Jump
+    NOP = auto()  # No Operation
 
-    GETGLOBAL = auto()
     GETLOCAL = auto()
     SETLOCAL = auto()
+    RESOLVE = auto()
+    GETITEM = auto()
 
-    CALLFILTER = auto()
-    GETFILTER = auto()
+    CAPTURE = auto()
+    SETCAPTURE = auto()
+
+    INC = auto()  # Increment
+    DEC = auto()  # Decrement
+    CYC = auto()  # Cycle
+
+    FOR = auto()  # For each loop
+    TAB = auto()  # TABle row
+    STE = auto()  # Step iterator
+    BRK = auto()  # Break
+    CON = auto()  # Continue
+
+    FIL = auto()  # Call FILter
+
+    def __str__(self):
+        return definitions[self].name
 
 
 assert len(Opcode) <= 255
-
-
-class Instructions(list):
-    """A list on instructions that can pretty print themselves."""
-
-    def __init__(self, *ins: Instruction) -> None:
-        super().__init__(chain(*ins))
-
-    def __str__(self):
-        return _string(self)
 
 
 class Definition(NamedTuple):
@@ -82,14 +92,29 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.AND: Definition("OpAnd", ()),
     Opcode.OR: Definition("OpOr", ()),
     Opcode.MINUS: Definition("OpMinus", ()),
-    Opcode.JUMPIFNOT: Definition("OpJumpNotTruthy", (2,)),
-    Opcode.JUMP: Definition("OpJump", (2,)),
-    Opcode.NOP: Definition("OpNoop", ()),
-    Opcode.GETGLOBAL: Definition("OpGetGlobal", (2,)),
+    Opcode.JIF: Definition("OpJumpIf", (2,)),  # instruction to jump to
+    Opcode.JIN: Definition("OpJumpIfNot", (2,)),  # instruction to jump to
+    Opcode.JIE: Definition("OpJumpIfEmpty", (2, 2)),  # jump to 1 if 2 is empty
+    Opcode.JSI: Definition(
+        "OpJumpStopIteration", (2, 2)
+    ),  # jump to 1 if 2 is stop iter
+    Opcode.JMP: Definition("OpJump", (2,)),  # instruction to jump to
+    Opcode.NOP: Definition("OpNoOp", ()),
     Opcode.GETLOCAL: Definition("OpGetLocal", (2,)),
     Opcode.SETLOCAL: Definition("OpSetLocal", (2,)),
-    Opcode.CALLFILTER: Definition("OpCallFilter", (1,)),
-    Opcode.GETFILTER: Definition("OpGetFilter", (2,)),
+    Opcode.RESOLVE: Definition("OpResolve", ()),
+    Opcode.GETITEM: Definition("OpGetAttr", ()),
+    Opcode.CAPTURE: Definition("OpCapture", ()),
+    Opcode.SETCAPTURE: Definition("OpSetCapture", (2,)),
+    Opcode.INC: Definition("OpIncrement", (2,)),
+    Opcode.DEC: Definition("OpDecrement", (2,)),
+    Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
+    Opcode.FOR: Definition("OpFor", (2, 2, 2)),
+    Opcode.TAB: Definition("OpTablerow", (2, 2, 2)),
+    Opcode.STE: Definition("OpStep", (2,)),
+    Opcode.CON: Definition("OpContinue", ()),
+    Opcode.BRK: Definition("OpBreak", ()),
+    Opcode.FIL: Definition("OpCallFilter", (2, 1)),  # filter id, num args
 }
 
 
@@ -104,7 +129,7 @@ def lookup(op: Opcode) -> Definition:
 def make(op: Opcode, *operands: int) -> Instruction:
     """Pack the given opcode and operands into an instruction."""
     _, widths = lookup(op)
-    assert len(widths) == len(operands)
+    assert len(widths) == len(operands), f"opcode: {Opcode(op)!r}"
 
     instruction: List[int] = [op]
 
@@ -114,13 +139,17 @@ def make(op: Opcode, *operands: int) -> Instruction:
     return instruction
 
 
-def _string(ins: Instructions) -> str:
+def chain(*instructions: Instruction) -> Instructions:
+    return list(itertools.chain(*instructions))
+
+
+def string(ins: Instructions) -> str:
     buf = []
 
     idx = 0
     while idx < len(ins):
         try:
-            opdef = lookup(ins[idx])
+            opdef = lookup(Opcode(ins[idx]))
         except OpcodeError as err:
             buf.append(f"error: {err}")
             continue
