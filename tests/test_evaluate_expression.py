@@ -168,13 +168,17 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
             ),
             Case(
                 "size of an empty array",
-                Context(global_objects={"a": {"b": {"c": "hello", "array": []}}},),
+                Context(
+                    global_objects={"a": {"b": {"c": "hello", "array": []}}},
+                ),
                 "a.b.array.size",
                 0,
             ),
             Case(
                 "size of an object",
-                Context(global_objects={"a": {"b": {"c": "hello", "array": []}}},),
+                Context(
+                    global_objects={"a": {"b": {"c": "hello", "array": []}}},
+                ),
                 "a.b.size",
                 2,
             ),
@@ -238,7 +242,11 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 context=Context(
                     global_objects={
                         "user": {"age": 20},
-                        "collection": {"tags": ["safe",]},
+                        "collection": {
+                            "tags": [
+                                "safe",
+                            ]
+                        },
                     }
                 ),
                 expression="user.age >= 21 or collection.tags contains 'safe'",
@@ -382,6 +390,24 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expression="'2' == 2",
                 expect=False,
             ),
+            Case(
+                description="empty string is truthy",
+                context=Context(),
+                expression="''",
+                expect=True,
+            ),
+            Case(
+                description="empty string and string is truthy",
+                context=Context(),
+                expression="'' and 'foo'",
+                expect=True,
+            ),
+            Case(
+                description="float equals int",
+                context=Context(),
+                expression="1 == 1.0",
+                expect=True,
+            ),
         ]
 
         self._test(test_cases, parse_boolean_expression)
@@ -435,7 +461,14 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expr.evaluate(case.context)
 
                 name, val = case.expect
-                self.assertEqual(case.context.get([name,]), val)
+                self.assertEqual(
+                    case.context.get(
+                        [
+                            name,
+                        ]
+                    ),
+                    val,
+                )
 
     def test_eval_loop_expression(self):
         """Test that we can evaluate loop expressions."""

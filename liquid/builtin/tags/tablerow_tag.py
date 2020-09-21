@@ -155,6 +155,8 @@ class TableRowDrop(collections.abc.Mapping):
 class TablerowNode(ast.Node):
     __slots__ = ("tok", "expression", "block")
 
+    statement = False
+
     def __init__(
         self,
         tok: Token,
@@ -198,22 +200,20 @@ class TablerowNode(ast.Node):
         if self.expression.cols:
             self.expression.cols.compile(compiler)
         else:
-            compiler.emit(Opcode.NOP)
+            compiler.emit(Opcode.NIL)
 
         self.expression.compile(compiler)
 
-        for_pos = compiler.emit(Opcode.FOR, symbol.index, 9999, 9999)
-
-        # XXX: Should JSI be accepting an index to check or should it be on the stack?
-        top_of_loop = compiler.emit(Opcode.JSI, 9999, symbol.index)
+        for_pos = compiler.emit(Opcode.TAB, symbol.index, 9999, 9999)
+        top_of_loop = compiler.emit(Opcode.JSI, 9999)  # break loop on stop iteration
 
         self.block.compile(compiler)
 
-        compiler.emit(Opcode.STE, symbol.index)
-        compiler.emit(Opcode.JMP, top_of_loop)
+        compiler.emit(Opcode.STE, symbol.index)  # step
+        compiler.emit(Opcode.JMP, top_of_loop)  # jump
 
         after_loop_pos = len(compiler.current_instructions())
-        compiler.change_operand(top_of_loop, after_loop_pos, symbol.index)
+        compiler.change_operand(top_of_loop, after_loop_pos)
         compiler.change_operand(for_pos, symbol.index, top_of_loop, after_loop_pos)
 
 

@@ -3,59 +3,20 @@ from collections import abc
 from io import StringIO
 from itertools import islice
 from operator import getitem
-from typing import Any, Mapping, NamedTuple, Iterator, Tuple, Iterable
+from typing import Any, Mapping, NamedTuple, Iterator
 
 from liquid.context import Context, ReadOnlyChainMap
 from liquid import code
 from liquid.code import Opcode
 from liquid import compiler
 from liquid.exceptions import StackOverflow, LiquidTypeError
+from liquid.expression import compare, is_truthy
 
 from liquid.builtin.tags.for_tag import ForLoopDrop
+from liquid.object import Empty, StopIter, Nop
 
 
 STACK_SIZE = 2048
-
-# TODO: Move these to liquid.object
-
-
-class EmptyObj:
-    __slots__ = ()
-
-    def __repr__(self):
-        return "Empty()"
-
-    def __str__(self):
-        return ""
-
-
-Empty = EmptyObj()
-
-
-class StopIterObj:
-    __slots__ = ()
-
-    def __repr__(self):
-        return "StopIter()"
-
-    def __str__(self):
-        return ""
-
-
-StopIter = StopIterObj()
-
-
-class NoOp:
-    __slots__ = ()
-
-    def __repr__(self):
-        return "NoOp()"
-
-    def __str__(self):
-        return ""
-
-
-Nop = NoOp()
 
 
 class ForIter(NamedTuple):
@@ -102,18 +63,18 @@ class VM:
                 self.push(self.constants[const_idx])
 
             elif op == Opcode.POP:
-                self.current_buffer().write(str(self.pop()))
+                self.current_buffer().write(to_string(self.pop()))
 
-            elif op == Opcode.TRUE:
+            elif op == Opcode.TRU:
                 self.push(True)
 
-            elif op == Opcode.FALSE:
+            elif op == Opcode.FAL:
                 self.push(False)
 
             elif op == Opcode.NIL:
                 self.push(None)
 
-            elif op == Opcode.EMPTY:
+            elif op == Opcode.EMP:
                 self.push(Empty)
 
             elif op in (
@@ -125,9 +86,13 @@ class VM:
                 Opcode.AND,
                 Opcode.OR,
             ):
-                self._exec_comparison(op)
+                right = self.pop()
+                left = self.pop()
+                operator = code.COMPARISON_OPERATORS[op]
 
-            elif op == Opcode.MINUS:
+                self.push(compare(left, operator, right))
+
+            elif op == Opcode.MIN:
                 operand = self.pop()
 
                 if not isinstance(operand, (int, float)):
@@ -155,16 +120,30 @@ class VM:
                 if not is_truthy(condition):
                     ip = pos - 1
 
+            elif op == Opcode.JIE:
+                pos = code.read_uint16(self.instructions[ip + 1 : ip + 3])
+                ip += 2
+
+                if self.pop() == Empty:
+                    ip = pos - 1
+
+            elif op == Opcode.JSI:
+                pos = code.read_uint16(self.instructions[ip + 1 : ip + 3])
+                ip += 2
+
+                if self.pop() == StopIter:
+                    ip = pos - 1
+
             elif op == Opcode.NOP:
                 self.push(Nop)
 
-            elif op == Opcode.SETLOCAL:
+            elif op == Opcode.SLO:
                 idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
                 ip += 2
 
                 self.context.locals[idx] = self.pop()
 
-            elif op == Opcode.GETLOCAL:
+            elif op == Opcode.GLO:
                 idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
                 ip += 2
 
@@ -181,12 +160,12 @@ class VM:
 
                 self.context.locals[idx] = value
 
-            elif op == Opcode.RESOLVE:
+            elif op == Opcode.RES:
                 name = self.pop()
                 obj = self.globals.get(name)
                 self.push(obj)
 
-            elif op == Opcode.GETITEM:
+            elif op == Opcode.GIT:
                 item = self.pop()
                 obj = self.pop()
                 try:
@@ -211,84 +190,21 @@ class VM:
                 ip += 1
 
                 group = self.pop()
-
                 args = [self.pop() for _ in range(num_args)]
 
                 self.push(next(self.context.cycle(group, args)))
 
             elif op == Opcode.FOR:
-                # Index of loop variable
                 idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
                 ip += 2
 
-                # Start of loop position
-                start_loop_idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
+                loop_start = code.read_uint16(self.instructions[ip + 1 : ip + 3])
                 ip += 2
 
-                # End of loop position
-                after_loop_idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
+                loop_stop = code.read_uint16(self.instructions[ip + 1 : ip + 3])
                 ip += 2
 
-                # Range start or collection to iterate
-                start = self.pop()
-                # Range stop. Will be None if start is a collection.
-                stop = self.pop()
-
-                if isinstance(start, int):
-                    assert isinstance(stop, int)
-                    it = range(start, stop + 1)
-                elif isinstance(start, abc.Sequence):
-                    it = iter(start)
-                elif isinstance(start, abc.Mapping):
-                    it = iter(start.items())
-                else:
-                    raise LiquidTypeError(f"can't iterate object '{start}'")
-
-                limit = self.pop()
-                offset = self.pop()
-                reverse = self.pop()
-
-                it = islice(it, offset, limit)
-
-                if reverse:
-                    it = reversed(list(it))
-
-                items = list(it)
-
-                if not items:
-                    self.context.locals[idx] = Empty
-                else:
-                    drop = ForLoopDrop(idx, len(items))
-                    self.iters[idx] = ForIter(
-                        iter(items), drop, start_loop_idx, after_loop_idx
-                    )
-
-                    # Init drop with first step
-                    next_val = next(self.iters[idx].it)
-                    drop.step(next_val)
-
-                    self.push_scope(drop, drop)  # XXX:
-
-            elif op == Opcode.JIE:
-                pos = code.read_uint16(self.instructions[ip + 1 : ip + 3])
-                ip += 2
-
-                idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
-                ip += 2
-
-                if self.locals[idx] == Empty:
-                    ip = pos - 1
-
-            elif op == Opcode.JSI:
-                pos = code.read_uint16(self.instructions[ip + 1 : ip + 3])
-                ip += 2
-
-                idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
-                ip += 2
-
-                if self.locals[idx] == StopIter:
-                    ip = pos - 1
-                    del self.context.locals[idx]
+                self._exec_forloop(idx, loop_start, loop_stop)
 
             elif op == Opcode.STE:
                 idx = code.read_uint16(self.instructions[ip + 1 : ip + 3])
@@ -299,14 +215,17 @@ class VM:
                 try:
                     next_val = next(it)
                     drop.step(next_val)
+
+                    self.context.locals[idx] = next_val
+                    self.push(Nop)
                 except StopIteration:
-                    self.pop_scope()
-                    self.context.locals[idx] = StopIter
-                    self.iters.popitem()
+                    self._stop_iteration()
+                    del self.context.locals[idx]
 
             elif op == Opcode.BRK:
-                _, it = self.iters.popitem()
-                self.pop_scope()
+                idx, it = self.iters.popitem()
+                del self.context.locals[idx]
+                self.pop_globals()
                 ip = it.after_idx - 1
 
             elif op == Opcode.CON:
@@ -315,11 +234,15 @@ class VM:
                 try:
                     next_val = next(it.it)
                     it.drop.step(next_val)
+
+                    self.context.locals[idx] = next_val
+                    self.push(Nop)
+
                     ip = it.start_idx - 1
                     self.iters[idx] = it
                 except StopIteration:
-                    self.pop_scope()
-                    self.context.locals[idx] = StopIter
+                    self._stop_iteration()
+                    del self.context.locals[idx]
 
             elif op == Opcode.FIL:
                 fltr_id = code.read_uint16(self.instructions[ip + 1 : ip + 3])
@@ -338,82 +261,52 @@ class VM:
 
             ip += 1
 
-    def _exec_comparison(self, op: Opcode):
-        right = self.pop()
-        left = self.pop()
+    def _exec_forloop(self, idx, loop_start, loop_stop):
+        # Range start or collection to iterate
+        start = self.pop()
+        # Range stop. Will be None if start is a collection.
+        stop = self.pop()
 
-        if isinstance(left, bool) and isinstance(right, bool):
-            self._exec_bool_comparison(left, op, right)
-        elif Empty in (left, right):
-            self._exec_empty_comparison(left, op, right)
-        elif type(left) in (int, float) and type(right) in (int, float):
-            self._exec_number_comparison(left, op, right)
-        elif isinstance(left, str) and isinstance(right, str):
-            self._exec_string_comparison(left, op, right)
+        if isinstance(start, int):
+            assert isinstance(stop, int)
+            it = range(start, stop + 1)
+        elif isinstance(start, abc.Sequence):
+            it = iter(start)
+        elif isinstance(start, abc.Mapping):
+            it = iter(start.items())
         else:
-            if op == Opcode.CONTAINS:
-                if isinstance(left, str):
-                    self.push(str(right) in left)
-                if isinstance(left, (list, dict)):
-                    self.push(right in left)
-            if op == Opcode.EQ:
-                self.push(left == right)
-            if op == Opcode.NE:
-                self.push(left != right)
-            else:
-                raise LiquidTypeError(f"unknown operator {op} ({left}, {right})")
+            raise LiquidTypeError(f"can't iterate object '{start}'")
 
-    def _exec_bool_comparison(self, left, op, right):
-        if op == Opcode.EQ:
-            self.push(left == right)
-        elif op == Opcode.NE:
-            self.push(left != right)
-        elif op == Opcode.AND:
-            self.push(left and right)
-        elif op == Opcode.OR:
-            self.push(left or right)
+        limit = self.pop()
+        offset = self.pop()
+        reverse = self.pop()
+
+        it = islice(it, offset, limit)
+
+        if reverse:
+            it = reversed(list(it))
+
+        items = list(it)
+
+        if not items:
+            self.push(Empty)
         else:
-            raise LiquidTypeError(f"unknown operator {op} ({left}, {right})")
+            self.push(Nop)
+            drop = ForLoopDrop(idx, len(items))
+            for_it = ForIter(iter(items), drop, loop_start, loop_stop)
+            self.iters[idx] = for_it
 
-    def _exec_empty_comparison(self, left, op, right):
-        if not left == Empty:
-            left, right = right, left
+            # Init drop with first step
+            next_val = next(for_it.it)
+            drop.step(next_val)
+            self.context.locals[idx] = next_val
 
-        is_equal = False
+            self.push_globals(drop)
 
-        if right == Empty:
-            is_equal = True
-        elif isinstance(right, (list, dict, str)) and not right:
-            is_equal = True
-
-        if op == Opcode.EQ:
-            self.push(is_equal)
-        elif op == Opcode.NE:
-            self.push(not is_equal)
-        else:
-            raise LiquidTypeError(f"unknown operator {op} ({left}, {right})")
-
-    def _exec_number_comparison(self, left, op, right):
-        if op == Opcode.EQ:
-            self.push(left == right)
-        elif op == Opcode.GE:
-            self.push(left <= right)
-        elif op == Opcode.GT:
-            self.push(left > right)
-        elif op == Opcode.NE:
-            self.push(left != right)
-        else:
-            raise LiquidTypeError(f"unknown operator {op} ({left}, {right})")
-
-    def _exec_string_comparison(self, left, op, right):
-        if op == Opcode.EQ:
-            self.push(left == right)
-        elif op == Opcode.NE:
-            self.push(left != right)
-        elif op == Opcode.CONTAINS:
-            self.push(right in left)
-        else:
-            raise LiquidTypeError(f"unknown operator {op} ({left}, {right})")
+    def _stop_iteration(self):
+        self.pop_globals()
+        self.push(StopIter)
+        self.iters.popitem()
 
     def push(self, obj: Any):
         """Push the given object on to the top of the stack."""
@@ -442,16 +335,21 @@ class VM:
         buf = self.buffers.pop()
         return buf.getvalue()
 
-    def push_scope(self, locals: Mapping[int, Any], globals: Mapping[int, Any]):
-        self.locals.push(locals)
+    def push_globals(self, globals: Mapping[int, Any]):
         self.globals.push(globals)
 
-    def pop_scope(self) -> Tuple[Mapping[Any, Any], Mapping[Any, Any]]:
-        return (self.locals.pop(), self.globals.pop())
+    def pop_globals(self) -> Mapping[Any, Any]:
+        return self.globals.pop()
 
 
-def is_truthy(obj: Any) -> bool:
-    """Return True if the given object is Liquid truthy."""
-    if obj in (False, None):
-        return False
-    return True
+def to_string(val: Any) -> str:
+    if isinstance(val, (list, tuple)):
+        res = "".join(str(v) for v in val)
+    elif isinstance(val, bool):
+        res = str(val).lower()
+    elif val is None:
+        res = ""
+    else:
+        res = str(val)
+
+    return res

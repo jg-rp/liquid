@@ -408,40 +408,40 @@ class VMTestCase(unittest.TestCase):
 
         self._test_last_popped(test_cases)
 
-    def test_for(self):
-        """Test that we can execute "for" tags."""
+    def test_for_render(self):
+        """Test that we can render "for" tags."""
         test_cases = [
             Case(
                 description="simple range loop",
                 source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
-                expected=3,
+                expected="0123",
             ),
             Case(
                 description="range loop with limit",
                 source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
-                expected=1,
+                expected="01",
             ),
             Case(
                 description="reversed range loop",
                 source=r"{% for i in (0..3) reversed %}{{ i }}{% endfor %}",
-                expected=0,
+                expected="3210",
             ),
             Case(
                 description="for each loop",
-                source=r"{% for c in collections %}{{ c }}{% endfor %}",
-                expected="garden",
+                source=r"{% for c in collections %}{{ c }} {% endfor %}",
+                expected="sport garden ",
                 globals={"collections": ["sport", "garden"]},
             ),
             Case(
                 description="forloop index helper",
                 source=r"{% for c in collections %}{{ forloop.index0 }}{% endfor %}",
-                expected=1,
+                expected="01",
                 globals={"collections": ["sport", "garden"]},
             ),
             Case(
                 description="forloop last helper",
-                source=r"{% for c in collections %}{{ forloop.last }}{% endfor %}",
-                expected=True,
+                source=r"{% for c in collections %}{{ forloop.last }} {% endfor %}",
+                expected="false true ",
                 globals={"collections": ["sport", "garden"]},
             ),
             Case(
@@ -450,13 +450,6 @@ class VMTestCase(unittest.TestCase):
                 expected="empty",
                 globals={"collections": []},
             ),
-        ]
-
-        self._test_last_popped(test_cases)
-
-    def test_for_render(self):
-        """Test that we can render "for" tags."""
-        test_cases = [
             Case(
                 description="nested loop with continue",
                 source=(

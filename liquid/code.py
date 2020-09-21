@@ -1,4 +1,5 @@
 """Opcode definitions and helpers."""
+
 from __future__ import annotations
 from enum import IntEnum, auto
 import itertools
@@ -19,33 +20,34 @@ class Opcode(IntEnum):
 
     POP = auto()
 
-    TRUE = auto()
-    FALSE = auto()
-    NIL = auto()
-    EMPTY = auto()
+    TRU = auto()  # True
+    FAL = auto()  # False
+    NIL = auto()  # Nil
+    EMP = auto()  # Empty
 
-    EQ = auto()
-    NE = auto()
-    GT = auto()
-    GE = auto()
+    EQ = auto()  # Equals
+    NE = auto()  # Not Equal
+    GT = auto()  # Greater Than
+    GE = auto()  # Greater than or equal to
     CONTAINS = auto()
 
     AND = auto()
     OR = auto()
 
-    MINUS = auto()
+    MIN = auto()  # Minus
 
     JIF = auto()  # Jump IF truthy
     JIN = auto()  # Jump If Not truthy
     JIE = auto()  # Jump If Empty
     JSI = auto()  # Jump Stop Iteration
     JMP = auto()  # Jump
+
     NOP = auto()  # No Operation
 
-    GETLOCAL = auto()
-    SETLOCAL = auto()
-    RESOLVE = auto()
-    GETITEM = auto()
+    GLO = auto()  # Get LOcal
+    SLO = auto()  # Set LOcal
+    RES = auto()  # RESolve
+    GIT = auto()  # Get ITem
 
     CAPTURE = auto()
     SETCAPTURE = auto()
@@ -69,6 +71,17 @@ class Opcode(IntEnum):
 assert len(Opcode) <= 255
 
 
+COMPARISON_OPERATORS = {
+    Opcode.EQ: "==",
+    Opcode.NE: "!=",
+    Opcode.GT: ">",
+    Opcode.GE: ">=",
+    Opcode.CONTAINS: "contains",
+    Opcode.AND: "and",
+    Opcode.OR: "or",
+}
+
+
 class Definition(NamedTuple):
     """Opcode definition."""
 
@@ -80,10 +93,10 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.CONSTANT: Definition("OpConstant", (2,)),
     Opcode.POP: Definition("OpPop", ()),
     Opcode.POP: Definition("OpPop", ()),
-    Opcode.TRUE: Definition("OpTrue", ()),
-    Opcode.FALSE: Definition("OpFalse", ()),
+    Opcode.TRU: Definition("OpTrue", ()),
+    Opcode.FAL: Definition("OpFalse", ()),
     Opcode.NIL: Definition("OpNil", ()),
-    Opcode.EMPTY: Definition("OpEmpty", ()),
+    Opcode.EMP: Definition("OpEmpty", ()),
     Opcode.EQ: Definition("OpEqual", ()),
     Opcode.NE: Definition("OpNotEqual", ()),
     Opcode.GT: Definition("OpGreaterThan", ()),
@@ -91,19 +104,21 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.CONTAINS: Definition("OpContains", ()),
     Opcode.AND: Definition("OpAnd", ()),
     Opcode.OR: Definition("OpOr", ()),
-    Opcode.MINUS: Definition("OpMinus", ()),
+    Opcode.MIN: Definition("OpMinus", ()),
     Opcode.JIF: Definition("OpJumpIf", (2,)),  # instruction to jump to
     Opcode.JIN: Definition("OpJumpIfNot", (2,)),  # instruction to jump to
-    Opcode.JIE: Definition("OpJumpIfEmpty", (2, 2)),  # jump to 1 if 2 is empty
+    Opcode.JIE: Definition(
+        "OpJumpIfEmpty", (2,)
+    ),  # jump to 1 if Empty is on the top of the stack
     Opcode.JSI: Definition(
-        "OpJumpStopIteration", (2, 2)
-    ),  # jump to 1 if 2 is stop iter
+        "OpJumpStopIteration", (2,)
+    ),  # jump to 1 if StopIter is on the top of the stack
     Opcode.JMP: Definition("OpJump", (2,)),  # instruction to jump to
     Opcode.NOP: Definition("OpNoOp", ()),
-    Opcode.GETLOCAL: Definition("OpGetLocal", (2,)),
-    Opcode.SETLOCAL: Definition("OpSetLocal", (2,)),
-    Opcode.RESOLVE: Definition("OpResolve", ()),
-    Opcode.GETITEM: Definition("OpGetAttr", ()),
+    Opcode.GLO: Definition("OpGetLocal", (2,)),
+    Opcode.SLO: Definition("OpSetLocal", (2,)),
+    Opcode.RES: Definition("OpResolve", ()),
+    Opcode.GIT: Definition("OpGetAttr", ()),
     Opcode.CAPTURE: Definition("OpCapture", ()),
     Opcode.SETCAPTURE: Definition("OpSetCapture", (2,)),
     Opcode.INC: Definition("OpIncrement", (2,)),

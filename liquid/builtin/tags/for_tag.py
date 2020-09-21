@@ -197,16 +197,17 @@ class ForNode(ast.Node):
         for_pos = compiler.emit(Opcode.FOR, symbol.index, 9999, 9999)
 
         # Jump to default if empty iterator
-        jump_to_default_pos = compiler.emit(Opcode.JIE, 9999, symbol.index)
+        jump_to_default_pos = compiler.emit(Opcode.JIE, 9999)
 
-        top_of_loop = compiler.emit(Opcode.JSI, 9999, symbol.index)  # Jump past default
+        top_of_loop = compiler.emit(Opcode.JSI, 9999)  # Jump past default
+
         self.block.compile(compiler)
 
         compiler.emit(Opcode.STE, symbol.index)
         compiler.emit(Opcode.JMP, top_of_loop)
 
         after_loop_block_pos = len(compiler.current_instructions())
-        compiler.change_operand(jump_to_default_pos, after_loop_block_pos, symbol.index)
+        compiler.change_operand(jump_to_default_pos, after_loop_block_pos)
 
         if self.default:
             self.default.compile(compiler)
@@ -214,7 +215,7 @@ class ForNode(ast.Node):
             compiler.emit(Opcode.NOP)
 
         after_default_pos = len(compiler.current_instructions())
-        compiler.change_operand(top_of_loop, after_default_pos, symbol.index)
+        compiler.change_operand(top_of_loop, after_default_pos)
         compiler.change_operand(for_pos, symbol.index, top_of_loop, after_default_pos)
 
 

@@ -31,10 +31,12 @@ class Expression(ABC):
         return self.tok
 
     def compile_expression(self, compiler: Compiler):
-        raise NotImplementedError(":(")
+        raise NotImplementedError(
+            f"don't know how to compile expression {self.__class__.__name__}"
+        )
 
     def compile(self, compiler: Compiler):
-        # XXX: Just in case we need to hook in to the compile method later.
+        # Just in case we need to hook in to the compile method later.
         self.compile_expression(compiler)
 
 
@@ -59,9 +61,9 @@ class Boolean(Expression):
 
     def compile_expression(self, compiler: Compiler):
         if self.value:
-            compiler.emit(Opcode.TRUE)
+            compiler.emit(Opcode.TRU)
         else:
-            compiler.emit(Opcode.FALSE)
+            compiler.emit(Opcode.FAL)
 
 
 class Nil(Expression):
@@ -103,7 +105,7 @@ class Empty(Expression):
         return self
 
     def compile_expression(self, compiler: Compiler):
-        compiler.emit(Opcode.EMPTY)
+        compiler.emit(Opcode.EMP)
 
 
 class Literal(Expression):
@@ -153,12 +155,8 @@ class FloatLiteral(Literal):
         return f"FloatLiteral(tok={self.tok}, value={self.value})"
 
 
-class IdentifierPathElement(Expression):
-    __slots__ = ("tok", "value")
-
-    def __init__(self, tok: Token, value: Union[str, int]):
-        super().__init__(tok)
-        self.value = value
+class IdentifierPathElement(Literal):
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, IdentifierPathElement) and self.value == other.value
@@ -169,14 +167,6 @@ class IdentifierPathElement(Expression):
     def __str__(self):
         return str(self.value)
 
-    def evaluate(self, context: Context) -> Union[str, int]:
-        return self.value
-
-    def compile_expression(self, compiler: Compiler):
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.value))
-
-
-# XXX:
 
 IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
 
@@ -213,15 +203,15 @@ class Identifier(Expression):
 
         try:
             symbol = compiler.symbol_table.resolve(name.value)
-            compiler.emit(Opcode.GETLOCAL, symbol.index)
+            compiler.emit(Opcode.GLO, symbol.index)
         except KeyError:
             # Not a locally defined variable. Might be in context at render time.
             name.compile(compiler)
-            compiler.emit(Opcode.RESOLVE)
+            compiler.emit(Opcode.RES)
 
             for item in items:
                 item.compile(compiler)
-                compiler.emit(Opcode.GETITEM)
+                compiler.emit(Opcode.GIT)  # Get ITem
 
 
 class PrefixExpression(Expression):
@@ -261,7 +251,7 @@ class PrefixExpression(Expression):
         self.right.compile(compiler)
 
         if self.operator == "-":
-            compiler.emit(Opcode.MINUS)
+            compiler.emit(Opcode.MIN)
         else:
             raise LiquidTypeError(f"unknown operator {self.operator}")
 
@@ -295,43 +285,9 @@ class InfixExpression(Expression):
         return f"({self.left} {self.operator} {self.right})"
 
     def evaluate(self, context: Context):
-        """
-
-        1 == 1.0 --> true
-
-        Liquid does not coerce left or right operands when types don't match. So
-        '1' == 1 --> false.
-        """
         left = self.left.evaluate(context)
         right = self.right.evaluate(context)
-
-        if isinstance(left, bool) and isinstance(right, bool):
-            return eval_bool_expression(left, self.operator, right)
-        if isinstance(left, Empty) or isinstance(right, Empty):
-            return eval_empty_expression(left, self.operator, right)
-        if type(left) in (int, float) and type(right) in (int, float):
-            return eval_number_expression(left, self.operator, right)
-        if isinstance(left, str) and isinstance(right, str):
-            return eval_string_expression(left, self.operator, right)
-
-        if self.operator == "contains":
-            if isinstance(left, str):
-                return str(right) in left
-            if isinstance(left, (list, dict)):
-                return right in left
-        if self.operator == "==":
-            return left == right
-        if self.operator in ("!=", "<>"):
-            return left != right
-
-        if type(left) != type(right):
-            raise LiquidTypeError(
-                f"invalid operator for types '{str(left)} {self.operator} {str(right)}'"
-            )
-
-        raise LiquidTypeError(
-            f"unknown operator: {type(left)} {self.operator} {type(right)}"
-        )
+        return compare(left, self.operator, right)
 
     def compile_expression(self, compiler: Compiler):
         if self.operator == "<":
@@ -352,7 +308,7 @@ class InfixExpression(Expression):
                 compiler.emit(Opcode.GT)
             elif self.operator == "==":
                 compiler.emit(Opcode.EQ)
-            elif self.operator == "!=" or self.operator == "<>":
+            elif self.operator in ("!=", "<>"):
                 compiler.emit(Opcode.NE)
             elif self.operator == ">=":
                 compiler.emit(Opcode.GE)
@@ -413,11 +369,7 @@ class BooleanExpression(Expression):
         return f"BooleanExpression(expression={self.expression!r})"
 
     def evaluate(self, context: Context) -> bool:
-        expr = self.expression.evaluate(context)
-        # Empty strings, arrays and hashes are truthy.
-        if expr in (False, None):
-            return False
-        return True
+        return is_truthy(self.expression.evaluate(context))
 
     def compile_expression(self, compiler: Compiler):
         # The VM has an `ìs_truthy` function.
@@ -448,7 +400,7 @@ class FilteredExpression(Expression):
     def __repr__(self):  # pragma: no cover
         return f"FilteredExpression(expression={self.expression!r}, filters={self.filters})"
 
-    def evaluate(self, context: Context):
+    def evaluate(self, context: Context) -> str:
         result = self.expression.evaluate(context)
 
         for fltr in self.filters:
@@ -516,7 +468,7 @@ class AssignmentExpression(Expression):
         assert isinstance(name.value, str)
 
         symbol = compiler.symbol_table.define(name.value)
-        compiler.emit(Opcode.SETLOCAL, symbol.index)
+        compiler.emit(Opcode.SLO, symbol.index)
 
 
 class LoopExpression(Expression):
@@ -640,9 +592,9 @@ class LoopExpression(Expression):
 
     def compile_expression(self, compiler: Compiler):
         if self.reversed:
-            compiler.emit(Opcode.TRUE)
+            compiler.emit(Opcode.TRU)
         else:
-            compiler.emit(Opcode.FALSE)
+            compiler.emit(Opcode.FAL)
 
         if self.offset:
             self.offset.compile(compiler)
@@ -665,14 +617,7 @@ class LoopExpression(Expression):
             self.start.compile(compiler)
 
 
-# TODO: Test shopify for <int> and <int>
-
-
-def eval_number_expression(
-    left: Number, operator: str, right: Number
-) -> Union[Number, bool]:
-    if operator == "==":
-        return left == right
+def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
     if operator == "<=":
         return left <= right
     if operator == ">=":
@@ -681,38 +626,11 @@ def eval_number_expression(
         return left < right
     if operator == ">":
         return left > right
-    if operator == "!=" or operator == "<>":
-        return left != right
-
-    raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
-
-
-def eval_string_expression(left: str, operator: str, right: str) -> Union[Number, bool]:
-    if operator == "==":
-        return left == right
-    if operator in ("!=", "<>"):
-        return left != right
-    if operator == "contains":
-        return right in left
-
-    raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
-
-
-def eval_bool_expression(left: bool, operator: str, right: bool) -> bool:
-    if operator == "==":
-        return left == right
-    if operator in ("!=", "<>"):
-        return left != right
-    if operator == "or":
-        return left or right
-    if operator == "and":
-        return left and right
 
     raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
 
 
 def eval_empty_expression(left: Any, operator: str, right: Any) -> bool:
-    assert isinstance(left, Empty) or isinstance(right, Empty)
     if not isinstance(left, Empty):
         left, right = right, left
 
@@ -722,3 +640,43 @@ def eval_empty_expression(left: Any, operator: str, right: Any) -> bool:
         return left != right
 
     raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
+
+
+def is_truthy(obj: Any) -> bool:
+    """Return True if the given object is Liquid truthy."""
+    if obj in (False, None):
+        return False
+    return True
+
+
+def compare(left: Any, operator: str, right: Any) -> bool:
+    if isinstance(left, Empty) or isinstance(right, Empty):
+        return eval_empty_expression(left, operator, right)
+
+    if operator == "and":
+        return is_truthy(left) and is_truthy(right)
+    if operator == "or":
+        return is_truthy(left) or is_truthy(right)
+    if operator == "==":
+        return left == right
+    if operator in ("!=", "<>"):
+        return left != right
+
+    if operator == "contains":
+        if isinstance(left, str):
+            return str(right) in left
+        if isinstance(left, (list, dict)):
+            return right in left
+
+    # FIXME: It appears that shopify will convert any illegal comparison into something
+    # falsey, at least in lax mode.
+
+    if type(left) in (int, float) and type(right) in (int, float):
+        return eval_number_expression(left, operator, right)
+
+    if type(left) != type(right):
+        raise LiquidTypeError(
+            f"invalid operator for types '{str(left)} {operator} {str(right)}'"
+        )
+
+    raise LiquidTypeError(f"unknown operator: {type(left)} {operator} {type(right)}")

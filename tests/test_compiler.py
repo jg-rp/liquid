@@ -35,11 +35,11 @@ class CompilerTestCase(unittest.TestCase):
                 self._test_constants(bytecode.constants, case.expected_constants)
 
     def _test_instructions(self, expected, actual):
-        print("---")
-        print(code.string(actual))
-        print("\n\n")
-        print(code.string(expected))
-        print("---")
+        # print("---")
+        # print(code.string(actual))
+        # print("\n\n")
+        # print(code.string(expected))
+        # print("---")
 
         self.assertEqual(len(expected), len(actual), msg="instruction length mismatch")
 
@@ -100,7 +100,7 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=[1],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.MINUS),
+                    code.make(Opcode.MIN),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -116,7 +116,7 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{{ true }}",
                 expected_constants=[],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE), code.make(Opcode.POP)
+                    code.make(Opcode.TRU), code.make(Opcode.POP)
                 ),
             ),
             Case(
@@ -124,7 +124,7 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{{ false }}",
                 expected_constants=[],
                 expected_instructions=code.chain(
-                    code.make(Opcode.FALSE), code.make(Opcode.POP)
+                    code.make(Opcode.FAL), code.make(Opcode.POP)
                 ),
             ),
             Case(
@@ -176,8 +176,8 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{{ true and false }}",
                 expected_constants=[],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE),
-                    code.make(Opcode.FALSE),
+                    code.make(Opcode.TRU),
+                    code.make(Opcode.FAL),
                     code.make(Opcode.AND),
                     code.make(Opcode.POP),
                 ),
@@ -187,8 +187,8 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{{ true or false }}",
                 expected_constants=[],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE),
-                    code.make(Opcode.FALSE),
+                    code.make(Opcode.TRU),
+                    code.make(Opcode.FAL),
                     code.make(Opcode.OR),
                     code.make(Opcode.POP),
                 ),
@@ -205,7 +205,7 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% if true %}10{% endif %}3333",
                 expected_constants=["10", "3333"],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE),
+                    code.make(Opcode.TRU),
                     code.make(Opcode.JIN, 10),
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.JMP, 11),
@@ -220,7 +220,7 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% if true %}10{% else %}20{% endif %}3333",
                 expected_constants=["10", "20", "3333"],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE),  # 0000
+                    code.make(Opcode.TRU),  # 0000
                     code.make(Opcode.JIN, 10),  # 0001
                     code.make(Opcode.CONSTANT, 0),  # 0004
                     code.make(Opcode.JMP, 13),  # 0007
@@ -235,11 +235,11 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% if false %}10{% elsif true %}20{% else %}30{% endif %}3333",
                 expected_constants=["10", "20", "30", "3333"],
                 expected_instructions=code.chain(
-                    code.make(Opcode.FALSE),  # 0000
+                    code.make(Opcode.FAL),  # 0000
                     code.make(Opcode.JIN, 10),  # 0001 Jump to next alternative
                     code.make(Opcode.CONSTANT, 0),  # 0004
                     code.make(Opcode.JMP, 23),  # 0007 Jump to end of condition
-                    code.make(Opcode.TRUE),  # 0010
+                    code.make(Opcode.TRU),  # 0010
                     code.make(Opcode.JIN, 20),  # 0011 Jump to next alternative
                     code.make(Opcode.CONSTANT, 1),  # 0014
                     code.make(Opcode.JMP, 23),  # 0017 Jump to end of condition
@@ -261,7 +261,7 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% unless false %}10{% endunless %}3333",
                 expected_constants=["10", "3333"],
                 expected_instructions=code.chain(
-                    code.make(Opcode.FALSE),
+                    code.make(Opcode.FAL),
                     code.make(Opcode.JIF, 7),
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.POP),
@@ -282,9 +282,9 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=[1, 2],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.SETLOCAL, 0),
+                    code.make(Opcode.SLO, 0),
                     code.make(Opcode.CONSTANT, 1),
-                    code.make(Opcode.SETLOCAL, 1),
+                    code.make(Opcode.SLO, 1),
                 ),
             ),
             Case(
@@ -293,8 +293,8 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=[1],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.SETLOCAL, 0),
-                    code.make(Opcode.GETLOCAL, 0),
+                    code.make(Opcode.SLO, 0),
+                    code.make(Opcode.GLO, 0),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -304,10 +304,10 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=[1],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.SETLOCAL, 0),
-                    code.make(Opcode.GETLOCAL, 0),
-                    code.make(Opcode.SETLOCAL, 1),
-                    code.make(Opcode.GETLOCAL, 1),
+                    code.make(Opcode.SLO, 0),
+                    code.make(Opcode.GLO, 0),
+                    code.make(Opcode.SLO, 1),
+                    code.make(Opcode.GLO, 1),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -343,14 +343,14 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% case true %}{% when false %}foo{% when true %}bar{% endcase %}3333",
                 expected_constants=["foo", "bar", "3333"],
                 expected_instructions=code.chain(
-                    code.make(Opcode.TRUE),  # 0000
-                    code.make(Opcode.FALSE),  # 0001
+                    code.make(Opcode.TRU),  # 0000
+                    code.make(Opcode.FAL),  # 0001
                     code.make(Opcode.EQ),  # 0002
                     code.make(Opcode.JIN, 12),  # 0003
                     code.make(Opcode.CONSTANT, 0),  # 0006
                     code.make(Opcode.JMP, 25),  # 0009
-                    code.make(Opcode.TRUE),  # 0012
-                    code.make(Opcode.TRUE),  # 0013
+                    code.make(Opcode.TRU),  # 0012
+                    code.make(Opcode.TRU),  # 0013
                     code.make(Opcode.EQ),  # 0014
                     code.make(Opcode.JIN, 24),  # 0015
                     code.make(Opcode.CONSTANT, 1),  # 0018
@@ -374,7 +374,7 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=["product"],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.RES),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -384,9 +384,9 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=["product", "title"],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.RES),
                     code.make(Opcode.CONSTANT, 1),
-                    code.make(Opcode.GETITEM),
+                    code.make(Opcode.GIT),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -396,12 +396,12 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=["collections", "product", "collection_name"],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.RES),
                     code.make(Opcode.CONSTANT, 1),
-                    code.make(Opcode.RESOLVE),
+                    code.make(Opcode.RES),
                     code.make(Opcode.CONSTANT, 2),
-                    code.make(Opcode.GETITEM),
-                    code.make(Opcode.GETITEM),
+                    code.make(Opcode.GIT),
+                    code.make(Opcode.GIT),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -537,18 +537,18 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
                 expected_constants=[3, 0],
                 expected_instructions=code.chain(
-                    code.make(Opcode.FALSE),  # reverse
+                    code.make(Opcode.FAL),  # reverse
                     code.make(Opcode.NIL),  # offset
                     code.make(Opcode.NIL),  # limit
                     code.make(Opcode.CONSTANT, 0),  # range stop
                     code.make(Opcode.CONSTANT, 1),  # range start
-                    code.make(Opcode.FOR, 0, 21, 37),  # index of loop var
-                    code.make(Opcode.JIE, 36, 0),
-                    code.make(Opcode.JSI, 37, 0),
-                    code.make(Opcode.GETLOCAL, 0),
+                    code.make(Opcode.FOR, 0, 19, 33),  # index of loop var
+                    code.make(Opcode.JIE, 32),
+                    code.make(Opcode.JSI, 33),
+                    code.make(Opcode.GLO, 0),
                     code.make(Opcode.POP),
                     code.make(Opcode.STE, 0),
-                    code.make(Opcode.JMP, 21),
+                    code.make(Opcode.JMP, 19),
                     code.make(Opcode.NOP),
                 ),
             ),
@@ -557,19 +557,46 @@ class CompilerTestCase(unittest.TestCase):
                 source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
                 expected_constants=[2, 3, 0],
                 expected_instructions=code.chain(
-                    code.make(Opcode.FALSE),  # reverse
+                    code.make(Opcode.FAL),  # reverse
                     code.make(Opcode.NIL),  # offset
                     code.make(Opcode.CONSTANT, 0),  # limit
                     code.make(Opcode.CONSTANT, 1),  # range stop
                     code.make(Opcode.CONSTANT, 2),  # range start
-                    code.make(Opcode.FOR, 0, 23, 39),  # index of loop var
-                    code.make(Opcode.JIE, 38, 0),
-                    code.make(Opcode.JSI, 39, 0),
-                    code.make(Opcode.GETLOCAL, 0),
+                    code.make(Opcode.FOR, 0, 21, 35),  # index of loop var
+                    code.make(Opcode.JIE, 34),
+                    code.make(Opcode.JSI, 35),
+                    code.make(Opcode.GLO, 0),
                     code.make(Opcode.POP),
                     code.make(Opcode.STE, 0),
-                    code.make(Opcode.JMP, 23),
+                    code.make(Opcode.JMP, 21),
                     code.make(Opcode.NOP),
+                ),
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_tablerow(self):
+        """Test that we can compile "tablerow" tags."""
+        test_cases = [
+            Case(
+                description="literal range with no args",
+                source=r"{% tablerow tag in tags %}{{ tag }}{% endtablerow %}",
+                expected_constants=["tags"],
+                expected_instructions=code.chain(
+                    code.make(Opcode.NIL),  # cols
+                    code.make(Opcode.FAL),  # reverse
+                    code.make(Opcode.NIL),  # offset
+                    code.make(Opcode.NIL),  # limit
+                    code.make(Opcode.NIL),  # range stop
+                    code.make(Opcode.CONSTANT, 0),  # identifier
+                    code.make(Opcode.RES),
+                    code.make(Opcode.TAB, 0, 16, 29),  # index of loop var
+                    code.make(Opcode.JSI, 29),
+                    code.make(Opcode.GLO, 0),
+                    code.make(Opcode.POP),
+                    code.make(Opcode.STE, 0),
+                    code.make(Opcode.JMP, 16),
                 ),
             ),
         ]
