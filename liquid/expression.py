@@ -209,9 +209,11 @@ class Identifier(Expression):
             name.compile(compiler)
             compiler.emit(Opcode.RES)
 
-            for item in items:
-                item.compile(compiler)
-                compiler.emit(Opcode.GIT)  # Get ITem
+        # It is possible for locally assign variables to reference liquid arrays or
+        # hahses.
+        for item in items:
+            item.compile(compiler)
+            compiler.emit(Opcode.GIT)  # Get ITem
 
 
 class PrefixExpression(Expression):

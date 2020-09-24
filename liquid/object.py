@@ -1,3 +1,8 @@
+from typing import NamedTuple
+
+from liquid import code
+
+
 class EmptyObj:
     """Empty"""
 
@@ -41,3 +46,10 @@ class NoOp:
 
 
 Nop = NoOp()
+
+
+class CompiledBlock(NamedTuple):
+    instructions: code.Instructions
+    num_locals: int = 0
+    num_parameters: int = 0
+    loop: bool = False

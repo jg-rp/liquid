@@ -433,6 +433,12 @@ class VMTestCase(unittest.TestCase):
                 globals={"collections": ["sport", "garden"]},
             ),
             Case(
+                description="for each loop over mapping",
+                source=r"{% for c in collection %}{{ c[0] }} {{c[1]}} {% endfor %}",
+                expected="title foo description bar ",
+                globals={"collection": {"title": "foo", "description": "bar"}},
+            ),
+            Case(
                 description="forloop index helper",
                 source=r"{% for c in collections %}{{ forloop.index0 }}{% endfor %}",
                 expected="01",
@@ -481,6 +487,14 @@ class VMTestCase(unittest.TestCase):
                 globals={
                     "nums": [1, 2, 3],
                     "letters": ["a", "b", "c"],
+                },
+            ),
+            Case(
+                description="loop variable goes out of scope",
+                source=r"{% for i in nums %}{{ i }}{% endfor %}{{ i }}",
+                expected="123",
+                globals={
+                    "nums": [1, 2, 3],
                 },
             ),
         ]

@@ -1,3 +1,4 @@
+"""Compiler test cases."""
 import unittest
 from typing import NamedTuple, List, Any
 
@@ -9,6 +10,8 @@ from liquid import hash_identifier
 
 
 class Case(NamedTuple):
+    """Test case definition."""
+
     description: str
     source: str
     expected_constants: List[Any]
@@ -16,6 +19,8 @@ class Case(NamedTuple):
 
 
 class CompilerTestCase(unittest.TestCase):
+    """Compiler test cases."""
+
     def _test(self, test_cases):
         """Helper method for testing lists of Cases."""
         env = Environment()

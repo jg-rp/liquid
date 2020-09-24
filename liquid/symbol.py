@@ -31,10 +31,10 @@ class SymbolTable:
         self.cycles = Scope()
         self.counters = Scope()
 
-    def define(self, name: str) -> Symbol:
-        if self.outer:
+    def define(self, name: str, scope: SymbolScope = None) -> Symbol:
+        if not scope and self.outer:
             scope = SymbolScope.BLOCK
-        else:
+        elif not scope:
             scope = SymbolScope.LOCAL
 
         symbol = Symbol(name=name, scope=scope, index=self.locals.size)

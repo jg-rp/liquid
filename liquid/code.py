@@ -56,6 +56,8 @@ class Opcode(IntEnum):
     DEC = auto()  # Decrement
     CYC = auto()  # Cycle
 
+    BLK = auto()  # Block. Define and "call" block.
+
     FOR = auto()  # For each loop
     TAB = auto()  # TABle row
     STE = auto()  # Step iterator
@@ -124,6 +126,7 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.INC: Definition("OpIncrement", (2,)),
     Opcode.DEC: Definition("OpDecrement", (2,)),
     Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
+    Opcode.BLK: Definition("OpBlock", (2,)),
     Opcode.FOR: Definition("OpFor", (2, 2, 2)),
     Opcode.TAB: Definition("OpTablerow", (2, 2, 2)),
     Opcode.STE: Definition("OpStep", (2,)),

@@ -720,6 +720,12 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"tags": ["sports", "garden"]}},
             ),
             Case(
+                description="simple hash loop",
+                template=r"{% for c in collection %}{{ c[0] }} {{ c[1] }} {% endfor %}",
+                expect="title foo description bar ",
+                globals={"collection": {"title": "foo", "description": "bar"}},
+            ),
+            Case(
                 description="empty array with default",
                 template=(
                     r"{% for img in emptythings.array %}"

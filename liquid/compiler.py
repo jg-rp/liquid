@@ -17,6 +17,13 @@ from liquid.symbol import SymbolTable
 # - "render" or "write" stack to buffer
 # - filters are built-in functions
 
+# = "built-in globals" = built-in and env/template/render context
+# = global bindings = local bindings (assign, capture)
+# = local bindings = block bindings (if, tablerow)
+# = CompiledFunction = CompiledBlock
+# = OpFunctionLiteral + OpCall = OpBlock
+# = "call frame" for functions = "block frame" for blocks
+
 
 class Bytecode(NamedTuple):
     """Liquid bytecode."""

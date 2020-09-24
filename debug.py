@@ -16,8 +16,8 @@ def main():
     # )
     # tree = env.parse("{% if false == false %}foo{% endif %}")
     tree = env.parse(
-        # "{% for i in nums %}{{ i }}{% endfor %}"
-        r"{% for i in nums %}{% for j in letters %}{% if j == 'b' %}{% continue %}{% endif %}{{ i }}{{ j }} {% endfor %}{% endfor %}"
+        "{% for i in nums %}{{ i }}{% endfor %}"
+        # r"{% for i in nums %}{% for j in letters %}{% if j == 'b' %}{% continue %}{% endif %}{{ i }}{{ j }} {% endfor %}{% endfor %}"
     )
 
     ctx = {
@@ -34,7 +34,7 @@ def main():
     print(bytecode.constants)
     print(code.string(bytecode.instructions))
 
-    vm = VM(bytecode, context=Context(ctx))
+    vm = VM(env, bytecode=bytecode, context=Context(ctx))
     vm.run()
 
     print(">", vm.current_buffer().getvalue(), "<")

@@ -190,6 +190,34 @@ class ForNode(ast.Node):
             if self.default:
                 self.default.render(context, buffer)
 
+    # def compile_node(self, compiler: Compiler):
+    #     compiler.enter_scope()
+
+    #     var = compiler.symbol_table.define(self.expression.name)
+    #     forloop = compiler.symbol_table.define("forloop")
+
+    #     self.expression.compile(compiler)
+    #     jump_to_default_pos = compiler.emit(Opcode.JIE, 9999)
+
+    #     top_of_loop = compiler.emit(Opcode.JSI, 9999)  # Jump past default
+
+    #     self.block.compile(compiler)
+
+    #     compiler.emit(Opcode.STE, var.index)
+    #     compiler.emit(Opcode.JMP, top_of_loop)
+
+    #     after_loop_block_pos = len(compiler.current_instructions())
+    #     compiler.change_operand(jump_to_default_pos, after_loop_block_pos)
+
+    #     if self.default:
+    #         self.default.compile(compiler)
+    #     else:
+    #         compiler.emit(Opcode.NOP)
+
+    #     after_default_pos = len(compiler.current_instructions())
+    #     compiler.change_operand(top_of_loop, after_default_pos)
+    #     compiler.change_operand(for_pos, var.index, top_of_loop, after_default_pos)
+
     def compile_node(self, compiler: Compiler):
         symbol = compiler.symbol_table.define(self.expression.name)
         self.expression.compile(compiler)
