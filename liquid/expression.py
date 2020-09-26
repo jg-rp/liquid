@@ -197,13 +197,12 @@ class Identifier(Expression):
     def compile_expression(self, compiler: Compiler):
         name, items = self.path[0], self.path[1:]
 
-        # XXX: These should be asserted in the parser.
         assert isinstance(name, IdentifierPathElement)
         assert isinstance(name.value, str)
 
         try:
             symbol = compiler.symbol_table.resolve(name.value)
-            compiler.emit(Opcode.GLO, symbol.index)
+            compiler.load_symbol(symbol)
         except KeyError:
             # Not a locally defined variable. Might be in context at render time.
             name.compile(compiler)

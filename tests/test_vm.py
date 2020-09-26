@@ -457,6 +457,22 @@ class VMTestCase(unittest.TestCase):
                 globals={"collections": []},
             ),
             Case(
+                description="nested loop",
+                source=(
+                    r"{% for i in nums %}"
+                    r"{% for j in letters %}"
+                    r"{{ i }}{{ j }} "
+                    r"{% endfor %}"
+                    r"{% endfor %}"
+                    r"{{ 9999 }}"
+                ),
+                expected="1a 1b 1c 2a 2b 2c 3a 3b 3c 9999",
+                globals={
+                    "nums": [1, 2, 3],
+                    "letters": ["a", "b", "c"],
+                },
+            ),
+            Case(
                 description="nested loop with continue",
                 source=(
                     r"{% for i in nums %}"
@@ -465,8 +481,9 @@ class VMTestCase(unittest.TestCase):
                     r"{{ i }}{{ j }} "
                     r"{% endfor %}"
                     r"{% endfor %}"
+                    r"{{ 9999 }}"
                 ),
-                expected="1a 1c 2a 2c 3a 3c ",
+                expected="1a 1c 2a 2c 3a 3c 9999",
                 globals={
                     "nums": [1, 2, 3],
                     "letters": ["a", "b", "c"],
@@ -487,6 +504,23 @@ class VMTestCase(unittest.TestCase):
                 globals={
                     "nums": [1, 2, 3],
                     "letters": ["a", "b", "c"],
+                },
+            ),
+            Case(
+                description="nested loop with break",
+                source=(
+                    r"{% for i in nums %}"
+                    r"{% for j in letters %}"
+                    r"{% if j == 'c' %}{% break %}{% endif %}"
+                    r"{{ i }}{{ j }} "
+                    r"{% endfor %}"
+                    r"hello "
+                    r"{% endfor %}"
+                ),
+                expected="1a 1b hello 2a 2b hello 3a 3b hello ",
+                globals={
+                    "nums": [1, 2, 3],
+                    "letters": ["a", "b", "c", "d"],
                 },
             ),
             Case(

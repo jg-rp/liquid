@@ -83,6 +83,8 @@ class SymbolTableTestCase(unittest.TestCase):
         second_block.define("e")
         second_block.define("f")
 
+        self.template_locals.define("g")
+
         tests_cases = [
             Case(
                 description="first block",
@@ -92,6 +94,7 @@ class SymbolTableTestCase(unittest.TestCase):
                     Symbol(name="b", scope=SymbolScope.LOCAL, index=1),
                     Symbol(name="c", scope=SymbolScope.BLOCK, index=0),
                     Symbol(name="d", scope=SymbolScope.BLOCK, index=1),
+                    Symbol(name="g", scope=SymbolScope.LOCAL, index=2),
                 ],
             ),
             Case(
@@ -102,8 +105,9 @@ class SymbolTableTestCase(unittest.TestCase):
                     Symbol(name="b", scope=SymbolScope.LOCAL, index=1),
                     Symbol(name="e", scope=SymbolScope.BLOCK, index=0),
                     Symbol(name="f", scope=SymbolScope.BLOCK, index=1),
-                    Symbol(name="c", scope=SymbolScope.BLOCK, index=0),
-                    Symbol(name="d", scope=SymbolScope.BLOCK, index=1),
+                    Symbol(name="c", scope=SymbolScope.FREE, index=0),
+                    Symbol(name="d", scope=SymbolScope.FREE, index=1),
+                    Symbol(name="g", scope=SymbolScope.LOCAL, index=2),
                 ],
             ),
         ]

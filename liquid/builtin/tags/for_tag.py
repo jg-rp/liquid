@@ -12,6 +12,7 @@ from liquid.expression import LoopExpression
 from liquid.exceptions import BreakLoop, ContinueLoop
 from liquid.compiler import Compiler
 from liquid.code import Opcode
+from liquid.object import CompiledBlock
 
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
@@ -190,61 +191,62 @@ class ForNode(ast.Node):
             if self.default:
                 self.default.render(context, buffer)
 
-    # def compile_node(self, compiler: Compiler):
-    #     compiler.enter_scope()
-
-    #     var = compiler.symbol_table.define(self.expression.name)
-    #     forloop = compiler.symbol_table.define("forloop")
-
-    #     self.expression.compile(compiler)
-    #     jump_to_default_pos = compiler.emit(Opcode.JIE, 9999)
-
-    #     top_of_loop = compiler.emit(Opcode.JSI, 9999)  # Jump past default
-
-    #     self.block.compile(compiler)
-
-    #     compiler.emit(Opcode.STE, var.index)
-    #     compiler.emit(Opcode.JMP, top_of_loop)
-
-    #     after_loop_block_pos = len(compiler.current_instructions())
-    #     compiler.change_operand(jump_to_default_pos, after_loop_block_pos)
-
-    #     if self.default:
-    #         self.default.compile(compiler)
-    #     else:
-    #         compiler.emit(Opcode.NOP)
-
-    #     after_default_pos = len(compiler.current_instructions())
-    #     compiler.change_operand(top_of_loop, after_default_pos)
-    #     compiler.change_operand(for_pos, var.index, top_of_loop, after_default_pos)
-
     def compile_node(self, compiler: Compiler):
-        symbol = compiler.symbol_table.define(self.expression.name)
-        self.expression.compile(compiler)
+        # For tags have two block scoped variables, the loop variable and
+        # the `forloop` helper drop.
+        compiler.enter_scope()
 
-        for_pos = compiler.emit(Opcode.FOR, symbol.index, 9999, 9999)
+        symbol = compiler.symbol_table.define(self.expression.name)
+        compiler.symbol_table.define("forloop")
 
         # Jump to default if empty iterator
-        jump_to_default_pos = compiler.emit(Opcode.JIE, 9999)
+        jump_to_default_position = compiler.emit(Opcode.JIE, 9999)
 
-        top_of_loop = compiler.emit(Opcode.JSI, 9999)  # Jump past default
+        top_of_loop = len(compiler.current_instructions())
 
         self.block.compile(compiler)
 
+        # Step the iterator and jump to the top of the loop.
         compiler.emit(Opcode.STE, symbol.index)
         compiler.emit(Opcode.JMP, top_of_loop)
 
-        after_loop_block_pos = len(compiler.current_instructions())
-        compiler.change_operand(jump_to_default_pos, after_loop_block_pos)
+        # Update the JIE instruction with the current position, which is the
+        # start of the default block.
+        after_block_position = len(compiler.current_instructions())
+        compiler.change_operand(jump_to_default_position, after_block_position)
 
+        # Use a no-op if a default was not given.
         if self.default:
             self.default.compile(compiler)
         else:
             compiler.emit(Opcode.NOP)
 
-        after_default_pos = len(compiler.current_instructions())
-        compiler.change_operand(top_of_loop, after_default_pos)
-        compiler.change_operand(for_pos, symbol.index, top_of_loop, after_default_pos)
+        compiler.emit(Opcode.BRK)
+
+        # Must instpect the scoped symbol table before leaving the scope.
+        free_symbols = compiler.symbol_table.free_symbols
+        num_block_vars = compiler.symbol_table.locals.size
+        assert num_block_vars == 2
+
+        instructions = compiler.leave_scope()
+
+        # num_locals is always 2, the loop variable and the `forloop` drop.
+        # num_arguments is always 5 (start, stop, limit, offset, reversed).
+        compiled_block = CompiledBlock(
+            instructions=instructions,
+            num_locals=2,
+            num_arguments=5,
+            num_free=len(free_symbols),
+        )
+
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(compiled_block))
+
+        for free_symbol in reversed(free_symbols):
+            compiler.load_symbol(free_symbol)
+
+        # self.expression compiles for loop parameters.
+        self.expression.compile(compiler)
+        compiler.emit(Opcode.FOR, compiled_block.num_locals, compiled_block.num_free)
 
 
 class BreakNode(ast.Node):

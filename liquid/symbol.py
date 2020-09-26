@@ -1,12 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import NamedTuple, MutableMapping
+from typing import NamedTuple, MutableMapping, List
 
 
 class SymbolScope(Enum):
     LOCAL = "LOCAL"
     BLOCK = "BLOCK"
+    BULTIN = "BULTIN"
+    FREE = "FREE"
     CYCLE = "CYCLE"
     COUNTER = "COUNTER"
 
@@ -28,6 +30,8 @@ class SymbolTable:
         self.outer = outer
 
         self.locals = Scope()
+        self.free_symbols: List[Symbol] = []
+
         self.cycles = Scope()
         self.counters = Scope()
 
@@ -45,12 +49,26 @@ class SymbolTable:
 
     def resolve(self, name: str) -> Symbol:
         try:
-            obj = self.locals.store[name]
+            symbol = self.locals.store[name]
         except KeyError:
             if self.outer:
-                return self.outer.resolve(name)
+                symbol = self.outer.resolve(name)
+
+                if symbol.scope in (SymbolScope.LOCAL, SymbolScope.BULTIN):
+                    return symbol
+
+                self.free_symbols.append(symbol)
+                symbol = Symbol(
+                    name=symbol.name,
+                    scope=SymbolScope.FREE,
+                    index=len(self.free_symbols) - 1,
+                )
+
+                self.locals.store[symbol.name] = symbol
+                return symbol
+
             raise
-        return obj
+        return symbol
 
     def define_counter(self, name: str) -> Symbol:
         if self.outer:

@@ -4,25 +4,7 @@ from typing import NamedTuple, List, Any
 
 from liquid import code
 from liquid.code import Opcode
-from liquid.symbol import SymbolTable
-
-
-# TODO:
-# - Compilation scopes for "capture" and "inline render" support
-# - Stack frames for adding locals to block tags and executing "capture"
-# - "locals" are variables defined with "assign" or "capture"
-# - `case` gets compiled to `if else..`
-# - `unless` gets compiled to `if else ..`
-# - "globals" is a pre-defined mapping populated at render time
-# - "render" or "write" stack to buffer
-# - filters are built-in functions
-
-# = "built-in globals" = built-in and env/template/render context
-# = global bindings = local bindings (assign, capture)
-# = local bindings = block bindings (if, tablerow)
-# = CompiledFunction = CompiledBlock
-# = OpFunctionLiteral + OpCall = OpBlock
-# = "call frame" for functions = "block frame" for blocks
+from liquid.symbol import SymbolTable, SymbolScope, Symbol
 
 
 class Bytecode(NamedTuple):
@@ -33,7 +15,7 @@ class Bytecode(NamedTuple):
 
 
 class EmittedInstruction(NamedTuple):
-    """And opcode at a position in our instruction list"""
+    """And opcode at a position in our instruction list."""
 
     opcode: Opcode
     position: int
@@ -150,3 +132,11 @@ class Compiler:
         self.symbol_table = self.symbol_table.outer
 
         return ins
+
+    def load_symbol(self, symbol: Symbol):
+        if symbol.scope == SymbolScope.LOCAL:
+            self.emit(Opcode.GLO, symbol.index)
+        elif symbol.scope == SymbolScope.BLOCK:
+            self.emit(Opcode.GBL, symbol.index)
+        elif symbol.scope == SymbolScope.FREE:
+            self.emit(Opcode.GFR, symbol.index)

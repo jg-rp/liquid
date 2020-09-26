@@ -44,10 +44,12 @@ class Opcode(IntEnum):
 
     NOP = auto()  # No Operation
 
-    GLO = auto()  # Get LOcal
-    SLO = auto()  # Set LOcal
-    RES = auto()  # RESolve
-    GIT = auto()  # Get ITem
+    GLO = auto()  # Get LOcal (assigned and captured variables)
+    SLO = auto()  # Set LOcal (assign and capture)
+    RES = auto()  # RESolve names from context
+    GIT = auto()  # Get ITem (sequence index or mapping key)
+    GBL = auto()  # Get BLock scope
+    GFR = auto()  # Get FRee
 
     CAPTURE = auto()
     SETCAPTURE = auto()
@@ -55,8 +57,6 @@ class Opcode(IntEnum):
     INC = auto()  # Increment
     DEC = auto()  # Decrement
     CYC = auto()  # Cycle
-
-    BLK = auto()  # Block. Define and "call" block.
 
     FOR = auto()  # For each loop
     TAB = auto()  # TABle row
@@ -121,13 +121,14 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.SLO: Definition("OpSetLocal", (2,)),
     Opcode.RES: Definition("OpResolve", ()),
     Opcode.GIT: Definition("OpGetAttr", ()),
+    Opcode.GBL: Definition("OpGetBlockVar", (1,)),
+    Opcode.GFR: Definition("OpGetFreeVar", (1,)),
     Opcode.CAPTURE: Definition("OpCapture", ()),
     Opcode.SETCAPTURE: Definition("OpSetCapture", (2,)),
     Opcode.INC: Definition("OpIncrement", (2,)),
     Opcode.DEC: Definition("OpDecrement", (2,)),
     Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
-    Opcode.BLK: Definition("OpBlock", (2,)),
-    Opcode.FOR: Definition("OpFor", (2, 2, 2)),
+    Opcode.FOR: Definition("OpFor", (1, 1)),
     Opcode.TAB: Definition("OpTablerow", (2, 2, 2)),
     Opcode.STE: Definition("OpStep", (2,)),
     Opcode.CON: Definition("OpContinue", ()),

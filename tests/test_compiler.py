@@ -1,5 +1,6 @@
 """Compiler test cases."""
 import unittest
+import textwrap
 from typing import NamedTuple, List, Any
 
 from liquid import Environment
@@ -57,9 +58,18 @@ class CompilerTestCase(unittest.TestCase):
 
         for i, pair in enumerate(zip(actual, expected)):
             got, want = pair
-            self.assertEqual(got, want, msg=f"constants do not match at {i}")
+
+            if isinstance(want, list):
+                self._test_compiled_capture_constants(got.instructions, want)
+            else:
+                self.assertEqual(got, want, msg=f"constants do not match at {i}")
 
     def _test_compiled_capture_constants(self, actual, expected):
+
+        # print(textwrap.indent(code.string(actual), "\t"))
+        # print("\n")
+        # print(textwrap.indent(code.string(expected), "\t"))
+
         for i, pair in enumerate(zip(actual, expected)):
             got, want = pair
             self.assertEqual(got, want, msg=f"captured constants do not match at {i}")
@@ -537,44 +547,115 @@ class CompilerTestCase(unittest.TestCase):
     def test_for(self):
         """Test that we can compile "for" tags."""
         test_cases = [
+            # Case(
+            #     description="literal range with no args",
+            #     source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
+            #     expected_constants=[3, 0],
+            #     expected_instructions=code.chain(
+            #         code.make(Opcode.FAL),  # reverse
+            #         code.make(Opcode.NIL),  # offset
+            #         code.make(Opcode.NIL),  # limit
+            #         code.make(Opcode.CONSTANT, 0),  # range stop
+            #         code.make(Opcode.CONSTANT, 1),  # range start
+            #         code.make(Opcode.FOR, 0, 19, 33),  # index of loop var
+            #         code.make(Opcode.JIE, 32),
+            #         code.make(Opcode.JSI, 33),
+            #         code.make(Opcode.GLO, 0),
+            #         code.make(Opcode.POP),
+            #         code.make(Opcode.STE, 0),
+            #         code.make(Opcode.JMP, 19),
+            #         code.make(Opcode.NOP),
+            #     ),
+            # ),
+            # Case(
+            #     description="literal range with limit",
+            #     source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
+            #     expected_constants=[2, 3, 0],
+            #     expected_instructions=code.chain(
+            #         code.make(Opcode.FAL),  # reverse
+            #         code.make(Opcode.NIL),  # offset
+            #         code.make(Opcode.CONSTANT, 0),  # limit
+            #         code.make(Opcode.CONSTANT, 1),  # range stop
+            #         code.make(Opcode.CONSTANT, 2),  # range start
+            #         code.make(Opcode.FOR, 0, 21, 35),  # index of loop var
+            #         code.make(Opcode.JIE, 34),
+            #         code.make(Opcode.JSI, 35),
+            #         code.make(Opcode.GLO, 0),
+            #         code.make(Opcode.POP),
+            #         code.make(Opcode.STE, 0),
+            #         code.make(Opcode.JMP, 21),
+            #         code.make(Opcode.NOP),
+            #     ),
+            # ),
             Case(
                 description="literal range with no args",
                 source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
-                expected_constants=[3, 0],
+                expected_constants=[
+                    code.chain(
+                        code.make(Opcode.JIE, 12),  # 0000
+                        code.make(Opcode.GBL, 0),  # 0003
+                        code.make(Opcode.POP),  # 0006
+                        code.make(Opcode.STE, 0),  # 0007
+                        code.make(Opcode.JMP, 3),  # 0010
+                        code.make(Opcode.NOP),  # 0013
+                        code.make(Opcode.BRK),  # 0014
+                    ),
+                    3,
+                    0,
+                ],
                 expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),  # compiles block
                     code.make(Opcode.FAL),  # reverse
                     code.make(Opcode.NIL),  # offset
                     code.make(Opcode.NIL),  # limit
-                    code.make(Opcode.CONSTANT, 0),  # range stop
-                    code.make(Opcode.CONSTANT, 1),  # range start
-                    code.make(Opcode.FOR, 0, 19, 33),  # index of loop var
-                    code.make(Opcode.JIE, 32),
-                    code.make(Opcode.JSI, 33),
-                    code.make(Opcode.GLO, 0),
-                    code.make(Opcode.POP),
-                    code.make(Opcode.STE, 0),
-                    code.make(Opcode.JMP, 19),
-                    code.make(Opcode.NOP),
+                    code.make(Opcode.CONSTANT, 1),  # range stop
+                    code.make(Opcode.CONSTANT, 2),  # range start
+                    code.make(Opcode.FOR, 2, 0),  # number of block and free vars
                 ),
             ),
             Case(
-                description="literal range with limit",
-                source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
-                expected_constants=[2, 3, 0],
+                description="nested for loop",
+                source=r"{% for i in (0..3) %}{% for j in (5..7) %}{{ i }}{{ j }}{% endfor %}{% endfor %}",
+                expected_constants=[
+                    code.chain(
+                        code.make(Opcode.JIE, 15),  # 0000
+                        code.make(Opcode.GFR, 0),  # 0003
+                        code.make(Opcode.POP),  # 0006
+                        code.make(Opcode.GBL, 0),  # 0007
+                        code.make(Opcode.POP),  # 0010
+                        code.make(Opcode.STE, 0),  # 0011
+                        code.make(Opcode.JMP, 3),  # 0014
+                        code.make(Opcode.NOP),  # 0017
+                        code.make(Opcode.BRK),  # 0018
+                    ),
+                    7,
+                    5,
+                    code.chain(
+                        code.make(Opcode.JIE, 26),
+                        code.make(Opcode.CONSTANT, 0),
+                        code.make(Opcode.GBL, 0),
+                        code.make(Opcode.FAL),  # reverse
+                        code.make(Opcode.NIL),  # offset
+                        code.make(Opcode.NIL),  # limit
+                        code.make(Opcode.CONSTANT, 1),  # range stop
+                        code.make(Opcode.CONSTANT, 2),  # range start
+                        code.make(Opcode.FOR, 2, 1),  # index of loop var
+                        code.make(Opcode.STE, 0),
+                        code.make(Opcode.JMP, 3),
+                        code.make(Opcode.NOP),
+                        code.make(Opcode.BRK),
+                    ),
+                    3,
+                    0,
+                ],
                 expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 3),  # compiled block
                     code.make(Opcode.FAL),  # reverse
                     code.make(Opcode.NIL),  # offset
-                    code.make(Opcode.CONSTANT, 0),  # limit
-                    code.make(Opcode.CONSTANT, 1),  # range stop
-                    code.make(Opcode.CONSTANT, 2),  # range start
-                    code.make(Opcode.FOR, 0, 21, 35),  # index of loop var
-                    code.make(Opcode.JIE, 34),
-                    code.make(Opcode.JSI, 35),
-                    code.make(Opcode.GLO, 0),
-                    code.make(Opcode.POP),
-                    code.make(Opcode.STE, 0),
-                    code.make(Opcode.JMP, 21),
-                    code.make(Opcode.NOP),
+                    code.make(Opcode.NIL),  # limit
+                    code.make(Opcode.CONSTANT, 4),  # range stop
+                    code.make(Opcode.CONSTANT, 5),  # range start
+                    code.make(Opcode.FOR, 2, 0),  # index of loop var
                 ),
             ),
         ]

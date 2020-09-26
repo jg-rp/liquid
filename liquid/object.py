@@ -51,5 +51,8 @@ Nop = NoOp()
 class CompiledBlock(NamedTuple):
     instructions: code.Instructions
     num_locals: int = 0
-    num_parameters: int = 0
-    loop: bool = False
+    num_arguments: int = 0
+    num_free: int = 0
+
+    def __repr__(self):
+        return "CompiledBlock(..)"

@@ -296,11 +296,12 @@ good-names=i,
            ch,
            fd,
            n,
-           rv,
-           op,
-           ip,
-           vm,
-           it,
+           rv,  # result value
+           op,  # operation
+           ip,  # instruction pointer
+           vm,  # virtual machine
+           it,  # iterator
+           sp,  # stack pointer
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
