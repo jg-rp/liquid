@@ -252,7 +252,7 @@ class PrefixExpression(Expression):
         self.right.compile(compiler)
 
         if self.operator == "-":
-            compiler.emit(Opcode.MIN)
+            compiler.emit(Opcode.NEG)
         else:
             raise LiquidTypeError(f"unknown operator {self.operator}")
 

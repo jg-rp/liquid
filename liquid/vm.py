@@ -2,7 +2,7 @@ from collections import abc
 from io import StringIO
 from itertools import islice
 from operator import getitem
-from typing import Any, Mapping, Iterator, List, Dict
+from typing import Any, Iterator, List, Dict
 
 from liquid.context import Context, ReadOnlyChainMap
 from liquid import code
@@ -11,22 +11,25 @@ from liquid import compiler
 from liquid.exceptions import StackOverflow, LiquidTypeError
 from liquid.expression import compare, is_truthy
 
+from liquid.builtin.drops import IterableDrop
 from liquid.builtin.tags.for_tag import ForLoopDrop
-from liquid.object import Empty, StopIter, Nop
+from liquid.builtin.tags.tablerow_tag import TableRowDrop
+
+
+from liquid.object import Empty, Nop, CompiledBlock
 from liquid.block import Block
-from liquid.object import CompiledBlock
 
 
 STACK_SIZE = 2048
 
 
-class ForIter(abc.Iterator):
-    __slots__ = ("it", "drop", "before_idx", "after_idx")
+class LoopIter(abc.Iterator):
+    __slots__ = ("it", "drop")
 
     def __init__(
         self,
         it: Iterator,
-        drop: ForLoopDrop,
+        drop: IterableDrop,
     ):
         self.it = it
         self.drop = drop
@@ -37,11 +40,18 @@ class ForIter(abc.Iterator):
         return val
 
     def __repr__(self):
-        return "ForIter(..)"
+        return "LoopIter(..)"
+
+    def step(self, buffer):
+        val = next(self.it)
+        self.drop.step_write(val, buffer)
+        return val
+
+    def empty_exit_buffer(self, buffer):
+        self.drop.empty_exit_buffer(buffer)
 
 
 class VM:
-    # pylint: disable=redefined-builtin
     def __init__(self, env, bytecode: compiler.Bytecode, context: Context = None):
 
         self.blocks: Dict[int, Block] = {
@@ -53,8 +63,10 @@ class VM:
         self.constants = bytecode.constants
 
         self.stack: List[Any] = [None] * STACK_SIZE
-        self.sp = 0
+        self.sp = 0  # Stack pointer
 
+        # Stack of file-like objects for rendering to. The only built-in tag
+        # that uses anything other than the main buffer is the `capture` tag.
         self.buffers = [StringIO()]
 
         self.context = context or Context(filters=env.filters)
@@ -63,6 +75,7 @@ class VM:
         self.globals = ReadOnlyChainMap(self.context.globals, self.context._builtin)
 
     def last_popped_stack_elem(self) -> Any:
+        """Helper method used for testing only."""
         return self.stack[self.sp]
 
     # pylint: disable=too-many-branches too-many-statements
@@ -87,7 +100,7 @@ class VM:
                 self.push(self.constants[const_idx])
 
             elif op == Opcode.POP:
-                self.current_buffer().write(to_string(self.pop()))
+                self.current_buffer.write(to_string(self.pop()))
 
             elif op == Opcode.TRU:
                 self.push(True)
@@ -112,11 +125,11 @@ class VM:
             ):
                 right = self.pop()
                 left = self.pop()
-                operator = code.COMPARISON_OPERATORS[op]
+                operator = code.INFIX_OPERATORS[op]
 
                 self.push(compare(left, operator, right))
 
-            elif op == Opcode.MIN:
+            elif op == Opcode.NEG:
                 operand = self.pop()
 
                 if not isinstance(operand, (int, float)):
@@ -157,15 +170,6 @@ class VM:
                 self.current_block.ip += 2
 
                 if self.pop() == Empty:
-                    self.current_block.ip = pos - 1
-
-            elif op == Opcode.JSI:
-                pos = code.read_uint16(
-                    instructions[self.current_block.ip + 1 : self.current_block.ip + 3]
-                )
-                self.current_block.ip += 2
-
-                if self.pop() == StopIter:
                     self.current_block.ip = pos - 1
 
             elif op == Opcode.NOP:
@@ -269,6 +273,19 @@ class VM:
 
                 self._exec_forloop(num_block_vars, num_free_vars)
 
+            elif op == Opcode.TAB:
+                num_block_vars = code.read_uint16(
+                    instructions[self.current_block.ip + 1 : self.current_block.ip + 2]
+                )
+                self.current_block.ip += 1
+
+                num_free_vars = code.read_uint16(
+                    instructions[self.current_block.ip + 1 : self.current_block.ip + 2]
+                )
+                self.current_block.ip += 1
+
+                self._exec_tablerow(num_block_vars, num_free_vars)
+
             elif op == Opcode.STE:
                 idx = code.read_uint16(
                     instructions[self.current_block.ip + 1 : self.current_block.ip + 3]
@@ -276,20 +293,34 @@ class VM:
                 self.current_block.ip += 2
 
                 it = self.stack[self.sp - 1]
-                assert isinstance(it, ForIter)
+                assert isinstance(it, LoopIter), f"expected LoopIter, found {repr(it)}"
+
+                # TODO: Test shopify for tablerow inside forloop
 
                 try:
-                    val = next(it)
+                    val = it.step(self.current_buffer)
                     self.stack[self.current_block.base_pointer + idx] = val
                 except StopIteration:
-                    self._break()
+                    it.empty_exit_buffer(self.current_buffer)
+                    self._stop_iteration()
 
             elif op == Opcode.BRK:
-                self._break()
+                block = self.pop_block()
+                self.sp = block.base_pointer - 1
+
+                # Keep popping blocks off the stack until we find a for loop.
+                # For loops are the only blocks that respond to a break.
+                while not block.forloop:
+                    block = self.pop_block()
+                    self.sp = block.base_pointer - 1
+
+            elif op == Opcode.STO:
+                self._stop_iteration()
 
             elif op == Opcode.CON:
+                # FIXME: What if the current block is not a for loop?
                 it = self.stack[self.sp - 1]
-                assert isinstance(it, ForIter)
+                assert isinstance(it, LoopIter)
 
                 try:
                     val = next(it)
@@ -298,7 +329,7 @@ class VM:
                     # First block instruction is always at instruction 3
                     self.current_block.ip = 2
                 except StopIteration:
-                    self._break()
+                    self._stop_iteration()
 
             elif op == Opcode.FIL:
                 fltr_id = code.read_uint16(
@@ -320,6 +351,74 @@ class VM:
                 self.push(res)
 
     def _exec_forloop(self, num_block_vars, num_free_vars):
+        # Need to know the length of the sequence
+        items = list(self._make_iter())
+        it = iter(items)
+
+        free_vars = [self.pop() for _ in range(num_free_vars)]
+
+        compiled_block = self.stack[self.sp - 1]
+        assert isinstance(compiled_block, CompiledBlock)
+
+        block = Block(
+            block=compiled_block,
+            base_pointer=self.sp,
+            free=free_vars,
+            forloop=True,
+        )
+        self.push_block(block)
+        self.sp = block.base_pointer + compiled_block.num_locals
+
+        if not items:
+            self.push(Empty)
+        else:
+            drop = ForLoopDrop(0, len(items))
+            for_it = LoopIter(it, drop)
+
+            # Initialise drop with first step
+            val = next(for_it)
+
+            self.stack[self.current_block.base_pointer + 0] = val
+            self.stack[self.current_block.base_pointer + 1] = drop.forloop
+
+            self.push(for_it)
+            self.push(Nop)
+
+    def _exec_tablerow(self, num_block_vars, num_free_vars):
+        items = list(self._make_iter())
+
+        cols = self.pop()
+        if not cols:
+            cols = len(items)
+
+        free_vars = [self.pop() for _ in range(num_free_vars)]
+
+        compiled_block = self.stack[self.sp - 1]
+        assert isinstance(compiled_block, CompiledBlock)
+
+        block = Block(
+            block=compiled_block,
+            base_pointer=self.sp,
+            free=free_vars,
+            forloop=False,
+        )
+        self.push_block(block)
+        self.sp = block.base_pointer + compiled_block.num_locals
+
+        # TODO: Test shopify for empty tablerow
+
+        drop = TableRowDrop("", len(items), cols)
+        for_it = LoopIter(iter(items), drop)
+
+        # Initialise drop with first step
+        val = for_it.step(self.current_buffer)
+
+        self.stack[self.current_block.base_pointer + 0] = val
+        self.stack[self.current_block.base_pointer + 1] = drop.tablerow
+
+        self.push(for_it)
+
+    def _make_iter(self) -> Iterator:
         # Range start or collection to iterate
         start = self.pop()
         # Range stop. Will be None if start is a collection.
@@ -344,35 +443,9 @@ class VM:
         if reverse:
             it = reversed(list(it))
 
-        # Need to know the length of the sequence
-        items = list(it)
-        it = iter(items)
+        return it
 
-        free_vars = [self.pop() for _ in range(num_free_vars)]
-
-        compiled_block = self.stack[self.sp - 1]
-        assert isinstance(compiled_block, CompiledBlock)
-
-        block = Block(block=compiled_block, base_pointer=self.sp, free=free_vars)
-        self.push_block(block)
-        self.sp = block.base_pointer + compiled_block.num_locals
-
-        if not items:
-            self.push(Empty)
-        else:
-            drop = ForLoopDrop(0, len(items))
-            for_it = ForIter(it, drop)
-
-            # Initialise drop with first step
-            val = next(for_it)
-
-            self.stack[self.current_block.base_pointer + 0] = val
-            self.stack[self.current_block.base_pointer + 1] = drop.forloop
-
-            self.push(for_it)
-            self.push(Nop)
-
-    def _break(self):
+    def _stop_iteration(self):
         block = self.pop_block()
         self.sp = block.base_pointer - 1
 
@@ -404,6 +477,7 @@ class VM:
         del self.blocks[self.blocks_idx]
         return block
 
+    @property
     def current_buffer(self) -> StringIO:
         """Return the current ouput buffer."""
         return self.buffers[-1]
@@ -416,12 +490,6 @@ class VM:
         """Pop the current buffer of the buffer stack and return it."""
         buf = self.buffers.pop()
         return buf.getvalue()
-
-    def push_globals(self, globals: Mapping[int, Any]):
-        self.globals.push(globals)
-
-    def pop_globals(self) -> Mapping[Any, Any]:
-        return self.globals.pop()
 
 
 def to_string(val: Any) -> str:

@@ -21,6 +21,8 @@ class MockIterableDrop(IterableDrop):
             {"foo": 3, "bar": 3},
         ]
 
+        self.it = iter(self)
+
     def __contains__(self, item):
         return False
 
@@ -32,6 +34,9 @@ class MockIterableDrop(IterableDrop):
 
     def __str__(self):
         return "MockIterableDrop"
+
+    def step(self, item):
+        return next(self.it)
 
 
 TEMPLATE_DROP_ATTRS = (

@@ -18,21 +18,6 @@ class EmptyObj:
 Empty = EmptyObj()
 
 
-class StopIterObj:
-    """Stop Iteration"""
-
-    __slots__ = ()
-
-    def __repr__(self):
-        return "StopIter()"
-
-    def __str__(self):
-        return ""
-
-
-StopIter = StopIterObj()
-
-
 class NoOp:
     """No Operation"""
 
@@ -49,6 +34,8 @@ Nop = NoOp()
 
 
 class CompiledBlock(NamedTuple):
+    """A block of instructions."""
+
     instructions: code.Instructions
     num_locals: int = 0
     num_arguments: int = 0

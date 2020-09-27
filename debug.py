@@ -21,7 +21,8 @@ def main():
     # "{% for i in (1..3) %}{{ forloop }}{% endfor %}{{ 9999 }}"
     # "{% for i in (1..3) %}{% if i == 2 %}{% continue %}{% endif %}{{ forloop.index }}{% endfor %}{{ 9999 }}"
     # "{% for i in nums %}{{ i }}{% endfor %}"
-    template = r"{% assign one = 1 %}{{ one }}"
+    # template = r"{% assign one = 1 %}{{ one }}"
+    template = r"{% tablerow tag in tags cols:2 %}{{ tag }}{% endtablerow %}"
     # r"{% for i in (0..1) %}{{ forloop.first }}{% for j in (2..3) %}{{ forloop.first }}{% for k in (4..5) %}{{ forloop.first }} {{ i }}{{ j }}{{ k }} {% endfor %}{% endfor %}{% endfor %}"
     tree = env.parse(template)
 
@@ -30,6 +31,12 @@ def main():
         "title": "Hello",
         "nums": [1, 2, 3],
         "letters": ["a", "b", "c"],
+        "tags": [
+            "tag1",
+            "tag2",
+            "tag3",
+            "tag4",
+        ],
     }
 
     compiler = Compiler()
@@ -43,7 +50,7 @@ def main():
     vm = VM(env, bytecode=bytecode, context=Context(ctx))
     vm.run()
 
-    print(">", vm.current_buffer().getvalue(), "<")
+    print(">", vm.current_buffer.getvalue(), "<")
 
 
 def print_constants(constants):

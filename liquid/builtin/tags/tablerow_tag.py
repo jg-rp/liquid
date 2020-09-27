@@ -1,6 +1,7 @@
 """"""
 import sys
 import collections.abc
+import math
 from itertools import islice
 from typing import Any, List, TextIO
 
@@ -14,6 +15,9 @@ from liquid.parse import expect, parse_loop_expression, get_parser
 
 from liquid import Compiler
 from liquid import Opcode
+from liquid.object import CompiledBlock
+
+from liquid.builtin.drops import IterableDrop
 
 
 TAG_TABLEROW = sys.intern("tablerow")
@@ -39,6 +43,8 @@ class TableRow(collections.abc.Mapping):
         "col_first",
         "col_last",
         "keys",
+        "row",
+        "nrows",
     )
 
     def __init__(self, name: str, length: int, ncols: int):
@@ -58,6 +64,10 @@ class TableRow(collections.abc.Mapping):
         self.col0 = -1
         self.col_first = True
         self.col_last = False
+
+        # Zero based row counter is not exposed to templates.
+        self.row = 0
+        self.nrows = math.ceil(self.length / self.ncols)
 
         self.keys: List[str] = [
             "length",
@@ -120,15 +130,20 @@ class TableRow(collections.abc.Mapping):
         else:
             self.col_last = False
 
+        if self.col == 1:
+            self.row += 1
 
-class TableRowDrop(collections.abc.Mapping):
+
+class TableRowDrop(IterableDrop, collections.abc.Mapping):
     """Wrap a `TableRow` so it can be used as a `Context` namepsace."""
 
     __slots__ = ("tablerow", "name")
 
-    def __init__(self, tablerow: TableRow):
-        self.tablerow = tablerow
-        self.name = self.tablerow.name
+    def __init__(self, name: str, length: int, ncols: int):
+        self.tablerow = TableRow(name, length, ncols)
+        self.name = name
+
+        self._exit = []
 
     def __contains__(self, item):
         if item in ("tablerowloop", self.name):
@@ -150,6 +165,32 @@ class TableRowDrop(collections.abc.Mapping):
 
     def __str__(self):
         return f"TableRowDrop(name='{self.name}', tablerow={self.tablerow})"
+
+    def step(self, item: Any):
+        self.tablerow.step(item)
+
+    def step_write(self, item: Any, buffer: TextIO):
+        self.empty_exit_buffer(buffer)
+        self.step(item)
+
+        if self.tablerow.col == 1 and self.tablerow.row <= self.tablerow.nrows:
+            buffer.write(f'<tr class="row{self.tablerow.row}">')
+
+        buffer.write(f'<td class="col{self.tablerow.col}">')
+
+        if (
+            self.tablerow.col == self.tablerow.ncols
+            or self.tablerow.index == self.tablerow.length
+        ):
+            self._exit.append("</td></tr>")
+        else:
+            self._exit.append("</td>")
+
+    def empty_exit_buffer(self, buffer: TextIO):
+        try:
+            buffer.write(self._exit.pop())
+        except IndexError:
+            pass
 
 
 class TablerowNode(ast.Node):
@@ -181,21 +222,55 @@ class TablerowNode(ast.Node):
             cols = 1
             loop_iter = (loop_items,)
 
-        tablerow = TableRow(self.expression.name, len(loop_items), cols)
-        drop = TableRowDrop(tablerow)
+        drop = TableRowDrop(self.expression.name, len(loop_items), cols)
         ctx = context.extend(drop)
 
         for i, row in enumerate(loop_iter):
             buffer.write(f'<tr class="row{i+1}">')
             for j, data in enumerate(row):
-                tablerow.step(data)
+                drop.step(data)
                 buffer.write(f'<td class="col{j+1}">')
                 self.block.render(context=ctx, buffer=buffer)
                 buffer.write("</td>")
             buffer.write("</tr>")
 
     def compile_node(self, compiler: Compiler):
+        # tablerow tags have two block scoped variables, the loop variable and
+        # the `tablerow` helper drop.
+        compiler.enter_scope()
+
         symbol = compiler.symbol_table.define(self.expression.name)
+        compiler.symbol_table.define("tablerow")
+
+        top_of_loop = len(compiler.current_instructions())
+
+        self.block.compile(compiler)
+
+        compiler.emit(Opcode.STE, symbol.index)  # step
+        compiler.emit(Opcode.JMP, top_of_loop)  # jump
+
+        compiler.emit(Opcode.STO)
+
+        # Must instpect the scoped symbol table before leaving the scope.
+        free_symbols = compiler.symbol_table.free_symbols
+        num_block_vars = compiler.symbol_table.locals.size
+        assert num_block_vars == 2
+
+        instructions = compiler.leave_scope()
+
+        # num_locals is always 2, the loop variable and the `forloop` drop.
+        # num_arguments is always 6 (start, stop, limit, offset, reversed, cols).
+        compiled_block = CompiledBlock(
+            instructions=instructions,
+            num_locals=2,
+            num_arguments=6,
+            num_free=len(free_symbols),
+        )
+
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(compiled_block))
+
+        for free_symbol in reversed(free_symbols):
+            compiler.load_symbol(free_symbol)
 
         if self.expression.cols:
             self.expression.cols.compile(compiler)
@@ -203,18 +278,7 @@ class TablerowNode(ast.Node):
             compiler.emit(Opcode.NIL)
 
         self.expression.compile(compiler)
-
-        for_pos = compiler.emit(Opcode.TAB, symbol.index, 9999, 9999)
-        top_of_loop = compiler.emit(Opcode.JSI, 9999)  # break loop on stop iteration
-
-        self.block.compile(compiler)
-
-        compiler.emit(Opcode.STE, symbol.index)  # step
-        compiler.emit(Opcode.JMP, top_of_loop)  # jump
-
-        after_loop_pos = len(compiler.current_instructions())
-        compiler.change_operand(top_of_loop, after_loop_pos)
-        compiler.change_operand(for_pos, symbol.index, top_of_loop, after_loop_pos)
+        compiler.emit(Opcode.TAB, compiled_block.num_locals, compiled_block.num_free)
 
 
 class TablerowTag(Tag):

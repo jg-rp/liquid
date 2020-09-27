@@ -11,6 +11,7 @@ class Block:
     base_pointer: int
     ip: int = field(default=-1)
     free: List[Any] = field(default_factory=list)
+    forloop: bool = False
 
     @property
     def instructions(self) -> code.Instructions:

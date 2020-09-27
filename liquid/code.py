@@ -31,15 +31,14 @@ class Opcode(IntEnum):
     GE = auto()  # Greater than or equal to
     CONTAINS = auto()
 
-    AND = auto()
-    OR = auto()
+    AND = auto()  # Logical and
+    OR = auto()  # Logical or
 
-    MIN = auto()  # Minus
+    NEG = auto()  # Negative
 
     JIF = auto()  # Jump IF truthy
     JIN = auto()  # Jump If Not truthy
     JIE = auto()  # Jump If Empty
-    JSI = auto()  # Jump Stop Iteration
     JMP = auto()  # Jump
 
     NOP = auto()  # No Operation
@@ -63,6 +62,7 @@ class Opcode(IntEnum):
     STE = auto()  # Step iterator
     BRK = auto()  # Break
     CON = auto()  # Continue
+    STO = auto()  # Stop Iteration
 
     FIL = auto()  # Call FILter
 
@@ -73,7 +73,7 @@ class Opcode(IntEnum):
 assert len(Opcode) <= 255
 
 
-COMPARISON_OPERATORS = {
+INFIX_OPERATORS = {
     Opcode.EQ: "==",
     Opcode.NE: "!=",
     Opcode.GT: ">",
@@ -106,15 +106,12 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.CONTAINS: Definition("OpContains", ()),
     Opcode.AND: Definition("OpAnd", ()),
     Opcode.OR: Definition("OpOr", ()),
-    Opcode.MIN: Definition("OpMinus", ()),
+    Opcode.NEG: Definition("OpMinus", ()),
     Opcode.JIF: Definition("OpJumpIf", (2,)),  # instruction to jump to
     Opcode.JIN: Definition("OpJumpIfNot", (2,)),  # instruction to jump to
     Opcode.JIE: Definition(
         "OpJumpIfEmpty", (2,)
     ),  # jump to 1 if Empty is on the top of the stack
-    Opcode.JSI: Definition(
-        "OpJumpStopIteration", (2,)
-    ),  # jump to 1 if StopIter is on the top of the stack
     Opcode.JMP: Definition("OpJump", (2,)),  # instruction to jump to
     Opcode.NOP: Definition("OpNoOp", ()),
     Opcode.GLO: Definition("OpGetLocal", (2,)),
@@ -129,10 +126,11 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.DEC: Definition("OpDecrement", (2,)),
     Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
     Opcode.FOR: Definition("OpFor", (1, 1)),
-    Opcode.TAB: Definition("OpTablerow", (2, 2, 2)),
+    Opcode.TAB: Definition("OpTablerow", (1, 1)),
     Opcode.STE: Definition("OpStep", (2,)),
     Opcode.CON: Definition("OpContinue", ()),
     Opcode.BRK: Definition("OpBreak", ()),
+    Opcode.STO: Definition("OpStopIteration", ()),
     Opcode.FIL: Definition("OpCallFilter", (2, 1)),  # filter id, num args
 }
 

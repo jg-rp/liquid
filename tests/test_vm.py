@@ -57,7 +57,7 @@ class VMTestCase(unittest.TestCase):
                     context=Context(case.globals, filters=env.filters),
                 )
                 vm.run()
-                out = vm.current_buffer().getvalue()
+                out = vm.current_buffer.getvalue()
 
                 self.assertEqual(out, case.expected)
 
@@ -575,6 +575,87 @@ class VMTestCase(unittest.TestCase):
                 source=r"{{ product.title | prepend: 'bar ' }}",
                 expected="bar foo",
                 globals={"product": {"title": "foo"}},
+            ),
+        ]
+
+        self._test(test_cases)
+
+    def test_render_tablerow(self):
+        """Test that we can render tablerow tags."""
+        test_cases = [
+            Case(
+                description="one row",
+                source=r"{% tablerow tag in collection.tags %}{{ tag }}{% endtablerow %}",
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">tag1</td>'
+                    '<td class="col2">tag2</td>'
+                    '<td class="col3">tag3</td>'
+                    '<td class="col4">tag4</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+            Case(
+                description="two columns",
+                source=r"{% tablerow tag in collection.tags cols:2 %}{{ tag }}{% endtablerow %}",
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">tag1</td>'
+                    '<td class="col2">tag2</td>'
+                    "</tr>"
+                    '<tr class="row2">'
+                    '<td class="col1">tag3</td>'
+                    '<td class="col2">tag4</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+            Case(
+                description="two columns with parital row",
+                source=r"{% tablerow tag in collection.tags cols:2 %}{{ tag }}{% endtablerow %}",
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">tag1</td>'
+                    '<td class="col2">tag2</td>'
+                    "</tr>"
+                    '<tr class="row2">'
+                    '<td class="col1">tag3</td>'
+                    '<td class="col2">tag4</td>'
+                    "</tr>"
+                    '<tr class="row3">'
+                    '<td class="col1">tag5</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                            "tag5",
+                        ]
+                    }
+                },
             ),
         ]
 

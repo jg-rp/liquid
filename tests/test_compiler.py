@@ -115,7 +115,7 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=[1],
                 expected_instructions=code.chain(
                     code.make(Opcode.CONSTANT, 0),
-                    code.make(Opcode.MIN),
+                    code.make(Opcode.NEG),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -547,46 +547,6 @@ class CompilerTestCase(unittest.TestCase):
     def test_for(self):
         """Test that we can compile "for" tags."""
         test_cases = [
-            # Case(
-            #     description="literal range with no args",
-            #     source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
-            #     expected_constants=[3, 0],
-            #     expected_instructions=code.chain(
-            #         code.make(Opcode.FAL),  # reverse
-            #         code.make(Opcode.NIL),  # offset
-            #         code.make(Opcode.NIL),  # limit
-            #         code.make(Opcode.CONSTANT, 0),  # range stop
-            #         code.make(Opcode.CONSTANT, 1),  # range start
-            #         code.make(Opcode.FOR, 0, 19, 33),  # index of loop var
-            #         code.make(Opcode.JIE, 32),
-            #         code.make(Opcode.JSI, 33),
-            #         code.make(Opcode.GLO, 0),
-            #         code.make(Opcode.POP),
-            #         code.make(Opcode.STE, 0),
-            #         code.make(Opcode.JMP, 19),
-            #         code.make(Opcode.NOP),
-            #     ),
-            # ),
-            # Case(
-            #     description="literal range with limit",
-            #     source=r"{% for i in (0..3) limit:2 %}{{ i }}{% endfor %}",
-            #     expected_constants=[2, 3, 0],
-            #     expected_instructions=code.chain(
-            #         code.make(Opcode.FAL),  # reverse
-            #         code.make(Opcode.NIL),  # offset
-            #         code.make(Opcode.CONSTANT, 0),  # limit
-            #         code.make(Opcode.CONSTANT, 1),  # range stop
-            #         code.make(Opcode.CONSTANT, 2),  # range start
-            #         code.make(Opcode.FOR, 0, 21, 35),  # index of loop var
-            #         code.make(Opcode.JIE, 34),
-            #         code.make(Opcode.JSI, 35),
-            #         code.make(Opcode.GLO, 0),
-            #         code.make(Opcode.POP),
-            #         code.make(Opcode.STE, 0),
-            #         code.make(Opcode.JMP, 21),
-            #         code.make(Opcode.NOP),
-            #     ),
-            # ),
             Case(
                 description="literal range with no args",
                 source=r"{% for i in (0..3) %}{{ i }}{% endfor %}",
@@ -598,7 +558,7 @@ class CompilerTestCase(unittest.TestCase):
                         code.make(Opcode.STE, 0),  # 0007
                         code.make(Opcode.JMP, 3),  # 0010
                         code.make(Opcode.NOP),  # 0013
-                        code.make(Opcode.BRK),  # 0014
+                        code.make(Opcode.STO),  # 0014
                     ),
                     3,
                     0,
@@ -626,7 +586,7 @@ class CompilerTestCase(unittest.TestCase):
                         code.make(Opcode.STE, 0),  # 0011
                         code.make(Opcode.JMP, 3),  # 0014
                         code.make(Opcode.NOP),  # 0017
-                        code.make(Opcode.BRK),  # 0018
+                        code.make(Opcode.STO),  # 0018
                     ),
                     7,
                     5,
@@ -643,7 +603,7 @@ class CompilerTestCase(unittest.TestCase):
                         code.make(Opcode.STE, 0),
                         code.make(Opcode.JMP, 3),
                         code.make(Opcode.NOP),
-                        code.make(Opcode.BRK),
+                        code.make(Opcode.STO),
                     ),
                     3,
                     0,
@@ -668,21 +628,26 @@ class CompilerTestCase(unittest.TestCase):
             Case(
                 description="literal range with no args",
                 source=r"{% tablerow tag in tags %}{{ tag }}{% endtablerow %}",
-                expected_constants=["tags"],
+                expected_constants=[
+                    code.chain(
+                        code.make(Opcode.GBL, 0),
+                        code.make(Opcode.POP),
+                        code.make(Opcode.STE, 0),
+                        code.make(Opcode.JMP, 0),
+                        code.make(Opcode.STO),
+                    ),
+                    "tags",
+                ],
                 expected_instructions=code.chain(
+                    code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.NIL),  # cols
                     code.make(Opcode.FAL),  # reverse
                     code.make(Opcode.NIL),  # offset
                     code.make(Opcode.NIL),  # limit
                     code.make(Opcode.NIL),  # range stop
-                    code.make(Opcode.CONSTANT, 0),  # identifier
+                    code.make(Opcode.CONSTANT, 1),  # identifier
                     code.make(Opcode.RES),
-                    code.make(Opcode.TAB, 0, 16, 29),  # index of loop var
-                    code.make(Opcode.JSI, 29),
-                    code.make(Opcode.GLO, 0),
-                    code.make(Opcode.POP),
-                    code.make(Opcode.STE, 0),
-                    code.make(Opcode.JMP, 16),
+                    code.make(Opcode.TAB, 2, 0),
                 ),
             ),
         ]

@@ -14,6 +14,8 @@ from liquid.compiler import Compiler
 from liquid.code import Opcode
 from liquid.object import CompiledBlock
 
+from liquid.builtin.drops import IterableDrop
+
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
 TAG_ELSE = sys.intern("else")
@@ -99,7 +101,7 @@ class ForLoop(collections.abc.Mapping):
             self.last = False
 
 
-class ForLoopDrop(collections.abc.Mapping):
+class ForLoopDrop(IterableDrop, collections.abc.Mapping):
     """Wrap a `ForLoop` so it can be used as a `Context` namepsace."""
 
     __slots__ = ("forloop", "name")
@@ -221,7 +223,7 @@ class ForNode(ast.Node):
         else:
             compiler.emit(Opcode.NOP)
 
-        compiler.emit(Opcode.BRK)
+        compiler.emit(Opcode.STO)
 
         # Must instpect the scoped symbol table before leaving the scope.
         free_symbols = compiler.symbol_table.free_symbols
