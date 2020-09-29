@@ -1,9 +1,9 @@
 import math
 from collections import abc
-from functools import partial
+from functools import partial, reduce
 from io import StringIO
 from itertools import islice
-from typing import Any, Iterator, List, Mapping, Dict, Callable
+from typing import Any, Iterator, List, Mapping, Dict, Callable, Union
 
 from liquid.context import Context, ReadOnlyChainMap, _getitem
 from liquid import code
@@ -62,23 +62,27 @@ def execute(env, bytecode: compiler.Bytecode, context: Context = None) -> str:
 
 class VM:
     def __init__(self, env, bytecode: compiler.Bytecode, context: Context = None):
-        self.current_block = Block(CompiledBlock(instructions=bytecode.instructions), 0)
-        self.blocks: List[Block] = [self.current_block]
+        # This is a stack machine.
+        self.stack: List[Any] = [None] * STACK_SIZE
+        # Stack pointer
+        self.sp = 0
 
-        # self.instructions: code.Instructions = bytecode.instructions
         self.constants = bytecode.constants
 
-        self.stack: List[Any] = [None] * STACK_SIZE
-        self.sp = 0  # Stack pointer
+        # Block scopes
+        self.current_block = Block(CompiledBlock(instructions=bytecode.instructions), 0)
+        self.blocks: List[Block] = [self.current_block]
 
         # Stack of file-like objects for rendering to. The only built-in tag
         # that uses anything other than the main buffer is the `capture` tag.
         self.current_buffer = StringIO()
         self.buffers = [self.current_buffer]
 
-        self.context = context or Context(filters=env.filters)
-
+        # "assign" and "capture" scope
         self.locals = {}
+        # "increment", "decrement" and "cycle" scope
+        self.context = context or Context(filters=env.filters)
+        # Environment and/or template global scope
         self.globals = ReadOnlyChainMap(self.context.globals, self.context._builtin)
 
     def last_popped_stack_elem(self) -> Any:
@@ -91,23 +95,14 @@ class VM:
 
         while self.current_block.ip < self.current_block.instruction_count - 1:
             self.current_block.ip += 1
-            ip = self.current_block.ip
-            op = self.current_block.instructions[ip]
+            op = self.current_block.instructions[self.current_block.ip]
 
             # TODO: setup logging
             # print(
-            #     f"{self.current_block.ip:04d}: stack: {self.pprint_stack()} {str(op)} {self.context.locals}"
+            #     f"{self.current_block.ip:04d}: stack: {self.pprint_stack()} {str(Opcode(op))} {self.context.locals}"
             # )
 
             opcodes[op](self)
-
-    def _stop_iteration(self):
-        block = self.pop_block()
-        self.sp = block.base_pointer - 1
-
-        val = self.pop_buffer()
-        if not val.isspace():
-            self.current_buffer.write(val)
 
     def push(self, obj: Any):
         """Push the given object on to the top of the stack."""
@@ -199,6 +194,18 @@ def _exec_getitem(vm):
         vm.push(None)
 
 
+def _exec_getitems(vm: VM):
+    num_items = vm.read_uint8()
+    items = [vm.pop() for _ in range(num_items)]
+
+    obj = vm.pop()
+
+    try:
+        vm.push(nested_get(obj, items))
+    except (KeyError, IndexError, TypeError):
+        vm.push(None)
+
+
 def _exec_resolve(vm):
     name = vm.pop()
     obj = vm.globals.get(name)
@@ -267,7 +274,7 @@ def _exec_step(vm):
         vm.stack[vm.current_block.base_pointer + idx] = val
     except StopIteration:
         it.empty_exit_buffer(vm.current_buffer)
-        vm._stop_iteration()
+        _stop_iteration(vm)
 
 
 def _exec_set_capture(vm):
@@ -336,7 +343,7 @@ def _exec_continue(vm):
         # First block instruction is always at instruction 3
         vm.current_block.ip = 2
     except StopIteration:
-        vm._stop_iteration()
+        _stop_iteration(vm)
 
 
 def _exec_enter_block(vm):
@@ -371,10 +378,6 @@ def _exec_leave_block(vm):
 
 def _exec_capture(vm):
     vm.push_buffer()
-
-
-def _exec_stop_iteration(vm):
-    vm._stop_iteration()
 
 
 def _exec_forloop(vm):
@@ -466,13 +469,13 @@ def _make_iter(vm) -> Iterator:
     # Range stop. Will be None if start is a collection.
     stop = vm.pop()
 
-    if isinstance(start, int):
-        assert isinstance(stop, int)
-        it = range(start, stop + 1)
-    elif isinstance(start, abc.Sequence):
+    if isinstance(start, abc.Sequence):
         it = iter(start)
     elif isinstance(start, abc.Mapping):
         it = start.items()
+    elif isinstance(start, int):
+        assert isinstance(stop, int)
+        it = range(start, stop + 1)
     else:
         raise LiquidTypeError(f"can't iterate object '{start}'")
 
@@ -488,11 +491,21 @@ def _make_iter(vm) -> Iterator:
     return it
 
 
+def _stop_iteration(vm):
+    block = vm.pop_block()
+    vm.sp = block.base_pointer - 1
+
+    val = vm.pop_buffer()
+    if not val.isspace():
+        vm.current_buffer.write(val)
+
+
 opcodes: Dict[int, Callable] = {
     Opcode.CONSTANT: _exec_constant,
     Opcode.POP: _exec_pop,
     Opcode.FIL: _exec_filter,
     Opcode.GIT: _exec_getitem,
+    Opcode.GIS: _exec_getitems,
     Opcode.RES: _exec_resolve,
     Opcode.JMP: _exec_jump,
     Opcode.JIF: _exec_jump_if,
@@ -505,7 +518,7 @@ opcodes: Dict[int, Callable] = {
     Opcode.GFR: _exec_get_free,
     Opcode.STE: _exec_step,
     Opcode.FOR: _exec_forloop,
-    Opcode.STO: _exec_stop_iteration,
+    Opcode.STO: _stop_iteration,
     Opcode.CAPTURE: _exec_capture,
     Opcode.SETCAPTURE: _exec_set_capture,
     Opcode.DEC: _exec_decrement,
@@ -531,6 +544,34 @@ opcodes: Dict[int, Callable] = {
 }
 
 
+def decode(instructions: code.Instructions) -> List[Callable]:
+    decoded = []
+    idx = 0
+    n = len(instructions)
+
+    while idx < n:
+        opcode = instructions[idx]
+        idx += 1
+
+        func = opcodes[opcode]
+        widths = code.definitions[opcode].operand_widths
+
+        operands = []
+
+        for width in widths:
+            if width == 1:
+                operands.append(instructions[idx])
+                idx += 1
+            elif width == 2:
+                high, low = instructions[idx : idx + 3]
+                operands.append((high << 8) + low)
+                idx += 2
+
+        decoded.append(partial(func, *operands))
+
+    return decoded
+
+
 def to_string(val: Any) -> str:
     # Short cut condition. Strings are far more common than any other type.
     if isinstance(val, str):
@@ -545,6 +586,13 @@ def to_string(val: Any) -> str:
         res = str(val)
 
     return res
+
+
+def nested_get(obj, keys: List[Union[str, int]]) -> Any:
+    try:
+        return reduce(_getitem, keys, obj)
+    except (KeyError, IndexError, TypeError):
+        return None
 
 
 # TODO: Move me

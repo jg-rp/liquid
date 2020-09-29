@@ -212,9 +212,14 @@ class Identifier(Expression):
 
         # It is possible for locally assign variables to reference liquid arrays or
         # hahses.
-        for item in items:
-            item.compile(compiler)
-            compiler.emit(Opcode.GIT)  # Get ITem
+        if len(items) > 2:
+            for item in reversed(items):
+                item.compile(compiler)
+            compiler.emit(Opcode.GIS, len(items))  # Get ItemS
+        else:
+            for item in items:
+                item.compile(compiler)
+                compiler.emit(Opcode.GIT)  # Get ITem
 
 
 class PrefixExpression(Expression):

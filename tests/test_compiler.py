@@ -41,11 +41,11 @@ class CompilerTestCase(unittest.TestCase):
                 self._test_constants(bytecode.constants, case.expected_constants)
 
     def _test_instructions(self, expected, actual):
-        # print("---")
-        # print(code.string(actual))
-        # print("\n\n")
-        # print(code.string(expected))
-        # print("---")
+        print("---")
+        print(code.string(actual))
+        print("\n\n")
+        print(code.string(expected))
+        print("---")
 
         self.assertEqual(len(expected), len(actual), msg="instruction length mismatch")
 
@@ -401,7 +401,7 @@ class CompilerTestCase(unittest.TestCase):
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.RES),
                     code.make(Opcode.CONSTANT, 1),
-                    code.make(Opcode.GIT),
+                    code.make(Opcode.GIS, 1),
                     code.make(Opcode.POP),
                 ),
             ),
@@ -415,8 +415,8 @@ class CompilerTestCase(unittest.TestCase):
                     code.make(Opcode.CONSTANT, 1),
                     code.make(Opcode.RES),
                     code.make(Opcode.CONSTANT, 2),
-                    code.make(Opcode.GIT),
-                    code.make(Opcode.GIT),
+                    code.make(Opcode.GIS, 1),
+                    code.make(Opcode.GIS, 1),
                     code.make(Opcode.POP),
                 ),
             ),

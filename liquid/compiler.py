@@ -3,6 +3,7 @@ from typing import NamedTuple, List, Any
 
 from liquid import code
 from liquid.code import Opcode
+from liquid.object import CompiledBlock
 from liquid.symbol import SymbolTable, SymbolScope, Symbol
 
 
@@ -50,6 +51,7 @@ class Compiler:
 
     def __init__(self, symbol_table: SymbolTable = None, constants: List[Any] = None):
         self.constants = constants or []
+        self.constants_index = {}
         self.symbol_table = symbol_table or SymbolTable()
 
         main_scope = CompilationScope(
@@ -78,10 +80,20 @@ class Compiler:
     def add_constant(self, obj: Any) -> int:
         """Add the given object to the constant pool."""
         try:
-            return self.constants.index(obj)
-        except ValueError:
+            return self.constants_index[obj]
+        except KeyError:
             self.constants.append(obj)
-            return len(self.constants) - 1
+            idx = len(self.constants) - 1
+            self.constants_index[obj] = idx
+            return idx
+
+    def add_constant_block(self, block: CompiledBlock) -> int:
+        try:
+            return self.constants.index(block)
+        except ValueError:
+            self.constants.append(block)
+            idx = len(self.constants) - 1
+            return idx
 
     def emit(self, op: code.Opcode, *operands: int) -> int:
         """Emit an instruction from the given opcode and operands."""

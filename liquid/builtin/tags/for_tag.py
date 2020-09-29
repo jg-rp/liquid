@@ -241,7 +241,7 @@ class ForNode(ast.Node):
             num_free=len(free_symbols),
         )
 
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(compiled_block))
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant_block(compiled_block))
 
         for free_symbol in reversed(free_symbols):
             compiler.load_symbol(free_symbol)

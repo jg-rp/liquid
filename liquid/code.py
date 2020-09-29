@@ -42,6 +42,7 @@ class Opcode(IntEnum):
     SLO = auto()  # Set LOcal (assign and capture)
     RES = auto()  # RESolve names from context
     GIT = auto()  # Get ITem (sequence index or mapping key)
+    GIS = auto()  # Get ItemS
     GBL = auto()  # Get BLock scope
     GFR = auto()  # Get FRee
 
@@ -95,7 +96,7 @@ class Definition(NamedTuple):
     operand_widths: Tuple[int, ...]
 
 
-definitions: Dict[Opcode, Definition] = {
+definitions: Dict[int, Definition] = {
     Opcode.CONSTANT: Definition("OpConstant", (2,)),
     Opcode.POP: Definition("OpPop", ()),
     Opcode.POP: Definition("OpPop", ()),
@@ -121,7 +122,8 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.GLO: Definition("OpGetLocal", (2,)),
     Opcode.SLO: Definition("OpSetLocal", (2,)),
     Opcode.RES: Definition("OpResolve", ()),
-    Opcode.GIT: Definition("OpGetAttr", ()),
+    Opcode.GIT: Definition("OpGetItem", ()),
+    Opcode.GIS: Definition("OpGetItems", (1,)),
     Opcode.GBL: Definition("OpGetBlockVar", (1,)),
     Opcode.GFR: Definition("OpGetFreeVar", (1,)),
     Opcode.CAPTURE: Definition("OpCapture", ()),

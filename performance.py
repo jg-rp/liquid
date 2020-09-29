@@ -302,10 +302,10 @@ def profile_render(search_path: str):
     templates = setup_render(search_path)
 
     cProfile.runctx(
-        "[render(templates) for _ in range(5)]",
+        "[render(templates) for _ in range(20)]",
         globals={"render": render, "templates": templates},
         locals={},
-        sort="cumtime",
+        sort="tottime",
     )
 
 
@@ -338,7 +338,7 @@ def profile_execute(search_path: str):
         "[execute(templates) for _ in range(20)]",
         globals={"execute": execute, "templates": templates},
         locals={},
-        sort="cumtime",
+        sort="tottime",
     )
 
 
@@ -374,47 +374,49 @@ def setup_parse(search_path):
 
 def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     # Benchmark
-    # print(
-    #     "lex: ",
-    #     timeit.repeat(
-    #         "lex(env, templates)",
-    #         setup="env, templates = setup_parse(search_path)",
-    #         globals={**globals(), "search_path": search_path},
-    #         number=number,
-    #         repeat=repeat,
-    #     ),
-    # )
+    print(
+        "lex: ",
+        timeit.repeat(
+            "lex(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
 
-    # print("parse: ",
-    #     timeit.repeat(
-    #         "parse(env, templates)",
-    #         setup="env, templates = setup_parse(search_path)",
-    #         globals={**globals(), "search_path": search_path},
-    #         number=number,
-    #         repeat=repeat,
-    #     )
-    # )
+    print(
+        "parse: ",
+        timeit.repeat(
+            "parse(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
 
-    # print(
-    #     "render: ",
-    #     timeit.repeat(
-    #         "render(templates)",
-    #         setup="templates = setup_render(search_path)",
-    #         globals={**globals(), "search_path": search_path},
-    #         number=number,
-    #         repeat=repeat,
-    #     ),
-    # )
+    print(
+        "render: ",
+        timeit.repeat(
+            "render(templates)",
+            setup="templates = setup_render(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
 
-    # print("parse and render: ",
-    #     timeit.repeat(
-    #         "parse_and_render(env, templates)",
-    #         setup="env, templates = setup_parse(search_path)",
-    #         globals={**globals(), "search_path": search_path},
-    #         number=number,
-    #         repeat=repeat,
-    #     )
-    # )
+    print(
+        "parse and render: ",
+        timeit.repeat(
+            "parse_and_render(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
 
     print(
         "compile: ",
