@@ -1,14 +1,15 @@
 import math
 from collections import abc
+from functools import partial
 from io import StringIO
 from itertools import islice
-from typing import Any, Iterator, List, Mapping
+from typing import Any, Iterator, List, Mapping, Dict, Callable
 
 from liquid.context import Context, ReadOnlyChainMap, _getitem
 from liquid import code
 from liquid.code import Opcode
 from liquid import compiler
-from liquid.exceptions import StackOverflow, LiquidTypeError
+from liquid.exceptions import LiquidTypeError
 from liquid.expression import compare, is_truthy
 
 from liquid.builtin.drops import IterableDrop
@@ -89,386 +90,16 @@ class VM:
         """Execute instructions"""
 
         while self.current_block.ip < self.current_block.instruction_count - 1:
-            current_block = self.current_block
-            current_block.ip += 1
-
-            ip = current_block.ip
-            instructions = current_block.instructions
-
-            op = instructions[ip]
+            self.current_block.ip += 1
+            ip = self.current_block.ip
+            op = self.current_block.instructions[ip]
 
             # TODO: setup logging
             # print(
             #     f"{self.current_block.ip:04d}: stack: {self.pprint_stack()} {str(op)} {self.context.locals}"
             # )
 
-            if op == Opcode.CONSTANT:
-                high, low = instructions[ip + 1 : ip + 3]
-                const_idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.push(self.constants[const_idx])
-
-            elif op == Opcode.POP:
-                self.current_buffer.write(to_string(self.pop()))
-
-            elif op == Opcode.FIL:
-                high, low = instructions[ip + 1 : ip + 3]
-                fltr_id = (high << 8) + low
-
-                num_args = instructions[ip + 3]
-                current_block.ip += 3
-
-                args = [self.pop() for _ in range(num_args)]
-                val = self.pop()
-
-                func = self.context.filter(fltr_id)
-                res = func(val, *args)
-
-                self.push(res)
-
-            elif op == Opcode.GIT:
-                item = self.pop()
-                obj = self.pop()
-                try:
-                    self.push(_getitem(obj, item))
-                except (KeyError, IndexError, TypeError):
-                    self.push(None)
-
-            elif op == Opcode.RES:
-                name = self.pop()
-                obj = self.globals.get(name)
-                self.push(obj)
-
-            elif op == Opcode.JMP:
-                high, low = instructions[ip + 1 : ip + 3]
-                pos = (high << 8) + low
-                current_block.ip = pos - 1
-
-            elif op == Opcode.JIF:
-                high, low = instructions[ip + 1 : ip + 3]
-                pos = (high << 8) + low
-                current_block.ip += 2
-
-                condition = self.pop()
-                if is_truthy(condition):
-                    current_block.ip = pos - 1
-
-            elif op == Opcode.JIN:
-                high, low = instructions[ip + 1 : ip + 3]
-                pos = (high << 8) + low
-                current_block.ip += 2
-
-                condition = self.pop()
-                if not is_truthy(condition):
-                    current_block.ip = pos - 1
-
-            elif op == Opcode.JIE:
-                high, low = instructions[ip + 1 : ip + 3]
-                pos = (high << 8) + low
-                current_block.ip += 2
-
-                if self.pop() == Empty:
-                    current_block.ip = pos - 1
-
-            elif op == Opcode.NOP:
-                self.push(Nop)
-
-            elif op == Opcode.SLO:
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.locals[idx] = self.pop()
-
-            elif op == Opcode.GLO:
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.push(self.locals.get(idx))
-
-            elif op == Opcode.GBL:
-                idx = instructions[ip + 1]
-                current_block.ip += 1
-
-                self.push(self.stack[current_block.base_pointer + idx])
-
-            elif op == Opcode.GFR:
-                idx = instructions[ip + 1]
-                current_block.ip += 1
-
-                self.push(current_block.free[idx])
-
-            elif op == Opcode.STE:
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                it = self.stack[self.sp - 1]
-                assert isinstance(it, LoopIter), f"expected LoopIter, found {repr(it)}"
-
-                try:
-                    val = it.step(self.current_buffer)
-                    self.stack[current_block.base_pointer + idx] = val
-                except StopIteration:
-                    it.empty_exit_buffer(self.current_buffer)
-                    self._stop_iteration()
-
-            elif op == Opcode.FOR:
-                num_block_vars = instructions[ip + 1]
-                num_free_vars = instructions[current_block.ip + 2]
-                current_block.ip += 2
-
-                self._exec_forloop(num_block_vars, num_free_vars)
-
-            elif op == Opcode.STO:
-                self._stop_iteration()
-
-            elif op == Opcode.CAPTURE:
-                self.push_buffer()
-
-            elif op == Opcode.SETCAPTURE:
-                value = self.pop_buffer()
-
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.locals[idx] = value
-
-            elif op == Opcode.DEC:
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.push(self.context.decrement(idx))
-
-            elif op == Opcode.INC:
-                high, low = instructions[ip + 1 : ip + 3]
-                idx = (high << 8) + low
-                current_block.ip += 2
-
-                self.push(self.context.increment(idx))
-
-            elif op == Opcode.CYC:
-                num_args = instructions[ip + 1]
-                current_block.ip += 1
-
-                group = self.pop()
-                args = [self.pop() for _ in range(num_args)]
-
-                self.push(next(self.context.cycle(group, args)))
-
-            elif op == Opcode.TRU:
-                self.push(True)
-
-            elif op == Opcode.FAL:
-                self.push(False)
-
-            elif op == Opcode.NIL:
-                self.push(None)
-
-            elif op == Opcode.EMP:
-                self.push(Empty)
-
-            elif op in (
-                Opcode.EQ,
-                Opcode.NE,
-                Opcode.GT,
-                Opcode.GE,
-                Opcode.CONTAINS,
-                Opcode.AND,
-                Opcode.OR,
-            ):
-                right = self.pop()
-                left = self.pop()
-                operator = code.INFIX_OPERATORS[op]
-
-                self.push(compare(left, operator, right))
-
-            elif op == Opcode.NEG:
-                operand = self.pop()
-
-                if not isinstance(operand, (int, float)):
-                    raise LiquidTypeError(f"unknown operator {op} ({operand})")
-
-                self.push(-operand)
-
-            elif op == Opcode.TAB:
-                num_block_vars = instructions[ip + 1]
-                num_free_vars = instructions[ip + 2]
-                current_block.ip += 2
-
-                self._exec_tablerow(num_block_vars, num_free_vars)
-
-            elif op == Opcode.BRK:
-                block = self.pop_block()
-                self.sp = block.base_pointer - 1
-
-                # Keep popping blocks off the stack until we find a for loop.
-                # For loops are the only blocks that respond to a break.
-                while not block.forloop:
-                    block = self.pop_block()
-                    self.sp = block.base_pointer - 1
-
-                val = self.pop_buffer()
-                if not val.isspace():
-                    self.current_buffer.write(val)
-
-            elif op == Opcode.CON:
-                # Keep popping blocks off the stack until we find a for loop.
-                # For loops are the only blocks that respond to a continue.
-                while not self.current_block.forloop:
-                    block = self.pop_block()
-                    self.sp = block.base_pointer - 1
-
-                it = self.stack[self.sp - 1]
-                assert isinstance(it, LoopIter)
-
-                try:
-                    val = next(it)
-                    # Loop var is always at index 0 (from base_pointer)
-                    self.stack[self.current_block.base_pointer] = val
-                    # First block instruction is always at instruction 3
-                    self.current_block.ip = 2
-                except StopIteration:
-                    self._stop_iteration()
-
-            elif op == Opcode.EBL:
-                num_args = instructions[ip + 1]
-                num_free = instructions[ip + 2]
-                current_block.ip += 1
-
-                block_name = self.pop()
-                args = [self.pop() for _ in range(num_args)]
-
-                free_vars = [self.pop() for _ in range(num_free)]
-
-                compiled_block = self.stack[self.sp - 1]
-                assert isinstance(
-                    compiled_block, CompiledBlock
-                ), f"expected CompiledBlock, found {type(compiled_block)}"
-
-                # self.push_buffer()
-
-                block = Block(
-                    block=compiled_block,
-                    base_pointer=self.sp,
-                    free=free_vars,
-                )
-                self.push_block(block)
-                self.sp = block.base_pointer + compiled_block.num_locals
-
-                exec_func = lookup_exec[block_name]
-                exec_func(self, *args)
-
-            elif op == Opcode.LBL:
-                self.pop_block()
-
-    def _exec_forloop(self, num_block_vars, num_free_vars):
-        assert num_block_vars == 2
-
-        # Need to know the length of the sequence
-        items = list(self._make_iter())
-        it = iter(items)
-
-        free_vars = [self.pop() for _ in range(num_free_vars)]
-
-        compiled_block = self.stack[self.sp - 1]
-        assert isinstance(compiled_block, CompiledBlock)
-
-        self.push_buffer()
-
-        block = Block(
-            block=compiled_block,
-            base_pointer=self.sp,
-            free=free_vars,
-            forloop=True,
-        )
-        self.push_block(block)
-        self.sp = block.base_pointer + compiled_block.num_locals
-
-        if not items:
-            self.push(Empty)
-        else:
-            drop = ForLoopDrop(0, len(items))
-            for_it = LoopIter(it, drop)
-
-            # Initialise drop with first step
-            val = next(for_it)
-
-            offset = self.current_block.base_pointer
-
-            self.stack[offset] = val
-            self.stack[offset + 1] = drop.forloop
-
-            self.push(for_it)
-            self.push(Nop)
-
-    def _exec_tablerow(self, num_block_vars, num_free_vars):
-        assert num_block_vars == 2
-        items = list(self._make_iter())
-
-        cols = self.pop()
-        if not cols:
-            cols = len(items)
-
-        free_vars = [self.pop() for _ in range(num_free_vars)]
-
-        compiled_block = self.stack[self.sp - 1]
-        assert isinstance(compiled_block, CompiledBlock)
-
-        self.push_buffer()
-
-        block = Block(
-            block=compiled_block,
-            base_pointer=self.sp,
-            free=free_vars,
-            forloop=False,
-        )
-        self.push_block(block)
-        self.sp = block.base_pointer + compiled_block.num_locals
-
-        drop = TableRowDrop("", len(items), cols)
-        for_it = LoopIter(iter(items), drop)
-
-        # Initialise drop with first step
-        val = for_it.step(self.current_buffer)
-
-        offset = self.current_block.base_pointer
-
-        self.stack[offset] = val
-        self.stack[offset + 1] = drop.tablerow
-
-        self.push(for_it)
-
-    def _make_iter(self) -> Iterator:
-        # Range start or collection to iterate
-        start = self.pop()
-        # Range stop. Will be None if start is a collection.
-        stop = self.pop()
-
-        if isinstance(start, int):
-            assert isinstance(stop, int)
-            it = range(start, stop + 1)
-        elif isinstance(start, abc.Sequence):
-            it = iter(start)
-        elif isinstance(start, abc.Mapping):
-            it = start.items()
-        else:
-            raise LiquidTypeError(f"can't iterate object '{start}'")
-
-        limit = self.pop()
-        offset = self.pop()
-        reverse = self.pop()
-
-        it = islice(it, offset, limit)
-
-        if reverse:
-            it = reversed(list(it))
-
-        return it
+            opcodes[op](self)
 
     def _stop_iteration(self):
         block = self.pop_block()
@@ -519,6 +150,385 @@ class VM:
             else:
                 buf.append(itm)
         return ", ".join([repr(itm) for itm in buf])
+
+    def read_uint16(self):
+        high, low = self.current_block.instructions[
+            self.current_block.ip + 1 : self.current_block.ip + 3
+        ]
+        self.current_block.ip += 2
+        return (high << 8) + low
+
+    def read_uint8(self):
+        op = self.current_block.instructions[self.current_block.ip + 1]
+        self.current_block.ip += 1
+        return op
+
+
+def _exec_constant(vm):
+    const_idx = vm.read_uint16()
+    vm.push(vm.constants[const_idx])
+
+
+def _exec_pop(vm):
+    vm.current_buffer.write(to_string(vm.pop()))
+
+
+def _exec_push(vm, val):
+    vm.push(val)
+
+
+def _exec_filter(vm):
+    fltr_id = vm.read_uint16()
+    num_args = vm.read_uint8()
+
+    args = [vm.pop() for _ in range(num_args)]
+    val = vm.pop()
+
+    func = vm.context.filter(fltr_id)
+    res = func(val, *args)
+
+    vm.push(res)
+
+
+def _exec_getitem(vm):
+    item = vm.pop()
+    obj = vm.pop()
+    try:
+        vm.push(_getitem(obj, item))
+    except (KeyError, IndexError, TypeError):
+        vm.push(None)
+
+
+def _exec_resolve(vm):
+    name = vm.pop()
+    obj = vm.globals.get(name)
+    vm.push(obj)
+
+
+def _exec_jump(vm):
+    pos = vm.read_uint16()
+    vm.current_block.ip = pos - 1
+
+
+def _exec_jump_if(vm):
+    pos = vm.read_uint16()
+
+    condition = vm.pop()
+    if is_truthy(condition):
+        vm.current_block.ip = pos - 1
+
+
+def _exec_jump_if_not(vm):
+    pos = vm.read_uint16()
+
+    condition = vm.pop()
+    if not is_truthy(condition):
+        vm.current_block.ip = pos - 1
+
+
+def _exec_jump_if_empty(vm):
+    pos = vm.read_uint16()
+
+    if vm.pop() == Empty:
+        vm.current_block.ip = pos - 1
+
+
+def _exec_nop(vm):
+    vm.push(Nop)
+
+
+def _exec_set_local(vm):
+    idx = vm.read_uint16()
+    vm.locals[idx] = vm.pop()
+
+
+def _exec_get_local(vm):
+    idx = vm.read_uint16()
+    vm.push(vm.locals.get(idx))
+
+
+def _exec_get_block_var(vm):
+    idx = vm.read_uint8()
+    vm.push(vm.stack[vm.current_block.base_pointer + idx])
+
+
+def _exec_get_free(vm):
+    idx = vm.read_uint8()
+    vm.push(vm.current_block.free[idx])
+
+
+def _exec_step(vm):
+    idx = vm.read_uint16()
+    it = vm.stack[vm.sp - 1]
+    assert isinstance(it, LoopIter), f"expected LoopIter, found {repr(it)}"
+
+    try:
+        val = it.step(vm.current_buffer)
+        vm.stack[vm.current_block.base_pointer + idx] = val
+    except StopIteration:
+        it.empty_exit_buffer(vm.current_buffer)
+        vm._stop_iteration()
+
+
+def _exec_set_capture(vm):
+    idx = vm.read_uint16()
+    vm.locals[idx] = vm.pop_buffer()
+
+
+def _exec_decrement(vm):
+    idx = vm.read_uint8()
+    vm.push(vm.context.decrement(idx))
+
+
+def _exec_increment(vm):
+    idx = vm.read_uint8()
+    vm.push(vm.context.increment(idx))
+
+
+def _exec_cycle(vm):
+    num_args = vm.read_uint8()
+    group = vm.pop()
+    args = [vm.pop() for _ in range(num_args)]
+    vm.push(next(vm.context.cycle(group, args)))
+
+
+def _exec_infix(vm, op: Opcode):
+    right = vm.pop()
+    left = vm.pop()
+    operator = code.INFIX_OPERATORS[op]
+    vm.push(compare(left, operator, right))
+
+
+def _exec_negative(vm):
+    operand = vm.pop()
+    vm.push(-operand)
+
+
+def _exec_break(vm):
+    block = vm.pop_block()
+    vm.sp = block.base_pointer - 1
+
+    # Keep popping blocks off the stack until we find a for loop.
+    # For loops are the only blocks that respond to a break.
+    while not block.forloop:
+        block = vm.pop_block()
+        vm.sp = block.base_pointer - 1
+
+    val = vm.pop_buffer()
+    if not val.isspace():
+        vm.current_buffer.write(val)
+
+
+def _exec_continue(vm):
+    # Keep popping blocks off the stack until we find a for loop.
+    # For loops are the only blocks that respond to a continue.
+    while not vm.current_block.forloop:
+        block = vm.pop_block()
+        vm.sp = block.base_pointer - 1
+
+    it = vm.stack[vm.sp - 1]
+    assert isinstance(it, LoopIter)
+
+    try:
+        val = next(it)
+        # Loop var is always at index 0 (from base_pointer)
+        vm.stack[vm.current_block.base_pointer] = val
+        # First block instruction is always at instruction 3
+        vm.current_block.ip = 2
+    except StopIteration:
+        vm._stop_iteration()
+
+
+def _exec_enter_block(vm):
+    num_args = vm.read_uint8()
+    num_free = vm.read_uint8()
+
+    block_name = vm.pop()
+    args = [vm.pop() for _ in range(num_args)]
+
+    free_vars = [vm.pop() for _ in range(num_free)]
+
+    compiled_block = vm.stack[vm.sp - 1]
+    assert isinstance(
+        compiled_block, CompiledBlock
+    ), f"expected CompiledBlock, found {type(compiled_block)}"
+
+    block = Block(
+        block=compiled_block,
+        base_pointer=vm.sp,
+        free=free_vars,
+    )
+    vm.push_block(block)
+    vm.sp = block.base_pointer + compiled_block.num_locals
+
+    exec_func = lookup_exec[block_name]
+    exec_func(vm, *args)
+
+
+def _exec_leave_block(vm):
+    vm.pop_block()
+
+
+def _exec_capture(vm):
+    vm.push_buffer()
+
+
+def _exec_stop_iteration(vm):
+    vm._stop_iteration()
+
+
+def _exec_forloop(vm):
+    num_block_vars = vm.read_uint8()
+    num_free_vars = vm.read_uint8()
+    assert num_block_vars == 2
+
+    # Need to know the length of the sequence
+    items = list(_make_iter(vm))
+    it = iter(items)
+
+    free_vars = [vm.pop() for _ in range(num_free_vars)]
+
+    compiled_block = vm.stack[vm.sp - 1]
+    assert isinstance(compiled_block, CompiledBlock)
+
+    vm.push_buffer()
+
+    block = Block(
+        block=compiled_block,
+        base_pointer=vm.sp,
+        free=free_vars,
+        forloop=True,
+    )
+    vm.push_block(block)
+    vm.sp = block.base_pointer + compiled_block.num_locals
+
+    if not items:
+        vm.push(Empty)
+    else:
+        drop = ForLoopDrop(0, len(items))
+        for_it = LoopIter(it, drop)
+
+        # Initialise drop with first step
+        val = next(for_it)
+
+        offset = vm.current_block.base_pointer
+
+        vm.stack[offset] = val
+        vm.stack[offset + 1] = drop.forloop
+
+        vm.push(for_it)
+        vm.push(Nop)
+
+
+def _exec_tablerow(vm):
+    num_block_vars = vm.read_uint8()
+    num_free_vars = vm.read_uint8()
+    assert num_block_vars == 2
+    items = list(_make_iter(vm))
+
+    cols = vm.pop()
+    if not cols:
+        cols = len(items)
+
+    free_vars = [vm.pop() for _ in range(num_free_vars)]
+
+    compiled_block = vm.stack[vm.sp - 1]
+    assert isinstance(compiled_block, CompiledBlock)
+
+    vm.push_buffer()
+
+    block = Block(
+        block=compiled_block,
+        base_pointer=vm.sp,
+        free=free_vars,
+        forloop=False,
+    )
+    vm.push_block(block)
+    vm.sp = block.base_pointer + compiled_block.num_locals
+
+    drop = TableRowDrop("", len(items), cols)
+    for_it = LoopIter(iter(items), drop)
+
+    # Initialise drop with first step
+    val = for_it.step(vm.current_buffer)
+
+    offset = vm.current_block.base_pointer
+
+    vm.stack[offset] = val
+    vm.stack[offset + 1] = drop.tablerow
+
+    vm.push(for_it)
+
+
+def _make_iter(vm) -> Iterator:
+    # Range start or collection to iterate
+    start = vm.pop()
+    # Range stop. Will be None if start is a collection.
+    stop = vm.pop()
+
+    if isinstance(start, int):
+        assert isinstance(stop, int)
+        it = range(start, stop + 1)
+    elif isinstance(start, abc.Sequence):
+        it = iter(start)
+    elif isinstance(start, abc.Mapping):
+        it = start.items()
+    else:
+        raise LiquidTypeError(f"can't iterate object '{start}'")
+
+    limit = vm.pop()
+    offset = vm.pop()
+    reverse = vm.pop()
+
+    it = islice(it, offset, limit)
+
+    if reverse:
+        it = reversed(list(it))
+
+    return it
+
+
+opcodes: Dict[int, Callable] = {
+    Opcode.CONSTANT: _exec_constant,
+    Opcode.POP: _exec_pop,
+    Opcode.FIL: _exec_filter,
+    Opcode.GIT: _exec_getitem,
+    Opcode.RES: _exec_resolve,
+    Opcode.JMP: _exec_jump,
+    Opcode.JIF: _exec_jump_if,
+    Opcode.JIN: _exec_jump_if_not,
+    Opcode.JIE: _exec_jump_if_empty,
+    Opcode.NOP: _exec_nop,
+    Opcode.SLO: _exec_set_local,
+    Opcode.GLO: _exec_get_local,
+    Opcode.GBL: _exec_get_block_var,
+    Opcode.GFR: _exec_get_free,
+    Opcode.STE: _exec_step,
+    Opcode.FOR: _exec_forloop,
+    Opcode.STO: _exec_stop_iteration,
+    Opcode.CAPTURE: _exec_capture,
+    Opcode.SETCAPTURE: _exec_set_capture,
+    Opcode.DEC: _exec_decrement,
+    Opcode.INC: _exec_increment,
+    Opcode.CYC: _exec_cycle,
+    Opcode.TRU: partial(_exec_push, val=True),
+    Opcode.FAL: partial(_exec_push, val=False),
+    Opcode.NIL: partial(_exec_push, val=None),
+    Opcode.EMP: partial(_exec_push, val=Empty),
+    Opcode.EQ: partial(_exec_infix, op=Opcode.EQ),
+    Opcode.NE: partial(_exec_infix, op=Opcode.NE),
+    Opcode.GT: partial(_exec_infix, op=Opcode.GT),
+    Opcode.GE: partial(_exec_infix, op=Opcode.GE),
+    Opcode.CONTAINS: partial(_exec_infix, op=Opcode.CONTAINS),
+    Opcode.AND: partial(_exec_infix, op=Opcode.AND),
+    Opcode.OR: partial(_exec_infix, op=Opcode.OR),
+    Opcode.NEG: _exec_negative,
+    Opcode.TAB: _exec_tablerow,
+    Opcode.BRK: _exec_break,
+    Opcode.CON: _exec_continue,
+    Opcode.EBL: _exec_enter_block,
+    Opcode.LBL: _exec_leave_block,
+}
 
 
 def to_string(val: Any) -> str:

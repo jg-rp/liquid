@@ -3,7 +3,7 @@
 from __future__ import annotations
 from enum import IntEnum, auto
 import itertools
-from typing import List, NamedTuple, Dict, Tuple, MutableSequence, Union
+from typing import List, NamedTuple, Dict, Tuple, MutableSequence
 
 from liquid.exceptions import OpcodeError
 
@@ -126,8 +126,8 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.GFR: Definition("OpGetFreeVar", (1,)),
     Opcode.CAPTURE: Definition("OpCapture", ()),
     Opcode.SETCAPTURE: Definition("OpSetCapture", (2,)),
-    Opcode.INC: Definition("OpIncrement", (2,)),
-    Opcode.DEC: Definition("OpDecrement", (2,)),
+    Opcode.INC: Definition("OpIncrement", (1,)),
+    Opcode.DEC: Definition("OpDecrement", (1,)),
     Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
     Opcode.EBL: Definition("OpEnterBlock", (1, 1)),
     Opcode.LBL: Definition("OpLeaveBlock", ()),
@@ -156,11 +156,9 @@ def make(op: Opcode, *operands: int) -> Instruction:
     _, widths = lookup(op)
     assert len(widths) == len(operands), f"opcode: {Opcode(op)!r}"
 
-    # instruction = array("B", (op,))
     instruction: Instruction = [op]
 
     for width, operand in zip(widths, operands):
-        # instruction.extend(operand.to_bytes(width, byteorder="big", signed=False))
         instruction.extend(operand.to_bytes(width, byteorder="big", signed=False))
 
     return instruction
