@@ -277,7 +277,7 @@ class CompilerTestCase(unittest.TestCase):
                 expected_constants=["10", "3333"],
                 expected_instructions=code.chain(
                     code.make(Opcode.FAL),
-                    code.make(Opcode.JIF, 7),
+                    code.make(Opcode.JIF, 8),
                     code.make(Opcode.CONSTANT, 0),
                     code.make(Opcode.POP),
                     code.make(Opcode.CONSTANT, 1),

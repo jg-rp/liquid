@@ -24,6 +24,8 @@ class UnlessNode(ast.Node):
 
     __slots__ = ("tok", "condition", "consequence")
 
+    statement = False
+
     def __init__(self, tok: Token, condition: Expression, consequence: ast.BlockNode):
         self.tok = tok
         self.condition = condition
@@ -42,8 +44,8 @@ class UnlessNode(ast.Node):
 
         self.consequence.compile(compiler)
 
-        if compiler.last_instruction_is(Opcode.POP):
-            compiler.remove_last_pop()
+        # if compiler.last_instruction_is(Opcode.POP):
+        #     compiler.remove_last_pop()
 
         after_consequence_position = len(compiler.current_instructions())
         compiler.change_operand(jump_if_position, after_consequence_position)

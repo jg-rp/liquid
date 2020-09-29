@@ -531,6 +531,108 @@ class VMTestCase(unittest.TestCase):
                     "nums": [1, 2, 3],
                 },
             ),
+            Case(
+                description="nested table row",
+                source=(
+                    r"{% for x in (1..2) %}"
+                    r"{% tablerow i in nums %}"
+                    r"{{ i }}{{ x }}"
+                    r"{% endtablerow %}"
+                    r"{% endfor %}"
+                ),
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">a1</td>'
+                    '<td class="col2">b1</td>'
+                    '<td class="col3">c1</td>'
+                    "</tr>"
+                    '<tr class="row1">'
+                    '<td class="col1">a2</td>'
+                    '<td class="col2">b2</td>'
+                    '<td class="col3">c2</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "nums": ["a", "b", "c"],
+                },
+            ),
+            Case(
+                description="nested table row with continue",
+                source=(
+                    r"{% for x in (1..2) %}"
+                    r"{% if x == 2 %}{% continue %}{% endif %}"
+                    r"{% tablerow i in nums %}"
+                    r"{{ i }}{{ x }}"
+                    r"{% endtablerow %}"
+                    r"{% endfor %}"
+                ),
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">a1</td>'
+                    '<td class="col2">b1</td>'
+                    '<td class="col3">c1</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "nums": ["a", "b", "c"],
+                },
+            ),
+            Case(
+                description="nested table row with stupid break",
+                source=(
+                    r"{% for x in (1..3) %}"
+                    r"{% tablerow i in nums %}"
+                    r"{% if x == 2 %}{% break %}{% endif %}"
+                    r"{{ i }}{{ x }}"
+                    r"{% endtablerow %}"
+                    r"9999"
+                    r"{% endfor %}"
+                ),
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">a1</td>'
+                    '<td class="col2">b1</td>'
+                    '<td class="col3">c1</td>'
+                    "</tr>"
+                    "9999"
+                    '<tr class="row1">'
+                    '<td class="col1">'
+                ),
+                globals={
+                    "nums": ["a", "b", "c"],
+                },
+            ),
+            Case(
+                description="nested table row with stupid continue",
+                source=(
+                    r"{% for x in (1..3) %}"
+                    r"{% tablerow i in nums %}"
+                    r"{% if x == 2 %}{% continue %}{% endif %}"
+                    r"{{ i }}{{ x }}"
+                    r"{% endtablerow %}"
+                    r"9999"
+                    r"{% endfor %}"
+                ),
+                expected=(
+                    '<tr class="row1">'
+                    '<td class="col1">a1</td>'
+                    '<td class="col2">b1</td>'
+                    '<td class="col3">c1</td>'
+                    "</tr>"
+                    "9999"
+                    '<tr class="row1">'
+                    '<td class="col1">'
+                    '<tr class="row1">'
+                    '<td class="col1">a3</td>'
+                    '<td class="col2">b3</td>'
+                    '<td class="col3">c3</td>'
+                    "</tr>"
+                    "9999"
+                ),
+                globals={
+                    "nums": ["a", "b", "c"],
+                },
+            ),
         ]
 
         self._test(test_cases)

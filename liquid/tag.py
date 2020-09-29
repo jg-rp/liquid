@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from liquid.ast import IllegalNode
 from liquid.exceptions import Error
 from liquid.lex import get_expression_lexer
-from liquid.parse import eat_block, get_parser
+from liquid.parse import eat_block
 from liquid import ast
 
 # TODO: Make `block` a class property.

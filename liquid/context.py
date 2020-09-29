@@ -103,10 +103,6 @@ class Context:
 
         # Map of filter names to filter functions.
         self._filters = filters or {}
-        # FIXME: Don't really want to do this for every context
-        self._filters_by_hash = {
-            hash_identifier(k): v for k, v in self._filters.items()
-        }
 
         # A distinct namespace for cycle tags. The cycle tag render function
         # manages the getting and setting of itertools.cycle instances.
@@ -163,7 +159,7 @@ class Context:
         # warnings.warn(f"default of '{default}' used at '{path}'")
         return default
 
-    def filter(self, name: str) -> Callable:
+    def filter(self, name: Union[str, int]) -> Callable:
         """Returns a filter function with name `name`."""
         filter_func = self._filters.get(name)
         if not filter_func and self.outer:
@@ -173,20 +169,6 @@ class Context:
             raise NoSuchFilterFunc(name)
 
         if isinstance(filter_func, Filter) and filter_func.with_context:
-            return functools.partial(filter_func, context=self)
-
-        return filter_func
-
-    def resolve_filter(self, ident: int) -> Callable:
-        filter_func = self._filters_by_hash.get(ident)
-        if not filter_func and self.outer:
-            filter_func = self.outer.resolve_filter(ident)
-
-        if not filter_func:
-            raise NoSuchFilterFunc(ident)
-
-        if isinstance(filter_func, Filter) and filter_func.with_context:
-            # FIXME: self is not currently holding locals for compiled templates.
             return functools.partial(filter_func, context=self)
 
         return filter_func
@@ -269,6 +251,7 @@ class ReadOnlyContext(Context):
 
 def _getitem(obj, key):
     """Item getter with special methods for arrays/lists and hashes/dicts."""
+    # TODO: abc instead of list/dixt/str
     if isinstance(obj, list):
         if obj and key == "first":
             return obj[0]

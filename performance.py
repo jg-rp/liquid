@@ -50,6 +50,8 @@ from tests.mocks.filters.tag import (
 
 from tests.mocks.filters.weight import Weight, WeightWithUnit
 
+from liquid import compiler
+
 
 class ThemedTemplate(NamedTuple):
     """Parsed template and theme."""
@@ -64,12 +66,24 @@ class ThemedTemplate(NamedTuple):
             template=self.template.drop, content_for_layout=self.template.render()
         )
 
+    def compile(self):
+        self.template.compile()
+        self.theme.compile()
+
+    def execute(self):
+        # `run` will compile if it needs to.
+        content = self.template.run()
+        self.theme.run(template=self.template.drop, content_for_layout=content)
+
 
 class TemplateSource(NamedTuple):
     """A template's path and source."""
 
     path: pathlib.Path
     source: str
+
+    def __repr__(self):
+        return f"TemplateSource(template={self.path!r}, source='...')"
 
 
 class ThemedTemplateSource(NamedTuple):
@@ -88,30 +102,30 @@ def register_mocks(env: Environment):
     env.add_tag(CommentFormTag)
     env.add_tag(PaginateTag)
 
-    env.filters[JSON.name] = JSON(env)
-    env.filters[Money.name] = Money(env)
-    env.filters[MoneyWithCurrency.name] = MoneyWithCurrency(env)
-    env.filters[AssetUrl.name] = AssetUrl(env)
-    env.filters[DefaultPagination.name] = DefaultPagination(env)
-    env.filters[GlobalAssetUrl.name] = GlobalAssetUrl(env)
-    env.filters[ImgTag.name] = ImgTag(env)
-    env.filters[LinkTo.name] = LinkTo(env)
-    env.filters[LinkToType.name] = LinkToType(env)
-    env.filters[LinkToVendor.name] = LinkToVendor(env)
-    env.filters[ShopifyAssetUrl.name] = ShopifyAssetUrl(env)
-    env.filters[StylesheetTag.name] = StylesheetTag(env)
-    env.filters[ScriptTag.name] = ScriptTag(env)
-    env.filters[URLForType.name] = URLForType(env)
-    env.filters[URLForVendor.name] = URLForVendor(env)
-    env.filters[ProductImgURL.name] = ProductImgURL(env)
-    env.filters[Pluralize.name] = Pluralize(env)
-    env.filters[HighlightActiveTag.name] = HighlightActiveTag(env)
-    env.filters[LinkToAddTag.name] = LinkToAddTag(env)
-    env.filters[LinkToRemoveTag.name] = LinkToRemoveTag(env)
-    env.filters[LinkToTag.name] = LinkToTag(env)
-    env.filters[Weight.name] = Weight(env)
-    env.filters[WeightWithUnit.name] = WeightWithUnit(env)
-    env.filters[Within.name] = Within(env)
+    env.add_filter(JSON.name, JSON(env))
+    env.add_filter(Money.name, Money(env))
+    env.add_filter(MoneyWithCurrency.name, MoneyWithCurrency(env))
+    env.add_filter(AssetUrl.name, AssetUrl(env))
+    env.add_filter(DefaultPagination.name, DefaultPagination(env))
+    env.add_filter(GlobalAssetUrl.name, GlobalAssetUrl(env))
+    env.add_filter(ImgTag.name, ImgTag(env))
+    env.add_filter(LinkTo.name, LinkTo(env))
+    env.add_filter(LinkToType.name, LinkToType(env))
+    env.add_filter(LinkToVendor.name, LinkToVendor(env))
+    env.add_filter(ShopifyAssetUrl.name, ShopifyAssetUrl(env))
+    env.add_filter(StylesheetTag.name, StylesheetTag(env))
+    env.add_filter(ScriptTag.name, ScriptTag(env))
+    env.add_filter(URLForType.name, URLForType(env))
+    env.add_filter(URLForVendor.name, URLForVendor(env))
+    env.add_filter(ProductImgURL.name, ProductImgURL(env))
+    env.add_filter(Pluralize.name, Pluralize(env))
+    env.add_filter(HighlightActiveTag.name, HighlightActiveTag(env))
+    env.add_filter(LinkToAddTag.name, LinkToAddTag(env))
+    env.add_filter(LinkToRemoveTag.name, LinkToRemoveTag(env))
+    env.add_filter(LinkToTag.name, LinkToTag(env))
+    env.add_filter(Weight.name, Weight(env))
+    env.add_filter(WeightWithUnit.name, WeightWithUnit(env))
+    env.add_filter(Within.name, Within(env))
 
 
 def load_data() -> Dict[str, Any]:
@@ -231,6 +245,27 @@ def render(templates: List[ThemedTemplate]):
         template.render()
 
 
+def compile_templates(templates: List[ThemedTemplate]):
+    """Compile each of the given templates."""
+    for template in templates:
+        template.compile()
+
+
+def execute(templates: List[ThemedTemplate]):
+    """Compile and execute each of the given templates."""
+    # Will compile first if needed.
+    for template in templates:
+        template.execute()
+
+
+def compile_and_execute(templates: List[ThemedTemplate]):
+    """Compile and execute each of the given templates."""
+    # Will compile first if needed.
+    for template in templates:
+        template.compile()
+        template.execute()
+
+
 # pylint: disable=redefined-builtin
 def parse_and_render(
     env: Environment,
@@ -285,9 +320,46 @@ def profile_parse_and_render(search_path):
     )
 
 
+def profile_compile(search_path: str):
+    templates = setup_render(search_path)
+
+    cProfile.runctx(
+        "[compile_templates(templates) for _ in range(5)]",
+        globals={"compile_templates": compile_templates, "templates": templates},
+        locals={},
+        sort="tottime",
+    )
+
+
+def profile_execute(search_path: str):
+    templates = setup_execute(search_path)
+
+    cProfile.runctx(
+        "[execute(templates) for _ in range(20)]",
+        globals={"execute": execute, "templates": templates},
+        locals={},
+        sort="cumtime",
+    )
+
+
+def setup_execute(search_path: str) -> List[ThemedTemplate]:
+    templates = setup_render(search_path)
+    compile_templates(templates)
+
+    for template in templates:
+        assert template.template.bytecode is not None
+        assert template.theme.bytecode is not None
+    return templates
+
+
 def setup_render(search_path: str) -> List[ThemedTemplate]:
     env, template_sources = setup_parse(search_path)
     parsed_templates = parse(env, template_sources)
+
+    for template in parsed_templates:
+        assert template.template.bytecode is None
+        assert template.theme.bytecode is None
+
     return parsed_templates
 
 
@@ -300,43 +372,82 @@ def setup_parse(search_path):
     return env, templates
 
 
-def benchmark(search_path: str, number: int = 100):
+def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     # Benchmark
-    print(
-        timeit.repeat(
-            "lex(env, templates)",
-            setup="env, templates = setup_parse(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-        )
-    )
+    # print(
+    #     "lex: ",
+    #     timeit.repeat(
+    #         "lex(env, templates)",
+    #         setup="env, templates = setup_parse(search_path)",
+    #         globals={**globals(), "search_path": search_path},
+    #         number=number,
+    #         repeat=repeat,
+    #     ),
+    # )
 
-    print(
-        timeit.repeat(
-            "parse(env, templates)",
-            setup="env, templates = setup_parse(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-        )
-    )
+    # print("parse: ",
+    #     timeit.repeat(
+    #         "parse(env, templates)",
+    #         setup="env, templates = setup_parse(search_path)",
+    #         globals={**globals(), "search_path": search_path},
+    #         number=number,
+    #         repeat=repeat,
+    #     )
+    # )
 
     # print(
+    #     "render: ",
     #     timeit.repeat(
     #         "render(templates)",
     #         setup="templates = setup_render(search_path)",
     #         globals={**globals(), "search_path": search_path},
     #         number=number,
-    #     )
+    #         repeat=repeat,
+    #     ),
     # )
 
-    # print(
+    # print("parse and render: ",
     #     timeit.repeat(
     #         "parse_and_render(env, templates)",
     #         setup="env, templates = setup_parse(search_path)",
     #         globals={**globals(), "search_path": search_path},
     #         number=number,
+    #         repeat=repeat,
     #     )
     # )
+
+    print(
+        "compile: ",
+        timeit.repeat(
+            "compile_templates(templates)",
+            setup="templates = setup_render(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
+
+    print(
+        "compile and execute: ",
+        timeit.repeat(
+            "compile_and_execute(templates)",
+            setup="templates = setup_render(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
+
+    print(
+        "execute: ",
+        timeit.repeat(
+            "execute(templates)",
+            setup="templates = setup_execute(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+    )
 
 
 def main():
@@ -350,8 +461,10 @@ def main():
     elif n_args == 1 and args[0] == "--profile":
         # profile_render(search_path)
         # profile_parse_and_render(search_path)
-        profile_parse(search_path)
+        # profile_parse(search_path)
         # profile_lex(search_path)
+        # profile_compile(search_path)
+        profile_execute(search_path)
     else:
         sys.stderr.write("usage: python performance.py [--profile]\n")
         sys.exit(1)

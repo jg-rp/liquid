@@ -240,7 +240,7 @@ class TablerowNode(ast.Node):
         compiler.enter_scope()
 
         symbol = compiler.symbol_table.define(self.expression.name)
-        compiler.symbol_table.define("tablerow")
+        compiler.symbol_table.define("tablerowloop")
 
         top_of_loop = len(compiler.current_instructions())
 

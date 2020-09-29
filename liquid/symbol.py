@@ -41,6 +41,10 @@ class SymbolTable:
         elif not scope:
             scope = SymbolScope.LOCAL
 
+        # Locals must be defined in the outermost symbol table.
+        if self.outer and scope == SymbolScope.LOCAL:
+            return self.outer.define(name, scope)
+
         symbol = Symbol(name=name, scope=scope, index=self.locals.size)
 
         self.locals.store[name] = symbol

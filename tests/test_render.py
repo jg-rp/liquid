@@ -68,10 +68,14 @@ class RenderTestCases(unittest.TestCase):
         for case in test_cases:
             env = Environment(loader=DictLoader(case.partials))
 
-            with self.subTest(msg=case.description):
-                template = env.from_string(case.template, globals=case.globals)
-                result = template.render()
+            template = env.from_string(case.template, globals=case.globals)
 
+            with self.subTest(msg=case.description):
+                result = template.render()
+                self.assertEqual(result, case.expect)
+
+            with self.subTest(msg=case.description):
+                result = template.run()
                 self.assertEqual(result, case.expect)
 
     def test_literal(self):
@@ -411,7 +415,7 @@ class RenderTestCases(unittest.TestCase):
             ),
             Case(
                 description="blank empty 'if'",
-                template=r"{% if true %} {% elsif false %} {% else %} {% endif %}",
+                template=r"{% if true %}  {% elsif false %} {% else %} {% endif %}",
                 expect="",
             ),
             Case(

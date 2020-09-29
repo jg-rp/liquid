@@ -11,11 +11,11 @@ coverage:
 
 .PHONY: benchmark
 benchmark:
-	python performance.py
+	python -O performance.py
 
 .PHONY: profile
 profile:
-	python performance.py --profile
+	python -O performance.py --profile
 
 .PHONY: clean
 clean:

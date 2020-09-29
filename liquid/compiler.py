@@ -1,5 +1,4 @@
 """Turn a liquid.ast.ParseTree in to bytecode."""
-from dataclasses import dataclass
 from typing import NamedTuple, List, Any
 
 from liquid import code
@@ -21,13 +20,29 @@ class EmittedInstruction(NamedTuple):
     position: int
 
 
-@dataclass
 class CompilationScope:
     """Compile blocks independently"""
 
-    instructions: code.Instructions
-    last_instruction: EmittedInstruction
-    previous_instruction: EmittedInstruction
+    __slots__ = ("instructions", "last_instruction", "previous_instruction")
+
+    def __init__(
+        self,
+        instructions: code.Instructions,
+        last_instruction: EmittedInstruction,
+        previous_instruction: EmittedInstruction,
+    ):
+
+        self.instructions = instructions
+        self.last_instruction = last_instruction
+        self.previous_instruction = previous_instruction
+
+    def __repr__(self):
+        return (
+            f"CompilationScope("
+            f"instructions={self.instructions}, "
+            f"last_instruction={self.last_instruction}, "
+            f"previous_instruction={self.previous_instruction})"
+        )
 
 
 class Compiler:
@@ -43,19 +58,22 @@ class Compiler:
             previous_instruction=EmittedInstruction(opcode=Opcode.NOP, position=-1),
         )
 
+        # Stack of scopes
         self.scopes: List[CompilationScope] = [main_scope]
-        self.scope_idx = 0
+
+        # A reference to the current scope. Maintained by enter_scope and leave_scope.
+        self.current_scope = self.scopes[0]
 
     def compile(self, node):
         """Compile the template rooted at `node`."""
         node.compile(self)
 
     def current_instructions(self) -> code.Instructions:
-        return self.scopes[self.scope_idx].instructions
+        return self.current_scope.instructions
 
     def bytecode(self) -> Bytecode:
         """Return compiled bytecode."""
-        return Bytecode(self.current_instructions(), self.constants)
+        return Bytecode(bytearray(self.current_instructions()), self.constants)
 
     def add_constant(self, obj: Any) -> int:
         """Add the given object to the constant pool."""
@@ -71,36 +89,35 @@ class Compiler:
         pos = self.add_instruction(ins)
 
         self.set_last_instruction(op, pos)
-
         return pos
 
     def add_instruction(self, ins: code.Instruction) -> int:
         """Append an instruction to the instruction list."""
         pos = len(self.current_instructions())
-        self.scopes[self.scope_idx].instructions.extend(ins)
+        self.current_scope.instructions.extend(ins)
         return pos
 
     def last_instruction_is(self, op: Opcode) -> bool:
         if len(self.current_instructions()) == 0:
             return False
-        return self.scopes[self.scope_idx].last_instruction.opcode == op
+        return self.current_scope.last_instruction.opcode == op
 
     def remove_last_pop(self):
-        last = self.scopes[self.scope_idx].last_instruction
-        prev = self.scopes[self.scope_idx].previous_instruction
+        last = self.current_scope.last_instruction
+        prev = self.current_scope.previous_instruction
 
         old = self.current_instructions()
         new = old[: last.position]
 
-        self.scopes[self.scope_idx].instructions = new
-        self.scopes[self.scope_idx].last_instruction = prev
+        self.current_scope.instructions = new
+        self.current_scope.last_instruction = prev
 
     def set_last_instruction(self, op: Opcode, pos: int):
-        prev = self.scopes[self.scope_idx].previous_instruction
+        prev = self.current_scope.previous_instruction
         last = EmittedInstruction(op, pos)
 
-        self.scopes[self.scope_idx].previous_instruction = prev
-        self.scopes[self.scope_idx].last_instruction = last
+        self.current_scope.previous_instruction = prev
+        self.current_scope.last_instruction = last
 
     def replace_instruction(self, pos: int, new_instruction: code.Instruction):
         ins = self.current_instructions()
@@ -121,14 +138,14 @@ class Compiler:
         )
 
         self.scopes.append(scope)
-        self.scope_idx += 1
+        self.current_scope = scope
         self.symbol_table = SymbolTable(outer=self.symbol_table)
 
     def leave_scope(self) -> code.Instructions:
         ins = self.current_instructions()
 
         self.scopes.pop()
-        self.scope_idx -= 1
+        self.current_scope = self.scopes[-1]
         self.symbol_table = self.symbol_table.outer
 
         return ins

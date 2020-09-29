@@ -1,18 +1,37 @@
-from dataclasses import dataclass, field
 from typing import List, Any
 
-from liquid import code
 from liquid.object import CompiledBlock
 
 
-@dataclass
 class Block:
-    block: CompiledBlock
-    base_pointer: int
-    ip: int = field(default=-1)
-    free: List[Any] = field(default_factory=list)
-    forloop: bool = False
 
-    @property
-    def instructions(self) -> code.Instructions:
-        return self.block.instructions
+    __slots__ = (
+        "block",
+        "base_pointer",
+        "ip",
+        "free",
+        "forloop",
+        "instructions",
+        "instruction_count",
+    )
+
+    def __init__(
+        self,
+        block: CompiledBlock,
+        base_pointer: int,
+        ip: int = -1,
+        free: List[Any] = None,
+        forloop: bool = False,
+    ):
+
+        self.block = block
+        self.base_pointer = base_pointer
+        self.ip = ip
+        self.free = free or []
+        self.forloop = forloop
+
+        self.instructions = self.block.instructions
+        self.instruction_count = len(self.instructions)
+
+    def __repr__(self):
+        return f"Block(base_pointer={self.base_pointer}, ip={self.ip}, forloop={self.forloop})"

@@ -12,6 +12,8 @@ from liquid.code import Opcode
 from liquid.compiler import Compiler
 from liquid import hash_identifier
 
+from liquid.symbol import SymbolScope
+
 Number = Union[int, float]
 
 
@@ -468,7 +470,7 @@ class AssignmentExpression(Expression):
         assert isinstance(name, IdentifierPathElement)
         assert isinstance(name.value, str)
 
-        symbol = compiler.symbol_table.define(name.value)
+        symbol = compiler.symbol_table.define(name.value, scope=SymbolScope.LOCAL)
         compiler.emit(Opcode.SLO, symbol.index)
 
 

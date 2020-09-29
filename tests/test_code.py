@@ -9,7 +9,7 @@ class MakeCase(NamedTuple):
     description: str
     op: Opcode
     operands: List[int]
-    expected: code.Instruction
+    expected: List[int]
 
 
 class OperandsCase(NamedTuple):

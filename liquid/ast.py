@@ -41,7 +41,7 @@ class Node(ABC):
         """Render this node to the output buffer."""
 
     def compile_node(self, compiler: Compiler):
-        raise NotImplementedError(":(")
+        raise NotImplementedError(self.__class__.__name__)
 
     def compile(self, compiler: Compiler):
         self.compile_node(compiler)

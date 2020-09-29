@@ -18,6 +18,11 @@ from liquid import builtin
 from liquid.builtin.drops import TemplateDrop
 from liquid.exceptions import Error, lookup_warning, LiquidInterrupt, LiquidSyntaxError
 from liquid.utils import LRUCache
+from liquid import hash_identifier
+
+from liquid import Compiler
+from liquid import Bytecode
+from liquid import execute
 
 
 class Template:
@@ -45,6 +50,8 @@ class Template:
         self.uptodate = uptodate
 
         self.drop = TemplateDrop(self.name, self.path)
+
+        self.bytecode = None
 
     def render(self, *args, **kwargs) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
@@ -97,6 +104,24 @@ class Template:
                     raise
                 except Error as err:
                     self.env.error(err, linenum=node.tok.linenum)
+
+    def compile(self):
+        compiler = Compiler()
+        compiler.compile(self.tree)
+        self.bytecode = compiler.bytecode()
+
+    def run(self, *args, partial: bool = False, **kwargs) -> str:
+        namespace: Dict[str, Any] = {
+            "template": self.drop,
+            **dict(*args, **kwargs),
+            "partial": partial,
+        }
+
+        if not self.bytecode:
+            self.compile()
+
+        context = Context(ChainMap(self._globals, namespace), filters=self.env.filters)
+        return execute(self.env, self.bytecode, context)
 
     @property
     def is_up_to_date(self):
@@ -159,7 +184,7 @@ class Environment:
         self.tags: Dict[str, Tag] = {}
 
         # Filter register.
-        self.filters: Dict[str, Callable[..., Any]] = {}
+        self.filters: Dict[Union[str, int], Callable[..., Any]] = {}
 
         # Tollerence mode
         self.mode = tollerence
@@ -202,6 +227,7 @@ class Environment:
         """
         # TODO: Warn if overriding an existing filter.
         self.filters[name] = func
+        self.filters[hash_identifier(name)] = func
 
     def parse(self, source: str) -> ParseTree:
         """Parse the given string as a liquid template.
@@ -214,6 +240,13 @@ class Environment:
         token_iter = lexer.tokenize(source)
         parse_tree = parser.parse(token_iter)
         return parse_tree
+
+    def compile(self, source: str) -> Bytecode:
+        """Compile a template string to liquid bytecode."""
+        parse_tree = self.parse(source)
+        compiler = Compiler()
+        compiler.compile(parse_tree)
+        return compiler.bytecode()
 
     # pylint: disable=redefined-builtin
     def from_string(

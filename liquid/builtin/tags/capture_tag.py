@@ -11,6 +11,7 @@ from liquid.context import Context
 from liquid.lex import TokenStream
 from liquid.compiler import Compiler
 from liquid.code import Opcode
+from liquid.symbol import SymbolScope
 
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
@@ -40,7 +41,7 @@ class CaptureNode(ast.Node):
         context.assign(str(self.identifier), buf.getvalue())
 
     def compile_node(self, compiler: Compiler):
-        symbol = compiler.symbol_table.define(self.identifier)
+        symbol = compiler.symbol_table.define(self.identifier, scope=SymbolScope.LOCAL)
 
         compiler.emit(Opcode.CAPTURE)
         self.block.compile(compiler)

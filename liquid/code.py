@@ -3,14 +3,9 @@
 from __future__ import annotations
 from enum import IntEnum, auto
 import itertools
-from typing import List, NamedTuple, Dict, Tuple
+from typing import List, NamedTuple, Dict, Tuple, MutableSequence, Union
 
 from liquid.exceptions import OpcodeError
-
-# We're going to work with bytes in their decimal representation. We'll just
-# have to write extra tests to ensure each byte is within bounds.
-Instruction = List[int]
-Instructions = List[int]
 
 
 class Opcode(IntEnum):
@@ -57,8 +52,11 @@ class Opcode(IntEnum):
     DEC = auto()  # Decrement
     CYC = auto()  # Cycle
 
+    EBL = auto()  # Enter BLock
+    LBL = auto()  # Leave Block
+
     FOR = auto()  # For each loop
-    TAB = auto()  # TABle row
+    TAB = auto()  # TABle row loop
     STE = auto()  # Step iterator
     BRK = auto()  # Break
     CON = auto()  # Continue
@@ -82,6 +80,12 @@ INFIX_OPERATORS = {
     Opcode.AND: "and",
     Opcode.OR: "or",
 }
+
+# We're going to work with bytes in their decimal representation. We'll just
+# have to write extra tests to ensure each byte is within bounds.
+# Instruction = ArrayType
+Instruction = MutableSequence[int]
+Instructions = MutableSequence[int]
 
 
 class Definition(NamedTuple):
@@ -125,7 +129,11 @@ definitions: Dict[Opcode, Definition] = {
     Opcode.INC: Definition("OpIncrement", (2,)),
     Opcode.DEC: Definition("OpDecrement", (2,)),
     Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
-    Opcode.FOR: Definition("OpFor", (1, 1)),
+    Opcode.EBL: Definition("OpEnterBlock", (1, 1)),
+    Opcode.LBL: Definition("OpLeaveBlock", ()),
+    Opcode.FOR: Definition(
+        "OpFor", (1, 1)
+    ),  # Number of block vars, number of free vars
     Opcode.TAB: Definition("OpTablerow", (1, 1)),
     Opcode.STE: Definition("OpStep", (2,)),
     Opcode.CON: Definition("OpContinue", ()),
@@ -148,10 +156,12 @@ def make(op: Opcode, *operands: int) -> Instruction:
     _, widths = lookup(op)
     assert len(widths) == len(operands), f"opcode: {Opcode(op)!r}"
 
-    instruction: List[int] = [op]
+    # instruction = array("B", (op,))
+    instruction: Instruction = [op]
 
     for width, operand in zip(widths, operands):
-        instruction.extend(list(operand.to_bytes(width, byteorder="big", signed=False)))
+        # instruction.extend(operand.to_bytes(width, byteorder="big", signed=False))
+        instruction.extend(operand.to_bytes(width, byteorder="big", signed=False))
 
     return instruction
 
@@ -184,7 +194,7 @@ def read_operands(opdef: Definition, ins: Instructions) -> Tuple[List[int], int]
 
     for width in opdef.operand_widths:
         if width == 1:
-            operands.append(read_uint8(ins[idx : idx + width]))
+            operands.append(read_uint8(ins[idx]))
         elif width == 2:
             operands.append(read_uint16(ins[idx : idx + width]))
 
@@ -205,9 +215,11 @@ def _format_instruction(opdef: Definition, operands: List[int]) -> str:
     return f"{opdef.name} {' '.join(str(oper) for oper in operands)}"
 
 
-def read_uint8(ins: Instructions) -> int:
-    return int.from_bytes(ins[:1], byteorder="big", signed=False)
+def read_uint8(op: int) -> int:
+    return op
+    # return int.from_bytes(op, byteorder="big", signed=False)
 
 
-def read_uint16(ins: Instructions) -> int:
-    return int.from_bytes(ins[:2], byteorder="big", signed=False)
+def read_uint16(ops: Instruction) -> int:
+    assert len(ops) == 2
+    return int.from_bytes(ops, byteorder="big", signed=False)

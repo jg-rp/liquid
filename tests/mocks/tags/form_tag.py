@@ -15,6 +15,10 @@ from liquid.expression import Identifier
 from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier
 
+from liquid import Compiler
+from liquid import Opcode
+from liquid.object import CompiledBlock
+
 TAG_FORM = sys.intern("form")
 TAG_ENDFORM = sys.intern("endform")
 
@@ -40,10 +44,47 @@ class CommentFormNode(ast.Node):
         ctx = context.extend({"form": form})
 
         buffer.write(
-            f'<form id="article-{article["id"]}-comment-form" class="comment-form" method="post" action="">\n'
+            f'<form id="article-{article["id"]}-comment-form" '
+            'class="comment-form" method="post" action="">\n'
         )
         self.block.render(ctx, buffer)
         buffer.write("\n</form>")
+
+    def compile_node(self, compiler: Compiler):
+        compiler.enter_scope()
+
+        compiler.symbol_table.define(TAG_FORM)
+        self.block.compile(compiler)
+
+        compiler.emit(Opcode.LBL)  # Leave block
+
+        free_symbols = compiler.symbol_table.free_symbols
+        num_block_vars = compiler.symbol_table.locals.size
+        assert num_block_vars == 1
+
+        instructions = compiler.leave_scope()
+
+        # num_arguments is always 1. The target article.
+        compiled_block = CompiledBlock(
+            instructions=instructions,
+            num_locals=num_block_vars,
+            num_arguments=1,
+            num_free=len(free_symbols),
+        )
+
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(compiled_block))
+
+        for free_symbol in reversed(free_symbols):
+            compiler.load_symbol(free_symbol)
+
+        # Target article
+        self.article.compile(compiler)
+
+        # Block name. The VM needs to lookup the appropriate function to
+        # populate the "form" drop/mapping.
+        compiler.emit(Opcode.CONSTANT, compiler.add_constant(TAG_FORM))
+
+        compiler.emit(Opcode.EBL, compiled_block.num_arguments, compiled_block.num_free)
 
 
 class CommentFormTag(Tag):

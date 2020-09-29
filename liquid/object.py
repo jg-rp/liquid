@@ -42,4 +42,4 @@ class CompiledBlock(NamedTuple):
     num_free: int = 0
 
     def __repr__(self):
-        return "CompiledBlock(..)"
+        return f"CompiledBlock(n_locals={self.num_locals}, n_free={self.num_free})"
