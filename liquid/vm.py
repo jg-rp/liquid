@@ -67,6 +67,8 @@ class VM:
         # Stack pointer
         self.sp = 0
 
+        self.jump_register: Any = Nop
+
         self.constants = bytecode.constants
 
         # Block scopes
@@ -95,14 +97,14 @@ class VM:
 
         while self.current_block.ip < self.current_block.instruction_count - 1:
             self.current_block.ip += 1
-            op = self.current_block.instructions[self.current_block.ip]
+            instruction = self.current_block.instructions[self.current_block.ip]
 
             # TODO: setup logging
             # print(
             #     f"{self.current_block.ip:04d}: stack: {self.pprint_stack()} {str(Opcode(op))} {self.context.locals}"
             # )
 
-            opcodes[op](self)
+            opcodes[instruction.opcode](self, *instruction.operands)
 
     def push(self, obj: Any):
         """Push the given object on to the top of the stack."""
@@ -146,36 +148,24 @@ class VM:
                 buf.append(itm)
         return ", ".join([repr(itm) for itm in buf])
 
-    def read_uint16(self):
-        high, low = self.current_block.instructions[
-            self.current_block.ip + 1 : self.current_block.ip + 3
-        ]
-        self.current_block.ip += 2
-        return (high << 8) + low
 
-    def read_uint8(self):
-        op = self.current_block.instructions[self.current_block.ip + 1]
-        self.current_block.ip += 1
-        return op
-
-
-def _exec_constant(vm):
-    const_idx = vm.read_uint16()
+def _exec_constant(vm: VM, const_idx):
     vm.push(vm.constants[const_idx])
 
 
-def _exec_pop(vm):
+def _exec_pop(vm: VM):
     vm.current_buffer.write(to_string(vm.pop()))
 
 
-def _exec_push(vm, val):
+def _exec_store_jump(vm: VM):
+    vm.jump_register = vm.pop()
+
+
+def _exec_push(vm: VM, val):
     vm.push(val)
 
 
-def _exec_filter(vm):
-    fltr_id = vm.read_uint16()
-    num_args = vm.read_uint8()
-
+def _exec_filter(vm: VM, fltr_id, num_args):
     args = [vm.pop() for _ in range(num_args)]
     val = vm.pop()
 
@@ -185,7 +175,7 @@ def _exec_filter(vm):
     vm.push(res)
 
 
-def _exec_getitem(vm):
+def _exec_getitem(vm: VM):
     item = vm.pop()
     obj = vm.pop()
     try:
@@ -194,8 +184,7 @@ def _exec_getitem(vm):
         vm.push(None)
 
 
-def _exec_getitems(vm: VM):
-    num_items = vm.read_uint8()
+def _exec_getitems(vm: VM, num_items):
     items = [vm.pop() for _ in range(num_items)]
 
     obj = vm.pop()
@@ -206,66 +195,58 @@ def _exec_getitems(vm: VM):
         vm.push(None)
 
 
-def _exec_resolve(vm):
+def _exec_resolve(vm: VM):
     name = vm.pop()
     obj = vm.globals.get(name)
     vm.push(obj)
 
 
-def _exec_jump(vm):
-    pos = vm.read_uint16()
+def _exec_jump(vm: VM, pos):
     vm.current_block.ip = pos - 1
 
 
-def _exec_jump_if(vm):
-    pos = vm.read_uint16()
-
-    condition = vm.pop()
-    if is_truthy(condition):
+def _exec_jump_if(vm: VM, pos):
+    if is_truthy(vm.jump_register):
         vm.current_block.ip = pos - 1
 
+    vm.jump_register = Nop
 
-def _exec_jump_if_not(vm):
-    pos = vm.read_uint16()
 
-    condition = vm.pop()
-    if not is_truthy(condition):
+def _exec_jump_if_not(vm: VM, pos):
+    if not is_truthy(vm.jump_register):
         vm.current_block.ip = pos - 1
 
+    vm.jump_register = Nop
 
-def _exec_jump_if_empty(vm):
-    pos = vm.read_uint16()
 
-    if vm.pop() == Empty:
+def _exec_jump_if_empty(vm: VM, pos):
+    if vm.jump_register == Empty:
         vm.current_block.ip = pos - 1
 
+    vm.jump_register = Nop
 
-def _exec_nop(vm):
+
+def _exec_nop(vm: VM):
     vm.push(Nop)
 
 
-def _exec_set_local(vm):
-    idx = vm.read_uint16()
+def _exec_set_local(vm: VM, idx):
     vm.locals[idx] = vm.pop()
 
 
-def _exec_get_local(vm):
-    idx = vm.read_uint16()
+def _exec_get_local(vm: VM, idx):
     vm.push(vm.locals.get(idx))
 
 
-def _exec_get_block_var(vm):
-    idx = vm.read_uint8()
+def _exec_get_block_var(vm: VM, idx):
     vm.push(vm.stack[vm.current_block.base_pointer + idx])
 
 
-def _exec_get_free(vm):
-    idx = vm.read_uint8()
+def _exec_get_free(vm: VM, idx):
     vm.push(vm.current_block.free[idx])
 
 
-def _exec_step(vm):
-    idx = vm.read_uint16()
+def _exec_step(vm: VM, idx):
     it = vm.stack[vm.sp - 1]
     assert isinstance(it, LoopIter), f"expected LoopIter, found {repr(it)}"
 
@@ -277,41 +258,37 @@ def _exec_step(vm):
         _stop_iteration(vm)
 
 
-def _exec_set_capture(vm):
-    idx = vm.read_uint16()
+def _exec_set_capture(vm: VM, idx):
     vm.locals[idx] = vm.pop_buffer()
 
 
-def _exec_decrement(vm):
-    idx = vm.read_uint8()
+def _exec_decrement(vm: VM, idx):
     vm.push(vm.context.decrement(idx))
 
 
-def _exec_increment(vm):
-    idx = vm.read_uint8()
+def _exec_increment(vm: VM, idx):
     vm.push(vm.context.increment(idx))
 
 
-def _exec_cycle(vm):
-    num_args = vm.read_uint8()
+def _exec_cycle(vm: VM, num_args):
     group = vm.pop()
     args = [vm.pop() for _ in range(num_args)]
     vm.push(next(vm.context.cycle(group, args)))
 
 
-def _exec_infix(vm, op: Opcode):
+def _exec_infix(vm: VM, op: Opcode):
     right = vm.pop()
     left = vm.pop()
     operator = code.INFIX_OPERATORS[op]
     vm.push(compare(left, operator, right))
 
 
-def _exec_negative(vm):
+def _exec_negative(vm: VM):
     operand = vm.pop()
     vm.push(-operand)
 
 
-def _exec_break(vm):
+def _exec_break(vm: VM):
     block = vm.pop_block()
     vm.sp = block.base_pointer - 1
 
@@ -326,7 +303,7 @@ def _exec_break(vm):
         vm.current_buffer.write(val)
 
 
-def _exec_continue(vm):
+def _exec_continue(vm: VM):
     # Keep popping blocks off the stack until we find a for loop.
     # For loops are the only blocks that respond to a continue.
     while not vm.current_block.forloop:
@@ -340,15 +317,13 @@ def _exec_continue(vm):
         val = next(it)
         # Loop var is always at index 0 (from base_pointer)
         vm.stack[vm.current_block.base_pointer] = val
-        # First block instruction is always at instruction 3
-        vm.current_block.ip = 2
+        # First block instruction is always at instruction 1
+        vm.current_block.ip = 0
     except StopIteration:
         _stop_iteration(vm)
 
 
-def _exec_enter_block(vm):
-    num_args = vm.read_uint8()
-    num_free = vm.read_uint8()
+def _exec_enter_block(vm: VM, num_args, num_free):
 
     block_name = vm.pop()
     args = [vm.pop() for _ in range(num_args)]
@@ -372,24 +347,21 @@ def _exec_enter_block(vm):
     exec_func(vm, *args)
 
 
-def _exec_leave_block(vm):
+def _exec_leave_block(vm: VM):
     vm.pop_block()
 
 
-def _exec_capture(vm):
+def _exec_capture(vm: VM):
     vm.push_buffer()
 
 
-def _exec_forloop(vm):
-    num_block_vars = vm.read_uint8()
-    num_free_vars = vm.read_uint8()
-    assert num_block_vars == 2
+def _exec_forloop(vm: VM, num_args, num_free):
 
     # Need to know the length of the sequence
-    items = list(_make_iter(vm))
+    items = list(_make_iter(vm, num_args))
     it = iter(items)
 
-    free_vars = [vm.pop() for _ in range(num_free_vars)]
+    free_vars = [vm.pop() for _ in range(num_free)]
 
     compiled_block = vm.stack[vm.sp - 1]
     assert isinstance(compiled_block, CompiledBlock)
@@ -406,7 +378,7 @@ def _exec_forloop(vm):
     vm.sp = block.base_pointer + compiled_block.num_locals
 
     if not items:
-        vm.push(Empty)
+        vm.jump_register = Empty
     else:
         drop = ForLoopDrop(0, len(items))
         for_it = LoopIter(it, drop)
@@ -420,20 +392,16 @@ def _exec_forloop(vm):
         vm.stack[offset + 1] = drop.forloop
 
         vm.push(for_it)
-        vm.push(Nop)
 
 
-def _exec_tablerow(vm):
-    num_block_vars = vm.read_uint8()
-    num_free_vars = vm.read_uint8()
-    assert num_block_vars == 2
-    items = list(_make_iter(vm))
+def _exec_tablerow(vm: VM, num_args, num_free):
+    items = list(_make_iter(vm, num_args))
 
     cols = vm.pop()
     if not cols:
         cols = len(items)
 
-    free_vars = [vm.pop() for _ in range(num_free_vars)]
+    free_vars = [vm.pop() for _ in range(num_free)]
 
     compiled_block = vm.stack[vm.sp - 1]
     assert isinstance(compiled_block, CompiledBlock)
@@ -463,35 +431,48 @@ def _exec_tablerow(vm):
     vm.push(for_it)
 
 
-def _make_iter(vm) -> Iterator:
-    # Range start or collection to iterate
-    start = vm.pop()
-    # Range stop. Will be None if start is a collection.
-    stop = vm.pop()
+def _make_iter(vm: VM, num_args: int) -> Iterator:
+    if num_args <= 2:
+        obj = vm.pop()
+        try:
+            it = obj.items()
+        except AttributeError:
+            it = iter(obj)
 
-    if isinstance(start, abc.Sequence):
-        it = iter(start)
-    elif isinstance(start, abc.Mapping):
-        it = start.items()
-    elif isinstance(start, int):
-        assert isinstance(stop, int)
-        it = range(start, stop + 1)
+        if num_args == 2:
+            limit = vm.pop()
+            it = islice(it, 0, limit)
+
     else:
-        raise LiquidTypeError(f"can't iterate object '{start}'")
 
-    limit = vm.pop()
-    offset = vm.pop()
-    reverse = vm.pop()
+        # Range start or collection to iterate
+        start = vm.pop()
+        # Range stop. Will be None if start is a collection.
+        stop = vm.pop()
 
-    it = islice(it, offset, limit)
+        if isinstance(start, abc.Sequence):
+            it = iter(start)
+        elif isinstance(start, abc.Mapping):
+            it = start.items()
+        elif isinstance(start, int):
+            assert isinstance(stop, int)
+            it = range(start, stop + 1)
+        else:
+            raise LiquidTypeError(f"can't iterate object '{start}'")
 
-    if reverse:
-        it = reversed(list(it))
+        limit = vm.pop()
+        offset = vm.pop()
+        reverse = vm.pop()
+
+        it = islice(it, offset, limit)
+
+        if reverse:
+            it = reversed(list(it))
 
     return it
 
 
-def _stop_iteration(vm):
+def _stop_iteration(vm: VM):
     block = vm.pop_block()
     vm.sp = block.base_pointer - 1
 
@@ -503,6 +484,7 @@ def _stop_iteration(vm):
 opcodes: Dict[int, Callable] = {
     Opcode.CONSTANT: _exec_constant,
     Opcode.POP: _exec_pop,
+    Opcode.STJ: _exec_store_jump,
     Opcode.FIL: _exec_filter,
     Opcode.GIT: _exec_getitem,
     Opcode.GIS: _exec_getitems,
@@ -544,32 +526,36 @@ opcodes: Dict[int, Callable] = {
 }
 
 
-def decode(instructions: code.Instructions) -> List[Callable]:
-    decoded = []
-    idx = 0
-    n = len(instructions)
+# def decode(instructions: code.Instructions) -> Dict[int, Callable]:
+#     decoded = {}
+#     idx = 0
+#     n = len(instructions)
 
-    while idx < n:
-        opcode = instructions[idx]
-        idx += 1
+#     while idx < n:
+#         ip = idx
+#         opcode = instructions[idx]
+#         idx += 1
 
-        func = opcodes[opcode]
-        widths = code.definitions[opcode].operand_widths
+#         func = opcodes[opcode]
+#         widths = code.definitions[opcode].operand_widths
 
-        operands = []
+#         operands = []
 
-        for width in widths:
-            if width == 1:
-                operands.append(instructions[idx])
-                idx += 1
-            elif width == 2:
-                high, low = instructions[idx : idx + 3]
-                operands.append((high << 8) + low)
-                idx += 2
+#         for width in widths:
+#             if width == 1:
+#                 operands.append(instructions[idx])
+#                 idx += 1
+#             elif width == 2:
+#                 high, low = instructions[idx : idx + 3]
+#                 operands.append((high << 8) + low)
+#                 idx += 2
 
-        decoded.append(partial(func, *operands))
+#         if widths:
+#             decoded[ip] = partial(func, *operands)
+#         else:
+#             decoded[ip] = func
 
-    return decoded
+#     return decoded
 
 
 def to_string(val: Any) -> str:

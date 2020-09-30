@@ -382,6 +382,7 @@ class BooleanExpression(Expression):
     def compile_expression(self, compiler: Compiler):
         # The VM has an `ìs_truthy` function.
         self.expression.compile(compiler)
+        compiler.emit(Opcode.STJ)
 
 
 class FilteredExpression(Expression):
@@ -598,31 +599,47 @@ class LoopExpression(Expression):
 
         return loop_iter
 
+    def num_arguments(self) -> int:
+        if not self.reversed and not self.offset and self.identifier:
+            if self.limit:
+                return 2
+            return 1
+        return 5
+
     def compile_expression(self, compiler: Compiler):
-        if self.reversed:
-            compiler.emit(Opcode.TRU)
+        if not self.reversed and not self.offset and self.identifier:
+            if self.limit:
+                # Two argument loop
+                self.limit.compile(compiler)
+                self.identifier.compile(compiler)
+            else:
+                # One argument loop
+                self.identifier.compile(compiler)
         else:
-            compiler.emit(Opcode.FAL)
+            if self.reversed:
+                compiler.emit(Opcode.TRU)
+            else:
+                compiler.emit(Opcode.FAL)
 
-        if self.offset:
-            self.offset.compile(compiler)
-        else:
-            compiler.emit(Opcode.NIL)
+            if self.offset:
+                self.offset.compile(compiler)
+            else:
+                compiler.emit(Opcode.NIL)
 
-        if self.limit:
-            self.limit.compile(compiler)
-        else:
-            compiler.emit(Opcode.NIL)
+            if self.limit:
+                self.limit.compile(compiler)
+            else:
+                compiler.emit(Opcode.NIL)
 
-        if self.identifier:
-            # For each loop
-            compiler.emit(Opcode.NIL)
-            self.identifier.compile(compiler)
+            if self.identifier:
+                # For each loop
+                compiler.emit(Opcode.NIL)
+                self.identifier.compile(compiler)
 
-        else:
-            # Range loop
-            self.stop.compile(compiler)
-            self.start.compile(compiler)
+            else:
+                # Range loop
+                self.stop.compile(compiler)
+                self.start.compile(compiler)
 
 
 def eval_number_expression(left: Number, operator: str, right: Number) -> bool:

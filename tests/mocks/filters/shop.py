@@ -22,11 +22,12 @@ TRANSLATION_TABLE = {"'": None, '"': None, "(": None, ")": None, "[": None, "]":
 
 def to_handle(s):
     _s = s.lower().translate(TRANSLATION_TABLE)
-    _s = re.sub(r"\W+", "-", _s)
-    if _s.endswith("-"):
-        _s = _s[:-1]
-    if _s.startswith("-"):
-        _s = s[1:]
+    # _s = re.sub(r"\W+", "-", _s)
+    _s = "-".join(_s.split())
+    # if _s.endswith("-"):
+    #     _s = _s[:-1]
+    # if _s.startswith("-"):
+    #     _s = s[1:]
 
     return _s
 

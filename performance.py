@@ -327,7 +327,7 @@ def profile_compile(search_path: str):
         "[compile_templates(templates) for _ in range(5)]",
         globals={"compile_templates": compile_templates, "templates": templates},
         locals={},
-        sort="tottime",
+        sort="cumtime",
     )
 
 
@@ -338,7 +338,7 @@ def profile_execute(search_path: str):
         "[execute(templates) for _ in range(20)]",
         globals={"execute": execute, "templates": templates},
         locals={},
-        sort="tottime",
+        sort="cumtime",
     )
 
 

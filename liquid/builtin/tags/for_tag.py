@@ -233,11 +233,10 @@ class ForNode(ast.Node):
         instructions = compiler.leave_scope()
 
         # num_locals is always 2, the loop variable and the `forloop` drop.
-        # num_arguments is always 5 (start, stop, limit, offset, reversed).
         compiled_block = CompiledBlock(
             instructions=instructions,
             num_locals=2,
-            num_arguments=5,
+            num_arguments=self.expression.num_arguments(),
             num_free=len(free_symbols),
         )
 
@@ -248,7 +247,7 @@ class ForNode(ast.Node):
 
         # self.expression compiles for loop parameters.
         self.expression.compile(compiler)
-        compiler.emit(Opcode.FOR, compiled_block.num_locals, compiled_block.num_free)
+        compiler.emit(Opcode.FOR, compiled_block.num_arguments, compiled_block.num_free)
 
 
 class BreakNode(ast.Node):

@@ -75,7 +75,7 @@ class Compiler:
 
     def bytecode(self) -> Bytecode:
         """Return compiled bytecode."""
-        return Bytecode(bytearray(self.current_instructions()), self.constants)
+        return Bytecode(self.current_instructions(), self.constants)
 
     def add_constant(self, obj: Any) -> int:
         """Add the given object to the constant pool."""
@@ -106,7 +106,7 @@ class Compiler:
     def add_instruction(self, ins: code.Instruction) -> int:
         """Append an instruction to the instruction list."""
         pos = len(self.current_instructions())
-        self.current_scope.instructions.extend(ins)
+        self.current_scope.instructions.append(ins)
         return pos
 
     def last_instruction_is(self, op: Opcode) -> bool:
@@ -133,14 +133,12 @@ class Compiler:
 
     def replace_instruction(self, pos: int, new_instruction: code.Instruction):
         ins = self.current_instructions()
+        ins[pos] = new_instruction
 
-        for i, byte in enumerate(new_instruction):
-            ins[pos + i] = byte
-
-    def change_operand(self, pos: int, *operand: int):
-        op = Opcode(self.current_instructions()[pos])
-        ins = code.make(op, *operand)
-        self.replace_instruction(pos, ins)
+    def change_operand(self, pos: int, *operands: int):
+        old_instruction = self.current_instructions()[pos]
+        new_instruction = old_instruction._replace(operands=list(operands))
+        self.replace_instruction(pos, new_instruction)
 
     def enter_scope(self):
         scope = CompilationScope(

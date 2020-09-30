@@ -2,10 +2,28 @@
 
 from __future__ import annotations
 from enum import IntEnum, auto
-import itertools
-from typing import List, NamedTuple, Dict, Tuple, MutableSequence
+from typing import NamedTuple, Dict, MutableSequence
 
 from liquid.exceptions import OpcodeError
+
+
+class Instruction(NamedTuple):
+    opcode: Opcode
+    operands: MutableSequence[int]
+    num_operands: int
+
+    def string(self, index: int):
+        try:
+            opdef = lookup(self.opcode)
+            if self.operands:
+                operands = " ".join(str(op) for op in self.operands)
+                return f"{index:04d} {opdef.name} {operands}"
+            return f"{index:04d} {opdef.name}"
+        except OpcodeError as err:
+            return f"error: {err}"
+
+
+Instructions = MutableSequence[Instruction]
 
 
 class Opcode(IntEnum):
@@ -13,6 +31,7 @@ class Opcode(IntEnum):
 
     CONSTANT = 1
 
+    STJ = auto()  # STore Jump register
     POP = auto()
 
     TRU = auto()  # True
@@ -82,66 +101,58 @@ INFIX_OPERATORS = {
     Opcode.OR: "or",
 }
 
-# We're going to work with bytes in their decimal representation. We'll just
-# have to write extra tests to ensure each byte is within bounds.
-# Instruction = ArrayType
-Instruction = MutableSequence[int]
-Instructions = MutableSequence[int]
-
 
 class Definition(NamedTuple):
     """Opcode definition."""
 
     name: str
-    operand_widths: Tuple[int, ...]
+    num_operand: int
 
 
 definitions: Dict[int, Definition] = {
-    Opcode.CONSTANT: Definition("OpConstant", (2,)),
-    Opcode.POP: Definition("OpPop", ()),
-    Opcode.POP: Definition("OpPop", ()),
-    Opcode.TRU: Definition("OpTrue", ()),
-    Opcode.FAL: Definition("OpFalse", ()),
-    Opcode.NIL: Definition("OpNil", ()),
-    Opcode.EMP: Definition("OpEmpty", ()),
-    Opcode.EQ: Definition("OpEqual", ()),
-    Opcode.NE: Definition("OpNotEqual", ()),
-    Opcode.GT: Definition("OpGreaterThan", ()),
-    Opcode.GE: Definition("OpGreaterThanEqual", ()),
-    Opcode.CONTAINS: Definition("OpContains", ()),
-    Opcode.AND: Definition("OpAnd", ()),
-    Opcode.OR: Definition("OpOr", ()),
-    Opcode.NEG: Definition("OpMinus", ()),
-    Opcode.JIF: Definition("OpJumpIf", (2,)),  # instruction to jump to
-    Opcode.JIN: Definition("OpJumpIfNot", (2,)),  # instruction to jump to
+    Opcode.CONSTANT: Definition("OpConstant", 1),
+    Opcode.POP: Definition("OpPop", 0),
+    Opcode.STJ: Definition("OpStoreJump", 0),
+    Opcode.TRU: Definition("OpTrue", 0),
+    Opcode.FAL: Definition("OpFalse", 0),
+    Opcode.NIL: Definition("OpNil", 0),
+    Opcode.EMP: Definition("OpEmpty", 0),
+    Opcode.EQ: Definition("OpEqual", 0),
+    Opcode.NE: Definition("OpNotEqual", 0),
+    Opcode.GT: Definition("OpGreaterThan", 0),
+    Opcode.GE: Definition("OpGreaterThanEqual", 0),
+    Opcode.CONTAINS: Definition("OpContains", 0),
+    Opcode.AND: Definition("OpAnd", 0),
+    Opcode.OR: Definition("OpOr", 0),
+    Opcode.NEG: Definition("OpMinus", 0),
+    Opcode.JIF: Definition("OpJumpIf", 1),  # instruction to jump to
+    Opcode.JIN: Definition("OpJumpIfNot", 1),  # instruction to jump to
     Opcode.JIE: Definition(
-        "OpJumpIfEmpty", (2,)
+        "OpJumpIfEmpty", 1
     ),  # jump to 1 if Empty is on the top of the stack
-    Opcode.JMP: Definition("OpJump", (2,)),  # instruction to jump to
-    Opcode.NOP: Definition("OpNoOp", ()),
-    Opcode.GLO: Definition("OpGetLocal", (2,)),
-    Opcode.SLO: Definition("OpSetLocal", (2,)),
-    Opcode.RES: Definition("OpResolve", ()),
-    Opcode.GIT: Definition("OpGetItem", ()),
-    Opcode.GIS: Definition("OpGetItems", (1,)),
-    Opcode.GBL: Definition("OpGetBlockVar", (1,)),
-    Opcode.GFR: Definition("OpGetFreeVar", (1,)),
-    Opcode.CAPTURE: Definition("OpCapture", ()),
-    Opcode.SETCAPTURE: Definition("OpSetCapture", (2,)),
-    Opcode.INC: Definition("OpIncrement", (1,)),
-    Opcode.DEC: Definition("OpDecrement", (1,)),
-    Opcode.CYC: Definition("OpCycle", (1,)),  # Number of expressions to cycle
-    Opcode.EBL: Definition("OpEnterBlock", (1, 1)),
-    Opcode.LBL: Definition("OpLeaveBlock", ()),
-    Opcode.FOR: Definition(
-        "OpFor", (1, 1)
-    ),  # Number of block vars, number of free vars
-    Opcode.TAB: Definition("OpTablerow", (1, 1)),
-    Opcode.STE: Definition("OpStep", (2,)),
-    Opcode.CON: Definition("OpContinue", ()),
-    Opcode.BRK: Definition("OpBreak", ()),
-    Opcode.STO: Definition("OpStopIteration", ()),
-    Opcode.FIL: Definition("OpCallFilter", (2, 1)),  # filter id, num args
+    Opcode.JMP: Definition("OpJump", 1),  # instruction to jump to
+    Opcode.NOP: Definition("OpNoOp", 0),
+    Opcode.GLO: Definition("OpGetLocal", 1),
+    Opcode.SLO: Definition("OpSetLocal", 1),
+    Opcode.RES: Definition("OpResolve", 0),
+    Opcode.GIT: Definition("OpGetItem", 0),
+    Opcode.GIS: Definition("OpGetItems", 1),
+    Opcode.GBL: Definition("OpGetBlockVar", 1),
+    Opcode.GFR: Definition("OpGetFreeVar", 1),
+    Opcode.CAPTURE: Definition("OpCapture", 0),
+    Opcode.SETCAPTURE: Definition("OpSetCapture", 1),
+    Opcode.INC: Definition("OpIncrement", 1),
+    Opcode.DEC: Definition("OpDecrement", 1),
+    Opcode.CYC: Definition("OpCycle", 1),  # Number of expressions to cycle
+    Opcode.EBL: Definition("OpEnterBlock", 2),
+    Opcode.LBL: Definition("OpLeaveBlock", 0),
+    Opcode.FOR: Definition("OpFor", 2),  # Number of block vars, number of free vars
+    Opcode.TAB: Definition("OpTablerow", 2),
+    Opcode.STE: Definition("OpStep", 1),
+    Opcode.CON: Definition("OpContinue", 0),
+    Opcode.BRK: Definition("OpBreak", 0),
+    Opcode.STO: Definition("OpStopIteration", 0),
+    Opcode.FIL: Definition("OpCallFilter", 2),  # filter id, num args
 }
 
 
@@ -155,71 +166,12 @@ def lookup(op: Opcode) -> Definition:
 
 def make(op: Opcode, *operands: int) -> Instruction:
     """Pack the given opcode and operands into an instruction."""
-    _, widths = lookup(op)
-    assert len(widths) == len(operands), f"opcode: {Opcode(op)!r}"
-
-    instruction: Instruction = [op]
-
-    for width, operand in zip(widths, operands):
-        instruction.extend(operand.to_bytes(width, byteorder="big", signed=False))
-
-    return instruction
+    _, num_operands = lookup(op)
+    assert num_operands == len(operands), f"opcode: {Opcode(op)!r}"
+    return Instruction(op, list(operands), len(operands))
 
 
-def chain(*instructions: Instruction) -> Instructions:
-    return list(itertools.chain(*instructions))
-
-
-def string(ins: Instructions) -> str:
-    buf = []
-
-    idx = 0
-    while idx < len(ins):
-        try:
-            opdef = lookup(Opcode(ins[idx]))
-        except OpcodeError as err:
-            buf.append(f"error: {err}")
-            continue
-
-        operands, read = read_operands(opdef, ins[idx + 1 :])
-        buf.append(f"{idx:04d} {_format_instruction(opdef, operands)}")
-
-        idx += read + 1
-    return "\n".join(buf)
-
-
-def read_operands(opdef: Definition, ins: Instructions) -> Tuple[List[int], int]:
-    operands = []
-    idx = 0
-
-    for width in opdef.operand_widths:
-        if width == 1:
-            operands.append(read_uint8(ins[idx]))
-        elif width == 2:
-            operands.append(read_uint16(ins[idx : idx + width]))
-
-        idx += width
-
-    return operands, idx
-
-
-def _format_instruction(opdef: Definition, operands: List[int]) -> str:
-    operand_count = len(opdef.operand_widths)
-
-    if len(operands) != operand_count:
-        return f"error: expected {operand_count} operands, found {len(operands)}"
-
-    if not operand_count:
-        return opdef.name
-
-    return f"{opdef.name} {' '.join(str(oper) for oper in operands)}"
-
-
-def read_uint8(op: int) -> int:
-    return op
-    # return int.from_bytes(op, byteorder="big", signed=False)
-
-
-def read_uint16(ops: Instruction) -> int:
-    assert len(ops) == 2
-    return int.from_bytes(ops, byteorder="big", signed=False)
+def string(instructions: Instructions) -> str:
+    """Return a pretty string representation of a list of instructions."""
+    strings = [ins.string(i) for i, ins in enumerate(instructions)]
+    return "\n".join(strings)

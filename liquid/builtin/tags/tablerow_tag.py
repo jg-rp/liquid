@@ -259,11 +259,10 @@ class TablerowNode(ast.Node):
         instructions = compiler.leave_scope()
 
         # num_locals is always 2, the loop variable and the `forloop` drop.
-        # num_arguments is always 6 (start, stop, limit, offset, reversed, cols).
         compiled_block = CompiledBlock(
             instructions=instructions,
             num_locals=2,
-            num_arguments=6,
+            num_arguments=self.expression.num_arguments(),
             num_free=len(free_symbols),
         )
 
@@ -278,7 +277,7 @@ class TablerowNode(ast.Node):
             compiler.emit(Opcode.NIL)
 
         self.expression.compile(compiler)
-        compiler.emit(Opcode.TAB, compiled_block.num_locals, compiled_block.num_free)
+        compiler.emit(Opcode.TAB, compiled_block.num_arguments, compiled_block.num_free)
 
 
 class TablerowTag(Tag):
