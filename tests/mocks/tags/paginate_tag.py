@@ -19,9 +19,6 @@ from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier, parse_integer_literal
 from liquid.exceptions import LiquidTypeError
 
-from liquid import Compiler
-from liquid import Opcode
-from liquid.object import CompiledBlock
 
 TAG_PAGINATE = sys.intern("paginate")
 TAG_ENDPAGINATE = sys.intern("endpaginate")
@@ -81,46 +78,6 @@ class PaginateNode(ast.Node):
 
         ctx = context.extend({"paginate": pagination})
         self.block.render(ctx, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        compiler.enter_scope()
-
-        # Block scopped variable has the same name as the tag.
-        compiler.symbol_table.define(TAG_PAGINATE)
-        self.block.compile(compiler)
-
-        compiler.emit(Opcode.LBL)
-
-        free_symbols = compiler.symbol_table.free_symbols
-        num_block_vars = compiler.symbol_table.locals.size
-        assert num_block_vars == 1
-
-        instructions = compiler.leave_scope()
-
-        # num_arguments is always 2. The target collection and the page size.
-        compiled_block = CompiledBlock(
-            instructions=instructions,
-            num_locals=num_block_vars,
-            num_arguments=2,
-            num_free=len(free_symbols),
-        )
-
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant_block(compiled_block))
-
-        for free_symbol in reversed(free_symbols):
-            compiler.load_symbol(free_symbol)
-
-        # Target collection
-        self.identifier.compile(compiler)
-
-        # Page size
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.page_size))
-
-        # Block name. The VM needs to lookup the appropriate function to
-        # populate the "paginate" drop.
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(TAG_PAGINATE))
-
-        compiler.emit(Opcode.EBL, compiled_block.num_arguments, compiled_block.num_free)
 
 
 def link(title, page):

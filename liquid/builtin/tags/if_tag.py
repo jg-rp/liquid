@@ -17,8 +17,6 @@ from liquid.lex import TokenStream
 from liquid.expression import Expression
 from liquid.exceptions import LiquidSyntaxError
 from liquid.builtin.illegal import IllegalNode
-from liquid.code import Opcode
-from liquid.compiler import Compiler
 
 TAG_IF = sys.intern("if")
 TAG_ENDIF = sys.intern("endif")
@@ -82,56 +80,6 @@ class IfNode(ast.Node):
 
             if not rendered and self.alternative:
                 self.alternative.render(context, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        # A list of jump instruction positions at the end of each conditional block.
-        # Each one of them needs to be updated with the position of just after the
-        # final alternative block, which we can do until we've compiled all conditions
-        # and blocks.
-        jump_positions = []
-
-        self.condition.compile(compiler)
-        jump_if_not_position = compiler.emit(Opcode.JIN, 9999)
-        self.consequence.compile(compiler)
-
-        if compiler.last_instruction_is(Opcode.POP):
-            compiler.remove_last_pop()
-
-        jump_positions.append(compiler.emit(Opcode.JMP, 9999))
-
-        after_consequence_pos = len(compiler.current_instructions())
-        compiler.change_operand(jump_if_not_position, after_consequence_pos)
-
-        # Repeat what we've just done for the condition and consequence, but for
-        # each alternative condition and block.
-        for alt in self.conditional_alternatives:
-            alt.condition.compile(compiler)
-            jump_if_not_position = compiler.emit(Opcode.JIN, 9999)
-            alt.block.compile(compiler)
-
-            if compiler.last_instruction_is(Opcode.POP):
-                compiler.remove_last_pop()
-
-            jump_positions.append(compiler.emit(Opcode.JMP, 9999))
-
-            after_conditional_alternative_pos = len(compiler.current_instructions())
-            compiler.change_operand(
-                jump_if_not_position, after_conditional_alternative_pos
-            )
-
-        # Emit a dummy alternative if one was not given.
-        if not self.alternative:
-            compiler.emit(Opcode.NOP)
-        else:
-            self.alternative.compile(compiler)
-
-            if compiler.last_instruction_is(Opcode.POP):
-                compiler.remove_last_pop()
-
-        # Update all jump instruction operands with this position.
-        after_alternative_pos = len(compiler.current_instructions())
-        for pos in jump_positions:
-            compiler.change_operand(pos, after_alternative_pos)
 
 
 class IfTag(Tag):

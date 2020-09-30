@@ -8,11 +8,6 @@ from typing import Union, List, Optional, Any, Iterator
 from liquid.context import Context
 from liquid.token import Token
 from liquid.exceptions import LiquidTypeError, Error
-from liquid.code import Opcode
-from liquid.compiler import Compiler
-from liquid import hash_identifier
-
-from liquid.symbol import SymbolScope
 
 Number = Union[int, float]
 
@@ -31,15 +26,6 @@ class Expression(ABC):
 
     def token(self):
         return self.tok
-
-    def compile_expression(self, compiler: Compiler):
-        raise NotImplementedError(
-            f"don't know how to compile expression {self.__class__.__name__}"
-        )
-
-    def compile(self, compiler: Compiler):
-        # Just in case we need to hook in to the compile method later.
-        self.compile_expression(compiler)
 
 
 class Boolean(Expression):
@@ -61,12 +47,6 @@ class Boolean(Expression):
     def evaluate(self, context: Context) -> bool:
         return self.value
 
-    def compile_expression(self, compiler: Compiler):
-        if self.value:
-            compiler.emit(Opcode.TRU)
-        else:
-            compiler.emit(Opcode.FAL)
-
 
 class Nil(Expression):
     __slots__ = ("tok",)
@@ -82,9 +62,6 @@ class Nil(Expression):
 
     def evaluate(self, context: Context) -> None:
         return None
-
-    def compile_expression(self, compiler: Compiler):
-        compiler.emit(Opcode.NIL)
 
 
 class Empty(Expression):
@@ -106,9 +83,6 @@ class Empty(Expression):
     def evaluate(self, context: Context) -> Empty:
         return self
 
-    def compile_expression(self, compiler: Compiler):
-        compiler.emit(Opcode.EMP)
-
 
 class Literal(Expression):
     __slots__ = ("tok", "value")
@@ -122,9 +96,6 @@ class Literal(Expression):
 
     def evaluate(self, context: Context) -> Any:
         return self.value
-
-    def compile_expression(self, compiler: Compiler):
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.value))
 
 
 class StringLiteral(Literal):
@@ -196,31 +167,6 @@ class Identifier(Expression):
         path: List[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
 
-    def compile_expression(self, compiler: Compiler):
-        name, items = self.path[0], self.path[1:]
-
-        assert isinstance(name, IdentifierPathElement)
-        assert isinstance(name.value, str)
-
-        try:
-            symbol = compiler.symbol_table.resolve(name.value)
-            compiler.load_symbol(symbol)
-        except KeyError:
-            # Not a locally defined variable. Might be in context at render time.
-            name.compile(compiler)
-            compiler.emit(Opcode.RES)
-
-        # It is possible for locally assign variables to reference liquid arrays or
-        # hahses.
-        if len(items) > 2:
-            for item in reversed(items):
-                item.compile(compiler)
-            compiler.emit(Opcode.GIS, len(items))  # Get ItemS
-        else:
-            for item in items:
-                item.compile(compiler)
-                compiler.emit(Opcode.GIT)  # Get ITem
-
 
 class PrefixExpression(Expression):
     __slots__ = ("tok", "operator", "right")
@@ -254,14 +200,6 @@ class PrefixExpression(Expression):
             )
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
-
-    def compile_expression(self, compiler: Compiler):
-        self.right.compile(compiler)
-
-        if self.operator == "-":
-            compiler.emit(Opcode.NEG)
-        else:
-            raise LiquidTypeError(f"unknown operator {self.operator}")
 
 
 class InfixExpression(Expression):
@@ -297,38 +235,6 @@ class InfixExpression(Expression):
         right = self.right.evaluate(context)
         return compare(left, self.operator, right)
 
-    def compile_expression(self, compiler: Compiler):
-        if self.operator == "<":
-            # Swap left and right, making "<" a ">"
-            self.right.compile(compiler)
-            self.left.compile(compiler)
-            compiler.emit(Opcode.GT)
-        elif self.operator == "<=":
-            # Swap left and right, making "<=" a ">="
-            self.right.compile(compiler)
-            self.left.compile(compiler)
-            compiler.emit(Opcode.GE)
-        else:
-            self.left.compile(compiler)
-            self.right.compile(compiler)
-
-            if self.operator == ">":
-                compiler.emit(Opcode.GT)
-            elif self.operator == "==":
-                compiler.emit(Opcode.EQ)
-            elif self.operator in ("!=", "<>"):
-                compiler.emit(Opcode.NE)
-            elif self.operator == ">=":
-                compiler.emit(Opcode.GE)
-            elif self.operator == "contains":
-                compiler.emit(Opcode.CONTAINS)
-            elif self.operator == "and":
-                compiler.emit(Opcode.AND)
-            elif self.operator == "or":
-                compiler.emit(Opcode.OR)
-            else:
-                raise LiquidTypeError(f"unknown operator: {self.operator}")
-
 
 class Filter:
     __slots__ = ("name", "args")
@@ -352,10 +258,6 @@ class Filter:
     def evaluate_args(self, context: Context):
         return [arg.evaluate(context) for arg in self.args]
 
-    def compile_args(self, compiler: Compiler):
-        for arg in reversed(self.args):
-            arg.compile(compiler)
-
 
 class BooleanExpression(Expression):
     __slots__ = ("expression",)
@@ -378,11 +280,6 @@ class BooleanExpression(Expression):
 
     def evaluate(self, context: Context) -> bool:
         return is_truthy(self.expression.evaluate(context))
-
-    def compile_expression(self, compiler: Compiler):
-        # The VM has an `ìs_truthy` function.
-        self.expression.compile(compiler)
-        compiler.emit(Opcode.STJ)
 
 
 class FilteredExpression(Expression):
@@ -427,15 +324,6 @@ class FilteredExpression(Expression):
 
         return result
 
-    def compile_expression(self, compiler: Compiler):
-        self.expression.compile(compiler)
-
-        for fltr in self.filters:
-            fltr.compile_args(compiler)
-
-            fltr_id = hash_identifier(fltr.name)
-            compiler.emit(Opcode.FIL, fltr_id, len(fltr.args))
-
 
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
@@ -468,16 +356,6 @@ class AssignmentExpression(Expression):
         result = self.expression.evaluate(context)
         context.assign(key=name, val=result)
         return ""
-
-    def compile_expression(self, compiler: Compiler):
-        self.expression.compile(compiler)
-        name = self.name.path[0]
-
-        assert isinstance(name, IdentifierPathElement)
-        assert isinstance(name.value, str)
-
-        symbol = compiler.symbol_table.define(name.value, scope=SymbolScope.LOCAL)
-        compiler.emit(Opcode.SLO, symbol.index)
 
 
 class LoopExpression(Expression):
@@ -598,48 +476,6 @@ class LoopExpression(Expression):
             loop_iter = reversed(list(loop_iter))
 
         return loop_iter
-
-    def num_arguments(self) -> int:
-        if not self.reversed and not self.offset and self.identifier:
-            if self.limit:
-                return 2
-            return 1
-        return 5
-
-    def compile_expression(self, compiler: Compiler):
-        if not self.reversed and not self.offset and self.identifier:
-            if self.limit:
-                # Two argument loop
-                self.limit.compile(compiler)
-                self.identifier.compile(compiler)
-            else:
-                # One argument loop
-                self.identifier.compile(compiler)
-        else:
-            if self.reversed:
-                compiler.emit(Opcode.TRU)
-            else:
-                compiler.emit(Opcode.FAL)
-
-            if self.offset:
-                self.offset.compile(compiler)
-            else:
-                compiler.emit(Opcode.NIL)
-
-            if self.limit:
-                self.limit.compile(compiler)
-            else:
-                compiler.emit(Opcode.NIL)
-
-            if self.identifier:
-                # For each loop
-                compiler.emit(Opcode.NIL)
-                self.identifier.compile(compiler)
-
-            else:
-                # Range loop
-                self.stop.compile(compiler)
-                self.start.compile(compiler)
 
 
 def eval_number_expression(left: Number, operator: str, right: Number) -> bool:

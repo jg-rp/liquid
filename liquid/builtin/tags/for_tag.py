@@ -10,9 +10,6 @@ from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import LoopExpression
 from liquid.exceptions import BreakLoop, ContinueLoop
-from liquid.compiler import Compiler
-from liquid.code import Opcode
-from liquid.object import CompiledBlock
 
 from liquid.builtin.drops import IterableDrop
 
@@ -193,62 +190,6 @@ class ForNode(ast.Node):
             if self.default:
                 self.default.render(context, buffer)
 
-    def compile_node(self, compiler: Compiler):
-        # For tags have two block scoped variables, the loop variable and
-        # the `forloop` helper drop.
-        compiler.enter_scope()
-
-        symbol = compiler.symbol_table.define(self.expression.name)
-        compiler.symbol_table.define("forloop")
-
-        # Jump to default if empty iterator
-        jump_to_default_position = compiler.emit(Opcode.JIE, 9999)
-
-        top_of_loop = len(compiler.current_instructions())
-
-        self.block.compile(compiler)
-
-        # Step the iterator and jump to the top of the loop.
-        compiler.emit(Opcode.STE, symbol.index)
-        compiler.emit(Opcode.JMP, top_of_loop)
-
-        # Update the JIE instruction with the current position, which is the
-        # start of the default block.
-        after_block_position = len(compiler.current_instructions())
-        compiler.change_operand(jump_to_default_position, after_block_position)
-
-        # Use a no-op if a default was not given.
-        if self.default:
-            self.default.compile(compiler)
-        else:
-            compiler.emit(Opcode.NOP)
-
-        compiler.emit(Opcode.STO)
-
-        # Must instpect the scoped symbol table before leaving the scope.
-        free_symbols = compiler.symbol_table.free_symbols
-        num_block_vars = compiler.symbol_table.locals.size
-        assert num_block_vars == 2
-
-        instructions = compiler.leave_scope()
-
-        # num_locals is always 2, the loop variable and the `forloop` drop.
-        compiled_block = CompiledBlock(
-            instructions=instructions,
-            num_locals=2,
-            num_arguments=self.expression.num_arguments(),
-            num_free=len(free_symbols),
-        )
-
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant_block(compiled_block))
-
-        for free_symbol in reversed(free_symbols):
-            compiler.load_symbol(free_symbol)
-
-        # self.expression compiles for loop parameters.
-        self.expression.compile(compiler)
-        compiler.emit(Opcode.FOR, compiled_block.num_arguments, compiled_block.num_free)
-
 
 class BreakNode(ast.Node):
     __slots__ = ("tok",)
@@ -262,9 +203,6 @@ class BreakNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         raise BreakLoop("break")
 
-    def compile_node(self, compiler: Compiler):
-        compiler.emit(Opcode.BRK)
-
 
 class ContinueNode(ast.Node):
     __slots__ = ("tok",)
@@ -277,9 +215,6 @@ class ContinueNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         raise ContinueLoop("continue")
-
-    def compile_node(self, compiler: Compiler):
-        compiler.emit(Opcode.CON)
 
 
 class ForTag(Tag):

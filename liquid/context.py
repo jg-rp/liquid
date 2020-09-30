@@ -14,7 +14,6 @@ from typing import Any, Union, Callable, Optional, List, Mapping, Iterable, Iter
 
 from liquid.exceptions import NoSuchFilterFunc, ContextDepthError
 from liquid.filter import Filter
-from liquid import hash_identifier
 
 MAX_CONTEXT_DEPTH = 30
 

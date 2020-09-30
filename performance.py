@@ -50,8 +50,6 @@ from tests.mocks.filters.tag import (
 
 from tests.mocks.filters.weight import Weight, WeightWithUnit
 
-from liquid import compiler
-
 
 class ThemedTemplate(NamedTuple):
     """Parsed template and theme."""
@@ -65,15 +63,6 @@ class ThemedTemplate(NamedTuple):
         self.theme.render(
             template=self.template.drop, content_for_layout=self.template.render()
         )
-
-    def compile(self):
-        self.template.compile()
-        self.theme.compile()
-
-    def execute(self):
-        # `run` will compile if it needs to.
-        content = self.template.run()
-        self.theme.run(template=self.template.drop, content_for_layout=content)
 
 
 class TemplateSource(NamedTuple):
@@ -245,27 +234,6 @@ def render(templates: List[ThemedTemplate]):
         template.render()
 
 
-def compile_templates(templates: List[ThemedTemplate]):
-    """Compile each of the given templates."""
-    for template in templates:
-        template.compile()
-
-
-def execute(templates: List[ThemedTemplate]):
-    """Compile and execute each of the given templates."""
-    # Will compile first if needed.
-    for template in templates:
-        template.execute()
-
-
-def compile_and_execute(templates: List[ThemedTemplate]):
-    """Compile and execute each of the given templates."""
-    # Will compile first if needed.
-    for template in templates:
-        template.compile()
-        template.execute()
-
-
 # pylint: disable=redefined-builtin
 def parse_and_render(
     env: Environment,
@@ -302,10 +270,10 @@ def profile_render(search_path: str):
     templates = setup_render(search_path)
 
     cProfile.runctx(
-        "[render(templates) for _ in range(20)]",
+        "[render(templates) for _ in range(60)]",
         globals={"render": render, "templates": templates},
         locals={},
-        sort="tottime",
+        sort="cumtime",
     )
 
 
@@ -318,38 +286,6 @@ def profile_parse_and_render(search_path):
         locals={"env": env, "templates": templates},
         sort="cumtime",
     )
-
-
-def profile_compile(search_path: str):
-    templates = setup_render(search_path)
-
-    cProfile.runctx(
-        "[compile_templates(templates) for _ in range(5)]",
-        globals={"compile_templates": compile_templates, "templates": templates},
-        locals={},
-        sort="cumtime",
-    )
-
-
-def profile_execute(search_path: str):
-    templates = setup_execute(search_path)
-
-    cProfile.runctx(
-        "[execute(templates) for _ in range(20)]",
-        globals={"execute": execute, "templates": templates},
-        locals={},
-        sort="cumtime",
-    )
-
-
-def setup_execute(search_path: str) -> List[ThemedTemplate]:
-    templates = setup_render(search_path)
-    compile_templates(templates)
-
-    for template in templates:
-        assert template.template.bytecode is not None
-        assert template.theme.bytecode is not None
-    return templates
 
 
 def setup_render(search_path: str) -> List[ThemedTemplate]:
@@ -418,39 +354,6 @@ def benchmark(search_path: str, number: int = 25, repeat: int = 3):
         ),
     )
 
-    print(
-        "compile: ",
-        timeit.repeat(
-            "compile_templates(templates)",
-            setup="templates = setup_render(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
-        ),
-    )
-
-    print(
-        "compile and execute: ",
-        timeit.repeat(
-            "compile_and_execute(templates)",
-            setup="templates = setup_render(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
-        ),
-    )
-
-    print(
-        "execute: ",
-        timeit.repeat(
-            "execute(templates)",
-            setup="templates = setup_execute(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
-        ),
-    )
-
 
 def main():
     search_path = "tests/fixtures/"
@@ -461,12 +364,11 @@ def main():
     if n_args == 0:
         benchmark(search_path)
     elif n_args == 1 and args[0] == "--profile":
-        # profile_render(search_path)
+        profile_render(search_path)
         # profile_parse_and_render(search_path)
         # profile_parse(search_path)
         # profile_lex(search_path)
         # profile_compile(search_path)
-        profile_execute(search_path)
     else:
         sys.stderr.write("usage: python performance.py [--profile]\n")
         sys.exit(1)

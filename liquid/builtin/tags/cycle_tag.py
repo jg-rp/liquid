@@ -21,8 +21,6 @@ from liquid.parse import (
 )
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
-from liquid.compiler import Compiler
-from liquid.code import Opcode
 
 TAG_CYCLE = sys.intern("cycle")
 
@@ -54,17 +52,6 @@ class CycleNode(ast.Node):
 
         args = [arg.evaluate(context) for arg in self.args]
         buffer.write(str(next(context.cycle(group_name, args))))
-
-    def compile_node(self, compiler: Compiler):
-        for arg in reversed(self.args):
-            arg.compile(compiler)
-
-        if self.group:
-            self.group.compile(compiler)
-        else:
-            compiler.emit(Opcode.CONSTANT, compiler.add_constant(""))
-
-        compiler.emit(Opcode.CYC, len(self.args))
 
 
 class CycleTag(Tag):

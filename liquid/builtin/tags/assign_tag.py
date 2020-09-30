@@ -9,7 +9,6 @@ from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import AssignmentExpression
 from liquid.parse import expect, parse_assignment_expression
-from liquid.compiler import Compiler
 
 TAG_ASSIGN = sys.intern("assign")
 
@@ -28,9 +27,6 @@ class AssignNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         self.expression.evaluate(context)
-
-    def compile_node(self, compiler: Compiler):
-        self.expression.compile(compiler)
 
 
 class AssignTag(Tag):

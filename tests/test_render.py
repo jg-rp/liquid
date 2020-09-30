@@ -74,10 +74,6 @@ class RenderTestCases(unittest.TestCase):
                 result = template.render()
                 self.assertEqual(result, case.expect)
 
-            with self.subTest(msg=case.description):
-                result = template.run()
-                self.assertEqual(result, case.expect)
-
     def test_literal(self):
         """Test that we can render template literals."""
 

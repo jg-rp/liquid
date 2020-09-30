@@ -7,8 +7,6 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream
-from liquid.code import Opcode
-from liquid.compiler import Compiler
 
 
 class LiteralNode(ast.Node):
@@ -27,9 +25,6 @@ class LiteralNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         buffer.write(self.tok.value)
-
-    def compile_node(self, compiler: Compiler):
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant(self.tok.value))
 
 
 class Literal(Tag):

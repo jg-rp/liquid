@@ -13,10 +13,6 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
-from liquid.expression import Expression
-
-from liquid.code import Opcode
-from liquid.compiler import Compiler
 
 TAG_CASE = sys.intern("case")
 TAG_ENDCASE = sys.intern("endcase")
@@ -65,41 +61,6 @@ class CaseNode(ast.Node):
 
         if not rendered and self.default:
             self.default.render(context, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        # This is very similar to IfNode, but we don't have a leading condition
-        # and consequence.
-
-        # Jump instructions that need updating after we've compiled all branches
-        # and the default.
-        jump_positions = []
-
-        for when in self.whens:
-            when.condition.compile(compiler)
-            jump_if_not_position = compiler.emit(Opcode.JIN, 9999)
-            when.block.compile(compiler)
-
-            if compiler.last_instruction_is(Opcode.POP):
-                compiler.remove_last_pop()
-
-            jump_positions.append(compiler.emit(Opcode.JMP, 9999))
-
-            after_when_pos = len(compiler.current_instructions())
-            compiler.change_operand(jump_if_not_position, after_when_pos)
-
-        # Emit a dummy default if one was not given.
-        if not self.default:
-            compiler.emit(Opcode.NOP)
-        else:
-            self.default.compile(compiler)
-
-            if compiler.last_instruction_is(Opcode.POP):
-                compiler.remove_last_pop()
-
-        # Update all jump instruction operands with this position.
-        after_default_pos = len(compiler.current_instructions())
-        for pos in jump_positions:
-            compiler.change_operand(pos, after_default_pos)
 
 
 class CaseTag(Tag):

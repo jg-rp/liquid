@@ -8,8 +8,6 @@ from liquid.token import Token, TOKEN_TAG_NAME
 from liquid.context import Context
 from liquid.expression import Expression
 from liquid.exceptions import DisabledTagError
-from liquid.code import Opcode
-from liquid.compiler import Compiler
 
 
 # TODO: Include version number in parse tree
@@ -40,16 +38,6 @@ class Node(ABC):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         """Render this node to the output buffer."""
 
-    def compile_node(self, compiler: Compiler):
-        raise NotImplementedError(self.__class__.__name__)
-
-    def compile(self, compiler: Compiler):
-        self.compile_node(compiler)
-
-        # Emit a stack pop for any tag that produces an output.
-        if self.statement:
-            compiler.emit(Opcode.POP)
-
 
 class ParseTree(Node):
     """The root node of all syntax trees."""
@@ -70,10 +58,6 @@ class ParseTree(Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         for stmt in self.statements:
             stmt.render(context, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        for stmt in self.statements:
-            stmt.compile(compiler)
 
 
 class IllegalNode(Node):
@@ -131,10 +115,6 @@ class BlockNode(Node):
         val = buf.getvalue()
         if not val.isspace():
             buffer.write(val)
-
-    def compile(self, compiler: Compiler):
-        for stmt in self.statements:
-            stmt.compile(compiler)
 
 
 class ConditionalBlockNode(Node):

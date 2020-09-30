@@ -8,7 +8,6 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream
-from liquid.compiler import Compiler
 
 TAG_COMMENT = sys.intern("comment")
 RAG_ENDCOMMENT = sys.intern("endcomment")
@@ -16,6 +15,8 @@ RAG_ENDCOMMENT = sys.intern("endcomment")
 
 class CommentNode(ast.Node):
     __slots__ = ("tok", "statements")
+
+    statement = False
 
     def __init__(self, tok: Token):
         self.tok = tok
@@ -25,9 +26,6 @@ class CommentNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         return False
-
-    def compile_node(self, compiler: Compiler):
-        pass
 
 
 class CommentTag(Tag):

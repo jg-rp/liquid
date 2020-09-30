@@ -10,8 +10,6 @@ from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import Expression
-from liquid.compiler import Compiler
-from liquid.code import Opcode
 
 TAG_UNLESS = sys.intern("unless")
 TAG_ENDUNLESS = sys.intern("endunless")
@@ -37,18 +35,6 @@ class UnlessNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         if not self.condition.evaluate(context):
             self.consequence.render(context, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        self.condition.compile(compiler)
-        jump_if_position = compiler.emit(Opcode.JIF, 9999)
-
-        self.consequence.compile(compiler)
-
-        # if compiler.last_instruction_is(Opcode.POP):
-        #     compiler.remove_last_pop()
-
-        after_consequence_position = len(compiler.current_instructions())
-        compiler.change_operand(jump_if_position, after_consequence_position)
 
 
 class UnlessTag(Tag):

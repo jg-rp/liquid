@@ -1,11 +1,8 @@
 """"""
 import sys
-from typing import List, TextIO
 
-from liquid.token import Token, TOKEN_EOF, TOKEN_TAG_NAME
-from liquid import ast
+from liquid.token import TOKEN_TAG_NAME
 from liquid.tag import Tag
-from liquid.context import Context
 from liquid.lex import TokenStream
 from liquid.parse import expect
 from liquid.builtin.literal import LiteralNode

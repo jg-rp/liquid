@@ -9,7 +9,6 @@ from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream, get_liquid_lexer
 from liquid.parse import expect, get_parser
-from liquid.compiler import Compiler
 
 TAG_LIQUID = sys.intern("liquid")
 
@@ -33,9 +32,6 @@ class LiquidNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         return self.block.render(context, buffer)
-
-    def compile_node(self, compiler: Compiler):
-        self.block.compile(compiler)
 
 
 class LiquidTag(Tag):

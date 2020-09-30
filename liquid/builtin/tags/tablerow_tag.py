@@ -13,9 +13,6 @@ from liquid.lex import TokenStream, get_expression_lexer
 from liquid.expression import LoopExpression
 from liquid.parse import expect, parse_loop_expression, get_parser
 
-from liquid import Compiler
-from liquid import Opcode
-from liquid.object import CompiledBlock
 
 from liquid.builtin.drops import IterableDrop
 
@@ -169,29 +166,6 @@ class TableRowDrop(IterableDrop, collections.abc.Mapping):
     def step(self, item: Any):
         self.tablerow.step(item)
 
-    def step_write(self, item: Any, buffer: TextIO):
-        self.empty_exit_buffer(buffer)
-        self.step(item)
-
-        if self.tablerow.col == 1 and self.tablerow.row <= self.tablerow.nrows:
-            buffer.write(f'<tr class="row{self.tablerow.row}">')
-
-        buffer.write(f'<td class="col{self.tablerow.col}">')
-
-        if (
-            self.tablerow.col == self.tablerow.ncols
-            or self.tablerow.index == self.tablerow.length
-        ):
-            self._exit.append("</td></tr>")
-        else:
-            self._exit.append("</td>")
-
-    def empty_exit_buffer(self, buffer: TextIO):
-        try:
-            buffer.write(self._exit.pop())
-        except IndexError:
-            pass
-
 
 class TablerowNode(ast.Node):
     __slots__ = ("tok", "expression", "block")
@@ -233,51 +207,6 @@ class TablerowNode(ast.Node):
                 self.block.render(context=ctx, buffer=buffer)
                 buffer.write("</td>")
             buffer.write("</tr>")
-
-    def compile_node(self, compiler: Compiler):
-        # tablerow tags have two block scoped variables, the loop variable and
-        # the `tablerow` helper drop.
-        compiler.enter_scope()
-
-        symbol = compiler.symbol_table.define(self.expression.name)
-        compiler.symbol_table.define("tablerowloop")
-
-        top_of_loop = len(compiler.current_instructions())
-
-        self.block.compile(compiler)
-
-        compiler.emit(Opcode.STE, symbol.index)  # step
-        compiler.emit(Opcode.JMP, top_of_loop)  # jump
-
-        compiler.emit(Opcode.STO)
-
-        # Must instpect the scoped symbol table before leaving the scope.
-        free_symbols = compiler.symbol_table.free_symbols
-        num_block_vars = compiler.symbol_table.locals.size
-        assert num_block_vars == 2
-
-        instructions = compiler.leave_scope()
-
-        # num_locals is always 2, the loop variable and the `forloop` drop.
-        compiled_block = CompiledBlock(
-            instructions=instructions,
-            num_locals=2,
-            num_arguments=self.expression.num_arguments(),
-            num_free=len(free_symbols),
-        )
-
-        compiler.emit(Opcode.CONSTANT, compiler.add_constant_block(compiled_block))
-
-        for free_symbol in reversed(free_symbols):
-            compiler.load_symbol(free_symbol)
-
-        if self.expression.cols:
-            self.expression.cols.compile(compiler)
-        else:
-            compiler.emit(Opcode.NIL)
-
-        self.expression.compile(compiler)
-        compiler.emit(Opcode.TAB, compiled_block.num_arguments, compiled_block.num_free)
 
 
 class TablerowTag(Tag):
