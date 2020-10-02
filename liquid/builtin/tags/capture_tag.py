@@ -18,25 +18,25 @@ ENDCAPTUREBLOCK = (TAG_ENDCAPTURE, TOKEN_EOF)
 
 
 class CaptureNode(ast.Node):
-    __slots__ = ("tok", "identifier", "block")
+    __slots__ = ("tok", "name", "block")
 
     statement = False
 
-    def __init__(self, tok: Token, identifier: str, block: ast.BlockNode = None):
+    def __init__(self, tok: Token, name: str, block: ast.BlockNode = None):
         self.tok = tok
-        self.identifier = identifier  # TODO: Validate identifier
+        self.name = name
         self.block = block
 
     def __str__(self) -> str:
-        return f"var {self.identifier} = {{ {self.block} }}"
+        return f"var {self.name} = {{ {self.block} }}"
 
     def __repr__(self):  # pragma: no cover
-        return f"CaptureNode(tok={self.tok}, identifier={self.identifier}, block='{self.block}')"
+        return f"CaptureNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
     def render_to_output(self, context: Context, buffer: TextIO):
         buf = StringIO()
         self.block.render(context, buf)
-        context.assign(str(self.identifier), buf.getvalue())
+        context.assign(self.name, buf.getvalue())
 
 
 class CaptureTag(Tag):
@@ -51,6 +51,7 @@ class CaptureTag(Tag):
         tok = stream.current
         stream.next_token()
 
+        # TODO: Validate identifier
         expect(stream, TOKEN_EXPRESSION)
         node = CaptureNode(tok, stream.current.value)
         stream.next_token()

@@ -79,37 +79,37 @@ class IncludeNode(ast.Node):
         template = self.get_template(name, None)
 
         namespace = {}
-        ctx = context.extend(namespace)
 
         # Add any keyword arguments to the new template context.
         for key, val in self.args.items():
             namespace[key] = val.evaluate(context)
 
-        # Bind a variable to the included template.
-        if self.var is not None:
-            val = self.var.evaluate(context)
-            key = self.alias or template.name.split(".")[0]
+        with context.extend(namespace):
+            # Bind a variable to the included template.
+            if self.var is not None:
+                val = self.var.evaluate(context)
+                key = self.alias or template.name.split(".")[0]
 
-            # If the variable is array-like, render the template once for each item in
-            # the array.
-            #
-            # The reference implementation does not seem to distinguish between "for"
-            # and "with". Just checks for array-like-ness.
-            if isinstance(val, (tuple, list, IterableDrop)):
-                # XXX: What if an included template with a bound array updates a
-                # keyword argument value? Do we need to update namespace arguments after
-                # each loop?
+                # If the variable is array-like, render the template once for each item in
+                # the array.
                 #
-                # The reference implementation seems to evaluate arguments once, before
-                # the loop.
-                for itm in val:
-                    namespace[key] = itm
-                    template.render_with_context(ctx, buffer, partial=True)
+                # The reference implementation does not seem to distinguish between "for"
+                # and "with". Just checks for array-like-ness.
+                if isinstance(val, (tuple, list, IterableDrop)):
+                    # XXX: What if an included template with a bound array updates a
+                    # keyword argument value? Do we need to update namespace arguments after
+                    # each loop?
+                    #
+                    # The reference implementation seems to evaluate arguments once, before
+                    # the loop.
+                    for itm in val:
+                        namespace[key] = itm
+                        template.render_with_context(context, buffer, partial=True)
+                else:
+                    namespace[key] = val
+                    template.render_with_context(context, buffer, partial=True)
             else:
-                namespace[key] = val
-                template.render_with_context(ctx, buffer, partial=True)
-        else:
-            template.render_with_context(ctx, buffer, partial=True)
+                template.render_with_context(context, buffer, partial=True)
 
 
 class IncludeTag(Tag):

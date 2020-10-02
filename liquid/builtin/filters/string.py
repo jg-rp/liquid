@@ -9,184 +9,181 @@ from liquid.filter import (
     expect_integer,
     expect_string,
     string_required,
-    no_args,
-    one_string_arg_required,
-    two_string_args_required,
 )
 
 from liquid.exceptions import FilterArgumentError
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars, truncate_words
 
-# XXX: Should we be casting int and float arguments to strings?
+
+class StringFilter(Filter):
+
+    __slots__ = ()
+
+    name = "AbstractStringFilter"
+    num_args = 0
+    msg = "{}: expected a string, found {}"
+
+    def __call__(self, val, *args):
+        if len(args) != self.num_args:
+            raise FilterArgumentError(
+                f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
+            )
+        try:
+            return self.func(str(val), *args)
+        except (AttributeError, TypeError) as err:
+            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+
+    def func(self, val, *args):
+        raise NotImplementedError(":(")
 
 
-class Capitalize(Filter):
+class Capitalize(StringFilter):
     """Make sure the first character of a string is upper case."""
 
     __slots__ = ()
 
     name = "capitalize"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.capitalize()
 
 
-class Append(Filter):
+class Append(StringFilter):
     """Concatenate two strings."""
 
     __slots__ = ()
 
     name = "append"
+    num_args = 1
 
-    @string_required
-    @one_string_arg_required
-    def __call__(self, val, *args, **kwargs):
-        return "".join((val, args[0]))
+    def func(self, val: str, string: str):
+        return val + str(string)
 
 
-class Downcase(Filter):
+class Downcase(StringFilter):
     """Make all characters in a string lower case."""
 
     __slots__ = ()
 
     name = "downcase"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.lower()
 
 
-class Escape(Filter):
+class Escape(StringFilter):
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
 
     __slots__ = ()
 
     name = "escape"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return html.escape(val)
 
 
-class EscapeOnce(Filter):
+class EscapeOnce(StringFilter):
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
 
     __slots__ = ()
 
     name = "escape_once"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return html.escape(html.unescape(val))
 
 
-class LStrip(Filter):
+class LStrip(StringFilter):
     """Remove leading whitespace."""
 
     __slots__ = ()
 
     name = "lstrip"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.lstrip()
 
 
-class NewlineToBR(Filter):
+class NewlineToBR(StringFilter):
     """Convert '\n' to '<br />'."""
 
     __slots__ = ()
 
     name = "newline_to_br"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.replace("\n", "<br />")
 
 
-class Prepend(Filter):
+class Prepend(StringFilter):
     """Concatenate string value to argument string."""
 
     __slots__ = ()
 
     name = "prepend"
+    num_args = 1
 
-    @string_required
-    @one_string_arg_required
-    def __call__(self, val, *args, **kwargs):
-        return "".join((args[0], val))
+    def func(self, val, string):
+        return str(string) + val
 
 
-class Remove(Filter):
+class Remove(StringFilter):
     """Remove all occurences of argument string from value."""
 
     __slots__ = ()
 
     name = "remove"
+    num_args = 1
 
-    @string_required
-    @one_string_arg_required
-    def __call__(self, val, *args, **kwargs):
-        return val.replace(args[0], "")
+    def func(self, val, sub):
+        return val.replace(str(sub), "")
 
 
-class RemoveFirst(Filter):
+class RemoveFirst(StringFilter):
     """Remove the first occurence of the argument string from value."""
 
     __slots__ = ()
 
     name = "remove_first"
+    num_args = 1
 
-    @string_required
-    @one_string_arg_required
-    def __call__(self, val, *args, **kwargs):
-        return val.replace(args[0], "", 1)
+    def func(self, val, sub):
+        return val.replace(str(sub), "", 1)
 
 
-class Replace(Filter):
+class Replace(StringFilter):
     """Replace all occurences of argument string in value."""
 
     __slots__ = ()
 
     name = "replace"
+    num_args = 2
 
-    @string_required
-    @two_string_args_required
-    def __call__(self, val, *args, **kwargs):
-        return val.replace(args[0], args[1])
+    def func(self, val, seq, sub):
+        return val.replace(str(seq), str(sub))
 
 
-class ReplaceFirst(Filter):
+class ReplaceFirst(StringFilter):
     """Replace the first occurence of the argument string in value."""
 
     __slots__ = ()
 
     name = "replace_first"
+    num_args = 2
 
-    @string_required
-    @two_string_args_required
-    def __call__(self, val, *args, **kwargs):
-        return val.replace(args[0], args[1], 1)
+    def func(self, val, seq, sub):
+        return val.replace(str(seq), str(sub), 1)
 
 
-class Upcase(Filter):
+class Upcase(StringFilter):
     """Make all characters in a string upper case."""
 
     __slots__ = ()
 
     name = "upcase"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.upper()
 
 
@@ -214,68 +211,59 @@ class Slice(Filter):
         return val[start : start + length]
 
 
-class Split(Filter):
+class Split(StringFilter):
     """Return a list of strings, using the argument value as a delimiter."""
 
     __slots__ = ()
 
     name = "split"
+    num_args = 1
 
-    @string_required
-    @one_string_arg_required
-    def __call__(self, val, *args, **kwargs):
-        return val.split(args[0])
+    def func(self, val, seq):
+        return val.split(str(seq))
 
 
-class Strip(Filter):
+class Strip(StringFilter):
     """Remove leading and trailing whitespace."""
 
     __slots__ = ()
 
     name = "strip"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.strip()
 
 
-class RStrip(Filter):
+class RStrip(StringFilter):
     """Remove trailing whitespace."""
 
     __slots__ = ()
 
     name = "rstrip"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.rstrip()
 
 
-class StripHTML(Filter):
+class StripHTML(StringFilter):
     """Return the given HTML with all tags stripped."""
 
     __slots__ = ()
 
     name = "strip_html"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return strip_tags(val)
 
 
-class StripNewlines(Filter):
+class StripNewlines(StringFilter):
     """Return the given string with all newline characters removed."""
 
     __slots__ = ()
 
     name = "strip_newlines"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return val.replace("\n", "")
 
 
@@ -319,27 +307,23 @@ class TruncateWords(Filter):
         return truncate_words(val, num, end)
 
 
-class URLEncode(Filter):
+class URLEncode(StringFilter):
     """Converts any URL-unsafe characters in a string into percent-encoded characters."""
 
     __slots__ = ()
 
     name = "url_encode"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return quote_plus(val)
 
 
-class URLDecode(Filter):
+class URLDecode(StringFilter):
     """Decodes a string that has been encoded as a URL."""
 
     __slots__ = ()
 
     name = "url_decode"
 
-    @no_args
-    @string_required
-    def __call__(self, val, *args, **kwargs):
+    def func(self, val):
         return unquote_plus(val)

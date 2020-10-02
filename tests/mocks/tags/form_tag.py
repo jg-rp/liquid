@@ -38,13 +38,14 @@ class CommentFormNode(ast.Node):
             "body": context.get(["comment", "body"]),
         }
 
-        ctx = context.extend({"form": form})
-
         buffer.write(
             f'<form id="article-{article["id"]}-comment-form" '
             'class="comment-form" method="post" action="">\n'
         )
-        self.block.render(ctx, buffer)
+
+        with context.extend({"form": form}):
+            self.block.render(context, buffer)
+
         buffer.write("\n</form>")
 
 

@@ -10,7 +10,7 @@ from liquid.exceptions import FilterArgumentError
 
 class Filter(ABC):
     """Base class for all filters.
-    
+
     If with_context is True, the current render context will be passed as a
     keyword argument every time the filter is called.
     """
@@ -24,7 +24,7 @@ class Filter(ABC):
 
     @abstractmethod
     def __call__(self, *args, **kwargs):
-        """Call the filter where `val` as the left hand expression of an output statement."""
+        """Call the filter where `val` is the left hand expression of an output statement."""
 
 
 def expect_number(name, val):

@@ -171,19 +171,19 @@ class ForNode(ast.Node):
 
             # Extend the context. Essentially giving priority to `ForLoopDrop`, then
             # delegating `get` and `assign` to the outer context.
-            ctx = context.extend(drop)
+            with context.extend(drop):
 
-            for itm in loop_items:
-                # Step the forloop helper. `ForLoop` does not initialised with an item,
-                # so we must step at the start of each iteration, not the end.
-                drop.step(itm)
+                for itm in loop_items:
+                    # Step the forloop helper. `ForLoop` does not initialised with an item,
+                    # so we must step at the start of each iteration, not the end.
+                    drop.step(itm)
 
-                try:
-                    self.block.render(ctx, buffer)
-                except ContinueLoop:
-                    continue
-                except BreakLoop:
-                    break
+                    try:
+                        self.block.render(context, buffer)
+                    except ContinueLoop:
+                        continue
+                    except BreakLoop:
+                        break
 
         else:
             # Empty iterator, try default

@@ -7,7 +7,7 @@ from typing import List, Optional, TextIO
 from liquid.token import Token, TOKEN_TAG_NAME
 from liquid.context import Context
 from liquid.expression import Expression
-from liquid.exceptions import DisabledTagError
+from liquid.exceptions import DisabledTagError, Error
 
 
 # TODO: Include version number in parse tree
@@ -31,7 +31,8 @@ class Node(ABC):
 
     def render(self, context: Context, buffer: TextIO) -> Optional[bool]:
         """Check disabled tags before delegating to `render_to_output`."""
-        self.raise_for_disabled(context.disabled_tags)
+        if context.disabled_tags:
+            self.raise_for_disabled(context.disabled_tags)
         return self.render_to_output(context, buffer)
 
     @abstractmethod
@@ -64,7 +65,7 @@ class IllegalNode(Node):
     """Parse tree node representing an illegal or unregistered tag.
 
     Illegal nodes are necesary when running in "warning" or "lax" mode. In
-    strict mode, an excpetions should be raised as soon as an illegal token
+    strict mode, an exception should be raised as soon as an illegal token
     is found.
     """
 
@@ -101,14 +102,14 @@ class BlockNode(Node):
         for stmt in self.statements:
             try:
                 stmt.render(context, buf)
+            except Error as err:
+                # Maybe resume rendering the block after an error.
+                context.error(err)
             except:
-                # Write what we have so far. We might be in warn or lax mode.
+                # Write what we have so far and stop rendering the block.
                 val = buf.getvalue()
                 if not val.isspace():
                     buffer.write(val)
-
-                # FIXME: We probably need to warn and continue when in WARN mode.
-                # Or ignore and continue in LAX mode.
                 raise
 
         # Don't write to the ouput buffer if the block contains only whitespace.

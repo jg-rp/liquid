@@ -660,10 +660,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "some = 'foo'",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="some"),
-                        path=[IdentifierPathElement(MockToken, "some")],
-                    ),
+                    name="some",
                     expression=FilteredExpression(
                         expression=StringLiteral(
                             tok=Token(1, TOKEN_STRING, "foo"), value="foo"
@@ -677,10 +674,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "some = 5",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="some"),
-                        path=[IdentifierPathElement(MockToken, "some")],
-                    ),
+                    name="some",
                     expression=FilteredExpression(
                         expression=IntegerLiteral(
                             tok=Token(1, TOKEN_INTEGER, "5"), value=5
@@ -694,10 +688,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "some = 5.6",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="some"),
-                        path=[IdentifierPathElement(MockToken, "some")],
-                    ),
+                    name="some",
                     expression=FilteredExpression(
                         expression=FloatLiteral(
                             tok=Token(1, TOKEN_FLOAT, "5.6"), value=5.6
@@ -711,10 +702,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "some = -5.6",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="some"),
-                        path=[IdentifierPathElement(MockToken, "some")],
-                    ),
+                    name="some",
                     expression=FilteredExpression(
                         expression=PrefixExpression(
                             tok=MockToken,
@@ -732,10 +720,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "some = true",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="some"),
-                        path=[IdentifierPathElement(MockToken, "some")],
-                    ),
+                    name="some",
                     expression=FilteredExpression(
                         expression=Boolean(
                             tok=Token(1, TOKEN_TRUE, "true"), value=True
@@ -749,10 +734,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 'fruits = "apples, oranges, peaches, tomatoes" | split: ", "',
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="fruits"),
-                        path=[IdentifierPathElement(MockToken, "fruits")],
-                    ),
+                    name="fruits",
                     expression=FilteredExpression(
                         expression=StringLiteral(
                             tok=Token(
@@ -771,10 +753,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "everything = fruits | concat: vegetables | concat: furniture",
                 AssignmentExpression(
                     MockToken,
-                    name=Identifier(
-                        Token(1, TOKEN_IDENTIFIER, value="everything"),
-                        path=[IdentifierPathElement(MockToken, "everything")],
-                    ),
+                    name="everything",
                     expression=FilteredExpression(
                         expression=Identifier(
                             tok=Token(1, TOKEN_IDENTIFIER, "fruits"),

@@ -105,14 +105,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=["there"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5there",
             ),
             Case(
                 description="argument not a string",
                 val="hello",
                 args=[5],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="hello5",
             ),
             Case(
                 description="missing argument",
@@ -148,7 +148,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -177,7 +177,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -213,7 +213,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -256,7 +256,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -285,7 +285,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -314,14 +314,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=["there"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="there5",
             ),
             Case(
                 description="argument not a string",
                 val="hello",
                 args=[5],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5hello",
             ),
             Case(
                 description="missing argument",
@@ -357,14 +357,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=["there"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="argument not a string",
                 val="hello",
                 args=[5],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="hello",
             ),
             Case(
                 description="missing argument",
@@ -400,14 +400,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=["rain"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="argument not a string",
                 val="hello",
                 args=[5],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="hello",
             ),
             Case(
                 description="missing argument",
@@ -441,16 +441,16 @@ class StringFilterTestCase(unittest.TestCase):
             Case(
                 description="not a string",
                 val=5,
-                args=["rain"],
+                args=["rain", "foo"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="argument not a string",
                 val="hello",
                 args=[5, "your"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="hello",
             ),
             Case(
                 description="missing argument",
@@ -491,16 +491,16 @@ class StringFilterTestCase(unittest.TestCase):
             Case(
                 description="not a string",
                 val=5,
-                args=["rain"],
+                args=["rain", "foo"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="argument not a string",
-                val="hello",
+                val="hello5",
                 args=[5, "your"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="helloyour",
             ),
             Case(
                 description="missing argument",
@@ -531,8 +531,20 @@ class StringFilterTestCase(unittest.TestCase):
         """Test slice filter function."""
 
         test_cases = [
-            Case(description="zero", val="hello", args=[0], kwargs={}, expect="h",),
-            Case(description="one", val="hello", args=[1], kwargs={}, expect="e",),
+            Case(
+                description="zero",
+                val="hello",
+                args=[0],
+                kwargs={},
+                expect="h",
+            ),
+            Case(
+                description="one",
+                val="hello",
+                args=[1],
+                kwargs={},
+                expect="e",
+            ),
             Case(
                 description="one length three",
                 val="hello",
@@ -600,7 +612,9 @@ class StringFilterTestCase(unittest.TestCase):
             Case(
                 description="split string",
                 val="Hi, how are you today?",
-                args=[" ",],
+                args=[
+                    " ",
+                ],
                 kwargs={},
                 expect=["Hi,", "how", "are", "you", "today?"],
             ),
@@ -609,14 +623,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[" "],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=["5"],
             ),
             Case(
                 description="argument not a string",
-                val="hello there",
+                val="hello th1ere",
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=["hello th", "ere"],
             ),
             Case(
                 description="missing argument",
@@ -652,7 +666,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -695,7 +709,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -738,7 +752,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -767,7 +781,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -796,7 +810,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -925,7 +939,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",
@@ -954,7 +968,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="unexpected argument",

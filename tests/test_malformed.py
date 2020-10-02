@@ -190,9 +190,9 @@ class MalformedTemplateTestCase(TestCase):
             ),
             Case(
                 description="wrong data type for filter",
-                template="{{ 5 | upcase }}",
+                template="{{ 5 | last }}",
                 expect_exception=FilterArgumentError,
-                expect_msg="upcase: expected a string, found <class 'int'>, on line 1",
+                expect_msg="last: expected an array, found <class 'int'>, on line 1",
             ),
             Case(
                 description="no such filter",
@@ -204,13 +204,13 @@ class MalformedTemplateTestCase(TestCase):
                 description="invalid subscript identifier",
                 template="{{ foo[1.2] }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="expected ']', found 'float', on line 1",
+                expect_msg="invalid identifier, found float, on line 1",
             ),
             Case(
                 description="nil subscript identifier",
                 template="{{ foo[nil] }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="expected ']', found 'nil', on line 1",
+                expect_msg="invalid identifier, found nil, on line 1",
             ),
             Case(
                 description="minus string",
@@ -256,9 +256,9 @@ class MalformedTemplateTestCase(TestCase):
             ),
             Case(
                 description="render next block after filter error",
-                template="before {{ nosuchthing | upcase }} after",
+                template="before {{ nosuchthing | last }} after",
                 expect_exception=FilterArgumentError,
-                expect_msg="upcase: expected a string, found <class 'NoneType'>, on line 1",
+                expect_msg="last: expected an array, found <class 'NoneType'>, on line 1",
                 expect_render="before  after",
             ),
         ]
@@ -348,7 +348,7 @@ class MalformedTemplateTestCase(TestCase):
         self._test_partial(test_cases, templates)
 
     def test_bad_render(self):
-        """Test that we gracefully handle include errors."""
+        """Test that we gracefully handle render errors."""
 
         test_cases = [
             Case(
@@ -384,3 +384,38 @@ class MalformedTemplateTestCase(TestCase):
         templates = {"break": "{% break %}", "include": "{% include 'foo' %}"}
 
         self._test_partial(test_cases, templates)
+
+    def test_resume_block(self):
+        """Test that we continue to execute a block after a signle statement error."""
+        source = (
+            r"{% if true %}"
+            r"before error "
+            r"{% comment  %}"
+            r"The following filter expression should throw a FilterArgumentError."
+            r"{% endcomment %}"
+            r"{{ 'foo' | upcase: bad }}"
+            r"after error"
+            r"{% endif %}"
+        )
+
+        env = Environment()
+
+        # Confirm the exception is raised when in strict mode.
+        env.mode = Mode.STRICT
+
+        template = env.from_string(source)
+        with self.assertRaises(FilterArgumentError):
+            template.render()
+
+        # Expect the template literal at the end of the block to render
+        # after the filter argument error.
+        env.mode = Mode.LAX
+        result = template.render()
+        self.assertEqual(result, "before error after error")
+
+        # Same, but warn too.
+        env.mode = Mode.WARN
+        with self.assertWarns(lookup_warning(FilterArgumentError)):
+            result = template.render()
+
+        self.assertEqual(result, "before error after error")

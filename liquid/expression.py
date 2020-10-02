@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from collections import abc
 from itertools import islice
 from typing import Union, List, Optional, Any, Iterator
 
 from liquid.context import Context
 from liquid.token import Token
-from liquid.exceptions import LiquidTypeError, Error
+from liquid.exceptions import LiquidTypeError, Error, FilterArgumentError
 
 Number = Union[int, float]
 
@@ -147,9 +148,9 @@ IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
 class Identifier(Expression):
     __slots__ = ("tok", "path")
 
-    def __init__(self, tok: Token, path: IdentifierPath = None):
+    def __init__(self, tok: Token, path: IdentifierPath):
         super().__init__(tok)
-        self.path = path or []
+        self.path = path
 
     def __eq__(self, other):
         return isinstance(other, Identifier) and self.path == other.path
@@ -328,7 +329,7 @@ class FilteredExpression(Expression):
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
 
-    def __init__(self, tok: Token, name: Identifier, expression: Expression = None):
+    def __init__(self, tok: Token, name: str, expression: Expression = None):
         super().__init__(tok)
         self.name = name
         self.expression = expression
@@ -349,12 +350,8 @@ class AssignmentExpression(Expression):
         )
 
     def evaluate(self, context: Context) -> str:
-        # XXX:
-        assert len(self.name.path) == 1
-        name = self.name.path[0].evaluate(context)
-        assert isinstance(name, str)
         result = self.expression.evaluate(context)
-        context.assign(key=name, val=result)
+        context.assign(key=self.name, val=result)
         return ""
 
 
@@ -446,10 +443,11 @@ class LoopExpression(Expression):
             # An identifier that must resolve to a list or dict in the current
             # global or local namespaces.
             obj = self.identifier.evaluate(context)
-            if isinstance(obj, dict):
+            if isinstance(obj, abc.Mapping):
                 loop_iter = obj.items()
-            elif isinstance(obj, list):
+            elif isinstance(obj, abc.Sequence):
                 loop_iter = iter(obj)
+
             else:
                 raise LiquidTypeError(
                     f"expected array or hash at '{self.identifier}', found '{str(obj)}'"

@@ -282,15 +282,16 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     <ident>[<int>]
     <ident>[<int>].<ident>
     """
-    ident = expression.Identifier(stream.current)
+    tok = stream.current
+    path = []
 
     while stream.current.type in IDENTIFIER_TOKENS:
         if stream.current.type == TOKEN_IDENTIFIER:
-            ident.path.append(
+            path.append(
                 expression.IdentifierPathElement(stream.current, stream.current.value)
             )
         elif stream.current.type == TOKEN_INTEGER:
-            ident.path.append(
+            path.append(
                 expression.IdentifierPathElement(
                     stream.current, int(stream.current.value)
                 )
@@ -299,22 +300,26 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
             stream.next_token()  # Eat open bracket
 
             if stream.current.type == TOKEN_STRING:
-                ident.path.append(
+                path.append(
                     expression.IdentifierPathElement(
                         stream.current, stream.current.value
                     )
                 )
             elif stream.current.type == TOKEN_INTEGER:
-                ident.path.append(
+                path.append(
                     expression.IdentifierPathElement(
                         stream.current, int(stream.current.value)
                     )
                 )
-            else:
+            elif stream.current.type == TOKEN_IDENTIFIER:
                 # Recursive call to parse_identifier. If it's not a string or
                 # integer, anything inside a pair of square brackets could be
                 # another identifier that resolves to a string or integer.
-                ident.path.append(parse_identifier(stream))
+                path.append(parse_identifier(stream))
+            else:
+                raise LiquidSyntaxError(
+                    f"invalid identifier, found {stream.current.type}"
+                )
 
             expect_peek(stream, TOKEN_RBRACKET)
             stream.next_token()  # Eat close bracket
@@ -327,7 +332,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
         stream.next_token()
 
     stream.push(stream.current)
-    return ident
+    return expression.Identifier(tok, path)
 
 
 RangeOption = namedtuple("RangeOption", ["tok", "arg"])
@@ -499,15 +504,14 @@ def parse_assignment_expression(stream) -> expression.AssignmentExpression:
     # assert stream.peek.type == TOKEN_ASSIGN
     expect_peek(stream, TOKEN_ASSIGN)
 
-    name = expression.Identifier(
-        tok=stream.current,
-        path=[expression.IdentifierPathElement(stream.current, stream.current.value)],
-    )
+    tok = stream.current
+    name = tok.value
+
     stream.next_token()
     stream.next_token()  # Eat ASSIGN TOKEN
     expr = parse_filtered_expression(stream)
 
-    return expression.AssignmentExpression(tok=name.tok, name=name, expression=expr)
+    return expression.AssignmentExpression(tok=tok, name=name, expression=expr)
 
 
 def parse_loop_expression(stream) -> expression.LoopExpression:

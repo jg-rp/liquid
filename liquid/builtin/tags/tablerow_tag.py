@@ -197,16 +197,16 @@ class TablerowNode(ast.Node):
             loop_iter = (loop_items,)
 
         drop = TableRowDrop(self.expression.name, len(loop_items), cols)
-        ctx = context.extend(drop)
 
-        for i, row in enumerate(loop_iter):
-            buffer.write(f'<tr class="row{i+1}">')
-            for j, data in enumerate(row):
-                drop.step(data)
-                buffer.write(f'<td class="col{j+1}">')
-                self.block.render(context=ctx, buffer=buffer)
-                buffer.write("</td>")
-            buffer.write("</tr>")
+        with context.extend(drop):
+            for i, row in enumerate(loop_iter):
+                buffer.write(f'<tr class="row{i+1}">')
+                for j, data in enumerate(row):
+                    drop.step(data)
+                    buffer.write(f'<td class="col{j+1}">')
+                    self.block.render(context=context, buffer=buffer)
+                    buffer.write("</td>")
+                buffer.write("</tr>")
 
 
 class TablerowTag(Tag):

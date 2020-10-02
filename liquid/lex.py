@@ -60,7 +60,7 @@ class Lexer(ABC):
 class TemplateLexer(Lexer):
     """Liquid template lexer.
 
-    Tokenize template strings. Output statements and tag expression do not
+    Tokenize template strings. Output statements and tag expressions do not
     get tokenized here. Each tag's parse method is responsible for lexing and
     parings their own expression.
     """
@@ -404,7 +404,7 @@ class RangeLexer(Lexer):
 
             elif source.find(self.tag_s, pos) == pos:
                 # The start of a tag. Could be the start or end of a tag block, or
-                # non-block tag.
+                # a non-block tag.
                 pos += self.tag_sl
 
                 wsc = source.find(TOKEN_WHITESPACE_CONTROL, pos) == pos

@@ -310,47 +310,59 @@ def setup_parse(search_path):
 
 def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     # Benchmark
+    templates = load_templates(search_path)
     print(
-        "lex: ",
-        timeit.repeat(
-            "lex(env, templates)",
-            setup="env, templates = setup_parse(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
+        f"Best of {repeat} rounds with {number} * {len(templates) * 2} calls per round."
+    )
+    print(
+        "lex:".rjust(20),
+        min(
+            timeit.repeat(
+                "lex(env, templates)",
+                setup="env, templates = setup_parse(search_path)",
+                globals={**globals(), "search_path": search_path},
+                number=number,
+                repeat=repeat,
+            )
         ),
     )
 
     print(
-        "parse: ",
-        timeit.repeat(
-            "parse(env, templates)",
-            setup="env, templates = setup_parse(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
+        "parse:".rjust(20),
+        min(
+            timeit.repeat(
+                "parse(env, templates)",
+                setup="env, templates = setup_parse(search_path)",
+                globals={**globals(), "search_path": search_path},
+                number=number,
+                repeat=repeat,
+            )
         ),
     )
 
     print(
-        "render: ",
-        timeit.repeat(
-            "render(templates)",
-            setup="templates = setup_render(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
+        "render:".rjust(20),
+        min(
+            timeit.repeat(
+                "render(templates)",
+                setup="templates = setup_render(search_path)",
+                globals={**globals(), "search_path": search_path},
+                number=number,
+                repeat=repeat,
+            )
         ),
     )
 
     print(
-        "parse and render: ",
-        timeit.repeat(
-            "parse_and_render(env, templates)",
-            setup="env, templates = setup_parse(search_path)",
-            globals={**globals(), "search_path": search_path},
-            number=number,
-            repeat=repeat,
+        "parse and render:".rjust(20),
+        min(
+            timeit.repeat(
+                "parse_and_render(env, templates)",
+                setup="env, templates = setup_parse(search_path)",
+                globals={**globals(), "search_path": search_path},
+                number=number,
+                repeat=repeat,
+            )
         ),
     )
 

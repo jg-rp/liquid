@@ -15,7 +15,7 @@ class LinkToTag(Filter):
     with_context = True
 
     def __call__(self, label, tag, *, context):
-        handle = context.get("handle", default="")
+        handle = context.resolve("handle", default="")
         return (
             f'<a title="Show tag {tag}" href="/collections/{handle}/{tag}">{label}</a>'
         )
@@ -41,8 +41,8 @@ class LinkToAddTag(Filter):
     with_context = True
 
     def __call__(self, label, tag, *, context):
-        handle = context.get("handle", default="")
-        tags = "+".join(set(context.get("current_tags", default=[]) + [tag]))
+        handle = context.resolve("handle", default="")
+        tags = "+".join(set(context.resolve("current_tags", default=[]) + [tag]))
         return (
             f'<a title="Show tag {tag}" href="/collections/{handle}/{tags}">{label}</a>'
         )
@@ -56,8 +56,8 @@ class LinkToRemoveTag(Filter):
     with_context = True
 
     def __call__(self, label, tag, *, context):
-        handle = context.get("handle", default="")
-        current_tags = set(context.get("current_tags", default=[]))
+        handle = context.resolve("handle", default="")
+        current_tags = set(context.resolve("current_tags", default=[]))
         tags = "+".join(t for t in current_tags if t != tag)
         return (
             f'<a title="Hide tag {tag}" href="/collections/{handle}/{tags}">{label}</a>'

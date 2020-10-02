@@ -76,8 +76,8 @@ class PaginateNode(ast.Node):
                 else:
                     pagination["parts"].append(link(page, page))
 
-        ctx = context.extend({"paginate": pagination})
-        self.block.render(ctx, buffer)
+        with context.extend({"paginate": pagination}):
+            self.block.render(context, buffer)
 
 
 def link(title, page):

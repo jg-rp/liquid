@@ -54,7 +54,9 @@ class Template:
         Accepts the same arguments as the `dict` constructor.
         """
         _vars = dict(*args, **kwargs)
-        context = Context(ChainMap(self._globals, _vars), filters=self.env.filters)
+
+        context = Context(self.env, ChainMap(self._globals, _vars))
+
         buf = StringIO()
         self.render_with_context(context, buf)
         return buf.getvalue()
@@ -84,21 +86,21 @@ class Template:
             **dict(*args, **kwargs),
             "partial": partial,
         }
-        ctx = context.extend(namespace=namespace)
 
-        for node in self.tree.statements:
-            with mode(self.env.mode, node.tok.linenum, filename=self.path):
-                try:
-                    node.render(ctx, buffer)
-                except LiquidInterrupt as err:
-                    # If this is an "included" template, the for loop could be in a
-                    # parent template. Convert the interrupt to a syntax error if
-                    # there is no parent.
-                    if not partial or block_scope:
-                        raise LiquidSyntaxError(f"unexpected '{err}'") from err
-                    raise
-                except Error as err:
-                    self.env.error(err, linenum=node.tok.linenum)
+        with context.extend(namespace=namespace):
+            for node in self.tree.statements:
+                with mode(self.env.mode, node.tok.linenum, filename=self.path):
+                    try:
+                        node.render(context, buffer)
+                    except LiquidInterrupt as err:
+                        # If this is an "included" template, the for loop could be in a
+                        # parent template. Convert the interrupt to a syntax error if
+                        # there is no parent.
+                        if not partial or block_scope:
+                            raise LiquidSyntaxError(f"unexpected '{err}'") from err
+                        raise
+                    except Error as err:
+                        self.env.error(err, linenum=node.tok.linenum)
 
     @property
     def is_up_to_date(self):
