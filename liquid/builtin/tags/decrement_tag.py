@@ -33,9 +33,7 @@ class DecrementTag(Tag):
     """
 
     name = TAG_DECREMENT
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> DecrementNode:
         expect(stream, TOKEN_TAG_NAME, value=TAG_DECREMENT)

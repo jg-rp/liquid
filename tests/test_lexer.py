@@ -3,7 +3,14 @@ from typing import NamedTuple, Any
 
 from liquid.environment import Environment
 from liquid.exceptions import LiquidSyntaxError
-from liquid.lex import get_lexer, get_expression_lexer, get_liquid_lexer
+from liquid.lex import (
+    get_liquid_lexer,
+    tokenize_loop_expression,
+    tokenize_filtered_expression,
+    tokenize_boolean_expression,
+    tokenize_include_expression,
+    tokenize_liquid,
+)
 from liquid.token import Token
 from liquid.token import *
 
@@ -17,26 +24,12 @@ class Case(NamedTuple):
 class LiquidLexerTestCase(TestCase):
     def setUp(self) -> None:
         self.env = Environment()
-        self.lex = get_lexer(self.env)
 
     def _test(self, test_cases):
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = self.lex.tokenize(case.source)
+                tokens = tokenize_liquid(case.source)
 
-                for got, want in zip(tokens, case.expect):
-                    self.assertEqual(got, want)
-
-    def _test_expressions(self, test_cases):
-        """Helper method for testing lists of `Case`s."""
-        env = Environment()
-        lex = get_expression_lexer(env)
-
-        for case in test_cases:
-            with self.subTest(msg=case.description):
-                tokens = list(lex.tokenize(case.source))
-
-                self.assertEqual(len(tokens), len(case.expect), msg=f"Tokens: {tokens}")
                 for got, want in zip(tokens, case.expect):
                     self.assertEqual(got, want)
 
@@ -143,9 +136,7 @@ class LiquidLexerTestCase(TestCase):
                 "raw",
                 "{% raw %}{{ hello }} %}{% {{ {% endraw %}",
                 [
-                    Token(1, TOKEN_TAG_NAME, "raw"),
                     Token(1, TOKEN_LITERAL, r"{{ hello }} %}{% {{ "),
-                    Token(1, TOKEN_TAG_NAME, "endraw"),
                 ],
             ),
             Case(
@@ -334,15 +325,12 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
-        env = Environment()
-        lex = get_lexer(env)
-
         for case in test_cases:
             with self.subTest(msg=case.description):
                 with self.assertRaises(LiquidSyntaxError):
-                    list(lex.tokenize(case.source))
+                    list(tokenize_liquid(case.source))
 
-    def test_lex_statement_expression(self):
+    def test_lex_output_statement_expression(self):
         """Test that the expression lexer can tokenize statement expressions."""
         test_cases = [
             Case(
@@ -548,7 +536,14 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
-        self._test_expressions(test_cases)
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                tokens = list(tokenize_filtered_expression(case.source))
+
+                self.assertTrue(len(tokens) == len(case.expect))
+
+                for got, want in zip(tokens, case.expect):
+                    self.assertEqual(got, want)
 
     def test_lex_boolean_expression(self):
         """Test that we can tokenize comparison expressions."""
@@ -660,7 +655,14 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
-        self._test_expressions(test_cases)
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                tokens = list(tokenize_boolean_expression(case.source))
+
+                self.assertTrue(len(tokens) == len(case.expect))
+
+                for got, want in zip(tokens, case.expect):
+                    self.assertEqual(got, want)
 
     def test_lex_loop_expression(self):
         """Test that we can tokenize loop expressions."""
@@ -722,7 +724,14 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
-        self._test_expressions(test_cases)
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                tokens = list(tokenize_loop_expression(case.source))
+
+                self.assertTrue(len(tokens) == len(case.expect))
+
+                for got, want in zip(tokens, case.expect):
+                    self.assertEqual(got, want)
 
     def test_lex_include_expression(self):
         """Test that we can tokenize include expressions."""
@@ -830,4 +839,11 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
-        self._test_expressions(test_cases)
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                tokens = list(tokenize_include_expression(case.source))
+
+                self.assertTrue(len(tokens) == len(case.expect))
+
+                for got, want in zip(tokens, case.expect):
+                    self.assertEqual(got, want)

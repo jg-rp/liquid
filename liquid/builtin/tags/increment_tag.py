@@ -27,15 +27,9 @@ class IncrementNode(ast.Node):
 
 
 class IncrementTag(Tag):
-    """
-
-    Increment and decrement tags share a namespace.
-    """
 
     name = TAG_INCREMENT
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> IncrementNode:
         expect(stream, TOKEN_TAG_NAME, value=TAG_INCREMENT)

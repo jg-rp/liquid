@@ -1,4 +1,6 @@
-""""""
+"""Parse tree node and Tag definition for the built-in "capture" tag."""
+
+import re
 import sys
 from io import StringIO
 from typing import TextIO
@@ -9,7 +11,9 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.lex import TokenStream
+from liquid.exceptions import LiquidSyntaxError
 
+RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
 
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
@@ -51,12 +55,18 @@ class CaptureTag(Tag):
         tok = stream.current
         stream.next_token()
 
-        # TODO: Validate identifier
         expect(stream, TOKEN_EXPRESSION)
-        node = CaptureNode(tok, stream.current.value)
+
+        if match := RE_CAPTURE.match(stream.current.value):
+            name = match.group()
+        else:
+            raise LiquidSyntaxError(
+                f'invalid capture identifier "{stream.current.value}"',
+                linenum=stream.current.linenum,
+            )
+
         stream.next_token()
-
-        node.block = parser.parse_block(stream, ENDCAPTUREBLOCK)
-
+        block = parser.parse_block(stream, ENDCAPTUREBLOCK)
         expect(stream, TOKEN_TAG_NAME, value=TAG_ENDCAPTURE)
-        return node
+
+        return CaptureNode(tok, name, block=block)

@@ -12,9 +12,7 @@ class Illegal(Tag):
     """Tag definition for dealing with illegal or unregistered tags."""
 
     name = TOKEN_ILLEGAL
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> IllegalNode:
         tok = stream.current

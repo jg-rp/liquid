@@ -2,15 +2,15 @@ from abc import ABC, abstractmethod
 
 from liquid.ast import IllegalNode
 from liquid.exceptions import Error
-from liquid.lex import get_expression_lexer
 from liquid.parse import eat_block
 from liquid import ast
 
-# TODO: Make `block` a class property.
-
 
 class Tag(ABC):
-    def __init__(self, env, block: bool = True):
+
+    block = True
+
+    def __init__(self, env):
         """
         Args:
             block: If True, indicates that this tag is a block tag, where we
@@ -19,8 +19,6 @@ class Tag(ABC):
         """
 
         self.env = env
-        self.block = block
-        self.expr_lexer = get_expression_lexer(self.env)
 
     @property
     @abstractmethod

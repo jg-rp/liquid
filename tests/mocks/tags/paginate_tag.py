@@ -13,7 +13,7 @@ from liquid.token import (
 )
 from liquid.tag import Tag
 from liquid import ast
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_paginate_expression
 from liquid.expression import Identifier
 from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier, parse_integer_literal
@@ -99,14 +99,13 @@ class PaginateTag(Tag):
 
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
-        lexer = get_expression_lexer(self.env)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_PAGINATE)
         tok = stream.current
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = lexer.tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_paginate_expression(stream.current.value))
 
         # Read the identifier (the object to be paginated).
         expect(expr_stream, TOKEN_IDENTIFIER)

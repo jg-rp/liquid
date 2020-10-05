@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from functools import reduce
 from operator import getitem
 from itertools import cycle
+
 from typing import (
     Any,
     Union,
@@ -19,7 +20,6 @@ from typing import (
     List,
     Mapping,
     Iterator,
-    Type,
     Sequence,
 )
 
@@ -77,7 +77,7 @@ class ReadOnlyChainMap(collections.abc.Mapping):
 
 
 class BuiltIn(collections.abc.Mapping):
-    """Mapping-like object for built-in, dynamic objects."""
+    """Mapping-like object for resolving built-in, dynamic objects."""
 
     def __contains__(self, item):
         if item in ("now", "today"):

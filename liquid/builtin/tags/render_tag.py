@@ -18,7 +18,7 @@ from liquid.token import (
     TOKEN_EOF,
     TOKEN_STRING,
 )
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_include_expression
 from liquid.parse import (
     expect,
     parse_identifier,
@@ -30,7 +30,7 @@ from liquid.expression import Expression
 from liquid.context import Context, ReadOnlyChainMap
 from liquid.exceptions import LiquidSyntaxError
 from liquid.builtin.drops import IterableDrop
-from liquid.builtin.tags.for_tag import ForLoopDrop
+from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
 
 TAG_RENDER = sys.intern("render")
@@ -105,10 +105,17 @@ class RenderNode(ast.Node):
             # `self.loop` being True indicates the render expression used "for" not
             # "with". This distinction is not made when using the 'include' tag.
             if self.loop and isinstance(val, (tuple, list, IterableDrop)):
-                forloop = ForLoopDrop(key, len(val))
-                namespace.push(forloop)
-                for itm in val:
-                    forloop.step(itm)
+                forloop = ForLoop(
+                    name=key,
+                    it=iter(val),
+                    length=len(val),
+                )
+
+                args["forloop"] = forloop
+                args[key] = None
+
+                for itm in forloop:
+                    args[key] = itm
                     template.render_with_context(
                         ctx, buffer, partial=True, block_scope=True
                     )
@@ -126,9 +133,7 @@ class RenderNode(ast.Node):
 class RenderTag(Tag):
 
     name = TAG_RENDER
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG_NAME, value=TAG_RENDER)
@@ -136,7 +141,7 @@ class RenderTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = get_expression_lexer(self.env).tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_include_expression(stream.current.value))
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
         # This is the name of the template to be included.

@@ -31,13 +31,23 @@ from liquid.token import (
     TOKEN_TRUE,
     TOKEN_FALSE,
 )
-from liquid.lex import get_expression_lexer
+from liquid.lex import (
+    tokenize_identifier,
+    tokenize_loop_expression,
+    tokenize_include_expression,
+    tokenize_filtered_expression,
+    tokenize_boolean_expression,
+    tokenize_assignment_expression,
+)
+
 from liquid.parse import (
     parse_filtered_expression,
     parse_boolean_expression,
     parse_assignment_expression,
     parse_loop_expression,
 )
+
+from liquid.stream import TokenStream
 
 
 class Case(NamedTuple):
@@ -54,14 +64,12 @@ MockToken = Token(1, TOKEN_INITIAL, "MOCK")
 class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
     """Liquid expression parser test cases."""
 
-    def _test(self, test_cases, parse_func):
+    def _test(self, test_cases, lex_func, parse_func):
         """Helper method for testing lists of Cases."""
-        env = Environment()
-        lex = get_expression_lexer(env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = lex.tokenize(case.expression)
+                tokens = TokenStream(lex_func(case.expression))
                 expr = parse_func(tokens)
                 self.assertEqual(expr, case.expect)
 
@@ -390,7 +398,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_filtered_expression)
+        self._test(test_cases, tokenize_filtered_expression, parse_filtered_expression)
 
     def test_parse_boolean_expression(self):
         """Test that we can parse boolean expressions."""
@@ -626,7 +634,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_boolean_expression)
+        self._test(test_cases, tokenize_boolean_expression, parse_boolean_expression)
 
     def test_parse_boolean_expression_precedence(self):
         """Test that we get the expected precedence when parsing boolean expressions."""
@@ -643,12 +651,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             ),
         ]
 
-        env = Environment()
-        lex = get_expression_lexer(env)
-
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = lex.tokenize(case.expression)
+                tokens = TokenStream(tokenize_boolean_expression(case.expression))
                 expr = parse_boolean_expression(tokens)
                 self.assertEqual(str(expr), case.expect)
 
@@ -792,7 +797,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_assignment_expression)
+        self._test(
+            test_cases, tokenize_assignment_expression, parse_assignment_expression
+        )
 
     def test_parse_loop_expression(self):
         """Test that we can parse loop expressions."""
@@ -979,4 +986,4 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_loop_expression)
+        self._test(test_cases, tokenize_loop_expression, parse_loop_expression)

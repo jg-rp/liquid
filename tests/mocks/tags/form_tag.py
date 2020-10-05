@@ -10,7 +10,7 @@ from liquid.token import (
 )
 from liquid.tag import Tag
 from liquid import ast
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_identifier
 from liquid.expression import Identifier
 from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier
@@ -55,7 +55,6 @@ class CommentFormTag(Tag):
     end = TAG_ENDFORM
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        lexer = get_expression_lexer(self.env)
         parser = get_parser(self.env)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_FORM)
@@ -63,7 +62,7 @@ class CommentFormTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = lexer.tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_identifier(stream.current.value))
 
         expect(expr_stream, TOKEN_IDENTIFIER)
         article = parse_identifier(expr_stream)

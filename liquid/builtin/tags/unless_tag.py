@@ -8,7 +8,7 @@ from liquid.parse import get_parser, expect, parse_boolean_expression
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_boolean_expression
 from liquid.expression import Expression
 
 TAG_UNLESS = sys.intern("unless")
@@ -45,15 +45,14 @@ class UnlessTag(Tag):
 
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
-        lexer = get_expression_lexer(self.env)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_UNLESS)
         tok = stream.current
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = lexer.tokenize(stream.current.value)
-        expr = parse_boolean_expression(expr_iter)
+        expr_iter = tokenize_boolean_expression(stream.current.value)
+        expr = parse_boolean_expression(TokenStream(expr_iter))
 
         stream.next_token()
         consequence = parser.parse_block(stream, ENDUNLESSBLOCK)

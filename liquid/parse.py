@@ -439,7 +439,8 @@ infix_funcs = {
 
 
 def parse_expression(
-    stream: TokenStream, precedence: Precedence = Precedence.LOWEST
+    stream: TokenStream,
+    precedence: Precedence = Precedence.LOWEST,
 ) -> expression.Expression:
     """Parse a literal or logical expression."""
     prefix = prefix_funcs.get(stream.current.type)
@@ -498,20 +499,18 @@ def parse_assignment_expression(stream) -> expression.AssignmentExpression:
     This is essentially the same as a parse_filtered_expression, but with
     an additional name to bind the expression result to.
     """
-    # assert stream.current.type == TOKEN_IDENTIFIER
     expect(stream, TOKEN_IDENTIFIER)
-
-    # assert stream.peek.type == TOKEN_ASSIGN
     expect_peek(stream, TOKEN_ASSIGN)
 
     tok = stream.current
-    name = tok.value
+    name = parse_unchained_identifier(stream)
 
     stream.next_token()
     stream.next_token()  # Eat ASSIGN TOKEN
+
     expr = parse_filtered_expression(stream)
 
-    return expression.AssignmentExpression(tok=tok, name=name, expression=expr)
+    return expression.AssignmentExpression(tok=tok, name=str(name), expression=expr)
 
 
 def parse_loop_expression(stream) -> expression.LoopExpression:
@@ -523,7 +522,6 @@ def parse_loop_expression(stream) -> expression.LoopExpression:
     expect(stream, TOKEN_IDENTIFIER)
     expect_peek(stream, TOKEN_IN)
 
-    # FIXME: Validate identifier
     expr = expression.LoopExpression(name=stream.current.value)
 
     stream.next_token()

@@ -5,13 +5,20 @@ from typing import NamedTuple, Any, Mapping
 
 from liquid.environment import Environment
 from liquid.context import Context
-from liquid.lex import get_expression_lexer
+from liquid.lex import (
+    tokenize_filtered_expression,
+    tokenize_boolean_expression,
+    tokenize_loop_expression,
+    tokenize_assignment_expression,
+)
 from liquid.parse import (
     parse_filtered_expression,
     parse_boolean_expression,
     parse_assignment_expression,
     parse_loop_expression,
 )
+
+from liquid.stream import TokenStream
 
 
 class Case(NamedTuple):
@@ -26,15 +33,14 @@ class Case(NamedTuple):
 class LiquidStatementEvalTestCase(unittest.TestCase):
     """Liquid statement expression evaluator test cases."""
 
-    def _test(self, test_cases, parse_func):
+    def _test(self, test_cases, lex_func, parse_func):
         """Utility method for evaluating lists of test cases."""
         env = Environment()
-        lex = get_expression_lexer(env)
 
         for case in test_cases:
             context = Context(env, case.context)
             with self.subTest(msg=case.description):
-                tokens = lex.tokenize(case.expression)
+                tokens = TokenStream(lex_func(case.expression))
                 expr = parse_func(tokens)
                 res = expr.evaluate(context)
                 self.assertEqual(res, case.expect)
@@ -151,7 +157,7 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_filtered_expression)
+        self._test(test_cases, tokenize_filtered_expression, parse_filtered_expression)
 
     def test_eval_boolean_expression(self):
         """Test that we can evaluate boolean expressions."""
@@ -375,7 +381,7 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, parse_boolean_expression)
+        self._test(test_cases, tokenize_boolean_expression, parse_boolean_expression)
 
     def test_eval_assignment_expression(self):
         """Test that we can evaluate assignment expressions."""
@@ -414,12 +420,11 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
         ]
 
         env = Environment()
-        lex = get_expression_lexer(env)
 
         for case in test_cases:
             context = Context(env, case.context)
             with self.subTest(msg=case.description):
-                stream = lex.tokenize(case.expression)
+                stream = TokenStream(tokenize_assignment_expression(case.expression))
                 expr = parse_assignment_expression(stream)
                 expr.evaluate(context)
 
@@ -451,13 +456,13 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
         ]
 
         env = Environment()
-        lex = get_expression_lexer(env)
 
         for case in test_cases:
             context = Context(env, case.context)
             with self.subTest(msg=case.description):
-                stream = lex.tokenize(case.expression)
+                stream = TokenStream(tokenize_loop_expression(case.expression))
                 expr = parse_loop_expression(stream)
-                loopiter = expr.evaluate(context)
+                loopiter, length = expr.evaluate(context)
 
                 self.assertEqual(list(loopiter), case.expect)
+                self.assertEqual(length, len(case.expect))

@@ -17,7 +17,7 @@ from liquid.token import (
     TOKEN_COLON,
     TOKEN_EOF,
 )
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_include_expression
 from liquid.parse import (
     expect,
     parse_identifier,
@@ -115,9 +115,7 @@ class IncludeNode(ast.Node):
 class IncludeTag(Tag):
 
     name = TAG_INCLUDE
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
         """
@@ -131,7 +129,7 @@ class IncludeTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = get_expression_lexer(self.env).tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_include_expression(stream.current.value))
 
         # Need a string or identifier that resolves to a string. This is the name
         # of the template to be included.

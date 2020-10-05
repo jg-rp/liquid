@@ -78,4 +78,4 @@ class TokenStream:
 
     def close(self):
         """Close the stream."""
-        self.current = Token(-1, TOKEN_EOF, "")
+        self.current = Token(0, TOKEN_EOF, "")

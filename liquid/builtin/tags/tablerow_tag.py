@@ -3,18 +3,15 @@ import sys
 import collections.abc
 import math
 from itertools import islice
-from typing import Any, List, TextIO
+from typing import Any, List, TextIO, Iterator
 
 from liquid.token import Token, TOKEN_TAG_NAME, TOKEN_EXPRESSION
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_loop_expression
 from liquid.expression import LoopExpression
 from liquid.parse import expect, parse_loop_expression, get_parser
-
-
-from liquid.builtin.drops import IterableDrop
 
 
 TAG_TABLEROW = sys.intern("tablerow")
@@ -26,6 +23,7 @@ class TableRow(collections.abc.Mapping):
 
     __slots__ = (
         "name",
+        "it",
         "length",
         "ncols",
         "item",
@@ -44,8 +42,9 @@ class TableRow(collections.abc.Mapping):
         "nrows",
     )
 
-    def __init__(self, name: str, length: int, ncols: int):
+    def __init__(self, name: str, it: Iterator, length: int, ncols: int):
         self.name = name
+        self.it = it
         self.length = length
         self.ncols = ncols
         self.item = None
@@ -92,13 +91,14 @@ class TableRow(collections.abc.Mapping):
         return len(self.keys)
 
     def __iter__(self):
-        return iter(self.keys)
+        return self
 
-    def step(self, item: Any):
+    def __next__(self):
+        return next(self.it)
+
+    def step(self):
         """Set the value for the current/next loop iteration and update forloop
         helper variables."""
-        self.item = item
-
         self.index += 1
         self.index0 += 1
         self.rindex -= 1
@@ -131,42 +131,6 @@ class TableRow(collections.abc.Mapping):
             self.row += 1
 
 
-class TableRowDrop(IterableDrop, collections.abc.Mapping):
-    """Wrap a `TableRow` so it can be used as a `Context` namepsace."""
-
-    __slots__ = ("tablerow", "name")
-
-    def __init__(self, name: str, length: int, ncols: int):
-        self.tablerow = TableRow(name, length, ncols)
-        self.name = name
-
-        self._exit = []
-
-    def __contains__(self, item):
-        if item in ("tablerowloop", self.name):
-            return True
-        return False
-
-    def __getitem__(self, key):
-        if key == "tablerowloop":
-            return self.tablerow
-        if key == self.name:
-            return self.tablerow.item
-        raise KeyError(str(key))
-
-    def __len__(self):
-        return 2
-
-    def __iter__(self):
-        return iter(["tablerowloop", self.name])
-
-    def __str__(self):
-        return f"TableRowDrop(name='{self.name}', tablerow={self.tablerow})"
-
-    def step(self, item: Any):
-        self.tablerow.step(item)
-
-
 class TablerowNode(ast.Node):
     __slots__ = ("tok", "expression", "block")
 
@@ -186,26 +150,35 @@ class TablerowNode(ast.Node):
         return f"tablerow({ self.expression }) {{ {self.block} }}"
 
     def render_to_output(self, context: Context, buffer: TextIO):
-        loop_items = list(self.expression.evaluate(context))
+        name = self.expression.name
+        loop_iter, length = self.expression.evaluate(context)
 
         if self.expression.cols:
             cols = self.expression.cols.evaluate(context)
             assert isinstance(cols, int)
-            loop_iter = tuple(grouper(loop_items, cols))
         else:
-            cols = 1
-            loop_iter = (loop_items,)
+            cols = length
 
-        drop = TableRowDrop(self.expression.name, len(loop_items), cols)
+        loop_iter = grouper(loop_iter, cols)
+        tablerow = TableRow(name, loop_iter, length, cols)
 
-        with context.extend(drop):
-            for i, row in enumerate(loop_iter):
+        namespace = {
+            "tablerowloop": tablerow,
+            name: None,
+        }
+
+        with context.extend(namespace):
+            for i, row in enumerate(tablerow):
                 buffer.write(f'<tr class="row{i+1}">')
-                for j, data in enumerate(row):
-                    drop.step(data)
+
+                for j, itm in enumerate(row):
+                    tablerow.step()
+                    namespace[name] = itm
+
                     buffer.write(f'<td class="col{j+1}">')
                     self.block.render(context=context, buffer=buffer)
                     buffer.write("</td>")
+
                 buffer.write("</tr>")
 
 
@@ -215,7 +188,6 @@ class TablerowTag(Tag):
     end = TAG_ENDTABLEROW
 
     def parse(self, stream: TokenStream) -> TablerowNode:
-        lexer = get_expression_lexer(self.env)
         parser = get_parser(self.env)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_TABLEROW)
@@ -223,8 +195,8 @@ class TablerowTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = lexer.tokenize(stream.current.value)
-        loop_expression = parse_loop_expression(expr_iter)
+        expr_iter = tokenize_loop_expression(stream.current.value)
+        loop_expression = parse_loop_expression(TokenStream(expr_iter))
         stream.next_token()
 
         block = parser.parse_block(stream, (TAG_ENDTABLEROW,))
@@ -233,8 +205,7 @@ class TablerowTag(Tag):
         return TablerowNode(tok, expression=loop_expression, block=block)
 
 
-def grouper(iterable, n):
+def grouper(iterator: Iterator, n):
     "Collect data into fixed-length chunks or blocks"
     # grouper('ABCDEFG', 3) --> ABC DEF G"
-    iterable = iter(iterable)
-    return iter(lambda: tuple(islice(iterable, n)), ())
+    return iter(lambda: tuple(islice(iterator, n)), ())

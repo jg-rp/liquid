@@ -16,7 +16,8 @@ import yaml
 
 from liquid.environment import Environment, Template
 from liquid.loaders import FileSystemLoader
-from liquid.lex import get_lexer
+from liquid.lex import get_lexer, tokenize_liquid
+from liquid.stream import TokenStream
 
 from tests.mocks.tags.form_tag import CommentFormTag
 from tests.mocks.tags.paginate_tag import PaginateTag
@@ -200,10 +201,10 @@ def load_templates(search_path: str = "tests/fixtures/") -> List[ThemedTemplateS
 # pylint: disable=redefined-builtin
 def lex(env: Environment, templates: List[ThemedTemplateSource]):
     """Tokenize a list of templates using the given environment."""
-    lexer = get_lexer(env)
+    # lexer = get_lexer(env)
     for bundle in templates:
-        list(lexer.tokenize(bundle.theme.source))
-        list(lexer.tokenize(bundle.template.source))
+        list(tokenize_liquid(bundle.theme.source))
+        list(tokenize_liquid(bundle.template.source))
 
 
 # pylint: disable=redefined-builtin
@@ -213,7 +214,7 @@ def parse(
     globals: Mapping[str, Any] = None,
 ) -> List[ThemedTemplate]:
     """Parse a list of templates using the given environment."""
-    parsed_tempaltes = []
+    parsed_templates = []
     for bundle in templates:
         parsed_theme = env.from_string(
             bundle.theme.source, path=bundle.theme.path, globals=globals
@@ -223,9 +224,9 @@ def parse(
             bundle.template.source, path=bundle.template.path, globals=globals
         )
 
-        parsed_tempaltes.append(ThemedTemplate(parsed_theme, parsed_template))
+        parsed_templates.append(ThemedTemplate(parsed_theme, parsed_template))
 
-    return parsed_tempaltes
+    return parsed_templates
 
 
 def render(templates: List[ThemedTemplate]):

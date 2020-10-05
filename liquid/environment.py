@@ -11,7 +11,8 @@ import warnings
 from liquid.mode import Mode, mode
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import get_lexer
+from liquid.lex import tokenize_liquid
+from liquid.stream import TokenStream
 from liquid.parse import get_parser
 from liquid.ast import ParseTree
 from liquid import builtin
@@ -204,7 +205,6 @@ class Environment:
                 from `liquid.Filter`, and override the `__call__` method. All
                 builtin filters are implmented in this way.
         """
-        # TODO: Warn if overriding an existing filter.
         self.filters[name] = func
 
     def parse(self, source: str) -> ParseTree:
@@ -212,11 +212,11 @@ class Environment:
 
         More often than not you'll want to use `Environment.from_string` instead.
         """
-        lexer = get_lexer(self)
+        # lexer = get_lexer(self)
         parser = get_parser(self)
 
-        token_iter = lexer.tokenize(source)
-        parse_tree = parser.parse(token_iter)
+        token_iter = tokenize_liquid(source)
+        parse_tree = parser.parse(TokenStream(token_iter))
         return parse_tree
 
     # pylint: disable=redefined-builtin
@@ -264,9 +264,14 @@ class Environment:
         """
         template = self.cache.get(name)
         if template and template.is_up_to_date:
-            # FIXME: Copy the cached template with new globals.
-            # Or just cache the parse tree.
-            return template
+            # Copy the cached template with new globals.
+            return Template(
+                env=self,
+                name=template.name,
+                path=template.path,
+                parse_tree=template.tree,
+                globals=self.make_globals(globals),
+            )
 
         template = self.loader.load(self, name, globals=self.make_globals(globals))
         self.cache[name] = template

@@ -13,7 +13,7 @@ from liquid.parse import expect, parse_boolean_expression, get_parser, eat_block
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream
+from liquid.lex import TokenStream, tokenize_boolean_expression
 from liquid.expression import Expression
 from liquid.exceptions import LiquidSyntaxError
 from liquid.builtin.illegal import IllegalNode
@@ -96,11 +96,11 @@ class IfTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = self.expr_lexer.tokenize(stream.current.value)
+        expr_iter = tokenize_boolean_expression(stream.current.value)
 
         # If the expression can't be parsed, eat the whole "if" tag, including
         # any alternatives. See `Tag.get_node`.
-        expr = parse_boolean_expression(expr_iter)
+        expr = parse_boolean_expression(TokenStream(expr_iter))
 
         node = IfNode(tok, expr)
         stream.next_token()
@@ -111,12 +111,12 @@ class IfTag(Tag):
             stream.next_token()
             expect(stream, TOKEN_EXPRESSION)
 
-            expr_iter = self.expr_lexer.tokenize(stream.current.value)
+            expr_iter = tokenize_boolean_expression(stream.current.value)
 
             # If the expression can't be parsed, eat the "elsif" block and
             # continue to parse more "elsif" expression, if any.
             try:
-                expr = parse_boolean_expression(expr_iter)
+                expr = parse_boolean_expression(TokenStream(expr_iter))
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)

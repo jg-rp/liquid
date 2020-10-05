@@ -5,7 +5,7 @@ from liquid.token import Token, TOKEN_STATEMENT
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream
+from liquid.lex import TokenStream, tokenize_filtered_expression
 from liquid.parse import parse_filtered_expression, expect
 from liquid.expression import Expression
 
@@ -48,7 +48,6 @@ class Statement(Tag):
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
 
-        # expr_iter = get_expression_lexer(self.env).tokenize(tok.value)
-        expr_iter = self.expr_lexer.tokenize(tok.value)
-        node = StatementNode(tok, parse_filtered_expression(expr_iter))
+        expr_iter = tokenize_filtered_expression(tok.value)
+        node = StatementNode(tok, parse_filtered_expression(TokenStream(expr_iter)))
         return node

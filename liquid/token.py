@@ -19,6 +19,7 @@ TOKEN_STATEMENT_END = sys.intern("statement_end")
 TOKEN_STATEMENT = sys.intern("statement")
 TOKEN_LITERAL = sys.intern("literal")
 
+TOKEN_NEWLINE = sys.intern("newline")
 TOKEN_WHITESPACE = sys.intern("whitespace")
 TOKEN_WHITESPACE_CONTROL = sys.intern("-")
 

@@ -4,13 +4,12 @@ from abc import ABC, abstractmethod
 from io import StringIO
 from typing import List, Optional, TextIO
 
+from liquid import __version__
+from liquid import Context
+from liquid import Expression
+
 from liquid.token import Token, TOKEN_TAG_NAME
-from liquid.context import Context
-from liquid.expression import Expression
 from liquid.exceptions import DisabledTagError, Error
-
-
-# TODO: Include version number in parse tree
 
 
 class Node(ABC):
@@ -43,12 +42,13 @@ class Node(ABC):
 class ParseTree(Node):
     """The root node of all syntax trees."""
 
-    __slots__ = ("statements",)
+    __slots__ = ("statements", "version")
 
     statement = False
 
     def __init__(self):
         self.statements = []
+        self.version = __version__
 
     def __str__(self):  # pragma: no cover
         return "".join(str(s) for s in self.statements)

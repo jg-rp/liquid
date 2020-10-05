@@ -38,9 +38,7 @@ class LiquidTag(Tag):
     """"""
 
     name = TAG_LIQUID
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG_NAME, value=TAG_LIQUID)

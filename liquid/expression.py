@@ -4,11 +4,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections import abc
 from itertools import islice
-from typing import Union, List, Optional, Any, Iterator
+from typing import Union, List, Optional, Any, Iterator, Tuple
 
 from liquid.context import Context
 from liquid.token import Token
-from liquid.exceptions import LiquidTypeError, Error, FilterArgumentError
+from liquid.exceptions import LiquidTypeError, Error
 
 Number = Union[int, float]
 
@@ -438,14 +438,17 @@ class LoopExpression(Expression):
             f"offset={self.offset}, cols={self.cols}, reversed={self.reversed})"
         )
 
-    def evaluate(self, context: Context) -> Iterator[Any]:
+    def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
         if self.identifier:
             # An identifier that must resolve to a list or dict in the current
             # global or local namespaces.
             obj = self.identifier.evaluate(context)
+
             if isinstance(obj, abc.Mapping):
+                length = len(obj)
                 loop_iter = obj.items()
             elif isinstance(obj, abc.Sequence):
+                length = len(obj)
                 loop_iter = iter(obj)
 
             else:
@@ -455,25 +458,30 @@ class LoopExpression(Expression):
         else:
             assert self.start is not None
             assert self.stop is not None
-            loop_iter = range(
-                self.start.evaluate(context), self.stop.evaluate(context) + 1
-            )
+
+            start = self.start.evaluate(context)
+            stop = self.stop.evaluate(context) + 1
+
+            loop_iter = range(start, stop)
+            length = stop - start
 
         limit = self.limit
         offset = self.offset
 
         if limit:
             limit = limit.evaluate(context)
+            length = min(length, limit)
 
         if offset:
             offset = offset.evaluate(context)
+            length = max(length - offset, 0)
 
         loop_iter = islice(loop_iter, offset, limit)
 
         if self.reversed:
             loop_iter = reversed(list(loop_iter))
 
-        return loop_iter
+        return loop_iter, length
 
 
 def eval_number_expression(left: Number, operator: str, right: Number) -> bool:

@@ -306,6 +306,18 @@ class RenderTestCases(unittest.TestCase):
             ]
         )
 
+    def test_assign_tag(self):
+        """Test that we can render assigned variables."""
+        self._test(
+            [
+                Case(
+                    description="assing a filtered literal",
+                    template="{% assign foo = 'foo' | upcase %}{{ foo }}",
+                    expect="FOO",
+                ),
+            ]
+        )
+
     def test_if_tag(self):
         """Test that we can render `if` tags."""
         test_cases = [
@@ -791,6 +803,40 @@ class RenderTestCases(unittest.TestCase):
                 template=r"{% for tag in product.tags %}{{ forloop.length }} {% endfor %}",
                 expect="2 2 ",
                 globals={"product": {"tags": ["sports", "garden"]}},
+            ),
+            Case(
+                description="forloop length with limit",
+                template=r"{% for tag in product.tags limit:3 %}{{ forloop.length }} {% endfor %}",
+                expect="3 3 3 ",
+                globals={
+                    "product": {
+                        "tags": [
+                            "sports",
+                            "garden",
+                            "sports",
+                            "garden",
+                            "sports",
+                            "garden",
+                        ]
+                    }
+                },
+            ),
+            Case(
+                description="forloop length with offset",
+                template=r"{% for tag in product.tags offset:3 %}{{ forloop.length }} {% endfor %}",
+                expect="3 3 3 ",
+                globals={
+                    "product": {
+                        "tags": [
+                            "sports",
+                            "garden",
+                            "sports",
+                            "garden",
+                            "sports",
+                            "garden",
+                        ]
+                    }
+                },
             ),
             Case(
                 description="forloop goes out of scope",

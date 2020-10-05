@@ -3,16 +3,11 @@ import sys
 from typing import Optional, List, TextIO
 
 from liquid.token import Token, TOKEN_EOF, TOKEN_EXPRESSION, TOKEN_TAG_NAME
-from liquid.parse import (
-    get_parser,
-    expect,
-    parse_filtered_expression,
-    parse_boolean_expression,
-)
+from liquid.parse import get_parser, expect, parse_boolean_expression
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_boolean_expression
 
 TAG_CASE = sys.intern("case")
 TAG_ENDCASE = sys.intern("endcase")
@@ -70,7 +65,6 @@ class CaseTag(Tag):
 
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
-        lexer = get_expression_lexer(self.env)
 
         expect(stream, TOKEN_TAG_NAME, value=TAG_CASE)
         tok = stream.current
@@ -92,8 +86,8 @@ class CaseTag(Tag):
             stream.next_token()  # Eat WHEN
             expect(stream, TOKEN_EXPRESSION)
 
-            expr_iter = lexer.tokenize(f"{case} == {stream.current.value}")
-            expr = parse_boolean_expression(expr_iter)
+            expr_iter = tokenize_boolean_expression(f"{case} == {stream.current.value}")
+            expr = parse_boolean_expression(TokenStream(expr_iter))
 
             when = ast.ConditionalBlockNode(
                 stream.current,

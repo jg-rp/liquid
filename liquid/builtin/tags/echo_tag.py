@@ -5,7 +5,7 @@ import sys
 from liquid.token import TOKEN_TAG_NAME, TOKEN_EXPRESSION
 from liquid import ast
 from liquid.tag import Tag
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_filtered_expression
 from liquid.parse import parse_filtered_expression, expect
 from liquid.builtin.statement import StatementNode
 
@@ -25,9 +25,7 @@ class EchoTag(Tag):
     """"""
 
     name = TAG_ECHO
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG_NAME, value=TAG_ECHO)
@@ -35,7 +33,7 @@ class EchoTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = get_expression_lexer(self.env).tokenize(stream.current.value)
+        expr_iter = tokenize_filtered_expression(stream.current.value)
 
-        expr = parse_filtered_expression(expr_iter)
+        expr = parse_filtered_expression(TokenStream(expr_iter))
         return EchoNode(tok, expression=expr)

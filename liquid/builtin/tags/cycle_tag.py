@@ -13,7 +13,7 @@ from liquid.token import (
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_expression_lexer
+from liquid.lex import TokenStream, tokenize_filtered_expression
 from liquid.parse import (
     expect,
     parse_expression,
@@ -58,9 +58,7 @@ class CycleTag(Tag):
     """"""
 
     name = TAG_CYCLE
-
-    def __init__(self, env, block: bool = False):
-        super().__init__(env, block)
+    block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG_NAME, value=TAG_CYCLE)
@@ -68,7 +66,7 @@ class CycleTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = get_expression_lexer(self.env).tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_filtered_expression(stream.current.value))
 
         if ":" in stream.current.value:
             group_name = parse_string_or_identifier(expr_stream, linenum=tok.linenum)

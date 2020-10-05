@@ -177,16 +177,13 @@ class MalformedTemplateTestCase(TestCase):
                 description="non integer in range",
                 template="{% for x in (2.4..4) %}{{ x }}{% endfor %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg=(
-                    "invalid range expression, "
-                    "expected an integer, found a float, on line 1"
-                ),
+                expect_msg=("expected '..', found '.', on line 1"),
             ),
             Case(
                 description="missing equal in assignment tag",
                 template="{% assign x 5 %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="expected '=', found 'integer', on line 1",
+                expect_msg='invalid assignment expression "x 5", on line 1',
             ),
             Case(
                 description="wrong data type for filter",
@@ -222,7 +219,7 @@ class MalformedTemplateTestCase(TestCase):
                 description="unknown prefix operator",
                 template="{{ +5 }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown prefix operator '+', on line 1",
+                expect_msg="unexpected '+', on line 1",
             ),
             Case(
                 description="float literal without a leading zero",
@@ -234,25 +231,25 @@ class MalformedTemplateTestCase(TestCase):
                 description="unknown infix operator",
                 template="{% if 1 =! 2 %}ok{% endif %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown operator '=', on line 1",
+                expect_msg="unknown operator '=!', on line 1",
             ),
             Case(
                 description="bad 'unless' expression",
                 template="{% unless 1 ~ 2 %}ok{% endunless %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown operator '~', on line 1",
+                expect_msg="unexpected '~', on line 1",
             ),
             Case(
                 description="unknown infix operator",
                 template="{% if 1 ~ 2 %}ok{% endif %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown operator '~', on line 1",
+                expect_msg="unexpected '~', on line 1",
             ),
             Case(
                 description="bad alternative condition expression",
                 template="{% if false %}ok{% elsif 1~=2 %}not ok{% endif %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown operator '~', on line 1",
+                expect_msg="unexpected '~', on line 1",
             ),
             Case(
                 description="render next block after filter error",
@@ -419,3 +416,30 @@ class MalformedTemplateTestCase(TestCase):
             result = template.render()
 
         self.assertEqual(result, "before error after error")
+
+    def test_invalid_identifiers(self):
+        """Test that we gracefully handle invalid identifiers."""
+        test_cases = [
+            Case(
+                description="unexpected character",
+                template=r"{% assign foo+bar = 'hello there'%}{{ foo+bar }}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="invalid assignment expression \"foo+bar = 'hello there'\", on line 1",
+            ),
+            Case(
+                description="unexpected chained assignment identifier",
+                template=r"{% assign foo.bar = 'hello there' %}{{ foo.bar }}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="invalid assignment expression \"foo.bar = 'hello there'\", on line 1",
+            ),
+            Case(
+                description="unexpected chained capture identifier",
+                template=r"{% capture foo.bar %}{% endcapture %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg='invalid capture identifier "foo.bar", on line 1',
+            ),
+        ]
+
+        self._test(test_cases, mode=Mode.STRICT)
+        # self._test(test_cases, mode=Mode.WARN)
+        # self._test(test_cases, mode=Mode.LAX)
