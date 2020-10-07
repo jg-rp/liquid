@@ -2,13 +2,13 @@
 
 from abc import ABC, abstractmethod
 from io import StringIO
-from typing import List, Optional, TextIO
+from typing import List, Optional, TextIO, Collection, Union, NoReturn
 
 from liquid import __version__
 from liquid import Context
 from liquid import Expression
 
-from liquid.token import Token, TOKEN_TAG_NAME
+from liquid.token import Token, TOKEN_TAG
 from liquid.exceptions import DisabledTagError, Error
 
 
@@ -17,15 +17,16 @@ class Node(ABC):
 
     statement = True
 
-    def token(self) -> Optional[Token]:
+    def token(self) -> Token:
         """The token that started this node."""
         return getattr(self, "tok", None)
 
-    def raise_for_disabled(self, disabled_tags):
+    def raise_for_disabled(self, disabled_tags: Collection[str]):
         tok = self.token()
-        if tok.type == TOKEN_TAG_NAME and tok.value in disabled_tags:
+        if tok.type == TOKEN_TAG and tok.value in disabled_tags:
             raise DisabledTagError(
-                f"{tok.value} usage is not allowed in this context", linenum=tok.linenum
+                f"{tok.value} usage is not allowed in this context",
+                linenum=tok.linenum,
             )
 
     def render(self, context: Context, buffer: TextIO) -> Optional[bool]:
@@ -35,7 +36,11 @@ class Node(ABC):
         return self.render_to_output(context, buffer)
 
     @abstractmethod
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self,
+        context: Context,
+        buffer: TextIO,
+    ) -> Union[Optional[bool], NoReturn]:
         """Render this node to the output buffer."""
 
 
@@ -87,7 +92,7 @@ class IllegalNode(Node):
 class BlockNode(Node):
     __slots__ = ("tok", "statements")
 
-    def __init__(self, tok: Token, statements: List[Node] = None):
+    def __init__(self, tok: Token, statements: Optional[List[Node]] = None):
         self.tok = tok
         self.statements = statements or []
 

@@ -1,10 +1,10 @@
 """"""
 import sys
-from typing import List, Any, Optional, TextIO, NamedTuple
+from typing import List, Any, Optional, TextIO
 
 from liquid.token import (
     Token,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_EXPRESSION,
     TOKEN_EOF,
     TOKEN_COMMA,
@@ -13,7 +13,8 @@ from liquid.token import (
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_filtered_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_filtered_expression
 from liquid.parse import (
     expect,
     parse_expression,
@@ -46,7 +47,7 @@ class CycleNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         if self.group:
-            group_name = self.group.evaluate(context)
+            group_name = str(self.group.evaluate(context))
         else:
             group_name = ""
 
@@ -61,7 +62,7 @@ class CycleTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_CYCLE)
+        expect(stream, TOKEN_TAG, value=TAG_CYCLE)
         tok = stream.current
         stream.next_token()
 
@@ -94,5 +95,4 @@ class CycleTag(Tag):
                     linenum=tok.linenum,
                 )
 
-        # TODO: Validate group as identifier.
         return CycleNode(tok, group_name, args)

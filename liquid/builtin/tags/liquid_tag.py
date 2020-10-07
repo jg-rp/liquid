@@ -3,11 +3,12 @@
 import sys
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG_NAME, TOKEN_EXPRESSION
+from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, get_liquid_lexer
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_liquid_expression
 from liquid.parse import expect, get_parser
 
 TAG_LIQUID = sys.intern("liquid")
@@ -41,12 +42,12 @@ class LiquidTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_LIQUID)
+        expect(stream, TOKEN_TAG, value=TAG_LIQUID)
         tok = stream.current
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = get_liquid_lexer(self.env).tokenize(stream.current.value)
+        expr_stream = TokenStream(tokenize_liquid_expression(stream.current.value))
 
         parser = get_parser(self.env)
         block = parser.parse_block(expr_stream, end=())

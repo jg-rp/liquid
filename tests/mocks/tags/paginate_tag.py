@@ -1,11 +1,13 @@
 import math
 import sys
+
+from collections import abc
 from typing import Optional, TextIO
 
 from liquid.token import (
     Token,
     TOKEN_EXPRESSION,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_BY,
     TOKEN_IDENTIFIER,
     TOKEN_INTEGER,
@@ -13,7 +15,8 @@ from liquid.token import (
 )
 from liquid.tag import Tag
 from liquid import ast
-from liquid.lex import TokenStream, tokenize_paginate_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_paginate_expression
 from liquid.expression import Identifier
 from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier, parse_integer_literal
@@ -43,13 +46,16 @@ class PaginateNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         collection = self.identifier.evaluate(context)
+        assert isinstance(collection, abc.Collection)
 
         if not collection:
             raise LiquidTypeError(f"cannot paginate {self.identifier.tok.value}")
 
         collection_size = len(collection)
         page_count = math.ceil(collection_size / self.page_size)
+
         current_page = context.get("current_page", default=1)
+        assert isinstance(current_page, int)
 
         pagination = {
             "page_size": self.page_size,
@@ -100,7 +106,7 @@ class PaginateTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_PAGINATE)
+        expect(stream, TOKEN_TAG, value=TAG_PAGINATE)
         tok = stream.current
         stream.next_token()
 
@@ -127,7 +133,7 @@ class PaginateTag(Tag):
         # Advance the stream passed the expression and read the block.
         stream.next_token()
         block = parser.parse_block(stream, end=(TAG_ENDPAGINATE,))
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDPAGINATE)
+        expect(stream, TOKEN_TAG, value=TAG_ENDPAGINATE)
 
         return PaginateNode(
             tok, identifier=identifier, page_size=page_size.value, block=block

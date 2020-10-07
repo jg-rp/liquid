@@ -5,12 +5,12 @@ import sys
 from io import StringIO
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG_NAME, TOKEN_EOF, TOKEN_EXPRESSION
+from liquid.token import Token, TOKEN_TAG, TOKEN_EOF, TOKEN_EXPRESSION
 from liquid.parse import expect, get_parser
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
 from liquid.exceptions import LiquidSyntaxError
 
 RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
@@ -26,7 +26,7 @@ class CaptureNode(ast.Node):
 
     statement = False
 
-    def __init__(self, tok: Token, name: str, block: ast.BlockNode = None):
+    def __init__(self, tok: Token, name: str, block: ast.BlockNode):
         self.tok = tok
         self.name = name
         self.block = block
@@ -51,7 +51,7 @@ class CaptureTag(Tag):
     def parse(self, stream: TokenStream) -> CaptureNode:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_CAPTURE)
+        expect(stream, TOKEN_TAG, value=TAG_CAPTURE)
         tok = stream.current
         stream.next_token()
 
@@ -67,6 +67,6 @@ class CaptureTag(Tag):
 
         stream.next_token()
         block = parser.parse_block(stream, ENDCAPTUREBLOCK)
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDCAPTURE)
+        expect(stream, TOKEN_TAG, value=TAG_ENDCAPTURE)
 
         return CaptureNode(tok, name, block=block)

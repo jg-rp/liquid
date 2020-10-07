@@ -5,7 +5,8 @@ from liquid.token import Token, TOKEN_STATEMENT
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_filtered_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_filtered_expression
 from liquid.parse import parse_filtered_expression, expect
 from liquid.expression import Expression
 

@@ -3,7 +3,6 @@
 import unittest
 from typing import NamedTuple, Any
 
-from liquid.environment import Environment
 from liquid.expression import (
     FilteredExpression,
     BooleanExpression,
@@ -31,6 +30,7 @@ from liquid.token import (
     TOKEN_TRUE,
     TOKEN_FALSE,
 )
+from liquid.stream import TokenStream
 from liquid.lex import (
     tokenize_identifier,
     tokenize_loop_expression,
@@ -46,8 +46,6 @@ from liquid.parse import (
     parse_assignment_expression,
     parse_loop_expression,
 )
-
-from liquid.stream import TokenStream
 
 
 class Case(NamedTuple):

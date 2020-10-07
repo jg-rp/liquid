@@ -1,8 +1,14 @@
-from typing import Dict, Type
+from typing import Dict, Type, Optional, Union
+from pathlib import Path
 
 
 class Error(Exception):
-    def __init__(self, *args, linenum=None, filename=None):
+    def __init__(
+        self,
+        *args: object,
+        linenum: Optional[int] = None,
+        filename: Optional[Union[str, Path]] = None,
+    ):
         self.linenum = linenum
         self.filename = filename
         super().__init__(*args)

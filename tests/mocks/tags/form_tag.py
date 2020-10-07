@@ -1,16 +1,18 @@
 import sys
+from collections import abc
 from typing import Optional, TextIO
 
 from liquid.token import (
     Token,
     TOKEN_EXPRESSION,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_IDENTIFIER,
     TOKEN_EOF,
 )
 from liquid.tag import Tag
 from liquid import ast
-from liquid.lex import TokenStream, tokenize_identifier
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_identifier
 from liquid.expression import Identifier
 from liquid.context import Context
 from liquid.parse import get_parser, expect, parse_identifier
@@ -30,6 +32,8 @@ class CommentFormNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         article = self.article.evaluate(context)
+        assert isinstance(article, abc.Mapping)
+
         form = {
             "posted_successfully?": context.get("posted_successfully", True),
             "errors": context.get(["comment", "errors"], []),
@@ -57,7 +61,7 @@ class CommentFormTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_FORM)
+        expect(stream, TOKEN_TAG, value=TAG_FORM)
         tok = stream.current
         stream.next_token()
 
@@ -74,6 +78,6 @@ class CommentFormTag(Tag):
         # Advance the stream passed the expression and read the block.
         stream.next_token()
         block = parser.parse_block(stream, end=(TAG_ENDFORM,))
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDFORM)
+        expect(stream, TOKEN_TAG, value=TAG_ENDFORM)
 
         return CommentFormNode(tok, article=article, block=block)

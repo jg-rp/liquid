@@ -7,7 +7,7 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.token import (
     Token,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_EXPRESSION,
     TOKEN_IDENTIFIER,
     TOKEN_WITH,
@@ -18,7 +18,8 @@ from liquid.token import (
     TOKEN_EOF,
     TOKEN_STRING,
 )
-from liquid.lex import TokenStream, tokenize_include_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_include_expression
 from liquid.parse import (
     expect,
     parse_identifier,
@@ -81,7 +82,7 @@ class RenderNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         template_name = self.name.evaluate(context)
-        template = self.get_template(template_name, None)
+        template = self.get_template(str(template_name), None)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -136,7 +137,7 @@ class RenderTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_RENDER)
+        expect(stream, TOKEN_TAG, value=TAG_RENDER)
         tok = stream.current
         stream.next_token()
 

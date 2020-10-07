@@ -3,9 +3,15 @@
 from abc import ABC, abstractmethod
 import collections.abc
 from functools import wraps
-from typing import Tuple, Any
+from typing import Tuple, Any, Protocol
 
+from liquid.mode import Mode
 from liquid.exceptions import FilterArgumentError
+
+
+class Env(Protocol):
+
+    mode: Mode
 
 
 class Filter(ABC):
@@ -19,7 +25,7 @@ class Filter(ABC):
 
     with_context = False
 
-    def __init__(self, env):
+    def __init__(self, env: Env):
         self.env = env
 
     @abstractmethod
@@ -27,7 +33,7 @@ class Filter(ABC):
         """Call the filter where `val` is the left hand expression of an output statement."""
 
 
-def expect_number(name, val):
+def expect_number(name: str, val: object):
     """Return `val` as an integer or float. Raise a FilterArgumentError
     if `val` can't be cast to an integer or float."""
     if isinstance(val, (int, float)):
@@ -48,7 +54,7 @@ def expect_number(name, val):
     return num
 
 
-def expect_integer(name, val):
+def expect_integer(name: str, val: object):
     """Return `val` as an integer. Raise a FilterArgumentError if `val` can't
     be cast to an integer."""
     if isinstance(val, int):
@@ -65,13 +71,13 @@ def expect_integer(name, val):
     return num
 
 
-def expect_string(name, val):
+def expect_string(name: str, val: object):
     """Raise a FilterArgumentError is val is not a string."""
     if not isinstance(val, str):
         raise FilterArgumentError(f"{name}: expected a string, found {type(val)}")
 
 
-def expect_string_or_array(name, val):
+def expect_string_or_array(name: str, val: object):
     """Raise a FilterArgumentError is val is not a string or a list."""
     if not isinstance(val, (str, list)):
         raise FilterArgumentError(
@@ -79,7 +85,7 @@ def expect_string_or_array(name, val):
         )
 
 
-def expect_n_args(name, n, args, kwargs):
+def expect_n_args(name: str, n: int, args: ..., kwargs: ...):
     """Raise a FilterArgumentError if args does not have `n` elements, and
     kwargs is not empty."""
     length = len(args)
@@ -93,13 +99,13 @@ def expect_n_args(name, n, args, kwargs):
         )
 
 
-def expect_one_arg(name, args, kwargs):
+def expect_one_arg(name: str, args: ..., kwargs: ...):
     """Raise a FilterArgumentError if args is not a single element tuple, and
     kwargs is not empty."""
     expect_n_args(name, 1, args, kwargs)
 
 
-def maybe_one_arg(name, args, kwargs):
+def maybe_one_arg(name: str, args: ..., kwargs: ...):
     """Raise a FilterArgumentError if args is not empty or a single element tuple,
     and kwargs is not empty."""
     if kwargs:
@@ -118,7 +124,7 @@ def maybe_one_arg(name, args, kwargs):
     )
 
 
-def one_maybe_two_args(name, args, kwargs) -> Tuple[Any, ...]:
+def one_maybe_two_args(name: str, args: ..., kwargs: ...) -> Tuple[Any, ...]:
     """Return (args[0], args[1]) or None if the args aren't there."""
     if kwargs:
         raise FilterArgumentError(
@@ -136,7 +142,7 @@ def one_maybe_two_args(name, args, kwargs) -> Tuple[Any, ...]:
     )
 
 
-def expect_no_args(name, args, kwargs):
+def expect_no_args(name: str, args: ..., kwargs: ...):
     """Raise a FilterArgumentError if args and kwargs are not empty."""
     if args:
         raise FilterArgumentError(
@@ -148,7 +154,7 @@ def expect_no_args(name, args, kwargs):
         )
 
 
-def expect_array(name, val):
+def expect_array(name: str, val: object):
     """Raise a FilterArgumentError is val is not an array/list."""
     if not isinstance(val, (list, tuple)):
         raise FilterArgumentError(f"{name}: expected an array, found {type(val)}")

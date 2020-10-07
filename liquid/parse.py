@@ -1,67 +1,44 @@
 """Liquid template parser."""
+from __future__ import annotations
 
-from collections import namedtuple
 from enum import IntEnum, auto
 from functools import lru_cache
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Optional, NamedTuple, Dict, Protocol, Any
 
 from liquid.exceptions import LiquidSyntaxError, Error
+from liquid.mode import Mode, error
+
 from liquid import expression
-from liquid.token import (
-    TOKEN_EOF,
-    TOKEN_IDENTIFIER,
-    TOKEN_INTEGER,
-    TOKEN_DOT,
-    TOKEN_LBRACKET,
-    TOKEN_LITERAL,
-    TOKEN_STRING,
-    TOKEN_EQ,
-    TOKEN_LT,
-    TOKEN_GT,
-    TOKEN_NE,
-    TOKEN_LG,
-    TOKEN_LE,
-    TOKEN_GE,
-    TOKEN_CONTAINS,
-    TOKEN_AND,
-    TOKEN_OR,
-    TOKEN_PIPE,
-    TOKEN_TRUE,
-    TOKEN_FALSE,
-    TOKEN_COMMA,
-    TOKEN_COLON,
-    TOKEN_LIMIT,
-    TOKEN_OFFSET,
-    TOKEN_COLS,
-    TOKEN_RBRACKET,
-    TOKEN_NIL,
-    TOKEN_EMPTY,
-    TOKEN_NEGATIVE,
-    TOKEN_FLOAT,
-    TOKEN_REVERSED,
-    TOKEN_ASSIGN,
-    TOKEN_IN,
-    TOKEN_RANGE,
-    TOKEN_LPAREN,
-    TOKEN_RPAREN,
-    Token,
-    TOKEN_STATEMENT,
-    TOKEN_TAG_NAME,
-    TOKEN_ILLEGAL,
-    reverse_operators,
-)
+from liquid.token import *  # pylint: disable=wildcard-import unused-wildcard-import
+
 from liquid import ast
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
+
+
+class Tag(Protocol):
+
+    block: bool
+
+    def get_node(self: Any, stream: TokenStream) -> ast.Node:
+        ...
+
+
+class Env(Protocol):
+
+    tags: Dict[str, Tag]
+    mode: Mode
 
 
 class Parser:
-    __slots__ = ("env", "illegal", "literal", "statement")
+    __slots__ = ("tags", "mode", "illegal", "literal", "statement")
 
-    def __init__(self, env):
-        self.env = env
-        self.illegal = self.env.tags[TOKEN_ILLEGAL]
-        self.literal = self.env.tags[TOKEN_LITERAL]
-        self.statement = self.env.tags[TOKEN_STATEMENT]
+    def __init__(self, env: Env):
+        self.tags = env.tags
+        self.mode = env.mode
+
+        self.illegal = self.tags[TOKEN_ILLEGAL]
+        self.literal = self.tags[TOKEN_LITERAL]
+        self.statement = self.tags[TOKEN_STATEMENT]
 
     def parse(self, stream: TokenStream) -> ast.ParseTree:
         root = ast.ParseTree()
@@ -71,19 +48,18 @@ class Parser:
                 if node := self.parse_statement(stream):
                     root.statements.append(node)
             except Error as err:
-                self.env.error(err, linenum=stream.current.linenum)
+                error(self.mode, err, linenum=stream.current.linenum)
 
             stream.next_token()
 
         return root
 
-    def parse_statement(self, stream) -> ast.Node:
+    def parse_statement(self, stream: TokenStream) -> ast.Node:
         """"""
-
         if stream.current.test(TOKEN_STATEMENT):
             node = self.statement.get_node(stream)
-        elif stream.current.test(TOKEN_TAG_NAME):
-            tag = self.env.tags.get(stream.current.value, self.illegal)
+        elif stream.current.test(TOKEN_TAG):
+            tag = self.tags.get(stream.current.value, self.illegal)
 
             if tag.block:
                 stream.balancing_stack.append(tag)
@@ -93,7 +69,8 @@ class Parser:
             # Tag parse functions can choose to return an IllegalNode.
             if node.__class__ == "IllegalNode":
                 raise LiquidSyntaxError(
-                    f"unexpected tag '{node.tok.value}'", linenum=node.tok.linenum
+                    f"unexpected tag '{node.token().value}'",
+                    linenum=node.token().linenum,
                 )
 
             if tag.block:
@@ -109,11 +86,11 @@ class Parser:
 
         return node
 
-    def parse_block(self, stream, end: Tuple[str, ...]) -> ast.BlockNode:
+    def parse_block(self, stream: TokenStream, end: Tuple[str, ...]) -> ast.BlockNode:
         block = ast.BlockNode(stream.current)
 
         while stream.current.type != TOKEN_EOF:
-            if stream.current.type == TOKEN_TAG_NAME and stream.current.value in end:
+            if stream.current.type == TOKEN_TAG and stream.current.value in end:
                 break
             stmt = self.parse_statement(stream)
             if stmt:
@@ -123,7 +100,7 @@ class Parser:
         return block
 
 
-def _expect(tok: Token, typ: str, value: str = None) -> None:
+def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
     if tok.type != typ or (value is not None and tok.value != value):
         _typ = reverse_operators.get(tok.type, tok.type)
         _expected_typ = reverse_operators.get(typ, typ)
@@ -134,11 +111,11 @@ def _expect(tok: Token, typ: str, value: str = None) -> None:
         raise LiquidSyntaxError(msg, linenum=tok.linenum)
 
 
-def expect(stream: TokenStream, typ: str, value: str = None) -> None:
+def expect(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
     _expect(stream.current, typ, value)
 
 
-def expect_peek(stream: TokenStream, typ: str, value: str = None) -> None:
+def expect_peek(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
     _expect(stream.peek, typ, value)
 
 
@@ -153,7 +130,7 @@ def eat_block(stream: TokenStream, end: Tuple[str, ...]) -> None:
     that we can continue to parse more of the stream after the offending block.
     """
     while stream.current.type != TOKEN_EOF:
-        if stream.current.type == TOKEN_TAG_NAME and stream.current.value in end:
+        if stream.current.type == TOKEN_TAG and stream.current.value in end:
             break
         stream.next_token()
 
@@ -335,7 +312,9 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     return expression.Identifier(tok, path)
 
 
-RangeOption = namedtuple("RangeOption", ["tok", "arg"])
+class RangeOption(NamedTuple):
+    tok: Token
+    arg: Optional[Union[expression.Identifier, expression.IntegerLiteral]]
 
 
 def parse_range_argument(
@@ -352,7 +331,10 @@ def parse_range_argument(
     return arg
 
 
-def parse_string_or_identifier(stream, linenum=None) -> ast.Expression:
+def parse_string_or_identifier(
+    stream: TokenStream,
+    linenum: Optional[int] = None,
+) -> ast.Expression:
     if stream.current.type == TOKEN_IDENTIFIER:
         expr = parse_identifier(stream)
     elif stream.current.type == TOKEN_STRING:
@@ -365,7 +347,10 @@ def parse_string_or_identifier(stream, linenum=None) -> ast.Expression:
     return expr
 
 
-def parse_unchained_identifier(stream, linenum=None) -> ast.Expression:
+def parse_unchained_identifier(
+    stream: TokenStream,
+    linenum: Optional[int] = None,
+) -> expression.Identifier:
     expect(stream, TOKEN_IDENTIFIER)
     tok = stream.current
     ident = parse_identifier(stream)
@@ -396,19 +381,31 @@ def parse_range_option(stream: TokenStream) -> RangeOption:
 
 
 def parse_prefix_expression(stream: TokenStream) -> expression.PrefixExpression:
-    exp = expression.PrefixExpression(stream.current, stream.current.value)
+    tok = stream.current
     stream.next_token()
-    exp.right = parse_expression(stream, precedence=Precedence.PREFIX)
+
+    exp = expression.PrefixExpression(
+        tok,
+        tok.value,
+        right=parse_expression(stream, precedence=Precedence.PREFIX),
+    )
+
     return exp
 
 
-def parse_infix_expression(stream: TokenStream, left) -> expression.InfixExpression:
-    exp = expression.InfixExpression(
-        stream.current, left=left, operator=stream.current.value
-    )
+def parse_infix_expression(
+    stream: TokenStream, left: expression.Expression
+) -> expression.InfixExpression:
+    tok = stream.current
     precedence = current_precedence(stream)
     stream.next_token()
-    exp.right = parse_expression(stream, precedence)
+
+    exp = expression.InfixExpression(
+        tok,
+        left=left,
+        operator=tok.value,
+        right=parse_expression(stream, precedence),
+    )
     return exp
 
 
@@ -477,7 +474,7 @@ def parse_filtered_expression(stream: TokenStream) -> expression.FilteredExpress
     return expression.FilteredExpression(expr, filters)
 
 
-def parse_boolean_expression(stream) -> expression.Expression:
+def parse_boolean_expression(stream: TokenStream) -> expression.Expression:
     """Parse a liquid expression that evaluates to a Boolean value.
 
     This is primarily used by control flow tags like `if`, `unless` and `case`/`when`.
@@ -487,13 +484,13 @@ def parse_boolean_expression(stream) -> expression.Expression:
     """
     if stream.current.type == TOKEN_EOF:
         # Empty expression.
-        return expression.Nil(tok=stream.current.type)
+        return expression.Nil(tok=stream.current)
     return expression.BooleanExpression(
-        tok=stream.current.type, expression=parse_expression(stream)
+        tok=stream.current, expression=parse_expression(stream)
     )
 
 
-def parse_assignment_expression(stream) -> expression.AssignmentExpression:
+def parse_assignment_expression(stream: TokenStream) -> expression.AssignmentExpression:
     """Parse a liquid assignment expression, as one might find in an `assign` tag.
 
     This is essentially the same as a parse_filtered_expression, but with
@@ -513,7 +510,7 @@ def parse_assignment_expression(stream) -> expression.AssignmentExpression:
     return expression.AssignmentExpression(tok=tok, name=str(name), expression=expr)
 
 
-def parse_loop_expression(stream) -> expression.LoopExpression:
+def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:
     """Parse a liquid loop expression, as one might find in a `for` tag.
 
     If any of the optional parameters are duplicated, the last (right most) is
@@ -576,5 +573,5 @@ def parse_loop_expression(stream) -> expression.LoopExpression:
 
 
 @lru_cache
-def get_parser(env):
+def get_parser(env: Env) -> Parser:
     return Parser(env)

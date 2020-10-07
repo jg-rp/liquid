@@ -1,118 +1,34 @@
 """Shared configuration from which templates can be loaded and parsed."""
 
 from __future__ import annotations
-from collections import ChainMap
-from io import StringIO
 from pathlib import Path
-from typing import Callable, Dict, Any, Type, Union, Optional, TextIO, Mapping
+
+from typing import (
+    Callable,
+    Dict,
+    Any,
+    Type,
+    Union,
+    Optional,
+    Mapping,
+)
 
 import warnings
 
-from liquid.mode import Mode, mode
+from liquid.mode import Mode
 from liquid.tag import Tag
-from liquid.context import Context
-from liquid.lex import tokenize_liquid
+from liquid.template import Template
+from liquid.lex import get_lexer
 from liquid.stream import TokenStream
 from liquid.parse import get_parser
-from liquid.ast import ParseTree
+
+from liquid import ast
 from liquid import builtin
-from liquid.builtin.drops import TemplateDrop
-from liquid.exceptions import Error, lookup_warning, LiquidInterrupt, LiquidSyntaxError
+from liquid import loaders
+
+from liquid.exceptions import Error
+from liquid.exceptions import lookup_warning
 from liquid.utils import LRUCache
-
-
-class Template:
-    """A loaded and parsed liquid template.
-
-    Rather than instantiating templates directly, the recommened way to create
-    templates is by calling `get_template` or `from_string` from an `Environment`.
-    """
-
-    # pylint: disable=redefined-builtin
-    def __init__(
-        self,
-        env: Environment,
-        parse_tree: ParseTree,
-        name: str = "",
-        path: Optional[Path] = None,
-        globals: Optional[Mapping[str, Any]] = None,
-        uptodate: Optional[Callable[[], bool]] = None,
-    ):
-        self.env = env
-        self.tree = parse_tree
-        self._globals = globals or {}
-        self.name = name
-        self.path = path
-        self.uptodate = uptodate
-
-        self.drop = TemplateDrop(self.name, self.path)
-
-        self.bytecode = None
-
-    def render(self, *args, **kwargs) -> str:
-        """Render the template with `args` and `kwargs` included in the render context.
-
-        Accepts the same arguments as the `dict` constructor.
-        """
-        _vars = dict(*args, **kwargs)
-
-        context = Context(self.env, ChainMap(self._globals, _vars))
-
-        buf = StringIO()
-        self.render_with_context(context, buf)
-        return buf.getvalue()
-
-    def render_with_context(
-        self,
-        context: Context,
-        buffer: TextIO,
-        *args,
-        partial: bool = False,
-        block_scope=False,
-        **kwargs,
-    ):
-        """Render the template using an existing context and output buffer.
-
-        Args:
-            context: A render context.
-            buffer: File-like object to which rendered text is written.
-            partial: If `True`, indicates that the current template has been
-                included using either a "render" or "include" tag.
-            block_scope: If `True`, indicates that assigns, breaks and continues
-                from this template will not leak into the parent context.
-        """
-        # "template" could get overriden from args/kwargs, "partial" will not.
-        namespace: Dict[str, Any] = {
-            "template": self.drop,
-            **dict(*args, **kwargs),
-            "partial": partial,
-        }
-
-        with context.extend(namespace=namespace):
-            for node in self.tree.statements:
-                with mode(self.env.mode, node.tok.linenum, filename=self.path):
-                    try:
-                        node.render(context, buffer)
-                    except LiquidInterrupt as err:
-                        # If this is an "included" template, the for loop could be in a
-                        # parent template. Convert the interrupt to a syntax error if
-                        # there is no parent.
-                        if not partial or block_scope:
-                            raise LiquidSyntaxError(f"unexpected '{err}'") from err
-                        raise
-                    except Error as err:
-                        self.env.error(err, linenum=node.tok.linenum)
-
-    @property
-    def is_up_to_date(self):
-        """False if the template was modified since it was last parsed,
-        True otherwise."""
-        if not self.uptodate:
-            return True
-        return self.uptodate()
-
-    def __repr__(self):
-        return f"Template(name='{self.name}', path='{self.path}', uptodate={self.is_up_to_date})"
 
 
 # pylint: disable=too-many-instance-attributes
@@ -149,22 +65,22 @@ class Environment:
         statement_end_string: str = r"}}",
         strip_tags: bool = False,
         tollerence: Mode = Mode.STRICT,
-        loader=None,
-        globals: Mapping[[str], Any] = None,
+        loader: Optional[loaders.BaseLoader] = None,
+        globals: Optional[Mapping[str, object]] = None,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
         self.statement_start_string = statement_start_string
         self.statement_end_string = statement_end_string
         self.strip_tags = strip_tags
-        self.loader = loader
-        self.globals = globals or {}
+        self.loader = loader or loaders.DictLoader({})
+        self.globals: Mapping[str, object] = globals or {}
 
         # Tag register.
         self.tags: Dict[str, Tag] = {}
 
         # Filter register.
-        self.filters: Dict[Union[str, int], Callable[..., Any]] = {}
+        self.filters: Dict[str, Callable[..., Any]] = {}
 
         # Tollerence mode
         self.mode = tollerence
@@ -207,15 +123,20 @@ class Environment:
         """
         self.filters[name] = func
 
-    def parse(self, source: str) -> ParseTree:
+    def parse(self, source: str) -> ast.ParseTree:
         """Parse the given string as a liquid template.
 
         More often than not you'll want to use `Environment.from_string` instead.
         """
-        # lexer = get_lexer(self)
+        tokenize = get_lexer(
+            self.tag_start_string,
+            self.tag_end_string,
+            self.statement_start_string,
+            self.statement_end_string,
+        )
         parser = get_parser(self)
 
-        token_iter = tokenize_liquid(source)
+        token_iter = tokenize(source)
         parse_tree = parser.parse(TokenStream(token_iter))
         return parse_tree
 
@@ -224,8 +145,8 @@ class Environment:
         self,
         source: str,
         name: str = "",
-        path: Path = None,
-        globals: Mapping[str, Any] = None,
+        path: Optional[Path] = None,
+        globals: Optional[Mapping[str, object]] = None,
     ) -> Template:
         """Parse the given string as a liquid template.
 
@@ -251,7 +172,9 @@ class Environment:
         )
 
     # pylint: disable=redefined-builtin
-    def get_template(self, name: str, globals: Dict[str, Any] = None) -> Template:
+    def get_template(
+        self, name: str, globals: Optional[Mapping[str, object]] = None
+    ) -> Template:
         """Load and parse a template using the configured loader.
 
         Args:
@@ -263,7 +186,8 @@ class Environment:
             A parsed template ready to be rendered.
         """
         template = self.cache.get(name)
-        if template and template.is_up_to_date:
+
+        if isinstance(template, Template) and template.is_up_to_date:
             # Copy the cached template with new globals.
             return Template(
                 env=self,
@@ -278,15 +202,22 @@ class Environment:
         return template
 
     # pylint: disable=redefined-builtin
-    def make_globals(self, globals: Mapping[str, Any] = None) -> Mapping[str, Any]:
+    def make_globals(
+        self, globals: Optional[Mapping[str, object]] = None
+    ) -> Mapping[str, object]:
         """Combine environment globals with template globals."""
         if globals:
-            return {**self.globals, **globals}
-        return {**self.globals}
+            _globals: Dict[str, object] = {**self.globals, **globals}
+        else:
+            _globals: Dict[str, object] = {**self.globals}
+        return _globals
 
     def error(
-        self, exc: Union[Type[Error], Error], msg: str = None, linenum: int = None
-    ):
+        self,
+        exc: Union[Type[Error], Error],
+        msg: Optional[str] = None,
+        linenum: Optional[int] = None,
+    ) -> None:
         if not isinstance(exc, Error):
             exc = exc(msg, linenum=linenum)
         elif not exc.linenum:

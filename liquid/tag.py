@@ -1,16 +1,30 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
+from typing import Protocol, Union, Type, Optional, Any
 
 from liquid.ast import IllegalNode
 from liquid.exceptions import Error
 from liquid.parse import eat_block
 from liquid import ast
+from liquid.stream import TokenStream
+
+
+class Env(Protocol):
+    def error(
+        self: Any,
+        exc: Union[Type[Error], Error],
+        msg: Optional[str] = ...,
+        linenum: Optional[int] = ...,
+    ) -> None:
+        ...
 
 
 class Tag(ABC):
 
     block = True
+    name = ""
 
-    def __init__(self, env):
+    def __init__(self, env: Env):
         """
         Args:
             block: If True, indicates that this tag is a block tag, where we
@@ -20,16 +34,11 @@ class Tag(ABC):
 
         self.env = env
 
-    @property
     @abstractmethod
-    def name(self) -> str:
-        """The tag name, as used in Liquid templates."""
-
-    @abstractmethod
-    def parse(self, stream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> ast.Node:
         """Build a parse tree node from a stream of tokens."""
 
-    def get_node(self, stream) -> ast.Node:
+    def get_node(self, stream: TokenStream) -> ast.Node:
         """Return an IllegalNode if an error is raised when calling `parse`."""
         tok = stream.current
         try:

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from liquid.token import TOKEN_ILLEGAL, TOKEN_EXPRESSION
 from liquid.tag import Tag
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
 from liquid.exceptions import LiquidSyntaxError
 from liquid.ast import IllegalNode
 

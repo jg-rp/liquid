@@ -1,15 +1,15 @@
-import collections.abc
 import re
 import sys
-from typing import Optional, Any, List, TextIO, Iterator
+from collections import abc
+from typing import Optional, Any, List, TextIO, Iterator, NoReturn, Union
 
-from liquid.token import Token, TOKEN_EXPRESSION, TOKEN_TAG_NAME
+from liquid.token import Token, TOKEN_EXPRESSION, TOKEN_TAG
 from liquid.parse import get_parser, expect, parse_loop_expression
-from liquid.stream import TokenStream
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_loop_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_loop_expression
 from liquid.expression import LoopExpression
 from liquid.exceptions import BreakLoop, ContinueLoop
 
@@ -26,7 +26,7 @@ ENDFORBLOCK = (TAG_ENDFOR, TAG_ELSE)
 ENDFORELSEBLOCK = (TAG_ENDFOR,)
 
 
-class ForLoop(collections.abc.Mapping):
+class ForLoop(abc.Mapping):
     """Loop helper variables."""
 
     __slots__ = (
@@ -69,7 +69,7 @@ class ForLoop(collections.abc.Mapping):
     def __repr__(self):  # pragma: no cover
         return f"ForLoop(name='{self.name}', length={self.length})"
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         if key in self.keys:
             return getattr(self, key)
         raise KeyError(key)
@@ -118,7 +118,7 @@ class ForNode(ast.Node):
         self,
         tok: Token,
         expression: LoopExpression,
-        block: ast.BlockNode = None,
+        block: ast.BlockNode,
         default: Optional[ast.BlockNode] = None,
     ):
         self.tok = tok
@@ -178,7 +178,11 @@ class BreakNode(ast.Node):
     def __str__(self) -> str:
         return "`break`"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(
+        self,
+        context: Context,
+        buffer: TextIO,
+    ) -> Union[Optional[bool], NoReturn]:
         raise BreakLoop("break")
 
 
@@ -191,7 +195,11 @@ class ContinueNode(ast.Node):
     def __str__(self) -> str:
         return "`continue`"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(
+        self,
+        context: Context,
+        buffer: TextIO,
+    ) -> Union[Optional[bool], NoReturn]:
         raise ContinueLoop("continue")
 
 
@@ -212,7 +220,7 @@ class ForTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_FOR)
+        expect(stream, TOKEN_TAG, value=TAG_FOR)
         tok = stream.current
         stream.next_token()
 
@@ -220,17 +228,18 @@ class ForTag(Tag):
         expr_iter = tokenize_loop_expression(stream.current.value)
         expr = parse_loop_expression(TokenStream(expr_iter))
 
-        tag = ForNode(tok, expression=expr)
         stream.next_token()
 
-        tag.block = parser.parse_block(stream, ENDFORBLOCK)
+        block = parser.parse_block(stream, ENDFORBLOCK)
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
-            tag.default = parser.parse_block(stream, ENDFORELSEBLOCK)
+            default = parser.parse_block(stream, ENDFORELSEBLOCK)
+        else:
+            default = None
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDFOR)
-        return tag
+        expect(stream, TOKEN_TAG, value=TAG_ENDFOR)
+        return ForNode(tok, expression=expr, block=block, default=default)
 
 
 class BreakTag(Tag):
@@ -239,7 +248,7 @@ class BreakTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> BreakNode:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_BREAK)
+        expect(stream, TOKEN_TAG, value=TAG_BREAK)
         return BreakNode(stream.current)
 
 
@@ -249,5 +258,5 @@ class ContinueTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> ContinueNode:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_CONTINUE)
+        expect(stream, TOKEN_TAG, value=TAG_CONTINUE)
         return ContinueNode(stream.current)

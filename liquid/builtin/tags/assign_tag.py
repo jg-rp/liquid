@@ -4,11 +4,12 @@ import re
 import sys
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG_NAME, TOKEN_EXPRESSION
+from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_filtered_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_filtered_expression
 from liquid.expression import AssignmentExpression
 from liquid.exceptions import LiquidSyntaxError
 from liquid.parse import expect, parse_filtered_expression
@@ -41,7 +42,7 @@ class AssignTag(Tag):
 
     def parse(self, stream: TokenStream) -> AssignNode:
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ASSIGN)
+        expect(stream, TOKEN_TAG, value=TAG_ASSIGN)
         tok = stream.current
         stream.next_token()
 

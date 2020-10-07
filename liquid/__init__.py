@@ -6,4 +6,5 @@ from liquid.token import Token
 from liquid.context import Context
 from liquid.expression import Expression
 from liquid.environment import Environment
+from liquid.environment import Template
 from liquid.loaders import FileSystemLoader

@@ -3,25 +3,65 @@
 import sys
 from typing import NamedTuple
 
-
-WHITESPACE = frozenset(" \t\n\r\x0b\x0c")
+__all__ = (
+    "TOKEN_ILLEGAL",
+    "TOKEN_INITIAL",
+    "TOKEN_EOF",
+    "TOKEN_TAG",
+    "TOKEN_EXPRESSION",
+    "TOKEN_STATEMENT",
+    "TOKEN_LITERAL",
+    "TOKEN_IDENTIFIER",
+    "TOKEN_STRING",
+    "TOKEN_INTEGER",
+    "TOKEN_FLOAT",
+    "TOKEN_EMPTY",
+    "TOKEN_NIL",
+    "TOKEN_WITH",
+    "TOKEN_FOR",
+    "TOKEN_AS",
+    "TOKEN_BY",
+    "TOKEN_NEGATIVE",
+    "TOKEN_TRUE",
+    "TOKEN_FALSE",
+    "TOKEN_CONTAINS",
+    "TOKEN_IN",
+    "TOKEN_LPAREN",
+    "TOKEN_RPAREN",
+    "TOKEN_RANGE",
+    "TOKEN_LIMIT",
+    "TOKEN_OFFSET",
+    "TOKEN_REVERSED",
+    "TOKEN_COLS",
+    "TOKEN_PIPE",
+    "TOKEN_COLON",
+    "TOKEN_COMMA",
+    "TOKEN_DOT",
+    "TOKEN_LBRACKET",
+    "TOKEN_RBRACKET",
+    "TOKEN_ASSIGN",
+    "TOKEN_AND",
+    "TOKEN_OR",
+    "TOKEN_EQ",
+    "TOKEN_NE",
+    "TOKEN_LG",
+    "TOKEN_LT",
+    "TOKEN_GT",
+    "TOKEN_LE",
+    "TOKEN_GE",
+    "operators",
+    "reverse_operators",
+    "Token",
+)
 
 TOKEN_ILLEGAL = sys.intern("illegal")
 TOKEN_INITIAL = sys.intern("initial")
 TOKEN_EOF = sys.intern("eof")
 
+TOKEN_TAG = sys.intern("tag")
 TOKEN_EXPRESSION = sys.intern("expression")
-TOKEN_TAG_START = sys.intern("tag_begin")
-TOKEN_TAG_END = sys.intern("tag_end")
-TOKEN_TAG_NAME = sys.intern("tag")
-TOKEN_STATEMENT_START = sys.intern("statement_begin")
-TOKEN_STATEMENT_END = sys.intern("statement_end")
 TOKEN_STATEMENT = sys.intern("statement")
 TOKEN_LITERAL = sys.intern("literal")
-
-TOKEN_NEWLINE = sys.intern("newline")
-TOKEN_WHITESPACE = sys.intern("whitespace")
-TOKEN_WHITESPACE_CONTROL = sys.intern("-")
 
 TOKEN_IDENTIFIER = sys.intern("identifier")
 TOKEN_STRING = sys.intern("string")
@@ -82,18 +122,6 @@ TOKEN_RBRACKET = sys.intern("rbracket")
 # Assignment
 TOKEN_ASSIGN = sys.intern("assign")
 
-token_types = {
-    1: TOKEN_STATEMENT_START,
-    2: TOKEN_STATEMENT_END,
-    3: TOKEN_TAG_START,
-    4: TOKEN_TAG_END,
-    5: TOKEN_STATEMENT,
-    6: TOKEN_TAG_NAME,
-    7: TOKEN_EXPRESSION,
-    8: TOKEN_LITERAL,
-    9: TOKEN_EOF,
-}
-
 operators = {
     "==": TOKEN_EQ,
     "!=": TOKEN_NE,
@@ -117,25 +145,6 @@ operators = {
 
 reverse_operators = {v: k for k, v in operators.items()}
 
-keywords = {
-    "true": TOKEN_TRUE,
-    "false": TOKEN_FALSE,
-    "nil": TOKEN_NIL,
-    "and": TOKEN_AND,
-    "or": TOKEN_OR,
-    "contains": TOKEN_CONTAINS,
-    "in": TOKEN_IN,
-    "limit": TOKEN_LIMIT,
-    "offset": TOKEN_OFFSET,
-    "reversed": TOKEN_REVERSED,
-    "cols": TOKEN_COLS,
-    "empty": TOKEN_EMPTY,
-    "with": TOKEN_WITH,
-    "for": TOKEN_FOR,
-    "as": TOKEN_AS,
-    "by": TOKEN_BY,
-}
-
 
 class Token(NamedTuple):
     linenum: int
@@ -146,4 +155,4 @@ class Token(NamedTuple):
         return self.type == typ
 
     def istag(self, name: str) -> bool:
-        return self.type == TOKEN_TAG_NAME and self.value == name
+        return self.type == TOKEN_TAG and self.value == name

@@ -6,10 +6,21 @@ See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import NamedTuple, Callable, Dict, Any, Optional
+from typing import NamedTuple, Callable, Mapping, Optional, Protocol, Any
 
-from liquid.environment import Environment, Template
+from liquid.template import Template
 from liquid.exceptions import TemplateNotFound
+
+
+class Env(Protocol):
+    def from_string(
+        self: Any,
+        source: str,
+        name: str = "",
+        path: Optional[Path] = None,
+        globals: Optional[Mapping[str, object]] = None,
+    ) -> Template:
+        ...
 
 
 class TemplateSource(NamedTuple):
@@ -20,12 +31,15 @@ class TemplateSource(NamedTuple):
 
 class BaseLoader(ABC):
     @abstractmethod
-    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+    def get_source(self, env: Env, template_name: str) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
 
     # pylint: disable=redefined-builtin
     def load(
-        self, env: Environment, name: str, globals: Dict[str, Any] = None
+        self,
+        env: Env,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
     ) -> Template:
         """"""
         try:
@@ -44,7 +58,7 @@ class FileSystemLoader(BaseLoader):
     def __init__(self, search_path: str):
         self.search_path = Path(search_path)
 
-    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+    def get_source(self, env: Env, template_name: str) -> TemplateSource:
         source_path = self.search_path.joinpath(template_name)
 
         if not source_path.exists():
@@ -61,10 +75,10 @@ class FileSystemLoader(BaseLoader):
 
 
 class DictLoader(BaseLoader):
-    def __init__(self, templates: Dict[str, str]):
+    def __init__(self, templates: Mapping[str, str]):
         self.templates = templates
 
-    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+    def get_source(self, env: Env, template_name: str) -> TemplateSource:
         if template_name not in self.templates:
             raise TemplateNotFound(template_name)
 

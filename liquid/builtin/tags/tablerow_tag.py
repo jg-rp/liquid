@@ -3,13 +3,14 @@ import sys
 import collections.abc
 import math
 from itertools import islice
-from typing import Any, List, TextIO, Iterator
+from typing import List, TextIO, Iterator
 
-from liquid.token import Token, TOKEN_TAG_NAME, TOKEN_EXPRESSION
+from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_loop_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_loop_expression
 from liquid.expression import LoopExpression
 from liquid.parse import expect, parse_loop_expression, get_parser
 
@@ -190,7 +191,7 @@ class TablerowTag(Tag):
     def parse(self, stream: TokenStream) -> TablerowNode:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_TABLEROW)
+        expect(stream, TOKEN_TAG, value=TAG_TABLEROW)
         tok = stream.current
         stream.next_token()
 
@@ -200,7 +201,7 @@ class TablerowTag(Tag):
         stream.next_token()
 
         block = parser.parse_block(stream, (TAG_ENDTABLEROW,))
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDTABLEROW)
+        expect(stream, TOKEN_TAG, value=TAG_ENDTABLEROW)
 
         return TablerowNode(tok, expression=loop_expression, block=block)
 

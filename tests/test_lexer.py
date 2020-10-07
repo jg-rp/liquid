@@ -4,12 +4,12 @@ from typing import NamedTuple, Any
 from liquid.environment import Environment
 from liquid.exceptions import LiquidSyntaxError
 from liquid.lex import (
-    get_liquid_lexer,
+    tokenize_liquid_expression,
     tokenize_loop_expression,
     tokenize_filtered_expression,
     tokenize_boolean_expression,
     tokenize_include_expression,
-    tokenize_liquid,
+    get_lexer,
 )
 from liquid.token import Token
 from liquid.token import *
@@ -26,9 +26,16 @@ class LiquidLexerTestCase(TestCase):
         self.env = Environment()
 
     def _test(self, test_cases):
+        tokenize = get_lexer(
+            self.env.tag_start_string,
+            self.env.tag_end_string,
+            self.env.statement_start_string,
+            self.env.statement_end_string,
+        )
+
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = tokenize_liquid(case.source)
+                tokens = tokenize(case.source)
 
                 for got, want in zip(tokens, case.expect):
                     self.assertEqual(got, want)
@@ -74,12 +81,12 @@ class LiquidLexerTestCase(TestCase):
                 "<HTML>{% if product %}some{% else %}other{% endif %}</HTML>",
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
-                    Token(1, TOKEN_TAG_NAME, "if"),
+                    Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
                     Token(1, TOKEN_LITERAL, "some"),
-                    Token(1, TOKEN_TAG_NAME, "else"),
+                    Token(1, TOKEN_TAG, "else"),
                     Token(1, TOKEN_LITERAL, "other"),
-                    Token(1, TOKEN_TAG_NAME, "endif"),
+                    Token(1, TOKEN_TAG, "endif"),
                     Token(1, TOKEN_LITERAL, "</HTML>"),
                 ],
             ),
@@ -88,12 +95,12 @@ class LiquidLexerTestCase(TestCase):
                 "<HTML>{%if  product %}some{% else  %}other{% endif%}</HTML>",
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
-                    Token(1, TOKEN_TAG_NAME, "if"),
+                    Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
                     Token(1, TOKEN_LITERAL, "some"),
-                    Token(1, TOKEN_TAG_NAME, "else"),
+                    Token(1, TOKEN_TAG, "else"),
                     Token(1, TOKEN_LITERAL, "other"),
-                    Token(1, TOKEN_TAG_NAME, "endif"),
+                    Token(1, TOKEN_TAG, "endif"),
                     Token(1, TOKEN_LITERAL, "</HTML>"),
                 ],
             ),
@@ -102,12 +109,12 @@ class LiquidLexerTestCase(TestCase):
                 "<HTML>{%if  product %}some  {%- else  %}other{% endif -%}</HTML>",
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
-                    Token(1, TOKEN_TAG_NAME, "if"),
+                    Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
                     Token(1, TOKEN_LITERAL, "some"),
-                    Token(1, TOKEN_TAG_NAME, "else"),
+                    Token(1, TOKEN_TAG, "else"),
                     Token(1, TOKEN_LITERAL, "other"),
-                    Token(1, TOKEN_TAG_NAME, "endif"),
+                    Token(1, TOKEN_TAG, "endif"),
                     Token(1, TOKEN_LITERAL, "</HTML>"),
                 ],
             ),
@@ -118,7 +125,7 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_LITERAL, "Some\n\n"),
                     Token(3, TOKEN_STATEMENT, "obj"),
                     Token(3, TOKEN_LITERAL, "\n"),
-                    Token(4, TOKEN_TAG_NAME, "assign"),
+                    Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
                 ],
             ),
@@ -128,7 +135,7 @@ class LiquidLexerTestCase(TestCase):
                 [
                     Token(1, TOKEN_LITERAL, "Some"),
                     Token(3, TOKEN_STATEMENT, "obj"),
-                    Token(4, TOKEN_TAG_NAME, "assign"),
+                    Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
                 ],
             ),
@@ -143,7 +150,7 @@ class LiquidLexerTestCase(TestCase):
                 "assign",
                 "{% assign foo = 'bar' %}",
                 [
-                    Token(1, TOKEN_TAG_NAME, "assign"),
+                    Token(1, TOKEN_TAG, "assign"),
                     Token(1, TOKEN_EXPRESSION, "foo = 'bar'"),
                 ],
             ),
@@ -151,12 +158,12 @@ class LiquidLexerTestCase(TestCase):
                 "capture",
                 "{% capture greeting %}Hello, {{ customer.first_name }}.{% endcapture %}",
                 [
-                    Token(1, TOKEN_TAG_NAME, "capture"),
+                    Token(1, TOKEN_TAG, "capture"),
                     Token(1, TOKEN_EXPRESSION, "greeting"),
                     Token(1, TOKEN_LITERAL, "Hello, "),
                     Token(1, TOKEN_STATEMENT, "customer.first_name"),
                     Token(1, TOKEN_LITERAL, "."),
-                    Token(1, TOKEN_TAG_NAME, "endcapture"),
+                    Token(1, TOKEN_TAG, "endcapture"),
                 ],
             ),
         ]
@@ -171,11 +178,11 @@ class LiquidLexerTestCase(TestCase):
                 "for loop",
                 "for i in (0..5)\necho i\nendfor",
                 [
-                    Token(1, TOKEN_TAG_NAME, "for"),
+                    Token(1, TOKEN_TAG, "for"),
                     Token(1, TOKEN_EXPRESSION, "i in (0..5)"),
-                    Token(2, TOKEN_TAG_NAME, "echo"),
+                    Token(2, TOKEN_TAG, "echo"),
                     Token(2, TOKEN_EXPRESSION, "i"),
-                    Token(3, TOKEN_TAG_NAME, "endfor"),
+                    Token(3, TOKEN_TAG, "endfor"),
                 ],
             ),
             Case(
@@ -195,24 +202,24 @@ class LiquidLexerTestCase(TestCase):
                     ]
                 ),
                 [
-                    Token(1, TOKEN_TAG_NAME, "case"),
+                    Token(1, TOKEN_TAG, "case"),
                     Token(1, TOKEN_EXPRESSION, "section.blocks.size"),
-                    Token(2, TOKEN_TAG_NAME, "when"),
+                    Token(2, TOKEN_TAG, "when"),
                     Token(2, TOKEN_EXPRESSION, "1"),
-                    Token(3, TOKEN_TAG_NAME, "assign"),
+                    Token(3, TOKEN_TAG, "assign"),
                     Token(3, TOKEN_EXPRESSION, "column_size = ''"),
-                    Token(4, TOKEN_TAG_NAME, "when"),
+                    Token(4, TOKEN_TAG, "when"),
                     Token(4, TOKEN_EXPRESSION, "2"),
-                    Token(5, TOKEN_TAG_NAME, "assign"),
+                    Token(5, TOKEN_TAG, "assign"),
                     Token(5, TOKEN_EXPRESSION, "column_size = 'one-half'"),
-                    Token(6, TOKEN_TAG_NAME, "when"),
+                    Token(6, TOKEN_TAG, "when"),
                     Token(6, TOKEN_EXPRESSION, "3"),
-                    Token(7, TOKEN_TAG_NAME, "assign"),
+                    Token(7, TOKEN_TAG, "assign"),
                     Token(7, TOKEN_EXPRESSION, "column_size = 'one-third'"),
-                    Token(8, TOKEN_TAG_NAME, "else"),
-                    Token(9, TOKEN_TAG_NAME, "assign"),
+                    Token(8, TOKEN_TAG, "else"),
+                    Token(9, TOKEN_TAG, "assign"),
                     Token(9, TOKEN_EXPRESSION, "column_size = 'one-quarter'"),
-                    Token(10, TOKEN_TAG_NAME, "endcase"),
+                    Token(10, TOKEN_TAG, "endcase"),
                 ],
             ),
             Case(
@@ -227,14 +234,14 @@ class LiquidLexerTestCase(TestCase):
                     ]
                 ),
                 [
-                    Token(1, TOKEN_TAG_NAME, "if"),
+                    Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product.featured_image"),
-                    Token(2, TOKEN_TAG_NAME, "echo"),
+                    Token(2, TOKEN_TAG, "echo"),
                     Token(2, TOKEN_EXPRESSION, "product.featured_image | img_tag"),
-                    Token(3, TOKEN_TAG_NAME, "else"),
-                    Token(4, TOKEN_TAG_NAME, "echo"),
+                    Token(3, TOKEN_TAG, "else"),
+                    Token(4, TOKEN_TAG, "echo"),
                     Token(4, TOKEN_EXPRESSION, "'product-1' | placeholder_svg_tag"),
-                    Token(5, TOKEN_TAG_NAME, "endif"),
+                    Token(5, TOKEN_TAG, "endif"),
                 ],
             ),
             Case(
@@ -252,29 +259,26 @@ class LiquidLexerTestCase(TestCase):
                     ]
                 ),
                 [
-                    Token(1, TOKEN_TAG_NAME, "if"),
+                    Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product.featured_image"),
-                    Token(2, TOKEN_TAG_NAME, "echo"),
+                    Token(2, TOKEN_TAG, "echo"),
                     Token(2, TOKEN_EXPRESSION, "product.featured_image | img_tag"),
-                    Token(3, TOKEN_TAG_NAME, "else"),
-                    Token(4, TOKEN_TAG_NAME, "echo"),
+                    Token(3, TOKEN_TAG, "else"),
+                    Token(4, TOKEN_TAG, "echo"),
                     Token(4, TOKEN_EXPRESSION, "'product-1' | placeholder_svg_tag"),
-                    Token(5, TOKEN_TAG_NAME, "endif"),
-                    Token(6, TOKEN_TAG_NAME, "for"),
+                    Token(5, TOKEN_TAG, "endif"),
+                    Token(6, TOKEN_TAG, "for"),
                     Token(6, TOKEN_EXPRESSION, "i in (0..5)"),
-                    Token(7, TOKEN_TAG_NAME, "echo"),
+                    Token(7, TOKEN_TAG, "echo"),
                     Token(7, TOKEN_EXPRESSION, "i"),
-                    Token(8, TOKEN_TAG_NAME, "endfor"),
+                    Token(8, TOKEN_TAG, "endfor"),
                 ],
             ),
         ]
 
-        env = Environment()
-        lex = get_liquid_lexer(env)
-
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = list(lex.tokenize(case.source))
+                tokens = list(tokenize_liquid_expression(case.source))
 
                 for got, want in zip(tokens, case.expect):
                     self.assertEqual(got, want)
@@ -304,7 +308,7 @@ class LiquidLexerTestCase(TestCase):
                 source=r"text {%",
                 expect=[
                     Token(1, TOKEN_LITERAL, "text "),
-                    Token(1, TOKEN_TAG_NAME, ""),
+                    Token(1, TOKEN_TAG, ""),
                 ],
             ),
             Case(
@@ -325,10 +329,17 @@ class LiquidLexerTestCase(TestCase):
             ),
         ]
 
+        tokenize = get_lexer(
+            self.env.tag_start_string,
+            self.env.tag_end_string,
+            self.env.statement_start_string,
+            self.env.statement_end_string,
+        )
+
         for case in test_cases:
             with self.subTest(msg=case.description):
                 with self.assertRaises(LiquidSyntaxError):
-                    list(tokenize_liquid(case.source))
+                    list(tokenize(case.source))
 
     def test_lex_output_statement_expression(self):
         """Test that the expression lexer can tokenize statement expressions."""

@@ -6,7 +6,7 @@ from liquid.token import Token, TOKEN_LITERAL
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
 
 
 class LiteralNode(ast.Node):

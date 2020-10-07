@@ -6,14 +6,15 @@ from typing import Optional, List, TextIO
 from liquid.token import (
     Token,
     TOKEN_EOF,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_EXPRESSION,
 )
 from liquid.parse import expect, parse_boolean_expression, get_parser, eat_block
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream, tokenize_boolean_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_boolean_expression
 from liquid.expression import Expression
 from liquid.exceptions import LiquidSyntaxError
 from liquid.builtin.illegal import IllegalNode
@@ -43,14 +44,14 @@ class IfNode(ast.Node):
         self,
         tok: Token,
         condition: Expression,
-        consequence: Optional[ast.BlockNode] = None,
-        conditional_alternatives: List[ast.ConditionalBlockNode] = None,
-        alternative: Optional[ast.BlockNode] = None,
+        consequence: ast.BlockNode,
+        conditional_alternatives: List[ast.ConditionalBlockNode],
+        alternative: Optional[ast.BlockNode],
     ):
         self.tok = tok
         self.condition = condition
         self.consequence = consequence
-        self.conditional_alternatives = conditional_alternatives or []
+        self.conditional_alternatives = conditional_alternatives
         self.alternative = alternative
 
     def __str__(self) -> str:
@@ -91,21 +92,19 @@ class IfTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_IF)
+        expect(stream, TOKEN_TAG, value=TAG_IF)
         tok = stream.current
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
         expr_iter = tokenize_boolean_expression(stream.current.value)
+        condition = parse_boolean_expression(TokenStream(expr_iter))
 
-        # If the expression can't be parsed, eat the whole "if" tag, including
-        # any alternatives. See `Tag.get_node`.
-        expr = parse_boolean_expression(TokenStream(expr_iter))
-
-        node = IfNode(tok, expr)
         stream.next_token()
 
-        node.consequence = parser.parse_block(stream, ENDIFBLOCK)
+        consequence = parser.parse_block(stream, ENDIFBLOCK)
+
+        conditional_alternatives = []
 
         while stream.current.istag(TAG_ELSIF):
             stream.next_token()
@@ -120,7 +119,7 @@ class IfTag(Tag):
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)
-                return IllegalNode(node.tok)
+                return IllegalNode(tok)
 
             alt = ast.ConditionalBlockNode(
                 stream.current,
@@ -128,11 +127,19 @@ class IfTag(Tag):
             )
             stream.next_token()
             alt.block = parser.parse_block(stream, ENDELSIFBLOCK)
-            node.conditional_alternatives.append(alt)
+            conditional_alternatives.append(alt)
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
-            node.alternative = parser.parse_block(stream, ENDIFELSEBLOCK)
+            alternative = parser.parse_block(stream, ENDIFELSEBLOCK)
+        else:
+            alternative = None
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDIF)
-        return node
+        expect(stream, TOKEN_TAG, value=TAG_ENDIF)
+        return IfNode(
+            tok=tok,
+            condition=condition,
+            consequence=consequence,
+            conditional_alternatives=conditional_alternatives,
+            alternative=alternative,
+        )

@@ -21,6 +21,8 @@ from typing import (
     Mapping,
     Iterator,
     Sequence,
+    Protocol,
+    Optional,
 )
 
 from liquid.exceptions import NoSuchFilterFunc, ContextDepthError, Error, lookup_warning
@@ -42,10 +44,10 @@ class ReadOnlyChainMap(collections.abc.Mapping):
         pylookup = Chainmap(locals(), globals(), vars(__builtin__))
     """
 
-    def __init__(self, *maps):
+    def __init__(self, *maps: Mapping[str, object]):
         self._maps = deque(maps)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         for mapping in self._maps:
             try:
                 return mapping[key]
@@ -63,7 +65,7 @@ class ReadOnlyChainMap(collections.abc.Mapping):
         """Return the number of maps in the chain."""
         return len(self._maps)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: object = None):
         try:
             return self[key]
         except KeyError:
@@ -79,12 +81,12 @@ class ReadOnlyChainMap(collections.abc.Mapping):
 class BuiltIn(collections.abc.Mapping):
     """Mapping-like object for resolving built-in, dynamic objects."""
 
-    def __contains__(self, item):
+    def __contains__(self, item: str) -> bool:
         if item in ("now", "today"):
             return True
         return False
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         if key == "now":
             return datetime.datetime.now()
         if key == "today":
@@ -99,6 +101,13 @@ class BuiltIn(collections.abc.Mapping):
 
 
 builtin = BuiltIn()
+
+
+class Env(Protocol):
+
+    mode: Mode
+    filters: Mapping[str, Callable[..., Any]]
+
 
 # pylint: disable=too-many-instance-attributes redefined-builtin
 class Context:
@@ -116,9 +125,9 @@ class Context:
 
     def __init__(
         self,
-        env,
-        globals: Namespace = None,
-        disabled_tags: List[str] = None,
+        env: Env,
+        globals: Optional[Namespace] = None,
+        disabled_tags: Optional[List[str]] = None,
     ):
         self.env = env
 
@@ -150,7 +159,7 @@ class Context:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
 
-    def get(self, path: ContextPath, default: Any = None) -> Any:
+    def get(self, path: ContextPath, default: object = None) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
             return self.resolve(path, default)
@@ -164,13 +173,13 @@ class Context:
             return get_item(obj, *items, default=default)
         return obj
 
-    def resolve(self, name: str, default=None) -> Any:
+    def resolve(self, name: str, default: object = None) -> Any:
         try:
             return self.scope[name]
         except KeyError:
             return default
 
-    def filter(self, name: str) -> Callable:
+    def filter(self, name: str) -> Callable[..., object]:
         """Returns a filter function with given name."""
         filter_func = self.env.filters.get(name)
 
@@ -218,7 +227,9 @@ class Context:
         finally:
             self.scope.pop()
 
-    def copy(self, namespace: Namespace, disabled_tags: List[str] = None) -> Context:
+    def copy(
+        self, namespace: Namespace, disabled_tags: Optional[List[str]] = None
+    ) -> Context:
         """Return a copy of this context without any local variables."""
         return Context(
             self.env,
@@ -233,7 +244,7 @@ class Context:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
 
-def _getitem(obj, key):
+def _getitem(obj: Any, key: str) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
@@ -245,9 +256,14 @@ def _getitem(obj, key):
     return getitem(obj, key)
 
 
-def get_item(obj, *items: Union[str, int], default=None) -> Any:
+def get_item(
+    obj: object,
+    *items: Union[str, int],
+    default: Optional[object] = None,
+) -> Any:
     """Chained item getter."""
     try:
-        return reduce(_getitem, items, obj)
+        itm: Any = reduce(_getitem, items, obj)
     except (KeyError, IndexError, TypeError):
-        return default
+        itm = default
+    return itm

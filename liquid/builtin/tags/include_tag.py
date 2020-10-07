@@ -7,7 +7,7 @@ from liquid import ast
 from liquid.tag import Tag
 from liquid.token import (
     Token,
-    TOKEN_TAG_NAME,
+    TOKEN_TAG,
     TOKEN_EXPRESSION,
     TOKEN_IDENTIFIER,
     TOKEN_WITH,
@@ -17,7 +17,8 @@ from liquid.token import (
     TOKEN_COLON,
     TOKEN_EOF,
 )
-from liquid.lex import TokenStream, tokenize_include_expression
+from liquid.stream import TokenStream
+from liquid.lex import tokenize_include_expression
 from liquid.parse import (
     expect,
     parse_identifier,
@@ -25,7 +26,7 @@ from liquid.parse import (
     parse_string_or_identifier,
     parse_unchained_identifier,
 )
-from liquid.expression import Expression
+from liquid.expression import Expression, Identifier
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
 from liquid.builtin.drops import IterableDrop
@@ -43,7 +44,7 @@ class IncludeNode(ast.Node):
         tok: Token,
         name: Expression,
         get_template: Callable[[str, Optional[Dict[str, Any]]], Any],
-        var: Optional[Expression] = None,
+        var: Optional[Identifier] = None,
         alias: Optional[str] = None,
         args: Optional[Dict[str, Any]] = None,
     ):
@@ -52,7 +53,7 @@ class IncludeNode(ast.Node):
         self.get_template = get_template
         self.var = var
         self.alias = alias
-        self.args = args
+        self.args = args or {}
 
     def __str__(self):
         buf = [f"{self.name}"]
@@ -76,9 +77,9 @@ class IncludeNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         name = self.name.evaluate(context)
-        template = self.get_template(name, None)
+        template = self.get_template(str(name), None)
 
-        namespace = {}
+        namespace: Dict[str, object] = {}
 
         # Add any keyword arguments to the new template context.
         for key, val in self.args.items():
@@ -96,7 +97,7 @@ class IncludeNode(ast.Node):
                 # The reference implementation does not seem to distinguish between "for"
                 # and "with". Just checks for array-like-ness.
                 if isinstance(val, (tuple, list, IterableDrop)):
-                    # XXX: What if an included template with a bound array updates a
+                    # NOTE: What if an included template with a bound array updates a
                     # keyword argument value? Do we need to update namespace arguments after
                     # each loop?
                     #
@@ -124,7 +125,7 @@ class IncludeTag(Tag):
         {% include 'product' with collection.products[0], foo: 'bar', some: other %}
         {% include 'product', foo: 'bar', some: other %}
         """
-        expect(stream, TOKEN_TAG_NAME, value=TAG_INCLUDE)
+        expect(stream, TOKEN_TAG, value=TAG_INCLUDE)
         tok = stream.current
         stream.next_token()
 

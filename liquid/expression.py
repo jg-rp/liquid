@@ -22,37 +22,17 @@ class Expression(ABC):
         self.tok = tok
 
     @abstractmethod
-    def evaluate(self, context: Context) -> Any:
+    def evaluate(self, context: Context) -> object:
         """Evaluate the expression with the given context."""
 
     def token(self):
         return self.tok
 
 
-class Boolean(Expression):
-    __slots__ = ("tok", "value")
-
-    def __init__(self, tok: Token, value: bool):
-        super().__init__(tok)
-        self.value = value
-
-    def __eq__(self, other):
-        return isinstance(other, Boolean), self.value == other.value
-
-    def __repr__(self):  # pragma: no cover
-        return f"Boolean(tok={self.tok}, value={self.value})"
-
-    def __str__(self):
-        return str(self.value)
-
-    def evaluate(self, context: Context) -> bool:
-        return self.value
-
-
 class Nil(Expression):
     __slots__ = ("tok",)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return isinstance(other, Nil)
 
     def __repr__(self):  # pragma: no cover
@@ -68,7 +48,7 @@ class Nil(Expression):
 class Empty(Expression):
     __slots__ = ("tok",)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         if isinstance(other, Empty):
             return True
         if isinstance(other, (list, dict, str)) and not other:
@@ -88,21 +68,39 @@ class Empty(Expression):
 class Literal(Expression):
     __slots__ = ("tok", "value")
 
-    def __init__(self, tok: Token, value: Any):
+    def __init__(self, tok: Token, value: object):
         super().__init__(tok)
         self.value = value
 
     def __str__(self):
         return repr(self.value)
 
-    def evaluate(self, context: Context) -> Any:
+    def evaluate(self, context: Context) -> object:
         return self.value
+
+
+class Boolean(Literal):
+    __slots__ = ()
+
+    def __init__(self, tok: Token, value: bool):
+        super().__init__(tok, value)
+        self.value = value
+
+    def __eq__(self, other: object):
+        return isinstance(other, Boolean) and self.value == other.value
+
+    def __repr__(self):  # pragma: no cover
+        return f"Boolean(tok={self.tok}, value={self.value})"
 
 
 class StringLiteral(Literal):
     __slots__ = ()
 
-    def __eq__(self, other):
+    def __init__(self, tok: Token, value: str):
+        super().__init__(tok, value)
+        self.value = value
+
+    def __eq__(self, other: object):
         return isinstance(other, StringLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
@@ -112,7 +110,11 @@ class StringLiteral(Literal):
 class IntegerLiteral(Literal):
     __slots__ = ()
 
-    def __eq__(self, other):
+    def __init__(self, tok: Token, value: int):
+        super().__init__(tok, value)
+        self.value = value
+
+    def __eq__(self, other: object):
         return isinstance(other, IntegerLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
@@ -122,7 +124,11 @@ class IntegerLiteral(Literal):
 class FloatLiteral(Literal):
     __slots__ = ()
 
-    def __eq__(self, other):
+    def __init__(self, tok: Token, value: float):
+        super().__init__(tok, value)
+        self.value = value
+
+    def __eq__(self, other: object):
         return isinstance(other, FloatLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
@@ -132,7 +138,7 @@ class FloatLiteral(Literal):
 class IdentifierPathElement(Literal):
     __slots__ = ()
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return isinstance(other, IdentifierPathElement) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
@@ -152,7 +158,7 @@ class Identifier(Expression):
         super().__init__(tok)
         self.path = path
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return isinstance(other, Identifier) and self.path == other.path
 
     def __repr__(self):  # pragma: no cover
@@ -164,7 +170,7 @@ class Identifier(Expression):
     def __hash__(self):
         return hash(str(self))
 
-    def evaluate(self, context: Context) -> Any:
+    def evaluate(self, context: Context) -> object:
         path: List[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
 
@@ -172,12 +178,12 @@ class Identifier(Expression):
 class PrefixExpression(Expression):
     __slots__ = ("tok", "operator", "right")
 
-    def __init__(self, tok: Token, operator: str, right: Expression = None):
+    def __init__(self, tok: Token, operator: str, right: Expression):
         super().__init__(tok)
         self.operator = operator
         self.right = right
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return (
             isinstance(other, PrefixExpression)
             and self.operator == other.operator
@@ -207,14 +213,18 @@ class InfixExpression(Expression):
     __slots__ = ("tok", "left", "operator", "right")
 
     def __init__(
-        self, tok: Token, left: Expression, operator: str, right: Expression = None
+        self,
+        tok: Token,
+        left: Expression,
+        operator: str,
+        right: Expression,
     ):
         super().__init__(tok)
         self.left = left
         self.operator = operator
         self.right = right
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return (
             isinstance(other, InfixExpression)
             and self.left == other.left
@@ -244,8 +254,12 @@ class Filter:
         self.name = name
         self.args = args
 
-    def __eq__(self, other):
-        return self.name == other.name and self.args == other.args
+    def __eq__(self, other: object):
+        return (
+            isinstance(other, Filter)
+            and self.name == other.name
+            and self.args == other.args
+        )
 
     def __repr__(self):  # pragma: no cover
         return f"Filter(name='{self.name}', args={self.args})"
@@ -267,8 +281,10 @@ class BooleanExpression(Expression):
         super().__init__(tok)
         self.expression = expression
 
-    def __eq__(self, other):
-        return self.expression == other.expression
+    def __eq__(self, other: object):
+        return (
+            isinstance(other, BooleanExpression) and self.expression == other.expression
+        )
 
     def __str__(self):
         expr_str = str(self.expression)
@@ -286,11 +302,11 @@ class BooleanExpression(Expression):
 class FilteredExpression(Expression):
     __slots__ = ("expression", "filters")
 
-    def __init__(self, expression: Expression, filters: List[Filter] = None):
+    def __init__(self, expression: Expression, filters: Optional[List[Filter]] = None):
         self.expression = expression
         self.filters = filters or []
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return (
             isinstance(other, FilteredExpression)
             and self.expression == other.expression
@@ -307,7 +323,7 @@ class FilteredExpression(Expression):
     def __repr__(self):  # pragma: no cover
         return f"FilteredExpression(expression={self.expression!r}, filters={self.filters})"
 
-    def evaluate(self, context: Context) -> str:
+    def evaluate(self, context: Context) -> object:
         result = self.expression.evaluate(context)
 
         for fltr in self.filters:
@@ -329,12 +345,12 @@ class FilteredExpression(Expression):
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
 
-    def __init__(self, tok: Token, name: str, expression: Expression = None):
+    def __init__(self, tok: Token, name: str, expression: Expression):
         super().__init__(tok)
         self.name = name
         self.expression = expression
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return (
             isinstance(other, AssignmentExpression)
             and self.name == other.name
@@ -396,7 +412,7 @@ class LoopExpression(Expression):
         self.cols = cols
         self.reversed = reversed_
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         return (
             isinstance(other, LoopExpression)
             and self.name == other.name
@@ -460,7 +476,12 @@ class LoopExpression(Expression):
             assert self.stop is not None
 
             start = self.start.evaluate(context)
-            stop = self.stop.evaluate(context) + 1
+            stop = self.stop.evaluate(context)
+
+            assert isinstance(start, int)
+            assert isinstance(stop, int)
+
+            stop = stop + 1
 
             loop_iter = range(start, stop)
             length = stop - start
@@ -470,10 +491,12 @@ class LoopExpression(Expression):
 
         if limit:
             limit = limit.evaluate(context)
+            assert isinstance(limit, int)
             length = min(length, limit)
 
         if offset:
             offset = offset.evaluate(context)
+            assert isinstance(offset, int)
             length = max(length - offset, 0)
 
         loop_iter = islice(loop_iter, offset, limit)

@@ -1,9 +1,9 @@
 """"""
 import sys
 
-from liquid.token import TOKEN_TAG_NAME
+from liquid.token import TOKEN_TAG
 from liquid.tag import Tag
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
 from liquid.parse import expect
 from liquid.builtin.literal import LiteralNode
 
@@ -17,11 +17,11 @@ class RawTag(Tag):
     end = TAG_ENDRAW
 
     def parse(self, stream: TokenStream) -> LiteralNode:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_RAW)
+        expect(stream, TOKEN_TAG, value=TAG_RAW)
         stream.next_token()
 
         tag = LiteralNode(stream.current)
         stream.next_token()
 
-        expect(stream, TOKEN_TAG_NAME, value=TAG_ENDRAW)
+        expect(stream, TOKEN_TAG, value=TAG_ENDRAW)
         return tag

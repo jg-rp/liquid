@@ -1,5 +1,8 @@
-from enum import IntEnum, auto
 import warnings
+
+from enum import IntEnum, auto
+from pathlib import Path
+from typing import Union, Optional, Type
 
 from liquid.exceptions import Error, lookup_warning
 
@@ -13,8 +16,13 @@ class Mode(IntEnum):
 
 
 class mode:
-    def __init__(self, _mode: Mode, linenum: int, filename=None) -> None:
-        self.mode: Mode = _mode
+    def __init__(
+        self,
+        tolerence: Mode,
+        linenum: int,
+        filename: Optional[Union[str, Path]] = None,
+    ):
+        self.mode: Mode = tolerence
         self.linenum = linenum
         self.filename = filename
 
@@ -32,3 +40,21 @@ class mode:
             return True
 
         return self.mode < Mode.STRICT
+
+
+def error(
+    tolerence: Mode,
+    exc: Union[Type[Error], Error],
+    msg: Optional[str] = None,
+    linenum: Optional[int] = None,
+):
+    """Raise an exception or warning according to the given mode."""
+    if not isinstance(exc, Error):
+        exc = exc(msg, linenum=linenum)
+    elif not exc.linenum:
+        exc.linenum = linenum
+
+    if tolerence == Mode.STRICT:
+        raise exc
+    if tolerence == Mode.WARN:
+        warnings.warn(str(exc), category=lookup_warning(exc.__class__))

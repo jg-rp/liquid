@@ -5,6 +5,7 @@ from typing import NamedTuple, Any, Mapping
 
 from liquid.environment import Environment
 from liquid.context import Context
+from liquid.stream import TokenStream
 from liquid.lex import (
     tokenize_filtered_expression,
     tokenize_boolean_expression,
@@ -17,8 +18,6 @@ from liquid.parse import (
     parse_assignment_expression,
     parse_loop_expression,
 )
-
-from liquid.stream import TokenStream
 
 
 class Case(NamedTuple):

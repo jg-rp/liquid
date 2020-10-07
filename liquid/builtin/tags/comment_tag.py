@@ -2,12 +2,12 @@
 import sys
 from typing import Optional, TextIO
 
-from liquid.token import Token, TOKEN_TAG_NAME
+from liquid.token import Token, TOKEN_TAG
 from liquid.parse import expect, eat_block
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
-from liquid.lex import TokenStream
+from liquid.stream import TokenStream
 
 TAG_COMMENT = sys.intern("comment")
 RAG_ENDCOMMENT = sys.intern("endcomment")
@@ -34,11 +34,11 @@ class CommentTag(Tag):
     end = RAG_ENDCOMMENT
 
     def parse(self, stream: TokenStream) -> CommentNode:
-        expect(stream, TOKEN_TAG_NAME, value=TAG_COMMENT)
+        expect(stream, TOKEN_TAG, value=TAG_COMMENT)
         stream.next_token()
 
         tag = CommentNode(stream.current)
         eat_block(stream, end=(RAG_ENDCOMMENT,))
 
-        expect(stream, TOKEN_TAG_NAME, value=RAG_ENDCOMMENT)
+        expect(stream, TOKEN_TAG, value=RAG_ENDCOMMENT)
         return tag

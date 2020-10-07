@@ -1,9 +1,11 @@
-"""Step through or iterate a stream of tokens."""
+from __future__ import annotations
 
 from collections import deque
 from typing import Iterator
 
-from liquid.token import Token, TOKEN_EOF, TOKEN_INITIAL
+from liquid.token import Token
+from liquid.token import TOKEN_INITIAL
+from liquid.token import TOKEN_EOF
 
 
 class TokenStream:
@@ -18,19 +20,19 @@ class TokenStream:
         # Stack of tags
         self.balancing_stack = []
 
-        self.current = Token(0, TOKEN_INITIAL, "")
+        self.current: Token = Token(0, TOKEN_INITIAL, "")
         next(self)
 
     class TokenStreamIterator:
         """An iterable token stream."""
 
-        def __init__(self, stream):
+        def __init__(self, stream: TokenStream):
             self.stream = stream
 
         def __iter__(self):
             return self
 
-        def __next__(self):
+        def __next__(self) -> Token:
             tok = self.stream.current
             if tok.type is TOKEN_EOF:
                 self.stream.close()
@@ -72,7 +74,7 @@ class TokenStream:
         self.current = old_token
         return result
 
-    def push(self, tok):
+    def push(self, tok: Token):
         """Push a token back to the stream."""
         self._pushed.append(tok)
 

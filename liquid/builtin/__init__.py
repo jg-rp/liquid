@@ -1,3 +1,8 @@
+from typing import Protocol, Any, Type, Callable
+
+from liquid.tag import Tag
+from liquid.mode import Mode
+
 from liquid.builtin import literal
 from liquid.builtin import statement
 from liquid.builtin import illegal
@@ -77,7 +82,18 @@ from liquid.builtin.filters.array import (
 from liquid.builtin.filters.misc import Size, Default, Date
 
 
-def register(env):
+class Env(Protocol):
+
+    mode: Mode
+
+    def add_tag(self: Any, tag: Type[Tag]) -> None:
+        ...
+
+    def add_filter(self: Any, name: str, func: Callable[..., Any]) -> None:
+        ...
+
+
+def register(env: Env) -> None:
     env.add_tag(literal.Literal)
     env.add_tag(statement.Statement)
     env.add_tag(illegal.Illegal)

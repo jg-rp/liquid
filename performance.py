@@ -10,14 +10,17 @@ import pathlib
 import timeit
 import sys
 
-from typing import NamedTuple, List, Dict, Any, Mapping
+from typing import NamedTuple, List, Dict, Any, Mapping, Optional
+from typing import Callable
+from typing import Iterator
 
 import yaml
 
-from liquid.environment import Environment, Template
+from liquid.environment import Environment
+from liquid.template import Template
 from liquid.loaders import FileSystemLoader
-from liquid.lex import get_lexer, tokenize_liquid
-from liquid.stream import TokenStream
+from liquid.token import Token
+from liquid.lex import get_lexer
 
 from tests.mocks.tags.form_tag import CommentFormTag
 from tests.mocks.tags.paginate_tag import PaginateTag
@@ -159,13 +162,13 @@ def load_data() -> Dict[str, Any]:
 
     # Key some objects by their handle
     data["collections"] = {c["handle"]: c for c in data["collections"]}
-    data["blogs"] = {blog["handle"]: blog for blog in data["blogs"]}
-    # XXX: Changing 'link_lists' to 'linklists'
-    data["linklists"] = {ll["handle"]: ll for ll in data["link_lists"]}
-    data["pages"] = {page["handle"]: page for page in data["pages"]}
-
     # "snowboards" has a description, the others do not.
     data["collection"] = data["collections"]["snowboards"]
+
+    data["blogs"] = {blog["handle"]: blog for blog in data["blogs"]}
+    # NOTE: Changing 'link_lists' to 'linklists'
+    data["linklists"] = {ll["handle"]: ll for ll in data["link_lists"]}
+    data["pages"] = {page["handle"]: page for page in data["pages"]}
 
     return data
 
@@ -198,20 +201,21 @@ def load_templates(search_path: str = "tests/fixtures/") -> List[ThemedTemplateS
     return templates
 
 
-# pylint: disable=redefined-builtin
-def lex(env: Environment, templates: List[ThemedTemplateSource]):
+def lex(
+    templates: List[ThemedTemplateSource],
+    tokenizer: Callable[[str], Iterator[Token]],
+):
     """Tokenize a list of templates using the given environment."""
-    # lexer = get_lexer(env)
     for bundle in templates:
-        list(tokenize_liquid(bundle.theme.source))
-        list(tokenize_liquid(bundle.template.source))
+        list(tokenizer(bundle.theme.source))
+        list(tokenizer(bundle.template.source))
 
 
 # pylint: disable=redefined-builtin
 def parse(
     env: Environment,
     templates: List[ThemedTemplateSource],
-    globals: Mapping[str, Any] = None,
+    globals: Optional[Mapping[str, object]] = None,
 ) -> List[ThemedTemplate]:
     """Parse a list of templates using the given environment."""
     parsed_templates = []
@@ -239,7 +243,7 @@ def render(templates: List[ThemedTemplate]):
 def parse_and_render(
     env: Environment,
     templates: List[ThemedTemplateSource],
-    globals: Mapping[str, Any] = None,
+    globals: Optional[Mapping[str, object]] = None,
 ):
     parsed_templates = parse(env, templates, globals=globals)
     render(parsed_templates)
@@ -249,8 +253,8 @@ def profile_lex(search_path: str):
     env, templates = setup_parse(search_path)
 
     cProfile.runctx(
-        "[lex(env, templates) for _ in range(10)]",
-        globals={"lex": lex, "templates": templates, "env": env},
+        "[lex(templates, tokenizer) for _ in range(10)]",
+        globals={"lex": lex, "templates": templates, "tokenizer": get_lexer()},
         locals={},
         sort="cumtime",
     )
@@ -278,7 +282,7 @@ def profile_render(search_path: str):
     )
 
 
-def profile_parse_and_render(search_path):
+def profile_parse_and_render(search_path: str):
     env, templates = setup_parse(search_path)
 
     cProfile.runctx(
@@ -300,7 +304,7 @@ def setup_render(search_path: str) -> List[ThemedTemplate]:
     return parsed_templates
 
 
-def setup_parse(search_path):
+def setup_parse(search_path: str):
     context_data = load_data()
     env = Environment(loader=FileSystemLoader("."), globals=context_data)
     register_mocks(env)
@@ -311,17 +315,24 @@ def setup_parse(search_path):
 
 def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     # Benchmark
+    just = 32
+
     templates = load_templates(search_path)
     print(
         f"Best of {repeat} rounds with {number} * {len(templates) * 2} calls per round."
     )
+
     print(
-        "lex:".rjust(20),
+        "lex template (not expressions):".rjust(just),
         min(
             timeit.repeat(
-                "lex(env, templates)",
+                "lex(templates, tokenizer)",
                 setup="env, templates = setup_parse(search_path)",
-                globals={**globals(), "search_path": search_path},
+                globals={
+                    **globals(),
+                    "search_path": search_path,
+                    "tokenizer": get_lexer(),
+                },
                 number=number,
                 repeat=repeat,
             )
@@ -329,7 +340,7 @@ def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     )
 
     print(
-        "parse:".rjust(20),
+        "lex and parse:".rjust(just),
         min(
             timeit.repeat(
                 "parse(env, templates)",
@@ -342,7 +353,7 @@ def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     )
 
     print(
-        "render:".rjust(20),
+        "render:".rjust(just),
         min(
             timeit.repeat(
                 "render(templates)",
@@ -355,7 +366,7 @@ def benchmark(search_path: str, number: int = 25, repeat: int = 3):
     )
 
     print(
-        "parse and render:".rjust(20),
+        "lex, parse and render:".rjust(just),
         min(
             timeit.repeat(
                 "parse_and_render(env, templates)",

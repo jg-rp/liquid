@@ -49,7 +49,7 @@ class LRUCache(abc.MutableMapping):
         rv._queue.extend(self._queue)
         return rv
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: object = None):
         """Return an item from the cache dict or `default`"""
         try:
             return self[key]
