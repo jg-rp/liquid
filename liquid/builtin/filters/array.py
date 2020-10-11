@@ -1,21 +1,15 @@
 """Filter functions that operate on arrays."""
 
 from collections import OrderedDict
+from collections import abc
 from operator import getitem
 from typing import List, Any
 
+from liquid.exceptions import FilterArgumentError
 from liquid.filter import Filter
 from liquid.filter import (
-    one_maybe_two_args,
     expect_string,
-    array_required,
-    no_args,
-    one_string_arg_required,
-    one_array_arg_required,
-    array_of_strings_required,
     array_of_hashable_required,
-    maybe_one_arg_required,
-    one_maybe_two_args_required,
 )
 
 # pylint: disable=arguments-differ, too-few-public-methods
@@ -24,59 +18,77 @@ from liquid.filter import (
 MAX_CH = chr(0x10FFFF)
 
 
-class Join(Filter):
+class ArrayFilter(Filter):
+
+    name = "AbstractStringFilter"
+    num_args = (0,)
+    msg = "{}: expected an array, found {}"
+
+    def __call__(self, val, *args):
+        if len(args) not in self.num_args:
+            raise FilterArgumentError(
+                f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
+            )
+
+        if not isinstance(val, abc.Sequence):
+            raise FilterArgumentError(self.msg.format(self.name, type(val)))
+
+        try:
+            return self.filter(val, *args)
+        except (AttributeError, TypeError) as err:
+            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+
+    def filter(self, val, *args):
+        raise NotImplementedError(":(")
+
+
+class Join(ArrayFilter):
     """Concatenate an array of strings"""
 
     __slots__ = ()
 
     name = "join"
+    num_args = (1,)
 
-    @array_of_strings_required
-    @one_string_arg_required
-    def __call__(self, iterable, separator):
-        return separator.join(iterable)
+    def filter(self, iterable, separator):
+        return str(separator).join(iterable)
 
 
-class First(Filter):
+class First(ArrayFilter):
     """Return the first item of an array"""
 
     __slots__ = ()
 
     name = "first"
 
-    @array_required
-    @no_args
-    def __call__(self, array):
+    def filter(self, array):
         if array:
             return array[0]
         return None
 
 
-class Last(Filter):
+class Last(ArrayFilter):
     """Return the last item of an array"""
 
     __slots__ = ()
 
     name = "last"
 
-    @array_required
-    @no_args
-    def __call__(self, array):
+    def filter(self, array):
         if array:
             return array[-1]
         return None
 
 
-class Concat(Filter):
+class Concat(ArrayFilter):
     """Return two arrays joined togather."""
 
     __slots__ = ()
 
     name = "concat"
+    num_args = (1,)
 
-    @array_required
-    @one_array_arg_required
-    def __call__(self, array, second_array):
+    def filter(self, array, second_array):
         return array + second_array
 
 
@@ -92,34 +104,31 @@ def _getitem(sequence, key: str, default: Any = None) -> Any:
         return default
 
 
-class Map(Filter):
+class Map(ArrayFilter):
     """Creates an array of values by extracting the values of a named property
     from another object."""
 
     __slots__ = ()
 
     name = "map"
+    num_args = (1,)
 
-    @array_required
-    @one_string_arg_required
-    def __call__(self, sequence, key):
-        return [_getitem(itm, key) for itm in sequence]
+    def filter(self, sequence, key):
+        return [_getitem(itm, str(key)) for itm in sequence]
 
 
-class Reverse(Filter):
+class Reverse(ArrayFilter):
     """Reverses the order of the items in an array."""
 
     __slots__ = ()
 
     name = "reverse"
 
-    @array_required
-    @no_args
-    def __call__(self, array):
+    def filter(self, array):
         return list(reversed(array))
 
 
-class Sort(Filter):
+class Sort(ArrayFilter):
     """Sorts items in an array in case-sensitive order.
 
     When a key string is provided, objects without the key property should
@@ -129,10 +138,9 @@ class Sort(Filter):
     __slots__ = ()
 
     name = "sort"
+    num_args = (0, 1)
 
-    @array_required
-    @maybe_one_arg_required
-    def __call__(self, sequence, key=None):
+    def filter(self, sequence, key=None):
         if key:
             expect_string(self.name, key)
             return list(sorted(sequence, key=lambda x: _getitem(x, key, MAX_CH)))
@@ -148,16 +156,15 @@ def _lower(val, default="") -> str:
         return default
 
 
-class SortNatural(Filter):
+class SortNatural(ArrayFilter):
     """Sorts items in an array in case-insensitive order."""
 
     __slots__ = ()
 
     name = "sort_natural"
+    num_args = (0, 1)
 
-    @array_required
-    @maybe_one_arg_required
-    def __call__(self, sequence, key=None) -> List[Any]:
+    def filter(self, sequence, key=None) -> List[Any]:
         if key:
             expect_string(self.name, key)
             return list(
@@ -167,17 +174,16 @@ class SortNatural(Filter):
         return list(sorted(sequence, key=_lower))
 
 
-class Where(Filter):
+class Where(ArrayFilter):
     """Creates an array including only the objects with a given property value,
     or any truthy value by default."""
 
     __slots__ = ()
 
     name = "where"
+    num_args = (1, 2)
 
-    @array_required
-    @one_maybe_two_args_required
-    def __call__(self, sequence, attr, value=None):
+    def filter(self, sequence, attr, value=None):
         expect_string(self.name, attr)
 
         if value:
@@ -187,7 +193,7 @@ class Where(Filter):
         return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
 
 
-class Uniq(Filter):
+class Uniq(ArrayFilter):
     """Removes any duplicate elements in an array. Input array order is not preserved."""
 
     __slots__ = ()
@@ -195,20 +201,17 @@ class Uniq(Filter):
     name = "uniq"
 
     @array_of_hashable_required
-    @no_args
-    def __call__(self, iterable):
+    def filter(self, iterable):
         unique = OrderedDict.fromkeys(iterable)
         return list(unique.keys())
 
 
-class Compact(Filter):
+class Compact(ArrayFilter):
     """Removes any nil values from an array."""
 
     __slots__ = ()
 
     name = "compact"
 
-    @array_required
-    @no_args
-    def __call__(self, iterable):
+    def filter(self, iterable):
         return [itm for itm in iterable if itm is not None]

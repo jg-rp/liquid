@@ -9,19 +9,13 @@ pylint = "*"
 flake8 = "*"
 coverage = "*"
 rope = "*"
-ipython = "*"
 pyyaml = "*"
-pytest = "*"
-sphinx = "*"
 rstcheck = "*"
 docutils = "*"
+flake8-bugbear = "*"
 
 [packages]
 python-dateutil = "*"
-cython = "*"
 
 [requires]
 python_version = "3.8"
-
-[pipenv]
-allow_prereleases = true

@@ -28,12 +28,15 @@ class StatementNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         val = self.expression.evaluate(context)
-        if isinstance(val, (list, tuple)):
-            val = "".join(str(v) for v in val)
+        if isinstance(val, str):
+            # shortcut for common case.
+            pass
         elif isinstance(val, bool):
             val = str(val).lower()
         elif val is None:
             val = ""
+        elif isinstance(val, (list, tuple)):
+            val = "".join(str(v) for v in val)
         else:
             val = str(val)
 

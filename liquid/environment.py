@@ -3,15 +3,13 @@
 from __future__ import annotations
 from pathlib import Path
 
-from typing import (
-    Callable,
-    Dict,
-    Any,
-    Type,
-    Union,
-    Optional,
-    Mapping,
-)
+from typing import Callable
+from typing import Dict
+from typing import Any
+from typing import Type
+from typing import Union
+from typing import Optional
+from typing import Mapping
 
 import warnings
 
@@ -52,8 +50,8 @@ class Environment:
             `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
         loader: A template loader. If you want to use the builtin "render" or
             "include" tags, a loader must be configured.
-        globals: A mapping that will be added to the global context of any
-            template loaded from this environment.
+        globals: A mapping that will be added to the context of any template
+            loaded from this environment.
     """
 
     # pylint: disable=redefined-builtin too-many-arguments

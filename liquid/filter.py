@@ -1,15 +1,20 @@
-"""Output statement filter function helpers."""
+"""Filter function helpers."""
+
+import collections.abc
 
 from abc import ABC, abstractmethod
-import collections.abc
 from functools import wraps
-from typing import Tuple, Any, Protocol
+
+from typing import Tuple
+from typing import Any
+from typing import Protocol
 
 from liquid.mode import Mode
 from liquid.exceptions import FilterArgumentError
 
 
 class Env(Protocol):
+    """Environment interface expected by `Filter`"""
 
     mode: Mode
 

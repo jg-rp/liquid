@@ -2,15 +2,17 @@ from unittest import TestCase
 from typing import NamedTuple, Any
 
 from liquid.environment import Environment
+from liquid.stream import TokenStream
+
 from liquid.exceptions import LiquidSyntaxError
-from liquid.lex import (
-    tokenize_liquid_expression,
-    tokenize_loop_expression,
-    tokenize_filtered_expression,
-    tokenize_boolean_expression,
-    tokenize_include_expression,
-    get_lexer,
-)
+
+from liquid.lex import tokenize_liquid_expression
+from liquid.lex import tokenize_loop_expression
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_include_expression
+from liquid.lex import get_lexer
+
 from liquid.token import Token
 from liquid.token import *
 
@@ -35,7 +37,7 @@ class LiquidLexerTestCase(TestCase):
 
         for case in test_cases:
             with self.subTest(msg=case.description):
-                tokens = tokenize(case.source)
+                tokens = TokenStream(tokenize(case.source))
 
                 for got, want in zip(tokens, case.expect):
                     self.assertEqual(got, want)

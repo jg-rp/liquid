@@ -2,7 +2,8 @@
 
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_LITERAL
+from liquid.token import Token
+from liquid.token import TOKEN_LITERAL
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context

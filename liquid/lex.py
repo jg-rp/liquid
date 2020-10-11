@@ -356,6 +356,7 @@ def get_lexer(
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
 ) -> Callable[[str], Iterator[Token]]:
+    """Return a template lexer using the given tag and statement delimters."""
     rules = compile_liquid_rules(
         tag_start_string,
         tag_end_string,

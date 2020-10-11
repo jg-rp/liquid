@@ -1,4 +1,5 @@
 """Liquid template render context."""
+
 from __future__ import annotations
 
 import collections.abc
@@ -9,30 +10,31 @@ import warnings
 
 from collections import deque
 from contextlib import contextmanager
-from functools import reduce
-from operator import getitem
 from itertools import cycle
+from operator import getitem
 
-from typing import (
-    Any,
-    Union,
-    Callable,
-    List,
-    Mapping,
-    Iterator,
-    Sequence,
-    Protocol,
-    Optional,
-)
+from typing import Any
+from typing import Union
+from typing import Callable
+from typing import List
+from typing import Mapping
+from typing import TextIO
+from typing import Iterator
+from typing import Sequence
+from typing import Protocol
+from typing import Optional
 
-from liquid.exceptions import NoSuchFilterFunc, ContextDepthError, Error, lookup_warning
-from liquid.filter import Filter
+from liquid.exceptions import NoSuchFilterFunc
+from liquid.exceptions import ContextDepthError
+from liquid.exceptions import Error
+from liquid.exceptions import lookup_warning
+
 from liquid import Mode
 
 MAX_CONTEXT_DEPTH = 30
 
 ContextPath = Union[str, Sequence[Union[str, int]]]
-Namespace = Mapping[str, Any]
+Namespace = Mapping[str, object]
 
 
 class ReadOnlyChainMap(collections.abc.Mapping):
@@ -86,7 +88,7 @@ class BuiltIn(collections.abc.Mapping):
             return True
         return False
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> object:
         if key == "now":
             return datetime.datetime.now()
         if key == "today":
@@ -103,10 +105,38 @@ class BuiltIn(collections.abc.Mapping):
 builtin = BuiltIn()
 
 
+class Template(Protocol):
+    """Interface for delegating `get_template` to the environment."""
+
+    name: str
+
+    def render_with_context(
+        self: Any,
+        context: Context,
+        buffer: TextIO,
+        partial: bool = ...,
+        block_scope: bool = ...,
+    ):
+        ...
+
+
+# pylint: disable=too-few-public-methods
 class Env(Protocol):
+    """Interface for a Contexts' "env" argument.
+
+    For the benefit of the static type checker while avoiding cyclic imports.
+    """
 
     mode: Mode
     filters: Mapping[str, Callable[..., Any]]
+
+    # pylint: disable=redefined-builtin
+    def get_template(
+        self: Any,
+        name: str,
+        globals: Optional[Mapping[str, object]] = ...,
+    ) -> Template:
+        ...
 
 
 # pylint: disable=too-many-instance-attributes redefined-builtin
@@ -131,16 +161,16 @@ class Context:
     ):
         self.env = env
 
-        # The namespace for local variables. Those that are bound with `assign`
-        # or `capture`.
+        # A namespace for template local variables. Those that are bound with
+        # `assign` or `capture`.
         self.locals = {}
 
-        # Read only namespace containing globally available variables. Usually
+        # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
         self.globals = globals or {}
 
         # Namespaces are searched in this order. When a context is extended, the
-        # temporary namespace is pushed to the front of this scope.
+        # temporary namespace is pushed to the front of this chain.
         self.scope = ReadOnlyChainMap(self.locals, self.globals, builtin)
 
         # A distinct namespace for iterables created by the built-in "cycle" tag.
@@ -151,8 +181,8 @@ class Context:
         self.counters = {}
 
         # A list of tags names that are disallowed in this context. For example,
-        # partial tags rendered using the "render" tag are not allowed to use
-        # "include" tags.
+        # partial templates rendered using the "render" tag are not allowed to
+        # use "include" tags.
         self.disabled_tags = disabled_tags or []
 
     def assign(self, key: str, val: Any):
@@ -177,19 +207,27 @@ class Context:
         try:
             return self.scope[name]
         except KeyError:
+            # XXX: Resolve mode
+            # print(name, repr(self.scope["template"]))
+            # raise
             return default
 
+    @functools.lru_cache
     def filter(self, name: str) -> Callable[..., object]:
-        """Returns a filter function with given name."""
-        filter_func = self.env.filters.get(name)
+        """Return the filter function with given name."""
+        try:
+            filter_func = self.env.filters[name]
+        except KeyError as err:
+            raise NoSuchFilterFunc(name) from err
 
-        if not filter_func:
-            raise NoSuchFilterFunc(name)
-
-        if isinstance(filter_func, Filter) and filter_func.with_context:
+        if getattr(filter_func, "with_context", False):
             return functools.partial(filter_func, context=self)
 
         return filter_func
+
+    def get_template(self, name: str) -> Template:
+        """Load a template from the environment."""
+        return self.env.get_template(name)
 
     def increment(self, name: str) -> int:
         """Increment the named counter and return it's value."""
@@ -244,7 +282,7 @@ class Context:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
 
-def _getitem(obj: Any, key: str) -> object:
+def _getitem(obj, key):
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
@@ -263,7 +301,7 @@ def get_item(
 ) -> Any:
     """Chained item getter."""
     try:
-        itm: Any = reduce(_getitem, items, obj)
+        itm: Any = functools.reduce(_getitem, items, obj)
     except (KeyError, IndexError, TypeError):
         itm = default
     return itm

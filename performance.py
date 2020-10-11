@@ -10,7 +10,12 @@ import pathlib
 import timeit
 import sys
 
-from typing import NamedTuple, List, Dict, Any, Mapping, Optional
+from typing import NamedTuple
+from typing import List
+from typing import Dict
+from typing import Any
+from typing import Mapping
+from typing import Optional
 from typing import Callable
 from typing import Iterator
 
@@ -18,6 +23,7 @@ import yaml
 
 from liquid.environment import Environment
 from liquid.template import Template
+from liquid.mode import Mode
 from liquid.loaders import FileSystemLoader
 from liquid.token import Token
 from liquid.lex import get_lexer
@@ -26,31 +32,30 @@ from tests.mocks.tags.form_tag import CommentFormTag
 from tests.mocks.tags.paginate_tag import PaginateTag
 
 from tests.mocks.filters.json import JSON
-from tests.mocks.filters.money import Money, MoneyWithCurrency
-from tests.mocks.filters.shop import (
-    AssetUrl,
-    DefaultPagination,
-    GlobalAssetUrl,
-    ImgTag,
-    LinkTo,
-    LinkToType,
-    LinkToVendor,
-    ShopifyAssetUrl,
-    StylesheetTag,
-    ScriptTag,
-    URLForType,
-    URLForVendor,
-    ProductImgURL,
-    Pluralize,
-    Within,
-)
 
-from tests.mocks.filters.tag import (
-    HighlightActiveTag,
-    LinkToAddTag,
-    LinkToRemoveTag,
-    LinkToTag,
-)
+from tests.mocks.filters.money import Money
+from tests.mocks.filters.money import MoneyWithCurrency
+
+from tests.mocks.filters.shop import AssetUrl
+from tests.mocks.filters.shop import DefaultPagination
+from tests.mocks.filters.shop import GlobalAssetUrl
+from tests.mocks.filters.shop import ImgTag
+from tests.mocks.filters.shop import LinkTo
+from tests.mocks.filters.shop import LinkToType
+from tests.mocks.filters.shop import LinkToVendor
+from tests.mocks.filters.shop import ShopifyAssetUrl
+from tests.mocks.filters.shop import StylesheetTag
+from tests.mocks.filters.shop import ScriptTag
+from tests.mocks.filters.shop import URLForType
+from tests.mocks.filters.shop import URLForVendor
+from tests.mocks.filters.shop import ProductImgURL
+from tests.mocks.filters.shop import Pluralize
+from tests.mocks.filters.shop import Within
+
+from tests.mocks.filters.tag import HighlightActiveTag
+from tests.mocks.filters.tag import LinkToAddTag
+from tests.mocks.filters.tag import LinkToRemoveTag
+from tests.mocks.filters.tag import LinkToTag
 
 from tests.mocks.filters.weight import Weight, WeightWithUnit
 
@@ -58,15 +63,14 @@ from tests.mocks.filters.weight import Weight, WeightWithUnit
 class ThemedTemplate(NamedTuple):
     """Parsed template and theme."""
 
-    template: Template
     theme: Template
+    template: Template
 
     def render(self):
         """Render the theme with the template as its content."""
         # Override the theme's "template" drop with that of the content.
-        self.theme.render(
-            template=self.template.drop, content_for_layout=self.template.render()
-        )
+        content = self.template.render()
+        self.theme.render(template=self.template.drop, content_for_layout=content)
 
 
 class TemplateSource(NamedTuple):
@@ -250,7 +254,7 @@ def parse_and_render(
 
 
 def profile_lex(search_path: str):
-    env, templates = setup_parse(search_path)
+    _, templates = setup_parse(search_path)
 
     cProfile.runctx(
         "[lex(templates, tokenizer) for _ in range(10)]",
@@ -306,76 +310,94 @@ def setup_render(search_path: str) -> List[ThemedTemplate]:
 
 def setup_parse(search_path: str):
     context_data = load_data()
-    env = Environment(loader=FileSystemLoader("."), globals=context_data)
+    env = Environment(
+        loader=FileSystemLoader("."), globals=context_data, tollerence=Mode.STRICT
+    )
     register_mocks(env)
     templates = load_templates(search_path)
 
     return env, templates
 
 
-def benchmark(search_path: str, number: int = 25, repeat: int = 3):
+def print_result(name: str, times: List[float], n_iterations: int, n_templates: int):
+    best = min(times)
+    n_calls = n_iterations * n_templates
+    per_sec = round(n_calls / best, 2)
+
+    per_i = best / n_iterations
+    i_per_s = 1 / per_i
+
+    print(f"{name:>31}: {best:.2}s ({per_sec:.2f} ops/s, {i_per_s:.2f} i/s)")
+
+
+def benchmark(search_path: str, number: int = 100, repeat: int = 5):
     # Benchmark
-    just = 32
 
     templates = load_templates(search_path)
-    print(
-        f"Best of {repeat} rounds with {number} * {len(templates) * 2} calls per round."
-    )
+    n_templates = len(templates) * 2
+    n_calls = number * n_templates
 
     print(
-        "lex template (not expressions):".rjust(just),
-        min(
-            timeit.repeat(
-                "lex(templates, tokenizer)",
-                setup="env, templates = setup_parse(search_path)",
-                globals={
-                    **globals(),
-                    "search_path": search_path,
-                    "tokenizer": get_lexer(),
-                },
-                number=number,
-                repeat=repeat,
-            )
-        ),
+        (
+            f"Best of {repeat} rounds with {number} iterations per round "
+            f"and {n_templates} ops per iteration ({n_calls} ops per round)."
+        )
     )
 
-    print(
-        "lex and parse:".rjust(just),
-        min(
-            timeit.repeat(
-                "parse(env, templates)",
-                setup="env, templates = setup_parse(search_path)",
-                globals={**globals(), "search_path": search_path},
-                number=number,
-                repeat=repeat,
-            )
+    print_result(
+        "lex template (not expressions)",
+        timeit.repeat(
+            "lex(templates, tokenizer)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={
+                **globals(),
+                "search_path": search_path,
+                "tokenizer": get_lexer(),
+            },
+            number=number,
+            repeat=repeat,
         ),
+        number,
+        n_templates,
     )
 
-    print(
-        "render:".rjust(just),
-        min(
-            timeit.repeat(
-                "render(templates)",
-                setup="templates = setup_render(search_path)",
-                globals={**globals(), "search_path": search_path},
-                number=number,
-                repeat=repeat,
-            )
+    print_result(
+        "lex and parse",
+        timeit.repeat(
+            "parse(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
         ),
+        number,
+        n_templates,
     )
 
-    print(
-        "lex, parse and render:".rjust(just),
-        min(
-            timeit.repeat(
-                "parse_and_render(env, templates)",
-                setup="env, templates = setup_parse(search_path)",
-                globals={**globals(), "search_path": search_path},
-                number=number,
-                repeat=repeat,
-            )
+    print_result(
+        "render",
+        timeit.repeat(
+            "render(templates)",
+            setup="templates = setup_render(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
         ),
+        number,
+        n_templates,
+    )
+
+    print_result(
+        "lex, parse and render",
+        timeit.repeat(
+            "parse_and_render(env, templates)",
+            setup="env, templates = setup_parse(search_path)",
+            globals={**globals(), "search_path": search_path},
+            number=number,
+            repeat=repeat,
+        ),
+        number,
+        n_templates,
     )
 
 

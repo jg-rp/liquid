@@ -1,5 +1,4 @@
 {
-    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
     "files.associations": {
         "algorithm": "cpp"
     },
@@ -7,5 +6,6 @@
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.typeCheckingMode": "basic",
     "telemetry.enableCrashReporter": false,
-    "telemetry.enableTelemetry": false
+    "telemetry.enableTelemetry": false,
+    "restructuredtext.confPath": "${workspaceFolder}/docs/source"
 }

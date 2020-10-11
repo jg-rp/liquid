@@ -15,6 +15,8 @@ from liquid.exceptions import FilterArgumentError
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars, truncate_words
 
+# pylint: disable=arguments-differ too-few-public-methods
+
 
 class StringFilter(Filter):
 
@@ -30,11 +32,11 @@ class StringFilter(Filter):
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
         try:
-            return self.func(str(val), *args)
+            return self.filter(str(val), *args)
         except (AttributeError, TypeError) as err:
             raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
 
-    def func(self, val, *args):
+    def filter(self, val, *args):
         raise NotImplementedError(":(")
 
 
@@ -45,7 +47,7 @@ class Capitalize(StringFilter):
 
     name = "capitalize"
 
-    def func(self, val):
+    def filter(self, val):
         return val.capitalize()
 
 
@@ -57,7 +59,7 @@ class Append(StringFilter):
     name = "append"
     num_args = 1
 
-    def func(self, val: str, string: str):
+    def filter(self, val: str, string: str):
         return val + str(string)
 
 
@@ -68,7 +70,7 @@ class Downcase(StringFilter):
 
     name = "downcase"
 
-    def func(self, val):
+    def filter(self, val):
         return val.lower()
 
 
@@ -79,7 +81,7 @@ class Escape(StringFilter):
 
     name = "escape"
 
-    def func(self, val):
+    def filter(self, val):
         return html.escape(val)
 
 
@@ -90,7 +92,7 @@ class EscapeOnce(StringFilter):
 
     name = "escape_once"
 
-    def func(self, val):
+    def filter(self, val):
         return html.escape(html.unescape(val))
 
 
@@ -101,7 +103,7 @@ class LStrip(StringFilter):
 
     name = "lstrip"
 
-    def func(self, val):
+    def filter(self, val):
         return val.lstrip()
 
 
@@ -112,7 +114,7 @@ class NewlineToBR(StringFilter):
 
     name = "newline_to_br"
 
-    def func(self, val):
+    def filter(self, val):
         return val.replace("\n", "<br />")
 
 
@@ -124,7 +126,7 @@ class Prepend(StringFilter):
     name = "prepend"
     num_args = 1
 
-    def func(self, val, string):
+    def filter(self, val, string):
         return str(string) + val
 
 
@@ -136,7 +138,7 @@ class Remove(StringFilter):
     name = "remove"
     num_args = 1
 
-    def func(self, val, sub):
+    def filter(self, val, sub):
         return val.replace(str(sub), "")
 
 
@@ -148,7 +150,7 @@ class RemoveFirst(StringFilter):
     name = "remove_first"
     num_args = 1
 
-    def func(self, val, sub):
+    def filter(self, val, sub):
         return val.replace(str(sub), "", 1)
 
 
@@ -160,7 +162,7 @@ class Replace(StringFilter):
     name = "replace"
     num_args = 2
 
-    def func(self, val, seq, sub):
+    def filter(self, val, seq, sub):
         return val.replace(str(seq), str(sub))
 
 
@@ -172,7 +174,7 @@ class ReplaceFirst(StringFilter):
     name = "replace_first"
     num_args = 2
 
-    def func(self, val, seq, sub):
+    def filter(self, val, seq, sub):
         return val.replace(str(seq), str(sub), 1)
 
 
@@ -183,7 +185,7 @@ class Upcase(StringFilter):
 
     name = "upcase"
 
-    def func(self, val):
+    def filter(self, val):
         return val.upper()
 
 
@@ -219,7 +221,7 @@ class Split(StringFilter):
     name = "split"
     num_args = 1
 
-    def func(self, val, seq):
+    def filter(self, val, seq):
         return val.split(str(seq))
 
 
@@ -230,7 +232,7 @@ class Strip(StringFilter):
 
     name = "strip"
 
-    def func(self, val):
+    def filter(self, val):
         return val.strip()
 
 
@@ -241,7 +243,7 @@ class RStrip(StringFilter):
 
     name = "rstrip"
 
-    def func(self, val):
+    def filter(self, val):
         return val.rstrip()
 
 
@@ -252,7 +254,7 @@ class StripHTML(StringFilter):
 
     name = "strip_html"
 
-    def func(self, val):
+    def filter(self, val):
         return strip_tags(val)
 
 
@@ -263,7 +265,7 @@ class StripNewlines(StringFilter):
 
     name = "strip_newlines"
 
-    def func(self, val):
+    def filter(self, val):
         return val.replace("\n", "")
 
 
@@ -308,13 +310,14 @@ class TruncateWords(Filter):
 
 
 class URLEncode(StringFilter):
-    """Converts any URL-unsafe characters in a string into percent-encoded characters."""
+    """Converts any URL-unsafe characters in a string into percent-encoded
+    characters."""
 
     __slots__ = ()
 
     name = "url_encode"
 
-    def func(self, val):
+    def filter(self, val):
         return quote_plus(val)
 
 
@@ -325,5 +328,5 @@ class URLDecode(StringFilter):
 
     name = "url_decode"
 
-    def func(self, val):
+    def filter(self, val):
         return unquote_plus(val)

@@ -1,22 +1,48 @@
+"""Liquid template definition."""
+
 from __future__ import annotations
 
-from collections import ChainMap, abc
+from collections import ChainMap
+from collections import abc
+
 from io import StringIO
 from pathlib import Path
 
-from typing import Callable, Dict, Any, Optional, TextIO, Mapping, Protocol, Union, Type
+from typing import Callable
+from typing import Dict
+from typing import Any
+from typing import Optional
+from typing import TextIO
+from typing import Mapping
+from typing import Protocol
+from typing import Union
+from typing import Type
 
-from liquid.mode import mode, Mode
+from liquid.mode import Mode
 from liquid.context import Context
-from liquid import ast
+from liquid.ast import ParseTree
 
-from liquid.exceptions import LiquidInterrupt, LiquidSyntaxError, Error
+from liquid.exceptions import LiquidInterrupt
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import Error
 
 
 class Env(Protocol):
+    """Environment interface.
+
+    For the benefit of the static type checker while avoiding cyclic imports.
+    """
 
     mode: Mode
     filters: Mapping[str, Callable[..., Any]]
+
+    # pylint: disable=redefined-builtin
+    def get_template(
+        self: Any,
+        name: str,
+        globals: Optional[Mapping[str, object]] = ...,
+    ) -> Template:
+        ...
 
     def error(
         self: Any,
@@ -38,7 +64,7 @@ class Template:
     def __init__(
         self,
         env: Env,
-        parse_tree: ast.ParseTree,
+        parse_tree: ParseTree,
         name: str = "",
         path: Optional[Path] = None,
         globals: Optional[Mapping[str, Any]] = None,
@@ -62,7 +88,7 @@ class Template:
         """
         _vars: Dict[str, object] = dict(*args, **kwargs)
 
-        context = Context(self.env, ChainMap(self._globals, _vars))
+        context = Context(self.env, ChainMap(_vars, self._globals))
 
         buf = StringIO()
         self.render_with_context(context, buf)
@@ -96,18 +122,25 @@ class Template:
 
         with context.extend(namespace=namespace):
             for node in self.tree.statements:
-                with mode(self.env.mode, node.tok.linenum, filename=self.path):
-                    try:
-                        node.render(context, buffer)
-                    except LiquidInterrupt as err:
-                        # If this is an "included" template, the for loop could be in a
-                        # parent template. Convert the interrupt to a syntax error if
-                        # there is no parent.
-                        if not partial or block_scope:
-                            raise LiquidSyntaxError(f"unexpected '{err}'") from err
+                try:
+                    node.render(context, buffer)
+                except LiquidInterrupt as err:
+                    # If this is an "included" template, there could be a for loop
+                    # in a parent template. A for loop that could be interrupted
+                    # from an included template.
+                    #
+                    # Convert the interrupt to a syntax error if there is no parent.
+                    if not partial or block_scope:
+                        self.env.error(
+                            LiquidSyntaxError(
+                                f"unexpected '{err}'", linenum=node.tok.linenum
+                            )
+                        )
+                    else:
                         raise
-                    except Error as err:
-                        self.env.error(err, linenum=node.tok.linenum)
+                except Error as err:
+                    # Raise or warn according to the current mode.
+                    self.env.error(err, linenum=node.tok.linenum)
 
     @property
     def is_up_to_date(self) -> bool:
@@ -118,10 +151,15 @@ class Template:
         return self.uptodate()
 
     def __repr__(self):
-        return f"Template(name='{self.name}', path='{self.path}', uptodate={self.is_up_to_date})"
+        return (
+            f"Template(name='{self.name}', "
+            f"path='{self.path}', uptodate={self.is_up_to_date})"
+        )
 
 
 class TemplateDrop(abc.Mapping):
+    """Template meta data mapping."""
+
     def __init__(self, name: str, path: Optional[Path]):
         self.name = name
         self.path = path or Path(name)
@@ -142,7 +180,10 @@ class TemplateDrop(abc.Mapping):
         return self.stem
 
     def __repr__(self):
-        return f"TemplateDrop(directory='{self['directory']}', name='{self['name']}', suffix='{self['suffix']}')"
+        return (
+            f"TemplateDrop(directory='{self['directory']}', "
+            f"name='{self['name']}', suffix='{self['suffix']}')"
+        )
 
     def __contains__(self, item):
         return item in self._items

@@ -1,42 +1,46 @@
 """Tag and output statement expression objects."""
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
+
+from abc import ABC
+from abc import abstractmethod
+
 from collections import abc
 from itertools import islice
-from typing import Union, List, Optional, Any, Iterator, Tuple
+
+from typing import Union
+from typing import List
+from typing import Optional
+from typing import Any
+from typing import Iterator
+from typing import Tuple
+from typing import Generic
+from typing import TypeVar
 
 from liquid.context import Context
-from liquid.token import Token
 from liquid.exceptions import LiquidTypeError, Error
 
-Number = Union[int, float]
+# pylint: disable=missing-class-docstring too-few-public-methods
 
 
 class Expression(ABC):
-    __slots__ = ("tok",)
+    __slots__ = ()
 
     expression_statement = True
-
-    def __init__(self, tok: Token):
-        self.tok = tok
 
     @abstractmethod
     def evaluate(self, context: Context) -> object:
         """Evaluate the expression with the given context."""
 
-    def token(self):
-        return self.tok
-
 
 class Nil(Expression):
-    __slots__ = ("tok",)
+    __slots__ = ()
 
     def __eq__(self, other: object):
         return isinstance(other, Nil)
 
     def __repr__(self):  # pragma: no cover
-        return f"Nil(tok={self.tok})"
+        return "Nil()"
 
     def __str__(self):  # pragma: no cover
         return "nil"
@@ -45,8 +49,11 @@ class Nil(Expression):
         return None
 
 
+NIL = Nil()
+
+
 class Empty(Expression):
-    __slots__ = ("tok",)
+    __slots__ = ()
 
     def __eq__(self, other: object):
         if isinstance(other, Empty):
@@ -56,7 +63,7 @@ class Empty(Expression):
         return False
 
     def __repr__(self):  # pragma: no cover
-        return f"Empty(tok={self.tok})"
+        return "Empty()"
 
     def __str__(self):  # pragma: no cover
         return "empty"
@@ -65,15 +72,23 @@ class Empty(Expression):
         return self
 
 
-class Literal(Expression):
-    __slots__ = ("tok", "value")
+EMPTY = Empty()
 
-    def __init__(self, tok: Token, value: object):
-        super().__init__(tok)
+
+T = TypeVar("T")  # pylint: disable=invalid-name
+
+
+class Literal(Expression, Generic[T]):
+    __slots__ = "value"
+
+    def __init__(self, value: T):
         self.value = value
 
     def __str__(self):
         return repr(self.value)
+
+    def __hash__(self):
+        return hash(self.value)
 
     def evaluate(self, context: Context) -> object:
         return self.value
@@ -82,57 +97,57 @@ class Literal(Expression):
 class Boolean(Literal):
     __slots__ = ()
 
-    def __init__(self, tok: Token, value: bool):
-        super().__init__(tok, value)
-        self.value = value
+    def __init__(self, value: bool):
+        super().__init__(value)
 
     def __eq__(self, other: object):
         return isinstance(other, Boolean) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
-        return f"Boolean(tok={self.tok}, value={self.value})"
+        return f"Boolean(value={self.value})"
+
+
+TRUE = Boolean(True)
+FALSE = Boolean(False)
 
 
 class StringLiteral(Literal):
     __slots__ = ()
 
-    def __init__(self, tok: Token, value: str):
-        super().__init__(tok, value)
-        self.value = value
+    def __init__(self, value: str):
+        super().__init__(value)
 
     def __eq__(self, other: object):
         return isinstance(other, StringLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
-        return f"StringLiteral(tok={self.tok}, value='{self.value}')"
+        return f"StringLiteral(value='{self.value}')"
 
 
 class IntegerLiteral(Literal):
     __slots__ = ()
 
-    def __init__(self, tok: Token, value: int):
-        super().__init__(tok, value)
-        self.value = value
+    def __init__(self, value: int):
+        super().__init__(value)
 
     def __eq__(self, other: object):
         return isinstance(other, IntegerLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
-        return f"IntegerLiteral(tok={self.tok}, value={self.value})"
+        return f"IntegerLiteral(value={self.value})"
 
 
 class FloatLiteral(Literal):
     __slots__ = ()
 
-    def __init__(self, tok: Token, value: float):
-        super().__init__(tok, value)
-        self.value = value
+    def __init__(self, value: float):
+        super().__init__(value)
 
     def __eq__(self, other: object):
         return isinstance(other, FloatLiteral) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
-        return f"FloatLiteral(tok={self.tok}, value={self.value})"
+        return f"FloatLiteral(value={self.value})"
 
 
 class IdentifierPathElement(Literal):
@@ -142,7 +157,7 @@ class IdentifierPathElement(Literal):
         return isinstance(other, IdentifierPathElement) and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
-        return f"IdentifierPathElement(tok={self.tok}, value={self.value})"
+        return f"IdentifierPathElement(value={self.value})"
 
     def __str__(self):
         return str(self.value)
@@ -152,17 +167,16 @@ IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
 
 
 class Identifier(Expression):
-    __slots__ = ("tok", "path")
+    __slots__ = "path"
 
-    def __init__(self, tok: Token, path: IdentifierPath):
-        super().__init__(tok)
+    def __init__(self, path: IdentifierPath):
         self.path = path
 
     def __eq__(self, other: object):
         return isinstance(other, Identifier) and self.path == other.path
 
     def __repr__(self):  # pragma: no cover
-        return f"Identifier(tok={self.tok}, path={self.path})"
+        return f"Identifier(path={self.path})"
 
     def __str__(self):
         return ".".join(str(elem) for elem in self.path)
@@ -176,10 +190,9 @@ class Identifier(Expression):
 
 
 class PrefixExpression(Expression):
-    __slots__ = ("tok", "operator", "right")
+    __slots__ = ("operator", "right")
 
-    def __init__(self, tok: Token, operator: str, right: Expression):
-        super().__init__(tok)
+    def __init__(self, operator: str, right: Expression):
         self.operator = operator
         self.right = right
 
@@ -191,7 +204,7 @@ class PrefixExpression(Expression):
         )
 
     def __repr__(self):  # pragma: no cover
-        return f"PrefixExpression(tok={self.tok}, operator='{self.operator}', right={self.right!r})"
+        return f"PrefixExpression(operator='{self.operator}', right={self.right!r})"
 
     def __str__(self):
         return f"({self.operator}{self.right})"
@@ -202,24 +215,20 @@ class PrefixExpression(Expression):
         if self.operator == "-":
             if isinstance(right, (int, float)):
                 return -right
-            raise LiquidTypeError(
-                f"unknown operator {self.operator}{self.right.tok.type}"
-            )
+            raise LiquidTypeError(f"unknown operator {self.operator}{self.right}")
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
 
 
 class InfixExpression(Expression):
-    __slots__ = ("tok", "left", "operator", "right")
+    __slots__ = ("left", "operator", "right")
 
     def __init__(
         self,
-        tok: Token,
         left: Expression,
         operator: str,
         right: Expression,
     ):
-        super().__init__(tok)
         self.left = left
         self.operator = operator
         self.right = right
@@ -234,7 +243,7 @@ class InfixExpression(Expression):
 
     def __repr__(self):  # pragma: no cover
         return (
-            f"InfixExpression(tok={self.tok}, left={self.left!r}, "
+            f"InfixExpression(left={self.left!r}, "
             f"operator='{self.operator}', right={self.right!r})"
         )
 
@@ -277,8 +286,7 @@ class Filter:
 class BooleanExpression(Expression):
     __slots__ = ("expression",)
 
-    def __init__(self, tok: Token, expression: Expression):
-        super().__init__(tok)
+    def __init__(self, expression: Expression):
         self.expression = expression
 
     def __eq__(self, other: object):
@@ -345,8 +353,7 @@ class FilteredExpression(Expression):
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
 
-    def __init__(self, tok: Token, name: str, expression: Expression):
-        super().__init__(tok)
+    def __init__(self, name: str, expression: Expression):
         self.name = name
         self.expression = expression
 
@@ -369,6 +376,9 @@ class AssignmentExpression(Expression):
         result = self.expression.evaluate(context)
         context.assign(key=self.name, val=result)
         return ""
+
+
+LoopArgument = Optional[Union[IntegerLiteral, Identifier]]
 
 
 class LoopExpression(Expression):
@@ -395,12 +405,12 @@ class LoopExpression(Expression):
     def __init__(
         self,
         name: str,
-        identifier: Optional[Identifier] = None,
-        start: Optional[Union[IntegerLiteral, Identifier]] = None,
-        stop: Optional[Union[IntegerLiteral, Identifier]] = None,
-        limit: Optional[Union[IntegerLiteral, Identifier]] = None,
-        offset: Optional[Union[IntegerLiteral, Identifier]] = None,
-        cols: Optional[Union[IntegerLiteral, Identifier]] = None,
+        identifier: LoopArgument = None,
+        start: LoopArgument = None,
+        stop: LoopArgument = None,
+        limit: LoopArgument = None,
+        offset: LoopArgument = None,
+        cols: LoopArgument = None,
         reversed_: bool = False,
     ):
         self.name = name
@@ -505,6 +515,9 @@ class LoopExpression(Expression):
             loop_iter = reversed(list(loop_iter))
 
         return loop_iter, length
+
+
+Number = Union[int, float]
 
 
 def eval_number_expression(left: Number, operator: str, right: Number) -> bool:

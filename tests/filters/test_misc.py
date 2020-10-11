@@ -55,7 +55,7 @@ class MiscFilterTestCase(unittest.TestCase):
             ),
             Case(
                 description="not an array or string",
-                val={},
+                val=1,
                 args=[],
                 kwargs={},
                 expect=FilterArgumentError,
@@ -74,17 +74,21 @@ class MiscFilterTestCase(unittest.TestCase):
                 val="",
                 args=["foo"],
                 kwargs={},
-                expect="foo",
+                expect="",
             ),
             Case(
-                description="empty list", val=[], args=["foo"], kwargs={}, expect="foo"
+                description="empty list",
+                val=[],
+                args=["foo"],
+                kwargs={},
+                expect=[],
             ),
             Case(
                 description="empty object",
                 val={},
                 args=["foo"],
                 kwargs={},
-                expect="foo",
+                expect={},
             ),
             Case(
                 description="not empty string",

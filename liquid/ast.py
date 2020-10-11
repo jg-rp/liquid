@@ -1,15 +1,23 @@
-""""""
+"""Common parse tree nodes."""
 
 from abc import ABC, abstractmethod
 from io import StringIO
-from typing import List, Optional, TextIO, Collection, Union, NoReturn
+
+from typing import List
+from typing import Optional
+from typing import TextIO
+from typing import Collection
+from typing import Union
+from typing import NoReturn
 
 from liquid import __version__
 from liquid import Context
 from liquid import Expression
 
 from liquid.token import Token, TOKEN_TAG
-from liquid.exceptions import DisabledTagError, Error
+
+from liquid.exceptions import DisabledTagError
+from liquid.exceptions import Error
 
 
 class Node(ABC):
@@ -69,7 +77,7 @@ class ParseTree(Node):
 class IllegalNode(Node):
     """Parse tree node representing an illegal or unregistered tag.
 
-    Illegal nodes are necesary when running in "warning" or "lax" mode. In
+    Illegal nodes are necesary when running in "warn" or "lax" mode. In
     strict mode, an exception should be raised as soon as an illegal token
     is found.
     """
@@ -90,6 +98,8 @@ class IllegalNode(Node):
 
 
 class BlockNode(Node):
+    """A parse tree node representing a list of statements."""
+
     __slots__ = ("tok", "statements")
 
     def __init__(self, tok: Token, statements: Optional[List[Node]] = None):
@@ -100,8 +110,8 @@ class BlockNode(Node):
         return "".join(str(s) for s in self.statements)
 
     def render_to_output(self, context: Context, buffer: TextIO):
-        # This intermediate buffer is used to suppress blocks that contain only
-        # whitespace.
+        # This intermediate buffer is used to suppress blocks that, when rendered,
+        # contain only whitespace.
         buf = StringIO()
 
         for stmt in self.statements:

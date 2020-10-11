@@ -1,11 +1,17 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import Protocol, Union, Type, Optional, Any
 
+from abc import ABC, abstractmethod
+
+from typing import Protocol
+from typing import Union
+from typing import Type
+from typing import Optional
+from typing import Any
+
+from liquid.ast import Node
 from liquid.ast import IllegalNode
 from liquid.exceptions import Error
 from liquid.parse import eat_block
-from liquid import ast
 from liquid.stream import TokenStream
 
 
@@ -20,26 +26,16 @@ class Env(Protocol):
 
 
 class Tag(ABC):
+    """Base class for all built-in and custom template tags."""
 
     block = True
     name = ""
 
     def __init__(self, env: Env):
-        """
-        Args:
-            block: If True, indicates that this tag is a block tag, where we
-                expect an "end" tag to follow and enclose more literals,
-                statements or tags.
-        """
-
         self.env = env
 
-    @abstractmethod
-    def parse(self, stream: TokenStream) -> ast.Node:
-        """Build a parse tree node from a stream of tokens."""
-
-    def get_node(self, stream: TokenStream) -> ast.Node:
-        """Return an IllegalNode if an error is raised when calling `parse`."""
+    def get_node(self, stream: TokenStream) -> Node:
+        """Wrapps `Tag.parse`, possibly returning an `IllegalNode`."""
         tok = stream.current
         try:
             return self.parse(stream)
@@ -53,3 +49,7 @@ class Tag(ABC):
                 eat_block(stream, (getattr(self, "end"),))
 
             return IllegalNode(tok)
+
+    @abstractmethod
+    def parse(self, stream: TokenStream) -> Node:
+        """Return a parse tree node py parsing tokens from the given stream."""

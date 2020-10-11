@@ -13,7 +13,6 @@ from liquid.builtin.tags import unless_tag
 from liquid.builtin.tags import case_tag
 from liquid.builtin.tags import for_tag
 from liquid.builtin.tags import tablerow_tag
-from liquid.builtin.tags import raw_tag
 from liquid.builtin.tags import capture_tag
 from liquid.builtin.tags import cycle_tag
 from liquid.builtin.tags import assign_tag
@@ -105,7 +104,6 @@ def register(env: Env) -> None:
     env.add_tag(for_tag.BreakTag)
     env.add_tag(for_tag.ContinueTag)
     env.add_tag(tablerow_tag.TablerowTag)
-    env.add_tag(raw_tag.RawTag)
     env.add_tag(capture_tag.CaptureTag)
     env.add_tag(cycle_tag.CycleTag)
     env.add_tag(assign_tag.AssignTag)

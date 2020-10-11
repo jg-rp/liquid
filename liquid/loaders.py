@@ -6,19 +6,28 @@ See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import NamedTuple, Callable, Mapping, Optional, Protocol, Any
+
+from typing import NamedTuple
+from typing import Callable
+from typing import Mapping
+from typing import Optional
+from typing import Protocol
+from typing import Any
 
 from liquid.template import Template
 from liquid.exceptions import TemplateNotFound
 
 
 class Env(Protocol):
+    """Environment interface expected by tje base loader."""
+
+    # pylint: disable=redefined-builtin
     def from_string(
         self: Any,
         source: str,
-        name: str = "",
-        path: Optional[Path] = None,
-        globals: Optional[Mapping[str, object]] = None,
+        name: str = ...,
+        path: Optional[Path] = ...,
+        globals: Optional[Mapping[str, object]] = ...,
     ) -> Template:
         ...
 
@@ -58,7 +67,7 @@ class FileSystemLoader(BaseLoader):
     def __init__(self, search_path: str):
         self.search_path = Path(search_path)
 
-    def get_source(self, env: Env, template_name: str) -> TemplateSource:
+    def get_source(self, _: Env, template_name: str) -> TemplateSource:
         source_path = self.search_path.joinpath(template_name)
 
         if not source_path.exists():
@@ -78,9 +87,10 @@ class DictLoader(BaseLoader):
     def __init__(self, templates: Mapping[str, str]):
         self.templates = templates
 
-    def get_source(self, env: Env, template_name: str) -> TemplateSource:
-        if template_name not in self.templates:
-            raise TemplateNotFound(template_name)
+    def get_source(self, _: Env, template_name: str) -> TemplateSource:
+        try:
+            source = self.templates[template_name]
+        except KeyError as err:
+            raise TemplateNotFound(template_name) from err
 
-        source = self.templates[template_name]
         return TemplateSource(source, template_name, None)

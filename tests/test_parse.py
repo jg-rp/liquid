@@ -15,7 +15,6 @@ from liquid.builtin import (
     case_tag,
     for_tag,
     tablerow_tag,
-    raw_tag,
     capture_tag,
     cycle_tag,
     assign_tag,

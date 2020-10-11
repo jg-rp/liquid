@@ -78,9 +78,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal single quotes",
                 "'foobar'",
                 FilteredExpression(
-                    expression=StringLiteral(
-                        Token(1, TOKEN_LITERAL, "foobar"), "foobar"
-                    ),
+                    expression=StringLiteral("foobar"),
                     filters=[],
                 ),
             ),
@@ -88,9 +86,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal double quotes",
                 '"foobar"',
                 FilteredExpression(
-                    expression=StringLiteral(
-                        Token(1, TOKEN_LITERAL, "foobar"), "foobar"
-                    ),
+                    expression=StringLiteral("foobar"),
                     filters=[],
                 ),
             ),
@@ -98,7 +94,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "integer literal",
                 "7",
                 FilteredExpression(
-                    expression=IntegerLiteral(Token(1, TOKEN_INTEGER, "7"), 7),
+                    expression=IntegerLiteral(7),
                     filters=[],
                 ),
             ),
@@ -107,9 +103,8 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "-7",
                 FilteredExpression(
                     expression=PrefixExpression(
-                        Token(1, TOKEN_NEGATIVE, "-"),
                         "-",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "7"), 7),
+                        right=IntegerLiteral(7),
                     ),
                     filters=[],
                 ),
@@ -118,7 +113,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "float literal statement expression",
                 "3.14",
                 FilteredExpression(
-                    expression=FloatLiteral(Token(1, TOKEN_FLOAT, "3.14"), 3.14),
+                    expression=FloatLiteral(3.14),
                     filters=[],
                 ),
             ),
@@ -127,9 +122,8 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "-3.14",
                 FilteredExpression(
                     expression=PrefixExpression(
-                        Token(1, TOKEN_NEGATIVE, "-"),
                         "-",
-                        right=FloatLiteral(Token(1, TOKEN_FLOAT, "3.14"), 3.14),
+                        right=FloatLiteral(3.14),
                     ),
                     filters=[],
                 ),
@@ -139,8 +133,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
-                        path=[IdentifierPathElement(MockToken, "collection")],
+                        path=[IdentifierPathElement("collection")],
                     ),
                     filters=[],
                 ),
@@ -150,10 +143,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection.products",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                     filters=[],
@@ -164,10 +156,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 'collection["products"]',
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                     filters=[],
@@ -178,11 +169,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 'collection["products"][0]',
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
-                            IdentifierPathElement(MockToken, 0),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement(0),
                         ],
                     ),
                     filters=[],
@@ -193,11 +183,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 'collection["products"].title',
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
-                            IdentifierPathElement(MockToken, "title"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement("title"),
                         ],
                     ),
                     filters=[],
@@ -208,10 +197,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection['products']",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                     filters=[],
@@ -222,11 +210,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection.products[0]",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
-                            IdentifierPathElement(MockToken, 0),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement(0),
                         ],
                     ),
                     filters=[],
@@ -237,13 +224,11 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection.products[i]",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                             Identifier(
-                                tok=Token(1, TOKEN_IDENTIFIER, value="i"),
-                                path=[IdentifierPathElement(MockToken, "i")],
+                                path=[IdentifierPathElement("i")],
                             ),
                         ],
                     ),
@@ -255,16 +240,14 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection.products[some.['object'].count]",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                             Identifier(
-                                tok=Token(1, TOKEN_IDENTIFIER, value="some"),
                                 path=[
-                                    IdentifierPathElement(MockToken, "some"),
-                                    IdentifierPathElement(MockToken, "object"),
-                                    IdentifierPathElement(MockToken, "count"),
+                                    IdentifierPathElement("some"),
+                                    IdentifierPathElement("object"),
+                                    IdentifierPathElement("count"),
                                 ],
                             ),
                         ],
@@ -276,7 +259,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal with filter",
                 "'foo' | upcase",
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "foo"),
+                    expression=StringLiteral("foo"),
                     filters=[Filter(name="upcase", args=[])],
                 ),
             ),
@@ -285,10 +268,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "collection.title | upcase",
                 FilteredExpression(
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "title"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("title"),
                         ],
                     ),
                     filters=[Filter(name="upcase", args=[])],
@@ -298,46 +280,39 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "integer literal with filter and integer argument",
                 "4 | at_least: 5",
                 FilteredExpression(
-                    expression=IntegerLiteral(MockToken, 4),
-                    filters=[
-                        Filter(name="at_least", args=[IntegerLiteral(MockToken, 5)])
-                    ],
+                    expression=IntegerLiteral(4),
+                    filters=[Filter(name="at_least", args=[IntegerLiteral(5)])],
                 ),
             ),
             Case(
                 "float literal with filter and float argument",
                 "4.1 | divided_by: 5.2",
                 FilteredExpression(
-                    expression=FloatLiteral(MockToken, 4.1),
-                    filters=[
-                        Filter(name="divided_by", args=[FloatLiteral(MockToken, 5.2)])
-                    ],
+                    expression=FloatLiteral(4.1),
+                    filters=[Filter(name="divided_by", args=[FloatLiteral(5.2)])],
                 ),
             ),
             Case(
                 "string literal with filter and string argument",
                 "'foo' | append: 'bar'",
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "foo"),
-                    filters=[
-                        Filter(name="append", args=[StringLiteral(MockToken, "bar")])
-                    ],
+                    expression=StringLiteral("foo"),
+                    filters=[Filter(name="append", args=[StringLiteral("bar")])],
                 ),
             ),
             Case(
                 "string literal with filter and identifier argument",
                 "'foo' | append: collection.title",
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "foo"),
+                    expression=StringLiteral("foo"),
                     filters=[
                         Filter(
                             name="append",
                             args=[
                                 Identifier(
-                                    tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                                     path=[
-                                        IdentifierPathElement(MockToken, "collection"),
-                                        IdentifierPathElement(MockToken, "title"),
+                                        IdentifierPathElement("collection"),
+                                        IdentifierPathElement("title"),
                                     ],
                                 )
                             ],
@@ -349,13 +324,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal with filter and multiple arguments",
                 '"Liquid" | slice: 2, 5',
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "Liquid"),
+                    expression=StringLiteral("Liquid"),
                     filters=[
                         Filter(
                             name="slice",
                             args=[
-                                IntegerLiteral(MockToken, 2),
-                                IntegerLiteral(MockToken, 5),
+                                IntegerLiteral(2),
+                                IntegerLiteral(5),
                             ],
                         )
                     ],
@@ -365,13 +340,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal with multiple filters",
                 '"Liquid" | slice: 2, 5 | upcase',
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "Liquid"),
+                    expression=StringLiteral("Liquid"),
                     filters=[
                         Filter(
                             name="slice",
                             args=[
-                                IntegerLiteral(MockToken, 2),
-                                IntegerLiteral(MockToken, 5),
+                                IntegerLiteral(2),
+                                IntegerLiteral(5),
                             ],
                         ),
                         Filter(name="upcase", args=[]),
@@ -382,13 +357,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "inconsistent whitespace",
                 ' "Liquid"   |slice: 2,5',
                 FilteredExpression(
-                    expression=StringLiteral(MockToken, "Liquid"),
+                    expression=StringLiteral("Liquid"),
                     filters=[
                         Filter(
                             name="slice",
                             args=[
-                                IntegerLiteral(MockToken, 2),
-                                IntegerLiteral(MockToken, 5),
+                                IntegerLiteral(2),
+                                IntegerLiteral(5),
                             ],
                         )
                     ],
@@ -405,29 +380,23 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "string literal double quotes",
                 '"foobar"',
                 BooleanExpression(
-                    tok=MockToken,
-                    expression=StringLiteral(
-                        Token(1, TOKEN_STRING, '"foobar"'), "foobar"
-                    ),
+                    expression=StringLiteral("foobar"),
                 ),
             ),
             Case(
                 "integer literal",
                 "7",
                 BooleanExpression(
-                    tok=MockToken,
-                    expression=IntegerLiteral(Token(1, TOKEN_INTEGER, "7"), 7),
+                    expression=IntegerLiteral(7),
                 ),
             ),
             Case(
                 "negative integer literal statement expression",
                 "-7",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=PrefixExpression(
-                        Token(1, TOKEN_NEGATIVE, "-"),
                         "-",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "7"), 7),
+                        right=IntegerLiteral(7),
                     ),
                 ),
             ),
@@ -435,19 +404,16 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "float literal statement expression",
                 "3.14",
                 BooleanExpression(
-                    tok=MockToken,
-                    expression=FloatLiteral(Token(1, TOKEN_FLOAT, "3.14"), 3.14),
+                    expression=FloatLiteral(3.14),
                 ),
             ),
             Case(
                 "negative float literal statement expression",
                 "-3.14",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=PrefixExpression(
-                        Token(1, TOKEN_NEGATIVE, "-"),
                         "-",
-                        right=FloatLiteral(Token(1, TOKEN_FLOAT, "3.14"), 3.14),
+                        right=FloatLiteral(3.14),
                     ),
                 ),
             ),
@@ -455,10 +421,8 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "single identifier statement expression",
                 "collection",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
-                        path=[IdentifierPathElement(MockToken, "collection")],
+                        path=[IdentifierPathElement("collection")],
                     ),
                 ),
             ),
@@ -466,12 +430,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "chained identifier",
                 "collection.products",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=Identifier(
-                        tok=Token(1, TOKEN_IDENTIFIER, "collection"),
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                 ),
@@ -480,28 +442,24 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "keyword true",
                 "true",
                 BooleanExpression(
-                    tok=MockToken,
-                    expression=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                    expression=Boolean(True),
                 ),
             ),
             Case(
                 "keyword false",
                 "false",
                 BooleanExpression(
-                    tok=MockToken,
-                    expression=Boolean(Token(1, TOKEN_FALSE, "false"), False),
+                    expression=Boolean(False),
                 ),
             ),
             Case(
                 "boolean equality",
                 "true == true",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_TRUE, "true"),
-                        left=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                        left=Boolean(True),
                         operator="==",
-                        right=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                        right=Boolean(True),
                     ),
                 ),
             ),
@@ -509,12 +467,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "boolean inequality",
                 "true != false",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_TRUE, "true"),
-                        left=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                        left=Boolean(True),
                         operator="!=",
-                        right=Boolean(Token(1, TOKEN_TRUE, "false"), False),
+                        right=Boolean(False),
                     ),
                 ),
             ),
@@ -522,12 +478,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "boolean inequality alternate",
                 "true <> false",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_TRUE, "true"),
-                        left=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                        left=Boolean(True),
                         operator="<>",
-                        right=Boolean(Token(1, TOKEN_TRUE, "false"), False),
+                        right=Boolean(False),
                     ),
                 ),
             ),
@@ -535,18 +489,15 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "identifier greater than literal",
                 "user.age > 21",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_IDENTIFIER, "user"),
                         left=Identifier(
-                            Token(1, TOKEN_IDENTIFIER, "user"),
                             path=[
-                                IdentifierPathElement(MockToken, "user"),
-                                IdentifierPathElement(MockToken, "age"),
+                                IdentifierPathElement("user"),
+                                IdentifierPathElement("age"),
                             ],
                         ),
                         operator=">",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "21"), 21),
+                        right=IntegerLiteral(21),
                     ),
                 ),
             ),
@@ -554,15 +505,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "identifier less than literal",
                 "age < 18",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_IDENTIFIER, "age"),
                         left=Identifier(
-                            Token(1, TOKEN_IDENTIFIER, "age"),
-                            path=[IdentifierPathElement(MockToken, "age")],
+                            path=[IdentifierPathElement("age")],
                         ),
                         operator="<",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "18"), 18),
+                        right=IntegerLiteral(18),
                     ),
                 ),
             ),
@@ -570,15 +518,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "identifier less than or equal to literal",
                 "age <= 18",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_IDENTIFIER, "age"),
                         left=Identifier(
-                            Token(1, TOKEN_IDENTIFIER, "age"),
-                            path=[IdentifierPathElement(MockToken, "age")],
+                            path=[IdentifierPathElement("age")],
                         ),
                         operator="<=",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "18"), 18),
+                        right=IntegerLiteral(18),
                     ),
                 ),
             ),
@@ -586,15 +531,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "identifier greater than or equal to literal",
                 "age >= 18",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_IDENTIFIER, "age"),
                         left=Identifier(
-                            Token(1, TOKEN_IDENTIFIER, "age"),
-                            path=[IdentifierPathElement(MockToken, "age")],
+                            path=[IdentifierPathElement("age")],
                         ),
                         operator=">=",
-                        right=IntegerLiteral(Token(1, TOKEN_INTEGER, "18"), 18),
+                        right=IntegerLiteral(18),
                     ),
                 ),
             ),
@@ -602,12 +544,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "boolean or boolean",
                 "true or false",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_TRUE, "true"),
-                        left=Boolean(Token(1, TOKEN_TRUE, "true"), True),
+                        left=Boolean(True),
                         operator="or",
-                        right=Boolean(Token(1, TOKEN_FALSE, "false"), False),
+                        right=Boolean(False),
                     ),
                 ),
             ),
@@ -615,18 +555,15 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "identifier contains string",
                 "product.tags contains 'sale'",
                 BooleanExpression(
-                    tok=MockToken,
                     expression=InfixExpression(
-                        Token(1, TOKEN_IDENTIFIER, "product"),
                         left=Identifier(
-                            MockToken,
                             path=[
-                                IdentifierPathElement(MockToken, "product"),
-                                IdentifierPathElement(MockToken, "tags"),
+                                IdentifierPathElement("product"),
+                                IdentifierPathElement("tags"),
                             ],
                         ),
                         operator="contains",
-                        right=StringLiteral(MockToken, "sale"),
+                        right=StringLiteral("sale"),
                     ),
                 ),
             ),
@@ -662,12 +599,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign a string literal",
                 "some = 'foo'",
                 AssignmentExpression(
-                    MockToken,
                     name="some",
                     expression=FilteredExpression(
-                        expression=StringLiteral(
-                            tok=Token(1, TOKEN_STRING, "foo"), value="foo"
-                        ),
+                        expression=StringLiteral(value="foo"),
                         filters=[],
                     ),
                 ),
@@ -676,12 +610,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign an integer literal",
                 "some = 5",
                 AssignmentExpression(
-                    MockToken,
                     name="some",
                     expression=FilteredExpression(
-                        expression=IntegerLiteral(
-                            tok=Token(1, TOKEN_INTEGER, "5"), value=5
-                        ),
+                        expression=IntegerLiteral(value=5),
                         filters=[],
                     ),
                 ),
@@ -690,12 +621,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign a float literal",
                 "some = 5.6",
                 AssignmentExpression(
-                    MockToken,
                     name="some",
                     expression=FilteredExpression(
-                        expression=FloatLiteral(
-                            tok=Token(1, TOKEN_FLOAT, "5.6"), value=5.6
-                        ),
+                        expression=FloatLiteral(value=5.6),
                         filters=[],
                     ),
                 ),
@@ -704,15 +632,11 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign a negative integer literal",
                 "some = -5.6",
                 AssignmentExpression(
-                    MockToken,
                     name="some",
                     expression=FilteredExpression(
                         expression=PrefixExpression(
-                            tok=MockToken,
                             operator="-",
-                            right=FloatLiteral(
-                                tok=Token(1, TOKEN_FLOAT, "5.6"), value=5.6
-                            ),
+                            right=FloatLiteral(value=5.6),
                         ),
                         filters=[],
                     ),
@@ -722,12 +646,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign a boolean",
                 "some = true",
                 AssignmentExpression(
-                    MockToken,
                     name="some",
                     expression=FilteredExpression(
-                        expression=Boolean(
-                            tok=Token(1, TOKEN_TRUE, "true"), value=True
-                        ),
+                        expression=Boolean(value=True),
                         filters=[],
                     ),
                 ),
@@ -736,18 +657,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign with a filter",
                 'fruits = "apples, oranges, peaches, tomatoes" | split: ", "',
                 AssignmentExpression(
-                    MockToken,
                     name="fruits",
                     expression=FilteredExpression(
                         expression=StringLiteral(
-                            tok=Token(
-                                1, TOKEN_STRING, "apples, oranges, peaches, tomatoes"
-                            ),
                             value="apples, oranges, peaches, tomatoes",
                         ),
-                        filters=[
-                            Filter(name="split", args=[StringLiteral(MockToken, ", ")])
-                        ],
+                        filters=[Filter(name="split", args=[StringLiteral(", ")])],
                     ),
                 ),
             ),
@@ -755,24 +670,17 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "assign with multiple filters and identifier arguments",
                 "everything = fruits | concat: vegetables | concat: furniture",
                 AssignmentExpression(
-                    MockToken,
                     name="everything",
                     expression=FilteredExpression(
                         expression=Identifier(
-                            tok=Token(1, TOKEN_IDENTIFIER, "fruits"),
-                            path=[IdentifierPathElement(MockToken, "fruits")],
+                            path=[IdentifierPathElement("fruits")],
                         ),
                         filters=[
                             Filter(
                                 name="concat",
                                 args=[
                                     Identifier(
-                                        Token(1, TOKEN_IDENTIFIER, "vegetables"),
-                                        path=[
-                                            IdentifierPathElement(
-                                                MockToken, "vegetables"
-                                            )
-                                        ],
+                                        path=[IdentifierPathElement("vegetables")],
                                     )
                                 ],
                             ),
@@ -780,12 +688,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                                 name="concat",
                                 args=[
                                     Identifier(
-                                        Token(1, TOKEN_IDENTIFIER, "furniture"),
-                                        path=[
-                                            IdentifierPathElement(
-                                                MockToken, "furniture"
-                                            )
-                                        ],
+                                        path=[IdentifierPathElement("furniture")],
                                     )
                                 ],
                             ),
@@ -808,10 +711,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                 ),
@@ -822,13 +724,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    limit=IntegerLiteral(MockToken, 5),
+                    limit=IntegerLiteral(5),
                 ),
             ),
             Case(
@@ -837,15 +738,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    limit=Identifier(
-                        MockToken, path=[IdentifierPathElement(MockToken, "max")]
-                    ),
+                    limit=Identifier(path=[IdentifierPathElement("max")]),
                 ),
             ),
             Case(
@@ -854,13 +752,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    offset=IntegerLiteral(MockToken, 2),
+                    offset=IntegerLiteral(2),
                 ),
             ),
             Case(
@@ -869,14 +766,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    limit=IntegerLiteral(MockToken, 5),
-                    offset=IntegerLiteral(MockToken, 2),
+                    limit=IntegerLiteral(5),
+                    offset=IntegerLiteral(2),
                 ),
             ),
             Case(
@@ -885,14 +781,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    limit=IntegerLiteral(MockToken, 5),
-                    offset=IntegerLiteral(MockToken, 2),
+                    limit=IntegerLiteral(5),
+                    offset=IntegerLiteral(2),
                 ),
             ),
             Case(
@@ -901,10 +796,9 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
                     reversed_=True,
@@ -916,14 +810,13 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     identifier=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
                         ],
                     ),
-                    limit=IntegerLiteral(MockToken, 5),
-                    offset=IntegerLiteral(MockToken, 2),
+                    limit=IntegerLiteral(5),
+                    offset=IntegerLiteral(2),
                     reversed_=True,
                 ),
             ),
@@ -932,8 +825,8 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..10)",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(MockToken, 1),
-                    stop=IntegerLiteral(MockToken, 10),
+                    start=IntegerLiteral(1),
+                    stop=IntegerLiteral(10),
                 ),
             ),
             Case(
@@ -941,13 +834,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..collection.products.size)",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(MockToken, 1),
+                    start=IntegerLiteral(1),
                     stop=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
-                            IdentifierPathElement(MockToken, "size"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement("size"),
                         ],
                     ),
                 ),
@@ -957,15 +849,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (num..collection.products.size)",
                 LoopExpression(
                     name="product",
-                    start=Identifier(
-                        MockToken, path=[IdentifierPathElement(MockToken, "num")]
-                    ),
+                    start=Identifier(path=[IdentifierPathElement("num")]),
                     stop=Identifier(
-                        MockToken,
                         path=[
-                            IdentifierPathElement(MockToken, "collection"),
-                            IdentifierPathElement(MockToken, "products"),
-                            IdentifierPathElement(MockToken, "size"),
+                            IdentifierPathElement("collection"),
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement("size"),
                         ],
                     ),
                 ),
@@ -975,10 +864,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..10) offset:2 limit:5 reversed",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(MockToken, 1),
-                    stop=IntegerLiteral(MockToken, 10),
-                    limit=IntegerLiteral(MockToken, 5),
-                    offset=IntegerLiteral(MockToken, 2),
+                    start=IntegerLiteral(1),
+                    stop=IntegerLiteral(10),
+                    limit=IntegerLiteral(5),
+                    offset=IntegerLiteral(2),
                     reversed_=True,
                 ),
             ),

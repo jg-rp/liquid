@@ -1,4 +1,10 @@
-from typing import Dict, Type, Optional, Union
+"""Liquid specific Excpeptions and wanrings."""
+
+from typing import Dict
+from typing import Type
+from typing import Optional
+from typing import Union
+
 from pathlib import Path
 
 

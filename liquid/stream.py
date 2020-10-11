@@ -1,3 +1,5 @@
+"""Wrapper for token iterators that lets us step through and peek ahead."""
+
 from __future__ import annotations
 
 from collections import deque

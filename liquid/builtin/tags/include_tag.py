@@ -1,7 +1,7 @@
 """Parse tree node and tag definition for the built in "include" tag."""
 
 import sys
-from typing import Optional, Dict, Any, Callable, TextIO
+from typing import Optional, Dict, Any, TextIO
 
 from liquid import ast
 from liquid.tag import Tag
@@ -37,20 +37,18 @@ TAG_INCLUDE = sys.intern("include")
 class IncludeNode(ast.Node):
     """Parse tree node for "include" block tags."""
 
-    __slots__ = ("tok", "name", "get_template", "var", "alias", "args")
+    __slots__ = ("tok", "name", "var", "alias", "args")
 
     def __init__(
         self,
         tok: Token,
         name: Expression,
-        get_template: Callable[[str, Optional[Dict[str, Any]]], Any],
         var: Optional[Identifier] = None,
         alias: Optional[str] = None,
         args: Optional[Dict[str, Any]] = None,
     ):
         self.tok = tok
         self.name = name
-        self.get_template = get_template
         self.var = var
         self.alias = alias
         self.args = args or {}
@@ -77,7 +75,7 @@ class IncludeNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         name = self.name.evaluate(context)
-        template = self.get_template(str(name), None)
+        template = context.get_template(str(name))
 
         namespace: Dict[str, object] = {}
 
@@ -177,14 +175,7 @@ class IncludeTag(Tag):
                     linenum=tok.linenum,
                 )
 
-        return IncludeNode(
-            tok,
-            name=name,
-            get_template=self.env.get_template,
-            var=identifier,
-            alias=alias,
-            args=args,
-        )
+        return IncludeNode(tok, name=name, var=identifier, alias=alias, args=args)
 
 
 def parse_argument(stream: TokenStream):

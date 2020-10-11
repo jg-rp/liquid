@@ -1,32 +1,36 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 
 import sys
-from typing import Optional, Dict, Any, Callable, TextIO
+
+from typing import Optional
+from typing import Dict
+from typing import Any
+from typing import TextIO
 
 from liquid import ast
 from liquid.tag import Tag
-from liquid.token import (
-    Token,
-    TOKEN_TAG,
-    TOKEN_EXPRESSION,
-    TOKEN_IDENTIFIER,
-    TOKEN_WITH,
-    TOKEN_FOR,
-    TOKEN_AS,
-    TOKEN_COMMA,
-    TOKEN_COLON,
-    TOKEN_EOF,
-    TOKEN_STRING,
-)
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_STRING
+
 from liquid.stream import TokenStream
 from liquid.lex import tokenize_include_expression
-from liquid.parse import (
-    expect,
-    parse_identifier,
-    parse_expression,
-    parse_unchained_identifier,
-    parse_string_literal,
-)
+
+from liquid.parse import expect
+from liquid.parse import parse_identifier
+from liquid.parse import parse_expression
+from liquid.parse import parse_unchained_identifier
+from liquid.parse import parse_string_literal
+
 from liquid.expression import Expression
 from liquid.context import Context, ReadOnlyChainMap
 from liquid.exceptions import LiquidSyntaxError
@@ -40,13 +44,12 @@ TAG_RENDER = sys.intern("render")
 class RenderNode(ast.Node):
     """Parse tree node for "render" tags."""
 
-    __slots__ = ("tok", "name", "get_template", "var", "loop", "alias", "args")
+    __slots__ = ("tok", "name", "var", "loop", "alias", "args")
 
     def __init__(
         self,
         tok: Token,
         name: Expression,
-        get_template: Callable[[str, Optional[Dict[str, Any]]], Any],
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[str] = None,
@@ -54,7 +57,6 @@ class RenderNode(ast.Node):
     ):
         self.tok = tok
         self.name = name
-        self.get_template = get_template
         self.var = var
         self.loop = loop
         self.alias = alias
@@ -82,7 +84,7 @@ class RenderNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         template_name = self.name.evaluate(context)
-        template = self.get_template(str(template_name), None)
+        template = context.get_template(str(template_name))
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -195,7 +197,6 @@ class RenderTag(Tag):
         return RenderNode(
             tok,
             name=name,
-            get_template=self.env.get_template,
             var=identifier,
             loop=loop,
             alias=alias,
@@ -204,6 +205,8 @@ class RenderTag(Tag):
 
 
 def parse_argument(stream: TokenStream):
+    """Return the next key/value pair from the stream where key and value
+    are separated by a colon."""
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
 

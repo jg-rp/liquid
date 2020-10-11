@@ -49,7 +49,7 @@ class PaginateNode(ast.Node):
         assert isinstance(collection, abc.Collection)
 
         if not collection:
-            raise LiquidTypeError(f"cannot paginate {self.identifier.tok.value}")
+            raise LiquidTypeError(f"cannot paginate {self.identifier}")
 
         collection_size = len(collection)
         page_count = math.ceil(collection_size / self.page_size)
@@ -74,7 +74,8 @@ class PaginateNode(ast.Node):
         if current_page < page_count:
             pagination["next"] = link("Next &raquo;", current_page + 1)
 
-        # XXX: Not an accurate port of the reference implementation.
+        # NOTE: Not an accurate port of the reference implementation. But should
+        # be close enough for a benchmark.
         if page_count > 1:
             for page in range(1, page_count + 1):
                 if current_page == page:

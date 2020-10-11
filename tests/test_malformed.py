@@ -213,7 +213,7 @@ class MalformedTemplateTestCase(TestCase):
                 description="minus string",
                 template="{{ -'foo' }}",
                 expect_exception=LiquidTypeError,
-                expect_msg="unknown operator -string, on line 1",
+                expect_msg="unknown operator -'foo', on line 1",
             ),
             Case(
                 description="unknown prefix operator",

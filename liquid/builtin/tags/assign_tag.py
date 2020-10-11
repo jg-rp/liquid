@@ -2,9 +2,13 @@
 
 import re
 import sys
+
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
@@ -58,4 +62,4 @@ class AssignTag(Tag):
 
         expr_iter = tokenize_filtered_expression(expression)
         expr = parse_filtered_expression(TokenStream(expr_iter))
-        return AssignNode(tok, AssignmentExpression(tok, name, expr))
+        return AssignNode(tok, AssignmentExpression(name, expr))

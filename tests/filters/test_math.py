@@ -52,15 +52,41 @@ class MathFilterTestCase(unittest.TestCase):
         """Test abs filter function."""
 
         test_cases = [
-            Case(description="positive integer", val=5, args=[], kwargs={}, expect=5,),
-            Case(description="negative integer", val=-5, args=[], kwargs={}, expect=5,),
             Case(
-                description="positive float", val=5.4, args=[], kwargs={}, expect=5.4,
+                description="positive integer",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=5,
             ),
             Case(
-                description="negative float", val=-5.4, args=[], kwargs={}, expect=5.4,
+                description="negative integer",
+                val=-5,
+                args=[],
+                kwargs={},
+                expect=5,
             ),
-            Case(description="zero", val=0, args=[], kwargs={}, expect=0,),
+            Case(
+                description="positive float",
+                val=5.4,
+                args=[],
+                kwargs={},
+                expect=5.4,
+            ),
+            Case(
+                description="negative float",
+                val=-5.4,
+                args=[],
+                kwargs={},
+                expect=5.4,
+            ),
+            Case(
+                description="zero",
+                val=0,
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
             Case(
                 description="positive string integer",
                 val="5",
@@ -94,13 +120,6 @@ class MathFilterTestCase(unittest.TestCase):
                 val=-3,
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword argument",
-                val=-3,
-                args=[],
-                kwargs={"foo": 1},
                 expect=FilterArgumentError,
             ),
             Case(
@@ -188,13 +207,6 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
         ]
 
         self._test(AtMost, test_cases)
@@ -266,13 +278,6 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
         ]
 
         self._test(AtLeast, test_cases)
@@ -281,15 +286,41 @@ class MathFilterTestCase(unittest.TestCase):
         """Test ceil filter function."""
 
         test_cases = [
-            Case(description="positive integer", val=5, args=[], kwargs={}, expect=5,),
             Case(
-                description="negative integer", val=-5, args=[], kwargs={}, expect=-5,
+                description="positive integer",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=5,
             ),
-            Case(description="positive float", val=5.4, args=[], kwargs={}, expect=6,),
             Case(
-                description="negative float", val=-5.4, args=[], kwargs={}, expect=-5,
+                description="negative integer",
+                val=-5,
+                args=[],
+                kwargs={},
+                expect=-5,
             ),
-            Case(description="zero", val=0, args=[], kwargs={}, expect=0,),
+            Case(
+                description="positive float",
+                val=5.4,
+                args=[],
+                kwargs={},
+                expect=6,
+            ),
+            Case(
+                description="negative float",
+                val=-5.4,
+                args=[],
+                kwargs={},
+                expect=-5,
+            ),
+            Case(
+                description="zero",
+                val=0,
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
             Case(
                 description="positive string float",
                 val="5.1",
@@ -309,13 +340,6 @@ class MathFilterTestCase(unittest.TestCase):
                 val=-3.1,
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword argument",
-                val=-3.1,
-                args=[],
-                kwargs={"foo": 1},
                 expect=FilterArgumentError,
             ),
             Case(
@@ -340,15 +364,41 @@ class MathFilterTestCase(unittest.TestCase):
         """Test floor filter function."""
 
         test_cases = [
-            Case(description="positive integer", val=5, args=[], kwargs={}, expect=5,),
             Case(
-                description="negative integer", val=-5, args=[], kwargs={}, expect=-5,
+                description="positive integer",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=5,
             ),
-            Case(description="positive float", val=5.4, args=[], kwargs={}, expect=5,),
             Case(
-                description="negative float", val=-5.4, args=[], kwargs={}, expect=-6,
+                description="negative integer",
+                val=-5,
+                args=[],
+                kwargs={},
+                expect=-5,
             ),
-            Case(description="zero", val=0, args=[], kwargs={}, expect=0,),
+            Case(
+                description="positive float",
+                val=5.4,
+                args=[],
+                kwargs={},
+                expect=5,
+            ),
+            Case(
+                description="negative float",
+                val=-5.4,
+                args=[],
+                kwargs={},
+                expect=-6,
+            ),
+            Case(
+                description="zero",
+                val=0,
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
             Case(
                 description="positive string float",
                 val="5.1",
@@ -368,13 +418,6 @@ class MathFilterTestCase(unittest.TestCase):
                 val=-3.1,
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword argument",
-                val=-3.1,
-                args=[],
-                kwargs={"foo": 1},
                 expect=FilterArgumentError,
             ),
             Case(
@@ -413,7 +456,13 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=5.0,
             ),
-            Case(description="integer division", val=9, args=[2], kwargs={}, expect=4,),
+            Case(
+                description="integer division",
+                val=9,
+                args=[2],
+                kwargs={},
+                expect=4,
+            ),
             Case(
                 description="float division",
                 val=20,
@@ -446,21 +495,14 @@ class MathFilterTestCase(unittest.TestCase):
                 description="too many args",
                 val=5,
                 args=[1, "5"],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
         ]
@@ -517,21 +559,14 @@ class MathFilterTestCase(unittest.TestCase):
                 description="too many args",
                 val=5,
                 args=[1, "5"],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
         ]
@@ -588,21 +623,14 @@ class MathFilterTestCase(unittest.TestCase):
                 description="too many args",
                 val=5,
                 args=[1, "5"],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
         ]
@@ -614,9 +642,19 @@ class MathFilterTestCase(unittest.TestCase):
 
         test_cases = [
             Case(
-                description="float round down", val=5.1, args=[], kwargs={}, expect=5,
+                description="float round down",
+                val=5.1,
+                args=[],
+                kwargs={},
+                expect=5,
             ),
-            Case(description="float round up", val=5.6, args=[], kwargs={}, expect=6,),
+            Case(
+                description="float round up",
+                val=5.6,
+                args=[],
+                kwargs={},
+                expect=6,
+            ),
             Case(
                 description="float as a string",
                 val="5.6",
@@ -638,19 +676,18 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=5.67,
             ),
-            Case(description="integer", val=5, args=[], kwargs={}, expect=5,),
+            Case(
+                description="integer",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=5,
+            ),
             Case(
                 description="too many args",
                 val=5,
                 args=[1, 2],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
                 expect=FilterArgumentError,
             ),
         ]
@@ -661,7 +698,13 @@ class MathFilterTestCase(unittest.TestCase):
         """Test times filter function."""
 
         test_cases = [
-            Case(description="int times int", val=5, args=[2], kwargs={}, expect=10,),
+            Case(
+                description="int times int",
+                val=5,
+                args=[2],
+                kwargs={},
+                expect=10,
+            ),
             Case(
                 description="int times float",
                 val=5,
@@ -709,13 +752,6 @@ class MathFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[1, 2],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
                 expect=FilterArgumentError,
             ),
         ]
@@ -772,21 +808,14 @@ class MathFilterTestCase(unittest.TestCase):
                 description="too many args",
                 val=5,
                 args=[1, "5"],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
-                kwargs={"x": 5},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="unexpected keyword args",
-                val=5,
-                args=[1],
-                kwargs={"x": 5},
+                kwargs={},
                 expect=FilterArgumentError,
             ),
         ]

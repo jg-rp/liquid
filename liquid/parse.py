@@ -1,9 +1,18 @@
 """Liquid template parser."""
+
 from __future__ import annotations
 
 from enum import IntEnum, auto
 from functools import lru_cache
-from typing import Tuple, List, Union, Optional, NamedTuple, Dict, Protocol, Any
+
+from typing import Tuple
+from typing import List
+from typing import Union
+from typing import Optional
+from typing import NamedTuple
+from typing import Dict
+from typing import Protocol
+from typing import Any
 
 from liquid.exceptions import LiquidSyntaxError, Error
 from liquid.mode import Mode, error
@@ -105,7 +114,10 @@ def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
         _typ = reverse_operators.get(tok.type, tok.type)
         _expected_typ = reverse_operators.get(typ, typ)
         if value is not None:
-            msg = f"expected {_expected_typ} with value '{value}', found {_typ} with value '{tok.value}'"
+            msg = (
+                f"expected {_expected_typ} with value '{value}', "
+                f"found {_typ} with value '{tok.value}'"
+            )
         else:
             msg = f"expected '{_expected_typ}', found '{_typ}'"
         raise LiquidSyntaxError(msg, linenum=tok.linenum)
@@ -220,32 +232,34 @@ def parse_filter(stream: TokenStream) -> expression.Filter:
 
 def parse_boolean(stream: TokenStream) -> expression.Boolean:
     """Read a boolean literal (true or false) from the token stream."""
-    return expression.Boolean(stream.current, value=stream.current.type == TOKEN_TRUE)
+    if stream.current.type == TOKEN_TRUE:
+        return expression.TRUE
+    return expression.FALSE
 
 
-def parse_nil(stream: TokenStream) -> expression.Nil:
+def parse_nil(_: TokenStream) -> expression.Nil:
     """Read a 'nil' keyword from the token stream."""
-    return expression.Nil(stream.current)
+    return expression.NIL
 
 
-def parse_empty(stream: TokenStream) -> expression.Empty:
+def parse_empty(_: TokenStream) -> expression.Empty:
     """Read a 'empty' keyword from the token stream."""
-    return expression.Empty(stream.current)
+    return expression.EMPTY
 
 
 def parse_string_literal(stream: TokenStream) -> expression.StringLiteral:
     """Read a string from the token stream."""
-    return expression.StringLiteral(stream.current, value=stream.current.value)
+    return expression.StringLiteral(value=stream.current.value)
 
 
 def parse_integer_literal(stream: TokenStream) -> expression.IntegerLiteral:
     """Read an integer from the token stream."""
-    return expression.IntegerLiteral(stream.current, value=int(stream.current.value))
+    return expression.IntegerLiteral(value=int(stream.current.value))
 
 
 def parse_float_literal(stream: TokenStream) -> expression.FloatLiteral:
     """Read a float from the token stream."""
-    return expression.FloatLiteral(stream.current, value=float(stream.current.value))
+    return expression.FloatLiteral(value=float(stream.current.value))
 
 
 def parse_identifier(stream: TokenStream) -> expression.Identifier:
@@ -259,35 +273,24 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     <ident>[<int>]
     <ident>[<int>].<ident>
     """
-    tok = stream.current
     path = []
 
     while stream.current.type in IDENTIFIER_TOKENS:
         if stream.current.type == TOKEN_IDENTIFIER:
-            path.append(
-                expression.IdentifierPathElement(stream.current, stream.current.value)
-            )
+            path.append(expression.IdentifierPathElement(stream.current.value))
+
         elif stream.current.type == TOKEN_INTEGER:
-            path.append(
-                expression.IdentifierPathElement(
-                    stream.current, int(stream.current.value)
-                )
-            )
+            path.append(expression.IdentifierPathElement(int(stream.current.value)))
+
         elif stream.current.type == TOKEN_LBRACKET:
             stream.next_token()  # Eat open bracket
 
             if stream.current.type == TOKEN_STRING:
-                path.append(
-                    expression.IdentifierPathElement(
-                        stream.current, stream.current.value
-                    )
-                )
+                path.append(expression.IdentifierPathElement(stream.current.value))
+
             elif stream.current.type == TOKEN_INTEGER:
-                path.append(
-                    expression.IdentifierPathElement(
-                        stream.current, int(stream.current.value)
-                    )
-                )
+                path.append(expression.IdentifierPathElement(int(stream.current.value)))
+
             elif stream.current.type == TOKEN_IDENTIFIER:
                 # Recursive call to parse_identifier. If it's not a string or
                 # integer, anything inside a pair of square brackets could be
@@ -309,7 +312,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
         stream.next_token()
 
     stream.push(stream.current)
-    return expression.Identifier(tok, path)
+    return expression.Identifier(path)
 
 
 class RangeOption(NamedTuple):
@@ -385,7 +388,6 @@ def parse_prefix_expression(stream: TokenStream) -> expression.PrefixExpression:
     stream.next_token()
 
     exp = expression.PrefixExpression(
-        tok,
         tok.value,
         right=parse_expression(stream, precedence=Precedence.PREFIX),
     )
@@ -401,7 +403,6 @@ def parse_infix_expression(
     stream.next_token()
 
     exp = expression.InfixExpression(
-        tok,
         left=left,
         operator=tok.value,
         right=parse_expression(stream, precedence),
@@ -484,10 +485,8 @@ def parse_boolean_expression(stream: TokenStream) -> expression.Expression:
     """
     if stream.current.type == TOKEN_EOF:
         # Empty expression.
-        return expression.Nil(tok=stream.current)
-    return expression.BooleanExpression(
-        tok=stream.current, expression=parse_expression(stream)
-    )
+        return expression.Nil()
+    return expression.BooleanExpression(expression=parse_expression(stream))
 
 
 def parse_assignment_expression(stream: TokenStream) -> expression.AssignmentExpression:
@@ -499,7 +498,6 @@ def parse_assignment_expression(stream: TokenStream) -> expression.AssignmentExp
     expect(stream, TOKEN_IDENTIFIER)
     expect_peek(stream, TOKEN_ASSIGN)
 
-    tok = stream.current
     name = parse_unchained_identifier(stream)
 
     stream.next_token()
@@ -507,7 +505,7 @@ def parse_assignment_expression(stream: TokenStream) -> expression.AssignmentExp
 
     expr = parse_filtered_expression(stream)
 
-    return expression.AssignmentExpression(tok=tok, name=str(name), expression=expr)
+    return expression.AssignmentExpression(name=str(name), expression=expr)
 
 
 def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:

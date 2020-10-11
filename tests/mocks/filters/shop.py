@@ -1,5 +1,3 @@
-import re
-
 from liquid.filter import (
     Filter,
     maybe_one_arg,
@@ -105,7 +103,6 @@ class LinkTo(Filter):
 
     name = "link_to"
 
-    @string_required
     def __call__(self, val, *args, **kwargs):
         url, title = one_maybe_two_args(self.name, args, kwargs)
         if not title:

@@ -1,6 +1,6 @@
 import collections.abc
 from abc import ABC, abstractmethod
-from typing import Any, TextIO
+from typing import Any
 
 
 class IterableDrop(ABC, collections.abc.Collection):
@@ -10,10 +10,3 @@ class IterableDrop(ABC, collections.abc.Collection):
     @abstractmethod
     def step(self, item: Any):
         """Step the iterator."""
-
-    def step_write(self, item: Any, buffer: TextIO):
-        """Step the iterator and write auxiliary text to buffer."""
-        self.step(item)
-
-    def empty_exit_buffer(self, buffer: TextIO):
-        """Write auxiliary text on StopIteration."""

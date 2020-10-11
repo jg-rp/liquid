@@ -3,9 +3,18 @@
 import sys
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_EOF, TOKEN_EXPRESSION, TOKEN_TAG
-from liquid.parse import get_parser, expect, parse_boolean_expression
-from liquid import ast
+from liquid.token import Token
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_boolean_expression
+
+from liquid.ast import Node
+from liquid.ast import BlockNode
+
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
@@ -18,14 +27,14 @@ TAG_ENDUNLESS = sys.intern("endunless")
 ENDUNLESSBLOCK = (TAG_ENDUNLESS, TOKEN_EOF)
 
 
-class UnlessNode(ast.Node):
+class UnlessNode(Node):
     """Parse tree node for an "unless" template tag."""
 
     __slots__ = ("tok", "condition", "consequence")
 
     statement = False
 
-    def __init__(self, tok: Token, condition: Expression, consequence: ast.BlockNode):
+    def __init__(self, tok: Token, condition: Expression, consequence: BlockNode):
         self.tok = tok
         self.condition = condition
         self.consequence = consequence
@@ -39,12 +48,11 @@ class UnlessNode(ast.Node):
 
 
 class UnlessTag(Tag):
-    """"""
 
     name = TAG_UNLESS
     end = TAG_ENDUNLESS
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> UnlessNode:
         parser = get_parser(self.env)
 
         expect(stream, TOKEN_TAG, value=TAG_UNLESS)
