@@ -1,30 +1,33 @@
-from typing import Protocol, Any, Type, Callable
+from typing import Protocol
+from typing import Any
+from typing import Type
+from typing import Callable
 
 from liquid.tag import Tag
 from liquid.mode import Mode
 
-from liquid.builtin import literal
-from liquid.builtin import statement
-from liquid.builtin import illegal
+from . import literal
+from . import statement
+from . import illegal
 
-from liquid.builtin.tags import if_tag
-from liquid.builtin.tags import comment_tag
-from liquid.builtin.tags import unless_tag
-from liquid.builtin.tags import case_tag
-from liquid.builtin.tags import for_tag
-from liquid.builtin.tags import tablerow_tag
-from liquid.builtin.tags import capture_tag
-from liquid.builtin.tags import cycle_tag
-from liquid.builtin.tags import assign_tag
-from liquid.builtin.tags import increment_tag
-from liquid.builtin.tags import decrement_tag
-from liquid.builtin.tags import echo_tag
-from liquid.builtin.tags import liquid_tag
-from liquid.builtin.tags import include_tag
-from liquid.builtin.tags import render_tag
+from .tags import if_tag
+from .tags import comment_tag
+from .tags import unless_tag
+from .tags import case_tag
+from .tags import for_tag
+from .tags import tablerow_tag
+from .tags import capture_tag
+from .tags import cycle_tag
+from .tags import assign_tag
+from .tags import increment_tag
+from .tags import decrement_tag
+from .tags import echo_tag
+from .tags import liquid_tag
+from .tags import include_tag
+from .tags import render_tag
 
 
-from liquid.builtin.filters.math import (
+from .filters.math import (
     Abs,
     AtMost,
     AtLeast,
@@ -38,7 +41,7 @@ from liquid.builtin.filters.math import (
     Modulo,
 )
 
-from liquid.builtin.filters.string import (
+from .filters.string import (
     Capitalize,
     Append,
     Downcase,
@@ -64,7 +67,7 @@ from liquid.builtin.filters.string import (
     URLDecode,
 )
 
-from liquid.builtin.filters.array import (
+from .filters.array import (
     Join,
     First,
     Last,
@@ -78,7 +81,7 @@ from liquid.builtin.filters.array import (
     Compact,
 )
 
-from liquid.builtin.filters.misc import Size, Default, Date
+from .filters.misc import Size, Default, Date
 
 
 class Env(Protocol):
