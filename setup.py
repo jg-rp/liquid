@@ -12,11 +12,11 @@ with open("README.rst", "r") as fd:
 setuptools.setup(
     name="Liquid",
     version=__version__,
-    description="Render Liquid templates",
+    description="A Python template engine for the Liquid markup language.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/jg-rp/liquid",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(include=["liquid"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=["python-dateutil>=2.8.1"],

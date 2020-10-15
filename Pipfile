@@ -13,6 +13,7 @@ pyyaml = "*"
 rstcheck = "*"
 docutils = "*"
 flake8-bugbear = "*"
+twine = "*"
 
 [packages]
 python-dateutil = "*"

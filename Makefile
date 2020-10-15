@@ -17,6 +17,10 @@ benchmark:
 profile:
 	python -O performance.py --profile
 
+.PHONY: build
+build: clean
+	python setup.py sdist bdist_wheel
+
 .PHONY: clean
 clean:
 	python -Bc "import pathlib; [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]"
@@ -24,4 +28,6 @@ clean:
 	rm -f .coverage
 	rm -rf htmlcov
 	rm -rf Liquid.egg-info
+	rm -rf build
+	rm -rf dist
 
