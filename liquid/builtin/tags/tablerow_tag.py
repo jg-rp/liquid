@@ -1,18 +1,32 @@
-""""""
-import sys
+"""Tag and node definition for the built-in "tablerow" tag."""
+
 import collections.abc
 import math
-from itertools import islice
-from typing import List, TextIO, Iterator
+import sys
 
-from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
-from liquid import ast
-from liquid.tag import Tag
+from itertools import islice
+
+from typing import List
+from typing import TextIO
+from typing import Iterator
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+
+from liquid.ast import Node
+from liquid.ast import BlockNode
+
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_loop_expression
 from liquid.expression import LoopExpression
-from liquid.parse import expect, parse_loop_expression, get_parser
+from liquid.lex import tokenize_loop_expression
+
+from liquid.parse import expect
+from liquid.parse import parse_loop_expression
+from liquid.parse import get_parser
+
+from liquid.tag import Tag
+from liquid.stream import TokenStream
 
 
 TAG_TABLEROW = sys.intern("tablerow")
@@ -132,16 +146,16 @@ class TableRow(collections.abc.Mapping):
             self.row += 1
 
 
-class TablerowNode(ast.Node):
-    __slots__ = ("tok", "expression", "block")
+class TablerowNode(Node):
+    """Parse tree node for the built-in "tablerow" tag."""
 
-    statement = False
+    __slots__ = ("tok", "expression", "block")
 
     def __init__(
         self,
         tok: Token,
         expression: LoopExpression,
-        block: ast.BlockNode,
+        block: BlockNode,
     ):
         self.tok = tok
         self.expression = expression
@@ -184,6 +198,7 @@ class TablerowNode(ast.Node):
 
 
 class TablerowTag(Tag):
+    """The built-in "tablerow" tag."""
 
     name = TAG_TABLEROW
     end = TAG_ENDTABLEROW

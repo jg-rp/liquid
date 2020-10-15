@@ -16,6 +16,10 @@ flake8-bugbear = "*"
 
 [packages]
 python-dateutil = "*"
+liquid = {editable = true, path = "."}
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

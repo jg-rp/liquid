@@ -1,4 +1,4 @@
-"""Parse tree node and Tag definition for the built-in "assign" tag."""
+"""Tag and node definition for the built-in "assign" tag."""
 
 import re
 import sys
@@ -24,9 +24,9 @@ TAG_ASSIGN = sys.intern("assign")
 
 
 class AssignNode(ast.Node):
-    __slots__ = ("tok", "expression")
+    """Parse tree node for the built-in "assign" tag."""
 
-    statement = False
+    __slots__ = ("tok", "expression")
 
     def __init__(self, tok: Token, expression: AssignmentExpression):
         self.tok = tok
@@ -40,6 +40,7 @@ class AssignNode(ast.Node):
 
 
 class AssignTag(Tag):
+    """The built-in cycle tag."""
 
     name = TAG_ASSIGN
     block = False

@@ -1,25 +1,26 @@
-"""Tag and tree node defninition for the "unless" tag."""
+"""Tag and node definition for the built-in "unless" tag."""
 
 import sys
 from typing import TextIO
+
+from liquid.ast import Node
+from liquid.ast import BlockNode
+
+from liquid.context import Context
+from liquid.lex import tokenize_boolean_expression
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.expression import Expression
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_boolean_expression
 
 from liquid.token import Token
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 
-from liquid.parse import get_parser
-from liquid.parse import expect
-from liquid.parse import parse_boolean_expression
-
-from liquid.ast import Node
-from liquid.ast import BlockNode
-
-from liquid.tag import Tag
-from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_boolean_expression
-from liquid.expression import Expression
 
 TAG_UNLESS = sys.intern("unless")
 TAG_ENDUNLESS = sys.intern("endunless")
@@ -28,11 +29,9 @@ ENDUNLESSBLOCK = (TAG_ENDUNLESS, TOKEN_EOF)
 
 
 class UnlessNode(Node):
-    """Parse tree node for an "unless" template tag."""
+    """Parse tree node for the built-in "unless" tag."""
 
     __slots__ = ("tok", "condition", "consequence")
-
-    statement = False
 
     def __init__(self, tok: Token, condition: Expression, consequence: BlockNode):
         self.tok = tok
@@ -48,6 +47,7 @@ class UnlessNode(Node):
 
 
 class UnlessTag(Tag):
+    """The built-in "unless" tag."""
 
     name = TAG_UNLESS
     end = TAG_ENDUNLESS

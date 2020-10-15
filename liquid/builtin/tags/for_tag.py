@@ -1,19 +1,39 @@
-import re
+"""Tag and node definition for the built-in "for" tag."""
+
 import sys
+
 from collections import abc
-from typing import Optional, Any, List, TextIO, Iterator, NoReturn, Union
 
-from liquid.token import Token, TOKEN_EXPRESSION, TOKEN_TAG
-from liquid.parse import get_parser, expect, parse_loop_expression
-from liquid import ast
-from liquid.tag import Tag
+from typing import Optional
+from typing import Any
+from typing import List
+from typing import TextIO
+from typing import Iterator
+from typing import NoReturn
+from typing import Union
+
+from liquid.ast import Node
+from liquid.ast import BlockNode
+
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_loop_expression
 from liquid.expression import LoopExpression
-from liquid.exceptions import BreakLoop, ContinueLoop
 
-RE_FOR_EXPRESSION = re.compile(r"^(\w[a-zA-Z0-9_\-]*)\s+in\s+([a-zA-Z0-9_\-:.()]+)$")
+from liquid.exceptions import BreakLoop
+from liquid.exceptions import ContinueLoop
+
+from liquid.lex import tokenize_loop_expression
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_loop_expression
+
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.token import Token
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+
 
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
@@ -107,19 +127,17 @@ class ForLoop(abc.Mapping):
             self.last = False
 
 
-class ForNode(ast.Node):
-    """A parse tree node representing a for loop tag block."""
+class ForNode(Node):
+    """Parse tree node for the built-in "for" tag."""
 
     __slots__ = ("tok", "expression", "block", "default")
-
-    statement = False
 
     def __init__(
         self,
         tok: Token,
         expression: LoopExpression,
-        block: ast.BlockNode,
-        default: Optional[ast.BlockNode] = None,
+        block: BlockNode,
+        default: Optional[BlockNode] = None,
     ):
         self.tok = tok
         self.expression = expression
@@ -169,7 +187,9 @@ class ForNode(ast.Node):
             self.default.render(context, buffer)
 
 
-class BreakNode(ast.Node):
+class BreakNode(Node):
+    """Parse tree node for the built-in "break" tag."""
+
     __slots__ = ("tok",)
 
     def __init__(self, tok: Token):
@@ -186,7 +206,9 @@ class BreakNode(ast.Node):
         raise BreakLoop("break")
 
 
-class ContinueNode(ast.Node):
+class ContinueNode(Node):
+    """Parse tree node for the built-in "continue" tag."""
+
     __slots__ = ("tok",)
 
     def __init__(self, tok: Token):
@@ -204,20 +226,12 @@ class ContinueNode(ast.Node):
 
 
 class ForTag(Tag):
-    """Loop over items in an array, pairs of items in a hash, or integers in a range.
-
-    For loop blocks share scope with their document. So assigning to a variable inside
-    a for loop will add to the document's "local" namespace and persist after the loop
-    has finished.
-
-    To support nested loops and to remove "forloop" helpers, after each loop has finished,
-    we push a "ForLoopDrop" to the context scope, then pop it after.
-    """
+    """The built-in "for" tag."""
 
     name = TAG_FOR
     end = TAG_ENDFOR
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         parser = get_parser(self.env)
 
         expect(stream, TOKEN_TAG, value=TAG_FOR)
@@ -243,6 +257,7 @@ class ForTag(Tag):
 
 
 class BreakTag(Tag):
+    """The built-in "break" tag."""
 
     name = TAG_BREAK
     block = False
@@ -253,6 +268,7 @@ class BreakTag(Tag):
 
 
 class ContinueTag(Tag):
+    """The built-in "continue" tag."""
 
     name = TAG_CONTINUE
     block = False

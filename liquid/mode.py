@@ -11,7 +11,7 @@ from liquid.exceptions import lookup_warning
 
 
 class Mode(IntEnum):
-    """Template correctness tolerence."""
+    """Template correctness tolerance."""
 
     LAX = auto()
     WARN = auto()
@@ -19,7 +19,7 @@ class Mode(IntEnum):
 
 
 def error(
-    tolerence: Mode,
+    tolerance: Mode,
     exc: Union[Type[Error], Error],
     msg: Optional[str] = None,
     linenum: Optional[int] = None,
@@ -30,7 +30,7 @@ def error(
     elif not exc.linenum:
         exc.linenum = linenum
 
-    if tolerence == Mode.STRICT:
+    if tolerance == Mode.STRICT:
         raise exc
-    if tolerence == Mode.WARN:
+    if tolerance == Mode.WARN:
         warnings.warn(str(exc), category=lookup_warning(exc.__class__))

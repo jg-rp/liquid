@@ -18,8 +18,47 @@ from typing import Collection
 from typing import Pattern
 from typing import Callable
 
-from liquid.token import *  # pylint: disable=wildcard-import unused-wildcard-import
 from liquid.exceptions import LiquidSyntaxError
+
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_BY
+from liquid.token import TOKEN_NEGATIVE
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_OFFSET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_COLS
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_ASSIGN
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_OR
+from liquid.token import operators
+from liquid.token import Token
+
 
 __all__ = (
     "tokenize_assignment_expression",
@@ -356,7 +395,7 @@ def get_lexer(
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
 ) -> Callable[[str], Iterator[Token]]:
-    """Return a template lexer using the given tag and statement delimters."""
+    """Return a template lexer using the given tag and statement delimiters."""
     rules = compile_liquid_rules(
         tag_start_string,
         tag_end_string,

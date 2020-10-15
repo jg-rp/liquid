@@ -1079,7 +1079,7 @@ class RenderTestCases(unittest.TestCase):
 
     def test_illegal(self):
         """Test that we can render an `illegal` token in LAX mode."""
-        env = Environment(tollerence=Mode.LAX)
+        env = Environment(tolerance=Mode.LAX)
         template = env.from_string(r"{% nosuchthing %}")
         result = template.render()
         self.assertEqual(result, "")

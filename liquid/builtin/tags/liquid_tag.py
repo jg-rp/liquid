@@ -1,27 +1,34 @@
-"""Parse tree node and tag definition for the built in "echo" tag."""
+"""Tag and node definition for the built-in "liquid" tag."""
 
 import sys
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
-from liquid import ast
-from liquid.tag import Tag
+from liquid.ast import Node
+from liquid.ast import BlockNode
+
 from liquid.context import Context
-from liquid.stream import TokenStream
 from liquid.lex import tokenize_liquid_expression
-from liquid.parse import expect, get_parser
+
+from liquid.parse import expect
+from liquid.parse import get_parser
+
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+
 
 TAG_LIQUID = sys.intern("liquid")
 
 
-class LiquidNode(ast.Node):
-    """Parse tree node representing a "liquid" tag."""
+class LiquidNode(Node):
+    """Parse tree node for the built-in "liquid" tag."""
 
     __slots__ = ("tok", "block")
 
-    statement = False
-
-    def __init__(self, tok: Token, block: ast.BlockNode):
+    def __init__(self, tok: Token, block: BlockNode):
         self.tok = tok
         self.block = block
 
@@ -36,12 +43,12 @@ class LiquidNode(ast.Node):
 
 
 class LiquidTag(Tag):
-    """"""
+    """The built-in "liquid" tag."""
 
     name = TAG_LIQUID
     block = False
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_LIQUID)
         tok = stream.current
         stream.next_token()

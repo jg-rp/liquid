@@ -19,7 +19,7 @@ from liquid.exceptions import TemplateNotFound
 
 
 class Env(Protocol):
-    """Environment interface expected by tje base loader."""
+    """Environment interface expected by the base loader."""
 
     # pylint: disable=redefined-builtin
     def from_string(

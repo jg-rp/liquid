@@ -31,6 +31,7 @@ from liquid.exceptions import lookup_warning
 
 from liquid import Mode
 
+# Maximum number of times a context can be extended or wrapped.
 MAX_CONTEXT_DEPTH = 30
 
 ContextPath = Union[str, Sequence[Union[str, int]]]
@@ -207,9 +208,7 @@ class Context:
         try:
             return self.scope[name]
         except KeyError:
-            # XXX: Resolve mode
-            # print(name, repr(self.scope["template"]))
-            # raise
+            # TODO: Resolve mode.
             return default
 
     @functools.lru_cache
@@ -276,6 +275,7 @@ class Context:
         )
 
     def error(self, exc: Error):
+        """Ignore, raise or convert the given exception to a warning."""
         if self.env.mode == Mode.STRICT:
             raise exc
         if self.env.mode == Mode.WARN:

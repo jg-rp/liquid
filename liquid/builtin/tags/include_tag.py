@@ -1,41 +1,47 @@
 """Parse tree node and tag definition for the built in "include" tag."""
 
 import sys
-from typing import Optional, Dict, Any, TextIO
 
-from liquid import ast
-from liquid.tag import Tag
-from liquid.token import (
-    Token,
-    TOKEN_TAG,
-    TOKEN_EXPRESSION,
-    TOKEN_IDENTIFIER,
-    TOKEN_WITH,
-    TOKEN_FOR,
-    TOKEN_AS,
-    TOKEN_COMMA,
-    TOKEN_COLON,
-    TOKEN_EOF,
-)
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_include_expression
-from liquid.parse import (
-    expect,
-    parse_identifier,
-    parse_expression,
-    parse_string_or_identifier,
-    parse_unchained_identifier,
-)
-from liquid.expression import Expression, Identifier
-from liquid.context import Context
-from liquid.exceptions import LiquidSyntaxError
+from typing import Optional
+from typing import Dict
+from typing import Any
+from typing import TextIO
+
+from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
+from liquid.context import Context
+
+from liquid.expression import Expression
+from liquid.expression import Identifier
+
+from liquid.exceptions import LiquidSyntaxError
+from liquid.lex import tokenize_include_expression
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.parse import expect
+from liquid.parse import parse_identifier
+from liquid.parse import parse_expression
+from liquid.parse import parse_string_or_identifier
+from liquid.parse import parse_unchained_identifier
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_EOF
+
 
 TAG_INCLUDE = sys.intern("include")
 
 
-class IncludeNode(ast.Node):
-    """Parse tree node for "include" block tags."""
+class IncludeNode(Node):
+    """Parse tree node for the built-in "include" tag."""
 
     __slots__ = ("tok", "name", "var", "alias", "args")
 
@@ -89,18 +95,18 @@ class IncludeNode(ast.Node):
                 val = self.var.evaluate(context)
                 key = self.alias or template.name.split(".")[0]
 
-                # If the variable is array-like, render the template once for each item in
-                # the array.
+                # If the variable is array-like, render the template once for each
+                # item in the array.
                 #
-                # The reference implementation does not seem to distinguish between "for"
-                # and "with". Just checks for array-like-ness.
+                # The reference implementation does not seem to distinguish between
+                # "for" and "with". Just checks for array-like-ness.
                 if isinstance(val, (tuple, list, IterableDrop)):
-                    # NOTE: What if an included template with a bound array updates a
-                    # keyword argument value? Do we need to update namespace arguments after
-                    # each loop?
+                    # NOTE: What if an included template with a bound array updates
+                    # a keyword argument value? Do we need to update namespace
+                    # arguments after each loop?
                     #
-                    # The reference implementation seems to evaluate arguments once, before
-                    # the loop.
+                    # The reference implementation seems to evaluate arguments once,
+                    # before the loop.
                     for itm in val:
                         namespace[key] = itm
                         template.render_with_context(context, buffer, partial=True)
@@ -112,17 +118,13 @@ class IncludeNode(ast.Node):
 
 
 class IncludeTag(Tag):
+    """The built-in "include" tag."""
 
     name = TAG_INCLUDE
     block = False
 
-    def parse(self, stream: TokenStream) -> ast.Node:
-        """
-
-        {% include 'product' with collection.products[0] as special, foo: 'bar', some: other %}
-        {% include 'product' with collection.products[0], foo: 'bar', some: other %}
-        {% include 'product', foo: 'bar', some: other %}
-        """
+    def parse(self, stream: TokenStream) -> Node:
+        """Read an IncludeNode from the given stream of tokens."""
         expect(stream, TOKEN_TAG, value=TAG_INCLUDE)
         tok = stream.current
         stream.next_token()
@@ -160,13 +162,13 @@ class IncludeTag(Tag):
 
         # The first keyword argument might follow immediately or after a comma.
         if expr_stream.current.type == TOKEN_IDENTIFIER:
-            key, val = parse_argument(expr_stream)
+            key, val = _parse_argument(expr_stream)
             args[key] = val
 
         while expr_stream.current.type != TOKEN_EOF:
             if expr_stream.current.type == TOKEN_COMMA:
                 expr_stream.next_token()  # Eat comma
-                key, val = parse_argument(expr_stream)
+                key, val = _parse_argument(expr_stream)
                 args[key] = val
             else:
                 typ = expr_stream.current.type
@@ -178,7 +180,7 @@ class IncludeTag(Tag):
         return IncludeNode(tok, name=name, var=identifier, alias=alias, args=args)
 
 
-def parse_argument(stream: TokenStream):
+def _parse_argument(stream: TokenStream):
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
 

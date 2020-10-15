@@ -1,4 +1,4 @@
-"""Parse tree node and Tag definition for the built-in "capture" tag."""
+"""Parse tree node and tag definition for the built-in "capture" tag."""
 
 import re
 import sys
@@ -22,9 +22,9 @@ ENDCAPTUREBLOCK = (TAG_ENDCAPTURE, TOKEN_EOF)
 
 
 class CaptureNode(ast.Node):
-    __slots__ = ("tok", "name", "block")
+    """Parse tree node for the built-in "capture" tag."""
 
-    statement = False
+    __slots__ = ("tok", "name", "block")
 
     def __init__(self, tok: Token, name: str, block: ast.BlockNode):
         self.tok = tok
@@ -44,6 +44,7 @@ class CaptureNode(ast.Node):
 
 
 class CaptureTag(Tag):
+    """The built-in capture tag."""
 
     name = TAG_CAPTURE
     end = TAG_ENDCAPTURE

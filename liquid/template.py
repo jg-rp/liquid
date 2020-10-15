@@ -56,7 +56,7 @@ class Env(Protocol):
 class Template:
     """A loaded and parsed liquid template.
 
-    Rather than instantiating templates directly, the recommened way to create
+    Rather than instantiating templates directly, the recommended way to create
     templates is by calling `get_template` or `from_string` from an `Environment`.
     """
 
@@ -113,7 +113,7 @@ class Template:
             block_scope: If `True`, indicates that assigns, breaks and continues
                 from this template will not leak into the parent context.
         """
-        # "template" could get overriden from args/kwargs, "partial" will not.
+        # "template" could get overridden from args/kwargs, "partial" will not.
         namespace: Dict[str, Any] = {
             "template": self.drop,
             **dict(*args, **kwargs),

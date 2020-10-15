@@ -1,15 +1,16 @@
 """Tag definition for illegal or unregistered tags."""
-from __future__ import annotations
 
-from liquid.token import TOKEN_ILLEGAL, TOKEN_EXPRESSION
-from liquid.tag import Tag
-from liquid.stream import TokenStream
-from liquid.exceptions import LiquidSyntaxError
 from liquid.ast import IllegalNode
+from liquid.exceptions import LiquidSyntaxError
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_EXPRESSION
 
 
 class Illegal(Tag):
-    """Tag definition for dealing with illegal or unregistered tags."""
+    """Tag definition for illegal or unregistered tags."""
 
     name = TOKEN_ILLEGAL
     block = False

@@ -93,8 +93,8 @@ the environment or for each call to ``render``, respectively.
 
 
 Templates are parsed and rendered in `lax` mode by default, where syntax and render-time
-type errors are ignored as much as possible. You can change the error tollerence mode with
-the ``tollerence`` argument to the ``Environment`` constructor.
+type errors are ignored as much as possible. You can change the error tolerance mode with
+the ``tolerance`` argument to the ``Environment`` constructor.
 
 Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 
@@ -104,7 +104,7 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 
     env = Environment(
         loader=FileSystemLoader("templates/"),
-        tollerence=Mode.WARN,
+        tolerance=Mode.WARN,
     )
 
 
@@ -125,9 +125,9 @@ Known Issues
   almost certainly produce a different error message.
   
 - The built-in ``date`` filter uses `dateutils <https://dateutil.readthedocs.io/en/stable/>`_
-  for parsing strings to ``datetime``\s, and ``strftime`` for formatting. There are likley to
-  be some inconsistencies between this and the reference implementaion's equivalent parsing 
-  and formating of dates and times.
+  for parsing strings to ``datetime``\s, and ``strftime`` for formatting. There are likely to
+  be some inconsistencies between this and the reference implementation's equivalent parsing 
+  and formatting of dates and times.
 
 
 Limitations
@@ -186,8 +186,8 @@ source tree gives us these results.
         parse & render:     26.139  (± 0.0%) i/s -    262.000  in  10.023365s
 
 I've tried to match the benchmark workload to that of the reference implementation, so that
-we might compare results directly. The workload is meant to be representitive of Shopify's 
-use case, although I wouldn't be supprised if their usage has changed subtly since the 
+we might compare results directly. The workload is meant to be representative of Shopify's 
+use case, although I wouldn't be surprised if their usage has changed subtly since the 
 benchmark fixture was designed.
 
 Custom Filters
@@ -217,8 +217,8 @@ And use it like this.
     {% endif %}
 
 
-If you want to add more complex filters, probably including some type checking/casting, or
-the filter needs access to the active context or environment, you'll want to inherit from 
+If you want to add more complex filters, probably including some type checking and/or casting,
+or the filter needs access to the active context or environment, you'll want to inherit from
 ``Filter`` and implement it's ``__call__`` method.
 
 .. code-block:: python
@@ -248,7 +248,7 @@ And register it wherever you create your environment.
   env = Environment(loader=FileSystemLoader("templates/"))
   env.add_filter(LinkToTag.name, LinkToTag(env))
 
-In a tempalte, you could then use the ``LinkToTag`` filter like this.
+In a template, you could then use the ``LinkToTag`` filter like this.
 
 .. code-block::
 
@@ -278,10 +278,10 @@ inherit from ``liquid.tag.Tag`` and implement it's ``parse`` method.
 
 ``parse`` takes a single argument of type ``TokenStream`` that wraps an iterator of ``Token``\s,
 and returns an ``ast.Node`` instance. More often than not, a new subclass of ``ast.node`` will
-acompany each ``Tag``. These ``Node``\s make up the parse tree, and are responsible for writing
+accompany each ``Tag``. These ``Node``\s make up the parse tree, and are responsible for writing
 rendered text to the output stream via the required  ``render_to_output`` method.
 
-Here's the implementaion of ``UnlessTag``, which parses a boolean expression and a block of
+Here's the implementation of ``UnlessTag``, which parses a boolean expression and a block of
 statements before returning a ``UnlessNode``.
 
 .. code-block:: python
@@ -344,6 +344,7 @@ of strings instead of the file system for loading templates.
 
     from liquid.loaders import BaseLoader
     from liquid.loaders import TemplateSource
+    from liquid.exceptions import TemplateNotFound
 
     class DictLoader(BaseLoader):
         def __init__(self, templates: Mapping[str, str]):
@@ -359,7 +360,7 @@ of strings instead of the file system for loading templates.
 
 ``TemplateSource`` is a named tuple containing the template source as a string, it's name and an
 optional ``uptodate`` callable. If ``uptodate`` is not ``None`` it should be a callable that
-returns ``False`` if the tempalte needs to be loaded again, or ``True`` otherwise.
+returns ``False`` if the template needs to be loaded again, or ``True`` otherwise.
 
 You could then use ``DictLoader`` like this.
 
@@ -394,6 +395,8 @@ You could then use ``DictLoader`` like this.
 
 Contributing
 ------------
+
+- Install development dependencies with `Pipenv <https://github.com/pypa/pipenv>`_
 
 - Python Liquid fully embraces type hints and static type checking. I like to use the
   `Pylance <https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance>`_ 

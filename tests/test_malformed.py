@@ -80,7 +80,7 @@ class MalformedTemplateTestCase(TestCase):
 
                 self.assertEqual(str(raised.exception), case.expect_msg)
 
-        env = Environment(loader=DictLoader(templates), tollerence=Mode.WARN)
+        env = Environment(loader=DictLoader(templates), tolerance=Mode.WARN)
         for case in test_cases:
             with self.subTest(msg=case.description):
                 with self.assertWarns(lookup_warning(case.expect_exception)):
@@ -89,7 +89,7 @@ class MalformedTemplateTestCase(TestCase):
                     )
                     template.render()
 
-        env = Environment(loader=DictLoader(templates), tollerence=Mode.LAX)
+        env = Environment(loader=DictLoader(templates), tolerance=Mode.LAX)
         for case in test_cases:
             with self.subTest(msg=case.description):
                 template = env.from_string(case.template, globals=self.global_context)

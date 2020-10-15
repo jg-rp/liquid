@@ -329,7 +329,10 @@ class FilteredExpression(Expression):
         return str(self.expression)
 
     def __repr__(self):  # pragma: no cover
-        return f"FilteredExpression(expression={self.expression!r}, filters={self.filters})"
+        return (
+            f"FilteredExpression(expression={self.expression!r}, "
+            "filters={self.filters})"
+        )
 
     def evaluate(self, context: Context) -> object:
         result = self.expression.evaluate(context)
@@ -339,8 +342,8 @@ class FilteredExpression(Expression):
             try:
                 result = func(result, *fltr.evaluate_args(context))
             except Exception as err:
-                # Any exception causes us to abort the filter chain and discard the result.
-                # Nothing will be rendered.
+                # Any exception causes us to abort the filter chain and discard the
+                # result. Nothing will be rendered.
                 if not issubclass(type(err), Error):
                     raise Error(
                         f"filter '{fltr.name}': unexpected error: {err}"

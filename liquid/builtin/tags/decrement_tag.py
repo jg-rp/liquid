@@ -1,19 +1,27 @@
-""""""
+"""Tag and node definition for the built-in "decrement" tag."""
+
 import sys
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG, TOKEN_EXPRESSION
 from liquid import ast
-from liquid.tag import Tag
 from liquid.context import Context
-from liquid.stream import TokenStream
 from liquid.lex import tokenize_identifier
-from liquid.parse import expect, parse_unchained_identifier
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.parse import expect
+from liquid.parse import parse_unchained_identifier
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
 
 TAG_DECREMENT = sys.intern("decrement")
 
 
 class DecrementNode(ast.Node):
+    """Parse tree node for the built-in "decrement" tag."""
+
     __slots__ = ("tok", "identifier")
 
     def __init__(self, tok: Token, identifier: str):
@@ -28,10 +36,7 @@ class DecrementNode(ast.Node):
 
 
 class DecrementTag(Tag):
-    """
-
-    Increment and decrement tags share a namespace.
-    """
+    """The built-in "decrement" tag."""
 
     name = TAG_DECREMENT
     block = False

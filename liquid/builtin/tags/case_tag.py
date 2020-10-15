@@ -1,4 +1,4 @@
-""""""
+"""Tag and node definition for the built-in "case" tag."""
 import sys
 from typing import Optional, List, TextIO
 
@@ -20,6 +20,8 @@ ENDCASEBLOCK = (TAG_ENDCASE,)
 
 
 class CaseNode(ast.Node):
+    """Parse tree node for the built-in "case" tag."""
+
     __slots__ = ("tok", "whens", "default")
 
     def __init__(
@@ -60,6 +62,7 @@ class CaseNode(ast.Node):
 
 
 class CaseTag(Tag):
+    """The built-in cycle tag."""
 
     name = TAG_CASE
     end = TAG_ENDCASE

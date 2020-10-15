@@ -1,22 +1,30 @@
-""""""
-import sys
-from typing import Optional, TextIO
+"""Tag and node definition for the built-in "comment" tag."""
 
-from liquid.token import Token, TOKEN_TAG
-from liquid.parse import expect, eat_block
+import sys
+
+from typing import Optional
+from typing import TextIO
+
 from liquid import ast
-from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.parse import expect
+from liquid.parse import eat_block
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+
 
 TAG_COMMENT = sys.intern("comment")
 RAG_ENDCOMMENT = sys.intern("endcomment")
 
 
 class CommentNode(ast.Node):
-    __slots__ = ("tok", "statements")
+    """Parse tree node for the built-in "comment" tag."""
 
-    statement = False
+    __slots__ = ("tok", "statements")
 
     def __init__(self, tok: Token):
         self.tok = tok
@@ -24,11 +32,16 @@ class CommentNode(ast.Node):
     def __str__(self) -> str:
         return "/* */"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self,
+        context: Context,
+        buffer: TextIO,
+    ) -> Optional[bool]:
         return False
 
 
 class CommentTag(Tag):
+    """The built-in "comment" tag."""
 
     name = TAG_COMMENT
     end = RAG_ENDCOMMENT

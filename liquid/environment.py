@@ -33,7 +33,7 @@ from liquid.utils import LRUCache
 class Environment:
     """Shared configuration from which templates can be loaded and parsed.
 
-    An `Environment` is also where you'd register custom tags and filters.
+    An ``Environment`` is also where you'd register custom tags and filters.
 
     Args:
         tag_start_string: The sequence of characters indicating the start of a
@@ -46,7 +46,7 @@ class Environment:
             of an output statement.
         strip_tags: If `True` will strip preceding and trailing whitespace from
             all tags, regardless of whitespace control characters.
-        tollerence: Indicates how tollerent to be of errors. Must be one of
+        tolerance: Indicates how tolerant to be of errors. Must be one of
             `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
         loader: A template loader. If you want to use the builtin "render" or
             "include" tags, a loader must be configured.
@@ -62,7 +62,7 @@ class Environment:
         statement_start_string: str = r"{{",
         statement_end_string: str = r"}}",
         strip_tags: bool = False,
-        tollerence: Mode = Mode.STRICT,
+        tolerance: Mode = Mode.STRICT,
         loader: Optional[loaders.BaseLoader] = None,
         globals: Optional[Mapping[str, object]] = None,
     ):
@@ -80,8 +80,8 @@ class Environment:
         # Filter register.
         self.filters: Dict[str, Callable[..., Any]] = {}
 
-        # Tollerence mode
-        self.mode = tollerence
+        # tolerance mode
+        self.mode = tolerance
 
         # Template cache
         self.cache = LRUCache(300)
@@ -117,7 +117,7 @@ class Environment:
                 If the filter needs access to the environment or render
                 context, you probably want to make `func` a class that inherits
                 from `liquid.Filter`, and override the `__call__` method. All
-                builtin filters are implmented in this way.
+                builtin filters are implemented in this way.
         """
         self.filters[name] = func
 

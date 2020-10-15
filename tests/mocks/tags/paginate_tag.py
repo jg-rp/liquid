@@ -1,25 +1,31 @@
+"""Tag and node definition for the mock "paginate" tag."""
+
 import math
 import sys
 
 from collections import abc
 from typing import Optional, TextIO
 
-from liquid.token import (
-    Token,
-    TOKEN_EXPRESSION,
-    TOKEN_TAG,
-    TOKEN_BY,
-    TOKEN_IDENTIFIER,
-    TOKEN_INTEGER,
-    TOKEN_EOF,
-)
+from liquid.token import Token
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_BY
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_EOF
+
 from liquid.tag import Tag
 from liquid import ast
 from liquid.stream import TokenStream
 from liquid.lex import tokenize_paginate_expression
 from liquid.expression import Identifier
 from liquid.context import Context
-from liquid.parse import get_parser, expect, parse_identifier, parse_integer_literal
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_identifier
+from liquid.parse import parse_integer_literal
+
 from liquid.exceptions import LiquidTypeError
 
 
@@ -28,10 +34,9 @@ TAG_ENDPAGINATE = sys.intern("endpaginate")
 
 
 class PaginateNode(ast.Node):
+    """Parse tree node for the mock "paginate" tag."""
 
     __slots__ = ("tok", "identifier", "page_size", "block")
-
-    statement = False
 
     def __init__(
         self, tok: Token, identifier: Identifier, page_size: int, block: ast.BlockNode
@@ -100,6 +105,7 @@ def no_link(title):
 
 
 class PaginateTag(Tag):
+    """The mock "paginate" tag."""
 
     name = TAG_PAGINATE
     end = TAG_ENDPAGINATE

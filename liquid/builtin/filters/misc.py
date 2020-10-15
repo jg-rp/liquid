@@ -1,9 +1,9 @@
 """Filter functions that can operate on multiple input data types."""
 
 import datetime
+import functools
 
 from dateutil import parser
-from functools import lru_cache
 
 from liquid.filter import Filter
 from liquid.exceptions import FilterArgumentError
@@ -63,7 +63,7 @@ class Date(AbstractFilter):
     name = "date"
     num_args = 1
 
-    @lru_cache(maxsize=10)
+    @functools.lru_cache(maxsize=10)
     def filter(self, dt, fmt):
         if isinstance(dt, str):
             if dt == "now":

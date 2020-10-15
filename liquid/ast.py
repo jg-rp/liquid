@@ -21,15 +21,16 @@ from liquid.exceptions import Error
 
 
 class Node(ABC):
-    __slots__ = ()
+    """Base class for all nodes in a parse tree."""
 
-    statement = True
+    __slots__ = ()
 
     def token(self) -> Token:
         """The token that started this node."""
         return getattr(self, "tok", None)
 
     def raise_for_disabled(self, disabled_tags: Collection[str]):
+        """Raise a DisabledTagError if this node's type is in the given list."""
         tok = self.token()
         if tok.type == TOKEN_TAG and tok.value in disabled_tags:
             raise DisabledTagError(
@@ -57,8 +58,6 @@ class ParseTree(Node):
 
     __slots__ = ("statements", "version")
 
-    statement = False
-
     def __init__(self):
         self.statements = []
         self.version = __version__
@@ -77,7 +76,7 @@ class ParseTree(Node):
 class IllegalNode(Node):
     """Parse tree node representing an illegal or unregistered tag.
 
-    Illegal nodes are necesary when running in "warn" or "lax" mode. In
+    Illegal nodes are necessary when running in "warn" or "lax" mode. In
     strict mode, an exception should be raised as soon as an illegal token
     is found.
     """
@@ -98,7 +97,7 @@ class IllegalNode(Node):
 
 
 class BlockNode(Node):
-    """A parse tree node representing a list of statements."""
+    """A parse tree node representing a sequence of statements."""
 
     __slots__ = ("tok", "statements")
 
@@ -120,20 +119,23 @@ class BlockNode(Node):
             except Error as err:
                 # Maybe resume rendering the block after an error.
                 context.error(err)
-            except:
+            except Exception:
                 # Write what we have so far and stop rendering the block.
                 val = buf.getvalue()
                 if not val.isspace():
                     buffer.write(val)
                 raise
 
-        # Don't write to the ouput buffer if the block contains only whitespace.
+        # Don't write to the output buffer if the block contains only whitespace.
         val = buf.getvalue()
         if not val.isspace():
             buffer.write(val)
 
 
 class ConditionalBlockNode(Node):
+    """A parse tree node representing a sequence of statements and a conditional
+    expression."""
+
     __slots__ = ("tok", "condition", "block")
 
     def __init__(self, tok: Token, condition: Expression, block: BlockNode = None):

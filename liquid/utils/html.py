@@ -1,45 +1,34 @@
-"""From https://github.com/django/django/blob/master/django/utils/html.py"""
+"""Utilities for working with strings of HTML."""
+
 from html.parser import HTMLParser
 
 
-class MLStripper(HTMLParser):
+class StripParser(HTMLParser):
+    """An HTML parser that strips out tags."""
+
     def __init__(self):
         super().__init__(convert_charrefs=False)
         self.reset()
-        self.fed = []
+        self.dat = []
 
     def handle_data(self, data):
-        self.fed.append(data)
+        self.dat.append(data)
 
     def handle_entityref(self, name):
-        self.fed.append("&%s;" % name)
+        self.dat.append(f"&{name};")
 
     def handle_charref(self, name):
-        self.fed.append("&#%s;" % name)
+        self.dat.append(f"&#{name};")
 
-    def get_data(self):
-        return "".join(self.fed)
-
-
-def _strip_once(value):
-    """
-    Internal tag stripping utility used by strip_tags.
-    """
-    s = MLStripper()
-    s.feed(value)
-    s.close()
-    return s.get_data()
+    def get_data(self) -> str:
+        return "".join(self.dat)
 
 
-def strip_tags(value):
-    """Return the given HTML with all tags stripped."""
-    # Note: in typical case this loop executes _strip_once once. Loop condition
-    # is redundant, but helps to reduce number of executions of _strip_once.
-    value = str(value)
-    while "<" in value and ">" in value:
-        new_value = _strip_once(value)
-        if value.count("<") == new_value.count("<"):
-            # _strip_once wasn't able to detect more tags.
-            break
-        value = new_value
+def strip_tags(value: str) -> str:
+    """Return the given value with all HTML tags removed."""
+    if "<" in value and ">" in value:
+        parser = StripParser()
+        parser.feed(value)
+        parser.close()
+        return parser.get_data()
     return value

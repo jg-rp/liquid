@@ -311,7 +311,7 @@ def setup_render(search_path: str) -> List[ThemedTemplate]:
 def setup_parse(search_path: str):
     context_data = load_data()
     env = Environment(
-        loader=FileSystemLoader("."), globals=context_data, tollerence=Mode.STRICT
+        loader=FileSystemLoader("."), globals=context_data, tolerance=Mode.STRICT
     )
     register_mocks(env)
     templates = load_templates(search_path)

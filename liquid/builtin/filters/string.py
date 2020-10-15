@@ -1,15 +1,13 @@
 """Filter functions that operate on strings."""
 
 import html
-from urllib.parse import quote_plus, unquote_plus
+import urllib.parse
 
 from liquid.filter import Filter
-from liquid.filter import (
-    one_maybe_two_args,
-    expect_integer,
-    expect_string,
-    string_required,
-)
+from liquid.filter import one_maybe_two_args
+from liquid.filter import expect_integer
+from liquid.filter import expect_string
+from liquid.filter import string_required
 
 from liquid.exceptions import FilterArgumentError
 from liquid.utils.html import strip_tags
@@ -318,7 +316,7 @@ class URLEncode(StringFilter):
     name = "url_encode"
 
     def filter(self, val):
-        return quote_plus(val)
+        return urllib.parse.quote_plus(val)
 
 
 class URLDecode(StringFilter):
@@ -329,4 +327,4 @@ class URLDecode(StringFilter):
     name = "url_decode"
 
     def filter(self, val):
-        return unquote_plus(val)
+        return urllib.parse.unquote_plus(val)

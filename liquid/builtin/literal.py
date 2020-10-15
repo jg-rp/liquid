@@ -1,17 +1,18 @@
-"""Parse tree node and pseudo "tag" for template literals."""
+"""Pseudo tag and node definition for template literals."""
 
 from typing import TextIO
 
-from liquid.token import Token
-from liquid.token import TOKEN_LITERAL
-from liquid import ast
-from liquid.tag import Tag
+from liquid.ast import Node
 from liquid.context import Context
 from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.token import Token
+from liquid.token import TOKEN_LITERAL
 
 
-class LiteralNode(ast.Node):
-    """Parse tree node representing a template literal."""
+class LiteralNode(Node):
+    """Parse tree node for template literals."""
 
     __slots__ = ("tok",)
 
@@ -29,7 +30,7 @@ class LiteralNode(ast.Node):
 
 
 class Literal(Tag):
-    """Pseudo "tag" to register template literals with the environment."""
+    """Pseudo "tag" for template literals."""
 
     name = TOKEN_LITERAL
 

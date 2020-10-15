@@ -1,21 +1,28 @@
-import sys
-from collections import abc
-from typing import Optional, TextIO
+"""Tag and node definition for the mock "form" tag."""
 
-from liquid.token import (
-    Token,
-    TOKEN_EXPRESSION,
-    TOKEN_TAG,
-    TOKEN_IDENTIFIER,
-    TOKEN_EOF,
-)
+import sys
+
+from collections import abc
+
+from typing import Optional
+from typing import TextIO
+
+from liquid.token import Token
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_EOF
+
 from liquid.tag import Tag
 from liquid import ast
 from liquid.stream import TokenStream
 from liquid.lex import tokenize_identifier
 from liquid.expression import Identifier
 from liquid.context import Context
-from liquid.parse import get_parser, expect, parse_identifier
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_identifier
 
 
 TAG_FORM = sys.intern("form")
@@ -23,6 +30,8 @@ TAG_ENDFORM = sys.intern("endform")
 
 
 class CommentFormNode(ast.Node):
+    """Parse tree node for the mock "form" tag."""
+
     __slots__ = ("tok", "article", "block")
 
     def __init__(self, tok: Token, article: Identifier, block: ast.BlockNode):
@@ -54,6 +63,7 @@ class CommentFormNode(ast.Node):
 
 
 class CommentFormTag(Tag):
+    """The mock "paginate" tag."""
 
     name = TAG_FORM
     end = TAG_ENDFORM

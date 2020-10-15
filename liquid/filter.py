@@ -204,7 +204,8 @@ def array_of_hashable_required(func):
         for item in val:
             if not isinstance(item, collections.abc.Hashable):
                 raise FilterArgumentError(
-                    f"{instance.name}: expected an array of hashable items, found a {type(item)}"
+                    f"{instance.name}: expected an array of hashable items, "
+                    f"found a {type(item)}"
                 )
         return func(instance, val, *args, **kwargs)
 

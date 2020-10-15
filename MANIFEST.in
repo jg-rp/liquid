@@ -1,0 +1,3 @@
+include README.rst LICENSE Pipfile Pipfile.lock
+graft tests/fixtures
+global-exclude *.pyc

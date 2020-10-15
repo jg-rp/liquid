@@ -2,12 +2,14 @@
 import math
 import decimal
 
-from liquid.filter import Filter
-from liquid.filter import (
-    expect_integer,
-    expect_number,
-)
 from liquid.exceptions import FilterArgumentError
+
+from liquid.filter import Filter
+from liquid.filter import expect_integer
+from liquid.filter import expect_number
+
+
+# pylint: disable=arguments-differ too-few-public-methods
 
 D = decimal.Decimal
 

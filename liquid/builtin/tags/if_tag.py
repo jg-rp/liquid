@@ -1,22 +1,34 @@
-"""Parse tree node and tag definition for the built in "if" tag."""
+"""Tag and node definition for the built-in "if" tag."""
 
 import sys
-from typing import Optional, List, TextIO
 
-from liquid.token import (
-    Token,
-    TOKEN_EOF,
-    TOKEN_TAG,
-    TOKEN_EXPRESSION,
-)
-from liquid.parse import expect, parse_boolean_expression, get_parser, eat_block
-from liquid import ast
-from liquid.tag import Tag
+from typing import Optional
+from typing import List
+from typing import TextIO
+
+from liquid.token import Token
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+
+from liquid.ast import Node
+from liquid.ast import BlockNode
+from liquid.ast import ConditionalBlockNode
+
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_boolean_expression
-from liquid.expression import Expression
 from liquid.exceptions import LiquidSyntaxError
+from liquid.expression import Expression
+from liquid.lex import tokenize_boolean_expression
+
+from liquid.parse import expect
+from liquid.parse import parse_boolean_expression
+from liquid.parse import get_parser
+from liquid.parse import eat_block
+
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+
 from liquid.builtin.illegal import IllegalNode
 
 TAG_IF = sys.intern("if")
@@ -29,8 +41,8 @@ ENDELSIFBLOCK = (TAG_ENDIF, TAG_ELSIF, TAG_ELSE)
 ENDIFELSEBLOCK = (TAG_ENDIF,)
 
 
-class IfNode(ast.Node):
-    """Parse tree node for "if" block tags."""
+class IfNode(Node):
+    """Parse tree node for the built-in "if" tag."""
 
     __slots__ = (
         "tok",
@@ -44,9 +56,9 @@ class IfNode(ast.Node):
         self,
         tok: Token,
         condition: Expression,
-        consequence: ast.BlockNode,
-        conditional_alternatives: List[ast.ConditionalBlockNode],
-        alternative: Optional[ast.BlockNode],
+        consequence: BlockNode,
+        conditional_alternatives: List[ConditionalBlockNode],
+        alternative: Optional[BlockNode],
     ):
         self.tok = tok
         self.condition = condition
@@ -84,12 +96,12 @@ class IfNode(ast.Node):
 
 
 class IfTag(Tag):
-    """"""
+    """The built-in "if" tag."""
 
     name = TAG_IF
     end = TAG_ENDIF
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         parser = get_parser(self.env)
 
         expect(stream, TOKEN_TAG, value=TAG_IF)
@@ -121,7 +133,7 @@ class IfTag(Tag):
                 eat_block(stream, ENDELSIFBLOCK)
                 return IllegalNode(tok)
 
-            alt = ast.ConditionalBlockNode(
+            alt = ConditionalBlockNode(
                 stream.current,
                 condition=expr,
             )

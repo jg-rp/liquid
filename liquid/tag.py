@@ -35,7 +35,7 @@ class Tag(ABC):
         self.env = env
 
     def get_node(self, stream: TokenStream) -> Node:
-        """Wrapps `Tag.parse`, possibly returning an `IllegalNode`."""
+        """Wraps `Tag.parse`, possibly returning an `IllegalNode`."""
         tok = stream.current
         try:
             return self.parse(stream)

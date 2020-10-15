@@ -7,7 +7,26 @@ from typing import Dict
 from typing import Any
 from typing import TextIO
 
-from liquid import ast
+from liquid.ast import Node
+
+from liquid.builtin.drops import IterableDrop
+from liquid.builtin.tags.for_tag import ForLoop
+from liquid.builtin.tags.include_tag import TAG_INCLUDE
+
+from liquid.context import Context
+from liquid.context import ReadOnlyChainMap
+
+from liquid.exceptions import LiquidSyntaxError
+from liquid.expression import Expression
+from liquid.lex import tokenize_include_expression
+
+from liquid.parse import expect
+from liquid.parse import parse_identifier
+from liquid.parse import parse_expression
+from liquid.parse import parse_unchained_identifier
+from liquid.parse import parse_string_literal
+
+from liquid.stream import TokenStream
 from liquid.tag import Tag
 
 from liquid.token import Token
@@ -22,27 +41,12 @@ from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_STRING
 
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_include_expression
-
-from liquid.parse import expect
-from liquid.parse import parse_identifier
-from liquid.parse import parse_expression
-from liquid.parse import parse_unchained_identifier
-from liquid.parse import parse_string_literal
-
-from liquid.expression import Expression
-from liquid.context import Context, ReadOnlyChainMap
-from liquid.exceptions import LiquidSyntaxError
-from liquid.builtin.drops import IterableDrop
-from liquid.builtin.tags.for_tag import ForLoop
-from liquid.builtin.tags.include_tag import TAG_INCLUDE
 
 TAG_RENDER = sys.intern("render")
 
 
-class RenderNode(ast.Node):
-    """Parse tree node for "render" tags."""
+class RenderNode(Node):
+    """Parse tree node for the built-in "render" tag."""
 
     __slots__ = ("tok", "name", "var", "loop", "alias", "args")
 
@@ -134,11 +138,12 @@ class RenderNode(ast.Node):
 
 
 class RenderTag(Tag):
+    """The built-in "render" tag."""
 
     name = TAG_RENDER
     block = False
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_RENDER)
         tok = stream.current
         stream.next_token()

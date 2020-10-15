@@ -1,33 +1,37 @@
-""""""
-import sys
-from typing import List, Any, Optional, TextIO
+"""Tag and node definition for the built-in "cycle" tag."""
 
-from liquid.token import (
-    Token,
-    TOKEN_TAG,
-    TOKEN_EXPRESSION,
-    TOKEN_EOF,
-    TOKEN_COMMA,
-    TOKEN_COLON,
-)
-from liquid import ast
-from liquid.tag import Tag
+import sys
+
+from typing import List
+from typing import Any
+from typing import Optional
+from typing import TextIO
+
+from liquid.ast import Node
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_filtered_expression
-from liquid.parse import (
-    expect,
-    parse_expression,
-    parse_string_or_identifier,
-)
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
+from liquid.lex import tokenize_filtered_expression
+
+from liquid.parse import expect
+from liquid.parse import parse_expression
+from liquid.parse import parse_string_or_identifier
+
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_COLON
 
 TAG_CYCLE = sys.intern("cycle")
 
 
-class CycleNode(ast.Node):
-    """Parse tree node for a "cycle" tag."""
+class CycleNode(Node):
+    """Parse tree node for the built-in "cycle" tag."""
 
     __slots__ = ("tok", "group", "args", "key")
 
@@ -56,12 +60,12 @@ class CycleNode(ast.Node):
 
 
 class CycleTag(Tag):
-    """"""
+    """The built-in "cycle" tag."""
 
     name = TAG_CYCLE
     block = False
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_CYCLE)
         tok = stream.current
         stream.next_token()
@@ -91,7 +95,8 @@ class CycleTag(Tag):
                 break
             else:
                 raise LiquidSyntaxError(
-                    f"expected a comma separated list of arguments, found {expr_stream.current.type}",
+                    f"expected a comma separated list of arguments, "
+                    f"found {expr_stream.current.type}",
                     linenum=tok.linenum,
                 )
 

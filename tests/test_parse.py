@@ -89,7 +89,7 @@ class ParserTestCase(unittest.TestCase):
             ),
         ]
 
-        env = Environment(tollerence=Mode.LAX)
+        env = Environment(tolerance=Mode.LAX)
 
         for case in test_cases:
             with self.subTest(msg=case.description):

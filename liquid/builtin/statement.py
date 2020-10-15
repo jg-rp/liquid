@@ -1,17 +1,22 @@
 """Parse tree node and pseudo "tag" for output statements."""
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_STATEMENT
-from liquid import ast
-from liquid.tag import Tag
-from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_filtered_expression
-from liquid.parse import parse_filtered_expression, expect
+
+from liquid.ast import Node
 from liquid.expression import Expression
+from liquid.context import Context
+from liquid.lex import tokenize_filtered_expression
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+
+from liquid.parse import parse_filtered_expression
+from liquid.parse import expect
+
+from liquid.token import Token
+from liquid.token import TOKEN_STATEMENT
 
 
-class StatementNode(ast.Node):
+class StatementNode(Node):
     """Parse tree node representing an output statement."""
 
     __slots__ = ("tok", "expression")
@@ -48,7 +53,7 @@ class Statement(Tag):
 
     name = TOKEN_STATEMENT
 
-    def parse(self, stream: TokenStream) -> ast.Node:
+    def parse(self, stream: TokenStream) -> Node:
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
 

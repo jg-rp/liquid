@@ -18,10 +18,50 @@ from liquid.exceptions import LiquidSyntaxError, Error
 from liquid.mode import Mode, error
 
 from liquid import expression
-from liquid.token import *  # pylint: disable=wildcard-import unused-wildcard-import
-
 from liquid import ast
 from liquid.stream import TokenStream
+
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NEGATIVE
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_OFFSET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_COLS
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_ASSIGN
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_EQ
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_LT
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_GE
+from liquid.token import reverse_operators
+from liquid.token import Token
 
 
 class Tag(Protocol):
@@ -329,7 +369,8 @@ def parse_range_argument(
         arg = parse_integer_literal(stream)
     else:
         raise LiquidSyntaxError(
-            f"invalid range expression, expected an integer, found a {stream.current.type}"
+            "invalid range expression, expected an integer, "
+            f"found a {stream.current.type}"
         )
     return arg
 
