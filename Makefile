@@ -23,4 +23,5 @@ clean:
 	python -Bc "import pathlib; [p.rmdir() for p in pathlib.Path('.').rglob('__pycache__')]"
 	rm -f .coverage
 	rm -rf htmlcov
+	rm -rf Liquid.egg-info
 
