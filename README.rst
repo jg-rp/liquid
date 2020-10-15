@@ -23,7 +23,7 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
 .. code-block:: text
 
-    $ python -m pip install -U liquid
+    $ python -m pip install -U python-liquid
 
 .. note:: 
     

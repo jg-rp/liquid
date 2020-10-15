@@ -10,7 +10,7 @@ with open("README.rst", "r") as fd:
     long_description = fd.read()
 
 setuptools.setup(
-    name="Liquid",
+    name="python-liquid",
     version=__version__,
     description="A Python template engine for the Liquid markup language.",
     long_description=long_description,
