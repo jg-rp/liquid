@@ -1,6 +1,6 @@
 import unittest
 
-from liquid import Environment
+from liquid.environment import Environment
 from liquid.environment import Template
 from liquid.loaders import FileSystemLoader, DictLoader
 from liquid.exceptions import TemplateNotFound

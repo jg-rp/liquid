@@ -1,5 +1,6 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 
+import pathlib
 import sys
 
 from typing import Optional
@@ -88,7 +89,18 @@ class RenderNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO):
         template_name = self.name.evaluate(context)
-        template = context.get_template(str(template_name))
+
+        # TODO: Store this kind of thing on the context object but not the
+        # globals/locals namespace.
+        render_folder = context.get("render_folder", default=None)
+        if render_folder:
+            path = pathlib.Path(str(render_folder), str(template_name)).with_suffix(
+                ".liquid"
+            )
+        else:
+            path = template_name
+
+        template = context.get_template(str(path))
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate

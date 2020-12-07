@@ -256,6 +256,45 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 ),
             ),
             Case(
+                "chained identifier with object from chained identifier",
+                "linklists[section.settings.menu]",
+                FilteredExpression(
+                    expression=Identifier(
+                        path=[
+                            IdentifierPathElement("linklists"),
+                            Identifier(
+                                path=[
+                                    IdentifierPathElement("section"),
+                                    IdentifierPathElement("settings"),
+                                    IdentifierPathElement("menu"),
+                                ],
+                            ),
+                        ],
+                    ),
+                    filters=[],
+                ),
+            ),
+            Case(
+                "chained identifier with object from chained identifier and trailing identifier",
+                "linklists[section.settings.menu].links",
+                FilteredExpression(
+                    expression=Identifier(
+                        path=[
+                            IdentifierPathElement("linklists"),
+                            Identifier(
+                                path=[
+                                    IdentifierPathElement("section"),
+                                    IdentifierPathElement("settings"),
+                                    IdentifierPathElement("menu"),
+                                ],
+                            ),
+                            IdentifierPathElement("links"),
+                        ],
+                    ),
+                    filters=[],
+                ),
+            ),
+            Case(
                 "string literal with filter",
                 "'foo' | upcase",
                 FilteredExpression(

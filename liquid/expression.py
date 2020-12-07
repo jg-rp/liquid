@@ -179,7 +179,14 @@ class Identifier(Expression):
         return f"Identifier(path={self.path})"
 
     def __str__(self):
-        return ".".join(str(elem) for elem in self.path)
+        buf = []
+
+        for elem in self.path:
+            if isinstance(elem, Identifier):
+                buf.append(f"[{elem}]")
+            else:
+                buf.append(str(elem))
+        return ".".join(buf)
 
     def __hash__(self):
         return hash(str(self))
@@ -576,6 +583,9 @@ def compare(left: Any, operator: str, right: Any) -> bool:
 
     # FIXME: It appears that shopify will convert any illegal comparison into something
     # falsey, at least in lax mode.
+
+    if None in (left, right):
+        return False
 
     if type(left) in (int, float) and type(right) in (int, float):
         return eval_number_expression(left, operator, right)

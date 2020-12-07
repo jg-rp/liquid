@@ -1,10 +1,16 @@
 __version__ = "0.5.2"
 
-from liquid.mode import Mode
-from liquid.filter import Filter
-from liquid.token import Token
-from liquid.context import Context
-from liquid.expression import Expression
-from liquid.environment import Environment
-from liquid.environment import Template
-from liquid.loaders import FileSystemLoader
+
+from .mode import Mode
+from .filter import Filter
+from .token import Token
+from .context import Context
+from .expression import Expression
+
+
+from .template import Template
+from .loaders import FileSystemLoader
+
+from .utils import LRUCache
+
+from .environment import Environment

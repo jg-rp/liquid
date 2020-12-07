@@ -123,9 +123,9 @@ class IncludeTag(Tag):
     name = TAG_INCLUDE
     block = False
 
-    def parse(self, stream: TokenStream) -> Node:
+    def parse(self, stream: TokenStream) -> IncludeNode:
         """Read an IncludeNode from the given stream of tokens."""
-        expect(stream, TOKEN_TAG, value=TAG_INCLUDE)
+        expect(stream, TOKEN_TAG, value=self.name)
         tok = stream.current
         stream.next_token()
 

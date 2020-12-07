@@ -9,7 +9,7 @@ from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 
-from liquid import ast
+from liquid.ast import Node
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
@@ -23,7 +23,7 @@ RE_ASSIGNMENT = re.compile(r"^(\w[a-zA-Z0-9_\-]*)\s*=\s*(.+)$")
 TAG_ASSIGN = sys.intern("assign")
 
 
-class AssignNode(ast.Node):
+class AssignNode(Node):
     """Parse tree node for the built-in "assign" tag."""
 
     __slots__ = ("tok", "expression")

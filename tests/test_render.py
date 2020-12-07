@@ -5,7 +5,7 @@ import unittest
 from dataclasses import dataclass, field
 from typing import Mapping, Any
 
-from liquid import Environment
+from liquid.environment import Environment
 from liquid.mode import Mode
 from liquid.loaders import DictLoader
 from liquid.builtin.drops import IterableDrop
@@ -919,6 +919,18 @@ class RenderTestCases(unittest.TestCase):
                 description="blank empty loops",
                 template=r"{% for i in (0..10) %}  {% endfor %}",
                 expect="",
+            ),
+            Case(
+                description=(
+                    "loop over nested and chained object from context "
+                    "with trailing identifier"
+                ),
+                template=r"{% for link in linklists[section.settings.menu].links %}{{ link }} {% endfor %}",
+                expect="1 2 ",
+                globals={
+                    "linklists": {"main": {"links": ["1", "2"]}},
+                    "section": {"settings": {"menu": "main"}},
+                },
             ),
         ]
 

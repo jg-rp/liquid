@@ -154,6 +154,15 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 "a.b.size",
                 2,
             ),
+            Case(
+                "nested and chained",
+                {
+                    "linklists": {"main": "main menu"},
+                    "section": {"settings": {"menu": "main"}},
+                },
+                "linklists[section.settings.menu]",
+                "main menu",
+            ),
         ]
 
         self._test(test_cases, tokenize_filtered_expression, parse_filtered_expression)
@@ -451,6 +460,27 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 context={"a": {"name": "foo", "title": "bar"}},
                 expression="i in a",
                 expect=[("name", "foo"), ("title", "bar")],
+            ),
+            Case(
+                description="loop over nested and chained object from context",
+                context={
+                    "linklists": {"main": ["1", "2"]},
+                    "section": {"settings": {"menu": "main"}},
+                },
+                expression="link in linklists[section.settings.menu]",
+                expect=["1", "2"],
+            ),
+            Case(
+                description=(
+                    "loop over nested and chained object from context "
+                    "with trailing identifier"
+                ),
+                context={
+                    "linklists": {"main": {"links": ["1", "2"]}},
+                    "section": {"settings": {"menu": "main"}},
+                },
+                expression="link in linklists[section.settings.menu].links",
+                expect=["1", "2"],
             ),
         ]
 
