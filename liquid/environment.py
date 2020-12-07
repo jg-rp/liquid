@@ -21,13 +21,13 @@ from liquid.stream import TokenStream
 from liquid.parse import get_parser
 
 from liquid import ast
-
+from liquid import builtin
 from liquid import loaders
 
 from liquid.exceptions import Error
 from liquid.exceptions import lookup_warning
 
-from . import LRUCache
+from liquid.utils import LRUCache
 
 
 # pylint: disable=too-many-instance-attributes
@@ -86,8 +86,6 @@ class Environment:
 
         # Template cache
         self.cache = LRUCache(300)
-
-        from liquid import builtin
 
         builtin.register(self)
 

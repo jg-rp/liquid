@@ -16,7 +16,16 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/jg-rp/liquid",
-    packages=setuptools.find_packages(include=["liquid"]),
+    packages=setuptools.find_packages(
+        include=[
+            "liquid",
+            "liquid.builtin",
+            "liquid.utils",
+            "liquid.builtin.tags",
+            "liquid.builtin.drops",
+            "liquid.builtin.filters",
+        ]
+    ),
     include_package_data=True,
     zip_safe=False,
     install_requires=["python-dateutil>=2.8.1"],
