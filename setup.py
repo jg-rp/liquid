@@ -3,7 +3,7 @@ import setuptools
 
 
 with open("liquid/__init__.py", "r") as fd:
-    match = re.search(r'__version__ = "([0-5\.]+)"', fd.read())
+    match = re.search(r'__version__ = "([0-9\.]+)"', fd.read())
     __version__ = match.group(1)
 
 with open("README.rst", "r") as fd:
@@ -16,16 +16,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/jg-rp/liquid",
-    packages=setuptools.find_packages(
-        include=[
-            "liquid",
-            "liquid.builtin",
-            "liquid.utils",
-            "liquid.builtin.tags",
-            "liquid.builtin.drops",
-            "liquid.builtin.filters",
-        ]
-    ),
+    packages=setuptools.find_packages(exclude=["tests*"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=["python-dateutil>=2.8.1"],
