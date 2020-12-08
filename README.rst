@@ -27,7 +27,7 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
 .. note:: 
     
-    **Liquid requires Python 3.8+**. Let me know if this is an problem for you by raising
+    **Liquid requires Python 3.8+**. Let me know if this is a problem for you by raising
     an issue. Given enough interest, I'll happily add support for older Python versions.
 
 
@@ -92,9 +92,9 @@ the environment or for each call to ``render``, respectively.
     print(template.render(some="variable", other="thing"))
 
 
-Templates are parsed and rendered in `lax` mode by default, where syntax and render-time
-type errors are ignored as much as possible. You can change the error tolerance mode with
-the ``tolerance`` argument to the ``Environment`` constructor.
+Templates are parsed and rendered in `strict` mode by default, where syntax and render-time
+type errors raise an exception as soon as possible. You can change the error tolerance mode
+with the ``tolerance`` argument to the ``Environment`` constructor.
 
 Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 
@@ -104,7 +104,7 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 
     env = Environment(
         loader=FileSystemLoader("templates/"),
-        tolerance=Mode.WARN,
+        tolerance=Mode.LAX,
     )
 
 
