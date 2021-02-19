@@ -13,7 +13,7 @@ class AbstractFilter(Filter):
 
     name = "AbstractStringFilter"
     num_args = 0
-    msg = "{}: unexpected arguemnt type {}"
+    msg = "{}: unexpected argument type {}"
 
     def __call__(self, val, *args):
         if len(args) != self.num_args:

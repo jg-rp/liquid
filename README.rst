@@ -34,11 +34,13 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 Quick Start
 -----------
 
-See `Shopify's documentation <https://shopify.github.io/liquid/>`_ for details of template
-syntax and available tags and filters.
+Please see `Shopify's documentation <https://shopify.github.io/liquid/>`_ for template
+syntax details and a reference of available tags and filters.
 
 An application typically creates a single ``Environment``, with a template ``Loader``, 
-then loads and renders templates from that environment.
+then loads and renders templates from that environment. This example assumes a folder
+called ``templates`` exists in the current working directory, and that the template file
+``index.html`` exists within it.
 
 .. code-block:: python
 
@@ -50,7 +52,7 @@ then loads and renders templates from that environment.
     print(template.render(some="variable", other="thing"))
 
 Keyword arguments passed to the ``render`` method of a ``Template`` are made available
-for templates to use in template expressions.
+for templates to use in template statements and expressions.
 
 A ``Loader`` is only required if you plan to use the built-in ``include`` or ``render``
 tags. You could instead create a ``Template`` directly from a string.
@@ -193,7 +195,7 @@ benchmark fixture was designed.
 Custom Filters
 --------------
 
-Add a custom template filter by calling the ``add_filter`` method of an ``Environment``.
+Add a custom template filter to an ``Environment`` by calling its ``add_filter`` method.
 A filter can be any callable that accepts at least one argument (the result of the left 
 hand side of a filtered expression), and returns a string or object with a ``__str__``
 method.
