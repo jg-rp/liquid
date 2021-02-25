@@ -38,7 +38,9 @@ class Node(ABC):
                 linenum=tok.linenum,
             )
 
-    def render(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render(
+        self, context: Context, buffer: TextIO
+    ) -> Union[Optional[bool], NoReturn]:
         """Check disabled tags before delegating to `render_to_output`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)

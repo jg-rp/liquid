@@ -7,6 +7,7 @@ A non evaling templating language suitable for end users.
 
 - `Installing`_
 - `Quick Start`_
+- `Related Projects`_
 - `Compatibility`_
 - `Limitations`_
 - `Benchmark`_
@@ -27,7 +28,7 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
 .. note:: 
     
-    **Liquid requires Python 3.8+**. Let me know if this is a problem for you by raising
+    **Liquid requires Python>=3.8**. Let me know if this is a problem for you by raising
     an issue. Given enough interest, I'll happily add support for older Python versions.
 
 
@@ -108,6 +109,12 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
         loader=FileSystemLoader("templates/"),
         tolerance=Mode.LAX,
     )
+
+
+Related Projects
+----------------
+
+- `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render Liquid templates in your Flask applications.
 
 
 Compatibility
