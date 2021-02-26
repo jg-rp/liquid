@@ -278,7 +278,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val="- apples\n- oranges\n",
                 args=[],
                 kwargs={},
-                expect="- apples<br />- oranges<br />",
+                expect="- apples<br />\n- oranges<br />\n",
             ),
             Case(
                 description="not a string",
@@ -293,6 +293,20 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="reference implementation test 1",
+                val="a\nb\nc",
+                args=[],
+                kwargs={},
+                expect="a<br />\nb<br />\nc",
+            ),
+            Case(
+                description="reference implementation test 2",
+                val="a\r\nb\nc",
+                args=[],
+                kwargs={},
+                expect="a<br />\nb<br />\nc",
             ),
         ]
 
@@ -927,28 +941,28 @@ class StringFilterTestCase(unittest.TestCase):
                 expect="测试测试测试测试",
             ),
             Case(
-                description="reference implementation test 1",
+                description="reference implementation test 2",
                 val="one two three",
                 args=[2, 1],
                 kwargs={},
                 expect="one two1",
             ),
             Case(
-                description="reference implementation test 1",
+                description="reference implementation test 3",
                 val="one  two\tthree\nfour",
                 args=[3],
                 kwargs={},
                 expect="one two three...",
             ),
             Case(
-                description="reference implementation test 2",
+                description="reference implementation test 4",
                 val="one two three four",
                 args=[2],
                 kwargs={},
                 expect="one two...",
             ),
             Case(
-                description="reference implementation test 3",
+                description="reference implementation test 5",
                 val="one two three four",
                 args=[0],
                 kwargs={},

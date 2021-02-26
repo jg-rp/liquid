@@ -1,6 +1,7 @@
 """Filter functions that operate on strings."""
 
 import html
+import re
 import urllib.parse
 
 from liquid.filter import Filter
@@ -106,14 +107,17 @@ class LStrip(StringFilter):
 
 
 class NewlineToBR(StringFilter):
-    """Convert '\n' to '<br />'."""
+    """Convert '\r\n' or '\n' to '<br />\n'."""
 
     __slots__ = ()
 
     name = "newline_to_br"
+    re_lineterm = re.compile(r"\r?\n")
 
     def filter(self, val):
-        return val.replace("\n", "<br />")
+        # The reference implementation was changed to replace "\r\n" as well as "\n",
+        # but they don't seem to care about "\r" (Mac OS).
+        return self.re_lineterm.sub("<br />\n", val)
 
 
 class Prepend(StringFilter):
