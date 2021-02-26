@@ -133,7 +133,7 @@ class Prepend(StringFilter):
 
 
 class Remove(StringFilter):
-    """Remove all occurences of argument string from value."""
+    """Remove all occurrences of argument string from value."""
 
     __slots__ = ()
 
@@ -145,7 +145,7 @@ class Remove(StringFilter):
 
 
 class RemoveFirst(StringFilter):
-    """Remove the first occurence of the argument string from value."""
+    """Remove the first occurrences of the argument string from value."""
 
     __slots__ = ()
 
@@ -157,7 +157,7 @@ class RemoveFirst(StringFilter):
 
 
 class Replace(StringFilter):
-    """Replace all occurences of argument string in value."""
+    """Replace all occurrences of argument string in value."""
 
     __slots__ = ()
 
@@ -169,7 +169,7 @@ class Replace(StringFilter):
 
 
 class ReplaceFirst(StringFilter):
-    """Replace the first occurence of the argument string in value."""
+    """Replace the first occurrences of the argument string in value."""
 
     __slots__ = ()
 
@@ -266,9 +266,10 @@ class StripNewlines(StringFilter):
     __slots__ = ()
 
     name = "strip_newlines"
+    re_lineterm = re.compile(r"\r?\n")
 
     def filter(self, val):
-        return val.replace("\n", "")
+        return self.re_lineterm.sub("", val)
 
 
 class Truncate(Filter):

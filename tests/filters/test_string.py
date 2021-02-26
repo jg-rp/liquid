@@ -833,6 +833,20 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="reference implementation test 1",
+                val="a\nb\nc",
+                args=[],
+                kwargs={},
+                expect="abc",
+            ),
+            Case(
+                description="reference implementation test 2",
+                val="a\r\nb\nc",
+                args=[],
+                kwargs={},
+                expect="abc",
+            ),
         ]
 
         self._test(StripNewlines, test_cases)
