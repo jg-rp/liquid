@@ -300,9 +300,13 @@ class TruncateWords(Filter):
         expect_integer(self.name, num)
 
         if end is not None:
-            expect_string(self.name, end)
+            end = str(end)
         else:
             end = "..."
+
+        # The reference implementation seems to force a minimum `num` of 1.
+        if num <= 0:
+            num = 1
 
         return truncate_words(val, num, end)
 

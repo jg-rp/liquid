@@ -919,6 +919,41 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="reference implementation test 1",
+                val="测试测试测试测试",
+                args=[5],
+                kwargs={},
+                expect="测试测试测试测试",
+            ),
+            Case(
+                description="reference implementation test 1",
+                val="one two three",
+                args=[2, 1],
+                kwargs={},
+                expect="one two1",
+            ),
+            Case(
+                description="reference implementation test 1",
+                val="one  two\tthree\nfour",
+                args=[3],
+                kwargs={},
+                expect="one two three...",
+            ),
+            Case(
+                description="reference implementation test 2",
+                val="one two three four",
+                args=[2],
+                kwargs={},
+                expect="one two...",
+            ),
+            Case(
+                description="reference implementation test 3",
+                val="one two three four",
+                args=[0],
+                kwargs={},
+                expect="one...",
+            ),
         ]
 
         self._test(TruncateWords, test_cases)
