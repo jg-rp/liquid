@@ -7,6 +7,7 @@ from dateutil import parser
 
 from liquid.filter import Filter
 from liquid.exceptions import FilterArgumentError
+from liquid.expression import EMPTY
 
 
 class AbstractFilter(Filter):
@@ -15,17 +16,17 @@ class AbstractFilter(Filter):
     num_args = 0
     msg = "{}: unexpected argument type {}"
 
-    def __call__(self, val, *args):
+    def __call__(self, val, *args, **kwargs):
         if len(args) != self.num_args:
             raise FilterArgumentError(
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
         try:
-            return self.filter(val, *args)
+            return self.filter(val, *args, **kwargs)
         except (AttributeError, TypeError) as err:
             raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
 
-    def filter(self, val, *args):
+    def filter(self, val, *args, **kwargs):
         raise NotImplementedError(":(")
 
 
@@ -49,9 +50,13 @@ class Default(AbstractFilter):
     name = "default"
     num_args = 1
 
-    def filter(self, obj, default):
-        if obj in (None, False):
+    def filter(self, obj, default, allow_false=None):
+        if allow_false is True and obj is False:
+            return obj
+
+        if obj in (None, False, EMPTY):
             return default
+
         return obj
 
 

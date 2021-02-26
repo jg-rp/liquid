@@ -206,6 +206,21 @@ class RenderTestCases(unittest.TestCase):
                     template=r"{{ today | date: '%d/%m/%Y' }}",
                     expect=datetime.date.today().strftime(r"%d/%m/%Y"),
                 ),
+                Case(
+                    description="default filter on false literal",
+                    template=r"{{ false | default: 'bar' }}",
+                    expect="bar",
+                ),
+                Case(
+                    description="default filter allow false",
+                    template=r"{{ false | default: 'bar', allow_false: true }}",
+                    expect="false",
+                ),
+                Case(
+                    description="default filter don't allow false",
+                    template=r"{{ false | default: 'bar', allow_false: false }}",
+                    expect="bar",
+                ),
             ]
         )
 

@@ -257,17 +257,31 @@ def parse_filter(stream: TokenStream) -> expression.Filter:
 
     #
     args = []
+    kwargs = {}
+
     if stream.current.type == TOKEN_COLON:
         stream.next_token()
 
         while stream.current.type not in (TOKEN_PIPE, TOKEN_EOF):
-            args.append(parse_expression(stream))
+            if stream.peek.type == TOKEN_COLON:
+                # A named parameter
+                param_name = stream.current.value
+                stream.next_token()
+
+                # Eat colon
+                stream.next_token()
+
+                param_value = parse_expression(stream)
+                kwargs[param_name] = param_value
+            else:
+                # A positional argument/parameter
+                args.append(parse_expression(stream))
             stream.next_token()
 
             if stream.current.type == TOKEN_COMMA:
                 stream.next_token()
 
-    return expression.Filter(filter_name, args)
+    return expression.Filter(filter_name, args, kwargs)
 
 
 def parse_boolean(stream: TokenStream) -> expression.Boolean:

@@ -13,6 +13,7 @@ from typing import List
 from typing import Optional
 from typing import Any
 from typing import Iterator
+from typing import Mapping
 from typing import Tuple
 from typing import Generic
 from typing import TypeVar
@@ -264,30 +265,51 @@ class InfixExpression(Expression):
 
 
 class Filter:
-    __slots__ = ("name", "args")
+    __slots__ = ("name", "args", "kwargs")
 
-    def __init__(self, name: str, args: List[Expression]):
+    def __init__(
+        self,
+        name: str,
+        args: List[Expression],
+        kwargs: Optional[Mapping[str, Expression]] = None,
+    ):
         self.name = name
         self.args = args
+        self.kwargs = kwargs or {}
 
     def __eq__(self, other: object):
         return (
             isinstance(other, Filter)
             and self.name == other.name
             and self.args == other.args
+            and self.kwargs == other.kwargs
         )
 
     def __repr__(self):  # pragma: no cover
-        return f"Filter(name='{self.name}', args={self.args})"
+        return f"Filter(name='{self.name}', args={self.args}, kwargs={self.kwargs})"
 
     def __str__(self):
+        buf = [self.name]
+
         args_str = ", ".join([str(arg) for arg in self.args])
         if args_str:
-            return f"{self.name}: {args_str})"
-        return f"{self.name}"
+            buf.append(f": {args_str}")
+            # return f"{self.name}: {args_str})"
+
+        kwargs_str = ", ".join([f"{k}: {v}" for k, v in self.kwargs.items()])
+        if kwargs_str:
+            if len(buf) == 1:
+                buf.append(f": {kwargs_str}")
+            else:
+                buf.append(f", {kwargs_str}")
+
+        return "".join(buf)
 
     def evaluate_args(self, context: Context):
         return [arg.evaluate(context) for arg in self.args]
+
+    def evaluate_kwargs(self, context: Context):
+        return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
 
 class BooleanExpression(Expression):
@@ -347,7 +369,9 @@ class FilteredExpression(Expression):
         for fltr in self.filters:
             func = context.filter(fltr.name)
             try:
-                result = func(result, *fltr.evaluate_args(context))
+                args = fltr.evaluate_args(context)
+                kwargs = fltr.evaluate_kwargs(context)
+                result = func(result, *args, **kwargs)
             except Exception as err:
                 # Any exception causes us to abort the filter chain and discard the
                 # result. Nothing will be rendered.

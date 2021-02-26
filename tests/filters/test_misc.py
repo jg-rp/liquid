@@ -6,6 +6,7 @@ from typing import NamedTuple, Any, List, Dict
 
 from liquid.environment import Environment
 from liquid.exceptions import FilterArgumentError
+from liquid.expression import EMPTY
 
 from liquid.builtin.filters.misc import Size, Default, Date
 
@@ -74,21 +75,21 @@ class MiscFilterTestCase(unittest.TestCase):
                 val="",
                 args=["foo"],
                 kwargs={},
-                expect="",
+                expect="foo",
             ),
             Case(
                 description="empty list",
                 val=[],
                 args=["foo"],
                 kwargs={},
-                expect=[],
+                expect="foo",
             ),
             Case(
                 description="empty object",
                 val={},
                 args=["foo"],
                 kwargs={},
-                expect={},
+                expect="foo",
             ),
             Case(
                 description="not empty string",
@@ -131,6 +132,27 @@ class MiscFilterTestCase(unittest.TestCase):
                 args=[],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="false returns default",
+                val=False,
+                args=["bar"],
+                kwargs={},
+                expect="bar",
+            ),
+            Case(
+                description="empty returns default",
+                val=EMPTY,
+                args=["bar"],
+                kwargs={},
+                expect="bar",
+            ),
+            Case(
+                description="allow false",
+                val=False,
+                args=["bar"],
+                kwargs={"allow_false": True},
+                expect=False,
             ),
         ]
 
