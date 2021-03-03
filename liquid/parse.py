@@ -10,12 +10,10 @@ from typing import List
 from typing import Union
 from typing import Optional
 from typing import NamedTuple
-from typing import Dict
-from typing import Protocol
-from typing import Any
+from typing import TYPE_CHECKING
 
 from liquid.exceptions import LiquidSyntaxError, Error
-from liquid.mode import Mode, error
+from liquid.mode import error
 
 from liquid import expression
 from liquid import ast
@@ -63,25 +61,14 @@ from liquid.token import TOKEN_GE
 from liquid.token import reverse_operators
 from liquid.token import Token
 
-
-class Tag(Protocol):
-
-    block: bool
-
-    def get_node(self: Any, stream: TokenStream) -> ast.Node:
-        ...
-
-
-class Env(Protocol):
-
-    tags: Dict[str, Tag]
-    mode: Mode
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
 class Parser:
     __slots__ = ("tags", "mode", "illegal", "literal", "statement")
 
-    def __init__(self, env: Env):
+    def __init__(self, env: Environment):
         self.tags = env.tags
         self.mode = env.mode
 
@@ -94,7 +81,8 @@ class Parser:
 
         while stream.current.type != TOKEN_EOF:
             try:
-                if node := self.parse_statement(stream):
+                node = self.parse_statement(stream)
+                if node:
                     root.statements.append(node)
             except Error as err:
                 error(self.mode, err, linenum=stream.current.linenum)
@@ -625,6 +613,6 @@ def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:
     return expr
 
 
-@lru_cache
-def get_parser(env: Env) -> Parser:
+@lru_cache(maxsize=128)
+def get_parser(env: Environment) -> Parser:
     return Parser(env)

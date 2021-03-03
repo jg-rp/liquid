@@ -1,5 +1,7 @@
 """Filter function helpers."""
 
+from __future__ import annotations
+
 import collections.abc
 
 from abc import ABC, abstractmethod
@@ -7,16 +9,12 @@ from functools import wraps
 
 from typing import Tuple
 from typing import Any
-from typing import Protocol
+from typing import TYPE_CHECKING
 
-from liquid.mode import Mode
 from liquid.exceptions import FilterArgumentError
 
-
-class Env(Protocol):
-    """Environment interface expected by `Filter`"""
-
-    mode: Mode
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
 class Filter(ABC):
@@ -28,14 +26,16 @@ class Filter(ABC):
 
     __slots__ = ("env",)
 
-    with_context = False
+    with_context: bool = False
+    name: str = "filter"
 
-    def __init__(self, env: Env):
+    def __init__(self, env: Environment):
         self.env = env
 
     @abstractmethod
     def __call__(self, *args, **kwargs):
-        """Call the filter where `val` is the left hand expression of an output statement."""
+        """Call the filter where `val` is the left hand expression of an output
+        statement."""
 
 
 def expect_number(name: str, val: object):

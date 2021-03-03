@@ -58,7 +58,8 @@ class CaptureTag(Tag):
 
         expect(stream, TOKEN_EXPRESSION)
 
-        if match := RE_CAPTURE.match(stream.current.value):
+        match = RE_CAPTURE.match(stream.current.value)
+        if match:
             name = match.group()
         else:
             raise LiquidSyntaxError(

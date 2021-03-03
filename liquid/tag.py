@@ -2,11 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from typing import Protocol
-from typing import Union
-from typing import Type
-from typing import Optional
-from typing import Any
+from typing import TYPE_CHECKING
 
 from liquid.ast import Node
 from liquid.ast import IllegalNode
@@ -14,15 +10,8 @@ from liquid.exceptions import Error
 from liquid.parse import eat_block
 from liquid.stream import TokenStream
 
-
-class Env(Protocol):
-    def error(
-        self: Any,
-        exc: Union[Type[Error], Error],
-        msg: Optional[str] = ...,
-        linenum: Optional[int] = ...,
-    ) -> None:
-        ...
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
 class Tag(ABC):
@@ -30,8 +19,9 @@ class Tag(ABC):
 
     block = True
     name = ""
+    end = ""
 
-    def __init__(self, env: Env):
+    def __init__(self, env: Environment):
         self.env = env
 
     def get_node(self, stream: TokenStream) -> Node:
@@ -46,7 +36,7 @@ class Tag(ABC):
             self.env.error(err)
 
             if self.block and hasattr(self, "end"):
-                eat_block(stream, (getattr(self, "end"),))
+                eat_block(stream, (self.end,))
 
             return IllegalNode(tok)
 

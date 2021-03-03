@@ -304,7 +304,6 @@ tokenize_loop_expression = partial(
     keywords=loop_expression_keywords,
 )
 
-
 tokenize_filtered_expression = partial(
     _tokenize,
     rules=_compile_rules(filtered_expression_rules),
@@ -388,7 +387,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
         yield Token(line_num, kind, value)
 
 
-@lru_cache
+@lru_cache(maxsize=128)
 def get_lexer(
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",

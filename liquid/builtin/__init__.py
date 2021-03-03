@@ -1,10 +1,6 @@
-from typing import Protocol
-from typing import Any
-from typing import Type
-from typing import Callable
+from __future__ import annotations
 
-from liquid.tag import Tag
-from liquid.mode import Mode
+from typing import TYPE_CHECKING
 
 from . import literal
 from . import statement
@@ -84,18 +80,11 @@ from .filters.array import (
 from .filters.misc import Size, Default, Date
 
 
-class Env(Protocol):
-
-    mode: Mode
-
-    def add_tag(self: Any, tag: Type[Tag]) -> None:
-        ...
-
-    def add_filter(self: Any, name: str, func: Callable[..., Any]) -> None:
-        ...
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
-def register(env: Env) -> None:
+def register(env: Environment) -> None:
     env.add_tag(literal.Literal)
     env.add_tag(statement.Statement)
     env.add_tag(illegal.Illegal)

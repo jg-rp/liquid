@@ -1,6 +1,6 @@
 
-Liquid
-======
+Python Liquid
+=============
 
 Liquid is a Python implementation of `Liquid <https://shopify.github.io/liquid/>`_.
 A non evaling templating language suitable for end users.
@@ -26,10 +26,7 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
     $ python -m pip install -U python-liquid
 
-.. note:: 
-    
-    **Liquid requires Python>=3.8**. Let me know if this is a problem for you by raising
-    an issue. Given enough interest, I'll happily add support for older Python versions.
+Liquid requires Python>=3.7 or PyPy3.7.
 
 
 Quick Start
@@ -174,6 +171,17 @@ Ryzen 5 1500X, we get the following results.
                      lex and parse: 6.4s (942.15 ops/s, 15.70 i/s)
                             render: 1.7s (3443.62 ops/s, 57.39 i/s)
              lex, parse and render: 8.2s (733.30 ops/s, 12.22 i/s)
+
+And PyPy3.7 gives us a decent increase in performance.
+
+.. code-block:: text
+
+    Best of 5 rounds with 100 iterations per round and 60 ops per iteration (6000 ops per round).
+
+    lex template (not expressions): 0.58s (10421.14 ops/s, 173.69 i/s)
+                     lex and parse: 2.9s (2036.33 ops/s, 33.94 i/s)
+                            render: 1.1s (5644.80 ops/s, 94.08 i/s)
+             lex, parse and render: 4.2s (1439.43 ops/s, 23.99 i/s)
 
 
 On the same machine, running ``rake benchmark:run`` from the root of the reference implementation

@@ -3,6 +3,7 @@
 Modelled after Jinja2 template loaders.
 See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
 """
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -11,25 +12,14 @@ from typing import NamedTuple
 from typing import Callable
 from typing import Mapping
 from typing import Optional
-from typing import Protocol
-from typing import Any
+from typing import TYPE_CHECKING
 
 from liquid.template import Template
 from liquid.exceptions import TemplateNotFound
 
 
-class Env(Protocol):
-    """Environment interface expected by the base loader."""
-
-    # pylint: disable=redefined-builtin
-    def from_string(
-        self: Any,
-        source: str,
-        name: str = ...,
-        path: Optional[Path] = ...,
-        globals: Optional[Mapping[str, object]] = ...,
-    ) -> Template:
-        ...
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
 class TemplateSource(NamedTuple):
@@ -40,13 +30,13 @@ class TemplateSource(NamedTuple):
 
 class BaseLoader(ABC):
     @abstractmethod
-    def get_source(self, env: Env, template_name: str) -> TemplateSource:
+    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
 
     # pylint: disable=redefined-builtin
     def load(
         self,
-        env: Env,
+        env: Environment,
         name: str,
         globals: Optional[Mapping[str, object]] = None,
     ) -> Template:
@@ -67,7 +57,7 @@ class FileSystemLoader(BaseLoader):
     def __init__(self, search_path: str):
         self.search_path = Path(search_path)
 
-    def get_source(self, _: Env, template_name: str) -> TemplateSource:
+    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
         source_path = self.search_path.joinpath(template_name)
 
         if not source_path.exists():
@@ -87,7 +77,7 @@ class DictLoader(BaseLoader):
     def __init__(self, templates: Mapping[str, str]):
         self.templates = templates
 
-    def get_source(self, _: Env, template_name: str) -> TemplateSource:
+    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
         try:
             source = self.templates[template_name]
         except KeyError as err:

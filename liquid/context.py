@@ -18,11 +18,10 @@ from typing import Union
 from typing import Callable
 from typing import List
 from typing import Mapping
-from typing import TextIO
 from typing import Iterator
 from typing import Sequence
-from typing import Protocol
 from typing import Optional
+from typing import TYPE_CHECKING
 
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
@@ -30,6 +29,10 @@ from liquid.exceptions import Error
 from liquid.exceptions import lookup_warning
 
 from liquid import Mode
+
+if TYPE_CHECKING:
+    from liquid import Environment
+    from liquid import Template
 
 # Maximum number of times a context can be extended or wrapped.
 MAX_CONTEXT_DEPTH = 30
@@ -41,10 +44,10 @@ Namespace = Mapping[str, object]
 class ReadOnlyChainMap(collections.abc.Mapping):
     """Combine multiple mappings for sequential lookup.
 
-    For example, to emulate Python's normal lookup sequence:
+    Based on the "A greatly simplified read-only version of Chainmap" recipe link to
+    from https://docs.python.org/3/library/collections.html#chainmap-examples-and-recipes.
 
-        import __builtin__
-        pylookup = Chainmap(locals(), globals(), vars(__builtin__))
+    The link seems to be broken.
     """
 
     def __init__(self, *maps: Mapping[str, object]):
@@ -106,40 +109,6 @@ class BuiltIn(collections.abc.Mapping):
 builtin = BuiltIn()
 
 
-class Template(Protocol):
-    """Interface for delegating `get_template` to the environment."""
-
-    name: str
-
-    def render_with_context(
-        self: Any,
-        context: Context,
-        buffer: TextIO,
-        partial: bool = ...,
-        block_scope: bool = ...,
-    ):
-        ...
-
-
-# pylint: disable=too-few-public-methods
-class Env(Protocol):
-    """Interface for a Contexts' "env" argument.
-
-    For the benefit of the static type checker while avoiding cyclic imports.
-    """
-
-    mode: Mode
-    filters: Mapping[str, Callable[..., Any]]
-
-    # pylint: disable=redefined-builtin
-    def get_template(
-        self: Any,
-        name: str,
-        globals: Optional[Mapping[str, object]] = ...,
-    ) -> Template:
-        ...
-
-
 # pylint: disable=too-many-instance-attributes redefined-builtin
 class Context:
     """Liquid template context."""
@@ -156,7 +125,7 @@ class Context:
 
     def __init__(
         self,
-        env: Env,
+        env: Environment,
         globals: Optional[Namespace] = None,
         disabled_tags: Optional[List[str]] = None,
     ):
@@ -205,13 +174,18 @@ class Context:
         return obj
 
     def resolve(self, name: str, default: object = None) -> Any:
+        """Return the object/value at `name` in the current scope.
+
+        This is like `get`, but does a single, top-level lookup rather than a
+        chained lookup from sequence of keys.
+        """
         try:
             return self.scope[name]
         except KeyError:
             # TODO: Resolve mode.
             return default
 
-    @functools.lru_cache
+    @functools.lru_cache(maxsize=128)
     def filter(self, name: str) -> Callable[..., object]:
         """Return the filter function with given name."""
         try:

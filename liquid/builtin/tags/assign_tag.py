@@ -53,7 +53,8 @@ class AssignTag(Tag):
 
         expect(stream, TOKEN_EXPRESSION)
 
-        if match := RE_ASSIGNMENT.match(stream.current.value):
+        match = RE_ASSIGNMENT.match(stream.current.value)
+        if match:
             name, expression = match.groups()
         else:
             raise LiquidSyntaxError(

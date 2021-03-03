@@ -14,45 +14,20 @@ from typing import Any
 from typing import Optional
 from typing import TextIO
 from typing import Mapping
-from typing import Protocol
-from typing import Union
-from typing import Type
+from typing import TYPE_CHECKING
 
-from liquid.mode import Mode
 from liquid.context import Context
-from liquid.ast import ParseTree
 
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
 
-
-class Env(Protocol):
-    """Environment interface.
-
-    For the benefit of the static type checker while avoiding cyclic imports.
-    """
-
-    mode: Mode
-    filters: Mapping[str, Callable[..., Any]]
-
-    # pylint: disable=redefined-builtin
-    def get_template(
-        self: Any,
-        name: str,
-        globals: Optional[Mapping[str, object]] = ...,
-    ) -> Template:
-        ...
-
-    def error(
-        self: Any,
-        exc: Union[Type[Error], Error],
-        msg: Optional[str] = ...,
-        linenum: Optional[int] = ...,
-    ) -> None:
-        ...
+if TYPE_CHECKING:
+    from liquid import Environment
+    from liquid.ast import ParseTree
 
 
+# pylint: disable=too-many-instance-attributes
 class Template:
     """A loaded and parsed liquid template.
 
@@ -63,7 +38,7 @@ class Template:
     # pylint: disable=redefined-builtin
     def __init__(
         self,
-        env: Env,
+        env: Environment,
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Path] = None,

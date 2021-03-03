@@ -21,5 +21,5 @@ setuptools.setup(
     zip_safe=False,
     install_requires=["python-dateutil>=2.8.1"],
     test_suite="tests",
-    python_requires=">=3.8",
+    python_requires=">=3.7",
 )
