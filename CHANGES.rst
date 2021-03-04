@@ -5,7 +5,7 @@ Version 0.6.2
 -------------
 
 - Refactored the standard expression parser. It's now possible to extend ``ExpressionParser`` for use with custom tags.
-
+- Decoupled boolean expression parsing for easier ``if``, ``unless`` and ``case`` tag subclassing.
 
 Version 0.6.1
 -------------

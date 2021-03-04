@@ -1,14 +1,31 @@
 """Tag and node definition for the built-in "case" tag."""
-import sys
-from typing import Optional, List, TextIO
+from __future__ import annotations
 
-from liquid.token import Token, TOKEN_EOF, TOKEN_EXPRESSION, TOKEN_TAG
-from liquid.parse import get_parser, expect, parse_boolean_expression
+import sys
+
+from typing import Optional
+from typing import List
+from typing import TextIO
+from typing import TYPE_CHECKING
+
+from liquid.token import Token
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+
+from liquid.parse import get_parser
+from liquid.parse import expect
+from liquid.parse import parse_boolean_expression
+
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
 from liquid.lex import tokenize_boolean_expression
+
+if TYPE_CHECKING:
+    from liquid import Environment
+    from liquid.expression import Expression
 
 TAG_CASE = sys.intern("case")
 TAG_ENDCASE = sys.intern("endcase")
@@ -67,9 +84,16 @@ class CaseTag(Tag):
     name = TAG_CASE
     end = TAG_ENDCASE
 
-    def parse(self, stream: TokenStream) -> ast.Node:
-        parser = get_parser(self.env)
+    def __init__(self, env: Environment):
+        super().__init__(env)
+        self.parser = get_parser(self.env)
 
+    def parse_expression(self, case: str, stream: TokenStream) -> Expression:
+        expect(stream, TOKEN_EXPRESSION)
+        expr_iter = tokenize_boolean_expression(f"{case} == {stream.current.value}")
+        return parse_boolean_expression(TokenStream(expr_iter))
+
+    def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG, value=TAG_CASE)
         tok = stream.current
         stream.next_token()
@@ -89,10 +113,7 @@ class CaseTag(Tag):
 
         while stream.current.istag(TAG_WHEN):
             stream.next_token()  # Eat WHEN
-            expect(stream, TOKEN_EXPRESSION)
-
-            expr_iter = tokenize_boolean_expression(f"{case} == {stream.current.value}")
-            expr = parse_boolean_expression(TokenStream(expr_iter))
+            expr = self.parse_expression(case, stream)
 
             when = ast.ConditionalBlockNode(
                 stream.current,
@@ -100,12 +121,12 @@ class CaseTag(Tag):
             )
 
             stream.next_token()
-            when.block = parser.parse_block(stream, ENDWHENBLOCK)
+            when.block = self.parser.parse_block(stream, ENDWHENBLOCK)
             whens.append(when)
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
-            default = parser.parse_block(stream, ENDCASEBLOCK)
+            default = self.parser.parse_block(stream, ENDCASEBLOCK)
         else:
             default = None
 

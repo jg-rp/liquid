@@ -1,10 +1,11 @@
 """Tag and node definition for the built-in "if" tag."""
-
+from __future__ import annotations
 import sys
 
 from typing import Optional
 from typing import List
 from typing import TextIO
+from typing import TYPE_CHECKING
 
 from liquid.token import Token
 from liquid.token import TOKEN_EOF
@@ -15,9 +16,7 @@ from liquid.ast import Node
 from liquid.ast import BlockNode
 from liquid.ast import ConditionalBlockNode
 
-from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
-from liquid.expression import Expression
 from liquid.lex import tokenize_boolean_expression
 
 from liquid.parse import expect
@@ -28,8 +27,12 @@ from liquid.parse import eat_block
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 
-
 from liquid.builtin.illegal import IllegalNode
+
+if TYPE_CHECKING:
+    from liquid.context import Context
+    from liquid import Environment
+    from liquid.expression import Expression
 
 TAG_IF = sys.intern("if")
 TAG_ENDIF = sys.intern("endif")
@@ -101,33 +104,33 @@ class IfTag(Tag):
     name = TAG_IF
     end = TAG_ENDIF
 
-    def parse(self, stream: TokenStream) -> Node:
-        parser = get_parser(self.env)
+    def __init__(self, env: Environment):
+        super().__init__(env)
+        self.parser = get_parser(self.env)
 
+    def parse_expression(self, stream: TokenStream) -> Expression:
+        expect(stream, TOKEN_EXPRESSION)
+        expr_iter = tokenize_boolean_expression(stream.current.value)
+        return parse_boolean_expression(TokenStream(expr_iter))
+
+    def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_IF)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_boolean_expression(stream.current.value)
-        condition = parse_boolean_expression(TokenStream(expr_iter))
-
+        condition = self.parse_expression(stream)
         stream.next_token()
 
-        consequence = parser.parse_block(stream, ENDIFBLOCK)
-
+        consequence = self.parser.parse_block(stream, ENDIFBLOCK)
         conditional_alternatives = []
 
         while stream.current.istag(TAG_ELSIF):
             stream.next_token()
-            expect(stream, TOKEN_EXPRESSION)
-
-            expr_iter = tokenize_boolean_expression(stream.current.value)
 
             # If the expression can't be parsed, eat the "elsif" block and
             # continue to parse more "elsif" expression, if any.
             try:
-                expr = parse_boolean_expression(TokenStream(expr_iter))
+                expr = self.parse_expression(stream)
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)
@@ -138,12 +141,12 @@ class IfTag(Tag):
                 condition=expr,
             )
             stream.next_token()
-            alt.block = parser.parse_block(stream, ENDELSIFBLOCK)
+            alt.block = self.parser.parse_block(stream, ENDELSIFBLOCK)
             conditional_alternatives.append(alt)
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
-            alternative = parser.parse_block(stream, ENDIFELSEBLOCK)
+            alternative = self.parser.parse_block(stream, ENDIFELSEBLOCK)
         else:
             alternative = None
 
