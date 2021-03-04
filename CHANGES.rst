@@ -1,6 +1,18 @@
 Python Liquid Change Log
 ========================
 
+Version 0.6.2
+-------------
+
+- Refactored the standard expression parser. It's now possible to extend ``ExpressionParser`` for use with custom tags.
+
+
+Version 0.6.1
+-------------
+
+- Added support for Python 3.7 and PyPy3.7.
+
+
 Version 0.6.0
 -------------
 
@@ -10,4 +22,3 @@ Version 0.6.0
 - The ``newline_to_br`` filter now replaces ``\n`` and ``\r\n`` with ``<br />\n``.
 - The ``strip_newlines`` filter strips ``\r\n``.
   
-

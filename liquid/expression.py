@@ -309,6 +309,10 @@ class Filter:
         return [arg.evaluate(context) for arg in self.args]
 
     def evaluate_kwargs(self, context: Context):
+        # Shortcut for the common case. Most filters do not use named
+        # parameters.
+        if not self.kwargs:
+            return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
 
