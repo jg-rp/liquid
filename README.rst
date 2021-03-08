@@ -2,7 +2,7 @@
 Python Liquid
 =============
 
-Liquid is a Python implementation of `Liquid <https://shopify.github.io/liquid/>`_.
+A Python implementation of `Liquid <https://shopify.github.io/liquid/>`_.
 A non evaling templating language suitable for end users.
 
 - `Installing`_
@@ -33,7 +33,7 @@ Quick Start
 -----------
 
 Please see `Shopify's documentation <https://shopify.github.io/liquid/>`_ for template
-syntax details and a reference of available tags and filters.
+syntax and a reference of available tags and filters.
 
 An application typically creates a single ``Environment``, with a template ``Loader``, 
 then loads and renders templates from that environment. This example assumes a folder
@@ -61,13 +61,13 @@ tags. You could instead create a ``Template`` directly from a string.
 
     env = Environment()
 
-    template = env.from_string(
-        "<html>"
-        "{% for i in (1..3) %}"
-        "hello {{ some }} {{ i }}"
-        "{% endfor %}"
-        "</html>"
-    )
+    template = env.from_string("""
+        <html>
+        {% for i in (1..3) %}
+            hello {{ some }} {{ i }}
+        {% endfor %}
+        </html>
+    """)
 
     print(template.render(some="variable", other="thing"))
 
@@ -111,8 +111,9 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 Related Projects
 ----------------
 
-- `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render Liquid templates in your Flask applications.
-
+- `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render
+  Liquid templates in your Flask applications.
+  
 
 Compatibility
 -------------
@@ -388,25 +389,25 @@ You could then use ``DictLoader`` like this.
 
     snippets = {
         "greeting": "Hello {{ user.name }}",
-        "row": (
-            '<div class="row"'
-            '  <div class="col">'
-            '    {{ row_content }}'
-            '  </div>'
-            '</div>'
-        )
+        "row": """
+            <div class="row"'
+              <div class="col">
+                {{ row_content }}
+              </div>
+            </div>
+            """,
     }
 
     env = Environment(loader=DictLoader(snippets))
     
-    template = env.from_string(
-        "<html>"
-        "  {% include 'greeting' %}"
-        "  {% for i in (1..3) %}"
-        "    {% include 'row' with i as row_content %}"
-        "  {% endfor %}"
-        "</html>"
-    )
+    template = env.from_string("""
+        <html>
+          {% include 'greeting' %}
+          {% for i in (1..3) %}
+            {% include 'row' with i as row_content %}
+          {% endfor %}
+        </html>
+    """)
 
     print(template.render(user={"name": "Brian"}))
 

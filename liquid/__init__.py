@@ -1,6 +1,5 @@
 __version__ = "0.6.2"
 
-
 from .mode import Mode
 from .filter import Filter
 from .token import Token
