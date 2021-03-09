@@ -31,6 +31,8 @@ from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_WITH
 from liquid.token import TOKEN_FOR
 from liquid.token import TOKEN_AS
@@ -109,7 +111,9 @@ filtered_expression_keywords = frozenset(
         TOKEN_TRUE,
         TOKEN_FALSE,
         TOKEN_NIL,
+        TOKEN_NULL,
         TOKEN_EMPTY,
+        TOKEN_BLANK,
     ]
 )
 
@@ -139,7 +143,9 @@ boolean_expression_keywords = frozenset(
         TOKEN_TRUE,
         TOKEN_FALSE,
         TOKEN_NIL,
+        TOKEN_NULL,
         TOKEN_EMPTY,
+        TOKEN_BLANK,
         TOKEN_AND,
         TOKEN_OR,
         TOKEN_CONTAINS,
@@ -192,7 +198,9 @@ include_expression_keywords = frozenset(
         TOKEN_TRUE,
         TOKEN_FALSE,
         TOKEN_NIL,
+        TOKEN_NULL,
         TOKEN_EMPTY,
+        TOKEN_BLANK,
         TOKEN_WITH,
         TOKEN_FOR,
         TOKEN_AS,

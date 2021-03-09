@@ -57,7 +57,7 @@ class Empty(Expression):
     __slots__ = ()
 
     def __eq__(self, other: object):
-        if isinstance(other, Empty):
+        if isinstance(other, (Empty, Blank)):
             return True
         if isinstance(other, (list, dict, str)) and not other:
             return True
@@ -74,6 +74,24 @@ class Empty(Expression):
 
 
 EMPTY = Empty()
+
+# As far as I'm able to tell, the reference implementation treats `empty`
+# and `blank` as an alias for the empty string. Are they simply converting
+# empty collections to strings (empty strings in the case of empty collections)
+# before comparing they to `blank` and/or `empty`?
+
+
+class Blank(Empty):
+    __slots__ = ()
+
+    def __repr__(self):  # pragma: no cover
+        return "Blank()"
+
+    def __str__(self):  # pragma: no cover
+        return "blank"
+
+
+BLANK = Blank()
 
 
 T = TypeVar("T")  # pylint: disable=invalid-name

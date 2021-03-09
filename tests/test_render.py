@@ -446,6 +446,12 @@ class RenderTestCases(unittest.TestCase):
                 template=r"{% if true %} {% comment %} this is blank {% endcomment %} {% endif %}",
                 expect="",
             ),
+            Case(
+                description="compare to blank",
+                template=r"{% if username == blank %}username is blank{% endif %}",
+                expect="username is blank",
+                globals={"username": ""},
+            ),
         ]
 
         self._test(test_cases)

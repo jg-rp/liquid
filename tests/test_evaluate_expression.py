@@ -286,6 +286,18 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expect=True,
             ),
             Case(
+                description="nil equals null",
+                context={},
+                expression="nil == null",
+                expect=True,
+            ),
+            Case(
+                description="null equals null",
+                context={},
+                expression="null == null",
+                expect=True,
+            ),
+            Case(
                 description="string contains string",
                 context={},
                 expression="'hello' contains 'ell'",
@@ -385,6 +397,30 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 description="float equals int",
                 context={},
                 expression="1 == 1.0",
+                expect=True,
+            ),
+            Case(
+                description="empty string equals blank",
+                context={},
+                expression="'' == blank",
+                expect=True,
+            ),
+            Case(
+                description="empty string equals empty",
+                context={},
+                expression="'' == empty",
+                expect=True,
+            ),
+            Case(
+                description="empty array equals empty",
+                context={"x": []},
+                expression="x == empty",
+                expect=True,
+            ),
+            Case(
+                description="empty array equals blank",
+                context={"x": []},
+                expression="x == blank",
                 expect=True,
             ),
         ]

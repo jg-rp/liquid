@@ -30,6 +30,8 @@ from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_NEGATIVE
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_FALSE
@@ -224,6 +226,11 @@ def parse_nil(_: TokenStream) -> expression.Nil:
 def parse_empty(_: TokenStream) -> expression.Empty:
     """Read a 'empty' keyword from the token stream."""
     return expression.EMPTY
+
+
+def parse_blank(_: TokenStream) -> expression.Blank:
+    """Read a 'blank' keyword from the token stream."""
+    return expression.BLANK
 
 
 def parse_string_literal(stream: TokenStream) -> expression.StringLiteral:
@@ -440,7 +447,9 @@ class ExpressionParser:
             TOKEN_FALSE: parse_boolean,
             TOKEN_TRUE: parse_boolean,
             TOKEN_NIL: parse_nil,
+            TOKEN_NULL: parse_nil,
             TOKEN_EMPTY: parse_empty,
+            TOKEN_BLANK: parse_blank,
             TOKEN_NEGATIVE: self.parse_prefix_expression,
             TOKEN_STRING: parse_string_literal,
             TOKEN_INTEGER: parse_integer_literal,

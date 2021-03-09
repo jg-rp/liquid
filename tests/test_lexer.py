@@ -14,7 +14,46 @@ from liquid.lex import tokenize_include_expression
 from liquid.lex import get_lexer
 
 from liquid.token import Token
-from liquid.token import *
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_NEGATIVE
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_OFFSET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_EQ
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_GE
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_FOR
 
 
 class Case(NamedTuple):
@@ -24,6 +63,8 @@ class Case(NamedTuple):
 
 
 class LiquidLexerTestCase(TestCase):
+    """Liquid lexer test cases."""
+
     def setUp(self) -> None:
         self.env = Environment()
 
@@ -580,6 +621,15 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
+                "not null identifier",
+                "user != null",
+                [
+                    Token(1, TOKEN_IDENTIFIER, "user"),
+                    Token(1, TOKEN_NE, "!="),
+                    Token(1, TOKEN_NULL, "null"),
+                ],
+            ),
+            Case(
                 "alternate not nil",
                 "user <> nil",
                 [
@@ -664,6 +714,28 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_IDENTIFIER, "tags"),
                     Token(1, TOKEN_CONTAINS, "contains"),
                     Token(1, TOKEN_STRING, "sale"),
+                ],
+            ),
+            Case(
+                "identifier equals blank",
+                "product.title == blank",
+                [
+                    Token(1, TOKEN_IDENTIFIER, "product"),
+                    Token(1, TOKEN_DOT, "."),
+                    Token(1, TOKEN_IDENTIFIER, "title"),
+                    Token(1, TOKEN_EQ, "=="),
+                    Token(1, TOKEN_BLANK, "blank"),
+                ],
+            ),
+            Case(
+                "identifier equals empty",
+                "product.title == empty",
+                [
+                    Token(1, TOKEN_IDENTIFIER, "product"),
+                    Token(1, TOKEN_DOT, "."),
+                    Token(1, TOKEN_IDENTIFIER, "title"),
+                    Token(1, TOKEN_EQ, "=="),
+                    Token(1, TOKEN_EMPTY, "empty"),
                 ],
             ),
         ]
@@ -766,7 +838,7 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
-                "string literal name with idientifier local variable",
+                "string literal name with identifier local variable",
                 "'product' with products[0]",
                 [
                     Token(1, TOKEN_STRING, "product"),
@@ -795,7 +867,7 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
-                "string literal name with idientifier aliased local variable",
+                "string literal name with identifier aliased local variable",
                 "'product' with products[0] as foo",
                 [
                     Token(1, TOKEN_STRING, "product"),
@@ -829,7 +901,7 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
-                "string literal name with idientifier aliased local variable and arguments",
+                "literal name with identifier aliased local variable and arguments",
                 "'product' with products[0] as foo, bar: 42, baz: 'hello'",
                 [
                     Token(1, TOKEN_STRING, "product"),

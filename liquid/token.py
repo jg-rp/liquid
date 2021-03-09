@@ -17,6 +17,8 @@ __all__ = (
     "TOKEN_FLOAT",
     "TOKEN_EMPTY",
     "TOKEN_NIL",
+    "TOKEN_NULL",
+    "TOKEN_BLANK",
     "TOKEN_WITH",
     "TOKEN_FOR",
     "TOKEN_AS",
@@ -69,6 +71,8 @@ TOKEN_INTEGER = sys.intern("integer")
 TOKEN_FLOAT = sys.intern("float")
 TOKEN_EMPTY = sys.intern("empty")
 TOKEN_NIL = sys.intern("nil")
+TOKEN_NULL = sys.intern("null")
+TOKEN_BLANK = sys.intern("blank")
 
 # "include" and "render" keywords
 TOKEN_WITH = sys.intern("with")
