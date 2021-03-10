@@ -26,8 +26,9 @@ clean:
 	python -Bc "import pathlib; [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]"
 	python -Bc "import pathlib; [p.rmdir() for p in pathlib.Path('.').rglob('__pycache__')]"
 	rm -f .coverage
+	rm -rf .tox
 	rm -rf htmlcov
-	rm -rf Liquid.egg-info
+	rm -rf python_liquid.egg-info
 	rm -rf build
 	rm -rf dist
 
