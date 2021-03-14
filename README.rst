@@ -239,7 +239,7 @@ And use it like this.
 
 If you want to add more complex filters, probably including some type checking and/or casting,
 or the filter needs access to the active context or environment, you'll want to inherit from
-``Filter`` and implement it's ``__call__`` method.
+``Filter`` and implement its ``__call__`` method.
 
 .. code-block:: python
 
@@ -293,8 +293,8 @@ for many more examples.
 Custom Tags
 -----------
 
-Register a new tag with an ``Environment`` by calling it's ``add_tag`` method. All tags must 
-inherit from ``liquid.tag.Tag`` and implement it's ``parse`` method.
+Register a new tag with an ``Environment`` by calling its ``add_tag`` method. All tags must 
+inherit from ``liquid.tag.Tag`` and implement its ``parse`` method.
 
 ``parse`` takes a single argument of type ``TokenStream`` that wraps an iterator of ``Token``\s,
 and returns an ``ast.Node`` instance. More often than not, a new subclass of ``ast.node`` will
@@ -336,10 +336,10 @@ statements before returning a ``UnlessNode``.
 Things worthy of note: 
 
 - Block tags (those that have a start and end tag with any number of statements in between)
-  are expect to leave the stream with their closing tag as the current token.
+  are expected to leave the stream with their closing tag as the current token.
 
 - The template lexer does not attempt to tokenize tag expressions. It is up to the ``Tag``
-  to tokenize and parse it's expression, if any, possibly using or extending a built-in
+  to tokenize and parse its expression, if any, possibly using or extending a built-in
   expression lexer found in ``liquid.lex``.
 
 - The ``expect`` and ``expect_peek`` helper functions inspect tokens from the stream and
@@ -357,7 +357,7 @@ Custom Loaders
 --------------
 
 Write a custom loader class by inheriting from ``liquid.loaders.BaseLoader`` and implementing
-it's ``get_source`` method. Here we implement ``DictLoader``, a loader that uses a dictionary
+its ``get_source`` method. Here we implement ``DictLoader``, a loader that uses a dictionary
 of strings instead of the file system for loading templates.
 
 .. code-block:: python
@@ -378,7 +378,7 @@ of strings instead of the file system for loading templates.
 
             return TemplateSource(source, template_name, None)
 
-``TemplateSource`` is a named tuple containing the template source as a string, it's name and an
+``TemplateSource`` is a named tuple containing the template source as a string, its name and an
 optional ``uptodate`` callable. If ``uptodate`` is not ``None`` it should be a callable that
 returns ``False`` if the template needs to be loaded again, or ``True`` otherwise.
 
