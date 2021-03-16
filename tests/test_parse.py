@@ -79,13 +79,13 @@ class ParserTestCase(unittest.TestCase):
                 "unknown tag name",
                 "{% foobar some %}{% endfoobar %}",
                 "",
-                expect_statements=1,
+                expect_statements=0,
             ),
             Case(
                 "unknown tag name with surrounding literal",
                 "<HTML>{% foobar %}{% endfoobar %}</HTML>",
                 "<HTML></HTML>",
-                expect_statements=3,
+                expect_statements=2,
             ),
         ]
 
