@@ -9,7 +9,6 @@ A non evaling templating language suitable for end users.
 - `Quick Start`_
 - `Related Projects`_
 - `Compatibility`_
-- `Limitations`_
 - `Benchmark`_
 - `Custom Filters`_
 - `Custom Tags`_
@@ -138,29 +137,8 @@ Known Issues
   be some inconsistencies between this and the reference implementation's equivalent parsing 
   and formatting of dates and times.
 
-
-Limitations
------------
-
-The following limitations might be removed in future releases. These limitations apply
-as of version 0.5.
-
-
-Performance
-***********
-
-This project was conceived as the engine behind a local development environment for
-Shopify themes. As such, performance at scale was not a particularly high priority.
-
-There is no "compile" phase. Templates are tokenized, parsed and rendered directly from
-the parse tree. The parse tree is not very compact, so consumes more memory than is ideal
-for large scale deployments.
-
-As there is no bytecode to speak of, persistent storage of parsed templates is limited
-to pickling and compressing parse trees, which is not very portable.
-
 Benchmark
-^^^^^^^^^
+*********
 
 You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if you
 don't have ``make``) from the root of the source tree. On my ropey desktop computer with a 
