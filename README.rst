@@ -5,6 +5,14 @@ Python Liquid
 A Python implementation of `Liquid <https://shopify.github.io/liquid/>`_.
 A non evaling templating language suitable for end users.
 
+.. image:: https://img.shields.io/pypi/pyversions/python-liquid.svg
+    :target: https://pypi.org/project/python-liquid/
+    :alt: Python versions
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
+    :alt: Code style
+
 - `Installing`_
 - `Quick Start`_
 - `Related Projects`_
