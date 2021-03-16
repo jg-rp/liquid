@@ -423,6 +423,36 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expression="x == blank",
                 expect=True,
             ),
+            Case(
+                description="whitespace string equals blank",
+                context={"x": "   "},
+                expression="x == blank",
+                expect=True,
+            ),
+            Case(
+                description="whitespace string does not equal empty",
+                context={"x": "   "},
+                expression="x == empty",
+                expect=False,
+            ),
+            Case(
+                description="blank does not equal empty",
+                context={},
+                expression="blank == empty",
+                expect=False,
+            ),
+            Case(
+                description="empty does not equal blank",
+                context={},
+                expression="empty == blank",
+                expect=False,
+            ),
+            Case(
+                description="blank does not equal empty",
+                context={},
+                expression="blank != empty",
+                expect=True,
+            ),
         ]
 
         self._test(test_cases, tokenize_boolean_expression, parse_boolean_expression)

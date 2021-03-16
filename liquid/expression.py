@@ -57,7 +57,7 @@ class Empty(Expression):
     __slots__ = ()
 
     def __eq__(self, other: object):
-        if isinstance(other, (Empty, Blank)):
+        if isinstance(other, Empty):
             return True
         if isinstance(other, (list, dict, str)) and not other:
             return True
@@ -75,20 +75,28 @@ class Empty(Expression):
 
 EMPTY = Empty()
 
-# As far as I'm able to tell, the reference implementation treats `empty`
-# and `blank` as an alias for the empty string. Are they simply converting
-# empty collections to strings (empty strings in the case of empty collections)
-# before comparing they to `blank` and/or `empty`?
 
-
-class Blank(Empty):
+class Blank(Expression):
     __slots__ = ()
+
+    def __eq__(self, other: object):
+        if isinstance(other, str) and (not other or other.isspace()):
+            return True
+        if isinstance(other, (list, dict)) and not other:
+            return True
+        if isinstance(other, Blank):
+            return True
+
+        return False
 
     def __repr__(self):  # pragma: no cover
         return "Blank()"
 
     def __str__(self):  # pragma: no cover
         return "blank"
+
+    def evaluate(self, context: Context) -> Blank:
+        return self
 
 
 BLANK = Blank()
@@ -589,18 +597,6 @@ def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
     raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
 
 
-def eval_empty_expression(left: Any, operator: str, right: Any) -> bool:
-    if not isinstance(left, Empty):
-        left, right = right, left
-
-    if operator == "==":
-        return left == right
-    if operator in ("!=", "<>"):
-        return left != right
-
-    raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
-
-
 def is_truthy(obj: Any) -> bool:
     """Return True if the given object is Liquid truthy."""
     if obj in (False, None):
@@ -609,13 +605,14 @@ def is_truthy(obj: Any) -> bool:
 
 
 def compare(left: Any, operator: str, right: Any) -> bool:
-    if isinstance(left, Empty) or isinstance(right, Empty):
-        return eval_empty_expression(left, operator, right)
-
     if operator == "and":
         return is_truthy(left) and is_truthy(right)
     if operator == "or":
         return is_truthy(left) or is_truthy(right)
+
+    if isinstance(right, (Empty, Blank)):
+        left, right = right, left
+
     if operator == "==":
         return left == right
     if operator in ("!=", "<>"):

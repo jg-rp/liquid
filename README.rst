@@ -9,9 +9,14 @@ A non evaling templating language suitable for end users.
     :target: https://pypi.org/project/python-liquid/
     :alt: Python versions
 
+.. image:: https://img.shields.io/badge/pypy-3.7-blue
+    :target: https://pypi.org/project/python-liquid/
+    :alt: PyPy versions
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/ambv/black
-    :alt: Code style
+    :target: https://github.com/psf/black
+    :alt: Code style  
+
 
 - `Installing`_
 - `Quick Start`_
