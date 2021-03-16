@@ -97,18 +97,18 @@ class Parser:
         return root
 
     def parse_statement(self, stream: TokenStream) -> ast.Node:
-        if stream.current.test(TOKEN_STATEMENT):
+        if stream.current.type == TOKEN_STATEMENT:
             node = self.statement.get_node(stream)
-        elif stream.current.test(TOKEN_TAG):
+        elif stream.current.type == TOKEN_TAG:
             tag = self.tags.get(stream.current.value, self.illegal)
 
             if tag.block:
-                stream.balancing_stack.append(tag)
+                stream.balancing_stack.append(tag.end)
 
             node = tag.get_node(stream)
 
             # Tag parse functions can choose to return an IllegalNode.
-            if node.__class__ == "IllegalNode":
+            if isinstance(node, ast.IllegalNode):
                 raise LiquidSyntaxError(
                     f"unexpected tag '{node.token().value}'",
                     linenum=node.token().linenum,
@@ -116,13 +116,12 @@ class Parser:
 
             if tag.block:
                 popped = stream.balancing_stack.pop()
-                if stream.current.value != popped.end:
+                if stream.current.value != popped:
                     raise LiquidSyntaxError(
-                        f"expected {popped.end}, found {stream.current.value}",
+                        f"expected {popped}, found {stream.current.value}",
                         linenum=stream.current.linenum,
                     )
         else:
-            expect(stream, TOKEN_LITERAL)
             node = self.literal.get_node(stream)
 
         return node
