@@ -21,6 +21,7 @@ from .tags import echo_tag
 from .tags import liquid_tag
 from .tags import include_tag
 from .tags import render_tag
+from .tags import ifchanged_tag
 
 
 from .filters.math import (
@@ -105,6 +106,7 @@ def register(env: Environment) -> None:
     env.add_tag(liquid_tag.LiquidTag)
     env.add_tag(include_tag.IncludeTag)
     env.add_tag(render_tag.RenderTag)
+    env.add_tag(ifchanged_tag.IfChangedTag)
 
     env.add_filter(Abs.name, Abs(env))
     env.add_filter(AtMost.name, AtMost(env))

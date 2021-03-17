@@ -136,8 +136,8 @@ We strive to be 100% compatible with the `reference implementation <https://gith
 of Liquid, written in Ruby. That is, given an equivalent render context, a template rendered with Python
 Liquid should produce the same output as when rendered with Ruby Liquid.
 
-Python Liquid faithfully reproduces the following tags. Note that ``echo``, ``include``, ``liquid``
-and ``render`` don't get a mention in the `official documentation <https://shopify.github.io/liquid/>`_
+Python Liquid faithfully reproduces the following tags. Note that ``echo``, ``ifchanged``, ``include``,
+``liquid`` and ``render`` don't get a mention in the `official documentation <https://shopify.github.io/liquid/>`_
 of "core" Liquid, despite being present.
 
 - assign
@@ -147,11 +147,13 @@ of "core" Liquid, despite being present.
 - cycle
 - decrement
 - echo
-- for
+- for/break/continue
+- ifchanged
 - if/elsif/else
 - include
 - increment
 - liquid
+- raw
 - render
 - tablerow
 - unless
@@ -171,7 +173,7 @@ Known Issues
   and formatting of dates and times.
 
 Benchmark
-*********
+---------
 
 You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if you
 don't have ``make``) from the root of the source tree. On my ropey desktop computer with a 

@@ -23,6 +23,7 @@ from liquid.builtin import (
     echo_tag,
     include_tag,
     render_tag,
+    ifchanged_tag,
 )
 
 
@@ -430,3 +431,15 @@ class ParserTestCase(unittest.TestCase):
         ]
 
         self._test(test_cases, render_tag.RenderNode)
+
+    def test_ifchanged_tag(self):
+        """Test that we can parse ifchanged tags."""
+        test_cases = [
+            Case(
+                "initial state - no change",
+                "{% ifchanged %}hello{% endifchanged %}",
+                r"ifchanged { hello }",
+            ),
+        ]
+
+        self._test(test_cases, ifchanged_tag.IfChangedNode)

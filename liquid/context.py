@@ -118,8 +118,7 @@ class Context:
         "locals",
         "globals",
         "scope",
-        "cycles",
-        "counters",
+        "_tag_namespace",
         "disabled_tags",
     )
 
@@ -143,12 +142,13 @@ class Context:
         # temporary namespace is pushed to the front of this chain.
         self.scope = ReadOnlyChainMap(self.locals, self.globals, builtin)
 
-        # A distinct namespace for iterables created by the built-in "cycle" tag.
-        self.cycles = {}
-
-        # A namespace for integer counters. The built-in increment and decrement
-        # tags share this namespace.
-        self.counters = {}
+        # A namspace supporting stateful tags. Such as `cycle`, `increment`,
+        # `decrement` and `ifchanged`.
+        self._tag_namespace = {
+            "cycles": {},
+            "counters": {},
+            "ifchanged": "",
+        }
 
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
@@ -204,14 +204,14 @@ class Context:
 
     def increment(self, name: str) -> int:
         """Increment the named counter and return it's value."""
-        val = self.counters.get(name, -1) + 1
-        self.counters[name] = val
+        val = self._tag_namespace["counters"].get(name, -1) + 1
+        self._tag_namespace["counters"][name] = val
         return val
 
     def decrement(self, name: str) -> int:
         """Decrement the named counter and return it's value."""
-        val = self.counters.get(name, 0) - 1
-        self.counters[name] = val
+        val = self._tag_namespace["counters"].get(name, 0) - 1
+        self._tag_namespace["counters"][name] = val
         return val
 
     def cycle(self, group_name: str, args: Sequence[Any]) -> Iterator[Any]:
@@ -219,9 +219,17 @@ class Context:
         if this is is the first time we're seeing this combination of group name
         and arguments."""
         key = f"{group_name}:{''.join([str(arg) for arg in args])}"
-        if key not in self.cycles:
-            self.cycles[key] = cycle(args)
-        return self.cycles[key]
+        if key not in self._tag_namespace["cycles"]:
+            self._tag_namespace["cycles"][key] = cycle(args)
+        return self._tag_namespace["cycles"][key]
+
+    def ifchanged(self, val: str) -> bool:
+        """Return True if the `ifchanged` value has changed."""
+        if val != self._tag_namespace["ifchanged"]:
+            self._tag_namespace["ifchanged"] = val
+            return True
+
+        return False
 
     @contextmanager
     def extend(self, namespace: Namespace):
