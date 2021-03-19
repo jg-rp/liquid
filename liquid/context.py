@@ -44,10 +44,9 @@ Namespace = Mapping[str, object]
 class ReadOnlyChainMap(collections.abc.Mapping):
     """Combine multiple mappings for sequential lookup.
 
-    Based on the "A greatly simplified read-only version of Chainmap" recipe link to
-    from https://docs.python.org/3/library/collections.html#chainmap-examples-and-recipes.
-
-    The link seems to be broken.
+    Based on the "A greatly simplified read-only version of Chainmap" recipe linked
+    to from https://docs.python.org/3/library/collections.html under the section
+    chainmap-examples-and-recipes. The link seems to be broken.
     """
 
     def __init__(self, *maps: Mapping[str, object]):
@@ -218,7 +217,7 @@ class Context:
         """Return the next item in the given cycle. Initialise the cycle first
         if this is is the first time we're seeing this combination of group name
         and arguments."""
-        key = f"{group_name}:{''.join([str(arg) for arg in args])}"
+        key = (group_name, tuple(args))
         if key not in self._tag_namespace["cycles"]:
             self._tag_namespace["cycles"][key] = cycle(args)
         return self._tag_namespace["cycles"][key]
