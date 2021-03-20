@@ -2,10 +2,15 @@
 
 import datetime
 import unittest
-from dataclasses import dataclass, field
-from typing import Mapping, Any
+
+from dataclasses import dataclass
+from dataclasses import field
+
+from typing import Mapping
+from typing import Any
 
 from liquid.environment import Environment
+from liquid.template import AwareBoundTemplate
 from liquid.mode import Mode
 from liquid.loaders import DictLoader
 from liquid.builtin.drops import IterableDrop
@@ -61,12 +66,13 @@ class Case:
 class RenderTestCases(unittest.TestCase):
     """Test cases for testing template renders."""
 
-    def _test(self, test_cases):
+    def _test(self, test_cases, template_class=AwareBoundTemplate):
         """Helper method for testing lists of test cases."""
         self.maxDiff = None
 
         for case in test_cases:
             env = Environment(loader=DictLoader(case.partials))
+            env.template_class = template_class
 
             template = env.from_string(case.template, globals=case.globals)
 

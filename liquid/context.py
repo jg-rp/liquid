@@ -30,9 +30,9 @@ from liquid.exceptions import lookup_warning
 
 from liquid import Mode
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
-    from liquid import Template
+    from liquid.template import BoundTemplate
 
 # Maximum number of times a context can be extended or wrapped.
 MAX_CONTEXT_DEPTH = 30
@@ -197,7 +197,7 @@ class Context:
 
         return filter_func
 
-    def get_template(self, name: str) -> Template:
+    def get_template(self, name: str) -> BoundTemplate:
         """Load a template from the environment."""
         return self.env.get_template(name)
 

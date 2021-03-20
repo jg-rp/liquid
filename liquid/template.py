@@ -22,17 +22,19 @@ from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
 
-if TYPE_CHECKING:
+
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
     from liquid.ast import ParseTree
 
 
 # pylint: disable=too-many-instance-attributes
-class Template:
-    """A loaded and parsed liquid template.
+class BoundTemplate:
+    """A liquid template that has been parsed and is bound to an Environment.
 
-    Rather than instantiating templates directly, the recommended way to create
-    templates is by calling `get_template` or `from_string` from an `Environment`.
+    Rather than instantiating a `BoundTemplate` directly, you'll usually want
+    to use the `Template(source)` API or the `get_template` or `from_string`
+    methods from an `Environment`.
     """
 
     # pylint: disable=redefined-builtin
@@ -51,10 +53,6 @@ class Template:
         self.name = name
         self.path = path
         self.uptodate = uptodate
-
-        self.drop = TemplateDrop(self.name, self.path)
-
-        self.bytecode = None
 
     def render(self, *args: ..., **kwargs: ...) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
@@ -89,11 +87,7 @@ class Template:
                 from this template will not leak into the parent context.
         """
         # "template" could get overridden from args/kwargs, "partial" will not.
-        namespace: Dict[str, Any] = {
-            "template": self.drop,
-            **dict(*args, **kwargs),
-            "partial": partial,
-        }
+        namespace = self._make_globals(partial, args, kwargs)
 
         with context.extend(namespace=namespace):
             for node in self.tree.statements:
@@ -125,11 +119,26 @@ class Template:
             return True
         return self.uptodate()
 
+    def _make_globals(self, partial, args, kwargs) -> abc.Mapping:
+        return {
+            **dict(*args, **kwargs),
+            "partial": partial,
+        }
+
     def __repr__(self):
         return (
             f"Template(name='{self.name}', "
             f"path='{self.path}', uptodate={self.is_up_to_date})"
-        )
+        )  # pragma: no cover
+
+
+class AwareBoundTemplate(BoundTemplate):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.drop = TemplateDrop(self.name, self.path)
+
+    def _make_globals(self, partial, args, kwargs) -> abc.Mapping:
+        return {"template": self.drop, **super()._make_globals(partial, args, kwargs)}
 
 
 class TemplateDrop(abc.Mapping):
@@ -158,7 +167,7 @@ class TemplateDrop(abc.Mapping):
         return (
             f"TemplateDrop(directory='{self['directory']}', "
             f"name='{self['name']}', suffix='{self['suffix']}')"
-        )
+        )  # pragma: no cover
 
     def __contains__(self, item):
         return item in self._items

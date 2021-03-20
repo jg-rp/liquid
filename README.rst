@@ -38,8 +38,6 @@ Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
     $ python -m pip install -U python-liquid
 
-Liquid requires Python>=3.7 or PyPy3.7.
-
 
 Quick Start
 -----------
@@ -47,66 +45,80 @@ Quick Start
 Please see `Shopify's documentation <https://shopify.github.io/liquid/>`_ for template
 syntax and a reference of available tags and filters.
 
-An application typically creates a single ``Environment``, with a template ``Loader``, 
-then loads and renders templates from that environment. This example assumes a folder
-called ``templates`` exists in the current working directory, and that the template file
-``index.html`` exists within it.
+Render a template string by creating a ``Template`` and calling its ``render`` method.
+
+.. code-block:: python
+
+    from liquid import Template
+    template = Template("Hello, {{ you }}!")
+    print(template.render(you="world"))  # "Hello, world!"
+
+Keyword arguments passed to ``render`` are made available for use in template statements and
+expressions.
+
+If you need to use the built-in ``include`` or ``render`` tags, you'll need to create an 
+``Environment``, with a template ``Loader``, then load and render templates from that
+environment. This example assumes a folder called ``templates`` exists in the current
+working directory, and that the template file ``index.html`` exists within it.
 
 .. code-block:: python
 
     from liquid import Environment, FileSystemLoader
-
     env = Environment(loader=FileSystemLoader("templates/"))
     template = env.get_template("index.html")
-
     print(template.render(some="variable", other="thing"))
 
-Keyword arguments passed to the ``render`` method of a ``Template`` are made available
-for templates to use in template statements and expressions.
-
-A ``Loader`` is only required if you plan to use the built-in ``include`` or ``render``
-tags. You could instead create a ``Template`` directly from a string.
+You can create templates from strings using an ``Environment`` too. This is often more efficient
+than using ``Template`` directly.
 
 .. code-block:: python
 
     from liquid import Environment
-
     env = Environment()
 
     template = env.from_string("""
         <html>
         {% for i in (1..3) %}
-            hello {{ some }} {{ i }}
+          <p>hello {{ some }} {{ i }}</p>
         {% endfor %}
         </html>
     """)
 
-    print(template.render(some="variable", other="thing"))
+    print(template.render(some="thing"))
 
-The ``Environment`` constructor and ``get_template`` method of an environment also accept
-``globals``, a dictionary of variables made available to all templates rendered from
-the environment or for each call to ``render``, respectively.
+The ``Environment`` constructor accepts ``globals``, a dictionary of variables made available to
+all templates rendered from that environment. 
 
 .. code-block:: python
 
-    from liquid import Environment, FileSystemLoader
+    from liquid import Environment
+    env = Environment(globals={"site_name": "Google"})
 
-    env = Environment(
-        loader=FileSystemLoader("templates/"),
-        globals={"site_name": "Google"},
-    )
+    template = env.from_string("""
+        <html>
+        <h1>{{ site_name }}</h1>
+        {% for i in (1..3) %}
+          <p>hello {{ some }} {{ i }}</p>
+        {% endfor %}
+        </html>
+    """)
 
-    template = env.get_template(
-        "index.html",
-        globals={"title": "Home Page"},
-    )
+    print(template.render(some="thing"))
 
-    print(template.render(some="variable", other="thing"))
+``Template``, ``Environment.get_template`` and ``Environment.from_string`` also accept ``globals``,
+where the dictionary of variables is added to the template context each time you call ``render``.
 
+.. code-block:: python
+
+    from liquid import Environment
+    env = Environment()
+
+    template = env.get_template("index.html", globals={"page": "home"})
+    print(template.render(some="thing"))
 
 Templates are parsed and rendered in `strict` mode by default, where syntax and render-time
 type errors raise an exception as soon as possible. You can change the error tolerance mode
-with the ``tolerance`` argument to the ``Environment`` constructor.
+with the ``tolerance`` argument to the ``Environment`` or ``Template`` constructor.
 
 Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 

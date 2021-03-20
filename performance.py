@@ -22,7 +22,8 @@ from typing import Iterator
 import yaml
 
 from liquid.environment import Environment
-from liquid.template import Template
+from liquid.template import BoundTemplate
+from liquid.template import AwareBoundTemplate
 from liquid.mode import Mode
 from liquid.loaders import FileSystemLoader
 from liquid.token import Token
@@ -63,13 +64,14 @@ from tests.mocks.filters.weight import Weight, WeightWithUnit
 class ThemedTemplate(NamedTuple):
     """Parsed template and theme."""
 
-    theme: Template
-    template: Template
+    theme: BoundTemplate
+    template: BoundTemplate
 
     def render(self):
         """Render the theme with the template as its content."""
         # Override the theme's "template" drop with that of the content.
         content = self.template.render()
+        assert isinstance(self.template, AwareBoundTemplate)
         self.theme.render(template=self.template.drop, content_for_layout=content)
 
 
@@ -151,7 +153,7 @@ def load_data() -> Dict[str, Any]:
                 product_collections.append(collection)
         product["collections"] = product_collections
 
-    # Arbitrary top-level objects for tempaltes that expect them.
+    # Arbitrary top-level objects for templates that expect them.
     data["product"] = data["products"][0]
     data["blog"] = data["blogs"][0]
     data["article"] = data["blog"]["articles"][0]
@@ -177,7 +179,6 @@ def load_data() -> Dict[str, Any]:
     return data
 
 
-# pylint: disable=redefined-builtin
 def load_templates(search_path: str = "tests/fixtures/") -> List[ThemedTemplateSource]:
     """Read template files and bundle them with their themes."""
     paths = list(pathlib.Path(search_path).glob("**/*.liquid"))
@@ -300,11 +301,6 @@ def profile_parse_and_render(search_path: str):
 def setup_render(search_path: str) -> List[ThemedTemplate]:
     env, template_sources = setup_parse(search_path)
     parsed_templates = parse(env, template_sources)
-
-    for template in parsed_templates:
-        assert template.template.bytecode is None
-        assert template.theme.bytecode is None
-
     return parsed_templates
 
 
@@ -314,6 +310,9 @@ def setup_parse(search_path: str):
         loader=FileSystemLoader("."), globals=context_data, tolerance=Mode.STRICT
     )
     register_mocks(env)
+
+    env.template_class = AwareBoundTemplate
+
     templates = load_templates(search_path)
 
     return env, templates

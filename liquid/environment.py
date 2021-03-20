@@ -15,7 +15,7 @@ import warnings
 
 from liquid.mode import Mode
 from liquid.tag import Tag
-from liquid.template import Template
+from liquid.template import BoundTemplate
 from liquid.lex import get_lexer
 from liquid.stream import TokenStream
 from liquid.parse import get_parser
@@ -87,6 +87,8 @@ class Environment:
         # Template cache
         self.cache = LRUCache(300)
 
+        self.template_class = BoundTemplate
+
         builtin.register(self)
 
     def __hash__(self):
@@ -146,7 +148,7 @@ class Environment:
         name: str = "",
         path: Optional[Path] = None,
         globals: Optional[Mapping[str, object]] = None,
-    ) -> Template:
+    ) -> BoundTemplate:
         """Parse the given string as a liquid template.
 
         `name` and `path` are passed to the `Template` constructor and will be
@@ -162,7 +164,7 @@ class Environment:
             A parsed template ready to be rendered.
         """
         parse_tree = self.parse(source)
-        return Template(
+        return self.template_class(
             env=self,
             name=name,
             path=path,
@@ -173,7 +175,7 @@ class Environment:
     # pylint: disable=redefined-builtin
     def get_template(
         self, name: str, globals: Optional[Mapping[str, object]] = None
-    ) -> Template:
+    ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
         Args:
@@ -186,9 +188,9 @@ class Environment:
         """
         template = self.cache.get(name)
 
-        if isinstance(template, Template) and template.is_up_to_date:
+        if isinstance(template, BoundTemplate) and template.is_up_to_date:
             # Copy the cached template with new globals.
-            return Template(
+            return self.template_class(
                 env=self,
                 name=template.name,
                 path=template.path,
@@ -226,3 +228,43 @@ class Environment:
             raise exc
         if self.mode == Mode.WARN:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
+
+
+_implicit_environments = LRUCache(10)
+
+
+def get_implicit_environment(*args):
+    try:
+        return _implicit_environments[args]
+    except KeyError:
+        env = Environment(*args)
+        _implicit_environments[args] = env
+        return env
+
+
+# `Template` is a factory function masquerading as a class. The desire to have
+# an intuitive API and to please the static type checker outweighs this abuse of
+# Python naming conventions. At least for now.
+
+# pylint: disable=redefined-builtin too-many-arguments invalid-name
+def Template(
+    source: str,
+    tag_start_string: str = r"{%",
+    tag_end_string: str = r"%}",
+    statement_start_string: str = r"{{",
+    statement_end_string: str = r"}}",
+    strip_tags: bool = False,
+    tolerance: Mode = Mode.STRICT,
+    globals: Optional[Mapping[str, object]] = None,
+) -> BoundTemplate:
+    """"""
+    env = get_implicit_environment(
+        tag_start_string,
+        tag_end_string,
+        statement_start_string,
+        statement_end_string,
+        strip_tags,
+        tolerance,
+    )
+
+    return env.from_string(source, globals=globals)

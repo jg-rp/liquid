@@ -1,6 +1,20 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.0
+-------------
+
+- New ``Template`` API. Create templates from strings without an ``Environment``.
+- The ``template`` object is no longer included in every render context automatically.
+- 
+
+Version 0.6.4
+-------------
+
+- Implemented the ``blank`` keyword. Empty string and strings containing only whitespace are equal to ``blank``.
+- Implemented the ``null`` keyword. ``null`` is an alias for ``nil``.
+- Implemented the ``ifchanged`` tag.
+
 Version 0.6.2
 -------------
 

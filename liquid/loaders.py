@@ -14,7 +14,7 @@ from typing import Mapping
 from typing import Optional
 from typing import TYPE_CHECKING
 
-from liquid.template import Template
+from liquid.template import BoundTemplate
 from liquid.exceptions import TemplateNotFound
 
 
@@ -39,7 +39,7 @@ class BaseLoader(ABC):
         env: Environment,
         name: str,
         globals: Optional[Mapping[str, object]] = None,
-    ) -> Template:
+    ) -> BoundTemplate:
         """"""
         try:
             source, filename, uptodate = self.get_source(env, name)
