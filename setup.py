@@ -22,9 +22,11 @@ setuptools.setup(
     install_requires=["python-dateutil>=2.8.1"],
     test_suite="tests",
     python_requires=">=3.7",
+    licence="MIT",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
