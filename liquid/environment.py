@@ -36,23 +36,22 @@ class Environment:
 
     An ``Environment`` is also where you'd register custom tags and filters.
 
-    Args:
-        tag_start_string: The sequence of characters indicating the start of a
-            liquid tag.
-        tag_end_string: The sequence of characters indicating the end of a
-            liquid tag.
-        statement_start_string: The sequence of characters indicating the start
-            of an output statement.
-        statement_end_string: The sequence of characters indicating the end
-            of an output statement.
-        strip_tags: If `True` will strip preceding and trailing whitespace from
-            all tags, regardless of whitespace control characters.
-        tolerance: Indicates how tolerant to be of errors. Must be one of
-            `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
-        loader: A template loader. If you want to use the builtin "render" or
-            "include" tags, a loader must be configured.
-        globals: A mapping that will be added to the context of any template
-            loaded from this environment.
+    :param tag_start_string: The sequence of characters indicating the start of a
+        liquid tag.
+    :param tag_end_string: The sequence of characters indicating the end of a liquid
+        tag.
+    :param statement_start_string: The sequence of characters indicating the start of
+        an output statement.
+    :param statement_end_string: The sequence of characters indicating the end of an
+        output statement.
+    :param strip_tags: If `True` will strip leading and trailing whitespace from all
+        tags, regardless of whitespace control characters.
+    :param tolerance: Indicates how tolerant to be of errors. Must be one of
+        `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
+    :param loader: A template loader. If you want to use the builtin "render" or
+        "include" tags, a loader must be configured.
+    :param globals: A mapping that will be added to the context of any template loaded
+        from this environment.
     """
 
     # pylint: disable=redefined-builtin too-many-arguments
@@ -234,6 +233,7 @@ _implicit_environments = LRUCache(10)
 
 
 def get_implicit_environment(*args):
+    """Return an :class:`Environment` initialized with the given arguments."""
     try:
         return _implicit_environments[args]
     except KeyError:
@@ -257,7 +257,26 @@ def Template(
     tolerance: Mode = Mode.STRICT,
     globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
-    """"""
+    """A :class:`BoundTemplate` factory.
+
+    :param source: A Liquid template source string.
+    :param tag_start_string: The sequence of characters indicating the start of a
+        liquid tag.
+    :param tag_end_string: The sequence of characters indicating the end of a liquid
+        tag.
+    :param statement_start_string: The sequence of characters indicating the start of
+        an output statement.
+    :param statement_end_string: The sequence of characters indicating the end of an
+        output statement.
+    :param strip_tags: If `True` will strip leading and trailing whitespace from all
+        tags, regardless of whitespace control characters.
+    :param tolerance: Indicates how tolerant to be of errors. Must be one of
+        `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
+    :param loader: A template loader. If you want to use the builtin "render" or
+        "include" tags, a loader must be configured.
+    :param globals: A mapping that will be added to the context of any template loaded
+        from this environment.
+    """
     env = get_implicit_environment(
         tag_start_string,
         tag_end_string,

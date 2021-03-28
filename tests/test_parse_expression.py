@@ -3,49 +3,34 @@
 import unittest
 from typing import NamedTuple, Any
 
-from liquid.expression import (
-    FilteredExpression,
-    BooleanExpression,
-    AssignmentExpression,
-    LoopExpression,
-    IdentifierPathElement,
-    Identifier,
-    Boolean,
-    Filter,
-    StringLiteral,
-    IntegerLiteral,
-    FloatLiteral,
-    PrefixExpression,
-    InfixExpression,
-)
-from liquid.token import (
-    Token,
-    TOKEN_INITIAL,
-    TOKEN_LITERAL,
-    TOKEN_INTEGER,
-    TOKEN_NEGATIVE,
-    TOKEN_FLOAT,
-    TOKEN_IDENTIFIER,
-    TOKEN_STRING,
-    TOKEN_TRUE,
-    TOKEN_FALSE,
-)
-from liquid.stream import TokenStream
-from liquid.lex import (
-    tokenize_identifier,
-    tokenize_loop_expression,
-    tokenize_include_expression,
-    tokenize_filtered_expression,
-    tokenize_boolean_expression,
-    tokenize_assignment_expression,
-)
+from liquid.expression import FilteredExpression
+from liquid.expression import BooleanExpression
+from liquid.expression import AssignmentExpression
+from liquid.expression import LoopExpression
+from liquid.expression import IdentifierPathElement
+from liquid.expression import Identifier
+from liquid.expression import Boolean
+from liquid.expression import Filter
+from liquid.expression import StringLiteral
+from liquid.expression import IntegerLiteral
+from liquid.expression import FloatLiteral
+from liquid.expression import PrefixExpression
+from liquid.expression import InfixExpression
 
-from liquid.parse import (
-    parse_filtered_expression,
-    parse_boolean_expression,
-    parse_assignment_expression,
-    parse_loop_expression,
-)
+from liquid.token import Token
+from liquid.token import TOKEN_INITIAL
+
+from liquid.stream import TokenStream
+
+from liquid.lex import tokenize_loop_expression
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_assignment_expression
+
+from liquid.parse import parse_filtered_expression
+from liquid.parse import parse_boolean_expression
+from liquid.parse import parse_assignment_expression
+from liquid.parse import parse_loop_expression
 
 
 class Case(NamedTuple):

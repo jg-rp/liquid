@@ -14,6 +14,7 @@ rstcheck = "*"
 docutils = "*"
 flake8-bugbear = "*"
 twine = "*"
+sphinx = "*"
 
 [packages]
 python-dateutil = "*"

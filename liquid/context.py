@@ -202,13 +202,13 @@ class Context:
         return self.env.get_template(name)
 
     def increment(self, name: str) -> int:
-        """Increment the named counter and return it's value."""
+        """Increment the named counter and return its value."""
         val = self._tag_namespace["counters"].get(name, -1) + 1
         self._tag_namespace["counters"][name] = val
         return val
 
     def decrement(self, name: str) -> int:
-        """Decrement the named counter and return it's value."""
+        """Decrement the named counter and return its value."""
         val = self._tag_namespace["counters"].get(name, 0) - 1
         self._tag_namespace["counters"][name] = val
         return val
