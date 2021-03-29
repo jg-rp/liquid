@@ -69,6 +69,10 @@ class ContextDepthError(Error):
     """Exception raised when the maximum context depth is reached."""
 
 
+class UndefinedError(Error):
+    """Exception raised by the StrictUndefined type."""
+
+
 class BreakLoop(LiquidInterrupt):
     """Exception raised when a BreakNode is rendered."""
 

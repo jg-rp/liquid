@@ -21,7 +21,7 @@ A non evaling templating language suitable for end users.
     :target: https://pypi.org/project/python-liquid/
     :alt: PyPy versions
 
-
+    
 - `Installing`_
 - `Quick Start`_
 - `Related Projects`_
@@ -133,6 +133,18 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
     env = Environment(
         loader=FileSystemLoader("templates/"),
         tolerance=Mode.LAX,
+    )
+
+By default, references to undefined variables are silently ignored. In `strict variables`
+mode, any operation on an undefined variable will raise an ``UndefinedError``.
+
+.. code-block:: python
+
+    from liquid import Environment, StrictUndefined
+
+    env = Environment(
+        loader=FileSystemLoader("templates/"),
+        undefined=StrictUndefined,
     )
 
 

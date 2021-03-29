@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
 from liquid.exceptions import Error
+from liquid.exceptions import UndefinedError
 from liquid.exceptions import lookup_warning
 
 from liquid import Mode
@@ -39,6 +40,34 @@ MAX_CONTEXT_DEPTH = 30
 
 ContextPath = Union[str, Sequence[Union[str, int]]]
 Namespace = Mapping[str, object]
+
+
+_undefined = object()
+
+
+def _getitem(obj, key):
+    """Item getter with special methods for arrays/lists and hashes/dicts."""
+    if key == "size" and isinstance(obj, collections.abc.Sized):
+        return len(obj)
+    if key == "first" and isinstance(obj, collections.abc.Sequence):
+        return obj[0]
+    if key == "last" and isinstance(obj, collections.abc.Sequence):
+        return obj[-1]
+
+    return getitem(obj, key)
+
+
+def get_item(
+    obj: object,
+    *items: Union[str, int],
+    default: Optional[object] = _undefined,
+) -> Any:
+    """Chained item getter."""
+    try:
+        itm: Any = functools.reduce(_getitem, items, obj)
+    except (KeyError, IndexError, TypeError):
+        itm = default
+    return itm
 
 
 class ReadOnlyChainMap(collections.abc.Mapping):
@@ -108,6 +137,59 @@ class BuiltIn(collections.abc.Mapping):
 builtin = BuiltIn()
 
 
+class Undefined(collections.abc.Mapping):
+    """The default undefined type."""
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __contains__(self, item: str) -> bool:
+        return False
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Undefined) or other is None
+
+    def __getitem__(self, key: str) -> object:
+        return self
+
+    def __len__(self):
+        return 0
+
+    def __iter__(self):
+        return iter([])
+
+    def __str__(self):
+        return ""
+
+    def __repr__(self):
+        return f"Undefined({self.name})"
+
+
+class StrictUndefined(Undefined):
+    """An undefined that raises an exception for everything other than ``repr``."""
+
+    def __contains__(self, item: str) -> bool:
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __eq__(self, other: object) -> bool:
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __getitem__(self, key: str) -> object:
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __len__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __iter__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __str__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __repr__(self):
+        return f"StrictUndefined({self.name})"
+
+
 # pylint: disable=too-many-instance-attributes redefined-builtin
 class Context:
     """Liquid template context."""
@@ -158,7 +240,7 @@ class Context:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
 
-    def get(self, path: ContextPath, default: object = None) -> object:
+    def get(self, path: ContextPath, default: object = _undefined) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
             return self.resolve(path, default)
@@ -169,10 +251,16 @@ class Context:
         obj = self.resolve(name, default)
 
         if items:
-            return get_item(obj, *items, default=default)
+            try:
+                return functools.reduce(_getitem, items, obj)
+            except (KeyError, IndexError, TypeError):
+                if default == _undefined:
+                    return self.env.undefined(name)
+                return default
+
         return obj
 
-    def resolve(self, name: str, default: object = None) -> Any:
+    def resolve(self, name: str, default: object = _undefined) -> Any:
         """Return the object/value at `name` in the current scope.
 
         This is like `get`, but does a single, top-level lookup rather than a
@@ -181,7 +269,8 @@ class Context:
         try:
             return self.scope[name]
         except KeyError:
-            # TODO: Resolve mode.
+            if default == _undefined:
+                return self.env.undefined(name)
             return default
 
     @functools.lru_cache(maxsize=128)
@@ -261,28 +350,3 @@ class Context:
             raise exc
         if self.env.mode == Mode.WARN:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
-
-
-def _getitem(obj, key):
-    """Item getter with special methods for arrays/lists and hashes/dicts."""
-    if key == "size" and isinstance(obj, collections.abc.Sized):
-        return len(obj)
-    if key == "first" and isinstance(obj, collections.abc.Sequence):
-        return obj[0]
-    if key == "last" and isinstance(obj, collections.abc.Sequence):
-        return obj[-1]
-
-    return getitem(obj, key)
-
-
-def get_item(
-    obj: object,
-    *items: Union[str, int],
-    default: Optional[object] = None,
-) -> Any:
-    """Chained item getter."""
-    try:
-        itm: Any = functools.reduce(_getitem, items, obj)
-    except (KeyError, IndexError, TypeError):
-        itm = default
-    return itm

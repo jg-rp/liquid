@@ -13,12 +13,14 @@ from typing import Mapping
 
 import warnings
 
+from liquid.context import Undefined
 from liquid.mode import Mode
 from liquid.tag import Tag
 from liquid.template import BoundTemplate
 from liquid.lex import get_lexer
 from liquid.stream import TokenStream
 from liquid.parse import get_parser
+from liquid.utils import LRUCache
 
 from liquid import ast
 from liquid import builtin
@@ -26,8 +28,6 @@ from liquid import loaders
 
 from liquid.exceptions import Error
 from liquid.exceptions import lookup_warning
-
-from liquid.utils import LRUCache
 
 
 # pylint: disable=too-many-instance-attributes
@@ -52,6 +52,7 @@ class Environment:
         "include" tags, a loader must be configured.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
+    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     """
 
     # pylint: disable=redefined-builtin too-many-arguments
@@ -65,6 +66,7 @@ class Environment:
         tolerance: Mode = Mode.STRICT,
         loader: Optional[loaders.BaseLoader] = None,
         globals: Optional[Mapping[str, object]] = None,
+        undefined: Type[Undefined] = Undefined,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
@@ -73,6 +75,9 @@ class Environment:
         self.strip_tags = strip_tags
         self.loader = loader or loaders.DictLoader({})
         self.globals: Mapping[str, object] = globals or {}
+
+        #
+        self.undefined = undefined
 
         # Tag register.
         self.tags: Dict[str, Tag] = {}
@@ -109,17 +114,16 @@ class Environment:
     def add_filter(self, name: str, func: Callable[..., Any]) -> None:
         """Register a filter function with the environment.
 
-        Args:
-            name: The filter's name. Does not need to match the function name.
-                This is what you'll use to apply the filter to an expression in
-                a liquid template.
-            func: Any callable that accepts at least one argument, the result
-                of the expression the filter is applied to.
+        :param name: The filter's name. Does not need to match the function name. This
+            is what you'll use to apply the filter to an expression in a liquid
+            template.
+        :param func: Any callable that accepts at least one argument, the result of the
+            expression the filter is applied to.
 
-                If the filter needs access to the environment or render
-                context, you probably want to make `func` a class that inherits
-                from `liquid.Filter`, and override the `__call__` method. All
-                builtin filters are implemented in this way.
+            If the filter needs access to the environment or render context, you
+            probably want to make `func` a class that inherits from `liquid.Filter`, and
+            override the `__call__` method. All builtin filters are implemented in this
+            way.
         """
         self.filters[name] = func
 
@@ -153,14 +157,12 @@ class Environment:
         `name` and `path` are passed to the `Template` constructor and will be
         used to populate the template's `TemplateDrop`.
 
-        Args:
-            source: Liquid template source.
-            name: Name of the template.
-            path: Location of the template.
-            globals: A mapping of context variables made available every time
-                the template is rendered.
-        Returns:
-            A parsed template ready to be rendered.
+        :param source: Liquid template source.
+        :param name: Name of the template.
+        :param path: Location of the template.
+        :param globals: A mapping of context variables made available every time the
+            template is rendered.
+        :returns: A parsed template ready to be rendered.
         """
         parse_tree = self.parse(source)
         return self.template_class(
@@ -177,13 +179,11 @@ class Environment:
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
-        Args:
-            name: The template's name. The loader is responsible for
-                interpretting the name.
-            globals: A mapping of context variables made available every time
-                the resulting template is rendered.
-        Returns:
-            A parsed template ready to be rendered.
+        :param name: The template's name. The loader is responsible for interpretting
+            the name.
+        :param globals: A mapping of context variables made available every time the
+            resulting template is rendered.
+        :returns: A parsed template ready to be rendered.
         """
         template = self.cache.get(name)
 
@@ -256,6 +256,7 @@ def Template(
     strip_tags: bool = False,
     tolerance: Mode = Mode.STRICT,
     globals: Optional[Mapping[str, object]] = None,
+    undefined: Type[Undefined] = Undefined,
 ) -> BoundTemplate:
     """A :class:`BoundTemplate` factory.
 
@@ -276,6 +277,7 @@ def Template(
         "include" tags, a loader must be configured.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
+    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     """
     env = get_implicit_environment(
         tag_start_string,
@@ -284,6 +286,7 @@ def Template(
         statement_end_string,
         strip_tags,
         tolerance,
+        undefined,
     )
 
     return env.from_string(source, globals=globals)

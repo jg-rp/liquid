@@ -255,7 +255,7 @@ class MalformedTemplateTestCase(TestCase):
                 description="render next block after filter error",
                 template="before {{ nosuchthing | last }} after",
                 expect_exception=FilterArgumentError,
-                expect_msg="last: expected an array, found <class 'NoneType'>, on line 1",
+                expect_msg="last: expected an array, found <class 'liquid.context.Undefined'>, on line 1",
                 expect_render="before  after",
             ),
         ]

@@ -324,6 +324,11 @@ class RenderTestCases(unittest.TestCase):
                     template=r"{% echo today | date: '%d/%m/%Y' %}",
                     expect=datetime.date.today().strftime(r"%d/%m/%Y"),
                 ),
+                Case(
+                    description="index of undefined",
+                    template=r"{{ nosuchthing[0] }}",
+                    expect="",
+                ),
             ]
         )
 
@@ -958,6 +963,12 @@ class RenderTestCases(unittest.TestCase):
                     "linklists": {"main": {"links": ["1", "2"]}},
                     "section": {"settings": {"menu": "main"}},
                 },
+            ),
+            Case(
+                description="loop over undefined",
+                template=r"{% for tag in nosuchthing %}{{ tag }}{% endfor %}",
+                expect="",
+                globals={},
             ),
         ]
 

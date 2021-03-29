@@ -453,6 +453,24 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expression="blank != empty",
                 expect=True,
             ),
+            Case(
+                description="undefined equals nil",
+                context={},
+                expression="nosuchthing == nil",
+                expect=True,
+            ),
+            Case(
+                description="undefined equals null",
+                context={},
+                expression="nosuchthing == null",
+                expect=True,
+            ),
+            Case(
+                description="nil equals undefined",
+                context={},
+                expression="nil == nosuchthing",
+                expect=True,
+            ),
         ]
 
         self._test(test_cases, tokenize_boolean_expression, parse_boolean_expression)

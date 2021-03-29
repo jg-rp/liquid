@@ -1,11 +1,17 @@
 """Bad context test cases."""
 
 from unittest import TestCase
-from typing import NamedTuple, Type
 
+from typing import NamedTuple
+from typing import Type
+
+from liquid.context import builtin
 from liquid.environment import Environment
+
+from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import lookup_warning
+
 from liquid.mode import Mode
-from liquid.exceptions import LiquidTypeError, lookup_warning
 
 
 class Case(NamedTuple):
@@ -52,14 +58,8 @@ class BadContextTemplateTestCase(TestCase):
                     self.assertEqual(result, case.expect_render)
 
     def test_bad_context(self):
-        """Test that we gracefully handle render time errors due to incorrect context."""
+        """Test that we handle render time errors due to incorrect context."""
         test_cases = [
-            Case(
-                description="loop expression variable does not exist",
-                template="{% for tag in product.tags %}{tag}{% endfor %}",
-                expect_exception=LiquidTypeError,
-                expect_msg="expected array or hash at 'product.tags', found 'None', on line 1",
-            ),
             Case(
                 description="array less than hash",
                 template="{% if arr < hash %}foo{% endif %}",
@@ -71,3 +71,27 @@ class BadContextTemplateTestCase(TestCase):
         self._test(test_cases, mode=Mode.STRICT)
         self._test(test_cases, mode=Mode.WARN)
         self._test(test_cases, mode=Mode.LAX)
+
+
+class BuiltinDynamicScopeTestCase(TestCase):
+    """Built-in dynamic scope test case."""
+
+    def test_builtin_contains_now(self):
+        """Test that `now` is in the builtin scope."""
+        self.assertTrue("now" in builtin)
+
+    def test_builtin_contains_today(self):
+        """Test that `today` is in the builtin scope."""
+        self.assertTrue("today" in builtin)
+
+    def test_builtin_not_contains(self):
+        """Test that garbage is not in the builtin scope."""
+        self.assertFalse("foo" in builtin)
+
+    def test_builtin_length(self):
+        """Test that builtin has a length."""
+        self.assertEqual(len(builtin), 2)
+
+    def test_builtin_iter(self):
+        """Test that builtin has a length."""
+        self.assertEqual(list(builtin), ["now", "today"])
