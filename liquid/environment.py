@@ -50,9 +50,11 @@ class Environment:
         `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
     :param loader: A template loader. If you want to use the builtin "render" or
         "include" tags, a loader must be configured.
+    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
+    :param strict_filters: If `True`, the default, will raise an exception upon finding
+        an undefined filter. Otherwise undefined filters are silently ignored.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
-    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     """
 
     # pylint: disable=redefined-builtin too-many-arguments
@@ -65,8 +67,9 @@ class Environment:
         strip_tags: bool = False,
         tolerance: Mode = Mode.STRICT,
         loader: Optional[loaders.BaseLoader] = None,
-        globals: Optional[Mapping[str, object]] = None,
         undefined: Type[Undefined] = Undefined,
+        strict_filters: bool = True,
+        globals: Optional[Mapping[str, object]] = None,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
@@ -76,8 +79,12 @@ class Environment:
         self.loader = loader or loaders.DictLoader({})
         self.globals: Mapping[str, object] = globals or {}
 
-        #
+        # The undefined type. When an identifier can not be resolved, the returned value
+        # is ``Undefined`` or a subclass of ``Undefined``.
         self.undefined = undefined
+
+        # Indicates if an undefined filter should raise an exception or be ignored.
+        self.strict_filters = strict_filters
 
         # Tag register.
         self.tags: Dict[str, Tag] = {}
@@ -255,8 +262,9 @@ def Template(
     statement_end_string: str = r"}}",
     strip_tags: bool = False,
     tolerance: Mode = Mode.STRICT,
-    globals: Optional[Mapping[str, object]] = None,
     undefined: Type[Undefined] = Undefined,
+    strict_filters: bool = True,
+    globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
     """A :class:`BoundTemplate` factory.
 
@@ -275,9 +283,11 @@ def Template(
         `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
     :param loader: A template loader. If you want to use the builtin "render" or
         "include" tags, a loader must be configured.
+    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
+    :param strict_filters: If `True`, the default, will raise an exception upon finding
+        an undefined filter. Otherwise undefined filters are silently ignored.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
-    :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     """
     env = get_implicit_environment(
         tag_start_string,
@@ -287,6 +297,7 @@ def Template(
         strip_tags,
         tolerance,
         undefined,
+        strict_filters,
     )
 
     return env.from_string(source, globals=globals)

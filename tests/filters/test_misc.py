@@ -1,14 +1,24 @@
 """Test miscellaneous filter functions."""
 import datetime
 import unittest
+
 from inspect import isclass
-from typing import NamedTuple, Any, List, Dict
+
+from typing import NamedTuple
+from typing import Any
+from typing import List
+from typing import Dict
 
 from liquid.environment import Environment
+
+from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
+
 from liquid.expression import EMPTY
 
-from liquid.builtin.filters.misc import Size, Default, Date
+from liquid.builtin.filters.misc import Size
+from liquid.builtin.filters.misc import Default
+from liquid.builtin.filters.misc import Date
 
 
 class Case(NamedTuple):
@@ -22,16 +32,16 @@ class Case(NamedTuple):
 class MiscFilterTestCase(unittest.TestCase):
     """Test miscellaneous filter functions."""
 
+    def setUp(self) -> None:
+        self.env = Environment()
+
     def _test(self, filter_cls, test_cases):
         """Helper method for running lists of `Case`s"""
-        env = Environment()
-        func = filter_cls(env)
+        func = filter_cls(self.env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):
-                if isclass(case.expect) and issubclass(
-                    case.expect, FilterArgumentError
-                ):
+                if isclass(case.expect) and issubclass(case.expect, Error):
                     with self.assertRaises(case.expect):
                         func(case.val, *case.args, **case.kwargs)
                 else:
@@ -43,10 +53,26 @@ class MiscFilterTestCase(unittest.TestCase):
         """Test `size` filter function."""
         test_cases = [
             Case(
-                description="array", val=["a", "b", "c"], args=[], kwargs={}, expect=3
+                description="array",
+                val=["a", "b", "c"],
+                args=[],
+                kwargs={},
+                expect=3,
             ),
-            Case(description="string", val="abc", args=[], kwargs={}, expect=3),
-            Case(description="empty array", val=[], args=[], kwargs={}, expect=0),
+            Case(
+                description="string",
+                val="abc",
+                args=[],
+                kwargs={},
+                expect=3,
+            ),
+            Case(
+                description="empty array",
+                val=[],
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
             Case(
                 description="unexpected argument",
                 val=[1, 2, 3],
@@ -61,6 +87,13 @@ class MiscFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
         ]
 
         self._test(Size, test_cases)
@@ -68,8 +101,20 @@ class MiscFilterTestCase(unittest.TestCase):
     def test_default(self):
         """Test `default` filter function."""
         test_cases = [
-            Case(description="nil", val=None, args=["foo"], kwargs={}, expect="foo"),
-            Case(description="false", val=False, args=["foo"], kwargs={}, expect="foo"),
+            Case(
+                description="nil",
+                val=None,
+                args=["foo"],
+                kwargs={},
+                expect="foo",
+            ),
+            Case(
+                description="false",
+                val=False,
+                args=["foo"],
+                kwargs={},
+                expect="foo",
+            ),
             Case(
                 description="empty string",
                 val="",
@@ -154,6 +199,13 @@ class MiscFilterTestCase(unittest.TestCase):
                 kwargs={"allow_false": True},
                 expect=False,
             ),
+            Case(
+                description="undefined",
+                val=self.env.undefined("test"),
+                args=["bar"],
+                kwargs={},
+                expect="bar",
+            ),
         ]
 
         self._test(Default, test_cases)
@@ -193,6 +245,20 @@ class MiscFilterTestCase(unittest.TestCase):
                 description="missing argument",
                 val=None,
                 args=[],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[r"%b %d, %y"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined argument",
+                val="March 14, 2016",
+                args=[self.env.undefined("test")],
                 kwargs={},
                 expect=FilterArgumentError,
             ),

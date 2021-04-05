@@ -1,26 +1,33 @@
 """Test math filter functions."""
 import unittest
+
 from inspect import isclass
-from typing import NamedTuple, Any, List, Dict
+
+from typing import NamedTuple
+from typing import Any
+from typing import List
+from typing import Dict
 
 from liquid.environment import Environment
+
 from liquid.exceptions import FilterArgumentError
-from liquid.builtin.filters.math import (
-    Abs,
-    AtMost,
-    AtLeast,
-    Ceil,
-    DividedBy,
-    Floor,
-    Minus,
-    Plus,
-    Round,
-    Times,
-    Modulo,
-)
+
+from liquid.builtin.filters.math import Abs
+from liquid.builtin.filters.math import AtMost
+from liquid.builtin.filters.math import AtLeast
+from liquid.builtin.filters.math import Ceil
+from liquid.builtin.filters.math import DividedBy
+from liquid.builtin.filters.math import Floor
+from liquid.builtin.filters.math import Minus
+from liquid.builtin.filters.math import Plus
+from liquid.builtin.filters.math import Round
+from liquid.builtin.filters.math import Times
+from liquid.builtin.filters.math import Modulo
 
 
 class Case(NamedTuple):
+    """Table driven test case helper."""
+
     description: str
     val: Any
     args: List[Any]
@@ -31,10 +38,12 @@ class Case(NamedTuple):
 class MathFilterTestCase(unittest.TestCase):
     """Test math filter functions."""
 
+    def setUp(self) -> None:
+        self.env = Environment()
+
     def _test(self, filter_cls, test_cases):
         """Helper method for running lists of `Case`s"""
-        env = Environment()
-        func = filter_cls(env)
+        func = filter_cls(self.env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):
@@ -127,14 +136,21 @@ class MathFilterTestCase(unittest.TestCase):
                 val="hello",
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect=0,
             ),
         ]
 
@@ -207,6 +223,27 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[5],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined argument",
+                val=5,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="unacceptable left value",
+                val="abc",
+                args=[-2],
+                kwargs={},
+                expect=-2,
+            ),
         ]
 
         self._test(AtMost, test_cases)
@@ -278,6 +315,27 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[5],
+                kwargs={},
+                expect=5,
+            ),
+            Case(
+                description="undefined argument",
+                val=5,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=5,
+            ),
+            Case(
+                description="unacceptable left value",
+                val="abc",
+                args=[2],
+                kwargs={},
+                expect=2,
+            ),
         ]
 
         self._test(AtLeast, test_cases)
@@ -347,14 +405,21 @@ class MathFilterTestCase(unittest.TestCase):
                 val="hello",
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect=0,
             ),
         ]
 
@@ -425,14 +490,21 @@ class MathFilterTestCase(unittest.TestCase):
                 val="hello",
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="not a string, int or float",
                 val=object(),
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect=0,
             ),
         ]
 
@@ -482,7 +554,7 @@ class MathFilterTestCase(unittest.TestCase):
                 val="foo",
                 args=["2.0"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="arg string not a number",
@@ -502,6 +574,20 @@ class MathFilterTestCase(unittest.TestCase):
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined argument",
+                val=10,
+                args=[self.env.undefined("test")],
                 kwargs={},
                 expect=FilterArgumentError,
             ),
@@ -546,14 +632,14 @@ class MathFilterTestCase(unittest.TestCase):
                 val="foo",
                 args=["2.0"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=-2.0,
             ),
             Case(
                 description="arg string not a number",
                 val="10",
                 args=["foo"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=10,
             ),
             Case(
                 description="too many args",
@@ -567,7 +653,21 @@ class MathFilterTestCase(unittest.TestCase):
                 val=object(),
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=-1,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=-2,
+            ),
+            Case(
+                description="undefined argument",
+                val=10,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=10,
             ),
         ]
 
@@ -610,14 +710,14 @@ class MathFilterTestCase(unittest.TestCase):
                 val="foo",
                 args=["2.0"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=2.0,
             ),
             Case(
                 description="arg string not a number",
                 val="10",
                 args=["foo"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=10,
             ),
             Case(
                 description="too many args",
@@ -631,7 +731,21 @@ class MathFilterTestCase(unittest.TestCase):
                 val=object(),
                 args=[1],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=1,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=2,
+            ),
+            Case(
+                description="undefined argument",
+                val=10,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=10,
             ),
         ]
 
@@ -689,6 +803,20 @@ class MathFilterTestCase(unittest.TestCase):
                 args=[1, 2],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined argument",
+                val=5.666,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=6,
             ),
         ]
 
@@ -754,6 +882,20 @@ class MathFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined argument",
+                val=5,
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=0,
+            ),
         ]
 
         self._test(Times, test_cases)
@@ -795,7 +937,7 @@ class MathFilterTestCase(unittest.TestCase):
                 val="foo",
                 args=["2.0"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="arg string not a number",
@@ -815,6 +957,20 @@ class MathFilterTestCase(unittest.TestCase):
                 description="not a string, int or float",
                 val=object(),
                 args=[1],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[2],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="undefined argument",
+                val=5,
+                args=[self.env.undefined("test")],
                 kwargs={},
                 expect=FilterArgumentError,
             ),

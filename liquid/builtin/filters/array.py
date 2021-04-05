@@ -1,16 +1,21 @@
 """Filter functions that operate on arrays."""
 
 from collections import OrderedDict
-from collections import abc
+
 from operator import getitem
-from typing import List, Any
+
+from typing import List
+from typing import Any
 
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterValueError
+
 from liquid.filter import Filter
-from liquid.filter import (
-    expect_string,
-    array_of_hashable_required,
-)
+from liquid.filter import expect_string
+from liquid.filter import expect_array
+
+from liquid import Undefined
+from liquid import is_undefined
 
 # pylint: disable=arguments-differ, too-few-public-methods
 
@@ -19,6 +24,9 @@ MAX_CH = chr(0x10FFFF)
 
 
 class ArrayFilter(Filter):
+    """Base class for built-in array filter functions."""
+
+    __slots__ = ()
 
     name = "AbstractStringFilter"
     num_args = (0,)
@@ -30,28 +38,32 @@ class ArrayFilter(Filter):
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
 
-        if not isinstance(val, abc.Sequence):
-            raise FilterArgumentError(self.msg.format(self.name, type(val)))
+        # Do not allow array operations on strings or arbitrary iterables.
+        if not isinstance(val, (list, tuple, Undefined)):
+            raise FilterValueError(self.msg.format(self.name, type(val).__name__))
 
         try:
             return self.filter(val, *args)
         except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+            raise FilterArgumentError(
+                self.msg.format(self.name, type(val).__name__)
+            ) from err
 
     def filter(self, val, *args):
+        """The filter's implementation."""
         raise NotImplementedError(":(")
 
 
 class Join(ArrayFilter):
-    """Concatenate an array of strings"""
+    """Concatenate an array of strings."""
 
     __slots__ = ()
 
     name = "join"
-    num_args = (1,)
+    num_args = (0, 1)
 
-    def filter(self, iterable, separator):
-        return str(separator).join(iterable)
+    def filter(self, iterable, separator=" "):
+        return str(separator).join(str(item) for item in iterable)
 
 
 class First(ArrayFilter):
@@ -81,7 +93,7 @@ class Last(ArrayFilter):
 
 
 class Concat(ArrayFilter):
-    """Return two arrays joined togather."""
+    """Return two arrays joined together."""
 
     __slots__ = ()
 
@@ -89,6 +101,9 @@ class Concat(ArrayFilter):
     num_args = (1,)
 
     def filter(self, array, second_array):
+        expect_array(self.name, second_array)
+        if is_undefined(array):
+            return second_array
         return array + second_array
 
 
@@ -100,7 +115,7 @@ def _getitem(sequence, key: str, default: Any = None) -> Any:
     """
     try:
         return getitem(sequence, key)
-    except (KeyError, IndexError, TypeError):
+    except (KeyError, IndexError):
         return default
 
 
@@ -114,7 +129,10 @@ class Map(ArrayFilter):
     num_args = (1,)
 
     def filter(self, sequence, key):
-        return [_getitem(itm, str(key)) for itm in sequence]
+        try:
+            return [_getitem(itm, str(key)) for itm in sequence]
+        except TypeError as err:
+            raise FilterValueError(f"{self.name}: can't map sequence") from err
 
 
 class Reverse(ArrayFilter):
@@ -145,7 +163,10 @@ class Sort(ArrayFilter):
             expect_string(self.name, key)
             return list(sorted(sequence, key=lambda x: _getitem(x, key, MAX_CH)))
 
-        return list(sorted(sequence))
+        try:
+            return list(sorted(sequence))
+        except TypeError as err:
+            raise FilterValueError(f"{self.name}: can't sort sequence") from err
 
 
 def _lower(val, default="") -> str:
@@ -184,23 +205,20 @@ class Where(ArrayFilter):
     num_args = (1, 2)
 
     def filter(self, sequence, attr, value=None):
-        expect_string(self.name, attr)
-
         if value:
-            expect_string(self.name, value)
             return [itm for itm in sequence if _getitem(itm, attr) == value]
 
         return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
 
 
 class Uniq(ArrayFilter):
-    """Removes any duplicate elements in an array. Input array order is not preserved."""
+    """Removes any duplicate elements in an array. Input array order is not
+    preserved."""
 
     __slots__ = ()
 
     name = "uniq"
 
-    @array_of_hashable_required
     def filter(self, iterable):
         unique = OrderedDict.fromkeys(iterable)
         return list(unique.keys())

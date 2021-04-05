@@ -19,7 +19,11 @@ from typing import Generic
 from typing import TypeVar
 
 from liquid.context import Context
-from liquid.exceptions import LiquidTypeError, Error
+
+from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import Error
+from liquid.exceptions import NoSuchFilterFunc
+from liquid.exceptions import FilterValueError
 
 # pylint: disable=missing-class-docstring too-few-public-methods
 
@@ -397,19 +401,26 @@ class FilteredExpression(Expression):
         result = self.expression.evaluate(context)
 
         for fltr in self.filters:
-            func = context.filter(fltr.name)
+            try:
+                func = context.filter(fltr.name)
+            except NoSuchFilterFunc:
+                if context.env.strict_filters:
+                    raise
+                continue
+
+            # Any exception causes us to abort the filter chain and discard the result.
+            # Nothing will be rendered.
             try:
                 args = fltr.evaluate_args(context)
                 kwargs = fltr.evaluate_kwargs(context)
                 result = func(result, *args, **kwargs)
-            except Exception as err:
-                # Any exception causes us to abort the filter chain and discard the
-                # result. Nothing will be rendered.
-                if not issubclass(type(err), Error):
-                    raise Error(
-                        f"filter '{fltr.name}': unexpected error: {err}"
-                    ) from err
+            except FilterValueError:
+                # Pass over filtered expressions who's left value is not allowed.
+                continue
+            except Error:
                 raise
+            except Exception as err:
+                raise Error(f"filter '{fltr.name}': unexpected error: {err}") from err
 
         return result
 
@@ -610,6 +621,8 @@ def compare(left: Any, operator: str, right: Any) -> bool:
     if operator == "or":
         return is_truthy(left) or is_truthy(right)
 
+    # NOTE: If both left and right are StrictUndefined, right will raise an exception
+    # before left.
     if isinstance(right, (Empty, Blank)):
         left, right = right, left
 

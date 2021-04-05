@@ -227,6 +227,16 @@ class RenderTestCases(unittest.TestCase):
                     template=r"{{ false | default: 'bar', allow_false: false }}",
                     expect="bar",
                 ),
+                Case(
+                    description="unexpected `join` filter left value passes through",
+                    template=r"{{ 12 | join: '#' }}",
+                    expect="12",
+                ),
+                Case(
+                    description="join a string",
+                    template=r"{{ 'a,b' | join: '#' }}",
+                    expect="a,b",
+                ),
             ]
         )
 

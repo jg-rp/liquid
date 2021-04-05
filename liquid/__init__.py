@@ -9,6 +9,7 @@ from .loaders import FileSystemLoader
 from .context import Context
 from .context import Undefined
 from .context import StrictUndefined
+from .context import is_undefined
 
 from .environment import Environment
 from .environment import Template

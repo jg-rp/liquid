@@ -56,6 +56,10 @@ class FilterArgumentError(Error):
     """Exception raised when a filters arguments are invalid."""
 
 
+class FilterValueError(Error):
+    """Exception raised when a filters value is invalid."""
+
+
 class TemplateNotFound(Error):
     """Excpetions raised when a template could not be found."""
 

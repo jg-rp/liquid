@@ -70,6 +70,11 @@ def get_item(
     return itm
 
 
+def is_undefined(obj):
+    """Return `True` if `obj` is undefined. `False` otherwise."""
+    return isinstance(obj, Undefined)
+
+
 class ReadOnlyChainMap(collections.abc.Mapping):
     """Combine multiple mappings for sequential lookup.
 
@@ -164,9 +169,23 @@ class Undefined(collections.abc.Mapping):
     def __repr__(self):
         return f"Undefined({self.name})"
 
+    def __int__(self):
+        return 0
+
+    def __hash__(self) -> int:
+        return hash(self.name)
+
+    def __reversed__(self):
+        return []
+
 
 class StrictUndefined(Undefined):
     """An undefined that raises an exception for everything other than ``repr``."""
+
+    def __getattribute__(self, name: str) -> Any:
+        if name in ("__repr__", "name"):
+            return super().__getattribute__(name)
+        raise UndefinedError(f"'{self.name}' is undefined")
 
     def __contains__(self, item: str) -> bool:
         raise UndefinedError(f"'{self.name}' is undefined")
@@ -188,6 +207,18 @@ class StrictUndefined(Undefined):
 
     def __repr__(self):
         return f"StrictUndefined({self.name})"
+
+    def __bool__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __int__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __hash__(self) -> int:
+        raise UndefinedError(f"'{self.name}' is undefined")
+
+    def __reversed__(self):
+        raise UndefinedError(f"'{self.name}' is undefined")
 
 
 # pylint: disable=too-many-instance-attributes redefined-builtin
@@ -279,7 +310,7 @@ class Context:
         try:
             filter_func = self.env.filters[name]
         except KeyError as err:
-            raise NoSuchFilterFunc(name) from err
+            raise NoSuchFilterFunc(f"unknown filter '{name}'") from err
 
         if getattr(filter_func, "with_context", False):
             return functools.partial(filter_func, context=self)

@@ -1,35 +1,38 @@
 import unittest
+
 from inspect import isclass
-from typing import NamedTuple, Any, List, Dict
+
+from typing import NamedTuple
+from typing import Any
+from typing import List
+from typing import Dict
 
 from liquid.environment import Environment
 from liquid.exceptions import FilterArgumentError
 
-from liquid.builtin.filters.string import (
-    Capitalize,
-    Append,
-    Downcase,
-    Escape,
-    EscapeOnce,
-    LStrip,
-    NewlineToBR,
-    Prepend,
-    Remove,
-    RemoveFirst,
-    Replace,
-    ReplaceFirst,
-    Slice,
-    Split,
-    Upcase,
-    Strip,
-    RStrip,
-    StripHTML,
-    StripNewlines,
-    Truncate,
-    TruncateWords,
-    URLEncode,
-    URLDecode,
-)
+from liquid.builtin.filters.string import Capitalize
+from liquid.builtin.filters.string import Append
+from liquid.builtin.filters.string import Downcase
+from liquid.builtin.filters.string import Escape
+from liquid.builtin.filters.string import EscapeOnce
+from liquid.builtin.filters.string import LStrip
+from liquid.builtin.filters.string import NewlineToBR
+from liquid.builtin.filters.string import Prepend
+from liquid.builtin.filters.string import Remove
+from liquid.builtin.filters.string import RemoveFirst
+from liquid.builtin.filters.string import Replace
+from liquid.builtin.filters.string import ReplaceFirst
+from liquid.builtin.filters.string import Slice
+from liquid.builtin.filters.string import Split
+from liquid.builtin.filters.string import Upcase
+from liquid.builtin.filters.string import Strip
+from liquid.builtin.filters.string import RStrip
+from liquid.builtin.filters.string import StripHTML
+from liquid.builtin.filters.string import StripNewlines
+from liquid.builtin.filters.string import Truncate
+from liquid.builtin.filters.string import TruncateWords
+from liquid.builtin.filters.string import URLEncode
+from liquid.builtin.filters.string import URLDecode
 
 
 class Case(NamedTuple):
@@ -43,10 +46,12 @@ class Case(NamedTuple):
 class StringFilterTestCase(unittest.TestCase):
     """Test string filter functions."""
 
+    def setUp(self) -> None:
+        self.env = Environment()
+
     def _test(self, filter_cls, test_cases):
         """Helper method for running lists of `Case`s"""
-        env = Environment()
-        func = filter_cls(env)
+        func = filter_cls(self.env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):
@@ -84,6 +89,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[2],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -128,6 +140,20 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["hi"],
+                kwargs={},
+                expect="hi",
+            ),
+            Case(
+                description="undefined argument",
+                val="hi",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect="hi",
+            ),
         ]
 
         self._test(Append, test_cases)
@@ -157,6 +183,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(Downcase, test_cases)
@@ -185,6 +218,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -221,6 +261,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -265,6 +312,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(LStrip, test_cases)
@@ -307,6 +361,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[],
                 kwargs={},
                 expect="a<br />\nb<br />\nc",
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -351,6 +412,20 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["hi"],
+                kwargs={},
+                expect="hi",
+            ),
+            Case(
+                description="undefined argument",
+                val="hi",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect="hi",
+            ),
         ]
 
         self._test(Prepend, test_cases)
@@ -394,6 +469,20 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["rain"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined argument",
+                val="I strained to see the train through the rain",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect="I strained to see the train through the rain",
+            ),
         ]
 
         self._test(Remove, test_cases)
@@ -436,6 +525,20 @@ class StringFilterTestCase(unittest.TestCase):
                 args=["how", "are", "you"],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["rain"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined argument",
+                val="I strained to see the train through the rain",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect="I strained to see the train through the rain",
             ),
         ]
 
@@ -487,6 +590,27 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["my", "your"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="Take my protein pills and put my helmet on",
+                args=[self.env.undefined("test"), "your"],
+                kwargs={},
+                expect="your",
+            ),
+            Case(
+                description="undefined second argument",
+                val="Take my protein pills and put my helmet on",
+                args=["my", self.env.undefined("test")],
+                kwargs={},
+                expect="Take  protein pills and put  helmet on",
+            ),
         ]
 
         self._test(Replace, test_cases)
@@ -536,6 +660,27 @@ class StringFilterTestCase(unittest.TestCase):
                 args=["how", "are", "you"],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["my", "your"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="Take my protein pills and put my helmet on",
+                args=[self.env.undefined("test"), "your"],
+                kwargs={},
+                expect="your",
+            ),
+            Case(
+                description="undefined second argument",
+                val="Take my protein pills and put my helmet on",
+                args=["my", self.env.undefined("test")],
+                kwargs={},
+                expect="Take  protein pills and put my helmet on",
             ),
         ]
 
@@ -615,6 +760,27 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={"x": "y"},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[1, 3],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="hello",
+                args=[self.env.undefined("test"), 3],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined second argument",
+                val="hello",
+                args=[1, self.env.undefined("test")],
+                kwargs={},
+                expect="e",
+            ),
         ]
 
         self._test(Slice, test_cases)
@@ -660,6 +826,43 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[" "],
+                kwargs={},
+                expect=[""],
+            ),
+            Case(
+                description="undefined argument",
+                val="Hi, how are you today?",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=[
+                    "H",
+                    "i",
+                    ",",
+                    " ",
+                    "h",
+                    "o",
+                    "w",
+                    " ",
+                    "a",
+                    "r",
+                    "e",
+                    " ",
+                    "y",
+                    "o",
+                    "u",
+                    " ",
+                    "t",
+                    "o",
+                    "d",
+                    "a",
+                    "y",
+                    "?",
+                ],
+            ),
         ]
 
         self._test(Split, test_cases)
@@ -688,6 +891,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -732,6 +942,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(Strip, test_cases)
@@ -775,6 +992,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(RStrip, test_cases)
@@ -803,6 +1027,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 
@@ -847,11 +1078,18 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="abc",
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(StripNewlines, test_cases)
 
-    def test_truncate_newlines(self):
+    def test_truncate(self):
         """Test truncate filter function."""
 
         test_cases = [
@@ -888,7 +1126,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[10],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="too many arguments",
@@ -897,11 +1135,32 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[5],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="Ground control to Major Tom.",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined second argument",
+                val="Ground control to Major Tom.",
+                args=[20, self.env.undefined("test")],
+                kwargs={},
+                expect="Ground control to Ma",
+            ),
         ]
 
         self._test(Truncate, test_cases)
 
-    def test_truncatewords_newlines(self):
+    def test_truncatewords(self):
         """Test truncatewords filter function."""
 
         test_cases = [
@@ -938,7 +1197,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[10],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="too many arguments",
@@ -982,6 +1241,27 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="one...",
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[5],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="one two three four",
+                args=[self.env.undefined("test")],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined second argument",
+                val="one two three four",
+                args=[2, self.env.undefined("test")],
+                kwargs={},
+                expect="one two",
+            ),
         ]
 
         self._test(TruncateWords, test_cases)
@@ -1011,6 +1291,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterArgumentError,
             ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
         ]
 
         self._test(URLEncode, test_cases)
@@ -1039,6 +1326,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[5],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
             ),
         ]
 

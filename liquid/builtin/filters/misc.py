@@ -5,6 +5,7 @@ import functools
 
 from dateutil import parser
 
+from liquid import is_undefined
 from liquid.filter import Filter
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
@@ -21,10 +22,13 @@ class AbstractFilter(Filter):
             raise FilterArgumentError(
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
+
         try:
             return self.filter(val, *args, **kwargs)
         except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+            raise FilterArgumentError(
+                self.msg.format(self.name, type(val).__name__)
+            ) from err
 
     def filter(self, val, *args, **kwargs):
         raise NotImplementedError(":(")
@@ -54,7 +58,7 @@ class Default(AbstractFilter):
         if allow_false is True and obj is False:
             return obj
 
-        if obj in (None, False, EMPTY):
+        if obj in (None, False, EMPTY) or is_undefined(obj):
             return default
 
         return obj
@@ -70,6 +74,9 @@ class Date(AbstractFilter):
 
     @functools.lru_cache(maxsize=10)
     def filter(self, dt, fmt):
+        if is_undefined(dt):
+            return ""
+
         if isinstance(dt, str):
             if dt == "now":
                 dt = datetime.datetime.now()

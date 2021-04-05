@@ -1,21 +1,24 @@
 """Malformed template test cases."""
 
 from unittest import TestCase
-from typing import NamedTuple, Type
+
+from typing import NamedTuple
+from typing import Type
 
 from liquid.environment import Environment
 from liquid.mode import Mode
-from liquid.exceptions import (
-    LiquidSyntaxError,
-    FilterArgumentError,
-    LiquidTypeError,
-    NoSuchFilterFunc,
-    lookup_warning,
-    Error,
-    TemplateNotFound,
-    DisabledTagError,
-    ContextDepthError,
-)
+
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterValueError
+from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import NoSuchFilterFunc
+from liquid.exceptions import lookup_warning
+from liquid.exceptions import Error
+from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import DisabledTagError
+from liquid.exceptions import ContextDepthError
+
 from liquid.loaders import DictLoader
 
 
@@ -44,7 +47,7 @@ class MalformedTemplateTestCase(TestCase):
         env.mode = mode
 
         for case in test_cases:
-            with self.subTest(msg=case.description):
+            with self.subTest(msg=case.description, mode=mode):
                 if mode == Mode.STRICT:
                     with self.assertRaises(case.expect_exception) as raised:
                         template = env.from_string(
@@ -185,18 +188,12 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg='invalid assignment expression "x 5", on line 1',
             ),
-            Case(
-                description="wrong data type for filter",
-                template="{{ 5 | last }}",
-                expect_exception=FilterArgumentError,
-                expect_msg="last: expected an array, found <class 'int'>, on line 1",
-            ),
-            Case(
-                description="no such filter",
-                template="{{ 'hello' | upper }}",
-                expect_exception=NoSuchFilterFunc,
-                expect_msg="upper, on line 1",
-            ),
+            # Case(
+            #     description="wrong data type for filter",
+            #     template="{{ 5 | last }}",
+            #     expect_exception=FilterArgumentError,
+            #     expect_msg="last: expected an array, found <class 'int'>, on line 1",
+            # ),
             Case(
                 description="invalid subscript identifier",
                 template="{{ foo[1.2] }}",
@@ -251,13 +248,6 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg="unexpected '~', on line 1",
             ),
-            Case(
-                description="render next block after filter error",
-                template="before {{ nosuchthing | last }} after",
-                expect_exception=FilterArgumentError,
-                expect_msg="last: expected an array, found <class 'liquid.context.Undefined'>, on line 1",
-                expect_render="before  after",
-            ),
         ]
 
         self._test(test_cases, mode=Mode.STRICT)
@@ -273,6 +263,12 @@ class MalformedTemplateTestCase(TestCase):
                 template=r"text {{method} oh nos!",
                 expect_exception=LiquidSyntaxError,
                 expect_msg="expected '}}', found 'eof', on line 1",
+            ),
+            Case(
+                description="single bracket close from tag sequence",
+                template=r"text {%method} oh nos!",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="expected '%}', found 'eof', on line 1",
             ),
         ]
 

@@ -29,21 +29,33 @@ class MathFilter(Filter):
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
 
-        num = expect_number(self.name, val)
+        num = self.expect_number(val, default=0)
 
         try:
             return self.filter(num, *args)
         except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+            raise FilterArgumentError(
+                self.msg.format(self.name, type(val).__name__)
+            ) from err
 
     def filter(self, val, *args):
         raise NotImplementedError(":(")
 
-    def expect_integer(self, val):
-        return expect_integer(self.name, val)
+    def expect_integer(self, val, default=None):
+        try:
+            return expect_integer(self.name, val)
+        except FilterArgumentError:
+            if default is not None:
+                return default
+            raise
 
-    def expect_number(self, val):
-        return expect_number(self.name, val)
+    def expect_number(self, val, default=None):
+        try:
+            return expect_number(self.name, val)
+        except FilterArgumentError:
+            if default is not None:
+                return default
+            raise
 
 
 class Abs(MathFilter):
@@ -72,7 +84,7 @@ class AtMost(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
         return min(num, other)
 
 
@@ -88,7 +100,7 @@ class AtLeast(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
         return max(num, other)
 
 
@@ -115,11 +127,14 @@ class DividedBy(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
 
-        if isinstance(other, float):
-            return num / other
-        return num // other
+        try:
+            if isinstance(other, float):
+                return num / other
+            return num // other
+        except ZeroDivisionError as err:
+            raise FilterArgumentError(f"{self.name}: can't divide by {other}") from err
 
 
 class Floor(MathFilter):
@@ -145,7 +160,7 @@ class Minus(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
 
         if isinstance(num, float) and isinstance(other, float):
             return float(D(str(num)) - D(str(other)))
@@ -161,7 +176,7 @@ class Plus(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
 
         if isinstance(num, float) and isinstance(other, float):
             return float(D(str(num)) + D(str(other)))
@@ -178,7 +193,7 @@ class Round(MathFilter):
 
     def filter(self, val, ndigits=None):
         if ndigits:
-            ndigits = self.expect_integer(ndigits)
+            ndigits = self.expect_integer(ndigits, default=0)
             return round(val, ndigits)
         return round(val)
 
@@ -192,7 +207,7 @@ class Times(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, default=0)
 
         if isinstance(num, float) and isinstance(other, float):
             return float(D(str(num)) * D(str(other)))
@@ -208,8 +223,11 @@ class Modulo(MathFilter):
     num_args = (1,)
 
     def filter(self, num, other):
-        other = self.expect_number(other)
+        other = self.expect_number(other, 0)
 
-        if isinstance(num, float) and isinstance(other, float):
-            return float(D(str(num)) % D(str(other)))
-        return num % other
+        try:
+            if isinstance(num, float) and isinstance(other, float):
+                return float(D(str(num)) % D(str(other)))
+            return num % other
+        except ZeroDivisionError as err:
+            raise FilterArgumentError(f"{self.name}: can't divide by {other}") from err

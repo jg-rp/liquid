@@ -429,6 +429,11 @@ class LiquidLexerTestCase(TestCase):
                 [Token(1, TOKEN_IDENTIFIER, "collection")],
             ),
             Case(
+                "lone identifier with a hyphen",
+                "main-collection",
+                [Token(1, TOKEN_IDENTIFIER, "main-collection")],
+            ),
+            Case(
                 "chained identifier",
                 "collection.products",
                 [

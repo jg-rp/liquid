@@ -147,7 +147,6 @@ mode, any operation on an undefined variable will raise an ``UndefinedError``.
         undefined=StrictUndefined,
     )
 
-
 Related Projects
 ----------------
 

@@ -389,7 +389,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
                 )
             if value.startswith(r"{%"):
                 raise LiquidSyntaxError(
-                    "expected '}}', found 'eof'", linenum=line_count
+                    "expected '%}', found 'eof'", linenum=line_count
                 )
 
         yield Token(line_num, kind, value)

@@ -4,13 +4,26 @@ Python Liquid Change Log
 Version 0.7.2
 -------------
 
-- Undefined variables are now represented by the ``Undefined`` type or a subclass of 
-  ``Undefined``. ``Undefined`` behaves like ``nil``, but can also be iterated and
+- Undefined variables are now represented by the ``Undefined`` type, or a subclass of 
+  ``Undefined``. ``Undefined`` behaves like ``nil``, but can also be iterated over and
   indexed without error.
 - Attempting to loop over an undefined variable no longer raises a ``LiquidTypeError``.
 - Optionally pass ``liquid.StrictUndefined`` as the ``undefined`` argument to
   ``Template()`` or ``Environment()`` to render in `strict variables` mode. All
   operations on an instance of ``StrictUndefined`` raise an ``UndefinedError``.
+- Filters can now raise ``FilterValueError`` in addition to ``FilterArgumentError``.
+  Where a ``FilterValueError`` refers to an issue with the left value a filter is
+  applied to.
+- Applying a built-in filter to an undefined variable no longer raises a
+  ``FilterArgumentError`` in most cases.
+- Added the ``strict_filters`` argument to the ``Environment`` and ``Template``
+  constructors. When ``True``, the default, undefined filters raise a
+  ``NoSuchFilterFunc`` exception at render time. When ``False``, undefined filters are
+  silently ignored.
+- The ``join`` filter now forces items in its left value to strings before joining them.
+- The ``join`` filter's argument is now optional, defaulting to a string containing a 
+  single space.
+
 
 Version 0.7.0
 -------------

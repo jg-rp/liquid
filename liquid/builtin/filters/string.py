@@ -4,15 +4,19 @@ import html
 import re
 import urllib.parse
 
+from liquid import is_undefined
+
 from liquid.filter import Filter
 from liquid.filter import one_maybe_two_args
 from liquid.filter import expect_integer
 from liquid.filter import expect_string
-from liquid.filter import string_required
 
 from liquid.exceptions import FilterArgumentError
 from liquid.utils.html import strip_tags
-from liquid.utils.text import truncate_chars, truncate_words
+
+from liquid.utils.text import truncate_chars
+from liquid.utils.text import truncate_words
+
 
 # pylint: disable=arguments-differ too-few-public-methods
 
@@ -30,10 +34,13 @@ class StringFilter(Filter):
             raise FilterArgumentError(
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
+
         try:
             return self.filter(str(val), *args)
         except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(self.msg.format(self.name, type(val))) from err
+            raise FilterArgumentError(
+                self.msg.format(self.name, type(val).__name__)
+            ) from err
 
     def filter(self, val, *args):
         raise NotImplementedError(":(")
@@ -165,6 +172,8 @@ class Replace(StringFilter):
     num_args = 2
 
     def filter(self, val, seq, sub):
+        if is_undefined(seq):
+            return str(sub)
         return val.replace(str(seq), str(sub))
 
 
@@ -177,6 +186,8 @@ class ReplaceFirst(StringFilter):
     num_args = 2
 
     def filter(self, val, seq, sub):
+        if is_undefined(seq):
+            return str(sub)
         return val.replace(str(seq), str(sub), 1)
 
 
@@ -198,13 +209,19 @@ class Slice(Filter):
 
     name = "slice"
 
-    @string_required
     def __call__(self, val, *args, **kwargs):
+        if is_undefined(val):
+            return ""
+
+        val = str(val)
         start, length = one_maybe_two_args(self.name, args, kwargs)
         expect_integer(self.name, start)
 
         if length is not None:
-            expect_integer(self.name, length)
+            if is_undefined(length):
+                length = 1
+            else:
+                expect_integer(self.name, length)
         else:
             length = 1
 
@@ -224,7 +241,10 @@ class Split(StringFilter):
     num_args = 1
 
     def filter(self, val, seq):
-        return val.split(str(seq))
+        seq = str(seq)
+        if not seq:
+            return [ch for ch in val]
+        return val.split(seq)
 
 
 class Strip(StringFilter):
@@ -279,13 +299,19 @@ class Truncate(Filter):
 
     name = "truncate"
 
-    @string_required
     def __call__(self, val, *args, **kwargs):
+        if is_undefined(val):
+            return ""
+
+        val = str(val)
         num, end = one_maybe_two_args(self.name, args, kwargs)
         expect_integer(self.name, num)
 
         if end is not None:
-            expect_string(self.name, end)
+            if is_undefined(end):
+                end = ""
+            else:
+                expect_string(self.name, end)
         else:
             end = "..."
 
@@ -299,13 +325,19 @@ class TruncateWords(Filter):
 
     name = "truncatewords"
 
-    @string_required
     def __call__(self, val, *args, **kwargs):
+        if is_undefined(val):
+            return ""
+
+        val = str(val)
         num, end = one_maybe_two_args(self.name, args, kwargs)
         expect_integer(self.name, num)
 
         if end is not None:
-            end = str(end)
+            if is_undefined(end):
+                end = ""
+            else:
+                end = str(end)
         else:
             end = "..."
 

@@ -5,6 +5,7 @@ from liquid import Environment
 from liquid import StrictUndefined
 
 from liquid.exceptions import UndefinedError
+from liquid.exceptions import NoSuchFilterFunc
 
 
 class Case(NamedTuple):
@@ -66,6 +67,26 @@ class TestUndefined(TestCase):
                 template=r"{{ nosuchthing.size }}",
                 expect="0",
             ),
+            Case(
+                description="filtered undefined",
+                template=r"hello {{ nosuchthing | last }} there",
+                expect="hello  there",
+            ),
+            Case(
+                description="math filter undefined",
+                template=r"hello {{ nosuchthing | abs }} there",
+                expect="hello 0 there",
+            ),
+            Case(
+                description="undefined filter argument",
+                template=r"hello {{ '1,2,3' | split: nosuchthing }} there",
+                expect="hello 1,2,3 there",
+            ),
+            Case(
+                description="filter undefined through date",
+                template=r"hello {{ nosuchthing | date: '%b %d, %y' }} there",
+                expect="hello  there",
+            ),
         ]
 
         env = Environment()
@@ -107,7 +128,7 @@ class TestUndefined(TestCase):
             Case(
                 description="undefined equals undefined",
                 template=r"{% if nosuchthing == noway %}hello{% endif %}",
-                expect="'nosuchthing' is undefined, on line 1",
+                expect="'noway' is undefined, on line 1",
             ),
             Case(
                 description="undefined contains string",
@@ -124,6 +145,21 @@ class TestUndefined(TestCase):
                 template=r"{{ nosuchthing.size }}",
                 expect="'nosuchthing' is undefined, on line 1",
             ),
+            Case(
+                description="filtered undefined",
+                template=r"hello {{ nosuchthing | last }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="undefined filter argument",
+                template=r"hello {{ '1,2,3' | split: nosuchthing }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="math filter undefined",
+                template=r"hello {{ nosuchthing | abs }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
         ]
 
         env = Environment(undefined=StrictUndefined)
@@ -133,6 +169,65 @@ class TestUndefined(TestCase):
                 template = env.from_string(case.template)
 
                 with self.assertRaises(UndefinedError) as raised:
+                    template.render()
+
+                self.assertEqual(case.expect, str(raised.exception))
+
+    def test_lax_filter(self):
+        """Test that undefined filters can be silently ignored."""
+        tests = [
+            Case(
+                description="undefined filter",
+                template=r"{{ 'hello' | nosuchthing }}",
+                expect="hello",
+            ),
+            Case(
+                description="undefined filter with argument",
+                template=r"{{ 'hello' | nosuchthing: 'foo' }}",
+                expect="hello",
+            ),
+            Case(
+                description="undefined filter with more filters",
+                template=r"{{ 'hello' | nosuchthing | upcase }}",
+                expect="HELLO",
+            ),
+        ]
+
+        env = Environment(strict_filters=False)
+
+        for case in tests:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+                result = template.render()
+                self.assertEqual(case.expect, result)
+
+    def test_strict_filters(self):
+        """Test that undefined filters raise an exception in strict mode."""
+        tests = [
+            Case(
+                description="undefined filter",
+                template=r"{{ 'hello' | nosuchthing }}",
+                expect="unknown filter 'nosuchthing', on line 1",
+            ),
+            Case(
+                description="undefined filter with argument",
+                template=r"{{ 'hello' | nosuchthing: 'foo' }}",
+                expect="unknown filter 'nosuchthing', on line 1",
+            ),
+            Case(
+                description="undefined filter with more filters",
+                template=r"{{ 'hello' | nosuchthing | upcase }}",
+                expect="unknown filter 'nosuchthing', on line 1",
+            ),
+        ]
+
+        env = Environment(strict_filters=True)
+
+        for case in tests:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+
+                with self.assertRaises(NoSuchFilterFunc) as raised:
                     template.render()
 
                 self.assertEqual(case.expect, str(raised.exception))

@@ -54,7 +54,7 @@ def expect_number(name: str, val: object):
             ) from err
     else:
         raise FilterArgumentError(
-            f"expected an int, float or string, found {type(val)}"
+            f"expected an int, float or string, found {type(val).__name__}"
         )
     return num
 
@@ -72,7 +72,9 @@ def expect_integer(name: str, val: object):
                 f"{name}: could not cast string '{val}' to an integer"
             )
     else:
-        raise FilterArgumentError(f"expected an int or string, found {type(val)}")
+        raise FilterArgumentError(
+            f"expected an int or string, found {type(val).__name__}"
+        )
     return num
 
 
