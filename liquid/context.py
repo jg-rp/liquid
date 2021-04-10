@@ -145,8 +145,12 @@ builtin = BuiltIn()
 class Undefined(collections.abc.Mapping):
     """The default undefined type."""
 
-    def __init__(self, name: str):
+    __slots__ = ("name", "obj", "hint")
+
+    def __init__(self, name: str, obj: object = _undefined, hint=None):
         self.name = name
+        self.obj = obj
+        self.hint = hint
 
     def __contains__(self, item: str) -> bool:
         return False
@@ -166,7 +170,7 @@ class Undefined(collections.abc.Mapping):
     def __str__(self):
         return ""
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f"Undefined({self.name})"
 
     def __int__(self):
@@ -179,11 +183,29 @@ class Undefined(collections.abc.Mapping):
         return []
 
 
+class DebugUndefined(Undefined):
+    """An undefined that returns debug information when rendered."""
+
+    __slots__ = ()
+
+    def __str__(self):
+        if self.hint:
+            return f"undefined: {self.hint}"
+        if self.obj is not _undefined:
+            return f"{type(self.obj).__name__} has no attribute '{self.name}'"
+        return f"'{self.name}' is undefined"
+
+    def __repr__(self):  # pragma: no cover
+        return f"Undefined({self.name})"
+
+
 class StrictUndefined(Undefined):
     """An undefined that raises an exception for everything other than ``repr``."""
 
+    __slots__ = ()
+
     def __getattribute__(self, name: str) -> Any:
-        if name in ("__repr__", "name"):
+        if name in ("__repr__", "name", "obj", "hint"):
             return super().__getattribute__(name)
         raise UndefinedError(f"'{self.name}' is undefined")
 

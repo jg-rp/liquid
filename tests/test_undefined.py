@@ -2,6 +2,7 @@ from unittest import TestCase
 from typing import NamedTuple
 
 from liquid import Environment
+from liquid import DebugUndefined
 from liquid import StrictUndefined
 
 from liquid.exceptions import UndefinedError
@@ -172,6 +173,29 @@ class TestUndefined(TestCase):
                     template.render()
 
                 self.assertEqual(case.expect, str(raised.exception))
+
+    def test_debug_undefined(self):
+        """Test that the debugging undefined type prints debugging information."""
+        env = Environment(undefined=DebugUndefined)
+        template = env.from_string(r"{{ nosuchthing }}")
+        result = template.render()
+        self.assertEqual(result, "'nosuchthing' is undefined")
+
+    def test_debug_undefined_hint(self):
+        """Test that the debugging undefined type prints debugging hints."""
+        env = Environment(undefined=DebugUndefined)
+        undef = DebugUndefined(name="nosuchthing", hint="can't resolve identifier")
+        template = env.from_string(r"{{ undef }}")
+        result = template.render(undef=undef)
+        self.assertEqual(result, "undefined: can't resolve identifier")
+
+    def test_debug_undefined_object(self):
+        """Test that the debugging undefined type prints related object information."""
+        env = Environment(undefined=DebugUndefined)
+        undef = DebugUndefined(name="nosuchthing", obj="foo")
+        template = env.from_string(r"{{ nosuchthing }}")
+        result = template.render(nosuchthing=undef)
+        self.assertEqual(result, "str has no attribute 'nosuchthing'")
 
     def test_lax_filter(self):
         """Test that undefined filters can be silently ignored."""

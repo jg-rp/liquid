@@ -8,6 +8,7 @@ from .loaders import FileSystemLoader
 
 from .context import Context
 from .context import Undefined
+from .context import DebugUndefined
 from .context import StrictUndefined
 from .context import is_undefined
 
