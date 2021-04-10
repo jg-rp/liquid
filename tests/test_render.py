@@ -237,6 +237,11 @@ class RenderTestCases(unittest.TestCase):
                     template=r"{{ 'a,b' | join: '#' }}",
                     expect="a,b",
                 ),
+                Case(
+                    description="literal output start sequence",
+                    template=r"{{ '{{' }}",
+                    expect=r"{{",
+                ),
             ]
         )
 

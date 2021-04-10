@@ -5,13 +5,20 @@ See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
 """
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+import os
+
+from abc import ABC
+from abc import abstractmethod
+
+from collections import abc
 from pathlib import Path
 
 from typing import NamedTuple
 from typing import Callable
+from typing import Iterable
 from typing import Mapping
 from typing import Optional
+from typing import Union
 from typing import TYPE_CHECKING
 
 from liquid.template import BoundTemplate
@@ -53,17 +60,41 @@ class BaseLoader(ABC):
         return template
 
 
+SearchPath = Union[str, Path, Iterable[Union[str, Path]]]
+
+
 class FileSystemLoader(BaseLoader):
-    def __init__(self, search_path: str):
-        self.search_path = Path(search_path)
+    """Load templates from one or more directories on the file system.
+
+    :param search_path: One or more paths to search.
+    :param encoding: Open template files with the given encoding.
+    """
+
+    def __init__(self, search_path: SearchPath, encoding="utf-8"):
+        if not isinstance(search_path, abc.Iterable) or isinstance(search_path, str):
+            search_path = [search_path]
+
+        self.search_path = [Path(path) for path in search_path]
+        self.encoding = encoding
+
+    def _resolve_path(self, template_name: str) -> Path:
+        template_path = Path(template_name)
+
+        if os.path.pardir in template_path.parts:
+            raise TemplateNotFound(template_name)
+
+        for path in self.search_path:
+            source_path = path.joinpath(template_path)
+
+            if not source_path.exists():
+                continue
+            return source_path
+        raise TemplateNotFound(template_name)
 
     def get_source(self, _: Environment, template_name: str) -> TemplateSource:
-        source_path = self.search_path.joinpath(template_name)
+        source_path = self._resolve_path(template_name)
 
-        if not source_path.exists():
-            raise TemplateNotFound(str(source_path))
-
-        with source_path.open() as fd:
+        with source_path.open(encoding=self.encoding) as fd:
             source = fd.read()
 
         mtime = source_path.stat().st_mtime

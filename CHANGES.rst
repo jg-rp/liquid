@@ -1,6 +1,17 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.3
+-------------
+
+- The built-in ``FileSystemLoader`` now accepts a list of paths to search, in order,
+  returning the first template source found. The ``search_path`` argument can be a
+  string or path-like, or an iterable of strings or path-like objects.
+- Added the ``encoding`` argument to ``FileSystemLoader``. Files will be opened with the
+  given encoding. Defaults to ``"utf-8"``.
+- ``FileSystemLoader`` will raise a ``TemplateNotFound`` exception if ``..`` appears in
+  a template name.
+
 Version 0.7.2
 -------------
 

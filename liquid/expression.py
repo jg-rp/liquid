@@ -547,7 +547,7 @@ class LoopExpression(Expression):
 
             if isinstance(obj, abc.Mapping):
                 length = len(obj)
-                loop_iter = obj.items()
+                loop_iter: Iterator[Any] = iter(obj.items())
             elif isinstance(obj, abc.Sequence):
                 length = len(obj)
                 loop_iter = iter(obj)
@@ -568,7 +568,7 @@ class LoopExpression(Expression):
 
             stop = stop + 1
 
-            loop_iter = range(start, stop)
+            loop_iter = iter(range(start, stop))
             length = stop - start
 
         limit = self.limit

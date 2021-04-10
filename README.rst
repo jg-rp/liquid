@@ -54,21 +54,27 @@ Render a template string by creating a ``Template`` and calling its ``render`` m
 .. code-block:: python
 
     from liquid import Template
+
     template = Template("Hello, {{ you }}!")
-    print(template.render(you="world"))  # "Hello, world!"
+    print(template.render(you="World"))  # "Hello, World!"
 
 Keyword arguments passed to ``render`` are made available for use in template statements and
 expressions.
 
-If you need to use the built-in ``include`` or ``render`` tags, you'll need to create an 
+If you want to use the built-in ``include`` or ``render`` tags, you'll need to create an 
 ``Environment``, with a template ``Loader``, then load and render templates from that
-environment. This example assumes a folder called ``templates`` exists in the current
-working directory, and that the template file ``index.html`` exists within it.
+environment
+
+This example assumes a folder called ``templates`` exists in the current working directory,
+and that the template file ``index.html`` exists within it.
 
 .. code-block:: python
 
-    from liquid import Environment, FileSystemLoader
+    from liquid import Environment
+    from liquid import FileSystemLoader
+
     env = Environment(loader=FileSystemLoader("templates/"))
+
     template = env.get_template("index.html")
     print(template.render(some="variable", other="thing"))
 
@@ -96,6 +102,7 @@ all templates rendered from that environment.
 .. code-block:: python
 
     from liquid import Environment
+
     env = Environment(globals={"site_name": "Google"})
 
     template = env.from_string("""
@@ -109,12 +116,13 @@ all templates rendered from that environment.
 
     print(template.render(some="thing"))
 
-``Template``, ``Environment.get_template`` and ``Environment.from_string`` also accept ``globals``,
-where the dictionary of variables is added to the template context each time you call ``render``.
+As does ``Template``, ``Environment.get_template`` and ``Environment.from_string``, where the
+dictionary of variables is added to the resulting render context each time you call ``render``.
 
 .. code-block:: python
 
     from liquid import Environment
+
     env = Environment()
 
     template = env.get_template("index.html", globals={"page": "home"})

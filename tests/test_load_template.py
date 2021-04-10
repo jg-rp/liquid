@@ -1,4 +1,8 @@
+"""Template loader test cases."""
+
 import unittest
+
+from pathlib import Path
 
 from liquid.environment import Environment
 from liquid.environment import BoundTemplate
@@ -9,28 +13,60 @@ from liquid.exceptions import TemplateNotFound
 
 
 class FileSystemLoaderTestCase(unittest.TestCase):
-    def setUp(self):
-        self.env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
+    """Test loading templates from the file system."""
 
     def test_load_template(self):
         """Test that we can load a template from the file system."""
-        template = self.env.get_template(name="dropify/index.liquid")
+        env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
+        template = env.get_template(name="dropify/index.liquid")
         self.assertIsInstance(template, BoundTemplate)
 
     def test_cached_template(self):
         """Test that templates loaded from the file system get cached."""
-        template = self.env.get_template(name="dropify/index.liquid")
+        env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
+        template = env.get_template(name="dropify/index.liquid")
         self.assertTrue(template.is_up_to_date)
 
-        another = self.env.get_template(name="dropify/index.liquid")
+        another = env.get_template(name="dropify/index.liquid")
         self.assertTrue(another.is_up_to_date)
 
         self.assertEqual(template.tree, another.tree)
 
     def test_template_not_found(self):
         """Test that we get an error if the template does not exist."""
+        env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
         with self.assertRaises(TemplateNotFound):
-            self.env.get_template(name="dropify/nosuchthing.liquid")
+            env.get_template(name="dropify/nosuchthing.liquid")
+
+    def test_no_such_search_path(self):
+        """Test that a non-existant search path does not cause an error."""
+        env = Environment(loader=FileSystemLoader(search_path="nosuchthing/foo/"))
+        with self.assertRaises(TemplateNotFound):
+            env.get_template(name="dropify/nosuchthing.liquid")
+
+    def test_multiple_search_paths(self):
+        """Test that we can search multiple directories for templates."""
+        env = Environment(
+            loader=FileSystemLoader(
+                search_path=[
+                    "tests/fixtures/",
+                    "tests/fixtures/subfolder/",
+                ]
+            )
+        )
+
+        template = env.get_template(name="fallback.html")
+        self.assertIsInstance(template, BoundTemplate)
+        self.assertEqual(template.path, Path("tests/fixtures/subfolder/fallback.html"))
+
+    def test_stay_in_search_path(self):
+        """Test that we can't stray above the search path"""
+        env = Environment(
+            loader=FileSystemLoader(search_path="tests/fixtures/subfolder")
+        )
+
+        with self.assertRaises(TemplateNotFound):
+            _ = env.get_template(name="../dropify/index.liquid")
 
 
 class TemplateDropTestCase(unittest.TestCase):
