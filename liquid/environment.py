@@ -27,6 +27,7 @@ from liquid import builtin
 from liquid import loaders
 
 from liquid.exceptions import Error
+from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import lookup_warning
 
 
@@ -171,7 +172,12 @@ class Environment:
             template is rendered.
         :returns: A parsed template ready to be rendered.
         """
-        parse_tree = self.parse(source)
+        try:
+            parse_tree = self.parse(source)
+        except LiquidSyntaxError as err:
+            err.filename = path
+            err.source = source
+            raise err
         return self.template_class(
             env=self,
             name=name,

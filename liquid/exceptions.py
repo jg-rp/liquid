@@ -1,4 +1,4 @@
-"""Liquid specific Excpeptions and wanrings."""
+"""Liquid specific Exceptions and warnings."""
 
 from typing import Dict
 from typing import Type
@@ -9,6 +9,8 @@ from pathlib import Path
 
 
 class Error(Exception):
+    """Base class for all Liquid exceptions."""
+
     def __init__(
         self,
         *args: object,
@@ -27,6 +29,13 @@ class Error(Exception):
             msg += f" of {self.filename}"
         return msg
 
+    @property
+    def message(self):
+        """Return the exception's error message if one was given."""
+        if self.args:
+            return self.args[0]
+        return None
+
 
 class LiquidInterrupt(Exception):
     """Loop interrupt"""
@@ -35,13 +44,26 @@ class LiquidInterrupt(Exception):
 class LiquidSyntaxError(Error):
     """Exception raised when there is a parser error."""
 
+    def __init__(
+        self,
+        *args: object,
+        linenum: Optional[int] = None,
+        filename: Optional[Union[str, Path]] = None,
+    ):
+        super().__init__(*args, linenum=linenum, filename=filename)
+        self.source: Optional[str] = None
+
+    @property
+    def name(self):
+        if isinstance(self.filename, Path):
+            return self.filename.as_posix()
+        if self.filename:
+            return str(self.filename)
+        return ""
+
 
 class LiquidTypeError(Error):
     """Exception raised when an error occurs at render time."""
-
-
-class LiquidKeyError(Error):
-    """Exception raised when an undefined variable is accessed."""
 
 
 class DisabledTagError(Error):

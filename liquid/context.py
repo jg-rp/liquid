@@ -356,9 +356,8 @@ class Context:
         return val
 
     def cycle(self, group_name: str, args: Sequence[Any]) -> Iterator[Any]:
-        """Return the next item in the given cycle. Initialise the cycle first
-        if this is is the first time we're seeing this combination of group name
-        and arguments."""
+        """Return the next item in the given cycle. Initialise the cycle first if this
+        is the first time we're seeing this combination of group name and arguments."""
         key = (group_name, tuple(args))
         if key not in self._tag_namespace["cycles"]:
             self._tag_namespace["cycles"][key] = cycle(args)
