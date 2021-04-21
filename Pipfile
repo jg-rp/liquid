@@ -19,6 +19,7 @@ sphinx = "*"
 [packages]
 python-dateutil = "*"
 liquid = {editable = true, path = "."}
+markupsafe = "*"
 
 [requires]
 python_version = "3.8"

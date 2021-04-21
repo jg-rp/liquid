@@ -1015,6 +1015,16 @@ class StringFilterTestCase(unittest.TestCase):
                 expect="Have you read Ulysses &amp; &#20;?",
             ),
             Case(
+                description="some HTML markup with HTML comment",
+                val=(
+                    "<!-- Have --><em>you</em> read "
+                    "<strong>Ulysses</strong> &amp; &#20;?"
+                ),
+                args=[],
+                kwargs={},
+                expect="you read Ulysses &amp; &#20;?",
+            ),
+            Case(
                 description="not a string",
                 val=5,
                 args=[],
@@ -1261,6 +1271,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[2, self.env.undefined("test")],
                 kwargs={},
                 expect="one two",
+            ),
+            Case(
+                description="very long argument",
+                val="",
+                args=[100000000000000],
+                kwargs={},
+                expect="",
             ),
         ]
 

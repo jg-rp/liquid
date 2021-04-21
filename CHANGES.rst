@@ -1,6 +1,17 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.4
+-------------
+
+.. _MarkupSafe: https://github.com/pallets/markupsafe
+
+- HTML auto-escaping. If `MarkupSafe`_ is installed and the ``autoescape`` argument to
+  ``Environment`` or ``Template`` is ``True``, context variables will be HTML escaped
+  automatically.
+- ``LiquidSyntaxError`` exceptions now include the offending template source as the
+  ``source`` property.
+
 Version 0.7.3
 -------------
 

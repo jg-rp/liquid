@@ -5,13 +5,27 @@ import sys
 from io import StringIO
 from typing import TextIO
 
-from liquid.token import Token, TOKEN_TAG, TOKEN_EOF, TOKEN_EXPRESSION
-from liquid.parse import expect, get_parser
+try:
+    from markupsafe import Markup
+except ImportError:
+    from liquid.exceptions import Markup
+
 from liquid import ast
-from liquid.tag import Tag
 from liquid.context import Context
-from liquid.stream import TokenStream
 from liquid.exceptions import LiquidSyntaxError
+
+from liquid.parse import expect
+from liquid.parse import get_parser
+
+from liquid.tag import Tag
+
+from liquid.token import Token
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+
+from liquid.stream import TokenStream
+
 
 RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
 
@@ -40,7 +54,11 @@ class CaptureNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         buf = StringIO()
         self.block.render(context, buf)
-        context.assign(self.name, buf.getvalue())
+
+        if context.autoescape:
+            context.assign(self.name, Markup(buf.getvalue()))
+        else:
+            context.assign(self.name, buf.getvalue())
 
 
 class CaptureTag(Tag):

@@ -141,3 +141,21 @@ WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {
 
 def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
     return WARNINGS.get(exc, LiquidWarning)
+
+
+def escape(val: object) -> str:
+    """A dummy escape function that always raises an exception."""
+    raise Error("autoescape requires Markupsafe to be installed")
+
+
+class Markup:
+    """A dummy markup class that always raises an exception."""
+
+    def __init__(self, val: object):
+        raise Error("autoescape requires Markupsafe to be installed")
+
+    def join(self, _: object) -> str:
+        raise Error("autoescape requires Markupsafe to be installed")
+
+    def unescape(self) -> str:
+        raise Error("autoescape requires Markupsafe to be installed")

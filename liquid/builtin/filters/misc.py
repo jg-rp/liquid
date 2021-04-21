@@ -5,10 +5,18 @@ import functools
 
 from dateutil import parser
 
+try:
+    from markupsafe import Markup
+except ImportError:
+    from liquid.exceptions import Markup
+
 from liquid import is_undefined
 from liquid.filter import Filter
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
+
+
+# pylint: disable=arguments-differ  too-few-public-methods
 
 
 class AbstractFilter(Filter):
@@ -88,5 +96,8 @@ class Date(AbstractFilter):
                 f"{self.name}: expected datetime.datetime, found {type(dt)} "
             )
 
-        # TODO: Compare Ruby and Python strftime format codes.
-        return dt.strftime(fmt)
+        rv = dt.strftime(fmt)
+
+        if self.env.autoescape and isinstance(fmt, Markup):
+            return Markup(rv)
+        return rv

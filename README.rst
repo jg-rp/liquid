@@ -1,4 +1,9 @@
 
+.. _reference documentation: https://shopify.github.io/liquid/
+.. _reference implementation: https://github.com/Shopify/liquid
+.. _dateutil: https://dateutil.readthedocs.io/en/stable/
+
+
 Python Liquid
 =============
 
@@ -58,15 +63,19 @@ Render a template string by creating a ``Template`` and calling its ``render`` m
     template = Template("Hello, {{ you }}!")
     print(template.render(you="World"))  # "Hello, World!"
 
-Keyword arguments passed to ``render`` are made available for use in template statements and
-expressions.
+Keyword arguments passed to ``render`` are added to the `render context`_, and are
+available as variables for templates to use in Liquid expressions.
+
+
+Loading Templates
+*****************
 
 If you want to use the built-in ``include`` or ``render`` tags, you'll need to create an 
 ``Environment``, with a template ``Loader``, then load and render templates from that
-environment
+environment.
 
-This example assumes a folder called ``templates`` exists in the current working directory,
-and that the template file ``index.html`` exists within it.
+This example assumes a folder called ``templates`` exists in the current working
+directory, and that the template file ``index.html`` exists within it.
 
 .. code-block:: python
 
@@ -78,8 +87,8 @@ and that the template file ``index.html`` exists within it.
     template = env.get_template("index.html")
     print(template.render(some="variable", other="thing"))
 
-You can create templates from strings using an ``Environment`` too. This is often more efficient
-than using ``Template`` directly.
+You can create templates from strings using an ``Environment`` too. This is often more
+efficient than using ``Template`` directly.
 
 .. code-block:: python
 
@@ -96,8 +105,16 @@ than using ``Template`` directly.
 
     print(template.render(some="thing"))
 
-The ``Environment`` constructor accepts ``globals``, a dictionary of variables made available to
-all templates rendered from that environment. 
+
+Render Context
+**************
+
+Among other things, a render context includes namespaces for `global` variables passed
+down from the ``Environment`` and `local` variables assigned with the built-in
+``{% assign %}`` or ``{% capture %}`` tags.
+
+The ``Environment`` constructor accepts ``globals``, a dictionary of variables made
+available to all templates rendered from that environment. 
 
 .. code-block:: python
 
@@ -116,8 +133,9 @@ all templates rendered from that environment.
 
     print(template.render(some="thing"))
 
-As does ``Template``, ``Environment.get_template`` and ``Environment.from_string``, where the
-dictionary of variables is added to the resulting render context each time you call ``render``.
+As does ``Template``, ``Environment.get_template`` and ``Environment.from_string``,
+where the dictionary of variables is added to the resulting render context each time you
+call ``render``.
 
 .. code-block:: python
 
@@ -128,9 +146,14 @@ dictionary of variables is added to the resulting render context each time you c
     template = env.get_template("index.html", globals={"page": "home"})
     print(template.render(some="thing"))
 
-Templates are parsed and rendered in `strict` mode by default, where syntax and render-time
-type errors raise an exception as soon as possible. You can change the error tolerance mode
-with the ``tolerance`` argument to the ``Environment`` or ``Template`` constructor.
+
+Strictness
+**********
+
+Templates are parsed and rendered in `strict` mode by default. Where syntax and
+render-time type errors raise an exception as soon as possible. You can change the error
+tolerance mode with the ``tolerance`` argument to the ``Environment`` or ``Template``
+constructor.
 
 Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
 
@@ -143,8 +166,9 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
         tolerance=Mode.LAX,
     )
 
-By default, references to undefined variables are silently ignored. In `strict variables`
-mode, any operation on an undefined variable will raise an ``UndefinedError``.
+By default, references to undefined variables are silently ignored. In
+`strict variables` mode, any operation on an undefined variable will raise an
+``UndefinedError``.
 
 .. code-block:: python
 
@@ -155,25 +179,68 @@ mode, any operation on an undefined variable will raise an ``UndefinedError``.
         undefined=StrictUndefined,
     )
 
+HTML Auto Escape
+****************
+
+As of version 0.7.4, Python Liquid offers HTML auto-escaping. Where context variables
+are automatically escaped on output. Install optional dependencies for auto-escaping
+using the ``autoescape`` extra.
+
+.. code-block:: text
+
+    $ python -m pip install -U python-liquid[autoescape]
+
+Auto-escaping is disabled by default. Enable it by setting the ``Environment`` or 
+``Template`` ``autoescape`` argument to ``True``.
+
+.. code-block:: python
+
+    >>> from liquid import Environment
+    >>> env = Environment(autoescape=True)
+    >>> template = env.from_string("<p>Hello, {{ you }}</p>")
+    >>> template.render(you='</p><script>alert("XSS!");</script>')
+    '<p>Hello, &lt;/p&gt;&lt;script&gt;alert(&#34;XSS!&#34;);&lt;/script&gt;</p>'
+
+Mark a string as "safe" by making it ``Markup``.
+
+.. code-block:: python
+
+    >>> from liquid import Environment, Markup
+    >>> env = Environment(autoescape=True)
+    >>> template = env.from_string("<p>Hello, {{ you }}</p>")
+    >>> template.render(you=Markup("<em>World!</em>"))
+    '<p>Hello, <em>World!</em></p>'
+
+Alternatively use the non-standard ``safe`` filter.
+
+.. code-block:: python
+
+    >>> from liquid import Environment
+    >>> env = Environment(autoescape=True)
+    >>> template = env.from_string("<p>Hello, {{ you | safe }}</p>")
+    >>> template.render(you="<em>World!</em>")
+    '<p>Hello, <em>World!</em></p>'
+
+
 Related Projects
 ----------------
 
-- `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render
-  Liquid templates in your Flask applications.
-- `python-liquid-extra <https://github.com/jg-rp/liquid-extra>`_: A growing collection of extra
-  tags and filters for Python Liquid. For example, an ``if`` tag that supports ``not`` and grouping
-  with parentheses.
+- `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid.
+  Render Liquid templates in your Flask applications.
+- `python-liquid-extra <https://github.com/jg-rp/liquid-extra>`_: A growing collection
+  of extra tags and filters for Python Liquid. For example, an ``if`` tag that supports
+  ``not`` and grouping with parentheses.
 
 Compatibility
 -------------
 
-We strive to be 100% compatible with the `reference implementation <https://github.com/Shopify/liquid>`_
-of Liquid, written in Ruby. That is, given an equivalent render context, a template rendered with Python
+We strive to be 100% compatible with the `reference implementation`_ of Liquid, written
+in Ruby. That is, given an equivalent render context, a template rendered with Python
 Liquid should produce the same output as when rendered with Ruby Liquid.
 
-Python Liquid faithfully reproduces the following tags. Note that ``echo``, ``ifchanged``, ``include``,
-``liquid`` and ``render`` don't get a mention in the `official documentation <https://shopify.github.io/liquid/>`_
-of "core" Liquid, despite being present.
+Python Liquid faithfully reproduces the following tags. Note that ``echo``,
+``ifchanged``, ``include``, ``liquid`` and ``render`` don't get a mention in the
+`reference documentation`_ of "core" Liquid, despite being present.
 
 - assign
 - capture
@@ -202,17 +269,17 @@ Known Issues
   way as the reference implementation. We might fail earlier or later, and will 
   almost certainly produce a different error message.
   
-- The built-in ``date`` filter uses `dateutils <https://dateutil.readthedocs.io/en/stable/>`_
-  for parsing strings to ``datetime``\s, and ``strftime`` for formatting. There are likely to
-  be some inconsistencies between this and the reference implementation's equivalent parsing 
-  and formatting of dates and times.
+- The built-in ``date`` filter uses `dateutil`_ for parsing strings to ``datetime``\s,
+  and ``strftime`` for formatting. There are likely to be some inconsistencies between
+  this and the reference implementation's equivalent parsing and formatting of dates and
+  times.
 
 Benchmark
 ---------
 
-You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if you
-don't have ``make``) from the root of the source tree. On my ropey desktop computer with a 
-Ryzen 5 1500X, we get the following results.
+You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if
+you don't have ``make``) from the root of the source tree. On my ropey desktop computer
+with a Ryzen 5 1500X, we get the following results.
 
 .. code-block:: text
 
@@ -235,8 +302,8 @@ And PyPy3.7 gives us a decent increase in performance.
              lex, parse and render: 4.2s (1439.43 ops/s, 23.99 i/s)
 
 
-On the same machine, running ``rake benchmark:run`` from the root of the reference implementation
-source tree gives us these results.
+On the same machine, running ``rake benchmark:run`` from the root of the reference
+implementation source tree gives us these results.
 
 .. code-block:: text
 
@@ -253,10 +320,10 @@ source tree gives us these results.
                 render:     86.995  (± 1.1%) i/s -    872.000  in  10.024951s
         parse & render:     26.139  (± 0.0%) i/s -    262.000  in  10.023365s
 
-I've tried to match the benchmark workload to that of the reference implementation, so that
-we might compare results directly. The workload is meant to be representative of Shopify's 
-use case, although I wouldn't be surprised if their usage has changed subtly since the 
-benchmark fixture was designed.
+I've tried to match the benchmark workload to that of the reference implementation, so
+that we might compare results directly. The workload is meant to be representative of
+Shopify's use case, although I wouldn't be surprised if their usage has changed subtly
+since the benchmark fixture was designed.
 
 Custom Filters
 --------------
@@ -285,9 +352,9 @@ And use it like this.
     {% endif %}
 
 
-If you want to add more complex filters, probably including some type checking and/or casting,
-or the filter needs access to the active context or environment, you'll want to inherit from
-``Filter`` and implement its ``__call__`` method.
+If you want to add more complex filters, probably including some type checking and/or
+casting, or the filter needs access to the active context or environment, you'll want to
+inherit from ``Filter`` and implement its ``__call__`` method.
 
 .. code-block:: python
 
@@ -329,28 +396,29 @@ In a template, you could then use the ``LinkToTag`` filter like this.
         </dl>
     {% endif %}
 
-Note that the ``Filter`` constructor takes a single argument, a reference to the environment,
-which is available to ``Filter`` methods as ``self.env``. The class variable ``name`` is used by
-the ``string_required`` decorator (and all other helpers/decorators found in ``liquid.filter``)
-to give informative error messages.
+Note that the ``Filter`` constructor takes a single argument, a reference to the
+environment, which is available to ``Filter`` methods as ``self.env``. The class
+variable ``name`` is used by the ``string_required`` decorator (and all other helpers/
+decorators found in ``liquid.filter``) to give informative error messages.
 
-All built-in filters are implemented in this way, so have a look in ``liquid/builtin/filters/``
-for many more examples.
+All built-in filters are implemented in this way, so have a look in ``liquid/builtin/\
+filters/`` for many more examples.
 
 
 Custom Tags
 -----------
 
-Register a new tag with an ``Environment`` by calling its ``add_tag`` method. All tags must 
-inherit from ``liquid.tag.Tag`` and implement its ``parse`` method.
+Register a new tag with an ``Environment`` by calling its ``add_tag`` method. All tags
+must  inherit from ``liquid.tag.Tag`` and implement its ``parse`` method.
 
-``parse`` takes a single argument of type ``TokenStream`` that wraps an iterator of ``Token``\s,
-and returns an ``ast.Node`` instance. More often than not, a new subclass of ``ast.node`` will
-accompany each ``Tag``. These ``Node``\s make up the parse tree, and are responsible for writing
-rendered text to the output stream via the required  ``render_to_output`` method.
+``parse`` takes a single argument of type ``TokenStream`` that wraps an iterator of
+``Token``\s, and returns an ``ast.Node`` instance. More often than not, a new subclass
+of ``ast.node`` will accompany each ``Tag``. These ``Node``\s make up the parse tree,
+and are responsible for writing rendered text to the output stream via the required
+``render_to_output`` method.
 
-Here's the implementation of ``UnlessTag``, which parses a boolean expression and a block of
-statements before returning a ``UnlessNode``.
+Here's the implementation of ``UnlessTag``, which parses a boolean expression and a
+block of statements before returning a ``UnlessNode``.
 
 .. code-block:: python
 
@@ -383,30 +451,31 @@ statements before returning a ``UnlessNode``.
 
 Things worthy of note: 
 
-- Block tags (those that have a start and end tag with any number of statements in between)
-  are expected to leave the stream with their closing tag as the current token.
+- Block tags (those that have a start and end tag with any number of statements in
+  between) are expected to leave the stream with their closing tag as the current token.
 
-- The template lexer does not attempt to tokenize tag expressions. It is up to the ``Tag``
-  to tokenize and parse its expression, if any, possibly using or extending a built-in
-  expression lexer found in ``liquid.lex``.
+- The template lexer does not attempt to tokenize tag expressions. It is up to the
+  ``Tag`` to tokenize and parse its expression, if any, possibly using or extending a
+  built-in expression lexer found in ``liquid.lex``.
 
 - The ``expect`` and ``expect_peek`` helper functions inspect tokens from the stream and
-  raise an appropriate exception should a token's type or value not meet a tag's expectations.
+  raise an appropriate exception should a token's type or value not meet a tag's
+  expectations.
 
-- You can find parsers for common expression types in ``liquid.parse``, all of which return
-  a ``liquid.expression.Expression``. ``Expression``\s have an ``evaluate(context)`` method
-  for use from ``ast.Node.render_to_output``.
+- You can find parsers for common expression types in ``liquid.parse``, all of which
+  return a ``liquid.expression.Expression``. ``Expression``\s have an
+  ``evaluate(context)`` method for use from ``ast.Node.render_to_output``.
 
 
-All built-in tags are implemented in this way, so have a look in ``liquid/builtin/tags/``
-for examples. 
+All built-in tags are implemented in this way, so have a look in
+``liquid/builtin/tags/`` for examples. 
 
 Custom Loaders
 --------------
 
-Write a custom loader class by inheriting from ``liquid.loaders.BaseLoader`` and implementing
-its ``get_source`` method. Here we implement ``DictLoader``, a loader that uses a dictionary
-of strings instead of the file system for loading templates.
+Write a custom loader class by inheriting from ``liquid.loaders.BaseLoader`` and
+implementing its ``get_source`` method. Here we implement ``DictLoader``, a loader that
+uses a dictionary of strings instead of the file system for loading templates.
 
 .. code-block:: python
 
@@ -426,9 +495,10 @@ of strings instead of the file system for loading templates.
 
             return TemplateSource(source, template_name, None)
 
-``TemplateSource`` is a named tuple containing the template source as a string, its name and an
-optional ``uptodate`` callable. If ``uptodate`` is not ``None`` it should be a callable that
-returns ``False`` if the template needs to be loaded again, or ``True`` otherwise.
+``TemplateSource`` is a named tuple containing the template source as a string, its name
+and an optional ``uptodate`` callable. If ``uptodate`` is not ``None`` it should be a
+callable that returns ``False`` if the template needs to be loaded again, or ``True``
+otherwise.
 
 You could then use ``DictLoader`` like this.
 
@@ -464,12 +534,14 @@ You could then use ``DictLoader`` like this.
 Contributing
 ------------
 
+.. _Pylance: https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
+.. _Pyright: https://github.com/microsoft/pyright
+
 - Install development dependencies with `Pipenv <https://github.com/pypa/pipenv>`_
 
 - Python Liquid fully embraces type hints and static type checking. I like to use the
-  `Pylance <https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance>`_ 
-  extension for Visual Studio Code, which includes `Pyright <https://github.com/microsoft/pyright>`_
-  for static type checking.
+  `Pylance`_ extension for Visual Studio Code, which includes `Pyright`_ for static type
+  checking.
 
 - Format code using `black <https://github.com/psf/black>`_.
 
@@ -477,6 +549,7 @@ Contributing
 
 - Run tests with ``make test`` or ``python -m unittest``.
 
-- Check test coverage with ``make coverage`` and open ``htmlcov/index.html`` in your browser.
+- Check test coverage with ``make coverage`` and open ``htmlcov/index.html`` in your
+  browser.
 
 - Check your changes have not adversely affected performance with ``make benchmark``.

@@ -18,6 +18,11 @@ from typing import Tuple
 from typing import Generic
 from typing import TypeVar
 
+try:
+    from markupsafe import Markup
+except ImportError:
+    from liquid.exceptions import Markup
+
 from liquid.context import Context
 
 from liquid.exceptions import LiquidTypeError
@@ -30,8 +35,6 @@ from liquid.exceptions import FilterValueError
 
 class Expression(ABC):
     __slots__ = ()
-
-    expression_statement = True
 
     @abstractmethod
     def evaluate(self, context: Context) -> object:
@@ -110,7 +113,7 @@ T = TypeVar("T")  # pylint: disable=invalid-name
 
 
 class Literal(Expression, Generic[T]):
-    __slots__ = "value"
+    __slots__ = ("value",)
 
     def __init__(self, value: T):
         self.value = value
@@ -153,6 +156,11 @@ class StringLiteral(Literal):
 
     def __repr__(self):  # pragma: no cover
         return f"StringLiteral(value='{self.value}')"
+
+    def evaluate(self, context: Context) -> Union[str, Markup]:
+        if context.autoescape:
+            return Markup(self.value)
+        return self.value
 
 
 class IntegerLiteral(Literal):
@@ -198,7 +206,7 @@ IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
 
 
 class Identifier(Expression):
-    __slots__ = "path"
+    __slots__ = ("path",)
 
     def __init__(self, path: IdentifierPath):
         self.path = path

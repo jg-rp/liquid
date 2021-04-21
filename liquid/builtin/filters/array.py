@@ -7,6 +7,11 @@ from operator import getitem
 from typing import List
 from typing import Any
 
+try:
+    from markupsafe import Markup
+except ImportError:
+    from liquid.exceptions import Markup
+
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
@@ -54,6 +59,12 @@ class ArrayFilter(Filter):
         raise NotImplementedError(":(")
 
 
+def _str_if_not(val: object) -> str:
+    if not isinstance(val, str):
+        return str(val)
+    return val
+
+
 class Join(ArrayFilter):
     """Concatenate an array of strings."""
 
@@ -63,7 +74,13 @@ class Join(ArrayFilter):
     num_args = (0, 1)
 
     def filter(self, iterable, separator=" "):
-        return str(separator).join(str(item) for item in iterable)
+        if not isinstance(separator, str):
+            separator = str(separator)
+
+        if self.env.autoescape and separator == " ":
+            separator = Markup(" ")
+
+        return separator.join(_str_if_not(item) for item in iterable)
 
 
 class First(ArrayFilter):

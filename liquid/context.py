@@ -254,6 +254,7 @@ class Context:
         "scope",
         "_tag_namespace",
         "disabled_tags",
+        "autoescape",
     )
 
     def __init__(
@@ -288,6 +289,9 @@ class Context:
         # partial templates rendered using the "render" tag are not allowed to
         # use "include" tags.
         self.disabled_tags = disabled_tags or []
+
+        # Indicates if autoescape is enabled.
+        self.autoescape = self.env.autoescape
 
     def assign(self, key: str, val: Any):
         """Add `val` to the context with key `key`."""

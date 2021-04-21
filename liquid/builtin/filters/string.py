@@ -4,6 +4,13 @@ import html
 import re
 import urllib.parse
 
+try:
+    from markupsafe import escape
+    from markupsafe import Markup
+except ImportError:
+    from liquid.exceptions import escape
+    from liquid.exceptions import Markup
+
 from liquid import is_undefined
 
 from liquid.filter import Filter
@@ -22,6 +29,9 @@ from liquid.utils.text import truncate_words
 
 
 class StringFilter(Filter):
+    """A `Filter` subclass that ensures a filter's left value is a string and checks
+    the number of arguments against `num_args` before delegating to its `filter`
+    method."""
 
     __slots__ = ()
 
@@ -29,20 +39,24 @@ class StringFilter(Filter):
     num_args = 0
     msg = "{}: expected a string, found {}"
 
-    def __call__(self, val, *args):
+    def __call__(self, val, *args, **kwargs):
         if len(args) != self.num_args:
             raise FilterArgumentError(
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
             )
 
+        if not isinstance(val, str):
+            val = str(val)
+
         try:
-            return self.filter(str(val), *args)
+            return self.filter(val, *args, **kwargs)
         except (AttributeError, TypeError) as err:
             raise FilterArgumentError(
                 self.msg.format(self.name, type(val).__name__)
             ) from err
 
-    def filter(self, val, *args):
+    def filter(self, val, *args, **kwargs):
+        """Subclasses of :class:`StringFilter` should implement `filter`."""
         raise NotImplementedError(":(")
 
 
@@ -66,7 +80,9 @@ class Append(StringFilter):
     num_args = 1
 
     def filter(self, val: str, string: str):
-        return val + str(string)
+        if not isinstance(string, str):
+            string = str(string)
+        return val + string
 
 
 class Downcase(StringFilter):
@@ -88,6 +104,8 @@ class Escape(StringFilter):
     name = "escape"
 
     def filter(self, val):
+        if self.env.autoescape:
+            return escape(str(val))
         return html.escape(val)
 
 
@@ -99,6 +117,8 @@ class EscapeOnce(StringFilter):
     name = "escape_once"
 
     def filter(self, val):
+        if self.env.autoescape:
+            return Markup.unescape(val)
         return html.escape(html.unescape(val))
 
 
@@ -124,6 +144,9 @@ class NewlineToBR(StringFilter):
     def filter(self, val):
         # The reference implementation was changed to replace "\r\n" as well as "\n",
         # but they don't seem to care about "\r" (Mac OS).
+        if self.env.autoescape:
+            val = escape(val)
+            return Markup(self.re_lineterm.sub("<br />\n", val))
         return self.re_lineterm.sub("<br />\n", val)
 
 
@@ -136,7 +159,9 @@ class Prepend(StringFilter):
     num_args = 1
 
     def filter(self, val, string):
-        return str(string) + val
+        if not isinstance(string, str):
+            string = str(string)
+        return string + val
 
 
 class Remove(StringFilter):
@@ -148,7 +173,9 @@ class Remove(StringFilter):
     num_args = 1
 
     def filter(self, val, sub):
-        return val.replace(str(sub), "")
+        if not isinstance(sub, str):
+            sub = str(sub)
+        return val.replace(sub, "")
 
 
 class RemoveFirst(StringFilter):
@@ -160,7 +187,9 @@ class RemoveFirst(StringFilter):
     num_args = 1
 
     def filter(self, val, sub):
-        return val.replace(str(sub), "", 1)
+        if not isinstance(sub, str):
+            sub = str(sub)
+        return val.replace(sub, "", 1)
 
 
 class Replace(StringFilter):
@@ -172,9 +201,16 @@ class Replace(StringFilter):
     num_args = 2
 
     def filter(self, val, seq, sub):
+        if not isinstance(sub, str):
+            sub = str(sub)
+
         if is_undefined(seq):
-            return str(sub)
-        return val.replace(str(seq), str(sub))
+            return sub
+
+        if not isinstance(seq, str):
+            seq = str(seq)
+
+        return val.replace(seq, sub)
 
 
 class ReplaceFirst(StringFilter):
@@ -186,9 +222,16 @@ class ReplaceFirst(StringFilter):
     num_args = 2
 
     def filter(self, val, seq, sub):
+        if not isinstance(sub, str):
+            sub = str(sub)
+
         if is_undefined(seq):
-            return str(sub)
-        return val.replace(str(seq), str(sub), 1)
+            return sub
+
+        if not isinstance(seq, str):
+            seq = str(seq)
+
+        return val.replace(seq, sub, 1)
 
 
 class Upcase(StringFilter):
@@ -213,7 +256,9 @@ class Slice(Filter):
         if is_undefined(val):
             return ""
 
-        val = str(val)
+        if not isinstance(val, str):
+            val = str(val)
+
         start, length = one_maybe_two_args(self.name, args, kwargs)
         expect_integer(self.name, start)
 
@@ -241,9 +286,12 @@ class Split(StringFilter):
     num_args = 1
 
     def filter(self, val, seq):
-        seq = str(seq)
+        if not isinstance(seq, str):
+            seq = str(seq)
+
         if not seq:
-            return [ch for ch in val]
+            return list(val)
+
         return val.split(seq)
 
 
@@ -277,7 +325,10 @@ class StripHTML(StringFilter):
     name = "strip_html"
 
     def filter(self, val):
-        return strip_tags(val)
+        stripped = strip_tags(val)
+        if self.env.autoescape and isinstance(val, Markup):
+            return Markup(stripped)
+        return stripped
 
 
 class StripNewlines(StringFilter):
@@ -289,6 +340,9 @@ class StripNewlines(StringFilter):
     re_lineterm = re.compile(r"\r?\n")
 
     def filter(self, val):
+        if self.env.autoescape:
+            val = escape(val)
+            return Markup(self.re_lineterm.sub("", val))
         return self.re_lineterm.sub("", val)
 
 
@@ -315,6 +369,7 @@ class Truncate(Filter):
         else:
             end = "..."
 
+        # XXX: Is truncating markup ever safe? Autoescape for now.
         return truncate_chars(val, num, end)
 
 
@@ -345,6 +400,7 @@ class TruncateWords(Filter):
         if num <= 0:
             num = 1
 
+        # XXX: Is truncating markup ever safe? Autoescape for now.
         return truncate_words(val, num, end)
 
 
@@ -357,6 +413,8 @@ class URLEncode(StringFilter):
     name = "url_encode"
 
     def filter(self, val):
+        if self.env.autoescape:
+            return Markup(urllib.parse.quote_plus(val))
         return urllib.parse.quote_plus(val)
 
 
@@ -368,4 +426,5 @@ class URLDecode(StringFilter):
     name = "url_decode"
 
     def filter(self, val):
+        # XXX: Assuming URL decoded strings are all unsafe.
         return urllib.parse.unquote_plus(val)

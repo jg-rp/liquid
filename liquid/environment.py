@@ -54,6 +54,9 @@ class Environment:
     :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     :param strict_filters: If `True`, the default, will raise an exception upon finding
         an undefined filter. Otherwise undefined filters are silently ignored.
+    :param autoescape: If `True`, all context values will be HTML-escaped before output
+        unless they've been explicitly marks as "safe". Requires the package Markupsafe.
+        Defaults to `False`.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
     """
@@ -70,6 +73,7 @@ class Environment:
         loader: Optional[loaders.BaseLoader] = None,
         undefined: Type[Undefined] = Undefined,
         strict_filters: bool = True,
+        autoescape: bool = False,
         globals: Optional[Mapping[str, object]] = None,
     ):
         self.tag_start_string = tag_start_string
@@ -86,6 +90,9 @@ class Environment:
 
         # Indicates if an undefined filter should raise an exception or be ignored.
         self.strict_filters = strict_filters
+
+        # Indicates if autoescape is enabled.
+        self.autoescape = autoescape
 
         # Tag register.
         self.tags: Dict[str, Tag] = {}
@@ -270,6 +277,7 @@ def Template(
     tolerance: Mode = Mode.STRICT,
     undefined: Type[Undefined] = Undefined,
     strict_filters: bool = True,
+    autoescape: bool = False,
     globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
     """A :class:`BoundTemplate` factory.
@@ -292,6 +300,9 @@ def Template(
     :param undefined: A subclass of :class:`Undefined` that represents undefined values.
     :param strict_filters: If `True`, the default, will raise an exception upon finding
         an undefined filter. Otherwise undefined filters are silently ignored.
+    :param autoescape: If `True`, all context values will be HTML-escaped before output
+        unless they've been explicitly marks as "safe". Requires the package Markupsafe.
+        Defaults to `False`.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
     """
@@ -304,6 +315,7 @@ def Template(
         tolerance,
         undefined,
         strict_filters,
+        autoescape,
     )
 
     return env.from_string(source, globals=globals)

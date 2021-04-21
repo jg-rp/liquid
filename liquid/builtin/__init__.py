@@ -78,7 +78,11 @@ from .filters.array import (
     Compact,
 )
 
-from .filters.misc import Size, Default, Date
+from .filters.misc import Size
+from .filters.misc import Default
+from .filters.misc import Date
+
+from .filters.extra import Safe
 
 
 if TYPE_CHECKING:
@@ -159,3 +163,5 @@ def register(env: Environment) -> None:
     env.add_filter(Size.name, Size(env))
     env.add_filter(Default.name, Default(env))
     env.add_filter(Date.name, Date(env))
+
+    env.add_filter(Safe.name, Safe(env))
