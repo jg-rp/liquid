@@ -225,6 +225,8 @@ Alternatively use the non-standard ``safe`` filter.
 Related Projects
 ----------------
 
+- `django-liquid <https://github.com/jg-rp/django-liquid>`_: A Django template backend
+  for Liquid. Render Liquid templates in your Django apps.
 - `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid.
   Render Liquid templates in your Flask applications.
 - `python-liquid-extra <https://github.com/jg-rp/liquid-extra>`_: A growing collection
