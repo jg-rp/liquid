@@ -587,3 +587,155 @@ class AutoescapeTestCase(TestCase):
                 template = env.from_string(case.template)
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
+
+    def test_tablerow_tag(self):
+        """Test that the tablerow tag behaves well with autoescape."""
+        tests = [
+            Case(
+                description="no markup",
+                template=(
+                    r"{% tablerow i in (1..4) cols:2 %}"
+                    r"{{ i }} {{ tablerowloop.col_first }}"
+                    r"{% endtablerow %}"
+                ),
+                context={},
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1">1 true</td>'
+                    '<td class="col2">2 false</td>'
+                    "</tr>"
+                    '<tr class="row2">'
+                    '<td class="col1">3 true</td>'
+                    '<td class="col2">4 false</td>'
+                    "</tr>"
+                ),
+            ),
+            Case(
+                description="markup in loop block",
+                template=(
+                    r"{% tablerow i in (1..4) cols:2 %}"
+                    r"<b>{{ i }}</b> {{ tablerowloop.col_first }}"
+                    r"{% endtablerow %}"
+                ),
+                context={},
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1"><b>1</b> true</td>'
+                    '<td class="col2"><b>2</b> false</td>'
+                    "</tr>"
+                    '<tr class="row2">'
+                    '<td class="col1"><b>3</b> true</td>'
+                    '<td class="col2"><b>4</b> false</td>'
+                    "</tr>"
+                ),
+            ),
+            Case(
+                description="unsafe markup from iterable",
+                template=(
+                    r"{% tablerow tag in collection.tags %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1">&lt;b&gt;tag1&lt;/b&gt;</td>'
+                    '<td class="col2">tag2</td>'
+                    '<td class="col3">tag3</td>'
+                    '<td class="col4">tag4</td>'
+                    "</tr>"
+                ),
+                context={
+                    "collection": {
+                        "tags": [
+                            "<b>tag1</b>",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+            Case(
+                description="safe markup from iterable",
+                template=(
+                    r"{% tablerow tag in collection.tags %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1"><b>tag1</b></td>'
+                    '<td class="col2">tag2</td>'
+                    '<td class="col3">tag3</td>'
+                    '<td class="col4">tag4</td>'
+                    "</tr>"
+                ),
+                context={
+                    "collection": {
+                        "tags": [
+                            Markup("<b>tag1</b>"),
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+        ]
+
+        env = Environment(autoescape=True)
+
+        for case in tests:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+                result = template.render(**case.context)
+                self.assertEqual(result, case.expect)
+
+    def test_liquid_tag(self):
+        """Test that the liquid tag behaves well with autoescape."""
+        tests = [
+            Case(
+                description="echo markup from context",
+                template="\n".join(
+                    [
+                        r"{% liquid ",
+                        r"    echo foo",
+                        r"%}",
+                    ]
+                ),
+                context={"foo": "<em>hello</em>"},
+                expect="&lt;em&gt;hello&lt;/em&gt;",
+            ),
+            Case(
+                description="echo unsafe markup from string literal",
+                template="\n".join(
+                    [
+                        r"{% liquid ",
+                        r"    echo '<em>hello</em>'",
+                        r"%}",
+                    ]
+                ),
+                context={},
+                expect="<em>hello</em>",
+            ),
+            Case(
+                description="echo safe markup from context",
+                template="\n".join(
+                    [
+                        r"{% liquid ",
+                        r"    echo foo",
+                        r"%}",
+                    ]
+                ),
+                context={"foo": Markup("<em>hello</em>")},
+                expect="<em>hello</em>",
+            ),
+        ]
+
+        env = Environment(autoescape=True)
+
+        for case in tests:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+                result = template.render(**case.context)
+                self.assertEqual(result, case.expect)
