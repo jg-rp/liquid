@@ -13,7 +13,6 @@ from typing import Dict
 from typing import Any
 from typing import Optional
 from typing import TextIO
-from typing import Mapping
 from typing import TYPE_CHECKING
 
 from liquid.context import Context
@@ -44,12 +43,12 @@ class BoundTemplate:
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Path] = None,
-        globals: Optional[Mapping[str, Any]] = None,
+        globals: Optional[Dict[str, Any]] = None,
         uptodate: Optional[Callable[[], bool]] = None,
     ):
         self.env = env
         self.tree = parse_tree
-        self._globals = globals or {}
+        self.globals = globals or {}
         self.name = name
         self.path = path
         self.uptodate = uptodate
@@ -61,7 +60,7 @@ class BoundTemplate:
         """
         _vars: Dict[str, object] = dict(*args, **kwargs)
 
-        context = Context(self.env, ChainMap(_vars, self._globals))
+        context = Context(self.env, ChainMap(_vars, self.globals))
 
         buf = StringIO()
         self.render_with_context(context, buf)

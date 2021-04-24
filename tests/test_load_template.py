@@ -1,5 +1,7 @@
 """Template loader test cases."""
 
+import tempfile
+import time
 import unittest
 
 from pathlib import Path
@@ -23,7 +25,10 @@ class FileSystemLoaderTestCase(unittest.TestCase):
 
     def test_cached_template(self):
         """Test that templates loaded from the file system get cached."""
-        env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
+        env = Environment(
+            loader=FileSystemLoader(search_path="tests/fixtures/"),
+            auto_reload=True,
+        )
         template = env.get_template(name="dropify/index.liquid")
         self.assertTrue(template.is_up_to_date)
 
@@ -31,6 +36,74 @@ class FileSystemLoaderTestCase(unittest.TestCase):
         self.assertTrue(another.is_up_to_date)
 
         self.assertEqual(template.tree, another.tree)
+
+    def test_auto_reload_template(self):
+        """Test templates loaded from the file system are reloaded automatically."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = Path(tmpdir) / "somefile.txt"
+
+            # Initial template content
+            with template_path.open("w") as fd:
+                fd.write("hello there\n")
+
+            env = Environment(
+                loader=FileSystemLoader(search_path=tmpdir),
+                auto_reload=True,
+            )
+
+            template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            same_template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            self.assertEqual(template.tree, same_template.tree)
+
+            # Update template content.
+            time.sleep(0.01)  # Make sure some time has passed.
+            template_path.touch()
+
+            # Template has been updated
+            self.assertFalse(template.is_up_to_date)
+
+            updated_template = env.get_template(name=str(template_path))
+            self.assertTrue(updated_template.is_up_to_date)
+
+            self.assertNotEqual(template.tree, updated_template.tree)
+
+    def test_without_auto_reload_template(self):
+        """Test that auto_reload can be disabled."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = Path(tmpdir) / "somefile.txt"
+
+            # Initial template content
+            with template_path.open("w") as fd:
+                fd.write("hello there\n")
+
+            env = Environment(
+                loader=FileSystemLoader(search_path=tmpdir),
+                auto_reload=False,
+            )
+
+            template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            same_template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            self.assertEqual(template.tree, same_template.tree)
+
+            # Update template content.
+            time.sleep(0.01)  # Make sure some time has passed.
+            template_path.touch()
+
+            # Template has been updated
+            self.assertFalse(template.is_up_to_date)
+
+            updated_template = env.get_template(name=str(template_path))
+            self.assertFalse(updated_template.is_up_to_date)
+
+            self.assertEqual(template.tree, updated_template.tree)
 
     def test_template_not_found(self):
         """Test that we get an error if the template does not exist."""

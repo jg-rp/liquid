@@ -57,6 +57,10 @@ class Environment:
     :param autoescape: If `True`, all context values will be HTML-escaped before output
         unless they've been explicitly marks as "safe". Requires the package Markupsafe.
         Defaults to `False`.
+    :param auto_reload: If `True` (default), loaders that have an ``uptodate`` callable
+        will reload template source data automatically. For deployments where template
+        sources don't change between service reloads, setting auto_reload to `False` can
+        yield an increase in performance by avoiding calls to ``uptodate``.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
     """
@@ -74,6 +78,7 @@ class Environment:
         undefined: Type[Undefined] = Undefined,
         strict_filters: bool = True,
         autoescape: bool = False,
+        auto_reload: bool = True,
         globals: Optional[Mapping[str, object]] = None,
     ):
         self.tag_start_string = tag_start_string
@@ -105,6 +110,7 @@ class Environment:
 
         # Template cache
         self.cache = LRUCache(300)
+        self.auto_reload = auto_reload
 
         self.template_class = BoundTemplate
 
@@ -207,15 +213,11 @@ class Environment:
         """
         template = self.cache.get(name)
 
-        if isinstance(template, BoundTemplate) and template.is_up_to_date:
-            # Copy the cached template with new globals.
-            return self.template_class(
-                env=self,
-                name=template.name,
-                path=template.path,
-                parse_tree=template.tree,
-                globals=self.make_globals(globals),
-            )
+        if isinstance(template, BoundTemplate) and (
+            not self.auto_reload or template.is_up_to_date
+        ):
+            template.globals.update(self.make_globals(globals))
+            return template
 
         template = self.loader.load(self, name, globals=self.make_globals(globals))
         self.cache[name] = template
@@ -224,7 +226,7 @@ class Environment:
     # pylint: disable=redefined-builtin
     def make_globals(
         self, globals: Optional[Mapping[str, object]] = None
-    ) -> Mapping[str, object]:
+    ) -> Dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
             _globals: Dict[str, object] = {**self.globals, **globals}
@@ -278,6 +280,7 @@ def Template(
     undefined: Type[Undefined] = Undefined,
     strict_filters: bool = True,
     autoescape: bool = False,
+    auto_reload: bool = True,
     globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
     """A :class:`BoundTemplate` factory.
@@ -303,6 +306,10 @@ def Template(
     :param autoescape: If `True`, all context values will be HTML-escaped before output
         unless they've been explicitly marks as "safe". Requires the package Markupsafe.
         Defaults to `False`.
+    :param auto_reload: If `True` (default), loaders that have an ``uptodate`` callable
+        will reload template source data automatically. For deployments where template
+        sources don't change between service reloads, setting auto_reload to `False` can
+        yield an increase in performance by avoiding calls to ``uptodate``.
     :param globals: A mapping that will be added to the context of any template loaded
         from this environment.
     """
@@ -312,10 +319,12 @@ def Template(
         statement_start_string,
         statement_end_string,
         strip_tags,
+        None,  # loader
         tolerance,
         undefined,
         strict_filters,
         autoescape,
+        auto_reload,
     )
 
     return env.from_string(source, globals=globals)

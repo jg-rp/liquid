@@ -1,6 +1,17 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.5
+-------------
+
+- Auto reload. Disable automatic reloading of templates by passing ``auto_reload=False``
+  to ``Environment`` or ``Template``. For deployments where template sources don't
+  change between service reloads, setting auto_reload to `False` can yield an increase
+  in performance by avoiding calls to ``uptodate``.
+- Fixed a bug where, when using the ``Template`` API, ``undefined``, ``strict_filters``,
+  and ``autoescape`` where not always passed through to the implicit environment
+  correctly.
+
 Version 0.7.4
 -------------
 
@@ -9,7 +20,7 @@ Version 0.7.4
 - HTML auto-escaping. If `MarkupSafe`_ is installed and the ``autoescape`` argument to
   ``Environment`` or ``Template`` is ``True``, context variables will be HTML escaped
   automatically.
-- ``LiquidSyntaxError`` exceptions now include the offending template source as the
+- ``LiquidSyntaxError`` exceptions now include the offending template source in the
   ``source`` property.
 
 Version 0.7.3
