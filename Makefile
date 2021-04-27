@@ -6,7 +6,9 @@ test:
 
 .PHONY: coverage
 coverage:
-	coverage run -m unittest
+	coverage erase
+	tox -c tox_cov.ini
+	coverage combine
 	coverage html
 
 .PHONY: benchmark
