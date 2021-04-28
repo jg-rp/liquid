@@ -10,24 +10,17 @@ Python Liquid
 
 Release v\ |version|
 
-A Python implementation of `Liquid`_. A safe, customer-facing template language.
+A Python implementation of `Liquid`_. A non evaling templating language suitable for
+end users.
 
-.. image:: https://img.shields.io/pypi/pyversions/python-liquid.svg
-    :target: https://pypi.org/project/python-liquid/
-    :alt: Python versions
+Installation
+------------
 
-.. image:: https://img.shields.io/badge/pypy-3.7-blue
-    :target: https://pypi.org/project/python-liquid/
-    :alt: PyPy versions
+Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
 
-.. image:: https://img.shields.io/pypi/wheel/python-liquid.svg
-    :target: https://pypi.org/project/python-liquid/
+.. code-block:: text
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
-    :alt: Code style 
-
--------------------------------
+    $ python -m pip install -U python-liquid
 
 Quick Start
 -----------
@@ -41,9 +34,15 @@ Render a template string by creating a ``Template`` and calling its ``render`` m
     >>> template.render(you="Dave")         
     'Hello, Dave!'
 
-When using the built-in ``include`` or ``render`` tags, it's necessary to create an
+Keyword arguments passed to ``render`` are made available as variables for templates
+to use in Liquid expressions.
+
+If you want to use the built-in ``include`` or ``render`` tags, you'll need to create an 
 ``Environment``, with a template ``Loader``, then load and render templates from that
 environment.
+
+This example assumes a folder called ``templates`` exists in the current working
+directory, and that the template file ``index.html`` exists within it.
 
     >>> from liquid import Environment, FileSystemLoader
     >>> env = Environment(loader=FileSystemLoader("templates/"))
@@ -55,28 +54,32 @@ efficient than using ``Template`` directly.
 
     >>> from liquid import Environment
     >>> env = Environment()
-    >>> template = env.from_string("""  
+    >>> template = env.from_string(""" 
     ...     <html>    
-    ...     {% for i in (1..3) %}
+    ...     {% for i in (1..3) -%}
     ...     <p>hello {{ some }} {{ i }}</p>
-    ...     {% endfor %}
+    ...     {% endfor -%}
     ...     </html>
     ... """)
-    >>> template.render(some="thing")
+    >>> print(template.render(some="thing"))
+    <html>
+    <p>hello thing 1</p>
+    <p>hello thing 2</p>
+    <p>hello thing 3</p>
+    </html>
 
 
 User's Guide
 ------------
 
-
-
 .. toctree::
     :maxdepth: 2
  
-    user/description
-    user/render
+    user/rendering
+    user/loading
     user/context
-    user/loaders
+    user/strictness
+    user/autoescape
     user/tags
     user/filters
 
@@ -86,11 +89,8 @@ API Reference
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    api
-
-   
 
 
 Indices and tables

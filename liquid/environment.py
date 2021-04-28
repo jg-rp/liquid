@@ -35,34 +35,50 @@ from liquid.exceptions import lookup_warning
 class Environment:
     """Shared configuration from which templates can be loaded and parsed.
 
-    An ``Environment`` is also where you'd register custom tags and filters.
+    An ``Environment`` is where you might register custom tags and filters, or store
+    global context variables that should be included with every template.
 
     :param tag_start_string: The sequence of characters indicating the start of a
-        liquid tag.
+        liquid tag. Defaults to ``{%``.
+    :type tag_start_string: str
     :param tag_end_string: The sequence of characters indicating the end of a liquid
-        tag.
+        tag. Defaults to ``%}``.
+    :type tag_end_string: str
     :param statement_start_string: The sequence of characters indicating the start of
-        an output statement.
+        an output statement. Defaults to ``{{``.
+    :type statement_start_string: str
     :param statement_end_string: The sequence of characters indicating the end of an
-        output statement.
-    :param strip_tags: If `True` will strip leading and trailing whitespace from all
-        tags, regardless of whitespace control characters.
+        output statement. Defaults to ``}}``
+    :type statement_end_string: str
     :param tolerance: Indicates how tolerant to be of errors. Must be one of
-        `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
+        ``Mode.LAX``, ``Mode.WARN`` or ``Mode.STRICT``. Defaults to ``Mode.STRICT``.
+    :type tolerance: Mode
     :param loader: A template loader. If you want to use the builtin "render" or
-        "include" tags, a loader must be configured.
+        "include" tags, a loader must be configured. Defaults to an empty
+        :class:`liquid.loaders.DictLoader`.
+    :type loader: liquid.loaders.BaseLoader
     :param undefined: A subclass of :class:`Undefined` that represents undefined values.
-    :param strict_filters: If `True`, the default, will raise an exception upon finding
-        an undefined filter. Otherwise undefined filters are silently ignored.
+        Could be one of the built-in undefined types, :class:`Undefined`,
+        :class:`DebugUndefined` or :class:`StrictUndefined`. Defaults to
+        :class:`Undefined`, an undefined type that silently ignores undefined values.
+    :type undefined: liquid.Undefined
+    :param strict_filters: If ``True``, will raise an exception upon finding an
+        undefined filter. Otherwise undefined filters are silently ignored. Defaults to
+        ``True``.
+    :type strict_filters: bool
     :param autoescape: If `True`, all context values will be HTML-escaped before output
-        unless they've been explicitly marks as "safe". Requires the package Markupsafe.
-        Defaults to `False`.
-    :param auto_reload: If `True` (default), loaders that have an ``uptodate`` callable
-        will reload template source data automatically. For deployments where template
+        unless they've been explicitly marked as "safe". Requires the package
+        Markupsafe. Defaults to ``False``.
+    :type autoescape: bool
+    :param auto_reload: If `True`, loaders that have an ``uptodate`` callable will
+        reload template source data automatically. For deployments where template
         sources don't change between service reloads, setting auto_reload to `False` can
-        yield an increase in performance by avoiding calls to ``uptodate``.
-    :param globals: A mapping that will be added to the context of any template loaded
-        from this environment.
+        yield an increase in performance by avoiding calls to ``uptodate``. Defaults to
+        ``True``.
+    :type auto_reload: bool
+    :param globals: An optional mapping that will be added to the context of any
+        template loaded from this environment. Defaults to ``None``.
+    :type globals: dict
     """
 
     # pylint: disable=redefined-builtin too-many-arguments
@@ -129,7 +145,12 @@ class Environment:
         )
 
     def add_tag(self, tag: Type[Tag]) -> None:
-        """Register a liquid tag with the environment."""
+        """Register a liquid tag with the environment. Built-in tags are registered for
+        you automatically with every new :class:`Environment`.
+
+        :param tag: The tag to register.
+        :type tag: Type[Tag]
+        """
         self.tags[tag.name] = tag(self)
 
     def add_filter(self, name: str, func: Callable[..., Any]) -> None:
@@ -138,13 +159,13 @@ class Environment:
         :param name: The filter's name. Does not need to match the function name. This
             is what you'll use to apply the filter to an expression in a liquid
             template.
+        :type name: str
         :param func: Any callable that accepts at least one argument, the result of the
-            expression the filter is applied to.
-
-            If the filter needs access to the environment or render context, you
-            probably want to make `func` a class that inherits from `liquid.Filter`, and
-            override the `__call__` method. All builtin filters are implemented in this
-            way.
+            expression the filter is applied to. If the filter needs access to the
+            environment or render context, you probably want to make ``func`` a class
+            that inherits from :class:`liquid.filter.Filter`, and override the
+            ``__call__`` method. All builtin filters are implemented in this way.
+        :type func: Callable[..., Any]
         """
         self.filters[name] = func
 
@@ -170,20 +191,24 @@ class Environment:
         self,
         source: str,
         name: str = "",
-        path: Optional[Path] = None,
+        path: Optional[Union[str, Path]] = None,
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """Parse the given string as a liquid template.
 
-        `name` and `path` are passed to the `Template` constructor and will be
-        used to populate the template's `TemplateDrop`.
-
-        :param source: Liquid template source.
-        :param name: Name of the template.
-        :param path: Location of the template.
-        :param globals: A mapping of context variables made available every time the
-            template is rendered.
+        :param source: The liquid template source code.
+        :type source: str
+        :param name: Optional name of the template. Available as ``Template.name``.
+            Defaults to the empty string.
+        :type name: str
+        :param path: Optional path or identifier to the origin of the template. Defaults
+            to ``None``.
+        :type path: str, pathlib.Path
+        :param globals: An optional mapping of context variables made available every
+            time the resulting template is rendered. Defaults to ``None``.
+        :type globals: dict
         :returns: A parsed template ready to be rendered.
+        :rtype: liquid.template.BoundTemplate
         """
         try:
             parse_tree = self.parse(source)
@@ -210,6 +235,10 @@ class Environment:
         :param globals: A mapping of context variables made available every time the
             resulting template is rendered.
         :returns: A parsed template ready to be rendered.
+        :rtype: liquid.template.BoundTemplate
+        :raises:
+            :class:`liquid.exceptions.TemplateNotFound`: if a template with the given
+            name can not be found.
         """
         template = self.cache.get(name)
 
@@ -283,35 +312,51 @@ def Template(
     auto_reload: bool = True,
     globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
-    """A :class:`BoundTemplate` factory.
+    """Returns a :class:`liquid.template.BoundTemplate`, automatically creating an
+    :class:`Environment` to bind it to.
+
+    Other than `source`, all arguments are passed to the implicit :class:`Environment`,
+    which might have been cached from previous calls to :func:`Template`.
 
     :param source: A Liquid template source string.
+    :type source: str
     :param tag_start_string: The sequence of characters indicating the start of a
-        liquid tag.
+        liquid tag. Defaults to ``{%``.
+    :type tag_start_string: str
     :param tag_end_string: The sequence of characters indicating the end of a liquid
-        tag.
+        tag. Defaults to ``%}``.
+    :type tag_end_string: str
     :param statement_start_string: The sequence of characters indicating the start of
-        an output statement.
+        an output statement. Defaults to ``{{``.
+    :type statement_start_string: str
     :param statement_end_string: The sequence of characters indicating the end of an
-        output statement.
-    :param strip_tags: If `True` will strip leading and trailing whitespace from all
-        tags, regardless of whitespace control characters.
+        output statement. Defaults to ``}}``
+    :type statement_end_string: str
     :param tolerance: Indicates how tolerant to be of errors. Must be one of
-        `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
-    :param loader: A template loader. If you want to use the builtin "render" or
-        "include" tags, a loader must be configured.
+        `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`. Defaults to ``Mode.STRICT``.
+    :type tolerance: Mode
     :param undefined: A subclass of :class:`Undefined` that represents undefined values.
-    :param strict_filters: If `True`, the default, will raise an exception upon finding
-        an undefined filter. Otherwise undefined filters are silently ignored.
+        Could be one of the built-in undefined types, :class:`Undefined`,
+        :class:`DebugUndefined` or :class:`StrictUndefined`. Defaults to
+        :class:`Undefined`, an undefined type that silently ignores undefined values.
+    :type undefined: Undefined
+    :param strict_filters: If ``True``, will raise an exception upon finding an
+        undefined filter. Otherwise undefined filters are silently ignored. Defaults to
+        ``True``.
+    :type strict_filters: bool
     :param autoescape: If `True`, all context values will be HTML-escaped before output
-        unless they've been explicitly marks as "safe". Requires the package Markupsafe.
-        Defaults to `False`.
-    :param auto_reload: If `True` (default), loaders that have an ``uptodate`` callable
-        will reload template source data automatically. For deployments where template
+        unless they've been explicitly marked as "safe". Requires the package
+        Markupsafe. Defaults to ``False``.
+    :type autoescape: bool
+    :param auto_reload: If `True`, loaders that have an ``uptodate`` callable will
+        reload template source data automatically. For deployments where template
         sources don't change between service reloads, setting auto_reload to `False` can
-        yield an increase in performance by avoiding calls to ``uptodate``.
-    :param globals: A mapping that will be added to the context of any template loaded
-        from this environment.
+        yield an increase in performance by avoiding calls to ``uptodate``. Defaults to
+        ``True``.
+    :type auto_reload: bool
+    :param globals: An optional mapping that will be added to the context of any
+        template loaded from this environment. Defaults to ``None``.
+    :type globals: dict
     """
     env = get_implicit_environment(
         tag_start_string,

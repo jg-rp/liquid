@@ -3,5 +3,4 @@
 Rendering Templates
 ===================
 
-Render some templates.
-
+TODO:

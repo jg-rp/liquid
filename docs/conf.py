@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+
 import os
 import sys
 
@@ -36,8 +37,11 @@ version = liquid.__version__
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
 ]
+
+autodoc_typehints = "description"
+intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -53,7 +57,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "nature"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

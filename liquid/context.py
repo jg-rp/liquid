@@ -143,7 +143,9 @@ builtin = BuiltIn()
 
 
 class Undefined(collections.abc.Mapping):
-    """The default undefined type."""
+    """The default undefined type. Always evaluates to an empty string. Can be iterated
+    over and indexed without error.
+    """
 
     __slots__ = ("name", "obj", "hint")
 

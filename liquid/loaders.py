@@ -15,6 +15,7 @@ from pathlib import Path
 
 from typing import NamedTuple
 from typing import Callable
+from typing import Dict
 from typing import Iterable
 from typing import Mapping
 from typing import Optional
@@ -30,12 +31,26 @@ if TYPE_CHECKING:
 
 
 class TemplateSource(NamedTuple):
+    """A Liquid template source as returned by the ``get_source`` method of a `loader`.
+
+    :param source: The liquid template source code.
+    :type source: str
+    :param filename: The liquid template file name or other string identifying its
+        origin.
+    :type filename: str
+    :param uptodate: Optional callable that will return ``True`` if the template is up
+        to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
+    :type uptodate: Optional[Callable[[], bool]]
+    """
+
     source: str
     filename: str
     uptodate: Optional[Callable[[], bool]]
 
 
 class BaseLoader(ABC):
+    """Base template loader from which all template loaders are derived."""
+
     @abstractmethod
     def get_source(self, env: Environment, template_name: str) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
@@ -47,7 +62,6 @@ class BaseLoader(ABC):
         name: str,
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
-        """"""
         try:
             source, filename, uptodate = self.get_source(env, name)
         except Exception as err:
@@ -60,17 +74,21 @@ class BaseLoader(ABC):
         return template
 
 
-SearchPath = Union[str, Path, Iterable[Union[str, Path]]]
-
-
 class FileSystemLoader(BaseLoader):
-    """Load templates from one or more directories on the file system.
+    """A loader that loads templates from one or more directories on the file system.
 
     :param search_path: One or more paths to search.
-    :param encoding: Open template files with the given encoding.
+    :type search_path: Union[str, Path, Iterable[Union[str, Path]]]
+    :param encoding: Open template files with the given encoding. Defaults to
+        ``"utf-8"``.
+    :type encoding: str
     """
 
-    def __init__(self, search_path: SearchPath, encoding="utf-8"):
+    def __init__(
+        self,
+        search_path: Union[str, Path, Iterable[Union[str, Path]]],
+        encoding: str = "utf-8",
+    ):
         if not isinstance(search_path, abc.Iterable) or isinstance(search_path, str):
             search_path = [search_path]
 
@@ -105,7 +123,17 @@ class FileSystemLoader(BaseLoader):
 
 
 class DictLoader(BaseLoader):
-    def __init__(self, templates: Mapping[str, str]):
+    """A loader that loads templates from a dictionary mapping template names to
+    template source strings. If the given dictionary is empty,
+    :meth:`liquid.Environment.get_template` will always raise a
+    :class:`liquid.exceptions.TemplateNotFound` exception.
+
+    :param templates: A dictionary mapping template names to template source strings.
+    :type templates: Dict[str, str]
+    """
+
+    def __init__(self, templates: Dict[str, str]):
+        super().__init__()
         self.templates = templates
 
     def get_source(self, _: Environment, template_name: str) -> TemplateSource:

@@ -92,7 +92,10 @@ class TemplateNotFound(Error):
 
 
 class ContextDepthError(Error):
-    """Exception raised when the maximum context depth is reached."""
+    """Exception raised when the maximum context depth is reached.
+
+    Usually indicates recursive use of ``render`` or ``include`` tags.
+    """
 
 
 class UndefinedError(Error):
@@ -121,14 +124,6 @@ class LiquidTypeWarning(LiquidWarning):
 
 class FilterWarning(LiquidWarning):
     """Replaces filter exceptions when in WARN mode."""
-
-
-class OpcodeError(Error):
-    """Exceptions raised when there is an opcode definition error."""
-
-
-class StackOverflow(Error):
-    """Exception raised when the stack is full."""
 
 
 WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {

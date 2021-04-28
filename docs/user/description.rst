@@ -14,10 +14,10 @@ ahead to :ref:`rendering`.
 
 .. note::
 
-    I use the term ``output statement`` or ``statement`` where the reference
-    documentation would use ``object``. I find the definitions presented here
-    to be more accurate and inline with what a developer would expect and 
-    ``object`` to be.
+    I use the term ``output statement`` where the reference documentation would use
+    ``object``. I find the definition presented here to be more inline with what a
+    developer would expect and ``object`` to be.
+
 
 Templates
 ---------

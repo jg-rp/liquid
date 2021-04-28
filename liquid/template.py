@@ -13,6 +13,7 @@ from typing import Dict
 from typing import Any
 from typing import Optional
 from typing import TextIO
+from typing import Union
 from typing import TYPE_CHECKING
 
 from liquid.context import Context
@@ -29,11 +30,24 @@ if TYPE_CHECKING:  # pragma: no cover
 
 # pylint: disable=too-many-instance-attributes
 class BoundTemplate:
-    """A liquid template that has been parsed and is bound to an Environment.
+    """A liquid template that has been parsed and is bound to a
+    :class:`liquid.Environment`.
 
-    Rather than instantiating a `BoundTemplate` directly, you'll usually want
-    to use the `Template(source)` API or the `get_template` or `from_string`
-    methods from an `Environment`.
+    You probably don't want to be instantiate :class:`BoundTemplate` directly. Instead,
+    use :meth:`liquid.Environment.from_string` or
+    :meth:`liquid.Environment.get_template`.
+
+    :param env: The environment this template is bound to.
+    :type env: liquid.Environment
+    :param parse_tree: The parse tree representing this template.
+    :type parse_tree: liquid.ast.ParseTree
+    :param name: Optional name of the template. Defaults to an empty string.
+    :type name: str
+    :param path: Optional origin path or identifier for the template.
+    :type path: Optional[Union[str, Path]]
+    :param uptodate: Optional callable that will return ``True`` if the template is up
+        to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
+    :type uptodate: Optional[Callable[[], bool]]
     """
 
     # pylint: disable=redefined-builtin
@@ -42,7 +56,7 @@ class BoundTemplate:
         env: Environment,
         parse_tree: ParseTree,
         name: str = "",
-        path: Optional[Path] = None,
+        path: Optional[Union[str, Path]] = None,
         globals: Optional[Dict[str, Any]] = None,
         uptodate: Optional[Callable[[], bool]] = None,
     ):
@@ -56,7 +70,7 @@ class BoundTemplate:
     def render(self, *args: ..., **kwargs: ...) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
 
-        Accepts the same arguments as the `dict` constructor.
+        Accepts the same arguments as the :class:`dict` constructor.
         """
         _vars: Dict[str, object] = dict(*args, **kwargs)
 
@@ -77,13 +91,16 @@ class BoundTemplate:
     ):
         """Render the template using an existing context and output buffer.
 
-        Args:
-            context: A render context.
-            buffer: File-like object to which rendered text is written.
-            partial: If `True`, indicates that the current template has been
-                included using either a "render" or "include" tag.
-            block_scope: If `True`, indicates that assigns, breaks and continues
-                from this template will not leak into the parent context.
+        ``args`` and ``kwargs`` are passed to the :class:`dict` constructor. The
+        resulting dictionary is added to the render context.
+
+        :param context: A render context.
+        :param buffer: File-like object to which rendered text is written.
+        :param partial: If `True`, indicates that the current template has been
+            included using either a "render" or "include" tag. Defaults to ``False``.
+        :param block_scope: If `True`, indicates that assigns, breaks and continues
+            from this template will not leak into the parent context. Defaults to
+            ``False``.
         """
         # "template" could get overridden from args/kwargs, "partial" will not.
         namespace = self._make_globals(partial, args, kwargs)
@@ -143,9 +160,12 @@ class AwareBoundTemplate(BoundTemplate):
 class TemplateDrop(abc.Mapping):
     """Template meta data mapping."""
 
-    def __init__(self, name: str, path: Optional[Path]):
+    def __init__(self, name: str, path: Optional[Union[str, Path]]):
         self.name = name
-        self.path = path or Path(name)
+        self.path = path
+
+        if not self.path or isinstance(self.path, str):
+            self.path = Path(self.name)
 
         self.stem = self.path.stem
         if "." in self.stem:
