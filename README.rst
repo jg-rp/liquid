@@ -240,9 +240,7 @@ We strive to be 100% compatible with the `reference implementation`_ of Liquid, 
 in Ruby. That is, given an equivalent render context, a template rendered with Python
 Liquid should produce the same output as when rendered with Ruby Liquid.
 
-Python Liquid faithfully reproduces the following tags. Note that ``echo``,
-``ifchanged``, ``include``, ``liquid`` and ``render`` don't get a mention in the
-`reference documentation`_ of "core" Liquid, despite being present.
+Python Liquid faithfully reproduces the following tags.
 
 - assign
 - capture
