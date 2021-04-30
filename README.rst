@@ -29,6 +29,7 @@ A non evaling templating language suitable for end users.
     
 - `Installing`_
 - `Quick Start`_
+- `API Reference <https://liquid.readthedocs.io/en/latest/api.html>`_
 - `Related Projects`_
 - `Compatibility`_
 - `Benchmark`_
