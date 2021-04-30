@@ -985,6 +985,86 @@ class RenderTestCases(unittest.TestCase):
                 expect="",
                 globals={},
             ),
+            Case(
+                description="continue a loop",
+                template=(
+                    r"{% for item in array limit: 3 %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% for item in array offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 4 5 6 ",
+                globals={"array": [1, 2, 3, 4, 5, 6]},
+            ),
+            Case(
+                description="continue a loop over a changing array",
+                template=(
+                    r"{% assign foo = '1,2,3,4,5,6' | split: ',' %}"
+                    r"{% for item in foo limit: 3 %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% assign foo = 'u,v,w,x,y,z' | split: ',' %}"
+                    r"{% for item in foo offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 x y z ",
+                globals={},
+            ),
+            Case(
+                description="continue with changing loop var",
+                template=(
+                    r"{% for foo in array limit: 3 %}"
+                    r"{{ foo }} "
+                    r"{% endfor %}"
+                    r"{% for bar in array offset: continue %}"
+                    r"{{ bar }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 1 2 3 4 5 6 ",
+                globals={"array": [1, 2, 3, 4, 5, 6]},
+            ),
+            Case(
+                description="nothing to continue from",
+                template=(
+                    r"{% for item in array %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% for item in array offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 4 5 6 ",
+                globals={"array": [1, 2, 3, 4, 5, 6]},
+            ),
+            Case(
+                description="continue from a limit that is greater than length",
+                template=(
+                    r"{% for item in array limit: 99 %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% for item in array offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 4 5 6 ",
+                globals={"array": [1, 2, 3, 4, 5, 6]},
+            ),
+            Case(
+                description="continue from a range expression",
+                template=(
+                    r"{% for item in (1..6) limit: 3 %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% for item in (1..6) offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 4 5 6 ",
+                globals={"array": [1, 2, 3, 4, 5, 6]},
+            ),
         ]
 
         self._test(test_cases)
@@ -1028,7 +1108,11 @@ class RenderTestCases(unittest.TestCase):
         test_cases = [
             Case(
                 description="one row",
-                template=r"{% tablerow tag in collection.tags %}{{ tag }}{% endtablerow %}",
+                template=(
+                    r"{% tablerow tag in collection.tags %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
                 expect=(
                     '<tr class="row1">'
                     '<td class="col1">tag1</td>'
@@ -1049,8 +1133,60 @@ class RenderTestCases(unittest.TestCase):
                 },
             ),
             Case(
+                description="one row with limit",
+                template=(
+                    r"{% tablerow tag in collection.tags limit: 2 %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1">tag1</td>'
+                    '<td class="col2">tag2</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+            Case(
+                description="one row with offset",
+                template=(
+                    r"{% tablerow tag in collection.tags offset: 2 %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
+                expect=(
+                    '<tr class="row1">'
+                    '<td class="col1">tag3</td>'
+                    '<td class="col2">tag4</td>'
+                    "</tr>"
+                ),
+                globals={
+                    "collection": {
+                        "tags": [
+                            "tag1",
+                            "tag2",
+                            "tag3",
+                            "tag4",
+                        ]
+                    }
+                },
+            ),
+            Case(
                 description="two columns",
-                template=r"{% tablerow tag in collection.tags cols:2 %}{{ tag }}{% endtablerow %}",
+                template=(
+                    r"{% tablerow tag in collection.tags cols:2 %}"
+                    r"{{ tag }}"
+                    r"{% endtablerow %}"
+                ),
                 expect=(
                     '<tr class="row1">'
                     '<td class="col1">tag1</td>'

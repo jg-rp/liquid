@@ -43,6 +43,7 @@ from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COLON
@@ -300,26 +301,6 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     return expression.Identifier(path)
 
 
-class RangeOption(NamedTuple):
-    tok: Token
-    arg: Optional[Union[expression.Identifier, expression.IntegerLiteral]]
-
-
-def parse_range_argument(
-    stream: TokenStream,
-) -> Union[expression.Identifier, expression.IntegerLiteral]:
-    if stream.current.type == TOKEN_IDENTIFIER:
-        arg = parse_identifier(stream)
-    elif stream.current.type == TOKEN_INTEGER:
-        arg = parse_integer_literal(stream)
-    else:
-        raise LiquidSyntaxError(
-            "invalid range expression, expected an integer, "
-            f"found a {stream.current.type}"
-        )
-    return arg
-
-
 def parse_string_or_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
@@ -350,6 +331,31 @@ def parse_unchained_identifier(
         )
 
     return ident
+
+
+RangeArg = Optional[
+    Union[expression.Identifier, expression.IntegerLiteral, expression.Continue]
+]
+
+
+class RangeOption(NamedTuple):
+    tok: Token
+    arg: RangeArg
+
+
+def parse_range_argument(stream: TokenStream) -> RangeArg:
+    if stream.current.type == TOKEN_IDENTIFIER:
+        arg = parse_identifier(stream)
+    elif stream.current.type == TOKEN_INTEGER:
+        arg = parse_integer_literal(stream)
+    elif stream.current.type == TOKEN_CONTINUE:
+        arg = expression.CONTINUE
+    else:
+        raise LiquidSyntaxError(
+            "invalid range expression, expected an integer, "
+            f"found a {stream.current.type}"
+        )
+    return arg
 
 
 def parse_range_option(stream: TokenStream) -> RangeOption:

@@ -36,6 +36,7 @@ from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
@@ -810,6 +811,21 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_RANGE, ".."),
                     Token(1, TOKEN_IDENTIFIER, "num"),
                     Token(1, TOKEN_RPAREN, ")"),
+                ],
+            ),
+            Case(
+                description="loop over named iterable with continue offset",
+                source="item in array limit: 3 offset: continue",
+                expect=[
+                    Token(1, TOKEN_IDENTIFIER, "item"),
+                    Token(1, TOKEN_IN, "in"),
+                    Token(1, TOKEN_IDENTIFIER, "array"),
+                    Token(1, TOKEN_LIMIT, "limit"),
+                    Token(1, TOKEN_COLON, ":"),
+                    Token(1, TOKEN_INTEGER, "3"),
+                    Token(1, TOKEN_OFFSET, "offset"),
+                    Token(1, TOKEN_COLON, ":"),
+                    Token(1, TOKEN_CONTINUE, "continue"),
                 ],
             ),
         ]

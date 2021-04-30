@@ -11,6 +11,7 @@ Version 0.7.5
 - Fixed a bug where, when using the ``Template`` API, ``undefined``, ``strict_filters``,
   and ``autoescape`` where not always passed through to the implicit environment
   correctly.
+- Added support for continuing a for loop using ``offset: continue``. See #14.
 
 Version 0.7.4
 -------------

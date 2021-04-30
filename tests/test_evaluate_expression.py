@@ -579,3 +579,20 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
 
                 self.assertEqual(list(loopiter), case.expect)
                 self.assertEqual(length, len(case.expect))
+
+    def test_eval_continue_loop_expression(self):
+        """Test that we can evaluate loop expressions that use a continue offset."""
+
+        env = Environment()
+        context = Context(env, {"array": [1, 2, 3, 4, 5, 6]})
+
+        # Mock a for loop with a limit
+        context.stopindex("item-array", 3)
+
+        stream = TokenStream(tokenize_loop_expression("item in array offset: continue"))
+        expr = parse_loop_expression(stream)
+
+        loopiter, length = expr.evaluate(context)
+
+        self.assertEqual(list(loopiter), [4, 5, 6])
+        self.assertEqual(length, 3)

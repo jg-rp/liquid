@@ -109,6 +109,27 @@ class Blank(Expression):
 BLANK = Blank()
 
 
+class Continue(Expression):
+    __slots__ = ()
+
+    def __eq__(self, other: object):
+        if isinstance(other, Continue):
+            return True
+        return False
+
+    def __repr__(self):  # pragma: no cover
+        return "Continue()"
+
+    def __str__(self):  # pragma: no cover
+        return "continue"
+
+    def evaluate(self, context: Context) -> Continue:
+        return self
+
+
+CONTINUE = Continue()
+
+
 T = TypeVar("T")  # pylint: disable=invalid-name
 
 
@@ -461,7 +482,7 @@ class AssignmentExpression(Expression):
         return ""
 
 
-LoopArgument = Optional[Union[IntegerLiteral, Identifier]]
+LoopArgument = Optional[Union[IntegerLiteral, Identifier, Continue]]
 
 
 class LoopExpression(Expression):
@@ -548,9 +569,24 @@ class LoopExpression(Expression):
         )
 
     def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
+        # For the sake of the special for loop offset `continue`, we need to derive an
+        # identifier for this loop and store the theoretical stop index on the render
+        # context using that identifier.
+        #
+        # For compatibility with the reference implementation, we'll key loop stop
+        # indexes on the loop item name and the name of the iterable. Not the contents
+        # of the iterable. In the case of a range expression, we'll use a string
+        # representation of the expression.
+        offset_key = [
+            self.name,
+        ]
+
         if self.identifier:
             # An identifier that must resolve to a list or dict in the current
             # global or local namespaces.
+            assert isinstance(self.identifier, Identifier)
+            offset_key.append(str(self.identifier))
+
             obj = self.identifier.evaluate(context)
 
             if isinstance(obj, abc.Mapping):
@@ -574,24 +610,34 @@ class LoopExpression(Expression):
             assert isinstance(start, int)
             assert isinstance(stop, int)
 
+            # Python's range function finishes on `stop - step`, whereas Liquid ranges
+            # are inclusive of stop, and always step by one, so add one.
             stop = stop + 1
+
+            offset_key.append(f"{start}..{stop}")
 
             loop_iter = iter(range(start, stop))
             length = stop - start
 
         limit = self.limit
         offset = self.offset
+        offset_key = "-".join(offset_key)
+
+        if offset:
+            if offset == CONTINUE:
+                offset = context.stopindex(key=offset_key)
+            else:
+                offset = offset.evaluate(context)
+
+            assert isinstance(offset, int)
+            length = max(length - offset, 0)
 
         if limit:
             limit = limit.evaluate(context)
             assert isinstance(limit, int)
             length = min(length, limit)
 
-        if offset:
-            offset = offset.evaluate(context)
-            assert isinstance(offset, int)
-            length = max(length - offset, 0)
-
+        context.stopindex(key=offset_key, index=length)
         loop_iter = islice(loop_iter, offset, limit)
 
         if self.reversed:

@@ -48,6 +48,7 @@ from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COLON
@@ -174,6 +175,7 @@ loop_expression_keywords = frozenset(
         TOKEN_LIMIT,
         TOKEN_REVERSED,
         TOKEN_COLS,
+        TOKEN_CONTINUE,
     ]
 )
 

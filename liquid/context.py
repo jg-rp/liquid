@@ -285,6 +285,7 @@ class Context:
             "cycles": {},
             "counters": {},
             "ifchanged": "",
+            "stopindex": {},
         }
 
         # A list of tags names that are disallowed in this context. For example,
@@ -376,6 +377,13 @@ class Context:
             return True
 
         return False
+
+    def stopindex(self, key: str, index: Optional[int] = None) -> int:
+        """Set or return the stop index of a for loop."""
+        if index is not None:
+            self._tag_namespace["stopindex"][key] = index
+            return index
+        return self._tag_namespace["stopindex"].get(key, 0)
 
     @contextmanager
     def extend(self, namespace: Namespace):

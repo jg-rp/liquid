@@ -34,6 +34,7 @@ __all__ = (
     "TOKEN_LIMIT",
     "TOKEN_OFFSET",
     "TOKEN_REVERSED",
+    "TOKEN_CONTINUE",
     "TOKEN_COLS",
     "TOKEN_PIPE",
     "TOKEN_COLON",
@@ -98,6 +99,7 @@ TOKEN_RANGE = sys.intern("range")
 TOKEN_LIMIT = sys.intern("limit")
 TOKEN_OFFSET = sys.intern("offset")
 TOKEN_REVERSED = sys.intern("reversed")
+TOKEN_CONTINUE = sys.intern("continue")
 
 # Tablerow specific argument
 TOKEN_COLS = sys.intern("cols")
