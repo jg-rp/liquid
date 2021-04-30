@@ -35,4 +35,9 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
+    project_urls={
+        "API Reference": "https://liquid.readthedocs.io/en/latest/api.html",
+        "Issue Tracker": "https://github.com/jg-rp/liquid/issues",
+        "Source Code": "https://github.com/jg-rp/liquid",
+    },
 )
