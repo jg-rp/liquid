@@ -137,6 +137,9 @@ class IncludeTag(Tag):
         name = parse_string_or_identifier(expr_stream, linenum=tok.linenum)
         expr_stream.next_token()
 
+        identifier: Optional[Identifier] = None
+        alias: Optional[str] = None
+
         # Optionally bind a variable to the included template context
         if expr_stream.current.type in (TOKEN_WITH, TOKEN_FOR):
             expr_stream.next_token()  # Eat 'with' or 'for'
@@ -151,11 +154,6 @@ class IncludeTag(Tag):
                 expect(expr_stream, TOKEN_IDENTIFIER)
                 alias = str(parse_unchained_identifier(expr_stream))
                 expr_stream.next_token()
-            else:
-                alias = None
-        else:
-            identifier = None
-            alias = None
 
         # Zero or more keyword arguments
         args = {}

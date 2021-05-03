@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from collections import deque
+
+from typing import Deque
 from typing import Iterator
+from typing import List
 
 from liquid.token import Token
 from liquid.token import TOKEN_INITIAL
@@ -17,10 +20,10 @@ class TokenStream:
         self.iter = tokeniter
 
         # Queue of peeked tokens
-        self._pushed = deque()
+        self._pushed: Deque[Token] = deque()
 
         # Stack of tags
-        self.balancing_stack = []
+        self.balancing_stack: List[str] = []
 
         self.current: Token = Token(0, TOKEN_INITIAL, "")
         next(self)

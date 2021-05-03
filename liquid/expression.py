@@ -21,7 +21,7 @@ from typing import TypeVar
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid.context import Context
 
@@ -123,8 +123,8 @@ class Continue(Expression):
     def __str__(self):  # pragma: no cover
         return "continue"
 
-    def evaluate(self, context: Context) -> Continue:
-        return self
+    def evaluate(self, context: Context) -> int:
+        return 0
 
 
 CONTINUE = Continue()
@@ -577,7 +577,7 @@ class LoopExpression(Expression):
         # indexes on the loop item name and the name of the iterable. Not the contents
         # of the iterable. In the case of a range expression, we'll use a string
         # representation of the expression.
-        offset_key = [
+        _offset_key = [
             self.name,
         ]
 
@@ -585,7 +585,7 @@ class LoopExpression(Expression):
             # An identifier that must resolve to a list or dict in the current
             # global or local namespaces.
             assert isinstance(self.identifier, Identifier)
-            offset_key.append(str(self.identifier))
+            _offset_key.append(str(self.identifier))
 
             obj = self.identifier.evaluate(context)
 
@@ -614,27 +614,29 @@ class LoopExpression(Expression):
             # are inclusive of stop, and always step by one, so add one.
             stop = stop + 1
 
-            offset_key.append(f"{start}..{stop}")
+            _offset_key.append(f"{start}..{stop}")
 
             loop_iter = iter(range(start, stop))
             length = stop - start
 
-        limit = self.limit
-        offset = self.offset
-        offset_key = "-".join(offset_key)
+        limit: Optional[int] = None
+        offset: Optional[int] = None
+        offset_key = "-".join(_offset_key)
 
-        if offset:
-            if offset == CONTINUE:
+        if self.offset:
+            if self.offset == CONTINUE:
                 offset = context.stopindex(key=offset_key)
             else:
-                offset = offset.evaluate(context)
+                _offset = self.offset.evaluate(context)
+                assert isinstance(_offset, int)
+                offset = _offset
 
-            assert isinstance(offset, int)
             length = max(length - offset, 0)
 
-        if limit:
-            limit = limit.evaluate(context)
-            assert isinstance(limit, int)
+        if self.limit:
+            _limit = self.limit.evaluate(context)
+            assert isinstance(_limit, int)
+            limit = _limit
             length = min(length, limit)
 
         context.stopindex(key=offset_key, index=length)

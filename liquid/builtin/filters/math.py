@@ -2,6 +2,8 @@
 import math
 import decimal
 
+from typing import Tuple
+
 from liquid.exceptions import FilterArgumentError
 
 from liquid.filter import Filter
@@ -19,7 +21,7 @@ class MathFilter(Filter):
     __slots__ = ()
 
     name = "AbstractMathFilter"
-    num_args = (0,)
+    num_args: Tuple[int, ...] = (0,)
     msg = "{}: expected a number, found {}"
 
     def __call__(self, val, *args):

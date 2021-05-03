@@ -28,7 +28,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from liquid.ast import ParseTree
 
 
-# pylint: disable=too-many-instance-attributes
 class BoundTemplate:
     """A liquid template that has been parsed and is bound to a
     :class:`liquid.Environment`.
@@ -67,7 +66,7 @@ class BoundTemplate:
         self.path = path
         self.uptodate = uptodate
 
-    def render(self, *args: ..., **kwargs: ...) -> str:
+    def render(self, *args: Any, **kwargs: Any) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
 
         Accepts the same arguments as the :class:`dict` constructor.
@@ -84,11 +83,11 @@ class BoundTemplate:
         self,
         context: Context,
         buffer: TextIO,
-        *args: ...,
+        *args: Any,
         partial: bool = False,
         block_scope: bool = False,
-        **kwargs: ...,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Render the template using an existing context and output buffer.
 
         ``args`` and ``kwargs`` are passed to the :class:`dict` constructor. The
@@ -168,10 +167,10 @@ class TemplateDrop(abc.Mapping):
             self.path = Path(self.name)
 
         self.stem = self.path.stem
+        self.suffix: Optional[str] = None
+
         if "." in self.stem:
             self.suffix = self.stem.split(".")[-1]
-        else:
-            self.suffix = None
 
         self._items = {
             "directory": self.path.parent.name,

@@ -259,7 +259,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     <ident>[<int>]
     <ident>[<int>].<ident>
     """
-    path = []
+    path: expression.IdentifierPath = []
 
     while stream.current.type in IDENTIFIER_TOKENS:
         if stream.current.type == TOKEN_IDENTIFIER:
@@ -306,7 +306,7 @@ def parse_string_or_identifier(
     linenum: Optional[int] = None,
 ) -> ast.Expression:
     if stream.current.type == TOKEN_IDENTIFIER:
-        expr = parse_identifier(stream)
+        expr: expression.Expression = parse_identifier(stream)
     elif stream.current.type == TOKEN_STRING:
         expr = parse_string_literal(stream)
     else:
@@ -345,7 +345,7 @@ class RangeOption(NamedTuple):
 
 def parse_range_argument(stream: TokenStream) -> RangeArg:
     if stream.current.type == TOKEN_IDENTIFIER:
-        arg = parse_identifier(stream)
+        arg: RangeArg = parse_identifier(stream)
     elif stream.current.type == TOKEN_INTEGER:
         arg = parse_integer_literal(stream)
     elif stream.current.type == TOKEN_CONTINUE:

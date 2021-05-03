@@ -1,6 +1,13 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.6
+-------------
+
+- The ``block`` argument to the ``liquid.ast.ConditionalBlockNode`` constructor is no 
+  longer optional.
+
+
 Version 0.7.5
 -------------
 

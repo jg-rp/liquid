@@ -140,7 +140,7 @@ class ConditionalBlockNode(Node):
 
     __slots__ = ("tok", "condition", "block")
 
-    def __init__(self, tok: Token, condition: Expression, block: BlockNode = None):
+    def __init__(self, tok: Token, condition: Expression, block: BlockNode):
         self.tok = tok
         self.condition = condition
         self.block = block

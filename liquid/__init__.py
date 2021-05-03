@@ -4,8 +4,8 @@ try:
     from markupsafe import escape
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import escape
-    from liquid.exceptions import Markup
+    from liquid.exceptions import escape  # type: ignore
+    from liquid.exceptions import Markup  # type: ignore
 
 from .mode import Mode
 from .filter import Filter

@@ -60,7 +60,7 @@ class ForLoop(abc.Mapping):
         "index0",
         "rindex",
         "rindex0",
-        "keys",
+        "_keys",
     )
 
     def __init__(self, name: str, it: Iterator[Any], length: int):
@@ -76,7 +76,7 @@ class ForLoop(abc.Mapping):
         self.rindex = self.length + 1
         self.rindex0 = self.length
 
-        self.keys: List[str] = [
+        self._keys: List[str] = [
             "length",
             "index",
             "index0",
@@ -90,12 +90,12 @@ class ForLoop(abc.Mapping):
         return f"ForLoop(name='{self.name}', length={self.length})"
 
     def __getitem__(self, key: str):
-        if key in self.keys:
+        if key in self._keys:
             return getattr(self, key)
         raise KeyError(key)
 
     def __len__(self):
-        return len(self.keys)
+        return len(self._keys)
 
     def __next__(self):
         self.step()
@@ -245,12 +245,11 @@ class ForTag(Tag):
         stream.next_token()
 
         block = parser.parse_block(stream, ENDFORBLOCK)
+        default: Optional[BlockNode] = None
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
             default = parser.parse_block(stream, ENDFORELSEBLOCK)
-        else:
-            default = None
 
         expect(stream, TOKEN_TAG, value=TAG_ENDFOR)
         return ForNode(tok, expression=expr, block=block, default=default)

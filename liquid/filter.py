@@ -92,7 +92,7 @@ def expect_string_or_array(name: str, val: object):
         )
 
 
-def expect_n_args(name: str, n: int, args: ..., kwargs: ...):
+def expect_n_args(name: str, n: int, args: Any, kwargs: Any):
     """Raise a FilterArgumentError if args does not have `n` elements, and
     kwargs is not empty."""
     length = len(args)
@@ -106,13 +106,13 @@ def expect_n_args(name: str, n: int, args: ..., kwargs: ...):
         )
 
 
-def expect_one_arg(name: str, args: ..., kwargs: ...):
+def expect_one_arg(name: str, args: Any, kwargs: Any):
     """Raise a FilterArgumentError if args is not a single element tuple, and
     kwargs is not empty."""
     expect_n_args(name, 1, args, kwargs)
 
 
-def maybe_one_arg(name: str, args: ..., kwargs: ...):
+def maybe_one_arg(name: str, args: Any, kwargs: Any):
     """Raise a FilterArgumentError if args is not empty or a single element tuple,
     and kwargs is not empty."""
     if kwargs:
@@ -131,7 +131,7 @@ def maybe_one_arg(name: str, args: ..., kwargs: ...):
     )
 
 
-def one_maybe_two_args(name: str, args: ..., kwargs: ...) -> Tuple[Any, ...]:
+def one_maybe_two_args(name: str, args: Any, kwargs: Any) -> Tuple[Any, ...]:
     """Return (args[0], args[1]) or None if the args aren't there."""
     if kwargs:
         raise FilterArgumentError(
@@ -149,7 +149,7 @@ def one_maybe_two_args(name: str, args: ..., kwargs: ...) -> Tuple[Any, ...]:
     )
 
 
-def expect_no_args(name: str, args: ..., kwargs: ...):
+def expect_no_args(name: str, args: Any, kwargs: Any):
     """Raise a FilterArgumentError if args and kwargs are not empty."""
     if args:
         raise FilterArgumentError(

@@ -114,21 +114,24 @@ class CaseTag(Tag):
         while stream.current.istag(TAG_WHEN):
             stream.next_token()  # Eat WHEN
             expr = self.parse_expression(case, stream)
-
-            when = ast.ConditionalBlockNode(
-                stream.current,
-                condition=expr,
-            )
+            when_tok = stream.current
 
             stream.next_token()
-            when.block = self.parser.parse_block(stream, ENDWHENBLOCK)
-            whens.append(when)
+            when_block = self.parser.parse_block(stream, ENDWHENBLOCK)
+
+            whens.append(
+                ast.ConditionalBlockNode(
+                    tok=when_tok,
+                    condition=expr,
+                    block=when_block,
+                )
+            )
+
+        default: Optional[ast.BlockNode] = None
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
             default = self.parser.parse_block(stream, ENDCASEBLOCK)
-        else:
-            default = None
 
         expect(stream, TOKEN_TAG, value=TAG_ENDCASE)
         return CaseNode(tok, whens=whens, default=default)

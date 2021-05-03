@@ -3,7 +3,7 @@
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from .string import StringFilter
 

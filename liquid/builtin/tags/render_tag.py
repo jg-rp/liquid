@@ -18,7 +18,10 @@ from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 
 from liquid.exceptions import LiquidSyntaxError
+
 from liquid.expression import Expression
+from liquid.expression import Identifier
+
 from liquid.lex import tokenize_include_expression
 
 from liquid.parse import expect
@@ -65,7 +68,7 @@ class RenderNode(Node):
         self.var = var
         self.loop = loop
         self.alias = alias
-        self.args = args
+        self.args = args or {}
 
     def __str__(self):
         buf = [f"{self.name}"]
@@ -88,17 +91,16 @@ class RenderNode(Node):
         return f"RenderNode(tok={self.tok!r}, name={self.name})"
 
     def render_to_output(self, context: Context, buffer: TextIO):
-        template_name = self.name.evaluate(context)
+        path = self.name.evaluate(context)
+        assert isinstance(path, str)
 
         # TODO: Store this kind of thing on the context object but not the
         # globals/locals namespace.
         render_folder = context.get("render_folder", default=None)
+
         if render_folder:
-            path = pathlib.Path(str(render_folder), str(template_name)).with_suffix(
-                ".liquid"
-            )
-        else:
-            path = template_name
+            # FIXME: Don't assume ".liquid"
+            path = pathlib.Path(str(render_folder), path).with_suffix(".liquid")
 
         template = context.get_template(str(path))
 
@@ -169,6 +171,10 @@ class RenderTag(Tag):
         name = parse_string_literal(expr_stream)
         expr_stream.next_token()
 
+        alias: Optional[str] = None
+        identifier: Optional[Identifier] = None
+        loop: bool = False
+
         # Optionally bind a variable to the included template context
         if expr_stream.current.type in (TOKEN_WITH, TOKEN_FOR):
             loop = expr_stream.current.type == TOKEN_FOR
@@ -184,12 +190,6 @@ class RenderTag(Tag):
                 expect(expr_stream, TOKEN_IDENTIFIER)
                 alias = str(parse_unchained_identifier(expr_stream))
                 expr_stream.next_token()
-            else:
-                alias = None
-        else:
-            identifier = None
-            loop = False
-            alias = None
 
         # Zero or more keyword arguments
         args = {}

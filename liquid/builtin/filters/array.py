@@ -6,11 +6,12 @@ from operator import getitem
 
 from typing import List
 from typing import Any
+from typing import Tuple
 
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
@@ -22,7 +23,7 @@ from liquid.filter import expect_array
 from liquid import Undefined
 from liquid import is_undefined
 
-# pylint: disable=arguments-differ, too-few-public-methods
+# pylint: disable=too-few-public-methods
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
@@ -34,10 +35,10 @@ class ArrayFilter(Filter):
     __slots__ = ()
 
     name = "AbstractStringFilter"
-    num_args = (0,)
+    num_args: Tuple[int, ...] = (0,)
     msg = "{}: expected an array, found {}"
 
-    def __call__(self, val, *args):
+    def __call__(self, val, *args, **kwargs):
         if len(args) not in self.num_args:
             raise FilterArgumentError(
                 f"{self.name}: expected {self.num_args} arguments, found {len(args)}"

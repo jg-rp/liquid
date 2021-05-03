@@ -8,8 +8,8 @@ try:
     from markupsafe import escape
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import escape
-    from liquid.exceptions import Markup
+    from liquid.exceptions import escape  # type: ignore
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid import is_undefined
 
@@ -25,7 +25,7 @@ from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
 
 
-# pylint: disable=arguments-differ too-few-public-methods
+# pylint: disable=too-few-public-methods
 
 
 class StringFilter(Filter):
@@ -67,7 +67,7 @@ class Capitalize(StringFilter):
 
     name = "capitalize"
 
-    def filter(self, val):
+    def filter(self, val, *args, **kwargs):
         return val.capitalize()
 
 

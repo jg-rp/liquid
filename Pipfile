@@ -15,6 +15,7 @@ docutils = "*"
 flake8-bugbear = "*"
 twine = "*"
 sphinx = "*"
+mypy = "*"
 
 [packages]
 python-dateutil = "*"

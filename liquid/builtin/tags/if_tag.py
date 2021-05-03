@@ -136,19 +136,19 @@ class IfTag(Tag):
                 eat_block(stream, ENDELSIFBLOCK)
                 return IllegalNode(tok)
 
-            alt = ConditionalBlockNode(
-                stream.current,
-                condition=expr,
-            )
+            alt_tok = stream.current
             stream.next_token()
-            alt.block = self.parser.parse_block(stream, ENDELSIFBLOCK)
-            conditional_alternatives.append(alt)
+            alt_block = self.parser.parse_block(stream, ENDELSIFBLOCK)
+
+            conditional_alternatives.append(
+                ConditionalBlockNode(alt_tok, condition=expr, block=alt_block)
+            )
+
+        alternative: Optional[BlockNode] = None
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
             alternative = self.parser.parse_block(stream, ENDIFELSEBLOCK)
-        else:
-            alternative = None
 
         expect(stream, TOKEN_TAG, value=TAG_ENDIF)
         return IfNode(

@@ -52,7 +52,7 @@ class TableRow(collections.abc.Mapping):
         "col0",
         "col_first",
         "col_last",
-        "keys",
+        "_keys",
         "row",
         "nrows",
     )
@@ -80,7 +80,7 @@ class TableRow(collections.abc.Mapping):
         self.row = 0
         self.nrows = math.ceil(self.length / self.ncols)
 
-        self.keys: List[str] = [
+        self._keys: List[str] = [
             "length",
             "index",
             "index0",
@@ -98,12 +98,12 @@ class TableRow(collections.abc.Mapping):
         return f"TableRow(name='{self.name}', length={self.length})"
 
     def __getitem__(self, key):
-        if key in self.keys:
+        if key in self._keys:
             return getattr(self, key)
         raise KeyError(key)
 
     def __len__(self):
-        return len(self.keys)
+        return len(self._keys)
 
     def __iter__(self):
         return self

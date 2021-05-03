@@ -258,9 +258,9 @@ class Environment:
     ) -> Dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
-            _globals: Dict[str, object] = {**self.globals, **globals}
+            _globals = {**self.globals, **globals}
         else:
-            _globals: Dict[str, object] = {**self.globals}
+            _globals = {**self.globals}
         return _globals
 
     def error(

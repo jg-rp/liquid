@@ -8,7 +8,7 @@ from dateutil import parser
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid import is_undefined
 from liquid.filter import Filter

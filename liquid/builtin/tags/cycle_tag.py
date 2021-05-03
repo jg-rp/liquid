@@ -73,15 +73,14 @@ class CycleTag(Tag):
         expect(stream, TOKEN_EXPRESSION)
         expr_stream = TokenStream(tokenize_filtered_expression(stream.current.value))
 
+        group_name: Optional[Expression] = None
+
         if ":" in stream.current.value:
             group_name = parse_string_or_identifier(expr_stream, linenum=tok.linenum)
             expr_stream.next_token()
 
             expect(expr_stream, TOKEN_COLON)
             expr_stream.next_token()
-
-        else:
-            group_name = None
 
         args = []
         while expr_stream.current.type != TOKEN_EOF:

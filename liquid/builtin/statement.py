@@ -5,8 +5,8 @@ try:
     from markupsafe import escape
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import escape
-    from liquid.exceptions import Markup
+    from liquid.exceptions import escape  # type: ignore
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid.ast import Node
 from liquid.context import Context
@@ -55,6 +55,8 @@ class StatementNode(Node):
                 val = "".join(_str_if_not(itm) for itm in val)
         else:
             val = str(val)
+
+        assert isinstance(val, str)
 
         if context.autoescape:
             val = escape(val)

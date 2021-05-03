@@ -14,13 +14,14 @@ from itertools import cycle
 from operator import getitem
 
 from typing import Any
-from typing import Union
 from typing import Callable
+from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Mapping
-from typing import Iterator
-from typing import Sequence
 from typing import Optional
+from typing import Sequence
+from typing import Union
 from typing import TYPE_CHECKING
 
 from liquid.exceptions import NoSuchFilterFunc
@@ -120,7 +121,7 @@ class ReadOnlyChainMap(collections.abc.Mapping):
 class BuiltIn(collections.abc.Mapping):
     """Mapping-like object for resolving built-in, dynamic objects."""
 
-    def __contains__(self, item: str) -> bool:
+    def __contains__(self, item: object) -> bool:
         if item in ("now", "today"):
             return True
         return False
@@ -154,7 +155,7 @@ class Undefined(collections.abc.Mapping):
         self.obj = obj
         self.hint = hint
 
-    def __contains__(self, item: str) -> bool:
+    def __contains__(self, item: object) -> bool:
         return False
 
     def __eq__(self, other: object) -> bool:
@@ -211,7 +212,7 @@ class StrictUndefined(Undefined):
             return super().__getattribute__(name)
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __contains__(self, item: str) -> bool:
+    def __contains__(self, item: object) -> bool:
         raise UndefinedError(f"'{self.name}' is undefined")
 
     def __eq__(self, other: object) -> bool:
@@ -269,7 +270,7 @@ class Context:
 
         # A namespace for template local variables. Those that are bound with
         # `assign` or `capture`.
-        self.locals = {}
+        self.locals: Dict[str, Any] = {}
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
@@ -281,7 +282,7 @@ class Context:
 
         # A namspace supporting stateful tags. Such as `cycle`, `increment`,
         # `decrement` and `ifchanged`.
-        self._tag_namespace = {
+        self._tag_namespace: Dict[str, Any] = {
             "cycles": {},
             "counters": {},
             "ifchanged": "",

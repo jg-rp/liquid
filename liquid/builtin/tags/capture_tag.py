@@ -8,7 +8,7 @@ from typing import TextIO
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid import ast
 from liquid.context import Context

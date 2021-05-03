@@ -215,7 +215,7 @@ def compile_liquid_rules(
     tag_end_string: str = r"%}",
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
-):
+) -> Pattern:
     """Compile rules for lexing liquid templates."""
     tag_s = re.escape(tag_start_string)
     tag_e = re.escape(tag_end_string)
@@ -234,7 +234,7 @@ def compile_liquid_rules(
     return _compile_rules(liquid_rules)
 
 
-def _compile_rules(rules: Iterable[Tuple[str, str]]):
+def _compile_rules(rules: Iterable[Tuple[str, str]]) -> Pattern:
     """Compile the given rules into a single regular expression."""
     pattern = "|".join(f"(?P<{name}>{pattern})" for name, pattern in rules)
     return re.compile(pattern, re.DOTALL)
