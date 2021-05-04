@@ -23,66 +23,59 @@ from .tags import include_tag
 from .tags import render_tag
 from .tags import ifchanged_tag
 
+from .filters._math import abs_
+from .filters._math import at_most
+from .filters._math import at_least
+from .filters._math import ceil
+from .filters._math import divided_by
+from .filters._math import floor
+from .filters._math import minus
+from .filters._math import plus
+from .filters._math import round_
+from .filters._math import times
+from .filters._math import modulo
 
-from .filters.math import (
-    Abs,
-    AtMost,
-    AtLeast,
-    Ceil,
-    DividedBy,
-    Floor,
-    Minus,
-    Plus,
-    Round,
-    Times,
-    Modulo,
-)
+from .filters._string import capitalize
+from .filters._string import append
+from .filters._string import downcase
+from .filters._string import escape
+from .filters._string import escape_once
+from .filters._string import lstrip
+from .filters._string import newline_to_br
+from .filters._string import prepend
+from .filters._string import remove
+from .filters._string import remove_first
+from .filters._string import replace
+from .filters._string import replace_first
+from .filters._string import slice_
+from .filters._string import split
+from .filters._string import upcase
+from .filters._string import strip
+from .filters._string import rstrip
+from .filters._string import strip_html
+from .filters._string import strip_newlines
+from .filters._string import truncate
+from .filters._string import truncatewords
+from .filters._string import url_encode
+from .filters._string import url_decode
 
-from .filters.string import (
-    Capitalize,
-    Append,
-    Downcase,
-    Escape,
-    EscapeOnce,
-    LStrip,
-    NewlineToBR,
-    Prepend,
-    Remove,
-    RemoveFirst,
-    Replace,
-    ReplaceFirst,
-    Slice,
-    Split,
-    Upcase,
-    Strip,
-    RStrip,
-    StripHTML,
-    StripNewlines,
-    Truncate,
-    TruncateWords,
-    URLEncode,
-    URLDecode,
-)
+from .filters._array import join
+from .filters._array import first
+from .filters._array import last
+from .filters._array import concat
+from .filters._array import map_
+from .filters._array import reverse
+from .filters._array import sort
+from .filters._array import sort_natural
+from .filters._array import where
+from .filters._array import uniq
+from .filters._array import compact
 
-from .filters.array import (
-    Join,
-    First,
-    Last,
-    Concat,
-    Map,
-    Reverse,
-    Sort,
-    SortNatural,
-    Where,
-    Uniq,
-    Compact,
-)
+from .filters._misc import size
+from .filters._misc import default
+from .filters._misc import date
 
-from .filters.misc import Size
-from .filters.misc import Default
-from .filters.misc import Date
-
-from .filters.extra import Safe
+from .filters._extra import safe
 
 
 if TYPE_CHECKING:
@@ -112,56 +105,56 @@ def register(env: Environment) -> None:
     env.add_tag(render_tag.RenderTag)
     env.add_tag(ifchanged_tag.IfChangedTag)
 
-    env.add_filter(Abs.name, Abs(env))
-    env.add_filter(AtMost.name, AtMost(env))
-    env.add_filter(AtLeast.name, AtLeast(env))
-    env.add_filter(Ceil.name, Ceil(env))
-    env.add_filter(DividedBy.name, DividedBy(env))
-    env.add_filter(Floor.name, Floor(env))
-    env.add_filter(Minus.name, Minus(env))
-    env.add_filter(Plus.name, Plus(env))
-    env.add_filter(Round.name, Round(env))
-    env.add_filter(Times.name, Times(env))
-    env.add_filter(Modulo.name, Modulo(env))
+    env.add_filter("abs", abs_)
+    env.add_filter("at_most", at_most)
+    env.add_filter("at_least", at_least)
+    env.add_filter("ceil", ceil)
+    env.add_filter("divided_by", divided_by)
+    env.add_filter("floor", floor)
+    env.add_filter("minus", minus)
+    env.add_filter("plus", plus)
+    env.add_filter("round", round_)
+    env.add_filter("times", times)
+    env.add_filter("modulo", modulo)
 
-    env.add_filter(Capitalize.name, Capitalize(env))
-    env.add_filter(Append.name, Append(env))
-    env.add_filter(Downcase.name, Downcase(env))
-    env.add_filter(Escape.name, Escape(env))
-    env.add_filter(EscapeOnce.name, EscapeOnce(env))
-    env.add_filter(LStrip.name, LStrip(env))
-    env.add_filter(NewlineToBR.name, NewlineToBR(env))
-    env.add_filter(Prepend.name, Prepend(env))
-    env.add_filter(Remove.name, Remove(env))
-    env.add_filter(RemoveFirst.name, RemoveFirst(env))
-    env.add_filter(Replace.name, Replace(env))
-    env.add_filter(ReplaceFirst.name, ReplaceFirst(env))
-    env.add_filter(Slice.name, Slice(env))
-    env.add_filter(Split.name, Split(env))
-    env.add_filter(Upcase.name, Upcase(env))
-    env.add_filter(Strip.name, Strip(env))
-    env.add_filter(RStrip.name, RStrip(env))
-    env.add_filter(StripHTML.name, StripHTML(env))
-    env.add_filter(StripNewlines.name, StripNewlines(env))
-    env.add_filter(Truncate.name, Truncate(env))
-    env.add_filter(TruncateWords.name, TruncateWords(env))
-    env.add_filter(URLEncode.name, URLEncode(env))
-    env.add_filter(URLDecode.name, URLDecode(env))
+    env.add_filter("capitalize", capitalize)
+    env.add_filter("append", append)
+    env.add_filter("downcase", downcase)
+    env.add_filter("escape", escape)
+    env.add_filter("escape_once", escape_once)
+    env.add_filter("lstrip", lstrip)
+    env.add_filter("newline_to_br", newline_to_br)
+    env.add_filter("prepend", prepend)
+    env.add_filter("remove", remove)
+    env.add_filter("remove_first", remove_first)
+    env.add_filter("replace", replace)
+    env.add_filter("replace_first", replace_first)
+    env.add_filter("slice", slice_)
+    env.add_filter("split", split)
+    env.add_filter("upcase", upcase)
+    env.add_filter("strip", strip)
+    env.add_filter("rstrip", rstrip)
+    env.add_filter("strip_html", strip_html)
+    env.add_filter("strip_newlines", strip_newlines)
+    env.add_filter("truncate", truncate)
+    env.add_filter("truncatewords", truncatewords)
+    env.add_filter("url_encode", url_encode)
+    env.add_filter("url_decode", url_decode)
 
-    env.add_filter(Join.name, Join(env))
-    env.add_filter(First.name, First(env))
-    env.add_filter(Last.name, Last(env))
-    env.add_filter(Concat.name, Concat(env))
-    env.add_filter(Map.name, Map(env))
-    env.add_filter(Reverse.name, Reverse(env))
-    env.add_filter(Sort.name, Sort(env))
-    env.add_filter(SortNatural.name, SortNatural(env))
-    env.add_filter(Where.name, Where(env))
-    env.add_filter(Uniq.name, Uniq(env))
-    env.add_filter(Compact.name, Compact(env))
+    env.add_filter("join", join)
+    env.add_filter("first", first)
+    env.add_filter("last", last)
+    env.add_filter("concat", concat)
+    env.add_filter("map", map_)
+    env.add_filter("reverse", reverse)
+    env.add_filter("sort", sort)
+    env.add_filter("sort_natural", sort_natural)
+    env.add_filter("where", where)
+    env.add_filter("uniq", uniq)
+    env.add_filter("compact", compact)
 
-    env.add_filter(Size.name, Size(env))
-    env.add_filter(Default.name, Default(env))
-    env.add_filter(Date.name, Date(env))
+    env.add_filter("size", size)
+    env.add_filter("default", default)
+    env.add_filter("date", date)
 
-    env.add_filter(Safe.name, Safe(env))
+    env.add_filter("safe", safe)

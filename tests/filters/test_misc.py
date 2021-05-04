@@ -2,6 +2,7 @@
 import datetime
 import unittest
 
+from functools import partial
 from inspect import isclass
 
 from typing import NamedTuple
@@ -15,6 +16,10 @@ from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
 
 from liquid.expression import EMPTY
+
+from liquid.builtin.filters._misc import size
+from liquid.builtin.filters._misc import default
+from liquid.builtin.filters._misc import date
 
 from liquid.builtin.filters.misc import Size
 from liquid.builtin.filters.misc import Default
@@ -37,7 +42,22 @@ class MiscFilterTestCase(unittest.TestCase):
 
     def _test(self, filter_cls, test_cases):
         """Helper method for running lists of `Case`s"""
-        func = filter_cls(self.env)
+        with self.assertWarns(DeprecationWarning):
+            func = filter_cls(self.env)
+
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                if isclass(case.expect) and issubclass(case.expect, Error):
+                    with self.assertRaises(case.expect):
+                        func(case.val, *case.args, **case.kwargs)
+                else:
+                    self.assertEqual(
+                        func(case.val, *case.args, **case.kwargs), case.expect
+                    )
+
+    def _test_newstyle_filter(self, func, test_cases):
+        if getattr(func, "with_environment", False):
+            func = partial(func, environment=self.env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):
@@ -97,6 +117,7 @@ class MiscFilterTestCase(unittest.TestCase):
         ]
 
         self._test(Size, test_cases)
+        self._test_newstyle_filter(size, test_cases)
 
     def test_default(self):
         """Test `default` filter function."""
@@ -209,6 +230,7 @@ class MiscFilterTestCase(unittest.TestCase):
         ]
 
         self._test(Default, test_cases)
+        self._test_newstyle_filter(default, test_cases)
 
     def test_date(self):
         """Test `date` filter function."""
@@ -265,3 +287,4 @@ class MiscFilterTestCase(unittest.TestCase):
         ]
 
         self._test(Date, test_cases)
+        self._test_newstyle_filter(date, test_cases)

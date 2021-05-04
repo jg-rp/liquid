@@ -1,4 +1,4 @@
-"""Filter functions that can operate on multiple input data types."""
+"""Legacy, class-based implementations of miscellaneous filters."""
 
 import datetime
 import functools
@@ -62,12 +62,12 @@ class Default(AbstractFilter):
     name = "default"
     num_args = 1
 
-    def filter(self, obj, default, allow_false=None):
+    def filter(self, obj, _default, allow_false=None):
         if allow_false is True and obj is False:
             return obj
 
         if obj in (None, False, EMPTY) or is_undefined(obj):
-            return default
+            return _default
 
         return obj
 

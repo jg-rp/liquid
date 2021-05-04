@@ -1,4 +1,4 @@
-"""Non-standard filters."""
+"""Legacy implementations of non-standard filters."""
 
 try:
     from markupsafe import Markup
@@ -7,7 +7,7 @@ except ImportError:
 
 from .string import StringFilter
 
-# pylint: disable=arguments-differ too-few-public-methods
+# pylint: disable=too-few-public-methods arguments-differ
 
 
 class Safe(StringFilter):

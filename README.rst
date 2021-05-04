@@ -353,38 +353,33 @@ And use it like this.
     {% endif %}
 
 
-If you want to add more complex filters, probably including some type checking and/or
-casting, or the filter needs access to the active context or environment, you'll want to
-inherit from ``Filter`` and implement its ``__call__`` method.
+Decorate filter functions with ``with_context`` or ``with_environment`` to have the 
+active context or environment passed as a keyword arguments.
 
 .. code-block:: python
 
-  from liquid.filter import Filter
-  from liquid.filter import string_required
+  from liquid.filter import with_context
+  from liquid.filter import string_filter
 
-  class LinkToTag(Filter):
-
-    name = "link_to_tag"
-    with_context = True
-
-    @string_required
-    def __call__(self, label, tag, *, context):
-        handle = context.resolve("handle", default="")
-        return (
-            f'<a title="Show tag {tag}" href="/collections/{handle}/{tag}">{label}</a>'
-        )
+  @string_filter
+  @with_context
+  def link_to_tag(label, tag, *, context):
+      handle = context.resolve("handle", default="")
+      return (
+          f'<a title="Show tag {tag}" href="/collections/{handle}/{tag}">{label}</a>'
+      )
 
 And register it wherever you create your environment.
 
 .. code-block:: python
 
   from liquid import Environment, FileSystemLoader
-  from myfilters import LinkToTag
+  from myfilters import link_to_tag
 
   env = Environment(loader=FileSystemLoader("templates/"))
-  env.add_filter(LinkToTag.name, LinkToTag(env))
+  env.add_filter("link_to_tag", link_to_tag)
 
-In a template, you could then use the ``LinkToTag`` filter like this.
+In a template, you could then use the ``link_to_tag`` filter like this.
 
 .. code-block::
 
@@ -397,13 +392,12 @@ In a template, you could then use the ``LinkToTag`` filter like this.
         </dl>
     {% endif %}
 
-Note that the ``Filter`` constructor takes a single argument, a reference to the
-environment, which is available to ``Filter`` methods as ``self.env``. The class
-variable ``name`` is used by the ``string_required`` decorator (and all other helpers/
-decorators found in ``liquid.filter``) to give informative error messages.
+All built-in filters are implemented in this way, so have a look in
+``liquid/builtin/filters/`` for many more examples.
 
-All built-in filters are implemented in this way, so have a look in ``liquid/builtin/\
-filters/`` for many more examples.
+Note that old style, class-based filters are depreciated and will be removed in Liquid
+0.9. You can still implement custom filters as callable classes, but Liquid will not
+include any abstract base classes for filters or legacy filter "helpers".
 
 
 Custom Tags

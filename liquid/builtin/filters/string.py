@@ -1,14 +1,14 @@
-"""Filter functions that operate on strings."""
+"""Legacy, class-based implementations of filters that operate on strings."""
 
 import html
 import re
 import urllib.parse
 
 try:
-    from markupsafe import escape
+    from markupsafe import escape as markupsafe_escape
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import escape  # type: ignore
+    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
 
 from liquid import is_undefined
@@ -25,7 +25,7 @@ from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods arguments-differ
 
 
 class StringFilter(Filter):
@@ -105,7 +105,7 @@ class Escape(StringFilter):
 
     def filter(self, val):
         if self.env.autoescape:
-            return escape(str(val))
+            return markupsafe_escape(str(val))
         return html.escape(val)
 
 
@@ -145,7 +145,7 @@ class NewlineToBR(StringFilter):
         # The reference implementation was changed to replace "\r\n" as well as "\n",
         # but they don't seem to care about "\r" (Mac OS).
         if self.env.autoescape:
-            val = escape(val)
+            val = markupsafe_escape(val)
             return Markup(self.re_lineterm.sub("<br />\n", val))
         return self.re_lineterm.sub("<br />\n", val)
 
@@ -341,7 +341,7 @@ class StripNewlines(StringFilter):
 
     def filter(self, val):
         if self.env.autoescape:
-            val = escape(val)
+            val = markupsafe_escape(val)
             return Markup(self.re_lineterm.sub("", val))
         return self.re_lineterm.sub("", val)
 

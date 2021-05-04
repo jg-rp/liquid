@@ -32,33 +32,34 @@ from liquid.lex import get_lexer
 from tests.mocks.tags.form_tag import CommentFormTag
 from tests.mocks.tags.paginate_tag import PaginateTag
 
-from tests.mocks.filters.json import JSON
+from tests.mocks.filters.json import json_
 
-from tests.mocks.filters.money import Money
-from tests.mocks.filters.money import MoneyWithCurrency
+from tests.mocks.filters.money import money_
+from tests.mocks.filters.money import money_with_currency
 
-from tests.mocks.filters.shop import AssetUrl
-from tests.mocks.filters.shop import DefaultPagination
-from tests.mocks.filters.shop import GlobalAssetUrl
-from tests.mocks.filters.shop import ImgTag
-from tests.mocks.filters.shop import LinkTo
-from tests.mocks.filters.shop import LinkToType
-from tests.mocks.filters.shop import LinkToVendor
-from tests.mocks.filters.shop import ShopifyAssetUrl
-from tests.mocks.filters.shop import StylesheetTag
-from tests.mocks.filters.shop import ScriptTag
-from tests.mocks.filters.shop import URLForType
-from tests.mocks.filters.shop import URLForVendor
-from tests.mocks.filters.shop import ProductImgURL
-from tests.mocks.filters.shop import Pluralize
-from tests.mocks.filters.shop import Within
+from tests.mocks.filters.shop import asset_url
+from tests.mocks.filters.shop import default_pagination
+from tests.mocks.filters.shop import global_asset_url
+from tests.mocks.filters.shop import img_tag
+from tests.mocks.filters.shop import link_to
+from tests.mocks.filters.shop import link_to_type
+from tests.mocks.filters.shop import link_to_vendor
+from tests.mocks.filters.shop import shopify_asset_url
+from tests.mocks.filters.shop import stylesheet_tag
+from tests.mocks.filters.shop import script_tag
+from tests.mocks.filters.shop import url_for_type
+from tests.mocks.filters.shop import url_for_vendor
+from tests.mocks.filters.shop import product_img_url
+from tests.mocks.filters.shop import pluralize
+from tests.mocks.filters.shop import within
 
-from tests.mocks.filters.tag import HighlightActiveTag
-from tests.mocks.filters.tag import LinkToAddTag
-from tests.mocks.filters.tag import LinkToRemoveTag
-from tests.mocks.filters.tag import LinkToTag
+from tests.mocks.filters.tag import highlight_active_tag
+from tests.mocks.filters.tag import link_to_add_tag
+from tests.mocks.filters.tag import link_to_remove_tag
+from tests.mocks.filters.tag import link_to_tag
 
-from tests.mocks.filters.weight import Weight, WeightWithUnit
+from tests.mocks.filters.weight import weight
+from tests.mocks.filters.weight import weight_with_unit
 
 
 class ThemedTemplate(NamedTuple):
@@ -101,30 +102,30 @@ def register_mocks(env: Environment):
     env.add_tag(CommentFormTag)
     env.add_tag(PaginateTag)
 
-    env.add_filter(JSON.name, JSON(env))
-    env.add_filter(Money.name, Money(env))
-    env.add_filter(MoneyWithCurrency.name, MoneyWithCurrency(env))
-    env.add_filter(AssetUrl.name, AssetUrl(env))
-    env.add_filter(DefaultPagination.name, DefaultPagination(env))
-    env.add_filter(GlobalAssetUrl.name, GlobalAssetUrl(env))
-    env.add_filter(ImgTag.name, ImgTag(env))
-    env.add_filter(LinkTo.name, LinkTo(env))
-    env.add_filter(LinkToType.name, LinkToType(env))
-    env.add_filter(LinkToVendor.name, LinkToVendor(env))
-    env.add_filter(ShopifyAssetUrl.name, ShopifyAssetUrl(env))
-    env.add_filter(StylesheetTag.name, StylesheetTag(env))
-    env.add_filter(ScriptTag.name, ScriptTag(env))
-    env.add_filter(URLForType.name, URLForType(env))
-    env.add_filter(URLForVendor.name, URLForVendor(env))
-    env.add_filter(ProductImgURL.name, ProductImgURL(env))
-    env.add_filter(Pluralize.name, Pluralize(env))
-    env.add_filter(HighlightActiveTag.name, HighlightActiveTag(env))
-    env.add_filter(LinkToAddTag.name, LinkToAddTag(env))
-    env.add_filter(LinkToRemoveTag.name, LinkToRemoveTag(env))
-    env.add_filter(LinkToTag.name, LinkToTag(env))
-    env.add_filter(Weight.name, Weight(env))
-    env.add_filter(WeightWithUnit.name, WeightWithUnit(env))
-    env.add_filter(Within.name, Within(env))
+    env.add_filter("json", json_)
+    env.add_filter("money", money_)
+    env.add_filter("money_with_currency", money_with_currency)
+    env.add_filter("asset_url", asset_url)
+    env.add_filter("default_pagination", default_pagination)
+    env.add_filter("global_asset_url", global_asset_url)
+    env.add_filter("img_tag", img_tag)
+    env.add_filter("link_to", link_to)
+    env.add_filter("link_to_type", link_to_type)
+    env.add_filter("link_to_vendor", link_to_vendor)
+    env.add_filter("shopify_asset_url", shopify_asset_url)
+    env.add_filter("stylesheet_tag", stylesheet_tag)
+    env.add_filter("script_tag", script_tag)
+    env.add_filter("url_for_type", url_for_type)
+    env.add_filter("url_for_vendor", url_for_vendor)
+    env.add_filter("product_img_url", product_img_url)
+    env.add_filter("pluralize", pluralize)
+    env.add_filter("highlight_active_tag", highlight_active_tag)
+    env.add_filter("link_to_add_tag", link_to_add_tag)
+    env.add_filter("link_to_remove_tag", link_to_remove_tag)
+    env.add_filter("link_to_tag", link_to_tag)
+    env.add_filter("weight", weight)
+    env.add_filter("weight_with_unit", weight_with_unit)
+    env.add_filter("within", within)
 
 
 def load_data() -> Dict[str, Any]:

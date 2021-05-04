@@ -4,6 +4,14 @@ Python Liquid Change Log
 Version 0.7.6
 -------------
 
+- Class-based filters are now depreciated in favour of decorated filter functions. 
+  Abstract filter classes (such as ``liquid.builtin.filters.string.StringFilter``) will
+  be removed in Liquid 0.9.
+- All built-in filters are now implemented as decorated functions. Legacy, class-based
+  filters are no longer registered automatically and will be removed in Liquid 0.9.
+- Legacy filter "helpers" are now depreciated and will be removed in Liquid 0.9. Use
+  the new decorators, like ``liquid.filter.string_filter`` and
+  ``liquid.filter.with_context``, instead.
 - The ``block`` argument to the ``liquid.ast.ConditionalBlockNode`` constructor is no 
   longer optional.
 

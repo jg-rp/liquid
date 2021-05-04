@@ -1,4 +1,5 @@
-"""Maths related filter function definitions"""
+"""Legacy, class-based implementations of maths related filters."""
+
 import math
 import decimal
 

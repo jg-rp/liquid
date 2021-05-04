@@ -1,27 +1,11 @@
-from liquid.filter import Filter, no_args, number_required
-
-# pylint: disable=arguments-differ, too-few-public-methods
+from liquid.filter import math_filter
 
 
-class MoneyWithCurrency(Filter):
-
-    __slots__ = ()
-
-    name = "money_with_currency"
-
-    @no_args
-    @number_required
-    def __call__(self, money):
-        return f"$ {money / 100.0:.2f} USD"
+@math_filter
+def money_with_currency(money):
+    return f"$ {money / 100.0:.2f} USD"
 
 
-class Money(Filter):
-
-    __slots__ = ()
-
-    name = "money"
-
-    @no_args
-    @number_required
-    def __call__(self, money):
-        return f"$ {money / 100.0:.2f}"
+@math_filter
+def money_(money):
+    return f"$ {money / 100.0:.2f}"

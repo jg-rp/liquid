@@ -1,4 +1,4 @@
-"""Filter functions that operate on arrays."""
+"""Legacy, class-based implementations of filters that operate on arrays."""
 
 from collections import OrderedDict
 
@@ -23,7 +23,7 @@ from liquid.filter import expect_array
 from liquid import Undefined
 from liquid import is_undefined
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods arguments-differ
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)

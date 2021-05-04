@@ -342,8 +342,16 @@ class Context:
         except KeyError as err:
             raise NoSuchFilterFunc(f"unknown filter '{name}'") from err
 
+        kwargs: Dict[str, Any] = {}
+
         if getattr(filter_func, "with_context", False):
-            return functools.partial(filter_func, context=self)
+            kwargs["context"] = self
+
+        if getattr(filter_func, "with_environment", False):
+            kwargs["environment"] = self.env
+
+        if kwargs:
+            return functools.partial(filter_func, **kwargs)
 
         return filter_func
 
