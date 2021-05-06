@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.7
+-------------
+
+- Recursive use of the "render" tag now raises a ``ContextDepthError`` if
+  ``MAX_CONTEXT_DEPTH`` is exceeded.
+
 Version 0.7.6
 -------------
 

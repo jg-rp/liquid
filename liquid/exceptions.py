@@ -154,3 +154,7 @@ class Markup:
 
     def unescape(self) -> str:
         raise Error("autoescape requires Markupsafe to be installed")
+
+    def format(self, *args, **kwargs) -> str:
+        raise Error("autoescape requires Markupsafe to be installed")
+

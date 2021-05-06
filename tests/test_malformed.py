@@ -10,9 +10,7 @@ from liquid.mode import Mode
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
 from liquid.exceptions import LiquidTypeError
-from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import lookup_warning
 from liquid.exceptions import Error
 from liquid.exceptions import TemplateNotFound
@@ -328,7 +326,10 @@ class MalformedTemplateTestCase(TestCase):
                 description="recursive include",
                 template="{% include 'recursive.liquid' %}",
                 expect_exception=ContextDepthError,
-                expect_msg="maximum context depth reached, possible recursive include, on line 1",
+                expect_msg=(
+                    "maximum context depth reached, "
+                    "possible recursive include, on line 1"
+                ),
             ),
         ]
 
@@ -348,12 +349,12 @@ class MalformedTemplateTestCase(TestCase):
                 description="break from render",
                 template="".join(
                     [
-                        "{% assign greeting = 'good morning' %}",
-                        "{% for i in (1..3) %}",
-                        "{{ i }}",
-                        "{% render 'break' %}",
-                        "{{ i }}",
-                        "{% endfor %}",
+                        r"{% assign greeting = 'good morning' %}",
+                        r"{% for i in (1..3) %}",
+                        r"{{ i }}",
+                        r"{% render 'break' %}",
+                        r"{{ i }}",
+                        r"{% endfor %}",
                     ]
                 ),
                 expect_exception=LiquidSyntaxError,
@@ -372,9 +373,23 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=DisabledTagError,
                 expect_msg="include usage is not allowed in this context, on line 1",
             ),
+            Case(
+                description="recursive render",
+                template="{% render 'recursive.liquid' %}",
+                expect_exception=ContextDepthError,
+                expect_msg=(
+                    "maximum context depth reached, "
+                    "possible recursive render, on line 1"
+                ),
+            ),
         ]
 
-        templates = {"break": "{% break %}", "include": "{% include 'foo' %}"}
+        templates = {
+            "break": "{% break %}",
+            "include": "{% include 'foo' %}",
+            "recursive.liquid": "{% render 'inner.liquid' %}",
+            "inner.liquid": "{% render 'recursive.liquid' %}",
+        }
 
         self._test_partial(test_cases, templates)
 

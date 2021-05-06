@@ -112,9 +112,11 @@ class ReadOnlyChainMap(collections.abc.Mapping):
             return default
 
     def push(self, namespace: Mapping[Any, Any]):
+        """Add a mapping to the front of the chain map."""
         self._maps.appendleft(namespace)
 
     def pop(self) -> Mapping[Any, Any]:
+        """Remove a mapping from the front of the chain map."""
         return self._maps.popleft()
 
 
@@ -258,6 +260,7 @@ class Context:
         "_tag_namespace",
         "disabled_tags",
         "autoescape",
+        "_copy_depth",
     )
 
     def __init__(
@@ -265,6 +268,7 @@ class Context:
         env: Environment,
         globals: Optional[Namespace] = None,
         disabled_tags: Optional[List[str]] = None,
+        copy_depth: int = 0,
     ):
         self.env = env
 
@@ -294,8 +298,13 @@ class Context:
         # use "include" tags.
         self.disabled_tags = disabled_tags or []
 
-        # Indicates if autoescape is enabled.
+        # Indicates if HTML auto-escaping is enabled.
         self.autoescape = self.env.autoescape
+
+        # Count of the number of times `copy` was called in creating this context. This
+        # helps us guard against recursive use of the "render" tag, or at least fail
+        # gracefully.
+        self._copy_depth = copy_depth
 
     def assign(self, key: str, val: Any):
         """Add `val` to the context with key `key`."""
@@ -325,7 +334,7 @@ class Context:
         """Return the object/value at `name` in the current scope.
 
         This is like `get`, but does a single, top-level lookup rather than a
-        chained lookup from sequence of keys.
+        chained lookup from a sequence of keys.
         """
         try:
             return self.scope[name]
@@ -412,11 +421,18 @@ class Context:
     def copy(
         self, namespace: Namespace, disabled_tags: Optional[List[str]] = None
     ) -> Context:
-        """Return a copy of this context without any local variables."""
+        """Return a copy of this context without any local variables or other state
+        for statefull tags."""
+        if self._copy_depth > MAX_CONTEXT_DEPTH:
+            raise ContextDepthError(
+                "maximum context depth reached, possible recursive render"
+            )
+
         return Context(
             self.env,
             globals=ReadOnlyChainMap(namespace, self.globals),
             disabled_tags=disabled_tags,
+            copy_depth=self._copy_depth + 1,
         )
 
     def error(self, exc: Error):
