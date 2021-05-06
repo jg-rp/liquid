@@ -6,6 +6,9 @@ from typing import NamedTuple
 from typing import Type
 
 from liquid.context import builtin
+from liquid.context import get_item
+from liquid.context import _undefined
+from liquid.context import ReadOnlyChainMap
 from liquid.environment import Environment
 
 from liquid.exceptions import LiquidTypeError
@@ -71,6 +74,83 @@ class BadContextTemplateTestCase(TestCase):
         self._test(test_cases, mode=Mode.STRICT)
         self._test(test_cases, mode=Mode.WARN)
         self._test(test_cases, mode=Mode.LAX)
+
+
+class ReadOnlyChainMapTestCase(TestCase):
+    """Read only chain map test case."""
+
+    def test_get(self):
+        """Test that we can get items from a chain map."""
+        test_cases = [
+            {
+                "description": "earlier maps take priority",
+                "maps": ({"foo": 1}, {"foo": 2}),
+                "expect": 1,
+            },
+            {
+                "description": "fall back top later maps",
+                "maps": ({"bar": 1}, {"foo": 2}),
+                "expect": 2,
+            },
+            {
+                "description": "default to None",
+                "maps": ({"bar": 1}, {"bar": 2}),
+                "expect": None,
+            },
+        ]
+
+        for case in test_cases:
+            with self.subTest(msg=case["description"]):
+                chain_map = ReadOnlyChainMap(*case["maps"])
+                self.assertEqual(chain_map.get("foo"), case["expect"])
+
+    def test_iter(self):
+        """Test that we can iterate a chain map."""
+        chain_map = ReadOnlyChainMap({"foo": 1}, {"bar": 2}, {"foo": 3})
+        self.assertEqual(list(chain_map), ["foo", "bar", "foo"])
+
+
+class ChainedItemGetterTestCase(TestCase):
+    """Chained item getter test case."""
+
+    def test_get_item(self):
+        """Test that we can get nested items."""
+        test_cases = [
+            {
+                "description": "single string key",
+                "obj": {"foo": 1},
+                "key": ["foo"],
+                "expect": 1,
+            },
+            {
+                "description": "chained string key",
+                "obj": {"foo": {"bar": 2}},
+                "key": ["foo", "bar"],
+                "expect": 2,
+            },
+            {
+                "description": "single int key",
+                "obj": ["foo", "bar"],
+                "key": [0],
+                "expect": "foo",
+            },
+            {
+                "description": "chained string and int key",
+                "obj": {"foo": [1, 2]},
+                "key": ["foo", 1],
+                "expect": 2,
+            },
+            {
+                "description": "default to undefined",
+                "obj": {"foo": 1},
+                "key": ["no", "such", "thing"],
+                "expect": _undefined,
+            },
+        ]
+
+        for case in test_cases:
+            with self.subTest(msg=case["description"]):
+                self.assertEqual(get_item(case["obj"], *case["key"]), case["expect"])
 
 
 class BuiltinDynamicScopeTestCase(TestCase):

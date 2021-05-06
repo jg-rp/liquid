@@ -2,6 +2,7 @@ from unittest import TestCase
 from typing import NamedTuple
 
 from liquid import Environment
+from liquid import Undefined
 from liquid import DebugUndefined
 from liquid import StrictUndefined
 
@@ -255,3 +256,39 @@ class TestUndefined(TestCase):
                     template.render()
 
                 self.assertEqual(case.expect, str(raised.exception))
+
+    def test_default_undefined_magic(self):
+        """Test the default undefined type magic methods."""
+        undefined = Undefined("test")
+        self.assertFalse("foo" in undefined)
+        self.assertTrue(int(undefined) == 0)
+
+    def test_strict_undefined_magic(self):
+        """Test the strict undefined type magic methods."""
+        undefined = StrictUndefined("test")
+
+        with self.assertRaises(UndefinedError):
+            self.assertFalse("foo" in undefined)
+
+        with self.assertRaises(UndefinedError):
+            int(undefined)
+
+        with self.assertRaises(UndefinedError):
+            list(undefined)
+
+        with self.assertRaises(UndefinedError):
+            len(undefined)
+
+        with self.assertRaises(UndefinedError):
+            str(undefined)
+
+        self.assertEqual(repr(undefined), "StrictUndefined(test)")
+
+        with self.assertRaises(UndefinedError):
+            bool(undefined)
+
+        with self.assertRaises(UndefinedError):
+            hash(undefined)
+
+        with self.assertRaises(UndefinedError):
+            reversed(undefined)

@@ -5,7 +5,7 @@ Version 0.7.7
 -------------
 
 - Recursive use of the "render" tag now raises a ``ContextDepthError`` if
-  ``MAX_CONTEXT_DEPTH`` is exceeded.
+  ``MAX_CONTEXT_DEPTH`` is exceeded. This is now consistent with recursive "include".
 
 Version 0.7.6
 -------------
