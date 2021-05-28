@@ -1,4 +1,4 @@
-def truncate_chars(val: str, num: int, end: str = "..."):
+def truncate_chars(val: str, num: int, end: str = "...") -> str:
     """Truncates a string if it is longer than the specified number of characters.
     Truncated strings will end with `end`, an ellipsis by default."""
     val_length = len(val)
@@ -10,7 +10,7 @@ def truncate_chars(val: str, num: int, end: str = "..."):
     return f"{val[:num-end_length]}{end}"
 
 
-def truncate_words(val: str, num: int, end: str = "..."):
+def truncate_words(val: str, num: int, end: str = "...") -> str:
     """Truncates a string down to the number of words passed as the first parameter."""
     # XXX: Replaces consecutive whitespace with a single newline.
     words = val.split()

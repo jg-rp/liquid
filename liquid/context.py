@@ -16,6 +16,7 @@ from operator import getitem
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Mapping
@@ -46,7 +47,7 @@ Namespace = Mapping[str, object]
 _undefined = object()
 
 
-def _getitem(obj, key):
+def _getitem(obj: Sequence[Any], key: Any) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
@@ -59,24 +60,24 @@ def _getitem(obj, key):
 
 
 def get_item(
-    obj: object,
-    *items: Union[str, int],
+    obj: Sequence[Any],
+    *items: Any,
     default: Optional[object] = _undefined,
 ) -> Any:
     """Chained item getter."""
     try:
-        itm: Any = functools.reduce(_getitem, items, obj)
+        itm: Any = functools.reduce(_getitem, items, obj)  # type: ignore
     except (KeyError, IndexError, TypeError):
         itm = default
     return itm
 
 
-def is_undefined(obj):
+def is_undefined(obj: object) -> bool:
     """Return `True` if `obj` is undefined. `False` otherwise."""
     return isinstance(obj, Undefined)
 
 
-class ReadOnlyChainMap(collections.abc.Mapping):
+class ReadOnlyChainMap(Mapping[str, object]):
     """Combine multiple mappings for sequential lookup.
 
     Based on the "A greatly simplified read-only version of Chainmap" recipe linked
@@ -87,7 +88,7 @@ class ReadOnlyChainMap(collections.abc.Mapping):
     def __init__(self, *maps: Mapping[str, object]):
         self._maps = deque(maps)
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> object:
         for mapping in self._maps:
             try:
                 return mapping[key]
@@ -95,23 +96,23 @@ class ReadOnlyChainMap(collections.abc.Mapping):
                 pass
         raise KeyError(key)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return itertools.chain(*self._maps)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return sum(len(map) for map in self._maps)
 
-    def size(self):
+    def size(self) -> int:
         """Return the number of maps in the chain."""
         return len(self._maps)
 
-    def get(self, key: str, default: object = None):
+    def get(self, key: str, default: object = None) -> object:
         try:
             return self[key]
         except KeyError:
             return default
 
-    def push(self, namespace: Mapping[Any, Any]):
+    def push(self, namespace: Mapping[Any, Any]) -> None:
         """Add a mapping to the front of the chain map."""
         self._maps.appendleft(namespace)
 
@@ -120,7 +121,7 @@ class ReadOnlyChainMap(collections.abc.Mapping):
         return self._maps.popleft()
 
 
-class BuiltIn(collections.abc.Mapping):
+class BuiltIn(Mapping[str, object]):
     """Mapping-like object for resolving built-in, dynamic objects."""
 
     def __contains__(self, item: object) -> bool:
@@ -135,24 +136,24 @@ class BuiltIn(collections.abc.Mapping):
             return datetime.date.today()
         raise KeyError(str(key))
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 2
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(["now", "today"])
 
 
 builtin = BuiltIn()
 
 
-class Undefined(collections.abc.Mapping):
+class Undefined(Mapping[Any, object]):
     """The default undefined type. Always evaluates to an empty string. Can be iterated
     over and indexed without error.
     """
 
     __slots__ = ("name", "obj", "hint")
 
-    def __init__(self, name: str, obj: object = _undefined, hint=None):
+    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
         self.name = name
         self.obj = obj
         self.hint = hint
@@ -166,25 +167,25 @@ class Undefined(collections.abc.Mapping):
     def __getitem__(self, key: str) -> object:
         return self
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 0
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         return iter([])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ""
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Undefined({self.name})"
 
-    def __int__(self):
+    def __int__(self) -> int:
         return 0
 
     def __hash__(self) -> int:
         return hash(self.name)
 
-    def __reversed__(self):
+    def __reversed__(self) -> Iterable[Any]:
         return []
 
 
@@ -193,14 +194,14 @@ class DebugUndefined(Undefined):
 
     __slots__ = ()
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.hint:
             return f"undefined: {self.hint}"
         if self.obj is not _undefined:
             return f"{type(self.obj).__name__} has no attribute '{self.name}'"
         return f"'{self.name}' is undefined"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Undefined({self.name})"
 
 
@@ -223,28 +224,28 @@ class StrictUndefined(Undefined):
     def __getitem__(self, key: str) -> object:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __len__(self):
+    def __len__(self) -> int:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __str__(self):
+    def __str__(self) -> str:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"StrictUndefined({self.name})"
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __int__(self):
+    def __int__(self) -> int:
         raise UndefinedError(f"'{self.name}' is undefined")
 
     def __hash__(self) -> int:
         raise UndefinedError(f"'{self.name}' is undefined")
 
-    def __reversed__(self):
+    def __reversed__(self) -> Iterable[Any]:
         raise UndefinedError(f"'{self.name}' is undefined")
 
 
@@ -306,7 +307,7 @@ class Context:
         # gracefully.
         self._copy_depth = copy_depth
 
-    def assign(self, key: str, val: Any):
+    def assign(self, key: str, val: Any) -> None:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
 
@@ -370,13 +371,13 @@ class Context:
 
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
-        val = self._tag_namespace["counters"].get(name, -1) + 1
+        val: int = self._tag_namespace["counters"].get(name, -1) + 1
         self._tag_namespace["counters"][name] = val
         return val
 
     def decrement(self, name: str) -> int:
         """Decrement the named counter and return its value."""
-        val = self._tag_namespace["counters"].get(name, 0) - 1
+        val: int = self._tag_namespace["counters"].get(name, 0) - 1
         self._tag_namespace["counters"][name] = val
         return val
 
@@ -386,7 +387,8 @@ class Context:
         key = (group_name, tuple(args))
         if key not in self._tag_namespace["cycles"]:
             self._tag_namespace["cycles"][key] = cycle(args)
-        return self._tag_namespace["cycles"][key]
+        it: Iterator[Any] = self._tag_namespace["cycles"][key]
+        return it
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
@@ -401,10 +403,12 @@ class Context:
         if index is not None:
             self._tag_namespace["stopindex"][key] = index
             return index
-        return self._tag_namespace["stopindex"].get(key, 0)
+
+        idx: int = self._tag_namespace["stopindex"].get(key, 0)
+        return idx
 
     @contextmanager
-    def extend(self, namespace: Namespace):
+    def extend(self, namespace: Namespace) -> Iterator[Context]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > MAX_CONTEXT_DEPTH:
             raise ContextDepthError(
@@ -435,7 +439,7 @@ class Context:
             copy_depth=self._copy_depth + 1,
         )
 
-    def error(self, exc: Error):
+    def error(self, exc: Error) -> None:
         """Ignore, raise or convert the given exception to a warning."""
         if self.env.mode == Mode.STRICT:
             raise exc

@@ -34,7 +34,7 @@ class TokenStream:
         def __init__(self, stream: TokenStream):
             self.stream = stream
 
-        def __iter__(self):
+        def __iter__(self) -> Iterator[Token]:
             return self
 
         def __next__(self) -> Token:
@@ -45,10 +45,10 @@ class TokenStream:
             next(self.stream)
             return tok
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Token]:
         return self.TokenStreamIterator(self)
 
-    def __next__(self):
+    def __next__(self) -> Token:
         tok = self.current
         if self._pushed:
             self.current = self._pushed.popleft()
@@ -59,14 +59,14 @@ class TokenStream:
                 self.close()
         return tok
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         buf = [
             f"current: {self.current}",
             f"next: {self.peek}",
         ]
         return "\n".join(buf)
 
-    def next_token(self):
+    def next_token(self) -> Token:
         """Return the next token from the stream."""
         return next(self)
 
@@ -79,10 +79,10 @@ class TokenStream:
         self.current = old_token
         return result
 
-    def push(self, tok: Token):
+    def push(self, tok: Token) -> None:
         """Push a token back to the stream."""
         self._pushed.append(tok)
 
-    def close(self):
+    def close(self) -> None:
         """Close the stream."""
         self.current = Token(0, TOKEN_EOF, "")

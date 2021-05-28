@@ -1,8 +1,9 @@
 """Liquid specific Exceptions and warnings."""
 
+from typing import Any
 from typing import Dict
-from typing import Type
 from typing import Optional
+from typing import Type
 from typing import Union
 
 from pathlib import Path
@@ -21,7 +22,7 @@ class Error(Exception):
         self.filename = filename
         super().__init__(*args)
 
-    def __str__(self):
+    def __str__(self) -> str:
         msg = super().__str__()
         if self.linenum:
             msg = f"{msg}, on line {self.linenum}"
@@ -30,7 +31,7 @@ class Error(Exception):
         return msg
 
     @property
-    def message(self):
+    def message(self) -> object:
         """Return the exception's error message if one was given."""
         if self.args:
             return self.args[0]
@@ -54,7 +55,7 @@ class LiquidSyntaxError(Error):
         self.source: Optional[str] = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         if isinstance(self.filename, Path):
             return self.filename.as_posix()
         if self.filename:
@@ -85,7 +86,7 @@ class FilterValueError(Error):
 class TemplateNotFound(Error):
     """Excpetions raised when a template could not be found."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         msg = super().__str__()
         msg = f"template not found {msg}"
         return msg
@@ -155,6 +156,5 @@ class Markup:
     def unescape(self) -> str:
         raise Error("autoescape requires Markupsafe to be installed")
 
-    def format(self, *args, **kwargs) -> str:
+    def format(self, *args: Any, **kwargs: Any) -> str:
         raise Error("autoescape requires Markupsafe to be installed")
-

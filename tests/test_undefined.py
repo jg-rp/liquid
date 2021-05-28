@@ -271,13 +271,13 @@ class TestUndefined(TestCase):
             self.assertFalse("foo" in undefined)
 
         with self.assertRaises(UndefinedError):
-            int(undefined)
+            int(undefined)  # type: ignore
 
         with self.assertRaises(UndefinedError):
             list(undefined)
 
         with self.assertRaises(UndefinedError):
-            len(undefined)
+            len(undefined)  # type: ignore
 
         with self.assertRaises(UndefinedError):
             str(undefined)
@@ -291,4 +291,4 @@ class TestUndefined(TestCase):
             hash(undefined)
 
         with self.assertRaises(UndefinedError):
-            reversed(undefined)
+            reversed(undefined)  # type: ignore

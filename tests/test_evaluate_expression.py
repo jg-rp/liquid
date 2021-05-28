@@ -566,6 +566,14 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expression="link in linklists[section.settings.menu].links",
                 expect=["1", "2"],
             ),
+            Case(
+                description="chained identifier in range loop",
+                context={
+                    "foo": {"bar": 3},
+                },
+                expression="x in (1..foo.bar)",
+                expect=[1, 2, 3],
+            ),
         ]
 
         env = Environment()

@@ -7,7 +7,7 @@ except ImportError:
     from liquid.exceptions import escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
 
-from .mode import Mode
+from .mode import Mode as Mode
 from .filter import Filter
 from .token import Token
 from .expression import Expression
@@ -19,5 +19,5 @@ from .context import DebugUndefined
 from .context import StrictUndefined
 from .context import is_undefined
 
-from .environment import Environment
-from .environment import Template
+from .environment import Environment as Environment
+from .environment import Template as Template

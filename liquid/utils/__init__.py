@@ -1,3 +1,4 @@
-from .cache import LRUCache
-from .html import strip_tags
-from .text import truncate_chars, truncate_words
+from .cache import LRUCache as LRUCache
+from .html import strip_tags as strip_tags
+from .text import truncate_chars as truncate_chars
+from .text import truncate_words as truncate_words

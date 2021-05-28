@@ -1,6 +1,7 @@
 """Shared configuration from which templates can be loaded and parsed."""
 
 from __future__ import annotations
+from functools import lru_cache
 from pathlib import Path
 
 from typing import Callable
@@ -132,7 +133,7 @@ class Environment:
 
         builtin.register(self)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(
             (
                 self.statement_start_string,
@@ -240,13 +241,13 @@ class Environment:
             :class:`liquid.exceptions.TemplateNotFound`: if a template with the given
             name can not be found.
         """
-        template = self.cache.get(name)
+        _cached = self.cache.get(name)
 
-        if isinstance(template, BoundTemplate) and (
-            not self.auto_reload or template.is_up_to_date
+        if isinstance(_cached, BoundTemplate) and (
+            not self.auto_reload or _cached.is_up_to_date
         ):
-            template.globals.update(self.make_globals(globals))
-            return template
+            _cached.globals.update(self.make_globals(globals))
+            return _cached
 
         template = self.loader.load(self, name, globals=self.make_globals(globals))
         self.cache[name] = template
@@ -280,17 +281,10 @@ class Environment:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
 
-_implicit_environments = LRUCache(10)
-
-
-def get_implicit_environment(*args):
+@lru_cache(maxsize=10)
+def get_implicit_environment(*args: Any) -> Environment:
     """Return an :class:`Environment` initialized with the given arguments."""
-    try:
-        return _implicit_environments[args]
-    except KeyError:
-        env = Environment(*args)
-        _implicit_environments[args] = env
-        return env
+    return Environment(*args)
 
 
 # `Template` is a factory function masquerading as a class. The desire to have
