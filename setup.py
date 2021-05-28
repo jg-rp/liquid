@@ -20,7 +20,7 @@ setuptools.setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=["python-dateutil>=2.8.1"],
-    extras_require={"autoescape": ["MarkupSafe>=1.0.0"]},
+    extras_require={"autoescape": ["MarkupSafe>=2.0.0"]},
     test_suite="tests",
     python_requires=">=3.7",
     licence="MIT",
