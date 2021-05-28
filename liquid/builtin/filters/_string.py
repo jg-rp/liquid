@@ -7,9 +7,12 @@ import urllib.parse
 try:
     from markupsafe import escape as markupsafe_escape
     from markupsafe import Markup
+    from markupsafe import soft_str
 except ImportError:
     from liquid.exceptions import escape as markupsafe_escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
+
+    soft_str = str  # pylint: disable=invalid-name
 
 from liquid import is_undefined
 from liquid.exceptions import FilterArgumentError
@@ -85,57 +88,39 @@ def newline_to_br(val, *, environment):
 @string_filter
 def prepend(val, arg):
     """Concatenate string value to argument string."""
-    if not isinstance(arg, str):
-        arg = str(arg)
-    return arg + val
+    return soft_str(arg) + val
 
 
 @string_filter
 def remove(val, arg):
     """Remove all occurrences of argument string from value."""
-    if not isinstance(arg, str):
-        arg = str(arg)
-    return val.replace(arg, "")
+    return val.replace(soft_str(arg), "")
 
 
 @string_filter
 def remove_first(val, arg):
     """Remove the first occurrences of the argument string from value."""
-    if not isinstance(arg, str):
-        arg = str(arg)
-    return val.replace(arg, "", 1)
+    return val.replace(soft_str(arg), "", 1)
 
 
 @string_filter
 def replace(val, seq, sub):
     """Replaces every occurrence of the first argument in a string with the second
     argument."""
-    if not isinstance(sub, str):
-        sub = str(sub)
-
     if is_undefined(seq):
         return sub
 
-    if not isinstance(seq, str):
-        seq = str(seq)
-
-    return val.replace(seq, sub)
+    return val.replace(soft_str(seq), soft_str(sub))
 
 
 @string_filter
 def replace_first(val, seq, sub):
     """Replaces the first occurrence of the first argument in a string with the second
     argument."""
-    if not isinstance(sub, str):
-        sub = str(sub)
-
     if is_undefined(seq):
         return sub
 
-    if not isinstance(seq, str):
-        seq = str(seq)
-
-    return val.replace(seq, sub, 1)
+    return val.replace(soft_str(seq), soft_str(sub), 1)
 
 
 @string_filter
@@ -179,13 +164,10 @@ def slice_(val, start, length=1):
 @string_filter
 def split(val, seq):
     """Split a string into a list of string, using the argument as a delimiter."""
-    if not isinstance(seq, str):
-        seq = str(seq)
-
     if not seq:
         return list(val)
 
-    return val.split(seq)
+    return val.split(soft_str(seq))
 
 
 @string_filter

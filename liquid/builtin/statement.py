@@ -4,9 +4,12 @@ from typing import TextIO
 try:
     from markupsafe import escape
     from markupsafe import Markup
+    from markupsafe import soft_str
 except ImportError:
     from liquid.exceptions import escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
+
+    soft_str = str  # pylint: disable=invalid-name
 
 from liquid.ast import Node
 from liquid.context import Context
@@ -50,9 +53,9 @@ class StatementNode(Node):
             val = ""
         elif isinstance(val, (list, tuple)):
             if context.autoescape:
-                val = Markup("").join(_str_if_not(itm) for itm in val)
+                val = Markup("").join(soft_str(itm) for itm in val)
             else:
-                val = "".join(_str_if_not(itm) for itm in val)
+                val = "".join(soft_str(itm) for itm in val)
         else:
             val = str(val)
 
@@ -76,9 +79,3 @@ class Statement(Tag):
         expr_iter = tokenize_filtered_expression(tok.value)
         node = StatementNode(tok, parse_filtered_expression(TokenStream(expr_iter)))
         return node
-
-
-def _str_if_not(val: object) -> str:
-    if not isinstance(val, str):
-        return str(val)
-    return val
