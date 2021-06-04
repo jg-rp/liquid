@@ -10,6 +10,8 @@ Version 0.7.7
   used as array indexes or hash keys, or in conditional expressions (including 
   ``case``/``when`` and ``unless``). If defined, the result of calling a drop's
   ``__liquid__`` method will be used in those scenarios.
+- Added ``base64_encode``, ``base64_decode``, ``base64_url_safe_encode`` and 
+  ``base64_url_safe_decode`` filters.
 
 Version 0.7.6
 -------------
