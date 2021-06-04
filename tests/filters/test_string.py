@@ -10,6 +10,7 @@ from typing import Dict
 
 from liquid.environment import Environment
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterValueError
 
 # New style filters
 from liquid.builtin.filters._string import capitalize
@@ -35,6 +36,10 @@ from liquid.builtin.filters._string import truncate
 from liquid.builtin.filters._string import truncatewords
 from liquid.builtin.filters._string import url_encode
 from liquid.builtin.filters._string import url_decode
+from liquid.builtin.filters._string import base64_encode
+from liquid.builtin.filters._string import base64_decode
+from liquid.builtin.filters._string import base64_url_safe_encode
+from liquid.builtin.filters._string import base64_url_safe_decode
 
 # Depreciated class-based filters
 from liquid.builtin.filters.string import Capitalize
@@ -84,7 +89,7 @@ class StringFilterTestCase(unittest.TestCase):
         for case in test_cases:
             with self.subTest(msg=case.description):
                 if isclass(case.expect) and issubclass(
-                    case.expect, FilterArgumentError
+                    case.expect, (FilterArgumentError, FilterValueError)
                 ):
                     with self.assertRaises(case.expect):
                         func(case.val, *case.args, **case.kwargs)
@@ -100,7 +105,7 @@ class StringFilterTestCase(unittest.TestCase):
         for case in test_cases:
             with self.subTest(msg=case.description):
                 if isclass(case.expect) and issubclass(
-                    case.expect, FilterArgumentError
+                    case.expect, (FilterArgumentError, FilterValueError)
                 ):
                     with self.assertRaises(case.expect):
                         func(case.val, *case.args, **case.kwargs)
@@ -1421,3 +1426,203 @@ class StringFilterTestCase(unittest.TestCase):
 
         self._test(URLDecode, test_cases)
         self._test_newstyle_filter(url_decode, test_cases)
+
+    def test_base64_encode(self):
+        """Test base64_encode filter function."""
+
+        test_cases = [
+            Case(
+                description="from string",
+                val="_#/.",
+                args=[],
+                kwargs={},
+                expect="XyMvLg==",
+            ),
+            Case(
+                description="from string with URL unsafe",
+                val=(
+                    r"abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|"
+                ),
+                args=[],
+                kwargs={},
+                expect=(
+                    "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1RVV"
+                    "ldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8/Ljo7W117fVx8"
+                ),
+            ),
+            Case(
+                description="not a string",
+                val=5,
+                args=[],
+                kwargs={},
+                expect="NQ==",
+            ),
+            Case(
+                description="unexpected argument",
+                val="hello",
+                args=[5],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
+        ]
+
+        self._test_newstyle_filter(base64_encode, test_cases)
+
+    def test_base64_decode(self):
+        """Test base64_decode filter function."""
+
+        test_cases = [
+            Case(
+                description="from string",
+                val="XyMvLg==",
+                args=[],
+                kwargs={},
+                expect="_#/.",
+            ),
+            Case(
+                description="from string with URL unsafe",
+                val=(
+                    "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1RVV"
+                    "ldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8/Ljo7W117fVx8"
+                ),
+                args=[],
+                kwargs={},
+                expect=(
+                    r"abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|"
+                ),
+            ),
+            Case(
+                description="not a string",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=FilterValueError,
+            ),
+            Case(
+                description="unexpected argument",
+                val="hello",
+                args=[5],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
+        ]
+
+        self._test_newstyle_filter(base64_decode, test_cases)
+
+    def test_base64_url_safe_encode(self):
+        """Test base64_url_safe_encode filter function."""
+
+        test_cases = [
+            Case(
+                description="from string",
+                val="_#/.",
+                args=[],
+                kwargs={},
+                expect="XyMvLg==",
+            ),
+            Case(
+                description="from string with URL unsafe",
+                val=(
+                    r"abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|"
+                ),
+                args=[],
+                kwargs={},
+                expect=(
+                    "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1RVV"
+                    "ldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8_Ljo7W117fVx8"
+                ),
+            ),
+            Case(
+                description="not a string",
+                val=5,
+                args=[],
+                kwargs={},
+                expect="NQ==",
+            ),
+            Case(
+                description="unexpected argument",
+                val="hello",
+                args=[5],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
+        ]
+
+        self._test_newstyle_filter(base64_url_safe_encode, test_cases)
+
+    def test_base64_url_safe_decode(self):
+        """Test base64_url_safe_decode filter function."""
+
+        test_cases = [
+            Case(
+                description="from string",
+                val="XyMvLg==",
+                args=[],
+                kwargs={},
+                expect="_#/.",
+            ),
+            Case(
+                description="from string with URL unsafe",
+                val=(
+                    "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1RVV"
+                    "ldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8_Ljo7W117fVx8"
+                ),
+                args=[],
+                kwargs={},
+                expect=(
+                    r"abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|"
+                ),
+            ),
+            Case(
+                description="not a string",
+                val=5,
+                args=[],
+                kwargs={},
+                expect=FilterValueError,
+            ),
+            Case(
+                description="unexpected argument",
+                val="hello",
+                args=[5],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=[],
+                kwargs={},
+                expect="",
+            ),
+        ]
+
+        self._test_newstyle_filter(base64_url_safe_decode, test_cases)

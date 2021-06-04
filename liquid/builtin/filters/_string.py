@@ -1,5 +1,7 @@
 """Filter functions that operate on strings."""
 
+import base64
+import binascii
 import html
 import re
 import urllib.parse
@@ -16,6 +18,7 @@ except ImportError:
 
 from liquid import is_undefined
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterValueError
 
 from liquid.filter import with_environment
 from liquid.filter import string_filter
@@ -256,3 +259,39 @@ def url_decode(val):
     """Decode a string that has been URL encoded."""
     # Assuming URL decoded strings are all unsafe.
     return urllib.parse.unquote_plus(val)
+
+
+@string_filter
+def base64_encode(val: str):
+    """Encode a string to base64."""
+    return base64.b64encode(val.encode()).decode()
+
+
+@string_filter
+def base64_decode(val: str):
+    """Decode a string from base64.
+
+    The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
+    """
+    try:
+        return base64.b64decode(val).decode()
+    except binascii.Error as err:
+        raise FilterValueError("Invalid base64-encoded string.") from err
+
+
+@string_filter
+def base64_url_safe_encode(val: str):
+    """Encode a string to URL safe base64."""
+    return base64.urlsafe_b64encode(val.encode()).decode()
+
+
+@string_filter
+def base64_url_safe_decode(val: str):
+    """Decode a URL safe string from base64.
+
+    The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
+    """
+    try:
+        return base64.urlsafe_b64decode(val).decode()
+    except binascii.Error as err:
+        raise FilterValueError("Invalid base64-encoded string.") from err

@@ -58,6 +58,10 @@ from .filters._string import truncate
 from .filters._string import truncatewords
 from .filters._string import url_encode
 from .filters._string import url_decode
+from .filters._string import base64_encode
+from .filters._string import base64_decode
+from .filters._string import base64_url_safe_encode
+from .filters._string import base64_url_safe_decode
 
 from .filters._array import join
 from .filters._array import first
@@ -140,6 +144,10 @@ def register(env: Environment) -> None:
     env.add_filter("truncatewords", truncatewords)
     env.add_filter("url_encode", url_encode)
     env.add_filter("url_decode", url_decode)
+    env.add_filter("base64_encode", base64_encode)
+    env.add_filter("base64_decode", base64_decode)
+    env.add_filter("base64_url_safe_encode", base64_url_safe_encode)
+    env.add_filter("base64_url_safe_decode", base64_url_safe_decode)
 
     env.add_filter("join", join)
     env.add_filter("first", first)

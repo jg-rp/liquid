@@ -323,6 +323,48 @@ class FilterResgisterTestCase(unittest.TestCase):
                 context={"foo": ["b", "a", None, "A"]},
                 expect="b#a#A",
             ),
+            Case(
+                description="base64_encode",
+                template=r"{{ 'one two three' | base64_encode }}",
+                context={},
+                expect="b25lIHR3byB0aHJlZQ==",
+            ),
+            Case(
+                description="base64_decode",
+                template=r"{{ 'b25lIHR3byB0aHJlZQ==' | base64_decode }}",
+                context={},
+                expect="one two three",
+            ),
+            Case(
+                description="base64_url_safe_encode",
+                template=(
+                    r"{{ "
+                    r"'abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|' "
+                    r"| base64_url_safe_encode }}"
+                ),
+                context={},
+                expect=(
+                    "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1"
+                    "RVVldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8_Ljo7W117fVx8"
+                ),
+            ),
+            Case(
+                description="base64_url_safe_decode",
+                template=(
+                    r"{{ "
+                    r"'YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXogQUJDREVGR0hJSktMTU5PUFFSU1"
+                    r"RVVldYWVogMTIzNDU2Nzg5MCAhQCMkJV4mKigpLT1fKy8_Ljo7W117fVx8' "
+                    r"| base64_url_safe_decode }}"
+                ),
+                context={},
+                expect=(
+                    r"abcdefghijklmnopqrstuvwxyz "
+                    r"ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    r"1234567890 !@#$%^&*()-=_+/?.:;[]{}\|"
+                ),
+            ),
         ]
 
         env = Environment()
