@@ -666,6 +666,9 @@ def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
 
 def is_truthy(obj: Any) -> bool:
     """Return True if the given object is Liquid truthy."""
+    if hasattr(obj, "__liquid__"):
+        obj = obj.__liquid__()
+
     if obj in (False, None):
         return False
     return True
@@ -677,8 +680,11 @@ def compare(left: Any, operator: str, right: Any) -> bool:
     if operator == "or":
         return is_truthy(left) or is_truthy(right)
 
-    # NOTE: If both left and right are StrictUndefined, right will raise an exception
-    # before left.
+    if hasattr(left, "__liquid__"):
+        left = left.__liquid__()
+    if hasattr(right, "__liquid__"):
+        right = right.__liquid__()
+
     if isinstance(right, (Empty, Blank)):
         left, right = right, left
 

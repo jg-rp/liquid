@@ -130,7 +130,7 @@ class TestUndefined(TestCase):
             Case(
                 description="undefined equals undefined",
                 template=r"{% if nosuchthing == noway %}hello{% endif %}",
-                expect="'noway' is undefined, on line 1",
+                expect="'nosuchthing' is undefined, on line 1",
             ),
             Case(
                 description="undefined contains string",

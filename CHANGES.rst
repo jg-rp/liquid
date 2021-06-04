@@ -6,6 +6,10 @@ Version 0.7.7
 
 - Recursive use of the "render" tag now raises a ``ContextDepthError`` if
   ``MAX_CONTEXT_DEPTH`` is exceeded. This is now consistent with recursive "include".
+- Drops (custom classes in a render context) can now mimic primitive Liquid values when
+  used as array indexes or hash keys, or in conditional expressions (including 
+  ``case``/``when`` and ``unless``). If defined, the result of calling a drop's
+  ``__liquid__`` method will be used in those scenarios.
 
 Version 0.7.6
 -------------

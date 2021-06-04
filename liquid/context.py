@@ -49,6 +49,10 @@ _undefined = object()
 
 def _getitem(obj: Sequence[Any], key: Any) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
+    # NOTE: A runtime checkable protocol was too slow.
+    if hasattr(key, "__liquid__"):
+        key = key.__liquid__()  # type: ignore
+
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
     if key == "first" and isinstance(obj, collections.abc.Sequence):

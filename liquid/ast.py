@@ -14,10 +14,12 @@ from liquid import __version__
 from liquid import Context
 from liquid import Expression
 
-from liquid.token import Token, TOKEN_TAG
+from liquid.token import Token, TOKEN_TAG, TOKEN_ILLEGAL
 
 from liquid.exceptions import DisabledTagError
 from liquid.exceptions import Error
+
+IllegalToken = Token(-1, TOKEN_ILLEGAL, "")
 
 
 class Node(ABC):
@@ -27,7 +29,7 @@ class Node(ABC):
 
     def token(self) -> Token:
         """The token that started this node."""
-        return getattr(self, "tok", None)
+        return getattr(self, "tok", IllegalToken)
 
     def raise_for_disabled(self, disabled_tags: Collection[str]):
         """Raise a DisabledTagError if this node's type is in the given list."""
