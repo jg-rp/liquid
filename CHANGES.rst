@@ -12,6 +12,9 @@ Version 0.7.7
   ``__liquid__`` method will be used in those scenarios.
 - Added ``base64_encode``, ``base64_decode``, ``base64_url_safe_encode`` and 
   ``base64_url_safe_decode`` filters.
+- Added asynchronous template loading and rendering. When ``Template.render_async`` is
+  awaited, ``render`` and ``include`` tags will load templates asynchronously. Custom 
+  loaders should implement ``get_source_async``.
 
 Version 0.7.6
 -------------

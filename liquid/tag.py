@@ -10,7 +10,7 @@ from liquid.exceptions import Error
 from liquid.parse import eat_block
 from liquid.stream import TokenStream
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
 
 

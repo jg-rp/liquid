@@ -5,6 +5,7 @@ See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
 """
 from __future__ import annotations
 
+import asyncio
 import os
 
 from abc import ABC
@@ -55,6 +56,14 @@ class BaseLoader(ABC):
     def get_source(self, env: Environment, template_name: str) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
 
+    async def get_source_async(
+        self,
+        env: Environment,
+        template_name: str,
+    ) -> TemplateSource:
+        """ """
+        return self.get_source(env, template_name)
+
     # pylint: disable=redefined-builtin
     def load(
         self,
@@ -64,6 +73,24 @@ class BaseLoader(ABC):
     ) -> BoundTemplate:
         try:
             source, filename, uptodate = self.get_source(env, name)
+        except Exception as err:
+            raise TemplateNotFound(name) from err
+
+        template = env.from_string(
+            source, globals=globals, name=name, path=Path(filename)
+        )
+        template.uptodate = uptodate
+        return template
+
+    async def load_async(
+        self,
+        env: Environment,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+    ) -> BoundTemplate:
+        try:
+            template_source = await self.get_source_async(env, name)
+            source, filename, uptodate = template_source
         except Exception as err:
             raise TemplateNotFound(name) from err
 
@@ -120,6 +147,12 @@ class FileSystemLoader(BaseLoader):
         return TemplateSource(
             source, str(source_path), lambda: mtime == source_path.stat().st_mtime
         )
+
+    async def get_source_async(
+        self, env: Environment, template_name: str
+    ) -> TemplateSource:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self.get_source, env, template_name)
 
 
 class DictLoader(BaseLoader):

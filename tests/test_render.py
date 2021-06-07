@@ -1376,6 +1376,12 @@ class RenderTestCases(unittest.TestCase):
                 partials={"product-args": r"{{ foo }} {{ bar }}"},
             ),
             Case(
+                description="some keyword arguments without leading comma",
+                template=r"{% include 'product-args' foo: 'hello', bar: 'there' %}",
+                expect="hello there",
+                partials={"product-args": r"{{ foo }} {{ bar }}"},
+            ),
+            Case(
                 description="template drop",
                 template=r"{% include 'some/template-attrs.alt.txt' %}",
                 expect="template-attrs.alt some template-attrs alt",

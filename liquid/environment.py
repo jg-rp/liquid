@@ -227,7 +227,9 @@ class Environment:
 
     # pylint: disable=redefined-builtin
     def get_template(
-        self, name: str, globals: Optional[Mapping[str, object]] = None
+        self,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
@@ -241,6 +243,37 @@ class Environment:
             :class:`liquid.exceptions.TemplateNotFound`: if a template with the given
             name can not be found.
         """
+        template = self._check_cache(name, globals)
+
+        if not template:
+            template = self.loader.load(self, name, globals=self.make_globals(globals))
+            self.cache[name] = template
+
+        return template
+
+    async def get_template_async(
+        self,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+    ) -> BoundTemplate:
+        """An async version of ``get_template``."""
+        template = self._check_cache(name, globals)
+
+        if not template:
+            template = await self.loader.load_async(
+                self,
+                name,
+                globals=self.make_globals(globals),
+            )
+            self.cache[name] = template
+
+        return template
+
+    def _check_cache(
+        self,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+    ) -> Optional[BoundTemplate]:
         _cached = self.cache.get(name)
 
         if isinstance(_cached, BoundTemplate) and (
@@ -248,10 +281,7 @@ class Environment:
         ):
             _cached.globals.update(self.make_globals(globals))
             return _cached
-
-        template = self.loader.load(self, name, globals=self.make_globals(globals))
-        self.cache[name] = template
-        return template
+        return None
 
     # pylint: disable=redefined-builtin
     def make_globals(
@@ -270,6 +300,7 @@ class Environment:
         msg: Optional[str] = None,
         linenum: Optional[int] = None,
     ) -> None:
+        """Raise ,warn or ignore the given exception according to the current mode."""
         if not isinstance(exc, Error):
             exc = exc(msg, linenum=linenum)
         elif not exc.linenum:

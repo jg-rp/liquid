@@ -88,11 +88,15 @@ class RenderNode(Node):
         return f"render({''.join(buf)})"
 
     def __repr__(self):
-        return f"RenderNode(tok={self.tok!r}, name={self.name})"
+        return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def _template_path(self, context: Context) -> str:
         path = self.name.evaluate(context)
         assert isinstance(path, str)
+
+        # XXX: This `render_folder` and forced ".liquid" suffix is to simulate a Shopify
+        # theme structure. If it does actually belong in Python Liquid, it needs to be
+        # documented.
 
         # TODO: Store this kind of thing on the context object but not the
         # globals/locals namespace.
@@ -100,9 +104,13 @@ class RenderNode(Node):
 
         if render_folder:
             # FIXME: Don't assume ".liquid"
-            path = pathlib.Path(str(render_folder), path).with_suffix(".liquid")
+            path = str(pathlib.Path(str(render_folder), path).with_suffix(".liquid"))
 
-        template = context.get_template(str(path))
+        return path
+
+    def render_to_output(self, context: Context, buffer: TextIO):
+        path = self._template_path(context)
+        template = context.get_template(path)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -149,6 +157,60 @@ class RenderNode(Node):
                 )
         else:
             template.render_with_context(ctx, buffer, partial=True, block_scope=True)
+
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        """An awaitable version of `render_to_output` that loads templates
+        asynchronously."""
+        path = self._template_path(context)
+        template = await context.get_template_async(path)
+
+        # Evaluate keyword arguments once. Unlike 'include', 'render' can not
+        # mutate variables in the outer scope, so there's no need to re-evaluate
+        # arguments for each loop (if any).
+        args = {k: v.evaluate(context) for k, v in self.args.items()}
+
+        # We're using a chain map here in case we need to push a forloop drop into
+        # it. As drops are read only, the built-in collections.ChainMap will not do.
+        namespace = ReadOnlyChainMap(args)
+
+        # New context with globals and filters from the parent, plus the read only
+        # namespace containing render arguments and bound variable.
+        ctx = context.copy(namespace, disabled_tags=[TAG_INCLUDE])
+
+        # Optionally bind a variable to the render namespace.
+        if self.var is not None:
+            val = self.var.evaluate(context)
+            key = self.alias or template.name.split(".")[0]
+
+            # If the variable is array-like, render the template once for each item.
+            # `self.loop` being True indicates the render expression used "for" not
+            # "with". This distinction is not made when using the 'include' tag.
+            if self.loop and isinstance(val, (tuple, list, IterableDrop)):
+                forloop = ForLoop(
+                    name=key,
+                    it=iter(val),
+                    length=len(val),
+                )
+
+                args["forloop"] = forloop
+                args[key] = None
+
+                for itm in forloop:
+                    args[key] = itm
+                    await template.render_with_context_async(
+                        ctx, buffer, partial=True, block_scope=True
+                    )
+            else:
+                # The bound variable is not array-like, shove it into the namespace
+                # via args.
+                args[key] = val
+                await template.render_with_context_async(
+                    ctx, buffer, partial=True, block_scope=True
+                )
+        else:
+            await template.render_with_context_async(
+                ctx, buffer, partial=True, block_scope=True
+            )
 
 
 class RenderTag(Tag):

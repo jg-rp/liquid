@@ -222,6 +222,26 @@ Alternatively use the non-standard ``safe`` filter.
     >>> template.render(you="<em>World!</em>")
     '<p>Hello, <em>World!</em></p>'
 
+Async Support
+*************
+
+Python Liquid supports loading and rendering templates asynchronously. When
+``Template.render_async`` is awaited, ``render`` and ``include`` tags will load
+templates asynchronously. Custom loaders should implement ``get_source_async``.
+
+.. code-block:: python
+
+    import asyncio
+    from liquid import Environment, FileSystemLoader
+
+    env = Environment(loader=FileSystemLoader("templates/"))
+
+    async def coro():
+        template = await env.get_template_async("index.html")
+        return await template.render_async(you="World")
+
+    result = asyncio.run(coro())
+
 
 Related Projects
 ----------------

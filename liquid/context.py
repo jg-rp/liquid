@@ -373,6 +373,10 @@ class Context:
         """Load a template from the environment."""
         return self.env.get_template(name)
 
+    async def get_template_async(self, name: str) -> BoundTemplate:
+        """Load a template from the environment asynchronously."""
+        return await self.env.get_template_async(name)
+
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
         val: int = self._tag_namespace["counters"].get(name, -1) + 1

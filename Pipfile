@@ -16,6 +16,7 @@ flake8-bugbear = "*"
 twine = "*"
 sphinx = "*"
 mypy = "*"
+mock = "*"
 
 [packages]
 python-dateutil = "*"

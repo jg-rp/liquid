@@ -9,7 +9,7 @@ Rendering Templates
 -------------------
 
 .. autoclass:: Environment([options])
-    :members: from_string, get_template, add_tag, add_filter
+    :members: from_string, get_template, get_template_async, add_tag, add_filter
 
     .. attribute:: undefined
 
@@ -60,7 +60,7 @@ Rendering Templates
 .. autofunction:: Template(source: str, [options])
 
 .. autoclass:: liquid.template.BoundTemplate
-    :members: render, render_with_context
+    :members: render, render_async, render_with_context, render_with_context_async
 
     .. attribute:: name
 
@@ -81,7 +81,7 @@ Template Loaders
 .. autoclass:: liquid.loaders.DictLoader
 
 .. autoclass:: liquid.loaders.BaseLoader
-    :members: get_source
+    :members: get_source, get_source_async
 
 .. autoclass:: liquid.loaders.TemplateSource
 

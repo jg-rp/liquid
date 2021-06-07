@@ -382,9 +382,19 @@ class MalformedTemplateTestCase(TestCase):
                     "possible recursive render, on line 1"
                 ),
             ),
+            Case(
+                description="arguments are not comma separated",
+                template="{% render 'index', foo: 'foo' bar: 'bar' %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "expected a comma separated list of arguments, "
+                    "found identifier, on line 1"
+                ),
+            ),
         ]
 
         templates = {
+            "index": "hello",
             "break": "{% break %}",
             "include": "{% include 'foo' %}",
             "recursive.liquid": "{% render 'inner.liquid' %}",

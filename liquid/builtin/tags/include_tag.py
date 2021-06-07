@@ -1,5 +1,4 @@
 """Parse tree node and tag definition for the built in "include" tag."""
-
 import sys
 
 from typing import Optional
@@ -77,7 +76,7 @@ class IncludeNode(Node):
         return f"include({''.join(buf)})"
 
     def __repr__(self):
-        return f"IncludeNode(tok={self.tok!r}, name={self.name})"
+        return f"IncludeNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
     def render_to_output(self, context: Context, buffer: TextIO):
         name = self.name.evaluate(context)
@@ -115,6 +114,35 @@ class IncludeNode(Node):
                     template.render_with_context(context, buffer, partial=True)
             else:
                 template.render_with_context(context, buffer, partial=True)
+
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        """Same as ``render_to_output`` but uses async versions of get_template and
+        render_with_context."""
+        name = self.name.evaluate(context)
+        template = await context.get_template_async(str(name))
+        namespace: Dict[str, object] = {}
+
+        for key, val in self.args.items():
+            namespace[key] = val.evaluate(context)
+
+        with context.extend(namespace):
+            if self.var is not None:
+                val = self.var.evaluate(context)
+                key = self.alias or template.name.split(".")[0]
+
+                if isinstance(val, (tuple, list, IterableDrop)):
+                    for itm in val:
+                        namespace[key] = itm
+                        await template.render_with_context_async(
+                            context, buffer, partial=True
+                        )
+                else:
+                    namespace[key] = val
+                    await template.render_with_context_async(
+                        context, buffer, partial=True
+                    )
+            else:
+                await template.render_with_context_async(context, buffer, partial=True)
 
 
 class IncludeTag(Tag):

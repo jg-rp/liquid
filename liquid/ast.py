@@ -48,6 +48,17 @@ class Node(ABC):
             self.raise_for_disabled(context.disabled_tags)
         return self.render_to_output(context, buffer)
 
+    async def render_async(
+        self, context: Context, buffer: TextIO
+    ) -> Union[Optional[bool], NoReturn]:
+        """ """
+        if context.disabled_tags:
+            self.raise_for_disabled(context.disabled_tags)
+        if hasattr(self, "render_to_output_async"):
+            # pylint: disable=no-member
+            return await self.render_to_output_async(context, buffer)  # type: ignore
+        return self.render_to_output(context, buffer)
+
     @abstractmethod
     def render_to_output(
         self,
@@ -63,7 +74,7 @@ class ParseTree(Node):
     __slots__ = ("statements", "version")
 
     def __init__(self):
-        self.statements = []
+        self.statements: List[Node] = []
         self.version = __version__
 
     def __str__(self):  # pragma: no cover

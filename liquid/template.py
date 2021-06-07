@@ -72,11 +72,19 @@ class BoundTemplate:
         Accepts the same arguments as the :class:`dict` constructor.
         """
         _vars: Dict[str, object] = dict(*args, **kwargs)
-
         context = Context(self.env, ChainMap(_vars, self.globals))
 
         buf = StringIO()
         self.render_with_context(context, buf)
+        return buf.getvalue()
+
+    async def render_async(self, *args: Any, **kwargs: Any) -> str:
+        """An async version of :meth:`liquid.template.BoundTemplate.render`."""
+        _vars: Dict[str, object] = dict(*args, **kwargs)
+        context = Context(self.env, ChainMap(_vars, self.globals))
+
+        buf = StringIO()
+        await self.render_with_context_async(context, buf)
         return buf.getvalue()
 
     def render_with_context(
@@ -117,14 +125,49 @@ class BoundTemplate:
                     if not partial or block_scope:
                         self.env.error(
                             LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.tok.linenum
+                                f"unexpected '{err}'", linenum=node.token().linenum
                             )
                         )
                     else:
                         raise
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.tok.linenum)
+                    self.env.error(err, linenum=node.token().linenum)
+
+    async def render_with_context_async(
+        self,
+        context: Context,
+        buffer: TextIO,
+        *args: Any,
+        partial: bool = False,
+        block_scope: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        """An async version of :meth:`liquid.template.BoundTemplate.render_with_context`."""
+        # "template" could get overridden from args/kwargs, "partial" will not.
+        namespace = self._make_globals(partial, args, kwargs)
+
+        with context.extend(namespace=namespace):
+            for node in self.tree.statements:
+                try:
+                    await node.render_async(context, buffer)
+                except LiquidInterrupt as err:
+                    # If this is an "included" template, there could be a for loop
+                    # in a parent template. A for loop that could be interrupted
+                    # from an included template.
+                    #
+                    # Convert the interrupt to a syntax error if there is no parent.
+                    if not partial or block_scope:
+                        self.env.error(
+                            LiquidSyntaxError(
+                                f"unexpected '{err}'", linenum=node.token().linenum
+                            )
+                        )
+                    else:
+                        raise
+                except Error as err:
+                    # Raise or warn according to the current mode.
+                    self.env.error(err, linenum=node.token().linenum)
 
     @property
     def is_up_to_date(self) -> bool:
