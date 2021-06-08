@@ -1,8 +1,11 @@
+"""Test Python Liquid's async API."""
 import asyncio
 import unittest
 
+from collections import abc
 from typing import NamedTuple
 
+# assert_awaited* were new in Python 3.8, so we're using the backport.
 from mock import patch
 
 from liquid import Template
@@ -13,6 +16,8 @@ from liquid.template import BoundTemplate
 
 
 class Case(NamedTuple):
+    """Table driven test helper."""
+
     description: str
     template: str
     context: dict
@@ -21,8 +26,8 @@ class Case(NamedTuple):
     calls: int
 
 
-class AsyncTestCase(unittest.TestCase):
-    """Test the async API."""
+class LoadAsyncTestCase(unittest.TestCase):
+    """Test that we can load templates asynchronously."""
 
     def test_basic_async(self):
         """Test that we can render a template asynchronously."""
@@ -208,3 +213,62 @@ class AsyncTestCase(unittest.TestCase):
                     source.assert_awaited_with(env.loader, env=env, template_name="foo")
                     self.assertEqual(source.call_count, case.calls)
                     self.assertEqual(result, case.expect)
+
+
+class MockAsyncDrop(abc.Mapping):
+    def __init__(self, val):
+        self.key = "foo"
+        self.val = val
+
+        self.call_count = 0
+        self.await_count = 0
+
+    def __len__(self):
+        return 1
+
+    def __iter__(self):
+        return iter([self.key])
+
+    def __getitem__(self, k):
+        self.call_count += 1
+        if k == self.key:
+            return self.val
+        raise KeyError(k)
+
+    async def __getitem_async__(self, k):
+        # Do IO here
+        self.await_count += 1
+        if k == self.key:
+            return self.val
+        raise KeyError(k)
+
+
+class AsyncDropTestCase(unittest.TestCase):
+    """Test that we can get items from a drop asynchronously."""
+
+    def setUp(self) -> None:
+        self.drop = MockAsyncDrop("hello")
+
+    def test_awaited(self):
+        """Test that __getitem_async__ is awaited when using render_async."""
+        env = Environment()
+        template = env.from_string(r"{{ drop.foo }}")
+
+        async def coro():
+            return await template.render_async(drop=self.drop)
+
+        result = asyncio.run(coro())
+
+        self.assertEqual(result, "hello")
+        self.assertEqual(self.drop.await_count, 1)
+        self.assertEqual(self.drop.call_count, 0)
+
+    def test_called(self):
+        """Test that __getitem_async__ is not called when rendering synchronously."""
+        env = Environment()
+        template = env.from_string(r"{{ drop.foo }}")
+        result = template.render(drop=self.drop)
+
+        self.assertEqual(result, "hello")
+        self.assertEqual(self.drop.await_count, 0)
+        self.assertEqual(self.drop.call_count, 1)

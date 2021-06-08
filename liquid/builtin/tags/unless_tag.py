@@ -50,6 +50,10 @@ class UnlessNode(Node):
         if not self.condition.evaluate(context):
             self.consequence.render(context, buffer)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        if not await self.condition.evaluate_async(context):
+            await self.consequence.render_async(context, buffer)
+
 
 class UnlessTag(Tag):
     """The built-in "unless" tag."""

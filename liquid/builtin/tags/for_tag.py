@@ -186,6 +186,40 @@ class ForNode(Node):
         elif self.default:
             self.default.render(context, buffer)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        loop_iter, length = await self.expression.evaluate_async(context)
+
+        if length:
+            name = self.expression.name
+
+            forloop = ForLoop(
+                name=name,
+                it=loop_iter,
+                length=length,
+            )
+
+            namespace = {
+                "forloop": forloop,
+                name: None,
+            }
+
+            # Extend the context. Essentially giving priority to `ForLoopDrop`, then
+            # delegating `get` and `assign` to the outer context.
+            with context.extend(namespace):
+
+                for itm in forloop:
+                    namespace[name] = itm
+
+                    try:
+                        await self.block.render_async(context, buffer)
+                    except ContinueLoop:
+                        continue
+                    except BreakLoop:
+                        break
+
+        elif self.default:
+            await self.default.render_async(context, buffer)
+
 
 class BreakNode(Node):
     """Parse tree node for the built-in "break" tag."""

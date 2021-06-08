@@ -38,6 +38,9 @@ class AssignNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         self.expression.evaluate(context)
 
+    async def render_to_output_async(self, context: Context, _: TextIO):
+        await self.expression.evaluate_async(context)
+
 
 class AssignTag(Tag):
     """The built-in cycle tag."""

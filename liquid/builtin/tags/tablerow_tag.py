@@ -196,6 +196,38 @@ class TablerowNode(Node):
 
                 buffer.write("</tr>")
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        name = self.expression.name
+        loop_iter, length = await self.expression.evaluate_async(context)
+
+        if self.expression.cols:
+            cols = await self.expression.cols.evaluate_async(context)
+            assert isinstance(cols, int)
+        else:
+            cols = length
+
+        loop_iter = grouper(loop_iter, cols)
+        tablerow = TableRow(name, loop_iter, length, cols)
+
+        namespace = {
+            "tablerowloop": tablerow,
+            name: None,
+        }
+
+        with context.extend(namespace):
+            for i, row in enumerate(tablerow):
+                buffer.write(f'<tr class="row{i+1}">')
+
+                for j, itm in enumerate(row):
+                    tablerow.step()
+                    namespace[name] = itm
+
+                    buffer.write(f'<td class="col{j+1}">')
+                    await self.block.render_async(context=context, buffer=buffer)
+                    buffer.write("</td>")
+
+                buffer.write("</tr>")
+
 
 class TablerowTag(Tag):
     """The built-in "tablerow" tag."""

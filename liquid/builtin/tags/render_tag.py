@@ -90,7 +90,7 @@ class RenderNode(Node):
     def __repr__(self):
         return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def _template_path(self, context: Context) -> str:
+    def render_to_output(self, context: Context, buffer: TextIO):
         path = self.name.evaluate(context)
         assert isinstance(path, str)
 
@@ -105,11 +105,6 @@ class RenderNode(Node):
         if render_folder:
             # FIXME: Don't assume ".liquid"
             path = str(pathlib.Path(str(render_folder), path).with_suffix(".liquid"))
-
-        return path
-
-    def render_to_output(self, context: Context, buffer: TextIO):
-        path = self._template_path(context)
         template = context.get_template(path)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
@@ -161,13 +156,26 @@ class RenderNode(Node):
     async def render_to_output_async(self, context: Context, buffer: TextIO):
         """An awaitable version of `render_to_output` that loads templates
         asynchronously."""
-        path = self._template_path(context)
+        path = await self.name.evaluate_async(context)
+        assert isinstance(path, str)
+
+        # XXX: This `render_folder` and forced ".liquid" suffix is to simulate a Shopify
+        # theme structure. If it does actually belong in Python Liquid, it needs to be
+        # documented.
+
+        # TODO: Store this kind of thing on the context object but not the
+        # globals/locals namespace.
+        render_folder = context.get("render_folder", default=None)
+
+        if render_folder:
+            # FIXME: Don't assume ".liquid"
+            path = str(pathlib.Path(str(render_folder), path).with_suffix(".liquid"))
         template = await context.get_template_async(path)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
         # arguments for each loop (if any).
-        args = {k: v.evaluate(context) for k, v in self.args.items()}
+        args = {k: await v.evaluate_async(context) for k, v in self.args.items()}
 
         # We're using a chain map here in case we need to push a forloop drop into
         # it. As drops are read only, the built-in collections.ChainMap will not do.
@@ -179,7 +187,7 @@ class RenderNode(Node):
 
         # Optionally bind a variable to the render namespace.
         if self.var is not None:
-            val = self.var.evaluate(context)
+            val = await self.var.evaluate_async(context)
             key = self.alias or template.name.split(".")[0]
 
             # If the variable is array-like, render the template once for each item.

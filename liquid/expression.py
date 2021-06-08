@@ -40,6 +40,10 @@ class Expression(ABC):
     def evaluate(self, context: Context) -> object:
         """Evaluate the expression with the given context."""
 
+    async def evaluate_async(self, context: Context) -> object:
+        """An async version of :meth:`liquid.expression.Expression.evaluate`."""
+        return self.evaluate(context)
+
 
 class Nil(Expression):
     __slots__ = ()
@@ -255,6 +259,10 @@ class Identifier(Expression):
         path: List[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
 
+    async def evaluate_async(self, context: Context) -> object:
+        path: List[Any] = [await elem.evaluate_async(context) for elem in self.path]
+        return await context.get_async(path)
+
 
 class PrefixExpression(Expression):
     __slots__ = ("operator", "right")
@@ -276,15 +284,21 @@ class PrefixExpression(Expression):
     def __str__(self):
         return f"({self.operator}{self.right})"
 
-    def evaluate(self, context: Context):
-        right = self.right.evaluate(context)
-
+    def _evaluate(self, right: object) -> Union[int, float]:
         if self.operator == "-":
             if isinstance(right, (int, float)):
                 return -right
             raise LiquidTypeError(f"unknown operator {self.operator}{self.right}")
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
+
+    def evaluate(self, context: Context):
+        right = self.right.evaluate(context)
+        return self._evaluate(right)
+
+    async def evaluate_async(self, context: Context):
+        right = await self.right.evaluate_async(context)
+        return self._evaluate(right)
 
 
 class InfixExpression(Expression):
@@ -320,6 +334,11 @@ class InfixExpression(Expression):
     def evaluate(self, context: Context):
         left = self.left.evaluate(context)
         right = self.right.evaluate(context)
+        return compare(left, self.operator, right)
+
+    async def evaluate_async(self, context: Context):
+        left = await self.left.evaluate_async(context)
+        right = await self.right.evaluate_async(context)
         return compare(left, self.operator, right)
 
 
@@ -367,12 +386,22 @@ class Filter:
     def evaluate_args(self, context: Context):
         return [arg.evaluate(context) for arg in self.args]
 
+    async def evaluate_args_async(self, context: Context):
+        return [await arg.evaluate_async(context) for arg in self.args]
+
     def evaluate_kwargs(self, context: Context):
         # Shortcut for the common case. Most filters do not use named
         # parameters.
         if not self.kwargs:
             return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
+
+    async def evaluate_kwargs_async(self, context: Context):
+        # Shortcut for the common case. Most filters do not use named
+        # parameters.
+        if not self.kwargs:
+            return {}
+        return {k: await v.evaluate_async(context) for k, v in self.kwargs.items()}
 
 
 class BooleanExpression(Expression):
@@ -397,6 +426,9 @@ class BooleanExpression(Expression):
 
     def evaluate(self, context: Context) -> bool:
         return is_truthy(self.expression.evaluate(context))
+
+    async def evaluate_async(self, context: Context) -> bool:
+        return is_truthy(await self.expression.evaluate_async(context))
 
 
 class FilteredExpression(Expression):
@@ -453,6 +485,33 @@ class FilteredExpression(Expression):
 
         return result
 
+    async def evaluate_async(self, context: Context) -> object:
+        result = await self.expression.evaluate_async(context)
+
+        for fltr in self.filters:
+            try:
+                func = context.filter(fltr.name)
+            except NoSuchFilterFunc:
+                if context.env.strict_filters:
+                    raise
+                continue
+
+            # Any exception causes us to abort the filter chain and discard the result.
+            # Nothing will be rendered.
+            try:
+                args = await fltr.evaluate_args_async(context)
+                kwargs = await fltr.evaluate_kwargs_async(context)
+                result = func(result, *args, **kwargs)
+            except FilterValueError:
+                # Pass over filtered expressions who's left value is not allowed.
+                continue
+            except Error:
+                raise
+            except Exception as err:
+                raise Error(f"filter '{fltr.name}': unexpected error: {err}") from err
+
+        return result
+
 
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
@@ -478,6 +537,11 @@ class AssignmentExpression(Expression):
 
     def evaluate(self, context: Context) -> str:
         result = self.expression.evaluate(context)
+        context.assign(key=self.name, val=result)
+        return ""
+
+    async def evaluate_async(self, context: Context) -> str:
+        result = await self.expression.evaluate_async(context)
         context.assign(key=self.name, val=result)
         return ""
 
@@ -647,6 +711,69 @@ class LoopExpression(Expression):
 
         return loop_iter, length
 
+    async def evaluate_async(self, context: Context) -> Tuple[Iterator[Any], int]:
+        _offset_key = [self.name]
+
+        if self.identifier:
+            assert isinstance(self.identifier, Identifier)
+            _offset_key.append(str(self.identifier))
+
+            obj = await self.identifier.evaluate_async(context)
+
+            if isinstance(obj, abc.Mapping):
+                length = len(obj)
+                loop_iter: Iterator[Any] = iter(obj.items())
+            elif isinstance(obj, abc.Sequence):
+                length = len(obj)
+                loop_iter = iter(obj)
+
+            else:
+                raise LiquidTypeError(
+                    f"expected array or hash at '{self.identifier}', found '{str(obj)}'"
+                )
+        else:
+            assert self.start is not None
+            assert self.stop is not None
+
+            start = await self.start.evaluate_async(context)
+            stop = await self.stop.evaluate_async(context)
+
+            assert isinstance(start, int)
+            assert isinstance(stop, int)
+
+            stop = stop + 1
+            _offset_key.append(f"{start}..{stop}")
+            loop_iter = iter(range(start, stop))
+            length = stop - start
+
+        limit: Optional[int] = None
+        offset: Optional[int] = None
+        offset_key = "-".join(_offset_key)
+
+        if self.offset:
+            if self.offset == CONTINUE:
+                offset = context.stopindex(key=offset_key)
+            else:
+                _offset = await self.offset.evaluate_async(context)
+                assert isinstance(_offset, int)
+                offset = _offset
+
+            length = max(length - offset, 0)
+
+        if self.limit:
+            _limit = await self.limit.evaluate_async(context)
+            assert isinstance(_limit, int)
+            limit = _limit
+            length = min(length, limit)
+
+        context.stopindex(key=offset_key, index=length)
+        loop_iter = islice(loop_iter, offset, limit)
+
+        if self.reversed:
+            loop_iter = reversed(list(loop_iter))
+
+        return loop_iter, length
+
 
 Number = Union[int, float]
 
@@ -698,9 +825,6 @@ def compare(left: Any, operator: str, right: Any) -> bool:
             return str(right) in left
         if isinstance(left, (list, dict)):
             return right in left
-
-    # FIXME: It appears that shopify will convert any illegal comparison into something
-    # falsey, at least in lax mode.
 
     if None in (left, right):
         return False

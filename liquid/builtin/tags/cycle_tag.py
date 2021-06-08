@@ -58,6 +58,15 @@ class CycleNode(Node):
         args = [arg.evaluate(context) for arg in self.args]
         buffer.write(str(next(context.cycle(group_name, args))))
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        if self.group:
+            group_name = str(await self.group.evaluate_async(context))
+        else:
+            group_name = ""
+
+        args = [await arg.evaluate_async(context) for arg in self.args]
+        buffer.write(str(next(context.cycle(group_name, args))))
+
 
 class CycleTag(Tag):
     """The built-in "cycle" tag."""

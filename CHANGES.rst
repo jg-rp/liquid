@@ -15,6 +15,9 @@ Version 0.7.7
 - Added asynchronous template loading and rendering. When ``Template.render_async`` is
   awaited, ``render`` and ``include`` tags will load templates asynchronously. Custom 
   loaders should implement ``get_source_async``.
+- Added support for asynchronous drops. If a class implements ``__getitem_async__``,
+  which is assumed to be an async version of ``__getitem__``, it will be awaited instead
+  of calling ``__getitem__``.
 
 Version 0.7.6
 -------------

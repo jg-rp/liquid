@@ -63,6 +63,25 @@ def _getitem(obj: Sequence[Any], key: Any) -> object:
     return getitem(obj, key)
 
 
+async def _getitem_async(obj: Sequence[Any], key: Any) -> object:
+    """Item getter with special methods for arrays/lists and hashes/dicts."""
+    # NOTE: A runtime checkable protocol was too slow.
+    if hasattr(key, "__liquid__"):
+        key = key.__liquid__()  # type: ignore
+
+    if key == "size" and isinstance(obj, collections.abc.Sized):
+        return len(obj)
+    if key == "first" and isinstance(obj, collections.abc.Sequence):
+        return obj[0]
+    if key == "last" and isinstance(obj, collections.abc.Sequence):
+        return obj[-1]
+
+    if hasattr(obj, "__getitem_async__"):
+        return await obj.__getitem_async__(key)  # type: ignore
+
+    return getitem(obj, key)
+
+
 def get_item(
     obj: Sequence[Any],
     *items: Any,
@@ -332,6 +351,27 @@ class Context:
                 if default == _undefined:
                     return self.env.undefined(name)
                 return default
+
+        return obj
+
+    async def get_async(
+        self, path: ContextPath, default: object = _undefined
+    ) -> object:
+        """Return the value at path `path` if it is in scope, else default."""
+        if isinstance(path, str):
+            return self.resolve(path, default)
+
+        name, items = path[0], path[1:]
+        assert isinstance(name, str)
+        obj = self.resolve(name, default)
+
+        if items:
+            try:
+                for item in items:
+                    obj = await _getitem_async(obj, item)  # type: ignore
+            except (KeyError, IndexError, TypeError):
+                if default == _undefined:
+                    return self.env.undefined(name)
 
         return obj
 

@@ -1,5 +1,6 @@
 """Liquid render tests."""
 
+import asyncio
 import datetime
 import unittest
 
@@ -67,9 +68,12 @@ class RenderTestCases(unittest.TestCase):
     """Test cases for testing template renders."""
 
     def _test(self, test_cases, template_class=AwareBoundTemplate):
-        """Helper method for testing lists of test cases."""
-        self.maxDiff = None
+        """Run all tests in `test_cases` in sync and async modes."""
+        self._test_sync(test_cases, template_class)
+        self._test_async(test_cases, template_class)
 
+    def _test_sync(self, test_cases, template_class=AwareBoundTemplate):
+        """Helper method for testing lists of test cases."""
         for case in test_cases:
             env = Environment(loader=DictLoader(case.partials))
             env.template_class = template_class
@@ -78,6 +82,22 @@ class RenderTestCases(unittest.TestCase):
 
             with self.subTest(msg=case.description):
                 result = template.render()
+                self.assertEqual(result, case.expect)
+
+    def _test_async(self, test_cases, template_class=AwareBoundTemplate):
+        """Helper method for table driven testing of asynchronous rendering."""
+
+        async def coro(template):
+            return await template.render_async()
+
+        for case in test_cases:
+            env = Environment(loader=DictLoader(case.partials))
+            env.template_class = template_class
+
+            template = env.from_string(case.template, globals=case.globals)
+
+            with self.subTest(msg=case.description, asynchronous=True):
+                result = asyncio.run(coro(template))
                 self.assertEqual(result, case.expect)
 
     def test_literal(self):
@@ -132,6 +152,11 @@ class RenderTestCases(unittest.TestCase):
                     description="integer literal",
                     template=r"{{ 123 }}",
                     expect="123",
+                ),
+                Case(
+                    description="negative integer literal",
+                    template=r"{{ -123 }}",
+                    expect="-123",
                 ),
                 Case(
                     description="float literal",

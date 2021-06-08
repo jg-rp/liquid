@@ -41,9 +41,7 @@ class StatementNode(Node):
     def __repr__(self):  # pragma: no cover
         return f"StatementNode(tok={self.tok}, expression={self.expression!r})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
-        val = self.expression.evaluate(context)
-
+    def _to_liquid_string(self, val: object, autoescape: bool) -> str:
         if isinstance(val, str):
             # shortcut for common case.
             pass
@@ -51,8 +49,8 @@ class StatementNode(Node):
             val = str(val).lower()
         elif val is None:
             val = ""
-        elif isinstance(val, (list, tuple)):
-            if context.autoescape:
+        elif isinstance(val, list):
+            if autoescape:
                 val = Markup("").join(soft_str(itm) for itm in val)
             else:
                 val = "".join(soft_str(itm) for itm in val)
@@ -61,10 +59,18 @@ class StatementNode(Node):
 
         assert isinstance(val, str)
 
-        if context.autoescape:
+        if autoescape:
             val = escape(val)
 
-        buffer.write(val)
+        return val
+
+    def render_to_output(self, context: Context, buffer: TextIO):
+        val = self.expression.evaluate(context)
+        buffer.write(self._to_liquid_string(val, context.autoescape))
+
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        val = await self.expression.evaluate_async(context)
+        buffer.write(self._to_liquid_string(val, context.autoescape))
 
 
 class Statement(Tag):

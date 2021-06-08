@@ -55,6 +55,16 @@ class IfChangedNode(Node):
         if context.ifchanged(val):
             buffer.write(val)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        # Render to an intermediate buffer.
+        buf = StringIO()
+        await self.block.render_async(context, buf)
+        val = buf.getvalue()
+
+        # The context will update its namespace if needed.
+        if context.ifchanged(val):
+            buffer.write(val)
+
 
 class IfChangedTag(Tag):
     """The built-in "ifchanged" tag"""

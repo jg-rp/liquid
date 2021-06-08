@@ -51,7 +51,7 @@ class Node(ABC):
     async def render_async(
         self, context: Context, buffer: TextIO
     ) -> Union[Optional[bool], NoReturn]:
-        """ """
+        """An async version of :meth:`liquid.ast.Node.render`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         if hasattr(self, "render_to_output_async"):
@@ -66,6 +66,14 @@ class Node(ABC):
         buffer: TextIO,
     ) -> Union[Optional[bool], NoReturn]:
         """Render this node to the output buffer."""
+
+    async def render_to_output_async(
+        self,
+        context: Context,
+        buffer: TextIO,
+    ) -> Union[Optional[bool], NoReturn]:
+        """An async version of :meth:`liquid.ast.Node.render_to_output`."""
+        return self.render_to_output(context, buffer)
 
 
 class ParseTree(Node):
@@ -146,6 +154,29 @@ class BlockNode(Node):
         if not val.isspace():
             buffer.write(val)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        # This intermediate buffer is used to suppress blocks that, when rendered,
+        # contain only whitespace.
+        buf = StringIO()
+
+        for stmt in self.statements:
+            try:
+                await stmt.render_async(context, buf)
+            except Error as err:
+                # Maybe resume rendering the block after an error.
+                context.error(err)
+            except Exception:
+                # Write what we have so far and stop rendering the block.
+                val = buf.getvalue()
+                if not val.isspace():
+                    buffer.write(val)
+                raise
+
+        # Don't write to the output buffer if the block contains only whitespace.
+        val = buf.getvalue()
+        if not val.isspace():
+            buffer.write(val)
+
 
 class ConditionalBlockNode(Node):
     """A parse tree node representing a sequence of statements and a conditional
@@ -164,5 +195,11 @@ class ConditionalBlockNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         if self.condition.evaluate(context):
             self.block.render(context, buffer)
+            return True
+        return False
+
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        if await self.condition.evaluate_async(context):
+            await self.block.render_async(context, buffer)
             return True
         return False

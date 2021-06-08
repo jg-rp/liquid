@@ -118,16 +118,16 @@ class IncludeNode(Node):
     async def render_to_output_async(self, context: Context, buffer: TextIO):
         """Same as ``render_to_output`` but uses async versions of get_template and
         render_with_context."""
-        name = self.name.evaluate(context)
+        name = await self.name.evaluate_async(context)
         template = await context.get_template_async(str(name))
         namespace: Dict[str, object] = {}
 
         for key, val in self.args.items():
-            namespace[key] = val.evaluate(context)
+            namespace[key] = await val.evaluate_async(context)
 
         with context.extend(namespace):
             if self.var is not None:
-                val = self.var.evaluate(context)
+                val = await self.var.evaluate_async(context)
                 key = self.alias or template.name.split(".")[0]
 
                 if isinstance(val, (tuple, list, IterableDrop)):

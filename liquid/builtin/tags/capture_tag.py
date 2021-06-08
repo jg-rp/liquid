@@ -51,14 +51,21 @@ class CaptureNode(ast.Node):
     def __repr__(self):  # pragma: no cover
         return f"CaptureNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
-        buf = StringIO()
-        self.block.render(context, buf)
-
+    def _assign(self, context, buf: StringIO):
         if context.autoescape:
             context.assign(self.name, Markup(buf.getvalue()))
         else:
             context.assign(self.name, buf.getvalue())
+
+    def render_to_output(self, context: Context, buffer: TextIO):
+        buf = StringIO()
+        self.block.render(context, buf)
+        self._assign(context, buf)
+
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        buf = StringIO()
+        await self.block.render_async(context, buf)
+        self._assign(context, buf)
 
 
 class CaptureTag(Tag):

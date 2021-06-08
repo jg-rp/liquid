@@ -41,6 +41,9 @@ class LiquidNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO):
         return self.block.render(context, buffer)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return await self.block.render_async(context, buffer)
+
 
 class LiquidTag(Tag):
     """The built-in "liquid" tag."""

@@ -97,6 +97,19 @@ class IfNode(Node):
             if not rendered and self.alternative:
                 self.alternative.render(context, buffer)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        if await self.condition.evaluate_async(context):
+            await self.consequence.render_async(context, buffer)
+        else:
+            rendered = False
+            for alt in self.conditional_alternatives:
+                if await alt.render_async(context, buffer):
+                    rendered = True
+                    break
+
+            if not rendered and self.alternative:
+                await self.alternative.render_async(context, buffer)
+
 
 class IfTag(Tag):
     """The built-in "if" tag."""

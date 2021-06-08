@@ -77,6 +77,17 @@ class CaseNode(ast.Node):
         if not rendered and self.default:
             self.default.render(context, buffer)
 
+    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        rendered = False
+
+        for when in self.whens:
+            if await when.render_async(context, buffer):
+                rendered = True
+                break
+
+        if not rendered and self.default:
+            await self.default.render_async(context, buffer)
+
 
 class CaseTag(Tag):
     """The built-in cycle tag."""

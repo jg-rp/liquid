@@ -242,6 +242,36 @@ templates asynchronously. Custom loaders should implement ``get_source_async``.
 
     result = asyncio.run(coro())
 
+Custom "drops" can implement ``__getitem_async__``. If an instance of a drop that
+implements ``__getitem_async__`` appears in a ``render_async`` context,
+``__getitem_async__`` will be awaited instead of calling ``__getitem__``.
+
+Most likely used for lazy loading objects from a database, an async drop would look
+something like this.
+
+.. code-block:: python
+
+    class SomeAsyncDrop(abc.Mapping):
+        def __init__(self, val):
+            self.key = "foo"
+            self.val = val
+
+        def __len__(self):
+            return 1
+
+        def __iter__(self):
+            return iter([self.key])
+
+        def __getitem__(self, k):
+            # Blocking IO here
+            time.sleep(0.5)
+            # ...
+
+        async def __getitem_async__(self, k):
+            # Do async IO here.
+            asyncio.sleep(0.5)
+            # ...
+            
 
 Related Projects
 ----------------
