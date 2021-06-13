@@ -281,8 +281,11 @@ Related Projects
 - `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid.
   Render Liquid templates in your Flask applications.
 - `python-liquid-extra <https://github.com/jg-rp/liquid-extra>`_: A growing collection
-  of extra tags and filters for Python Liquid. For example, an ``if`` tag that supports
-  ``not`` and grouping with parentheses.
+  of extra tags and filters for Python Liquid. Highlights of which are: 
+
+  - an ``if`` tag that supports ``not`` and grouping with parentheses.
+  - ``macro`` and ``call`` tags for defining and calling parameterized Liquid snippets.
+  - a JSON encoding filter.
 
 Compatibility
 -------------
