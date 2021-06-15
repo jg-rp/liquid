@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 0.8.0
+-------------
+
+Version bump. Last release before removing depreciated class-based filters.
+
 Version 0.7.8
 -------------
 
