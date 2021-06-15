@@ -14,6 +14,10 @@ A non evaling templating language suitable for end users.
     :target: https://pypi.org/project/python-liquid/
     :alt: Version
 
+.. image:: https://github.com/jg-rp/liquid/actions/workflows/tests.yaml/badge.svg
+    :target: https://github.com/jg-rp/liquid/tree/main/tests
+    :alt: Tests
+
 .. image:: https://img.shields.io/pypi/l/python-liquid.svg
     :target: https://pypi.org/project/python-liquid/
     :alt: Licence
