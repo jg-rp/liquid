@@ -89,6 +89,11 @@ class Date(AbstractFilter):
         if is_undefined(dt):
             return ""
 
+        if is_undefined(fmt):
+            raise FilterArgumentError(
+                f"expected a format string, found {type(fmt).__name__}"
+            )
+
         if isinstance(dt, str):
             if dt == "now":
                 dt = datetime.datetime.now()

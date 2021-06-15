@@ -17,6 +17,7 @@ twine = "*"
 sphinx = "*"
 mypy = "*"
 mock = "*"
+pytest = "*"
 
 [packages]
 python-dateutil = "*"

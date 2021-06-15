@@ -16,7 +16,7 @@ jobs:
           - {name: '3.9-autoescape', python: '3.9', os: ubuntu-latest, tox: py39-autoescape}
           - {name: '3.8-autoescape', python: '3.8', os: ubuntu-latest, tox: py38-autoescape}
           - {name: '3.7-autoescape', python: '3.7', os: ubuntu-latest, tox: py37-autoescape}
-          - {name: 'PyPy-autoescape', python: pypy3, os: ubuntu-latest, tox: pypy37-autoescape}
+          - {name: 'PyPy-autoescape', python: pypy3, os: ubuntu-latest, tox: pypy3-autoescape}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2

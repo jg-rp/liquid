@@ -49,6 +49,11 @@ def date(dat, fmt, *, environment):
     if is_undefined(dat):
         return ""
 
+    if is_undefined(fmt):
+        raise FilterArgumentError(
+            f"expected a format string, found {type(fmt).__name__}"
+        )
+
     if isinstance(dat, str):
         if dat == "now":
             dat = datetime.datetime.now()
