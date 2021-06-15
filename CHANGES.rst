@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 0.7.8
+-------------
+
+- The ``default`` filter now uses ``__liquid__``, if available, when testing an object
+  for truthy-ness.
+
 Version 0.7.7
 -------------
 

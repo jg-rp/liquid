@@ -63,10 +63,14 @@ class Default(AbstractFilter):
     num_args = 1
 
     def filter(self, obj, _default, allow_false=None):
-        if allow_false is True and obj is False:
+        _obj = obj
+        if hasattr(obj, "__liquid__"):
+            _obj = obj.__liquid__()
+
+        if allow_false is True and _obj is False:
             return obj
 
-        if obj in (None, False, EMPTY) or is_undefined(obj):
+        if _obj in (None, False, EMPTY) or is_undefined(_obj):
             return _default
 
         return obj

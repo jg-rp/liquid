@@ -34,6 +34,35 @@ class Case(NamedTuple):
     expect: Any
 
 
+class MockDrop:
+    def __init__(self, val):
+        self.val = val
+
+    def __eq__(self, other):
+        if isinstance(other, MockDrop) and self.val == other.val:
+            return True
+        return False
+
+    def __str__(self):
+        return "hello mock drop"
+
+    def __liquid__(self):
+        return self.val
+
+
+class NoLiquidDrop:
+    def __init__(self, val):
+        self.val = val
+
+    def __eq__(self, other):
+        if isinstance(other, NoLiquidDrop) and self.val == other.val:
+            return True
+        return False
+
+    def __str__(self):
+        return "hello no liquid drop"
+
+
 class MiscFilterTestCase(unittest.TestCase):
     """Test miscellaneous filter functions."""
 
@@ -226,6 +255,27 @@ class MiscFilterTestCase(unittest.TestCase):
                 args=["bar"],
                 kwargs={},
                 expect="bar",
+            ),
+            Case(
+                description="a false drop",
+                val=MockDrop(False),
+                args=["bar"],
+                kwargs={},
+                expect="bar",
+            ),
+            Case(
+                description="a true drop",
+                val=MockDrop(True),
+                args=["bar"],
+                kwargs={},
+                expect=MockDrop(True),
+            ),
+            Case(
+                description="simple drop is always true",
+                val=NoLiquidDrop(False),
+                args=["bar"],
+                kwargs={},
+                expect=NoLiquidDrop(False),
             ),
         ]
 

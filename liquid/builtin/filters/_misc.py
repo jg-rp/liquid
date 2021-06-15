@@ -28,10 +28,14 @@ def size(obj):
 @liquid_filter
 def default(obj, default_, *, allow_false=None):
     """Return a default value if the input is nil, false, or empty."""
-    if allow_false is True and obj is False:
+    _obj = obj
+    if hasattr(obj, "__liquid__"):
+        _obj = obj.__liquid__()
+
+    if allow_false is True and _obj is False:
         return obj
 
-    if obj in (None, False, EMPTY) or is_undefined(obj):
+    if _obj in (None, False, EMPTY) or is_undefined(_obj):
         return default_
 
     return obj
