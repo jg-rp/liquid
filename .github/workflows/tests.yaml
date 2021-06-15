@@ -12,11 +12,11 @@ jobs:
           - {name: '3.9', python: '3.9', os: ubuntu-latest, tox: py39-unsafe}
           - {name: '3.8', python: '3.8', os: ubuntu-latest, tox: py38-unsafe}
           - {name: '3.7', python: '3.7', os: ubuntu-latest, tox: py37-unsafe}
-          - {name: 'PyPy', python: pypy3, os: ubuntu-latest, tox: pypy37-unsafe}
+          - {name: 'PyPy', python: pypy-3.7, os: ubuntu-latest, tox: pypy37-unsafe}
           - {name: '3.9-autoescape', python: '3.9', os: ubuntu-latest, tox: py39-autoescape}
           - {name: '3.8-autoescape', python: '3.8', os: ubuntu-latest, tox: py38-autoescape}
           - {name: '3.7-autoescape', python: '3.7', os: ubuntu-latest, tox: py37-autoescape}
-          - {name: 'PyPy-autoescape', python: pypy3, os: ubuntu-latest, tox: pypy3-autoescape}
+          - {name: 'PyPy-autoescape', python: pypy-3.7, os: ubuntu-latest, tox: pypy37-autoescape}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
