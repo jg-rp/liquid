@@ -18,6 +18,7 @@ sphinx = "*"
 mypy = "*"
 mock = "*"
 pytest = "*"
+types-python-dateutil = "*"
 
 [packages]
 python-dateutil = "*"

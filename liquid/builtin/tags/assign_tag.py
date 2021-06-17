@@ -3,6 +3,7 @@
 import re
 import sys
 
+from typing import Optional
 from typing import TextIO
 
 from liquid.token import Token
@@ -35,11 +36,15 @@ class AssignNode(Node):
     def __str__(self) -> str:
         return f"var ({self.expression})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         self.expression.evaluate(context)
+        return None
 
-    async def render_to_output_async(self, context: Context, _: TextIO):
+    async def render_to_output_async(
+        self, context: Context, _: TextIO
+    ) -> Optional[bool]:
         await self.expression.evaluate_async(context)
+        return None
 
 
 class AssignTag(Tag):

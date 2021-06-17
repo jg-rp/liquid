@@ -2,8 +2,8 @@
 
 import sys
 
-from typing import List
 from typing import Any
+from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -49,7 +49,7 @@ class CycleNode(Node):
         buf.append(")")
         return "".join(buf)
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.group:
             group_name = str(self.group.evaluate(context))
         else:
@@ -58,7 +58,11 @@ class CycleNode(Node):
         args = [arg.evaluate(context) for arg in self.args]
         buffer.write(str(next(context.cycle(group_name, args))))
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         if self.group:
             group_name = str(await self.group.evaluate_async(context))
         else:
@@ -66,6 +70,8 @@ class CycleNode(Node):
 
         args = [await arg.evaluate_async(context) for arg in self.args]
         buffer.write(str(next(context.cycle(group_name, args))))
+
+        return None
 
 
 class CycleTag(Tag):

@@ -1,3 +1,4 @@
+# type: ignore
 """Legacy, class-based implementations of maths related filters."""
 
 import math

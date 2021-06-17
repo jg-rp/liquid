@@ -511,6 +511,13 @@ class ArrayFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=FilterValueError,
             ),
+            Case(
+                description="sort by key targeting an array of strings",
+                val=["Z", "b", "a", "C", "B", "A"],
+                args=["title"],
+                kwargs={},
+                expect=["Z", "b", "a", "C", "B", "A"],
+            ),
         ]
 
         self._test(Sort, test_cases)

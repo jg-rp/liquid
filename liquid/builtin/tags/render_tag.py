@@ -7,6 +7,7 @@ from typing import Optional
 from typing import Dict
 from typing import Any
 from typing import TextIO
+from typing import Tuple
 
 from liquid.ast import Node
 
@@ -70,7 +71,7 @@ class RenderNode(Node):
         self.alias = alias
         self.args = args or {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         buf = [f"{self.name}"]
 
         if self.var:
@@ -87,10 +88,10 @@ class RenderNode(Node):
 
         return f"render({''.join(buf)})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         path = self.name.evaluate(context)
         assert isinstance(path, str)
 
@@ -153,7 +154,11 @@ class RenderNode(Node):
         else:
             template.render_with_context(ctx, buffer, partial=True, block_scope=True)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         """An awaitable version of `render_to_output` that loads templates
         asynchronously."""
         path = await self.name.evaluate_async(context)
@@ -219,6 +224,8 @@ class RenderNode(Node):
             await template.render_with_context_async(
                 ctx, buffer, partial=True, block_scope=True
             )
+
+        return None
 
 
 class RenderTag(Tag):
@@ -291,7 +298,7 @@ class RenderTag(Tag):
         )
 
 
-def parse_argument(stream: TokenStream):
+def parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
     """Return the next key/value pair from the stream where key and value
     are separated by a colon."""
     key = str(parse_unchained_identifier(stream))

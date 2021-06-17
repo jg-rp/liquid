@@ -2,6 +2,7 @@
 
 import sys
 
+from typing import Optional
 from typing import TextIO
 
 from liquid.ast import Node
@@ -32,8 +33,9 @@ class IncrementNode(Node):
     def __str__(self) -> str:
         return f"{self.identifier} += 1"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.increment(self.identifier)))
+        return None
 
 
 class IncrementTag(Tag):

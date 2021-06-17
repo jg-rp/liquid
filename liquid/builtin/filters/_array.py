@@ -1,8 +1,17 @@
 """Filter functions that operate on arrays."""
+from __future__ import annotations
 
 from collections import OrderedDict
-
+from functools import partial
 from operator import getitem
+
+from typing import Any
+from typing import Iterable
+from typing import List
+from typing import Sequence
+from typing import Tuple
+from typing import TypeVar
+from typing import TYPE_CHECKING
 
 try:
     from markupsafe import Markup
@@ -17,6 +26,10 @@ from liquid.exceptions import FilterValueError
 
 from liquid import is_undefined
 
+if TYPE_CHECKING:
+    from liquid import Environment
+
+ArrayT = TypeVar("ArrayT", List[Any], Tuple[Any, ...])
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
@@ -28,7 +41,7 @@ def _str_if_not(val: object) -> str:
     return val
 
 
-def _getitem(sequence, key, default=None):
+def _getitem(sequence: Any, key: object, default: object = None) -> Any:
     """Helper for the map filter.
 
     Same as sequence[key], but returns a default value if key does not exist
@@ -38,19 +51,25 @@ def _getitem(sequence, key, default=None):
         return getitem(sequence, key)
     except (KeyError, IndexError):
         return default
+    except TypeError:
+        if not hasattr(sequence, "__getitem__"):
+            raise
+        return default
 
 
-def _lower(val, default="") -> str:
+def _lower(obj: Any) -> str:
     """Helper for the sort filter"""
     try:
-        return val.lower()
+        return str(obj.lower())
     except AttributeError:
-        return default
+        return ""
 
 
 @with_environment
 @array_filter
-def join(iterable, separator=" ", *, environment):
+def join(
+    iterable: Iterable[object], separator: str = " ", *, environment: Environment
+) -> str:
     """Concatenate an array of strings."""
     if not isinstance(separator, str):
         separator = str(separator)
@@ -62,7 +81,7 @@ def join(iterable, separator=" ", *, environment):
 
 
 @array_filter
-def first(array):
+def first(array: Sequence[Any]) -> object:
     """Return the first item of an array"""
     if array:
         return array[0]
@@ -70,7 +89,7 @@ def first(array):
 
 
 @array_filter
-def last(array):
+def last(array: Sequence[Any]) -> object:
     """Return the last item of an array"""
     if array:
         return array[-1]
@@ -78,7 +97,7 @@ def last(array):
 
 
 @array_filter
-def concat(array, second_array):
+def concat(array: ArrayT, second_array: ArrayT) -> ArrayT:
     """Return two arrays joined together."""
     if not isinstance(second_array, (list, tuple)):
         raise FilterArgumentError(
@@ -91,7 +110,7 @@ def concat(array, second_array):
 
 
 @array_filter
-def map_(sequence, key):
+def map_(sequence: ArrayT, key: object) -> List[object]:
     """Creates an array of values by extracting the values of a named property
     from another object."""
     try:
@@ -101,20 +120,21 @@ def map_(sequence, key):
 
 
 @array_filter
-def reverse(array):
+def reverse(array: ArrayT) -> List[object]:
     """Reverses the order of the items in an array."""
     return list(reversed(array))
 
 
 @array_filter
-def sort(sequence, key=None):
+def sort(sequence: ArrayT, key: object = None) -> List[object]:
     """Sorts items in an array in case-sensitive order.
 
     When a key string is provided, objects without the key property should
     be at the end of the output list/array.
     """
     if key:
-        return list(sorted(sequence, key=lambda x: _getitem(x, str(key), MAX_CH)))
+        key_func = partial(_getitem, key=str(key), default=MAX_CH)
+        return list(sorted(sequence, key=key_func))
 
     try:
         return list(sorted(sequence))
@@ -123,18 +143,17 @@ def sort(sequence, key=None):
 
 
 @array_filter
-def sort_natural(sequence, key=None):
+def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
     """Sorts items in an array in case-insensitive order."""
     if key:
-        return list(
-            sorted(sequence, key=lambda x: _lower(_getitem(x, str(key), MAX_CH)))
-        )
+        item_getter = partial(_getitem, key=str(key), default=MAX_CH)
+        return list(sorted(sequence, key=lambda obj: _lower(item_getter(obj))))
 
     return list(sorted(sequence, key=_lower))
 
 
 @array_filter
-def where(sequence, attr, value=None):
+def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
     """Creates an array including only the objects with a given property value,
     or any truthy value by default."""
     if value:
@@ -144,7 +163,7 @@ def where(sequence, attr, value=None):
 
 
 @array_filter
-def uniq(iterable):
+def uniq(iterable: ArrayT) -> List[object]:
     """Removes any duplicate elements in an array. Input array order is not
     preserved."""
     unique = OrderedDict.fromkeys(iterable)
@@ -152,6 +171,6 @@ def uniq(iterable):
 
 
 @array_filter
-def compact(iterable):
+def compact(iterable: ArrayT) -> List[object]:
     """Removes any nil values from an array."""
     return [itm for itm in iterable if itm is not None]

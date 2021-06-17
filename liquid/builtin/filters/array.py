@@ -1,3 +1,4 @@
+# type: ignore
 """Legacy, class-based implementations of filters that operate on arrays."""
 
 from collections import OrderedDict
@@ -11,7 +12,7 @@ from typing import Tuple
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import Markup
 
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
@@ -134,6 +135,10 @@ def _getitem(sequence, key: str, default: Any = None) -> Any:
     try:
         return getitem(sequence, key)
     except (KeyError, IndexError):
+        return default
+    except TypeError:
+        if not hasattr(sequence, "__getitem__"):
+            raise
         return default
 
 

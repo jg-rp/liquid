@@ -42,7 +42,7 @@ class LRUCache(abc.MutableMapping):
     # scale.  But as long as it's only used as storage for templates this
     # won't do any harm.
 
-    def __init__(self, capacity):
+    def __init__(self, capacity: int):
         self.capacity = capacity
         self._mapping = {}
         self._queue = deque()

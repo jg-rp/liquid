@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import sys
 
-from typing import Optional
 from typing import List
+from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
 
@@ -66,7 +66,7 @@ class CaseNode(ast.Node):
 
         return " ".join(buf)
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         rendered = False
 
         for when in self.whens:
@@ -77,7 +77,11 @@ class CaseNode(ast.Node):
         if not rendered and self.default:
             self.default.render(context, buffer)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         rendered = False
 
         for when in self.whens:
@@ -87,6 +91,8 @@ class CaseNode(ast.Node):
 
         if not rendered and self.default:
             await self.default.render_async(context, buffer)
+
+        return None
 
 
 class CaseTag(Tag):

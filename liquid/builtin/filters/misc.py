@@ -1,3 +1,4 @@
+# type: ignore
 """Legacy, class-based implementations of miscellaneous filters."""
 
 import datetime
@@ -8,7 +9,7 @@ from dateutil import parser
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import Markup
 
 from liquid import is_undefined
 from liquid.filter import Filter

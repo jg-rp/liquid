@@ -304,7 +304,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
 def parse_string_or_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
-) -> ast.Expression:
+) -> expression.Expression:
     if stream.current.type == TOKEN_IDENTIFIER:
         expr: expression.Expression = parse_identifier(stream)
     elif stream.current.type == TOKEN_STRING:
@@ -444,7 +444,7 @@ class ExpressionParser:
     parsing behavior. Such as adding a logical `NOT` operator.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.precedences = PRECEDENCES.copy()
         self.right_associative = RIGHT_ASSOCIATIVE.copy()
 
@@ -487,7 +487,7 @@ class ExpressionParser:
         """Return the precedence of the current token in the stream."""
         precedence = self.precedences.get(stream.current.type, Precedence.LOWEST)
         if stream.current.type in self.right_associative:
-            precedence -= 1
+            precedence = Precedence(precedence - 1)
         return Precedence(precedence)
 
     def parse_filters(self, stream: TokenStream) -> List[expression.Filter]:

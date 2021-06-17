@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Callable
 from typing import Dict
 from typing import Any
+from typing import Iterator
+from typing import Mapping
 from typing import Optional
 from typing import TextIO
 from typing import Union
@@ -177,13 +179,15 @@ class BoundTemplate:
             return True
         return self.uptodate()
 
-    def _make_globals(self, partial, args, kwargs) -> abc.Mapping:
+    def _make_globals(
+        self, partial: bool, args: Any, kwargs: Any
+    ) -> abc.Mapping[str, object]:
         return {
             **dict(*args, **kwargs),
             "partial": partial,
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Template(name='{self.name}', "
             f"path='{self.path}', uptodate={self.is_up_to_date})"
@@ -191,15 +195,17 @@ class BoundTemplate:
 
 
 class AwareBoundTemplate(BoundTemplate):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.drop = TemplateDrop(self.name, self.path)
 
-    def _make_globals(self, partial, args, kwargs) -> abc.Mapping:
+    def _make_globals(
+        self, partial: bool, args: Any, kwargs: Any
+    ) -> abc.Mapping[str, object]:
         return {"template": self.drop, **super()._make_globals(partial, args, kwargs)}
 
 
-class TemplateDrop(abc.Mapping):
+class TemplateDrop(Mapping[str, Optional[str]]):
     """Template meta data mapping."""
 
     def __init__(self, name: str, path: Optional[Union[str, Path]]):
@@ -221,23 +227,23 @@ class TemplateDrop(abc.Mapping):
             "suffix": self.suffix,
         }
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.stem
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"TemplateDrop(directory='{self['directory']}', "
             f"name='{self['name']}', suffix='{self['suffix']}')"
         )  # pragma: no cover
 
-    def __contains__(self, item):
+    def __contains__(self, item: object) -> bool:
         return item in self._items
 
-    def __getitem__(self, key):
-        return self._items[key]
+    def __getitem__(self, key: object) -> Optional[str]:
+        return self._items[str(key)]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._items)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._items)

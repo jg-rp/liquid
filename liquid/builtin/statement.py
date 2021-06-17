@@ -1,4 +1,5 @@
 """Parse tree node and pseudo "tag" for output statements."""
+from typing import Optional
 from typing import TextIO
 
 try:
@@ -9,7 +10,8 @@ except ImportError:
     from liquid.exceptions import escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
 
-    soft_str = str  # pylint: disable=invalid-name
+    # pylint: disable=invalid-name
+    soft_str = str  # type: ignore
 
 from liquid.ast import Node
 from liquid.context import Context
@@ -35,10 +37,10 @@ class StatementNode(Node):
         self.tok = tok
         self.expression = expression
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"`{self.expression}`"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"StatementNode(tok={self.tok}, expression={self.expression!r})"
 
     def _to_liquid_string(self, val: object, autoescape: bool) -> str:
@@ -64,13 +66,17 @@ class StatementNode(Node):
 
         return val
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         val = self.expression.evaluate(context)
         buffer.write(self._to_liquid_string(val, context.autoescape))
+        return None
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         val = await self.expression.evaluate_async(context)
         buffer.write(self._to_liquid_string(val, context.autoescape))
+        return None
 
 
 class Statement(Tag):

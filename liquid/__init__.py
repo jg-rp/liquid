@@ -1,4 +1,4 @@
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 
 try:
     from markupsafe import escape
@@ -17,7 +17,7 @@ from .context import Context
 from .context import Undefined
 from .context import DebugUndefined
 from .context import StrictUndefined
-from .context import is_undefined
+from .context import is_undefined as is_undefined
 
 from .environment import Environment as Environment
 from .environment import Template as Template

@@ -144,7 +144,7 @@ def escape(val: object) -> str:
     raise Error("autoescape requires Markupsafe to be installed")
 
 
-class Markup:
+class Markup(str):
     """A dummy markup class that always raises an exception."""
 
     def __init__(self, val: object):

@@ -11,6 +11,8 @@ from functools import wraps
 from typing import Tuple
 from typing import Any
 from typing import Callable
+from typing import Union
+from typing import Optional
 from typing import TYPE_CHECKING
 
 from liquid.context import Undefined
@@ -22,6 +24,7 @@ if TYPE_CHECKING:
     from liquid import Environment
 
     FilterT = Callable[..., Any]
+    N = Union[float, int]
 
 
 def with_context(_filter: FilterT) -> FilterT:
@@ -92,7 +95,7 @@ def liquid_filter(_filter: FilterT) -> FilterT:
     return wrapper
 
 
-def int_arg(val, default=None):
+def int_arg(val: Any, default: Optional[int] = None) -> int:
     try:
         return int(val)
     except ValueError as err:
@@ -103,7 +106,7 @@ def int_arg(val, default=None):
         ) from err
 
 
-def num_arg(val, default=None):
+def num_arg(val: Any, default: Optional[N] = None) -> N:
     if isinstance(val, (int, float)):
         return val
 

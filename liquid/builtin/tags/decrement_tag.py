@@ -1,7 +1,9 @@
 """Tag and node definition for the built-in "decrement" tag."""
 
 import sys
+
 from typing import TextIO
+from typing import Optional
 
 from liquid import ast
 from liquid.context import Context
@@ -31,8 +33,9 @@ class DecrementNode(ast.Node):
     def __str__(self) -> str:
         return f"{self.identifier} -= 1"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.decrement(self.identifier)))
+        return None
 
 
 class DecrementTag(Tag):

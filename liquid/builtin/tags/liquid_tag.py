@@ -1,6 +1,8 @@
 """Tag and node definition for the built-in "liquid" tag."""
 
 import sys
+
+from typing import Optional
 from typing import TextIO
 
 from liquid.ast import Node
@@ -32,16 +34,18 @@ class LiquidNode(Node):
         self.tok = tok
         self.block = block
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.block)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"LiquidNode(tok={self.tok}, block={self.block!r})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         return self.block.render(context, buffer)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         return await self.block.render_async(context, buffer)
 
 

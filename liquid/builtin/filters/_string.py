@@ -1,10 +1,15 @@
 """Filter functions that operate on strings."""
+from __future__ import annotations
 
 import base64
 import binascii
 import html
 import re
 import urllib.parse
+
+from typing import Any
+from typing import List
+from typing import TYPE_CHECKING
 
 try:
     from markupsafe import escape as markupsafe_escape
@@ -14,7 +19,8 @@ except ImportError:
     from liquid.exceptions import escape as markupsafe_escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
 
-    soft_str = str  # pylint: disable=invalid-name
+    # pylint: disable=invalid-name
+    soft_str = str  # type: ignore
 
 from liquid import is_undefined
 from liquid.exceptions import FilterArgumentError
@@ -27,9 +33,12 @@ from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
 
+if TYPE_CHECKING:
+    from liquid import Environment
+
 
 @string_filter
-def append(val, arg):
+def append(val: str, arg: object) -> str:
     """Concatenate two strings."""
     if not isinstance(arg, str):
         arg = str(arg)
@@ -37,21 +46,21 @@ def append(val, arg):
 
 
 @string_filter
-def capitalize(val):
+def capitalize(val: str) -> str:
     """Make sure the first character of a string is upper case and the rest
     lowercase."""
     return val.capitalize()
 
 
 @string_filter
-def downcase(val):
+def downcase(val: str) -> str:
     """Make all characters in a string lower case."""
     return val.lower()
 
 
 @with_environment
 @string_filter
-def escape(val, *, environment):
+def escape(val: str, *, environment: Environment) -> str:
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
     if environment.autoescape:
         return markupsafe_escape(str(val))
@@ -60,15 +69,15 @@ def escape(val, *, environment):
 
 @with_environment
 @string_filter
-def escape_once(val, *, environment):
+def escape_once(val: str, *, environment: Environment) -> str:
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
     if environment.autoescape:
-        return Markup.unescape(val)
+        return Markup(val).unescape()
     return html.escape(html.unescape(val))
 
 
 @string_filter
-def lstrip(val):
+def lstrip(val: str) -> str:
     """Remove leading whitespace."""
     return val.lstrip()
 
@@ -78,7 +87,7 @@ RE_LINETERM = re.compile(r"\r?\n")
 
 @with_environment
 @string_filter
-def newline_to_br(val, *, environment):
+def newline_to_br(val: str, *, environment: Environment) -> str:
     """Convert '\r\n' or '\n' to '<br />\n'."""
     # The reference implementation was changed to replace "\r\n" as well as "\n",
     # but they don't seem to care about "\r" (Mac OS).
@@ -89,25 +98,25 @@ def newline_to_br(val, *, environment):
 
 
 @string_filter
-def prepend(val, arg):
+def prepend(val: str, arg: str) -> str:
     """Concatenate string value to argument string."""
     return soft_str(arg) + val
 
 
 @string_filter
-def remove(val, arg):
+def remove(val: str, arg: str) -> str:
     """Remove all occurrences of argument string from value."""
     return val.replace(soft_str(arg), "")
 
 
 @string_filter
-def remove_first(val, arg):
+def remove_first(val: str, arg: str) -> str:
     """Remove the first occurrences of the argument string from value."""
     return val.replace(soft_str(arg), "", 1)
 
 
 @string_filter
-def replace(val, seq, sub):
+def replace(val: str, seq: str, sub: str) -> str:
     """Replaces every occurrence of the first argument in a string with the second
     argument."""
     if is_undefined(seq):
@@ -117,7 +126,7 @@ def replace(val, seq, sub):
 
 
 @string_filter
-def replace_first(val, seq, sub):
+def replace_first(val: str, seq: str, sub: str) -> str:
     """Replaces the first occurrence of the first argument in a string with the second
     argument."""
     if is_undefined(seq):
@@ -127,13 +136,13 @@ def replace_first(val, seq, sub):
 
 
 @string_filter
-def upcase(val):
+def upcase(val: str) -> str:
     """Make all characters in a string upper case."""
     return val.upper()
 
 
 @string_filter
-def slice_(val, start, length=1):
+def slice_(val: str, start: Any, length: int = 1) -> str:
     """Return a substring, starting at `start`, containing up to `length` characters."""
     if not val:
         return ""
@@ -165,7 +174,7 @@ def slice_(val, start, length=1):
 
 
 @string_filter
-def split(val, seq):
+def split(val: str, seq: str) -> List[str]:
     """Split a string into a list of string, using the argument as a delimiter."""
     if not seq:
         return list(val)
@@ -174,20 +183,20 @@ def split(val, seq):
 
 
 @string_filter
-def strip(val):
+def strip(val: str) -> str:
     """Remove leading and trailing whitespace."""
     return val.strip()
 
 
 @string_filter
-def rstrip(val):
+def rstrip(val: str) -> str:
     """Remove trailing whitespace."""
     return val.rstrip()
 
 
 @with_environment
 @string_filter
-def strip_html(val, *, environment):
+def strip_html(val: str, *, environment: Environment) -> str:
     """Return the given HTML with all HTML tags removed."""
     stripped = strip_tags(val)
     if environment.autoescape and isinstance(val, Markup):
@@ -197,7 +206,7 @@ def strip_html(val, *, environment):
 
 @with_environment
 @string_filter
-def strip_newlines(val, *, environment):
+def strip_newlines(val: str, *, environment: Environment) -> str:
     """Return the given string with all newline characters removed."""
     if environment.autoescape:
         val = markupsafe_escape(val)
@@ -206,7 +215,7 @@ def strip_newlines(val, *, environment):
 
 
 @string_filter
-def truncate(val, num, end="..."):
+def truncate(val: str, num: Any, end: str = "...") -> str:
     """Truncate a string if it is longer than the specified number of characters."""
     if is_undefined(num):
         raise FilterArgumentError("truncate expected an integer, found Undefined")
@@ -223,7 +232,7 @@ def truncate(val, num, end="..."):
 
 
 @string_filter
-def truncatewords(val, num, end="..."):
+def truncatewords(val: str, num: Any, end: str = "...") -> str:
     """Shorten a string down to the given number of words."""
     if is_undefined(num):
         raise FilterArgumentError("truncate expected an integer, found Undefined")
@@ -247,7 +256,7 @@ def truncatewords(val, num, end="..."):
 
 @with_environment
 @string_filter
-def url_encode(val, *, environment):
+def url_encode(val: str, *, environment: Environment) -> str:
     """Percent encode a string so it is useable in a URL."""
     if environment.autoescape:
         return Markup(urllib.parse.quote_plus(val))
@@ -255,20 +264,20 @@ def url_encode(val, *, environment):
 
 
 @string_filter
-def url_decode(val):
+def url_decode(val: str) -> str:
     """Decode a string that has been URL encoded."""
     # Assuming URL decoded strings are all unsafe.
     return urllib.parse.unquote_plus(val)
 
 
 @string_filter
-def base64_encode(val: str):
+def base64_encode(val: str) -> str:
     """Encode a string to base64."""
     return base64.b64encode(val.encode()).decode()
 
 
 @string_filter
-def base64_decode(val: str):
+def base64_decode(val: str) -> str:
     """Decode a string from base64.
 
     The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
@@ -280,13 +289,13 @@ def base64_decode(val: str):
 
 
 @string_filter
-def base64_url_safe_encode(val: str):
+def base64_url_safe_encode(val: str) -> str:
     """Encode a string to URL safe base64."""
     return base64.urlsafe_b64encode(val.encode()).decode()
 
 
 @string_filter
-def base64_url_safe_decode(val: str):
+def base64_url_safe_decode(val: str) -> str:
     """Decode a URL safe string from base64.
 
     The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.

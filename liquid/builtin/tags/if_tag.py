@@ -27,7 +27,7 @@ from liquid.parse import eat_block
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 
-from liquid.builtin.illegal import IllegalNode
+from liquid.ast import IllegalNode
 
 if TYPE_CHECKING:
     from liquid.context import Context
@@ -81,10 +81,10 @@ class IfNode(Node):
             buf.append(f"else {{ {self.alternative} }}")
         return " ".join(buf)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"IfNode(tok={self.tok}, condition='{self.condition}')"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.condition.evaluate(context):
             self.consequence.render(context, buffer)
         else:
@@ -97,7 +97,11 @@ class IfNode(Node):
             if not rendered and self.alternative:
                 self.alternative.render(context, buffer)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         if await self.condition.evaluate_async(context):
             await self.consequence.render_async(context, buffer)
         else:
@@ -109,6 +113,8 @@ class IfNode(Node):
 
             if not rendered and self.alternative:
                 await self.alternative.render_async(context, buffer)
+
+        return None
 
 
 class IfTag(Tag):

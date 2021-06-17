@@ -4,6 +4,7 @@ import sys
 
 from io import StringIO
 
+from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
 
@@ -42,10 +43,10 @@ class IfChangedNode(Node):
     def __str__(self) -> str:
         return f"ifchanged {{ {self.block} }}"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"IfChanged(tok={self.tok})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         # Render to an intermediate buffer.
         buf = StringIO()
         self.block.render(context, buf)
@@ -55,7 +56,11 @@ class IfChangedNode(Node):
         if context.ifchanged(val):
             buffer.write(val)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         # Render to an intermediate buffer.
         buf = StringIO()
         await self.block.render_async(context, buf)
@@ -64,6 +69,8 @@ class IfChangedNode(Node):
         # The context will update its namespace if needed.
         if context.ifchanged(val):
             buffer.write(val)
+
+        return None
 
 
 class IfChangedTag(Tag):

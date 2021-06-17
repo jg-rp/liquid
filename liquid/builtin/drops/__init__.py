@@ -1,1 +1,1 @@
-from .drops import IterableDrop
+from .drops import IterableDrop as IterableDrop

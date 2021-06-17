@@ -5,6 +5,7 @@ from typing import Optional
 from typing import Dict
 from typing import Any
 from typing import TextIO
+from typing import Tuple
 
 from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
@@ -58,7 +59,7 @@ class IncludeNode(Node):
         self.alias = alias
         self.args = args or {}
 
-    def __str__(self):
+    def __str__(self) -> str:
         buf = [f"{self.name}"]
 
         if self.var:
@@ -75,10 +76,10 @@ class IncludeNode(Node):
 
         return f"include({''.join(buf)})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"IncludeNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.name.evaluate(context)
         template = context.get_template(str(name))
 
@@ -115,7 +116,11 @@ class IncludeNode(Node):
             else:
                 template.render_with_context(context, buffer, partial=True)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         """Same as ``render_to_output`` but uses async versions of get_template and
         render_with_context."""
         name = await self.name.evaluate_async(context)
@@ -143,6 +148,8 @@ class IncludeNode(Node):
                     )
             else:
                 await template.render_with_context_async(context, buffer, partial=True)
+
+        return None
 
 
 class IncludeTag(Tag):
@@ -206,7 +213,7 @@ class IncludeTag(Tag):
         return IncludeNode(tok, name=name, var=identifier, alias=alias, args=args)
 
 
-def _parse_argument(stream: TokenStream):
+def _parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
 

@@ -2,15 +2,12 @@
 
 import sys
 
-from collections import abc
-
 from typing import Optional
 from typing import Any
 from typing import List
+from typing import Mapping
 from typing import TextIO
 from typing import Iterator
-from typing import NoReturn
-from typing import Union
 
 from liquid.ast import Node
 from liquid.ast import BlockNode
@@ -46,7 +43,7 @@ ENDFORBLOCK = (TAG_ENDFOR, TAG_ELSE)
 ENDFORELSEBLOCK = (TAG_ENDFOR,)
 
 
-class ForLoop(abc.Mapping):
+class ForLoop(Mapping[str, object]):
     """Loop helper variables."""
 
     __slots__ = (
@@ -86,28 +83,28 @@ class ForLoop(abc.Mapping):
             "last",
         ]
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"ForLoop(name='{self.name}', length={self.length})"
 
-    def __getitem__(self, key: str):
+    def __getitem__(self, key: str) -> object:
         if key in self._keys:
             return getattr(self, key)
         raise KeyError(key)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._keys)
 
-    def __next__(self):
+    def __next__(self) -> object:
         self.step()
         return next(self.it)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         return self
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "ForLoop"
 
-    def step(self):
+    def step(self) -> None:
         """Set the value for the current/next loop iteration and update forloop
         helper variables."""
 
@@ -125,6 +122,8 @@ class ForLoop(abc.Mapping):
             self.last = True
         else:
             self.last = False
+
+        return None
 
 
 class ForNode(Node):
@@ -152,7 +151,7 @@ class ForNode(Node):
 
         return tag_str
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         loop_iter, length = self.expression.evaluate(context)
 
         if length:
@@ -186,7 +185,11 @@ class ForNode(Node):
         elif self.default:
             self.default.render(context, buffer)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         loop_iter, length = await self.expression.evaluate_async(context)
 
         if length:
@@ -220,6 +223,8 @@ class ForNode(Node):
         elif self.default:
             await self.default.render_async(context, buffer)
 
+        return None
+
 
 class BreakNode(Node):
     """Parse tree node for the built-in "break" tag."""
@@ -236,7 +241,7 @@ class BreakNode(Node):
         self,
         context: Context,
         buffer: TextIO,
-    ) -> Union[Optional[bool], NoReturn]:
+    ) -> Optional[bool]:
         raise BreakLoop("break")
 
 
@@ -255,7 +260,7 @@ class ContinueNode(Node):
         self,
         context: Context,
         buffer: TextIO,
-    ) -> Union[Optional[bool], NoReturn]:
+    ) -> Optional[bool]:
         raise ContinueLoop("continue")
 
 

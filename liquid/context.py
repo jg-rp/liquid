@@ -47,11 +47,11 @@ Namespace = Mapping[str, object]
 _undefined = object()
 
 
-def _getitem(obj: Sequence[Any], key: Any) -> object:
+def _getitem(obj: Union[Mapping[Any, Any], Sequence[Any]], key: Any) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     # NOTE: A runtime checkable protocol was too slow.
     if hasattr(key, "__liquid__"):
-        key = key.__liquid__()  # type: ignore
+        key = key.__liquid__()
 
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
@@ -63,11 +63,11 @@ def _getitem(obj: Sequence[Any], key: Any) -> object:
     return getitem(obj, key)
 
 
-async def _getitem_async(obj: Sequence[Any], key: Any) -> object:
+async def _getitem_async(obj: Any, key: Any) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     # NOTE: A runtime checkable protocol was too slow.
     if hasattr(key, "__liquid__"):
-        key = key.__liquid__()  # type: ignore
+        key = key.__liquid__()
 
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
@@ -77,7 +77,7 @@ async def _getitem_async(obj: Sequence[Any], key: Any) -> object:
         return obj[-1]
 
     if hasattr(obj, "__getitem_async__"):
-        return await obj.__getitem_async__(key)  # type: ignore
+        return await obj.__getitem_async__(key)
 
     return getitem(obj, key)
 
@@ -368,7 +368,7 @@ class Context:
         if items:
             try:
                 for item in items:
-                    obj = await _getitem_async(obj, item)  # type: ignore
+                    obj = await _getitem_async(obj, item)
             except (KeyError, IndexError, TypeError):
                 if default == _undefined:
                     return self.env.undefined(name)

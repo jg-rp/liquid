@@ -1,3 +1,4 @@
+# type: ignore
 """Legacy, class-based implementations of filters that operate on strings."""
 
 import html
@@ -8,8 +9,8 @@ try:
     from markupsafe import escape as markupsafe_escape
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
-    from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import escape as markupsafe_escape
+    from liquid.exceptions import Markup
 
 from liquid import is_undefined
 
@@ -23,7 +24,6 @@ from liquid.utils.html import strip_tags
 
 from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
-
 
 # pylint: disable=too-few-public-methods arguments-differ
 

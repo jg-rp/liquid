@@ -1,12 +1,15 @@
 """Tag and node definition for the built-in "tablerow" tag."""
 
-import collections.abc
 import math
 import sys
 
 from itertools import islice
 
+from typing import Any
+from typing import Dict
 from typing import List
+from typing import Mapping
+from typing import Optional
 from typing import TextIO
 from typing import Iterator
 
@@ -33,7 +36,7 @@ TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
 
 
-class TableRow(collections.abc.Mapping):
+class TableRow(Mapping[str, object]):
     """Table row helper variables."""
 
     __slots__ = (
@@ -57,7 +60,7 @@ class TableRow(collections.abc.Mapping):
         "nrows",
     )
 
-    def __init__(self, name: str, it: Iterator, length: int, ncols: int):
+    def __init__(self, name: str, it: Iterator[Any], length: int, ncols: int) -> None:
         self.name = name
         self.it = it
         self.length = length
@@ -94,24 +97,24 @@ class TableRow(collections.abc.Mapping):
             "col_last",
         ]
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"TableRow(name='{self.name}', length={self.length})"
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> object:
         if key in self._keys:
             return getattr(self, key)
         raise KeyError(key)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._keys)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         return self
 
-    def __next__(self):
+    def __next__(self) -> object:
         return next(self.it)
 
-    def step(self):
+    def step(self) -> None:
         """Set the value for the current/next loop iteration and update forloop
         helper variables."""
         self.index += 1
@@ -164,7 +167,7 @@ class TablerowNode(Node):
     def __str__(self) -> str:
         return f"tablerow({ self.expression }) {{ {self.block} }}"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.expression.name
         loop_iter, length = self.expression.evaluate(context)
 
@@ -177,7 +180,7 @@ class TablerowNode(Node):
         loop_iter = grouper(loop_iter, cols)
         tablerow = TableRow(name, loop_iter, length, cols)
 
-        namespace = {
+        namespace: Dict[str, object] = {
             "tablerowloop": tablerow,
             name: None,
         }
@@ -196,7 +199,11 @@ class TablerowNode(Node):
 
                 buffer.write("</tr>")
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         name = self.expression.name
         loop_iter, length = await self.expression.evaluate_async(context)
 
@@ -209,7 +216,7 @@ class TablerowNode(Node):
         loop_iter = grouper(loop_iter, cols)
         tablerow = TableRow(name, loop_iter, length, cols)
 
-        namespace = {
+        namespace: Dict[str, object] = {
             "tablerowloop": tablerow,
             name: None,
         }
@@ -227,6 +234,8 @@ class TablerowNode(Node):
                     buffer.write("</td>")
 
                 buffer.write("</tr>")
+
+        return None
 
 
 class TablerowTag(Tag):
@@ -253,7 +262,7 @@ class TablerowTag(Tag):
         return TablerowNode(tok, expression=loop_expression, block=block)
 
 
-def grouper(iterator: Iterator, n):
+def grouper(iterator: Iterator[Any], n: int) -> Iterator[Any]:
     "Collect data into fixed-length chunks or blocks"
     # grouper('ABCDEFG', 3) --> ABC DEF G"
     return iter(lambda: tuple(islice(iterator, n)), ())

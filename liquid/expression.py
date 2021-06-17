@@ -8,6 +8,7 @@ from abc import abstractmethod
 from collections import abc
 from itertools import islice
 
+from typing import Dict
 from typing import Union
 from typing import List
 from typing import Optional
@@ -48,13 +49,13 @@ class Expression(ABC):
 class Nil(Expression):
     __slots__ = ()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Nil)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "Nil()"
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "nil"
 
     def evaluate(self, context: Context) -> None:
@@ -67,17 +68,17 @@ NIL = Nil()
 class Empty(Expression):
     __slots__ = ()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Empty):
             return True
         if isinstance(other, (list, dict, str)) and not other:
             return True
         return False
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "Empty()"
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "empty"
 
     def evaluate(self, context: Context) -> Empty:
@@ -90,7 +91,7 @@ EMPTY = Empty()
 class Blank(Expression):
     __slots__ = ()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, str) and (not other or other.isspace()):
             return True
         if isinstance(other, (list, dict)) and not other:
@@ -100,10 +101,10 @@ class Blank(Expression):
 
         return False
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "Blank()"
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "blank"
 
     def evaluate(self, context: Context) -> Blank:
@@ -116,15 +117,15 @@ BLANK = Blank()
 class Continue(Expression):
     __slots__ = ()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Continue):
             return True
         return False
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "Continue()"
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "continue"
 
     def evaluate(self, context: Context) -> int:
@@ -143,26 +144,26 @@ class Literal(Expression, Generic[T]):
     def __init__(self, value: T):
         self.value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self.value)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.value)
 
     def evaluate(self, context: Context) -> object:
         return self.value
 
 
-class Boolean(Literal):
+class Boolean(Literal[bool]):
     __slots__ = ()
 
     def __init__(self, value: bool):
         super().__init__(value)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Boolean) and self.value == other.value
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Boolean(value={self.value})"
 
 
@@ -170,16 +171,16 @@ TRUE = Boolean(True)
 FALSE = Boolean(False)
 
 
-class StringLiteral(Literal):
+class StringLiteral(Literal[str]):
     __slots__ = ()
 
     def __init__(self, value: str):
         super().__init__(value)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, StringLiteral) and self.value == other.value
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"StringLiteral(value='{self.value}')"
 
     def evaluate(self, context: Context) -> Union[str, Markup]:
@@ -188,42 +189,42 @@ class StringLiteral(Literal):
         return self.value
 
 
-class IntegerLiteral(Literal):
+class IntegerLiteral(Literal[int]):
     __slots__ = ()
 
     def __init__(self, value: int):
         super().__init__(value)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, IntegerLiteral) and self.value == other.value
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"IntegerLiteral(value={self.value})"
 
 
-class FloatLiteral(Literal):
+class FloatLiteral(Literal[float]):
     __slots__ = ()
 
     def __init__(self, value: float):
         super().__init__(value)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, FloatLiteral) and self.value == other.value
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"FloatLiteral(value={self.value})"
 
 
-class IdentifierPathElement(Literal):
+class IdentifierPathElement(Literal[Union[int, str]]):
     __slots__ = ()
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, IdentifierPathElement) and self.value == other.value
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"IdentifierPathElement(value={self.value})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
 
@@ -236,13 +237,13 @@ class Identifier(Expression):
     def __init__(self, path: IdentifierPath):
         self.path = path
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Identifier) and self.path == other.path
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Identifier(path={self.path})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         buf = []
 
         for elem in self.path:
@@ -252,7 +253,7 @@ class Identifier(Expression):
                 buf.append(str(elem))
         return ".".join(buf)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(str(self))
 
     def evaluate(self, context: Context) -> object:
@@ -271,17 +272,17 @@ class PrefixExpression(Expression):
         self.operator = operator
         self.right = right
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, PrefixExpression)
             and self.operator == other.operator
             and self.right == other.right
         )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"PrefixExpression(operator='{self.operator}', right={self.right!r})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.operator}{self.right})"
 
     def _evaluate(self, right: object) -> Union[int, float]:
@@ -292,11 +293,11 @@ class PrefixExpression(Expression):
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
 
-    def evaluate(self, context: Context):
+    def evaluate(self, context: Context) -> object:
         right = self.right.evaluate(context)
         return self._evaluate(right)
 
-    async def evaluate_async(self, context: Context):
+    async def evaluate_async(self, context: Context) -> object:
         right = await self.right.evaluate_async(context)
         return self._evaluate(right)
 
@@ -314,7 +315,7 @@ class InfixExpression(Expression):
         self.operator = operator
         self.right = right
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, InfixExpression)
             and self.left == other.left
@@ -322,21 +323,21 @@ class InfixExpression(Expression):
             and self.right == other.right
         )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"InfixExpression(left={self.left!r}, "
             f"operator='{self.operator}', right={self.right!r})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.left} {self.operator} {self.right})"
 
-    def evaluate(self, context: Context):
+    def evaluate(self, context: Context) -> object:
         left = self.left.evaluate(context)
         right = self.right.evaluate(context)
         return compare(left, self.operator, right)
 
-    async def evaluate_async(self, context: Context):
+    async def evaluate_async(self, context: Context) -> object:
         left = await self.left.evaluate_async(context)
         right = await self.right.evaluate_async(context)
         return compare(left, self.operator, right)
@@ -355,7 +356,7 @@ class Filter:
         self.args = args
         self.kwargs = kwargs or {}
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Filter)
             and self.name == other.name
@@ -363,10 +364,10 @@ class Filter:
             and self.kwargs == other.kwargs
         )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"Filter(name='{self.name}', args={self.args}, kwargs={self.kwargs})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         buf = [self.name]
 
         args_str = ", ".join([str(arg) for arg in self.args])
@@ -383,20 +384,20 @@ class Filter:
 
         return "".join(buf)
 
-    def evaluate_args(self, context: Context):
+    def evaluate_args(self, context: Context) -> List[object]:
         return [arg.evaluate(context) for arg in self.args]
 
-    async def evaluate_args_async(self, context: Context):
+    async def evaluate_args_async(self, context: Context) -> List[object]:
         return [await arg.evaluate_async(context) for arg in self.args]
 
-    def evaluate_kwargs(self, context: Context):
+    def evaluate_kwargs(self, context: Context) -> Dict[str, object]:
         # Shortcut for the common case. Most filters do not use named
         # parameters.
         if not self.kwargs:
             return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
-    async def evaluate_kwargs_async(self, context: Context):
+    async def evaluate_kwargs_async(self, context: Context) -> Dict[str, object]:
         # Shortcut for the common case. Most filters do not use named
         # parameters.
         if not self.kwargs:
@@ -410,18 +411,18 @@ class BooleanExpression(Expression):
     def __init__(self, expression: Expression):
         self.expression = expression
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, BooleanExpression) and self.expression == other.expression
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         expr_str = str(self.expression)
         if not expr_str.startswith("("):
             return f"({expr_str})"
         return expr_str
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"BooleanExpression(expression={self.expression!r})"
 
     def evaluate(self, context: Context) -> bool:
@@ -438,21 +439,21 @@ class FilteredExpression(Expression):
         self.expression = expression
         self.filters = filters or []
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, FilteredExpression)
             and self.expression == other.expression
             and self.filters == other.filters
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         filter_str = " | ".join([str(filter) for filter in self.filters])
 
         if filter_str:
             return f"{self.expression} | {filter_str}"
         return str(self.expression)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"FilteredExpression(expression={self.expression!r}, "
             "filters={self.filters})"
@@ -520,17 +521,17 @@ class AssignmentExpression(Expression):
         self.name = name
         self.expression = expression
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, AssignmentExpression)
             and self.name == other.name
             and self.expression == other.expression
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} = {self.expression}"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"AssignmentExpression(name='{self.name}', expression={self.expression!r})"
         )
@@ -590,7 +591,7 @@ class LoopExpression(Expression):
         self.cols = cols
         self.reversed = reversed_
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, LoopExpression)
             and self.name == other.name
@@ -603,7 +604,7 @@ class LoopExpression(Expression):
             and self.reversed == other.reversed
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         buf = [f"{self.name} in"]
 
         if self.identifier:
@@ -625,7 +626,7 @@ class LoopExpression(Expression):
 
         return " ".join(buf)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return (
             f"LoopExpression(name='{self.name}', identifier={self.identifier}, "
             f"start={self.start}, stop={self.stop}, limit={self.limit}, "
@@ -816,9 +817,9 @@ def compare(left: Any, operator: str, right: Any) -> bool:
         left, right = right, left
 
     if operator == "==":
-        return left == right
+        return bool(left == right)
     if operator in ("!=", "<>"):
-        return left != right
+        return bool(left != right)
 
     if operator == "contains":
         if isinstance(left, str):

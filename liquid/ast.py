@@ -3,16 +3,14 @@
 from abc import ABC, abstractmethod
 from io import StringIO
 
+from typing import Collection
 from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import Collection
-from typing import Union
-from typing import NoReturn
 
 from liquid import __version__
-from liquid import Context
-from liquid import Expression
+from liquid.context import Context
+from liquid.expression import Expression
 
 from liquid.token import Token, TOKEN_TAG, TOKEN_ILLEGAL
 
@@ -29,9 +27,10 @@ class Node(ABC):
 
     def token(self) -> Token:
         """The token that started this node."""
-        return getattr(self, "tok", IllegalToken)
+        token: Token = getattr(self, "tok", IllegalToken)
+        return token
 
-    def raise_for_disabled(self, disabled_tags: Collection[str]):
+    def raise_for_disabled(self, disabled_tags: Collection[str]) -> None:
         """Raise a DisabledTagError if this node's type is in the given list."""
         tok = self.token()
         if tok.type == TOKEN_TAG and tok.value in disabled_tags:
@@ -40,23 +39,19 @@ class Node(ABC):
                 linenum=tok.linenum,
             )
 
-    def render(
-        self, context: Context, buffer: TextIO
-    ) -> Union[Optional[bool], NoReturn]:
+    def render(self, context: Context, buffer: TextIO) -> Optional[bool]:
         """Check disabled tags before delegating to `render_to_output`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         return self.render_to_output(context, buffer)
 
-    async def render_async(
-        self, context: Context, buffer: TextIO
-    ) -> Union[Optional[bool], NoReturn]:
+    async def render_async(self, context: Context, buffer: TextIO) -> Optional[bool]:
         """An async version of :meth:`liquid.ast.Node.render`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         if hasattr(self, "render_to_output_async"):
             # pylint: disable=no-member
-            return await self.render_to_output_async(context, buffer)  # type: ignore
+            return await self.render_to_output_async(context, buffer)
         return self.render_to_output(context, buffer)
 
     @abstractmethod
@@ -64,14 +59,14 @@ class Node(ABC):
         self,
         context: Context,
         buffer: TextIO,
-    ) -> Union[Optional[bool], NoReturn]:
+    ) -> Optional[bool]:
         """Render this node to the output buffer."""
 
     async def render_to_output_async(
         self,
         context: Context,
         buffer: TextIO,
-    ) -> Union[Optional[bool], NoReturn]:
+    ) -> Optional[bool]:
         """An async version of :meth:`liquid.ast.Node.render_to_output`."""
         return self.render_to_output(context, buffer)
 
@@ -81,19 +76,20 @@ class ParseTree(Node):
 
     __slots__ = ("statements", "version")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.statements: List[Node] = []
         self.version = __version__
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         return "".join(str(s) for s in self.statements)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ParseTree({self.statements})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         for stmt in self.statements:
             stmt.render(context, buffer)
+        return None
 
 
 class IllegalNode(Node):
@@ -115,7 +111,7 @@ class IllegalNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"IllegalNode(tok={self.tok})"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         pass
 
 
@@ -128,10 +124,10 @@ class BlockNode(Node):
         self.tok = tok
         self.statements = statements or []
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "".join(str(s) for s in self.statements)
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         # This intermediate buffer is used to suppress blocks that, when rendered,
         # contain only whitespace.
         buf = StringIO()
@@ -154,7 +150,11 @@ class BlockNode(Node):
         if not val.isspace():
             buffer.write(val)
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+        return None
+
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         # This intermediate buffer is used to suppress blocks that, when rendered,
         # contain only whitespace.
         buf = StringIO()
@@ -177,6 +177,8 @@ class BlockNode(Node):
         if not val.isspace():
             buffer.write(val)
 
+        return None
+
 
 class ConditionalBlockNode(Node):
     """A parse tree node representing a sequence of statements and a conditional
@@ -189,16 +191,18 @@ class ConditionalBlockNode(Node):
         self.condition = condition
         self.block = block
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.condition} {{ {self.block} }}"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.condition.evaluate(context):
             self.block.render(context, buffer)
             return True
         return False
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         if await self.condition.evaluate_async(context):
             await self.block.render_async(context, buffer)
             return True

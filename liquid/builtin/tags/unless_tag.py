@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sys
 
+from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
 
@@ -46,13 +47,17 @@ class UnlessNode(Node):
     def __str__(self) -> str:
         return f"if !{self.condition} {{ {self.consequence} }}"
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if not self.condition.evaluate(context):
             self.consequence.render(context, buffer)
+        return None
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         if not await self.condition.evaluate_async(context):
             await self.consequence.render_async(context, buffer)
+        return None
 
 
 class UnlessTag(Tag):

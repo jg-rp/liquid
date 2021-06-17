@@ -1,9 +1,10 @@
+# type: ignore
 """Legacy implementations of non-standard filters."""
 
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import Markup
 
 from .string import StringFilter
 

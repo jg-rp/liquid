@@ -2,7 +2,10 @@
 
 import re
 import sys
+
 from io import StringIO
+
+from typing import Optional
 from typing import TextIO
 
 try:
@@ -48,24 +51,28 @@ class CaptureNode(ast.Node):
     def __str__(self) -> str:
         return f"var {self.name} = {{ {self.block} }}"
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"CaptureNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
-    def _assign(self, context, buf: StringIO):
+    def _assign(self, context: Context, buf: StringIO) -> None:
         if context.autoescape:
             context.assign(self.name, Markup(buf.getvalue()))
         else:
             context.assign(self.name, buf.getvalue())
 
-    def render_to_output(self, context: Context, buffer: TextIO):
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buf = StringIO()
         self.block.render(context, buf)
         self._assign(context, buf)
+        return None
 
-    async def render_to_output_async(self, context: Context, buffer: TextIO):
+    async def render_to_output_async(
+        self, context: Context, buffer: TextIO
+    ) -> Optional[bool]:
         buf = StringIO()
         await self.block.render_async(context, buf)
         self._assign(context, buf)
+        return None
 
 
 class CaptureTag(Tag):

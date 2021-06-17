@@ -23,7 +23,7 @@ def error(
     exc: Union[Type[Error], Error],
     msg: Optional[str] = None,
     linenum: Optional[int] = None,
-):
+) -> None:
     """Raise an exception or warning according to the given mode."""
     if not isinstance(exc, Error):
         exc = exc(msg, linenum=linenum)

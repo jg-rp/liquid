@@ -24,7 +24,7 @@ class EchoNode(StatementNode):
 
     __slots__ = ("tok", "expression")
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"EchoNode(tok={self.tok}, expression={self.expression!r})"
 
 

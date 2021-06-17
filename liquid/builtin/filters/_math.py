@@ -3,6 +3,9 @@
 import math
 import decimal
 
+from typing import Optional
+from typing import Union
+
 from liquid.exceptions import FilterArgumentError
 
 from liquid.filter import math_filter
@@ -10,10 +13,11 @@ from liquid.filter import num_arg
 from liquid.filter import int_arg
 
 D = decimal.Decimal
+N = Union[float, int]
 
 
 @math_filter
-def abs_(num):
+def abs_(num: N) -> N:
     """Return that absolute value of a number.
 
     Accepts an int, float or a string representations of an int or float.
@@ -22,7 +26,7 @@ def abs_(num):
 
 
 @math_filter
-def at_most(num, other):
+def at_most(num: N, other: N) -> N:
     """Return `val` or `args[0]`, whichever is smaller.
 
     Accepts an int, float or a string representations of an int or float.
@@ -32,7 +36,7 @@ def at_most(num, other):
 
 
 @math_filter
-def at_least(num, other):
+def at_least(num: N, other: N) -> N:
     """Return `val` or `args[0]`, whichever is greater.
 
     Accepts an int, float or a string representations of an int or float.
@@ -42,7 +46,7 @@ def at_least(num, other):
 
 
 @math_filter
-def ceil(num):
+def ceil(num: N) -> N:
     """Return the ceiling of x as an Integral.
 
     Accepts an int, float or a string representations of an int or float.
@@ -51,7 +55,7 @@ def ceil(num):
 
 
 @math_filter
-def divided_by(num, other):
+def divided_by(num: N, other: N) -> N:
     """Divide `num` by `other`."""
     other = num_arg(other, default=0)
 
@@ -64,7 +68,7 @@ def divided_by(num, other):
 
 
 @math_filter
-def floor(num):
+def floor(num: N) -> N:
     """Return the floor of x as an Integral.
 
     Accepts an int, float or a string representations of an int or float.
@@ -73,7 +77,7 @@ def floor(num):
 
 
 @math_filter
-def minus(num, other):
+def minus(num: N, other: N) -> N:
     """Subtract one number from another."""
     other = num_arg(other, default=0)
 
@@ -83,7 +87,7 @@ def minus(num, other):
 
 
 @math_filter
-def plus(num, other):
+def plus(num: N, other: N) -> N:
     """Add one number to another."""
     other = num_arg(other, default=0)
 
@@ -93,7 +97,7 @@ def plus(num, other):
 
 
 @math_filter
-def round_(num, ndigits=None):
+def round_(num: N, ndigits: Optional[int] = None) -> N:
     """Round a number to a given precision in decimal digits."""
     if ndigits:
         ndigits = int_arg(ndigits, default=0)
@@ -102,7 +106,7 @@ def round_(num, ndigits=None):
 
 
 @math_filter
-def times(num, other):
+def times(num: N, other: N) -> N:
     """Multiply a value by an integer or float."""
     other = num_arg(other, default=0)
 
@@ -112,7 +116,7 @@ def times(num, other):
 
 
 @math_filter
-def modulo(num, other):
+def modulo(num: N, other: N) -> N:
     """Divide a value by a number and returns the remainder."""
     other = num_arg(other, default=0)
 
