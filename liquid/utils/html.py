@@ -2,22 +2,24 @@
 
 from html.parser import HTMLParser
 
+from typing import List
 
-class StripParser(HTMLParser):
+
+class StripParser(HTMLParser):  # pylint: disable=abstract-method
     """An HTML parser that strips out tags."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(convert_charrefs=False)
         self.reset()
-        self.dat = []
+        self.dat: List[str] = []
 
-    def handle_data(self, data):
+    def handle_data(self, data: str) -> None:
         self.dat.append(data)
 
-    def handle_entityref(self, name):
+    def handle_entityref(self, name: str) -> None:
         self.dat.append(f"&{name};")
 
-    def handle_charref(self, name):
+    def handle_charref(self, name: str) -> None:
         self.dat.append(f"&#{name};")
 
     def get_data(self) -> str:
