@@ -5,6 +5,7 @@ import datetime
 import functools
 
 from typing import Any
+from typing import Union
 from typing import TYPE_CHECKING
 
 from dateutil import parser
@@ -51,7 +52,9 @@ def default(obj: Any, default_: object, *, allow_false: bool = False) -> Any:
 @with_environment
 @liquid_filter
 @functools.lru_cache(maxsize=10)
-def date(dat: datetime.datetime, fmt: str, *, environment: Environment) -> str:
+def date(
+    dat: Union[datetime.datetime, str], fmt: str, *, environment: Environment
+) -> str:
     """Formats a datetime according the the given format string."""
     if is_undefined(dat):
         return ""

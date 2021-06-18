@@ -68,7 +68,7 @@ def _lower(obj: Any) -> str:
 @with_environment
 @array_filter
 def join(
-    iterable: Iterable[object], separator: str = " ", *, environment: Environment
+    iterable: Iterable[object], separator: object = " ", *, environment: Environment
 ) -> str:
     """Concatenate an array of strings."""
     if not isinstance(separator, str):

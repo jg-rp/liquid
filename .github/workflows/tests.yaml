@@ -20,6 +20,7 @@ jobs:
           - {name: '3.8-autoescape', python: '3.8', os: ubuntu-latest, tox: py38-autoescape}
           - {name: '3.7-autoescape', python: '3.7', os: ubuntu-latest, tox: py37-autoescape}
           - {name: 'PyPy-autoescape', python: pypy-3.7, os: ubuntu-latest, tox: pypy37-autoescape}
+          - {name: 'Typing', python: '3.9', os: ubuntu-latest, tox: typing}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -38,5 +39,11 @@ jobs:
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('setup.py') }}
+      - name: cache mypy
+        uses: actions/cache@v2
+        with:
+          path: ./.mypy_cache
+          key: mypy|${{ matrix.python }}|${{ hashFiles('setup.cfg') }}
+        if: matrix.tox == 'typing'
       - run: pip install tox
       - run: tox -e ${{ matrix.tox }}

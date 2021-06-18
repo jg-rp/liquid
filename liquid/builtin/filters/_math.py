@@ -55,14 +55,14 @@ def ceil(num: N) -> N:
 
 
 @math_filter
-def divided_by(num: N, other: N) -> N:
+def divided_by(num: N, other: object) -> N:
     """Divide `num` by `other`."""
     other = num_arg(other, default=0)
 
     try:
-        if isinstance(other, float):
-            return num / other
-        return num // other
+        if isinstance(other, int):
+            return num // other
+        return num / other
     except ZeroDivisionError as err:
         raise FilterArgumentError(f"divided_by: can't divide by {other}") from err
 
@@ -81,9 +81,9 @@ def minus(num: N, other: N) -> N:
     """Subtract one number from another."""
     other = num_arg(other, default=0)
 
-    if isinstance(num, float) and isinstance(other, float):
-        return float(D(str(num)) - D(str(other)))
-    return num - other
+    if isinstance(num, int) and isinstance(other, int):
+        return num - other
+    return float(D(str(num)) - D(str(other)))
 
 
 @math_filter
@@ -91,9 +91,9 @@ def plus(num: N, other: N) -> N:
     """Add one number to another."""
     other = num_arg(other, default=0)
 
-    if isinstance(num, float) and isinstance(other, float):
-        return float(D(str(num)) + D(str(other)))
-    return num + other
+    if isinstance(num, int) and isinstance(other, int):
+        return num + other
+    return float(D(str(num)) + D(str(other)))
 
 
 @math_filter
@@ -110,9 +110,9 @@ def times(num: N, other: N) -> N:
     """Multiply a value by an integer or float."""
     other = num_arg(other, default=0)
 
-    if isinstance(num, float) and isinstance(other, float):
-        return float(D(str(num)) * D(str(other)))
-    return num * other
+    if isinstance(num, int) and isinstance(other, int):
+        return num * other
+    return float(D(str(num)) * D(str(other)))
 
 
 @math_filter
@@ -121,8 +121,9 @@ def modulo(num: N, other: N) -> N:
     other = num_arg(other, default=0)
 
     try:
-        if isinstance(num, float) and isinstance(other, float):
-            return float(D(str(num)) % D(str(other)))
-        return num % other
+        if isinstance(num, int) and isinstance(other, int):
+            return num % other
+        return float(D(str(num)) % D(str(other)))
+
     except ZeroDivisionError as err:
         raise FilterArgumentError(f"modulo: can't divide by {other}") from err
