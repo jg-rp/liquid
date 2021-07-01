@@ -135,6 +135,18 @@ class RenderTestCases(unittest.TestCase):
                     expect="\nWelcome back, Holly!",
                     globals={"customer": {"first_name": "Holly"}},
                 ),
+                Case(
+                    description="carriage return instead of newline",
+                    template="".join(
+                        [
+                            "\r{% if customer -%}\r",
+                            "Welcome back, {{ customer.first_name -}} !\r",
+                            "{%- endif -%}",
+                        ]
+                    ),
+                    expect="\rWelcome back, Holly!",
+                    globals={"customer": {"first_name": "Holly"}},
+                ),
             ]
         )
 
