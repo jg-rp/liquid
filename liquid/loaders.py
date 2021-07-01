@@ -52,9 +52,9 @@ class TemplateSource(NamedTuple):
 class BaseLoader(ABC):
     """Base template loader from which all template loaders are derived."""
 
-    @abstractmethod
     def get_source(self, env: Environment, template_name: str) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
+        raise NotImplementedError("template loaders must implement a get_source method")
 
     async def get_source_async(
         self,

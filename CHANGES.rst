@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 0.8.1
+-------------
+
+- Removed ``@abstractmethod`` from ``liquid.loaders.BaseLoader.get_source``. Custom
+  loaders are now free to implement either ``get_source`` or ``get_source_async`` or
+  both. The ``BaseLoader`` implementation of ``get_source`` simply raises a 
+  ``NotImplementedError``.
+
 Version 0.8.0
 -------------
 
