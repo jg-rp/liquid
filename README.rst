@@ -2,6 +2,7 @@
 .. _reference documentation: https://shopify.github.io/liquid/
 .. _reference implementation: https://github.com/Shopify/liquid
 .. _dateutil: https://dateutil.readthedocs.io/en/stable/
+.. _asyncpg: https://github.com/MagicStack/asyncpg
 
 
 Python Liquid
@@ -37,6 +38,7 @@ A non evaling templating language suitable for end users.
 - `Related Projects`_
 - `Compatibility`_
 - `Benchmark`_
+- `Async Support`_
 - `Custom Filters`_
 - `Custom Tags`_
 - `Custom Loaders`_
@@ -231,7 +233,7 @@ Async Support
 
 Python Liquid supports loading and rendering templates asynchronously. When
 ``Template.render_async`` is awaited, ``render`` and ``include`` tags will load
-templates asynchronously. Custom loaders should implement ``get_source_async``.
+templates asynchronously.
 
 .. code-block:: python
 
@@ -245,6 +247,54 @@ templates asynchronously. Custom loaders should implement ``get_source_async``.
         return await template.render_async(you="World")
 
     result = asyncio.run(coro())
+
+Custom template loaders should implement ``get_source_async``. For example,
+``AsyncDatabaseLoader`` will load templates from a PostgreSQL database using `asyncpg`_.
+
+.. code-block:: python
+
+  import datetime
+  import functools
+
+  import asyncpg
+
+  from liquid import Environment
+  from liquid.exceptions import TemplateNotFound
+  from liquid.loaders import BaseLoader
+  from liquid.loaders import TemplateSource
+
+
+  class AsyncDatabaseLoader(BaseLoader):
+      def __init__(self, pool: asyncpg.Pool) -> None:
+          self.pool = pool
+
+      def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+          raise NotImplementedError("async only loader")
+
+      async def _is_up_to_date(self, name: str, updated: datetime.datetime) -> bool:
+          async with self.pool.acquire() as connection:
+              return updated == await connection.fetchval(
+                  "SELECT updated FROM templates WHERE name = $1", name
+              )
+
+      async def get_source_async(
+          self, env: Environment, template_name: str
+      ) -> TemplateSource:
+          async with self.pool.acquire() as connection:
+              source = await connection.fetchrow(
+                  "SELECT source, updated FROM templates WHERE name = $1", template_name
+              )
+
+          if not source:
+              raise TemplateNotFound(template_name)
+
+          return TemplateSource(
+              source=source["source"],
+              filename=template_name,
+              uptodate=functools.partial(
+                  self._is_up_to_date, name=template_name, updated=source["updated"]
+              ),
+          )
 
 Custom "drops" can implement ``__getitem_async__``. If an instance of a drop that
 implements ``__getitem_async__`` appears in a ``render_async`` context,
