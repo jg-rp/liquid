@@ -8,7 +8,7 @@ from collections import abc
 from io import StringIO
 from pathlib import Path
 
-from typing import Callable
+from typing import Awaitable
 from typing import Dict
 from typing import Any
 from typing import Iterator
@@ -28,6 +28,7 @@ from liquid.exceptions import Error
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
     from liquid.ast import ParseTree
+    from liquid.loaders import UpToDate
 
 
 class BoundTemplate:
@@ -59,7 +60,7 @@ class BoundTemplate:
         name: str = "",
         path: Optional[Union[str, Path]] = None,
         globals: Optional[Dict[str, Any]] = None,
-        uptodate: Optional[Callable[[], bool]] = None,
+        uptodate: UpToDate = None,
     ):
         self.env = env
         self.tree = parse_tree
@@ -177,7 +178,27 @@ class BoundTemplate:
         True otherwise."""
         if not self.uptodate:
             return True
-        return self.uptodate()
+
+        uptodate = self.uptodate()
+        if not isinstance(uptodate, bool):
+            raise Error(
+                f"expected a boolean from uptodate, found {type(uptodate).__name__}"
+            )
+        return uptodate
+
+    async def is_up_to_date_async(self) -> bool:
+        """An async version of the ``is_up_to_date`` property.
+
+        If ``template.uptodate`` is a coroutine, it wil be awaited. Otherwise it will be
+        called just like ``is_up_to_date``
+        """
+        if not self.uptodate:
+            return True
+
+        uptodate = self.uptodate()
+        if isinstance(uptodate, Awaitable):
+            return await uptodate
+        return uptodate
 
     def _make_globals(
         self, partial: bool, args: Any, kwargs: Any

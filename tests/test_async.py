@@ -1,8 +1,11 @@
 """Test Python Liquid's async API."""
 import asyncio
+import tempfile
+import time
 import unittest
 
 from collections import abc
+from pathlib import Path
 from typing import NamedTuple
 
 # assert_awaited* were new in Python 3.8, so we're using the backport.
@@ -74,6 +77,42 @@ class LoadAsyncTestCase(unittest.TestCase):
             template = asyncio.run(coro())
             self.assertIsInstance(template, BoundTemplate)
             self.assertEqual(source.call_count, 1)
+
+    def test_async_up_to_date(self):
+        """Test that async uptodate functions are awaited."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = Path(tmpdir) / "some.liquid"
+
+            # Initial template content
+            with template_path.open("w") as fd:
+                fd.write("hello there\n")
+
+            env = Environment(
+                loader=FileSystemLoader(search_path=tmpdir),
+                auto_reload=True,
+            )
+
+            async def coro():
+                return await env.get_template_async("some.liquid")
+
+            template = asyncio.run(coro())
+            self.assertIsInstance(template, BoundTemplate)
+            uptodate = asyncio.run(template.is_up_to_date_async())
+            self.assertTrue(uptodate)
+
+            # Update template content.
+            time.sleep(0.01)  # Make sure some time has passed.
+            template_path.touch()
+
+            # Template is not up to date.
+            uptodate = asyncio.run(template.is_up_to_date_async())
+            self.assertFalse(uptodate)
+
+            template = asyncio.run(coro())
+            self.assertIsInstance(template, BoundTemplate)
+            # Template is up to date.
+            uptodate = asyncio.run(template.is_up_to_date_async())
+            self.assertTrue(uptodate)
 
     def test_nested_include_async(self):
         """Test that nested includes are rendered asynchronously."""

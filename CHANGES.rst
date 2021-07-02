@@ -8,6 +8,9 @@ Version 0.8.1
   loaders are now free to implement either ``get_source`` or ``get_source_async`` or
   both. The ``BaseLoader`` implementation of ``get_source`` simply raises a 
   ``NotImplementedError``.
+- ``liquid.loaders.TemplateSource.uptodate`` (as returned by ``get_source`` and
+  ``get_source_async``) can now be a coroutine function. This means async loaders can
+  check a template's source for changes asynchronously.
 
 Version 0.8.0
 -------------

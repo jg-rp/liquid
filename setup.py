@@ -4,6 +4,7 @@ import setuptools
 
 with open("liquid/__init__.py", "r") as fd:
     match = re.search(r'__version__ = "([0-9\.]+)"', fd.read())
+    assert match is not None
     __version__ = match.group(1)
 
 with open("README.rst", "r") as fd:

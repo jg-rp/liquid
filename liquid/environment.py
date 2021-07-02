@@ -257,9 +257,13 @@ class Environment:
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """An async version of ``get_template``."""
-        template = self._check_cache(name, globals)
+        template = self.cache.get(name)
 
-        if not template:
+        if isinstance(template, BoundTemplate) and (
+            not self.auto_reload or await template.is_up_to_date_async()
+        ):
+            template.globals.update(self.make_globals(globals))
+        else:
             template = await self.loader.load_async(
                 self,
                 name,

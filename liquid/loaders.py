@@ -9,17 +9,19 @@ import asyncio
 import os
 
 from abc import ABC
-from abc import abstractmethod
 
 from collections import abc
+from functools import partial
 from pathlib import Path
 
+from typing import Awaitable
 from typing import NamedTuple
 from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import Mapping
 from typing import Optional
+from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
 
@@ -27,8 +29,10 @@ from liquid.template import BoundTemplate
 from liquid.exceptions import TemplateNotFound
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
+
+UpToDate = Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
 
 
 class TemplateSource(NamedTuple):
@@ -41,12 +45,12 @@ class TemplateSource(NamedTuple):
     :type filename: str
     :param uptodate: Optional callable that will return ``True`` if the template is up
         to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
-    :type uptodate: Optional[Callable[[], bool]]
+    :type uptodate: Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
     """
 
     source: str
     filename: str
-    uptodate: Optional[Callable[[], bool]]
+    uptodate: UpToDate
 
 
 class BaseLoader(ABC):
@@ -136,23 +140,40 @@ class FileSystemLoader(BaseLoader):
             return source_path
         raise TemplateNotFound(template_name)
 
-    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
-        source_path = self._resolve_path(template_name)
-
+    def _read(self, source_path: Path) -> Tuple[str, float]:
         with source_path.open(encoding=self.encoding) as fd:
             source = fd.read()
+        return source, source_path.stat().st_mtime
 
-        mtime = source_path.stat().st_mtime
+    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
+        source_path = self._resolve_path(template_name)
+        source, mtime = self._read(source_path)
 
         return TemplateSource(
             source, str(source_path), lambda: mtime == source_path.stat().st_mtime
         )
 
+    @staticmethod
+    async def _uptodate(source_path: Path, mtime: float) -> bool:
+        uptodate = await asyncio.get_running_loop().run_in_executor(
+            None, lambda: mtime == source_path.stat().st_mtime
+        )
+        return uptodate
+
     async def get_source_async(
         self, env: Environment, template_name: str
     ) -> TemplateSource:
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, self.get_source, env, template_name)
+
+        source_path = await loop.run_in_executor(
+            None, self._resolve_path, template_name
+        )
+
+        source, mtime = await loop.run_in_executor(None, self._read, source_path)
+
+        return TemplateSource(
+            source, str(source_path), partial(self._uptodate, source_path, mtime)
+        )
 
 
 class DictLoader(BaseLoader):
