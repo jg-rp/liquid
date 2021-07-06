@@ -11,6 +11,8 @@ Version 0.8.1
 - ``liquid.loaders.TemplateSource.uptodate`` (as returned by ``get_source`` and
   ``get_source_async``) can now be a coroutine function. This means async loaders can
   check a template's source for changes asynchronously.
+- Added the ``cache_size`` argument to ``Environment`` and ``Template`` for controlling 
+  the capacity of the template cache.
 
 Version 0.8.0
 -------------

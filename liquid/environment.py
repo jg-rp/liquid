@@ -11,6 +11,7 @@ from typing import Type
 from typing import Union
 from typing import Optional
 from typing import Mapping
+from typing import MutableMapping
 
 import warnings
 
@@ -77,6 +78,10 @@ class Environment:
         yield an increase in performance by avoiding calls to ``uptodate``. Defaults to
         ``True``.
     :type auto_reload: bool
+    :param cache_size: The capacity of the template cache in number of templates.
+        Defaults to 300. If ``cache_size`` is ``None`` or less than ``1``, it has the
+        effect of setting ``auto_reload`` to ``False``.
+    :type cache_size: int
     :param globals: An optional mapping that will be added to the context of any
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
@@ -96,6 +101,7 @@ class Environment:
         strict_filters: bool = True,
         autoescape: bool = False,
         auto_reload: bool = True,
+        cache_size: int = 300,
         globals: Optional[Mapping[str, object]] = None,
     ):
         self.tag_start_string = tag_start_string
@@ -126,8 +132,12 @@ class Environment:
         self.mode = tolerance
 
         # Template cache
-        self.cache = LRUCache(300)
-        self.auto_reload = auto_reload
+        if cache_size and cache_size > 0:
+            self.cache: MutableMapping[Any, Any] = LRUCache(cache_size)
+            self.auto_reload = auto_reload
+        else:
+            self.cache = {}
+            self.auto_reload = False
 
         self.template_class = BoundTemplate
 
@@ -339,6 +349,7 @@ def Template(
     strict_filters: bool = True,
     autoescape: bool = False,
     auto_reload: bool = True,
+    cache_size: int = 300,
     globals: Optional[Mapping[str, object]] = None,
 ) -> BoundTemplate:
     """Returns a :class:`liquid.template.BoundTemplate`, automatically creating an
@@ -383,6 +394,10 @@ def Template(
         yield an increase in performance by avoiding calls to ``uptodate``. Defaults to
         ``True``.
     :type auto_reload: bool
+    :param cache_size: The capacity of the template cache in number of templates.
+        Defaults to 300. If ``cache_size`` is ``None`` or less than ``1``, it has the
+        effect of setting ``auto_reload`` to ``False``.
+    :type cache_size: int
     :param globals: An optional mapping that will be added to the context of any
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
@@ -399,6 +414,7 @@ def Template(
         strict_filters,
         autoescape,
         auto_reload,
+        cache_size,
     )
 
     return env.from_string(source, globals=globals)
