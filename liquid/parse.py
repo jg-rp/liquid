@@ -444,6 +444,12 @@ class ExpressionParser:
     parsing behavior. Such as adding a logical `NOT` operator.
     """
 
+    END_EXPRESSION = (
+        TOKEN_PIPE,
+        TOKEN_COMMA,
+        TOKEN_EOF,
+    )
+
     def __init__(self) -> None:
         self.precedences = PRECEDENCES.copy()
         self.right_associative = RIGHT_ASSOCIATIVE.copy()
@@ -579,8 +585,7 @@ class ExpressionParser:
         left = prefix(stream)
 
         while (
-            stream.peek.type != TOKEN_EOF
-            and stream.peek.type not in (TOKEN_PIPE, TOKEN_COMMA)
+            stream.peek.type not in self.END_EXPRESSION
             and precedence < self.peek_precedence(stream)
         ):
             infix = self.infix_funcs.get(stream.peek.type)
@@ -617,7 +622,7 @@ class ExpressionParser:
         """
         if stream.current.type == TOKEN_EOF:
             # Empty expression.
-            return expression.Nil()
+            return expression.NIL
         return expression.BooleanExpression(expression=self.parse_expression(stream))
 
     def parse_assignment_expression(

@@ -12,7 +12,8 @@ Version 0.8.1
   ``get_source_async``) can now be a coroutine function. This means async loaders can
   check a template's source for changes asynchronously.
 - Added the ``cache_size`` argument to ``Environment`` and ``Template`` for controlling 
-  the capacity of the template cache.
+  the capacity of the default template cache.
+- Easier subclassing of ``liquid.parser.ExpressionParser`` with ``END_EXPRESSION``.
 
 Version 0.8.0
 -------------
