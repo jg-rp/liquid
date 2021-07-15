@@ -339,6 +339,8 @@ Related Projects
 
   - an ``if`` tag that supports ``not`` and grouping with parentheses.
   - ``macro`` and ``call`` tags for defining and calling parameterized Liquid snippets.
+  - inline ``if``/``else`` expressions. For example ``{{ 'active' if link.active else '' }}``
+    or ``{% assign selected = true if product.selected_variant else false %}``.
   - a JSON encoding filter.
 
 Compatibility
