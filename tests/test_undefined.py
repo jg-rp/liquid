@@ -1,3 +1,5 @@
+import asyncio
+
 from unittest import TestCase
 from typing import NamedTuple
 
@@ -5,6 +7,8 @@ from liquid import Environment
 from liquid import Undefined
 from liquid import DebugUndefined
 from liquid import StrictUndefined
+
+from liquid.template import BoundTemplate
 
 from liquid.exceptions import UndefinedError
 from liquid.exceptions import NoSuchFilterFunc
@@ -256,6 +260,13 @@ class TestUndefined(TestCase):
                     template.render()
 
                 self.assertEqual(case.expect, str(raised.exception))
+
+                # And render async
+                async def coro(template: BoundTemplate):
+                    return await template.render_async()
+
+                with self.assertRaises(NoSuchFilterFunc) as raised:
+                    asyncio.run(coro(template))
 
     def test_default_undefined_magic(self):
         """Test the default undefined type magic methods."""
