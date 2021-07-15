@@ -152,6 +152,8 @@ class Environment:
                 self.tag_end_string,
                 self.mode,
                 self.strip_tags,
+                # Necessary when replacing the standard output statement implementation.
+                self.tags.get("statement"),
             )
         )
 
