@@ -1,9 +1,85 @@
 .. _filters:
+.. _Shopify's documentation: https://shopify.github.io/liquid/
 
-Templates Filters
-=================
+Template Filters
+================
 
-TODO:
+All built-in filters are registered automatically with every new
+:class:`liquid.Environment`. :attr:`liquid.Environment.filters` is a normal python
+dictionary mapping filter names (the string you would use in a template to apply a
+filter) to filter functions (see `Custom Filters`_).
+
+Please see `Shopify's documentation`_ for a filter function reference. Those built-in
+filters are:
+
+- abs
+- at_most
+- at_least
+- ceil
+- divided_by
+- floor
+- minus
+- plus
+- round
+- times
+- modulo
+- capitalize
+- append
+- downcase
+- escape
+- escape_once
+- lstrip
+- newline_to_br
+- prepend
+- remove
+- remove_first
+- replace
+- replace_first
+- slice
+- split
+- upcase
+- strip
+- rstrip
+- strip_html
+- strip_newlines
+- truncate
+- truncatewords
+- url_encode
+- url_decode
+- base64_encode
+- base64_decode
+- base64_url_safe_encode
+- base64_url_safe_decode
+- join
+- first
+- last
+- concat
+- map
+- reverse
+- sort
+- sort_natural
+- where
+- uniq
+- compact
+- size
+- default
+- date
+
+Non-Standard Filters
+--------------------
+
+Built-in filters that don't appear in the Liquid reference implementation.
+
+Safe (Auto Escape)
+******************
+
+The non-standard ``safe`` filter is used to mark context variables as "safe". Meaning 
+they don't need HTML escaping when :attr:`liquid.Environment.autoescape` is set to
+``True``.
+
+If the ``safe`` filter appears in a template rendered from and ``Environment`` without
+HTML auto-escaping enabled, the filter has no effect.
+
 
 Custom Filters
 --------------
@@ -32,38 +108,33 @@ And use it like this.
     {% endif %}
 
 
-If you want to add more complex filters, probably including some type checking and/or
-casting, or the filter needs access to the active context or environment, you'll want to
-inherit from ``Filter`` and implement its ``__call__`` method.
+Decorate filter functions with ``with_context`` or ``with_environment`` to have the 
+active context or environment passed as a keyword arguments.
 
 .. code-block:: python
 
-  from liquid.filter import Filter
-  from liquid.filter import string_required
+  from liquid.filter import with_context
+  from liquid.filter import string_filter
 
-  class LinkToTag(Filter):
-
-    name = "link_to_tag"
-    with_context = True
-
-    @string_required
-    def __call__(self, label, tag, *, context):
-        handle = context.resolve("handle", default="")
-        return (
-            f'<a title="Show tag {tag}" href="/collections/{handle}/{tag}">{label}</a>'
-        )
+  @string_filter
+  @with_context
+  def link_to_tag(label, tag, *, context):
+      handle = context.resolve("handle", default="")
+      return (
+          f'<a title="Show tag {tag}" href="/collections/{handle}/{tag}">{label}</a>'
+      )
 
 And register it wherever you create your environment.
 
 .. code-block:: python
 
   from liquid import Environment, FileSystemLoader
-  from myfilters import LinkToTag
+  from myfilters import link_to_tag
 
   env = Environment(loader=FileSystemLoader("templates/"))
-  env.add_filter(LinkToTag.name, LinkToTag(env))
+  env.add_filter("link_to_tag", link_to_tag)
 
-In a template, you could then use the ``LinkToTag`` filter like this.
+In a template, you could then use the ``link_to_tag`` filter like this.
 
 .. code-block::
 
@@ -76,10 +147,9 @@ In a template, you could then use the ``LinkToTag`` filter like this.
         </dl>
     {% endif %}
 
-Note that the ``Filter`` constructor takes a single argument, a reference to the
-environment, which is available to ``Filter`` methods as ``self.env``. The class
-variable ``name`` is used by the ``string_required`` decorator (and all other helpers/
-decorators found in ``liquid.filter``) to give informative error messages.
+All built-in filters are implemented in this way, so have a look in
+``liquid/builtin/filters/`` for many more examples.
 
-All built-in filters are implemented in this way, so have a look in ``liquid/builtin/\
-filters/`` for many more examples.
+Note that old style, class-based filters are depreciated and will be removed in Liquid
+0.9. You can still implement custom filters as callable classes, but Liquid will not
+include any abstract base classes for filters or legacy filter "helpers".
