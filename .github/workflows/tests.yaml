@@ -12,10 +12,12 @@ jobs:
           - {name: Linux, python: '3.9', os: ubuntu-latest, tox: py39}
           - {name: Windows, python: '3.9', os: windows-latest, tox: py39}
           - {name: Mac, python: '3.9', os: macos-latest, tox: py39}
+          - {name: '3.10', python: '3.10', os: ubuntu-latest, tox: py310-unsafe}
           - {name: '3.9', python: '3.9', os: ubuntu-latest, tox: py39-unsafe}
           - {name: '3.8', python: '3.8', os: ubuntu-latest, tox: py38-unsafe}
           - {name: '3.7', python: '3.7', os: ubuntu-latest, tox: py37-unsafe}
           - {name: 'PyPy', python: pypy-3.7, os: ubuntu-latest, tox: pypy37-unsafe}
+          - {name: '3.10-autoescape', python: '3.10', os: ubuntu-latest, tox: py310-autoescape}
           - {name: '3.9-autoescape', python: '3.9', os: ubuntu-latest, tox: py39-autoescape}
           - {name: '3.8-autoescape', python: '3.8', os: ubuntu-latest, tox: py38-autoescape}
           - {name: '3.7-autoescape', python: '3.7', os: ubuntu-latest, tox: py37-autoescape}
