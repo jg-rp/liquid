@@ -1,113 +1,82 @@
-# type: ignore
-"""Legacy, class-based implementations of miscellaneous filters."""
+"""Miscellaneous filters."""
+from __future__ import annotations
 
 import datetime
 import functools
+
+from typing import Any
+from typing import Union
+from typing import TYPE_CHECKING
 
 from dateutil import parser
 
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
 from liquid import is_undefined
-from liquid.filter import Filter
+
+from liquid.filter import liquid_filter
+from liquid.filter import with_environment
+
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
 
-
-# pylint: disable=arguments-differ  too-few-public-methods
-
-
-class AbstractFilter(Filter):
-
-    name = "AbstractStringFilter"
-    num_args = 0
-    msg = "{}: unexpected argument type {}"
-
-    def __call__(self, val, *args, **kwargs):
-        if len(args) != self.num_args:
-            raise FilterArgumentError(
-                f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
-            )
-
-        try:
-            return self.filter(val, *args, **kwargs)
-        except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(
-                self.msg.format(self.name, type(val).__name__)
-            ) from err
-
-    def filter(self, val, *args, **kwargs):
-        raise NotImplementedError(":(")
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
-class Size(AbstractFilter):
+@liquid_filter
+def size(obj: Any) -> int:
     """Return the length of an array or string."""
-
-    __slots__ = ()
-
-    name = "size"
-    msg = "{}: expected an array or string, found {}"
-
-    def filter(self, obj):
-        return len(obj)
+    return len(obj)
 
 
-class Default(AbstractFilter):
+@liquid_filter
+def default(obj: Any, default_: object, *, allow_false: bool = False) -> Any:
     """Return a default value if the input is nil, false, or empty."""
+    _obj = obj
+    if hasattr(obj, "__liquid__"):
+        _obj = obj.__liquid__()
 
-    __slots__ = ()
-
-    name = "default"
-    num_args = 1
-
-    def filter(self, obj, _default, allow_false=None):
-        _obj = obj
-        if hasattr(obj, "__liquid__"):
-            _obj = obj.__liquid__()
-
-        if allow_false is True and _obj is False:
-            return obj
-
-        if _obj in (None, False, EMPTY) or is_undefined(_obj):
-            return _default
-
+    if allow_false is True and _obj is False:
         return obj
 
+    if _obj in (None, False, EMPTY) or is_undefined(_obj):
+        return default_
 
-class Date(AbstractFilter):
-    """Converts a timestamp into another date format."""
+    return obj
 
-    __slots__ = ()
 
-    name = "date"
-    num_args = 1
+@with_environment
+@liquid_filter
+@functools.lru_cache(maxsize=10)
+def date(
+    dat: Union[datetime.datetime, str], fmt: str, *, environment: Environment
+) -> str:
+    """Formats a datetime according the the given format string."""
+    if is_undefined(dat):
+        return ""
 
-    @functools.lru_cache(maxsize=10)
-    def filter(self, dt, fmt):
-        if is_undefined(dt):
-            return ""
+    if is_undefined(fmt):
+        raise FilterArgumentError(
+            f"expected a format string, found {type(fmt).__name__}"
+        )
 
-        if is_undefined(fmt):
-            raise FilterArgumentError(
-                f"expected a format string, found {type(fmt).__name__}"
-            )
+    if isinstance(dat, str):
+        if dat == "now":
+            dat = datetime.datetime.now()
+        else:
+            dat = parser.parse(dat)
 
-        if isinstance(dt, str):
-            if dt == "now":
-                dt = datetime.datetime.now()
-            else:
-                dt = parser.parse(dt)
+    if not isinstance(dat, (datetime.datetime, datetime.date)):
+        raise FilterArgumentError(
+            f"date expected datetime.datetime, found {type(dat).__name__}"
+        )
 
-        if not isinstance(dt, (datetime.datetime, datetime.date)):
-            raise FilterArgumentError(
-                f"{self.name}: expected datetime.datetime, found {type(dt)} "
-            )
+    rv = dat.strftime(fmt)
 
-        rv = dt.strftime(fmt)
-
-        if self.env.autoescape and isinstance(fmt, Markup):
-            return Markup(rv)
-        return rv
+    if environment.autoescape and isinstance(fmt, Markup):
+        return Markup(rv)
+    return rv

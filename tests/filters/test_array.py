@@ -16,29 +16,17 @@ from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
-from liquid.builtin.filters._array import join
-from liquid.builtin.filters._array import first
-from liquid.builtin.filters._array import last
-from liquid.builtin.filters._array import concat
-from liquid.builtin.filters._array import map_
-from liquid.builtin.filters._array import reverse
-from liquid.builtin.filters._array import sort
-from liquid.builtin.filters._array import sort_natural
-from liquid.builtin.filters._array import where
-from liquid.builtin.filters._array import uniq
-from liquid.builtin.filters._array import compact
-
-from liquid.builtin.filters.array import Join
-from liquid.builtin.filters.array import First
-from liquid.builtin.filters.array import Last
-from liquid.builtin.filters.array import Concat
-from liquid.builtin.filters.array import Map
-from liquid.builtin.filters.array import Reverse
-from liquid.builtin.filters.array import Sort
-from liquid.builtin.filters.array import SortNatural
-from liquid.builtin.filters.array import Where
-from liquid.builtin.filters.array import Uniq
-from liquid.builtin.filters.array import Compact
+from liquid.builtin.filters.array import join
+from liquid.builtin.filters.array import first
+from liquid.builtin.filters.array import last
+from liquid.builtin.filters.array import concat
+from liquid.builtin.filters.array import map_
+from liquid.builtin.filters.array import reverse
+from liquid.builtin.filters.array import sort
+from liquid.builtin.filters.array import sort_natural
+from liquid.builtin.filters.array import where
+from liquid.builtin.filters.array import uniq
+from liquid.builtin.filters.array import compact
 
 
 class Case(NamedTuple):
@@ -55,22 +43,7 @@ class ArrayFilterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.env = Environment()
 
-    def _test(self, filter_cls, test_cases):
-        """Helper method for running lists of `Case`s"""
-        with self.assertWarns(DeprecationWarning):
-            func = filter_cls(self.env)
-
-        for case in test_cases:
-            with self.subTest(msg=case.description):
-                if isclass(case.expect) and issubclass(case.expect, Error):
-                    with self.assertRaises(case.expect):
-                        func(case.val, *case.args, **case.kwargs)
-                else:
-                    self.assertEqual(
-                        func(case.val, *case.args, **case.kwargs), case.expect
-                    )
-
-    def _test_newstyle_filter(self, func, test_cases):
+    def _test(self, func, test_cases):
         if getattr(func, "with_environment", False):
             func = partial(func, environment=self.env)
 
@@ -166,8 +139,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Join, test_cases)
-        self._test_newstyle_filter(join, test_cases)
+        self._test(join, test_cases)
 
     def test_first(self):
         """Test `first` filter function."""
@@ -217,8 +189,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(First, test_cases)
-        self._test_newstyle_filter(first, test_cases)
+        self._test(first, test_cases)
 
     def test_last(self):
         """Test `last` filter function."""
@@ -268,8 +239,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Last, test_cases)
-        self._test_newstyle_filter(last, test_cases)
+        self._test(last, test_cases)
 
     def test_concat(self):
         """Test `concat` filter function."""
@@ -333,8 +303,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Concat, test_cases)
-        self._test_newstyle_filter(concat, test_cases)
+        self._test(concat, test_cases)
 
     def test_map(self):
         """Test `map` filter function."""
@@ -398,8 +367,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Map, test_cases)
-        self._test_newstyle_filter(map_, test_cases)
+        self._test(map_, test_cases)
 
     def test_reverse(self):
         """Test `reverse` filter function."""
@@ -449,8 +417,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Reverse, test_cases)
-        self._test_newstyle_filter(reverse, test_cases)
+        self._test(reverse, test_cases)
 
     def test_sort(self):
         """Test `sort` filter function."""
@@ -521,8 +488,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Sort, test_cases)
-        self._test_newstyle_filter(sort, test_cases)
+        self._test(sort, test_cases)
 
     def test_sort_natural(self):
         """Test `sort_natural` filter function."""
@@ -593,8 +559,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(SortNatural, test_cases)
-        self._test_newstyle_filter(sort_natural, test_cases)
+        self._test(sort_natural, test_cases)
 
     def test_where(self):
         """Test `where` filter function."""
@@ -658,8 +623,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Where, test_cases)
-        self._test_newstyle_filter(where, test_cases)
+        self._test(where, test_cases)
 
     def test_uniq(self):
         """Test `uniq` filter function."""
@@ -716,8 +680,7 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Uniq, test_cases)
-        self._test_newstyle_filter(uniq, test_cases)
+        self._test(uniq, test_cases)
 
     def test_compact(self):
         """Test `compact` filter function."""
@@ -760,5 +723,4 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Compact, test_cases)
-        self._test_newstyle_filter(compact, test_cases)
+        self._test(compact, test_cases)

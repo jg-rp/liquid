@@ -1,65 +1,38 @@
-# type: ignore
-"""Legacy, class-based implementations of filters that operate on arrays."""
+"""Filter functions that operate on arrays."""
+from __future__ import annotations
 
 from collections import OrderedDict
-
+from functools import partial
 from operator import getitem
 
-from typing import List
 from typing import Any
+from typing import Iterable
+from typing import List
+from typing import Sequence
 from typing import Tuple
+from typing import TypeVar
+from typing import TYPE_CHECKING
 
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
+
+from liquid.filter import with_environment
+from liquid.filter import array_filter
 
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
 
-from liquid.filter import Filter
-from liquid.filter import expect_string
-from liquid.filter import expect_array
-
-from liquid import Undefined
 from liquid import is_undefined
 
-# pylint: disable=too-few-public-methods arguments-differ
+if TYPE_CHECKING:
+    from liquid import Environment
+
+ArrayT = TypeVar("ArrayT", List[Any], Tuple[Any, ...])
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
-
-
-class ArrayFilter(Filter):
-    """Base class for built-in array filter functions."""
-
-    __slots__ = ()
-
-    name = "AbstractStringFilter"
-    num_args: Tuple[int, ...] = (0,)
-    msg = "{}: expected an array, found {}"
-
-    def __call__(self, val, *args, **kwargs):
-        if len(args) not in self.num_args:
-            raise FilterArgumentError(
-                f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
-            )
-
-        # Do not allow array operations on strings or arbitrary iterables.
-        if not isinstance(val, (list, tuple, Undefined)):
-            raise FilterValueError(self.msg.format(self.name, type(val).__name__))
-
-        try:
-            return self.filter(val, *args)
-        except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(
-                self.msg.format(self.name, type(val).__name__)
-            ) from err
-
-    def filter(self, val, *args):
-        """The filter's implementation."""
-        raise NotImplementedError(":(")
 
 
 def _str_if_not(val: object) -> str:
@@ -68,66 +41,7 @@ def _str_if_not(val: object) -> str:
     return val
 
 
-class Join(ArrayFilter):
-    """Concatenate an array of strings."""
-
-    __slots__ = ()
-
-    name = "join"
-    num_args = (0, 1)
-
-    def filter(self, iterable, separator=" "):
-        if not isinstance(separator, str):
-            separator = str(separator)
-
-        if self.env.autoescape and separator == " ":
-            separator = Markup(" ")
-
-        return separator.join(_str_if_not(item) for item in iterable)
-
-
-class First(ArrayFilter):
-    """Return the first item of an array"""
-
-    __slots__ = ()
-
-    name = "first"
-
-    def filter(self, array):
-        if array:
-            return array[0]
-        return None
-
-
-class Last(ArrayFilter):
-    """Return the last item of an array"""
-
-    __slots__ = ()
-
-    name = "last"
-
-    def filter(self, array):
-        if array:
-            return array[-1]
-        return None
-
-
-class Concat(ArrayFilter):
-    """Return two arrays joined together."""
-
-    __slots__ = ()
-
-    name = "concat"
-    num_args = (1,)
-
-    def filter(self, array, second_array):
-        expect_array(self.name, second_array)
-        if is_undefined(array):
-            return second_array
-        return array + second_array
-
-
-def _getitem(sequence, key: str, default: Any = None) -> Any:
+def _getitem(sequence: Any, key: object, default: object = None) -> Any:
     """Helper for the map filter.
 
     Same as sequence[key], but returns a default value if key does not exist
@@ -143,117 +57,120 @@ def _getitem(sequence, key: str, default: Any = None) -> Any:
         return default
 
 
-class Map(ArrayFilter):
+def _lower(obj: Any) -> str:
+    """Helper for the sort filter"""
+    try:
+        return str(obj.lower())
+    except AttributeError:
+        return ""
+
+
+@with_environment
+@array_filter
+def join(
+    iterable: Iterable[object], separator: object = " ", *, environment: Environment
+) -> str:
+    """Concatenate an array of strings."""
+    if not isinstance(separator, str):
+        separator = str(separator)
+
+    if environment.autoescape and separator == " ":
+        separator = Markup(" ")
+
+    return separator.join(_str_if_not(item) for item in iterable)
+
+
+@array_filter
+def first(array: Sequence[Any]) -> object:
+    """Return the first item of an array"""
+    if array:
+        return array[0]
+    return None
+
+
+@array_filter
+def last(array: Sequence[Any]) -> object:
+    """Return the last item of an array"""
+    if array:
+        return array[-1]
+    return None
+
+
+@array_filter
+def concat(array: ArrayT, second_array: ArrayT) -> ArrayT:
+    """Return two arrays joined together."""
+    if not isinstance(second_array, (list, tuple)):
+        raise FilterArgumentError(
+            f"concat expected an array, found {type(second_array).__name__}"
+        )
+
+    if is_undefined(array):
+        return second_array
+    return array + second_array
+
+
+@array_filter
+def map_(sequence: ArrayT, key: object) -> List[object]:
     """Creates an array of values by extracting the values of a named property
     from another object."""
-
-    __slots__ = ()
-
-    name = "map"
-    num_args = (1,)
-
-    def filter(self, sequence, key):
-        try:
-            return [_getitem(itm, str(key)) for itm in sequence]
-        except TypeError as err:
-            raise FilterError(f"{self.name}: can't map sequence") from err
+    try:
+        return [_getitem(itm, str(key)) for itm in sequence]
+    except TypeError as err:
+        raise FilterError("can't map sequence") from err
 
 
-class Reverse(ArrayFilter):
+@array_filter
+def reverse(array: ArrayT) -> List[object]:
     """Reverses the order of the items in an array."""
-
-    __slots__ = ()
-
-    name = "reverse"
-
-    def filter(self, array):
-        return list(reversed(array))
+    return list(reversed(array))
 
 
-class Sort(ArrayFilter):
+@array_filter
+def sort(sequence: ArrayT, key: object = None) -> List[object]:
     """Sorts items in an array in case-sensitive order.
 
     When a key string is provided, objects without the key property should
     be at the end of the output list/array.
     """
+    if key:
+        key_func = partial(_getitem, key=str(key), default=MAX_CH)
+        return list(sorted(sequence, key=key_func))
 
-    __slots__ = ()
-
-    name = "sort"
-    num_args = (0, 1)
-
-    def filter(self, sequence, key=None):
-        if key:
-            expect_string(self.name, key)
-            return list(sorted(sequence, key=lambda x: _getitem(x, key, MAX_CH)))
-
-        try:
-            return list(sorted(sequence))
-        except TypeError as err:
-            raise FilterError(f"{self.name}: can't sort sequence") from err
-
-
-def _lower(val, default="") -> str:
-    """Helper for the sort filter"""
     try:
-        return val.lower()
-    except AttributeError:
-        return default
+        return list(sorted(sequence))
+    except TypeError as err:
+        raise FilterError("can't sort sequence") from err
 
 
-class SortNatural(ArrayFilter):
+@array_filter
+def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
     """Sorts items in an array in case-insensitive order."""
+    if key:
+        item_getter = partial(_getitem, key=str(key), default=MAX_CH)
+        return list(sorted(sequence, key=lambda obj: _lower(item_getter(obj))))
 
-    __slots__ = ()
-
-    name = "sort_natural"
-    num_args = (0, 1)
-
-    def filter(self, sequence, key=None) -> List[Any]:
-        if key:
-            expect_string(self.name, key)
-            return list(
-                sorted(sequence, key=lambda x: _lower(_getitem(x, key, MAX_CH)))
-            )
-
-        return list(sorted(sequence, key=_lower))
+    return list(sorted(sequence, key=_lower))
 
 
-class Where(ArrayFilter):
+@array_filter
+def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
     """Creates an array including only the objects with a given property value,
     or any truthy value by default."""
+    if value:
+        return [itm for itm in sequence if _getitem(itm, attr) == value]
 
-    __slots__ = ()
-
-    name = "where"
-    num_args = (1, 2)
-
-    def filter(self, sequence, attr, value=None):
-        if value:
-            return [itm for itm in sequence if _getitem(itm, attr) == value]
-
-        return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
+    return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
 
 
-class Uniq(ArrayFilter):
+@array_filter
+def uniq(iterable: ArrayT) -> List[object]:
     """Removes any duplicate elements in an array. Input array order is not
     preserved."""
-
-    __slots__ = ()
-
-    name = "uniq"
-
-    def filter(self, iterable):
-        unique = OrderedDict.fromkeys(iterable)
-        return list(unique.keys())
+    unique = OrderedDict.fromkeys(iterable)
+    return list(unique.keys())
 
 
-class Compact(ArrayFilter):
+@array_filter
+def compact(iterable: ArrayT) -> List[object]:
     """Removes any nil values from an array."""
-
-    __slots__ = ()
-
-    name = "compact"
-
-    def filter(self, iterable):
-        return [itm for itm in iterable if itm is not None]
+    return [itm for itm in iterable if itm is not None]

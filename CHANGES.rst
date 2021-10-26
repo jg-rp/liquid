@@ -8,6 +8,7 @@ Version 0.9.0
   environment properly (again).
 - Fixed a bug where some errors from the ``sort`` and ``map`` filters were being
   ignored. Those filters can now raise a ``FilterError``.
+- Removed depreciated class-based filters.
 
 Version 0.8.1
 -------------

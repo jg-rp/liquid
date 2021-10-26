@@ -13,29 +13,17 @@ from liquid.environment import Environment
 
 from liquid.exceptions import FilterArgumentError
 
-from liquid.builtin.filters._math import abs_
-from liquid.builtin.filters._math import at_most
-from liquid.builtin.filters._math import at_least
-from liquid.builtin.filters._math import ceil
-from liquid.builtin.filters._math import divided_by
-from liquid.builtin.filters._math import floor
-from liquid.builtin.filters._math import minus
-from liquid.builtin.filters._math import plus
-from liquid.builtin.filters._math import round_
-from liquid.builtin.filters._math import times
-from liquid.builtin.filters._math import modulo
-
-from liquid.builtin.filters.math import Abs
-from liquid.builtin.filters.math import AtMost
-from liquid.builtin.filters.math import AtLeast
-from liquid.builtin.filters.math import Ceil
-from liquid.builtin.filters.math import DividedBy
-from liquid.builtin.filters.math import Floor
-from liquid.builtin.filters.math import Minus
-from liquid.builtin.filters.math import Plus
-from liquid.builtin.filters.math import Round
-from liquid.builtin.filters.math import Times
-from liquid.builtin.filters.math import Modulo
+from liquid.builtin.filters.math import abs_
+from liquid.builtin.filters.math import at_most
+from liquid.builtin.filters.math import at_least
+from liquid.builtin.filters.math import ceil
+from liquid.builtin.filters.math import divided_by
+from liquid.builtin.filters.math import floor
+from liquid.builtin.filters.math import minus
+from liquid.builtin.filters.math import plus
+from liquid.builtin.filters.math import round_
+from liquid.builtin.filters.math import times
+from liquid.builtin.filters.math import modulo
 
 
 class Case(NamedTuple):
@@ -54,24 +42,7 @@ class MathFilterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.env = Environment()
 
-    def _test(self, filter_cls, test_cases):
-        """Helper method for running lists of `Case`s"""
-        with self.assertWarns(DeprecationWarning):
-            func = filter_cls(self.env)
-
-        for case in test_cases:
-            with self.subTest(msg=case.description):
-                if isclass(case.expect) and issubclass(
-                    case.expect, FilterArgumentError
-                ):
-                    with self.assertRaises(case.expect):
-                        func(case.val, *case.args, **case.kwargs)
-                else:
-                    self.assertEqual(
-                        func(case.val, *case.args, **case.kwargs), case.expect
-                    )
-
-    def _test_newstyle_filter(self, func, test_cases):
+    def _test(self, func, test_cases):
         if getattr(func, "with_environment", False):
             func = partial(func, environment=self.env)
 
@@ -184,8 +155,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Abs, test_cases)
-        self._test_newstyle_filter(abs_, test_cases)
+        self._test(abs_, test_cases)
 
     def test_at_most(self):
         """Test at_most filter function."""
@@ -277,8 +247,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(AtMost, test_cases)
-        self._test_newstyle_filter(at_most, test_cases)
+        self._test(at_most, test_cases)
 
     def test_at_least(self):
         """Test at_least filter function."""
@@ -370,8 +339,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(AtLeast, test_cases)
-        self._test_newstyle_filter(at_least, test_cases)
+        self._test(at_least, test_cases)
 
     def test_ceil(self):
         """Test ceil filter function."""
@@ -456,8 +424,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Ceil, test_cases)
-        self._test_newstyle_filter(ceil, test_cases)
+        self._test(ceil, test_cases)
 
     def test_floor(self):
         """Test floor filter function."""
@@ -542,8 +509,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Floor, test_cases)
-        self._test_newstyle_filter(floor, test_cases)
+        self._test(floor, test_cases)
 
     def test_divided_by(self):
         """Test divided_by filter function."""
@@ -628,8 +594,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(DividedBy, test_cases)
-        self._test_newstyle_filter(divided_by, test_cases)
+        self._test(divided_by, test_cases)
 
     def test_minus(self):
         """Test minus filter function."""
@@ -707,8 +672,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Minus, test_cases)
-        self._test_newstyle_filter(minus, test_cases)
+        self._test(minus, test_cases)
 
     def test_plus(self):
         """Test plus filter function."""
@@ -786,8 +750,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Plus, test_cases)
-        self._test_newstyle_filter(plus, test_cases)
+        self._test(plus, test_cases)
 
     def test_round(self):
         """Test round filter function."""
@@ -858,8 +821,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Round, test_cases)
-        self._test_newstyle_filter(round_, test_cases)
+        self._test(round_, test_cases)
 
     def test_times(self):
         """Test times filter function."""
@@ -937,8 +899,7 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Times, test_cases)
-        self._test_newstyle_filter(times, test_cases)
+        self._test(times, test_cases)
 
     def test_modulo(self):
         """Test modulo filter function."""
@@ -1016,5 +977,4 @@ class MathFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Modulo, test_cases)
-        self._test_newstyle_filter(modulo, test_cases)
+        self._test(modulo, test_cases)

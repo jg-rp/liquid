@@ -1,430 +1,306 @@
-# type: ignore
-"""Legacy, class-based implementations of filters that operate on strings."""
+"""Filter functions that operate on strings."""
+from __future__ import annotations
 
+import base64
+import binascii
 import html
 import re
 import urllib.parse
 
+from typing import Any
+from typing import List
+from typing import TYPE_CHECKING
+
 try:
     from markupsafe import escape as markupsafe_escape
     from markupsafe import Markup
+    from markupsafe import soft_str
 except ImportError:
-    from liquid.exceptions import escape as markupsafe_escape
-    from liquid.exceptions import Markup
+    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
+    from liquid.exceptions import Markup  # type: ignore
+
+    # pylint: disable=invalid-name
+    soft_str = str  # type: ignore
 
 from liquid import is_undefined
-
-from liquid.filter import Filter
-from liquid.filter import one_maybe_two_args
-from liquid.filter import expect_integer
-from liquid.filter import expect_string
-
 from liquid.exceptions import FilterArgumentError
-from liquid.utils.html import strip_tags
+from liquid.exceptions import FilterValueError
 
+from liquid.filter import with_environment
+from liquid.filter import string_filter
+
+from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
 
-# pylint: disable=too-few-public-methods arguments-differ
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
-class StringFilter(Filter):
-    """A `Filter` subclass that ensures a filter's left value is a string and checks
-    the number of arguments against `num_args` before delegating to its `filter`
-    method."""
-
-    __slots__ = ()
-
-    name = "AbstractStringFilter"
-    num_args = 0
-    msg = "{}: expected a string, found {}"
-
-    def __call__(self, val, *args, **kwargs):
-        if len(args) != self.num_args:
-            raise FilterArgumentError(
-                f"{self.name}: expected {self.num_args} arguments, found {len(args)}"
-            )
-
-        if not isinstance(val, str):
-            val = str(val)
-
-        try:
-            return self.filter(val, *args, **kwargs)
-        except (AttributeError, TypeError) as err:
-            raise FilterArgumentError(
-                self.msg.format(self.name, type(val).__name__)
-            ) from err
-
-    def filter(self, val, *args, **kwargs):
-        """Subclasses of :class:`StringFilter` should implement `filter`."""
-        raise NotImplementedError(":(")
-
-
-class Capitalize(StringFilter):
-    """Make sure the first character of a string is upper case."""
-
-    __slots__ = ()
-
-    name = "capitalize"
-
-    def filter(self, val, *args, **kwargs):
-        return val.capitalize()
-
-
-class Append(StringFilter):
+@string_filter
+def append(val: str, arg: object) -> str:
     """Concatenate two strings."""
-
-    __slots__ = ()
-
-    name = "append"
-    num_args = 1
-
-    def filter(self, val: str, string: str):
-        if not isinstance(string, str):
-            string = str(string)
-        return val + string
+    if not isinstance(arg, str):
+        arg = str(arg)
+    return val + arg
 
 
-class Downcase(StringFilter):
+@string_filter
+def capitalize(val: str) -> str:
+    """Make sure the first character of a string is upper case and the rest
+    lowercase."""
+    return val.capitalize()
+
+
+@string_filter
+def downcase(val: str) -> str:
     """Make all characters in a string lower case."""
-
-    __slots__ = ()
-
-    name = "downcase"
-
-    def filter(self, val):
-        return val.lower()
+    return val.lower()
 
 
-class Escape(StringFilter):
+@with_environment
+@string_filter
+def escape(val: str, *, environment: Environment) -> str:
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
-
-    __slots__ = ()
-
-    name = "escape"
-
-    def filter(self, val):
-        if self.env.autoescape:
-            return markupsafe_escape(str(val))
-        return html.escape(val)
+    if environment.autoescape:
+        return markupsafe_escape(str(val))
+    return html.escape(val)
 
 
-class EscapeOnce(StringFilter):
+@with_environment
+@string_filter
+def escape_once(val: str, *, environment: Environment) -> str:
     """Convert the characters &, < and > in string s to HTML-safe sequences."""
-
-    __slots__ = ()
-
-    name = "escape_once"
-
-    def filter(self, val):
-        if self.env.autoescape:
-            return Markup.unescape(val)
-        return html.escape(html.unescape(val))
+    if environment.autoescape:
+        return Markup(val).unescape()
+    return html.escape(html.unescape(val))
 
 
-class LStrip(StringFilter):
+@string_filter
+def lstrip(val: str) -> str:
     """Remove leading whitespace."""
-
-    __slots__ = ()
-
-    name = "lstrip"
-
-    def filter(self, val):
-        return val.lstrip()
+    return val.lstrip()
 
 
-class NewlineToBR(StringFilter):
+RE_LINETERM = re.compile(r"\r?\n")
+
+
+@with_environment
+@string_filter
+def newline_to_br(val: str, *, environment: Environment) -> str:
     """Convert '\r\n' or '\n' to '<br />\n'."""
-
-    __slots__ = ()
-
-    name = "newline_to_br"
-    re_lineterm = re.compile(r"\r?\n")
-
-    def filter(self, val):
-        # The reference implementation was changed to replace "\r\n" as well as "\n",
-        # but they don't seem to care about "\r" (Mac OS).
-        if self.env.autoescape:
-            val = markupsafe_escape(val)
-            return Markup(self.re_lineterm.sub("<br />\n", val))
-        return self.re_lineterm.sub("<br />\n", val)
+    # The reference implementation was changed to replace "\r\n" as well as "\n",
+    # but they don't seem to care about "\r" (Mac OS).
+    if environment.autoescape:
+        val = markupsafe_escape(val)
+        return Markup(RE_LINETERM.sub("<br />\n", val))
+    return RE_LINETERM.sub("<br />\n", val)
 
 
-class Prepend(StringFilter):
+@string_filter
+def prepend(val: str, arg: str) -> str:
     """Concatenate string value to argument string."""
-
-    __slots__ = ()
-
-    name = "prepend"
-    num_args = 1
-
-    def filter(self, val, string):
-        if not isinstance(string, str):
-            string = str(string)
-        return string + val
+    return soft_str(arg) + val
 
 
-class Remove(StringFilter):
+@string_filter
+def remove(val: str, arg: str) -> str:
     """Remove all occurrences of argument string from value."""
-
-    __slots__ = ()
-
-    name = "remove"
-    num_args = 1
-
-    def filter(self, val, sub):
-        if not isinstance(sub, str):
-            sub = str(sub)
-        return val.replace(sub, "")
+    return val.replace(soft_str(arg), "")
 
 
-class RemoveFirst(StringFilter):
+@string_filter
+def remove_first(val: str, arg: str) -> str:
     """Remove the first occurrences of the argument string from value."""
-
-    __slots__ = ()
-
-    name = "remove_first"
-    num_args = 1
-
-    def filter(self, val, sub):
-        if not isinstance(sub, str):
-            sub = str(sub)
-        return val.replace(sub, "", 1)
+    return val.replace(soft_str(arg), "", 1)
 
 
-class Replace(StringFilter):
-    """Replace all occurrences of argument string in value."""
+@string_filter
+def replace(val: str, seq: str, sub: str) -> str:
+    """Replaces every occurrence of the first argument in a string with the second
+    argument."""
+    if is_undefined(seq):
+        return sub
 
-    __slots__ = ()
-
-    name = "replace"
-    num_args = 2
-
-    def filter(self, val, seq, sub):
-        if not isinstance(sub, str):
-            sub = str(sub)
-
-        if is_undefined(seq):
-            return sub
-
-        if not isinstance(seq, str):
-            seq = str(seq)
-
-        return val.replace(seq, sub)
+    return val.replace(soft_str(seq), soft_str(sub))
 
 
-class ReplaceFirst(StringFilter):
-    """Replace the first occurrences of the argument string in value."""
+@string_filter
+def replace_first(val: str, seq: str, sub: str) -> str:
+    """Replaces the first occurrence of the first argument in a string with the second
+    argument."""
+    if is_undefined(seq):
+        return sub
 
-    __slots__ = ()
-
-    name = "replace_first"
-    num_args = 2
-
-    def filter(self, val, seq, sub):
-        if not isinstance(sub, str):
-            sub = str(sub)
-
-        if is_undefined(seq):
-            return sub
-
-        if not isinstance(seq, str):
-            seq = str(seq)
-
-        return val.replace(seq, sub, 1)
+    return val.replace(soft_str(seq), soft_str(sub), 1)
 
 
-class Upcase(StringFilter):
+@string_filter
+def upcase(val: str) -> str:
     """Make all characters in a string upper case."""
-
-    __slots__ = ()
-
-    name = "upcase"
-
-    def filter(self, val):
-        return val.upper()
+    return val.upper()
 
 
-class Slice(Filter):
-    """Return a substring of `val`."""
+@string_filter
+def slice_(val: str, start: Any, length: int = 1) -> str:
+    """Return a substring, starting at `start`, containing up to `length` characters."""
+    if not val:
+        return ""
 
-    __slots__ = ()
+    if is_undefined(start):
+        raise FilterArgumentError("slice expected an integer, found Undefined")
 
-    name = "slice"
+    if is_undefined(length):
+        length = 1
 
-    def __call__(self, val, *args, **kwargs):
-        if is_undefined(val):
-            return ""
+    try:
+        start = int(start)
+    except ValueError as err:
+        raise FilterArgumentError(
+            f"slice expected an integer, found {type(start).__name__}"
+        ) from err
 
-        if not isinstance(val, str):
-            val = str(val)
+    try:
+        length = int(length)
+    except ValueError as err:
+        raise FilterArgumentError(
+            f"slice expected an integer, found {type(start).__name__}"
+        ) from err
 
-        start, length = one_maybe_two_args(self.name, args, kwargs)
-        expect_integer(self.name, start)
+    if start > len(val) - 1:
+        raise FilterArgumentError("slice string index out of range")
 
-        if length is not None:
-            if is_undefined(length):
-                length = 1
-            else:
-                expect_integer(self.name, length)
-        else:
-            length = 1
-
-        max_index = len(val) - 1
-        if start > max_index:
-            raise FilterArgumentError(f"{self.name}: string index out of range")
-
-        return val[start : start + length]
-
-
-class Split(StringFilter):
-    """Return a list of strings, using the argument value as a delimiter."""
-
-    __slots__ = ()
-
-    name = "split"
-    num_args = 1
-
-    def filter(self, val, seq):
-        if not isinstance(seq, str):
-            seq = str(seq)
-
-        if not seq:
-            return list(val)
-
-        return val.split(seq)
+    return val[start : start + length]
 
 
-class Strip(StringFilter):
+@string_filter
+def split(val: str, seq: str) -> List[str]:
+    """Split a string into a list of string, using the argument as a delimiter."""
+    if not seq:
+        return list(val)
+
+    return val.split(soft_str(seq))
+
+
+@string_filter
+def strip(val: str) -> str:
     """Remove leading and trailing whitespace."""
-
-    __slots__ = ()
-
-    name = "strip"
-
-    def filter(self, val):
-        return val.strip()
+    return val.strip()
 
 
-class RStrip(StringFilter):
+@string_filter
+def rstrip(val: str) -> str:
     """Remove trailing whitespace."""
-
-    __slots__ = ()
-
-    name = "rstrip"
-
-    def filter(self, val):
-        return val.rstrip()
+    return val.rstrip()
 
 
-class StripHTML(StringFilter):
-    """Return the given HTML with all tags stripped."""
-
-    __slots__ = ()
-
-    name = "strip_html"
-
-    def filter(self, val):
-        stripped = strip_tags(val)
-        if self.env.autoescape and isinstance(val, Markup):
-            return Markup(stripped)
-        return stripped
+@with_environment
+@string_filter
+def strip_html(val: str, *, environment: Environment) -> str:
+    """Return the given HTML with all HTML tags removed."""
+    stripped = strip_tags(val)
+    if environment.autoescape and isinstance(val, Markup):
+        return Markup(stripped)
+    return stripped
 
 
-class StripNewlines(StringFilter):
+@with_environment
+@string_filter
+def strip_newlines(val: str, *, environment: Environment) -> str:
     """Return the given string with all newline characters removed."""
-
-    __slots__ = ()
-
-    name = "strip_newlines"
-    re_lineterm = re.compile(r"\r?\n")
-
-    def filter(self, val):
-        if self.env.autoescape:
-            val = markupsafe_escape(val)
-            return Markup(self.re_lineterm.sub("", val))
-        return self.re_lineterm.sub("", val)
+    if environment.autoescape:
+        val = markupsafe_escape(val)
+        return Markup(RE_LINETERM.sub("", val))
+    return RE_LINETERM.sub("", val)
 
 
-class Truncate(Filter):
-    """Truncates a string if it is longer than the specified number of characters."""
+@string_filter
+def truncate(val: str, num: Any, end: str = "...") -> str:
+    """Truncate a string if it is longer than the specified number of characters."""
+    if is_undefined(num):
+        raise FilterArgumentError("truncate expected an integer, found Undefined")
 
-    __slots__ = ()
+    try:
+        num = int(num)
+    except ValueError as err:
+        raise FilterArgumentError(
+            f"truncate expected an integer, found {type(num).__name__}"
+        ) from err
 
-    name = "truncate"
-
-    def __call__(self, val, *args, **kwargs):
-        if is_undefined(val):
-            return ""
-
-        val = str(val)
-        num, end = one_maybe_two_args(self.name, args, kwargs)
-        expect_integer(self.name, num)
-
-        if end is not None:
-            if is_undefined(end):
-                end = ""
-            else:
-                expect_string(self.name, end)
-        else:
-            end = "..."
-
-        # XXX: Is truncating markup ever safe? Autoescape for now.
-        return truncate_chars(val, num, end)
+    end = str(end)
+    return truncate_chars(val, num, end)
 
 
-class TruncateWords(Filter):
-    """Shortens a string down to the number of words passed as an argument."""
+@string_filter
+def truncatewords(val: str, num: Any, end: str = "...") -> str:
+    """Shorten a string down to the given number of words."""
+    if is_undefined(num):
+        raise FilterArgumentError("truncate expected an integer, found Undefined")
 
-    __slots__ = ()
+    try:
+        num = int(num)
+    except ValueError as err:
+        raise FilterArgumentError(
+            f"truncate expected an integer, found {type(num).__name__}"
+        ) from err
 
-    name = "truncatewords"
+    end = str(end)
 
-    def __call__(self, val, *args, **kwargs):
-        if is_undefined(val):
-            return ""
+    # The reference implementation seems to force a minimum `num` of 1.
+    if num <= 0:
+        num = 1
 
-        val = str(val)
-        num, end = one_maybe_two_args(self.name, args, kwargs)
-        expect_integer(self.name, num)
-
-        if end is not None:
-            if is_undefined(end):
-                end = ""
-            else:
-                end = str(end)
-        else:
-            end = "..."
-
-        # The reference implementation seems to force a minimum `num` of 1.
-        if num <= 0:
-            num = 1
-
-        # XXX: Is truncating markup ever safe? Autoescape for now.
-        return truncate_words(val, num, end)
+    # Is truncating markup ever safe? Autoescape for now.
+    return truncate_words(val, num, end)
 
 
-class URLEncode(StringFilter):
-    """Converts any URL-unsafe characters in a string into percent-encoded
-    characters."""
-
-    __slots__ = ()
-
-    name = "url_encode"
-
-    def filter(self, val):
-        if self.env.autoescape:
-            return Markup(urllib.parse.quote_plus(val))
-        return urllib.parse.quote_plus(val)
+@with_environment
+@string_filter
+def url_encode(val: str, *, environment: Environment) -> str:
+    """Percent encode a string so it is useable in a URL."""
+    if environment.autoescape:
+        return Markup(urllib.parse.quote_plus(val))
+    return urllib.parse.quote_plus(val)
 
 
-class URLDecode(StringFilter):
-    """Decodes a string that has been encoded as a URL."""
+@string_filter
+def url_decode(val: str) -> str:
+    """Decode a string that has been URL encoded."""
+    # Assuming URL decoded strings are all unsafe.
+    return urllib.parse.unquote_plus(val)
 
-    __slots__ = ()
 
-    name = "url_decode"
+@string_filter
+def base64_encode(val: str) -> str:
+    """Encode a string to base64."""
+    return base64.b64encode(val.encode()).decode()
 
-    def filter(self, val):
-        # XXX: Assuming URL decoded strings are all unsafe.
-        return urllib.parse.unquote_plus(val)
+
+@string_filter
+def base64_decode(val: str) -> str:
+    """Decode a string from base64.
+
+    The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
+    """
+    try:
+        return base64.b64decode(val).decode()
+    except binascii.Error as err:
+        raise FilterValueError("Invalid base64-encoded string.") from err
+
+
+@string_filter
+def base64_url_safe_encode(val: str) -> str:
+    """Encode a string to URL safe base64."""
+    return base64.urlsafe_b64encode(val.encode()).decode()
+
+
+@string_filter
+def base64_url_safe_decode(val: str) -> str:
+    """Decode a URL safe string from base64.
+
+    The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
+    """
+    try:
+        return base64.urlsafe_b64decode(val).decode()
+    except binascii.Error as err:
+        raise FilterValueError("Invalid base64-encoded string.") from err

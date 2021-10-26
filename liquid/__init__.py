@@ -11,7 +11,6 @@ except ImportError:
     from liquid.exceptions import Markup  # type: ignore
 
 from .mode import Mode as Mode
-from .filter import Filter
 from .token import Token
 from .expression import Expression
 from .loaders import FileSystemLoader

@@ -1,24 +1,23 @@
-# type: ignore
-"""Legacy implementations of non-standard filters."""
+"""Filters that don't exist in the reference implementation."""
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 try:
     from markupsafe import Markup
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
 
-from .string import StringFilter
+from liquid.filter import string_filter
+from liquid.filter import with_environment
 
-# pylint: disable=too-few-public-methods arguments-differ
+if TYPE_CHECKING:
+    from liquid import Environment
 
 
-class Safe(StringFilter):
+@with_environment
+@string_filter
+def safe(val: str, *, environment: Environment) -> str:
     """Stringify and mark as safe."""
-
-    __slots__ = ()
-
-    name = "safe"
-
-    def filter(self, val):
-        if self.env.autoescape:
-            return Markup(val)
-        return val
+    if environment.autoescape:
+        return Markup(val)
+    return val

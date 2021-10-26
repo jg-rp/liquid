@@ -17,13 +17,9 @@ from liquid.exceptions import FilterArgumentError
 
 from liquid.expression import EMPTY
 
-from liquid.builtin.filters._misc import size
-from liquid.builtin.filters._misc import default
-from liquid.builtin.filters._misc import date
-
-from liquid.builtin.filters.misc import Size
-from liquid.builtin.filters.misc import Default
-from liquid.builtin.filters.misc import Date
+from liquid.builtin.filters.misc import size
+from liquid.builtin.filters.misc import default
+from liquid.builtin.filters.misc import date
 
 
 class Case(NamedTuple):
@@ -69,22 +65,7 @@ class MiscFilterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.env = Environment()
 
-    def _test(self, filter_cls, test_cases):
-        """Helper method for running lists of `Case`s"""
-        with self.assertWarns(DeprecationWarning):
-            func = filter_cls(self.env)
-
-        for case in test_cases:
-            with self.subTest(msg=case.description):
-                if isclass(case.expect) and issubclass(case.expect, Error):
-                    with self.assertRaises(case.expect):
-                        func(case.val, *case.args, **case.kwargs)
-                else:
-                    self.assertEqual(
-                        func(case.val, *case.args, **case.kwargs), case.expect
-                    )
-
-    def _test_newstyle_filter(self, func, test_cases):
+    def _test(self, func, test_cases):
         if getattr(func, "with_environment", False):
             func = partial(func, environment=self.env)
 
@@ -145,8 +126,7 @@ class MiscFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Size, test_cases)
-        self._test_newstyle_filter(size, test_cases)
+        self._test(size, test_cases)
 
     def test_default(self):
         """Test `default` filter function."""
@@ -279,8 +259,7 @@ class MiscFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Default, test_cases)
-        self._test_newstyle_filter(default, test_cases)
+        self._test(default, test_cases)
 
     def test_date(self):
         """Test `date` filter function."""
@@ -336,5 +315,4 @@ class MiscFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(Date, test_cases)
-        self._test_newstyle_filter(date, test_cases)
+        self._test(date, test_cases)
