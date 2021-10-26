@@ -14,6 +14,7 @@ try:
 except ImportError:
     from liquid.exceptions import Markup
 
+from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
@@ -155,7 +156,7 @@ class Map(ArrayFilter):
         try:
             return [_getitem(itm, str(key)) for itm in sequence]
         except TypeError as err:
-            raise FilterValueError(f"{self.name}: can't map sequence") from err
+            raise FilterError(f"{self.name}: can't map sequence") from err
 
 
 class Reverse(ArrayFilter):
@@ -189,7 +190,7 @@ class Sort(ArrayFilter):
         try:
             return list(sorted(sequence))
         except TypeError as err:
-            raise FilterValueError(f"{self.name}: can't sort sequence") from err
+            raise FilterError(f"{self.name}: can't sort sequence") from err
 
 
 def _lower(val, default="") -> str:

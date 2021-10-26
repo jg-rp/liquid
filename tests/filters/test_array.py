@@ -12,6 +12,7 @@ from typing import Dict
 from liquid.environment import Environment
 
 from liquid.exceptions import Error
+from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
@@ -379,7 +380,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=[{"title": "foo"}, {"title": "bar"}, 5, []],
                 args=["title"],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterError,
             ),
             Case(
                 description="undefined left value",
@@ -509,14 +510,14 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=[{"z": "z", "title": "foo"}, {"title": "bar"}, {"title": "Baz"}],
                 args=[self.env.undefined("test")],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterError,
             ),
             Case(
                 description="sort by key targeting an array of strings",
-                val=["Z", "b", "a", "C", "B", "A"],
+                val=["Z", "b", "a", "C", "A", "B"],
                 args=["title"],
                 kwargs={},
-                expect=["Z", "b", "a", "C", "B", "A"],
+                expect=["Z", "b", "a", "C", "A", "B"],
             ),
         ]
 

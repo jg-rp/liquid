@@ -21,8 +21,8 @@ except ImportError:
 from liquid.filter import with_environment
 from liquid.filter import array_filter
 
+from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
 
 from liquid import is_undefined
 
@@ -116,7 +116,7 @@ def map_(sequence: ArrayT, key: object) -> List[object]:
     try:
         return [_getitem(itm, str(key)) for itm in sequence]
     except TypeError as err:
-        raise FilterValueError("can't map sequence") from err
+        raise FilterError("can't map sequence") from err
 
 
 @array_filter
@@ -139,7 +139,7 @@ def sort(sequence: ArrayT, key: object = None) -> List[object]:
     try:
         return list(sorted(sequence))
     except TypeError as err:
-        raise FilterValueError("can't sort sequence") from err
+        raise FilterError("can't sort sequence") from err
 
 
 @array_filter

@@ -75,6 +75,10 @@ class NoSuchFilterFunc(Error):
     """Exception raised when a filter lookup fails."""
 
 
+class FilterError(Error):
+    """Exception raised when a filter fails."""
+
+
 class FilterArgumentError(Error):
     """Exception raised when a filters arguments are invalid."""
 

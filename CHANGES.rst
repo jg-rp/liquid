@@ -6,6 +6,8 @@ Version 0.9.0
 
 - Fixed a bug where arguments to ``Template()`` where not being passed to the implicit
   environment properly (again).
+- Fixed a bug where some errors from the ``sort`` and ``map`` filters were being
+  ignored. Those filters can now raise a ``FilterError``.
 
 Version 0.8.1
 -------------
