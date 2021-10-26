@@ -329,9 +329,37 @@ class Environment:
 
 
 @lru_cache(maxsize=10)
-def get_implicit_environment(*args: Any) -> Environment:
+def get_implicit_environment(
+    tag_start_string: str,
+    tag_end_string: str,
+    statement_start_string: str,
+    statement_end_string: str,
+    strip_tags: bool,
+    tolerance: Mode,
+    loader: Optional[loaders.BaseLoader],
+    undefined: Type[Undefined],
+    strict_filters: bool,
+    autoescape: bool,
+    auto_reload: bool,
+    cache_size: int,
+    globals: Optional[Mapping[str, object]],
+) -> Environment:
     """Return an :class:`Environment` initialized with the given arguments."""
-    return Environment(*args)
+    return Environment(
+        tag_start_string=tag_start_string,
+        tag_end_string=tag_end_string,
+        statement_start_string=statement_start_string,
+        statement_end_string=statement_end_string,
+        strip_tags=strip_tags,
+        tolerance=tolerance,
+        loader=loader,
+        undefined=undefined,
+        strict_filters=strict_filters,
+        autoescape=autoescape,
+        auto_reload=auto_reload,
+        cache_size=cache_size,
+        globals=globals,
+    )
 
 
 # `Template` is a factory function masquerading as a class. The desire to have
@@ -404,19 +432,22 @@ def Template(
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
     """
+    # Resorting to named arguments (repeated 3 times) as I've twice missed a bug
+    # because of positional arguments.
     env = get_implicit_environment(
-        tag_start_string,
-        tag_end_string,
-        statement_start_string,
-        statement_end_string,
-        strip_tags,
-        None,  # loader
-        tolerance,
-        undefined,
-        strict_filters,
-        autoescape,
-        auto_reload,
-        cache_size,
+        tag_start_string=tag_start_string,
+        tag_end_string=tag_end_string,
+        statement_start_string=statement_start_string,
+        statement_end_string=statement_end_string,
+        strip_tags=strip_tags,
+        tolerance=tolerance,
+        loader=None,
+        undefined=undefined,
+        strict_filters=strict_filters,
+        autoescape=autoescape,
+        auto_reload=auto_reload,
+        cache_size=cache_size,
+        globals=None,
     )
 
     return env.from_string(source, globals=globals)

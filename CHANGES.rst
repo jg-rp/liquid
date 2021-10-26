@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 0.9.0
+-------------
+
+- Fixed a bug where arguments to ``Template()`` where not being passed to the implicit
+  environment properly (again).
+
 Version 0.8.1
 -------------
 

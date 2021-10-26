@@ -5,6 +5,7 @@ from unittest import TestCase
 from typing import NamedTuple
 from typing import Type
 
+from liquid import Template
 from liquid.environment import Environment
 from liquid.mode import Mode
 
@@ -251,6 +252,13 @@ class MalformedTemplateTestCase(TestCase):
         self._test(test_cases, mode=Mode.STRICT)
         self._test(test_cases, mode=Mode.WARN)
         self._test(test_cases, mode=Mode.LAX)
+
+    def test_liquid_syntax_from_template_api(self):
+        """Test that syntax errors are raised by default when using the `Template`
+        API."""
+        with self.assertRaises(LiquidSyntaxError):
+            # Missing colon before filter argument
+            Template(r"{{ a | sort foo }}")
 
     def test_unrecoverable_syntax_errors(self):
         """Test that we fail early and loud when parsing a malformed template."""
