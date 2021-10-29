@@ -515,6 +515,16 @@ class RenderTestCases(unittest.TestCase):
                 expect="username is blank",
                 globals={"username": ""},
             ),
+            Case(
+                description="conditional alternative with default",
+                template=(
+                    r"{% if false %}foo"
+                    r"{% elsif false %}bar"
+                    r"{% else %}hello"
+                    r"{% endif %}"
+                ),
+                expect="hello",
+            ),
         ]
 
         self._test(test_cases)
@@ -561,6 +571,26 @@ class RenderTestCases(unittest.TestCase):
                 description="blank empty block",
                 template=r"{% unless false %}  {% endunless %}",
                 expect="",
+            ),
+            Case(
+                description="alternative",
+                template=r"{% unless true %}foo{% else %}bar{% endunless %}",
+                expect="bar",
+            ),
+            Case(
+                description="conditional alternative",
+                template=r"{% unless true %}foo{% elsif true %}bar{% endunless %}",
+                expect="bar",
+            ),
+            Case(
+                description="conditional alternative with default",
+                template=(
+                    r"{% unless true %}foo"
+                    r"{% elsif false %}bar"
+                    r"{% else %}hello"
+                    r"{% endunless %}"
+                ),
+                expect="hello",
             ),
         ]
 

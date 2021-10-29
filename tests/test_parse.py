@@ -6,25 +6,23 @@ from typing import NamedTuple
 from liquid.environment import Environment
 from liquid.mode import Mode
 
-from liquid.builtin import (
-    literal,
-    statement,
-    if_tag,
-    comment_tag,
-    unless_tag,
-    case_tag,
-    for_tag,
-    tablerow_tag,
-    capture_tag,
-    cycle_tag,
-    assign_tag,
-    increment_tag,
-    decrement_tag,
-    echo_tag,
-    include_tag,
-    render_tag,
-    ifchanged_tag,
-)
+from liquid.builtin import literal
+from liquid.builtin import statement
+from liquid.builtin import if_tag
+from liquid.builtin import comment_tag
+from liquid.builtin import unless_tag
+from liquid.builtin import case_tag
+from liquid.builtin import for_tag
+from liquid.builtin import tablerow_tag
+from liquid.builtin import capture_tag
+from liquid.builtin import cycle_tag
+from liquid.builtin import assign_tag
+from liquid.builtin import increment_tag
+from liquid.builtin import decrement_tag
+from liquid.builtin import echo_tag
+from liquid.builtin import include_tag
+from liquid.builtin import render_tag
+from liquid.builtin import ifchanged_tag
 
 
 class Case(NamedTuple):
@@ -185,6 +183,26 @@ class ParserTestCase(unittest.TestCase):
                 "unless with object and literal",
                 "{% unless x == 1 %}foo {{ title }} bar{% endunless %}",
                 "if !(x == 1) { foo `title` bar }",
+            ),
+            Case(
+                "unless with alternative",
+                "{% unless true %}foo{% else %}bar{% endunless %}",
+                "if !(True) { foo } else { bar }",
+            ),
+            Case(
+                "unless with conditional alternative",
+                "{% unless true %}foo{% elsif true %}hello{% else %}bar{% endunless %}",
+                "if !(True) { foo } elsif (True) { hello } else { bar }",
+            ),
+            Case(
+                "unless with falsy conditional alternative",
+                (
+                    r"{% unless true %}foo"
+                    r"{% elsif false %}bar"
+                    r"{% else %}hello"
+                    r"{% endunless %}"
+                ),
+                "if !(True) { foo } elsif (False) { bar } else { hello }",
             ),
         ]
 

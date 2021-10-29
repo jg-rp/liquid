@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 0.9.1
+-------------
+
+- ``unless`` blocks can now contain ``else`` and ``elsif`` blocks.
+
 Version 0.9.0
 -------------
 

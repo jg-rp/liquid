@@ -236,6 +236,12 @@ class MalformedTemplateTestCase(TestCase):
                 expect_msg="unexpected '~', on line 1",
             ),
             Case(
+                description="bad conditional expression in unless block",
+                template="{% unless true %}ok{% elsif £$! %}{% endunless %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '£', on line 1",
+            ),
+            Case(
                 description="unknown infix operator",
                 template="{% if 1 ~ 2 %}ok{% endif %}",
                 expect_exception=LiquidSyntaxError,
