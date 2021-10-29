@@ -27,7 +27,7 @@ A non evaling templating language suitable for end users.
     :target: https://pypi.org/project/python-liquid/
     :alt: Python versions
 
-.. image:: https://img.shields.io/badge/pypy-3.7-blue
+.. image:: https://img.shields.io/badge/pypy-3.7%20%7C%203.8-blue
     :target: https://pypi.org/project/python-liquid/
     :alt: PyPy versions
 

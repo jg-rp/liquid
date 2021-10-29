@@ -41,5 +41,6 @@ setuptools.setup(
         "API Reference": "https://liquid.readthedocs.io/en/latest/api.html",
         "Issue Tracker": "https://github.com/jg-rp/liquid/issues",
         "Source Code": "https://github.com/jg-rp/liquid",
+        "Change Log": "https://github.com/jg-rp/liquid/blob/main/CHANGES.rst",
     },
 )
