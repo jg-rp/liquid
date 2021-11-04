@@ -5,6 +5,9 @@ Version 0.9.1
 -------------
 
 - ``unless`` blocks can now contain ``else`` and ``elsif`` blocks.
+- Added support for array item access with negative indices. Closes #27.
+- Improved error messages for context lookups that resulting an ``IndexError`` or
+  ``KeyError``.
 
 Version 0.9.0
 -------------

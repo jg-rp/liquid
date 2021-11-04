@@ -273,7 +273,12 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
 
             if stream.current.type == TOKEN_STRING:
                 path.append(expression.IdentifierPathElement(stream.current.value))
-
+            elif stream.current.type == TOKEN_NEGATIVE:
+                expect_peek(stream, TOKEN_INTEGER)
+                stream.next_token()
+                path.append(
+                    expression.IdentifierPathElement(-int(stream.current.value))
+                )
             elif stream.current.type == TOKEN_INTEGER:
                 path.append(expression.IdentifierPathElement(int(stream.current.value)))
 

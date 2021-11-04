@@ -1,7 +1,10 @@
 import asyncio
 
+from dataclasses import dataclass
+from dataclasses import field
+
 from unittest import TestCase
-from typing import NamedTuple
+from typing import Dict
 
 from liquid import Environment
 from liquid import Undefined
@@ -14,12 +17,14 @@ from liquid.exceptions import UndefinedError
 from liquid.exceptions import NoSuchFilterFunc
 
 
-class Case(NamedTuple):
+@dataclass
+class Case:
     """Table driven test case helper."""
 
     description: str
     template: str
     expect: str
+    context: Dict[str, object] = field(default_factory=dict)
 
 
 class TestUndefined(TestCase):
@@ -92,6 +97,16 @@ class TestUndefined(TestCase):
                 description="filter undefined through date",
                 template=r"hello {{ nosuchthing | date: '%b %d, %y' }} there",
                 expect="hello  there",
+            ),
+            Case(
+                description="array index out or range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[100] }}",
+                expect="",
+            ),
+            Case(
+                description="negative array index out or range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[-100] }}",
+                expect="",
             ),
         ]
 
@@ -166,6 +181,22 @@ class TestUndefined(TestCase):
                 template=r"hello {{ nosuchthing | abs }} there",
                 expect="'nosuchthing' is undefined, on line 1",
             ),
+            Case(
+                description="array index out of range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[100] }}",
+                expect="list index out of range: a[100], on line 1",
+            ),
+            Case(
+                description="negative array index out of range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[-100] }}",
+                expect="list index out of range: a[-100], on line 1",
+            ),
+            Case(
+                description="key error",
+                template=r"{{ obj['bar'] }}",
+                expect="key error: 'bar', obj[bar], on line 1",
+                context={"obj": {"foo": 1}},
+            ),
         ]
 
         env = Environment(undefined=StrictUndefined)
@@ -175,7 +206,7 @@ class TestUndefined(TestCase):
                 template = env.from_string(case.template)
 
                 with self.assertRaises(UndefinedError) as raised:
-                    template.render()
+                    template.render(**case.context)
 
                 self.assertEqual(case.expect, str(raised.exception))
 

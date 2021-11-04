@@ -203,6 +203,12 @@ class RenderTestCases(unittest.TestCase):
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
+                    description="array item by negative index",
+                    template=r"{{ product.tags[-2] }}",
+                    expect="sports",
+                    globals={"product": {"tags": ["sports", "garden"]}},
+                ),
+                Case(
                     description="array item by index from identifier",
                     template="{% assign i = 1 %}{{ product.tags[i] }}",
                     expect="garden",

@@ -163,6 +163,12 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 "linklists[section.settings.menu]",
                 "main menu",
             ),
+            Case(
+                "array index using negative subscript",
+                {"a": [1, 2, 3]},
+                "a[-1]",
+                3,
+            ),
         ]
 
         self._test(test_cases, tokenize_filtered_expression, parse_filtered_expression)

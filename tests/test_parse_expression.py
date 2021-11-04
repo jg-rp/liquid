@@ -393,6 +393,19 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                     ],
                 ),
             ),
+            Case(
+                "negative array index",
+                "products[-1]",
+                FilteredExpression(
+                    expression=Identifier(
+                        path=[
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement(-1),
+                        ],
+                    ),
+                    filters=[],
+                ),
+            ),
         ]
 
         self._test(test_cases, tokenize_filtered_expression, parse_filtered_expression)

@@ -231,45 +231,59 @@ class DebugUndefined(Undefined):
 class StrictUndefined(Undefined):
     """An undefined that raises an exception for everything other than ``repr``."""
 
-    __slots__ = ()
+    __slots__ = ("msg",)
+
+    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
+        super().__init__(name, obj=obj, hint=hint)
+        if self.hint:
+            self.msg = self.hint
+        else:
+            self.msg = f"'{self.name}' is undefined"
 
     def __getattribute__(self, name: str) -> Any:
-        if name in ("__repr__", "name", "obj", "hint"):
+        if name in (
+            "__repr__",
+            "name",
+            "hint",
+            "obj",
+            "hint",
+            "msg",
+        ):
             return super().__getattribute__(name)
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __contains__(self, item: object) -> bool:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __eq__(self, other: object) -> bool:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __getitem__(self, key: str) -> object:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __len__(self) -> int:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __iter__(self) -> Iterator[Any]:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __str__(self) -> str:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __repr__(self) -> str:
         return f"StrictUndefined({self.name})"
 
     def __bool__(self) -> bool:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __int__(self) -> int:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __hash__(self) -> int:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
     def __reversed__(self) -> Iterable[Any]:
-        raise UndefinedError(f"'{self.name}' is undefined")
+        raise UndefinedError(self.msg)
 
 
 # pylint: disable=too-many-instance-attributes redefined-builtin
@@ -347,9 +361,19 @@ class Context:
         if items:
             try:
                 return functools.reduce(_getitem, items, obj)
-            except (KeyError, IndexError, TypeError):
+            except (KeyError, IndexError, TypeError) as err:
+                if isinstance(err, KeyError):
+                    hint = (
+                        f"key error: {err}, {name}{''.join([f'[{i}]' for i in items])}"
+                    )
+                else:
+                    hint = f"{err}: {name}{''.join([f'[{i}]' for i in items])}"
+
                 if default == _undefined:
-                    return self.env.undefined(name)
+                    return self.env.undefined(
+                        name=name,
+                        hint=hint,
+                    )
                 return default
 
         return obj
@@ -369,9 +393,12 @@ class Context:
             try:
                 for item in items:
                     obj = await _getitem_async(obj, item)
-            except (KeyError, IndexError, TypeError):
+            except (KeyError, IndexError, TypeError) as err:
                 if default == _undefined:
-                    return self.env.undefined(name)
+                    return self.env.undefined(
+                        name=name,
+                        hint=f"{err}: {name}{''.join([f'[{i}]' for i in items])}",
+                    )
 
         return obj
 
