@@ -38,7 +38,7 @@ A non evaling templating language suitable for end users.
 - `Related Projects`_
 - `Compatibility`_
 - `Benchmark`_
-- `Data and Drops`_
+- `Objects and Drops`_
 - `Async Support`_
 - `Custom Filters`_
 - `Custom Tags`_
