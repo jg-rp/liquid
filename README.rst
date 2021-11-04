@@ -38,6 +38,7 @@ A non evaling templating language suitable for end users.
 - `Related Projects`_
 - `Compatibility`_
 - `Benchmark`_
+- `Data and Drops`_
 - `Async Support`_
 - `Custom Filters`_
 - `Custom Tags`_
@@ -69,9 +70,28 @@ Render a template string by creating a ``Template`` and calling its ``render`` m
 
     template = Template("Hello, {{ you }}!")
     print(template.render(you="World"))  # "Hello, World!"
+    print(template.render(you="Liquid"))  # "Hello, Liquid!"
 
-Keyword arguments passed to ``render`` are added to the `render context`_, and are
-available as variables for templates to use in Liquid expressions.
+Keyword arguments passed to ``render`` are available as variables for templates to use
+in Liquid expressions.
+
+.. code-block:: python
+
+    from liquid import Template
+
+    template = Template(
+        "{% for person in people %}"
+        "Hello, {{ person.name }}!\n"
+        "{% endfor %}"
+    )
+
+    context_data = {"people": [
+        {"name": "John"},
+        {"name": "Sally"},
+    ]}
+    print(template.render(**context_data))
+    # "Hello, John!"
+    # "Hello, Sally!"
 
 
 Loading Templates
@@ -116,9 +136,9 @@ efficient than using ``Template`` directly.
 Render Context
 **************
 
-Among other things, a render context includes namespaces for `global` variables passed
-down from the ``Environment`` and `local` variables assigned with the built-in
-``{% assign %}`` or ``{% capture %}`` tags.
+Each render context includes namespaces for `global` variables passed down from the
+``Environment`` and `local` variables assigned with the built-in ``{% assign %}`` or
+``{% capture %}`` tags.
 
 The ``Environment`` constructor accepts ``globals``, a dictionary of variables made
 available to all templates rendered from that environment. 
@@ -173,9 +193,9 @@ Available modes are ``Mode.STRICT``, ``Mode.WARN`` and ``Mode.LAX``.
         tolerance=Mode.LAX,
     )
 
-By default, references to undefined variables are silently ignored. In
-`strict variables` mode, any operation on an undefined variable will raise an
-``UndefinedError``.
+By default, references to undefined variables are silently ignored. Pass 
+``StrictUndefined`` as the ``undefined`` argument to ``Template`` or ``Environment``, 
+and any operation on an undefined variable will raise an ``UndefinedError``.
 
 .. code-block:: python
 
@@ -227,6 +247,157 @@ Alternatively use the non-standard ``safe`` filter.
     >>> template = env.from_string("<p>Hello, {{ you | safe }}</p>")
     >>> template.render(you="<em>World!</em>")
     '<p>Hello, <em>World!</em></p>'
+
+Objects and Drops
+*****************
+
+Python Liquid uses ``__getitem__`` internally for resolving attribute/property names and
+index access. So, if your data (keyword arguments passed to ``Template.render()``) is 
+some combination of Dictionaries and List, for example, templates can reference objects
+as follows.
+
+.. code-block:: python
+
+    >>> from liquid import Template
+    >>> example_data = {
+    ...     "products": [
+    ...         {
+    ...             "title": "Some Shoes",
+    ...             "available": 5,
+    ...             "colors": [
+    ...                 "blue",
+    ...                 "red",
+    ...             ],
+    ...         },
+    ...         {
+    ...             "title": "A Hat",
+    ...             "available": 2,
+    ...             "colors": [
+    ...                 "grey",
+    ...                 "brown",
+    ...             ],
+    ...         },
+    ...     ]
+    ... }
+    >>> Template("{{ products[0]title }}").render(**example_data)
+    'Some Shoes'
+    >>> Template("{{ products[-2]['title'] }}").render(**example_data)
+    'Some Shoes'
+    >>> Template("{{ products.last.title }}").render(**example_data)
+    'A Hat'
+    >>> Template("{{ products.last.foo }}").render(**example_data)
+    ''
+    >>> Template("{{ products.last.foo }}", undefined=StrictUndefined).render(**example_data)
+    Traceback (most recent call last):
+    .
+    .
+    liquid.exceptions.UndefinedError: key error: 'foo', products[last][foo], on line 1
+
+Attempting to access properties from a Python class or class instance will not work.
+
+.. code-block:: python
+
+    >>> from liquid import Template, StrictUndefined
+    >>>
+    >>> class Product:
+    ...     def __init__(self, title, colors):
+    ...         self.title = title
+    ...         self.colors = colors
+    >>>
+    >>> products = [
+    ...     Product(title="Some Shoes", colors=["blue", "red"]),
+    ...     Product(title="A Hat", colors=["grey", "brown"]),
+    ... ]
+    >>>
+    >>> Template("{{ products.first.title }}").render(products=products)
+    ''
+    >>> Template("{{ products.first.title }}", undefined=StrictUndefined).render(products=products)
+    Traceback (most recent call last):
+    .
+    .
+    UndefinedError: 'Product' object is not subscriptable: products[first][title], on line 1
+
+This is by design, and is one of the reasons Liquid is considered "safe" and "suitable
+for end users". To expose an object's properties we can implement Python's ``Mapping``
+or ``Sequence`` interface. This is Python Liquid's equivalent of a "drop".
+
+.. code-block:: python
+
+    from collections import abc
+    from liquid import Template, StrictUndefined
+
+    class User(abc.Mapping):
+        def __init__(
+            self,
+            first_name,
+            last_name,
+            perms,
+        ):
+            self.first_name = first_name
+            self.last_name = last_name
+            self.perms = perms or []
+
+            self._keys = [
+                "first_name",
+                "last_name",
+                "is_admin",
+                "name",
+            ]
+
+        def __getitem__(self, k):
+            if k in self._keys:
+                return getattr(self, k)
+            raise KeyError(k)
+
+        def __iter__(self):
+            return iter(self._keys)
+
+        def __len__(self):
+            return len(self._keys)
+
+        def __str__(self):
+            return f"User(first_name='{self.first_name}', last_name='{self.last_name}')"
+
+        @property
+        def is_admin(self):
+            return "admin" in self.perms
+
+        @property
+        def name(self):
+            return f"{self.first_name} {self.last_name}"
+    
+
+    user = User("John", "Smith", ["admin"])
+    
+    print(Template("{{ user.first_name }}").render(user=user))  # John
+    print(Template("{{ user.name }}").render(user=user))  # John Smith
+    print(Template("{{ user.is_admin }}").render(user=user))  # true
+
+    print(Template("{{ user.perms[0] }}", undefined=StrictUndefined).render(user=user))
+    # UndefinedError: key error: 'perms', user[perms][0], on line 1
+
+One could implement a simple "Drop" wrapper for data access objects like this, while
+still being explicit about which properties are exposed to templates.
+
+.. code-block:: python
+
+    class Drop(abc.Mapping):
+        def __init__(obj, keys):
+            self.obj = obj
+            self.keys = keys
+
+        def __getitem__(self, k):
+            # Delegate attribute access to self.obj only if `k` is in `self.keys`.
+            if k in self.keys:
+                return getattr(obj, k)
+            raise KeyError(k)
+
+        def __iter__(self):
+            return iter(self.keys)
+
+        def __len__(self):
+            return len(self.keys)
+
 
 Async Support
 *************
