@@ -1,6 +1,15 @@
 Python Liquid Change Log
 ========================
 
+Version 0.10.0
+--------------
+
+- Changed named counter (``increment`` and ``decrement``) scoping. Unless a named
+  counter is shadowed by an ``assign`` or ``capture``, the counter will be in scope for
+  all subsequent Liquid expressions.
+- Changed ``{% increment %}`` to be a post-increment operation. ``{% decrement %}``
+  remains a pre-decrement operation. 
+
 Version 0.9.1
 -------------
 

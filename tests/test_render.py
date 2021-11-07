@@ -786,12 +786,12 @@ class RenderTestCases(unittest.TestCase):
             Case(
                 description="named counter",
                 template=r"{% decrement foo %}{{ foo }} {% decrement foo %}{{ foo }}",
-                expect="-1 -2",
+                expect="-1-1 -2-2",
             ),
             Case(
                 description="increment and decrement named counter",
                 template=r"{% decrement foo %} {% decrement foo %} {% increment foo %}",
-                expect="-1 -2 -1",
+                expect="-1 -2 -2",
             ),
         ]
 
@@ -805,6 +805,11 @@ class RenderTestCases(unittest.TestCase):
                 description="named counter",
                 template=r"{% increment foo %} {% increment foo %} {% increment foo %}",
                 expect="0 1 2",
+            ),
+            Case(
+                description="incrementing counter renders before incrementing",
+                template=r"{% increment foo %} {{ foo }}",
+                expect="0 1",
             ),
             Case(
                 description="multiple named counters",
@@ -826,6 +831,17 @@ class RenderTestCases(unittest.TestCase):
                     r"{{ foo }}"
                 ),
                 expect="5 0 1 5",
+            ),
+            Case(
+                description="named counters are in scope for subsequent expressions",
+                template=(
+                    r"{% increment foo %} "
+                    r"{% increment foo %} "
+                    r"{% if foo > 0 %}"
+                    r"{{ foo }}"
+                    r"{% endif %}"
+                ),
+                expect="0 1 2",
             ),
         ]
 

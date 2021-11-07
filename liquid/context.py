@@ -294,6 +294,7 @@ class Context:
         "env",
         "locals",
         "globals",
+        "counters",
         "scope",
         "_tag_namespace",
         "disabled_tags",
@@ -318,15 +319,17 @@ class Context:
         # passed down from the environment.
         self.globals = globals or {}
 
+        # A namespace for `increment` and `decrement` counters.
+        self.counters: Dict[str, int] = {}
+
         # Namespaces are searched in this order. When a context is extended, the
         # temporary namespace is pushed to the front of this chain.
-        self.scope = ReadOnlyChainMap(self.locals, self.globals, builtin)
+        self.scope = ReadOnlyChainMap(self.locals, self.globals, builtin, self.counters)
 
         # A namspace supporting stateful tags. Such as `cycle`, `increment`,
         # `decrement` and `ifchanged`.
         self._tag_namespace: Dict[str, Any] = {
             "cycles": {},
-            "counters": {},
             "ifchanged": "",
             "stopindex": {},
         }
@@ -446,14 +449,14 @@ class Context:
 
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
-        val: int = self._tag_namespace["counters"].get(name, -1) + 1
-        self._tag_namespace["counters"][name] = val
+        val: int = self.counters.get(name, 0)
+        self.counters[name] = val + 1
         return val
 
     def decrement(self, name: str) -> int:
         """Decrement the named counter and return its value."""
-        val: int = self._tag_namespace["counters"].get(name, 0) - 1
-        self._tag_namespace["counters"][name] = val
+        val: int = self.counters.get(name, 0) - 1
+        self.counters[name] = val
         return val
 
     def cycle(self, group_name: str, args: Sequence[Any]) -> Iterator[Any]:

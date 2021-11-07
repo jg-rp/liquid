@@ -252,9 +252,9 @@ Objects and Drops
 *****************
 
 Python Liquid uses ``__getitem__`` internally for resolving attribute/property names and
-index access. So, if your data (keyword arguments passed to ``Template.render()``) is 
-some combination of Dictionaries and List, for example, templates can reference objects
-as follows.
+indexed array access. So, if your data (keyword arguments passed to
+``Template.render()``) is some combination of Dictionaries and Lists, for example,
+templates can reference objects as follows.
 
 .. code-block:: python
 
@@ -403,8 +403,9 @@ Async Support
 *************
 
 Python Liquid supports loading and rendering templates asynchronously. When
-``Template.render_async`` is awaited, ``render`` and ``include`` tags will load
-templates asynchronously.
+``Template.render_async`` is awaited, ``render`` and ``include`` tags will use
+``Environment.get_template_async``, which delegates to ``get_source_async`` of the
+configured template loader.
 
 .. code-block:: python
 
@@ -554,6 +555,10 @@ Known Issues
   and ``strftime`` for formatting. There are likely to be some inconsistencies between
   this and the reference implementation's equivalent parsing and formatting of dates and
   times.
+
+- In Ruby Liquid, the built-in ``increment`` and ``decrement`` tags can, in some cases,
+  mutate "global" context and keep named counters alive between renders. Although not 
+  difficult to implement, I can't quite bring myself to do it.
 
 Benchmark
 ---------
