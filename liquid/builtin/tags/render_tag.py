@@ -134,6 +134,7 @@ class RenderNode(Node):
                     name=key,
                     it=iter(val),
                     length=len(val),
+                    parentloop=context.env.undefined("parentloop"),
                 )
 
                 args["forloop"] = forloop
@@ -203,6 +204,7 @@ class RenderNode(Node):
                     name=key,
                     it=iter(val),
                     length=len(val),
+                    parentloop=context.env.undefined("parentloop"),
                 )
 
                 args["forloop"] = forloop

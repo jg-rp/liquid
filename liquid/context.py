@@ -36,6 +36,7 @@ from liquid import Mode
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
     from liquid.template import BoundTemplate
+    from liquid.builtin.tags.for_tag import ForLoop
 
 # Maximum number of times a context can be extended or wrapped.
 MAX_CONTEXT_DEPTH = 30
@@ -296,6 +297,7 @@ class Context:
         "globals",
         "counters",
         "scope",
+        "loops",
         "_tag_namespace",
         "disabled_tags",
         "autoescape",
@@ -333,6 +335,9 @@ class Context:
             "ifchanged": "",
             "stopindex": {},
         }
+
+        # As stack of forloop objects. Used for populating forloop.parentloop.
+        self.loops: List[object] = []
 
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
@@ -499,6 +504,23 @@ class Context:
             yield self
         finally:
             self.scope.pop()
+
+    @contextmanager
+    def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[Context]:
+        """Just like ``Context.extend``, but keeps track of ForLoop objects too."""
+        self.loops.append(forloop)
+        with self.extend(namespace) as context:
+            try:
+                yield context
+            finally:
+                self.loops.pop()
+
+    def parentloop(self) -> Union[Undefined, object]:
+        """Return the last ForLoop object from the loop stack."""
+        try:
+            return self.loops[-1]
+        except IndexError:
+            return self.env.undefined("parentloop")
 
     def copy(
         self, namespace: Namespace, disabled_tags: Optional[List[str]] = None

@@ -1154,6 +1154,60 @@ class RenderTestCases(unittest.TestCase):
                 expect="1 2 3 4 5 6 ",
                 globals={"array": [1, 2, 3, 4, 5, 6]},
             ),
+            Case(
+                description="parentloop is normally undefined",
+                template=(
+                    r"{% for i in (1..2)%}{{ forloop.parentloop.index }}{% endfor %}"
+                ),
+                expect="",
+                globals={},
+            ),
+            Case(
+                description="access parentloop",
+                template=(
+                    r"{% for i in (1..2)%}"
+                    r"{% for j in (1..2) %}"
+                    r"{{ i }} {{j}} {{ forloop.parentloop.index }} {{ forloop.index }} "
+                    r"{% endfor %}"
+                    r"{% endfor %}"
+                ),
+                expect="1 1 1 1 1 2 1 2 2 1 2 1 2 2 2 2 ",
+                globals={},
+            ),
+            Case(
+                description="parentloop goes out of scope",
+                template=(
+                    r"{% for i in (1..2)%}"
+                    r"{% for j in (1..2) %}"
+                    r"{{ i }} {{ j }} "
+                    r"{% endfor %}"
+                    r"{{ forloop.parentloop.index }}"
+                    r"{% endfor %}"
+                ),
+                expect="1 1 1 2 2 1 2 2 ",
+                globals={},
+            ),
+            Case(
+                description="parent's parentloop",
+                template=(
+                    r"{% for i in (1..2) %}"
+                    r"{% for j in (1..2) %}"
+                    r"{% for k in (1..2) %}"
+                    r"i={{ forloop.parentloop.parentloop.index }} "
+                    r"j={{ forloop.parentloop.index }} "
+                    r"k={{ forloop.index }} "
+                    r"{% endfor %}"
+                    r"{% endfor %}"
+                    r"{% endfor %}"
+                ),
+                expect=(
+                    "i=1 j=1 k=1 i=1 j=1 k=2 "
+                    "i=1 j=2 k=1 i=1 j=2 k=2 "
+                    "i=2 j=1 k=1 i=2 j=1 k=2 "
+                    "i=2 j=2 k=1 i=2 j=2 k=2 "
+                ),
+                globals={},
+            ),
         ]
 
         self._test(test_cases)
@@ -1730,6 +1784,40 @@ class RenderTestCases(unittest.TestCase):
                 expect="MockIterableDrop",
                 globals={"loop": MockIterableDrop()},
                 partials={"loop-with": r"{{ value }}"},
+            ),
+            Case(
+                description="render loops don't add parentloop",
+                template=r"{% render 'product' for collection.products %}",
+                expect="bike-0 0 1 2 car-1 0 1 2 ",
+                globals={
+                    "collection": {"products": [{"title": "bike"}, {"title": "car"}]}
+                },
+                partials={
+                    "product": (
+                        r"{{ product.title }}-{{ forloop.index0 }} "
+                        r"{% for x in (1..3) %}"
+                        r"{{ forloop.index0 }}{{ forloop.parentloop.index0 }} "
+                        r"{% endfor %}"
+                    ),
+                },
+            ),
+            Case(
+                description="render loops can't access parentloop",
+                template=(
+                    r"{% for x in (1..3) %}"
+                    r"{% render 'product' for collection.products %}"
+                    r"{% endfor %}"
+                ),
+                expect="bike-0 car-1 bike-0 car-1 bike-0 car-1 ",
+                globals={
+                    "collection": {"products": [{"title": "bike"}, {"title": "car"}]}
+                },
+                partials={
+                    "product": (
+                        r"{{ product.title }}-{{ forloop.index0 }} "
+                        r"{{ forloop.parentloop.index0 }}"
+                    ),
+                },
             ),
         ]
 

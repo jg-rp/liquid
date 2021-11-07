@@ -8,7 +8,8 @@ Version 0.10.0
   counter is shadowed by an ``assign`` or ``capture``, the counter will be in scope for
   all subsequent Liquid expressions.
 - Changed ``{% increment %}`` to be a post-increment operation. ``{% decrement %}``
-  remains a pre-decrement operation. 
+  remains a pre-decrement operation.
+- Added ``forloop.parentloop``. Access parent ``forloop`` objects from nested loops.
 
 Version 0.9.1
 -------------

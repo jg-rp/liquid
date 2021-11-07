@@ -1,5 +1,5 @@
 """Tag and node definition for the built-in "for" tag."""
-
+from __future__ import annotations
 import sys
 
 from typing import Optional
@@ -58,9 +58,16 @@ class ForLoop(Mapping[str, object]):
         "rindex",
         "rindex0",
         "_keys",
+        "parentloop",
     )
 
-    def __init__(self, name: str, it: Iterator[Any], length: int):
+    def __init__(
+        self,
+        name: str,
+        it: Iterator[Any],
+        length: int,
+        parentloop: object,
+    ):
         self.name = name
         self.it = it
         self.length = length
@@ -72,6 +79,7 @@ class ForLoop(Mapping[str, object]):
         self.index0 = -1
         self.rindex = self.length + 1
         self.rindex0 = self.length
+        self.parentloop = parentloop
 
         self._keys: List[str] = [
             "length",
@@ -81,6 +89,7 @@ class ForLoop(Mapping[str, object]):
             "rindex0",
             "first",
             "last",
+            "parentloop",
         ]
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -161,6 +170,7 @@ class ForNode(Node):
                 name=name,
                 it=loop_iter,
                 length=length,
+                parentloop=context.parentloop(),
             )
 
             namespace = {
@@ -170,7 +180,7 @@ class ForNode(Node):
 
             # Extend the context. Essentially giving priority to `ForLoopDrop`, then
             # delegating `get` and `assign` to the outer context.
-            with context.extend(namespace):
+            with context.loop(namespace, forloop):
 
                 for itm in forloop:
                     namespace[name] = itm
@@ -199,6 +209,7 @@ class ForNode(Node):
                 name=name,
                 it=loop_iter,
                 length=length,
+                parentloop=context.parentloop(),
             )
 
             namespace = {
@@ -208,7 +219,7 @@ class ForNode(Node):
 
             # Extend the context. Essentially giving priority to `ForLoopDrop`, then
             # delegating `get` and `assign` to the outer context.
-            with context.extend(namespace):
+            with context.loop(namespace, forloop):
 
                 for itm in forloop:
                     namespace[name] = itm
