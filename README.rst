@@ -560,6 +560,10 @@ Known Issues
   mutate "global" context and keep named counters alive between renders. Although not 
   difficult to implement, I can't quite bring myself to do it.
 
+- If a range literal uses a float literal as its start or stop value, the float literal 
+  must have something after the decimal point. This is OK ``(1.0..3)``. This is not 
+  ``(1...3)``. Ruby Liquid will accept either, resulting in a sequence of ``[1,2,3]``.
+
 Benchmark
 ---------
 

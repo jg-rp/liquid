@@ -64,7 +64,7 @@ def array_filter(_filter: FilterT) -> FilterT:
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
-        if not isinstance(val, (list, tuple, Undefined)):
+        if not isinstance(val, (list, tuple, Undefined, range)):
             raise FilterValueError(f"expected an array, found {type(val).__name__}")
 
         try:

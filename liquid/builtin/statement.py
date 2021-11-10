@@ -56,6 +56,8 @@ class StatementNode(Node):
                 val = Markup("").join(soft_str(itm) for itm in val)
             else:
                 val = "".join(soft_str(itm) for itm in val)
+        elif isinstance(val, range):
+            val = f"({val.start}..{val.stop - 1})"
         else:
             val = str(val)
 

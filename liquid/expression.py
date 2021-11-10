@@ -215,6 +215,73 @@ class FloatLiteral(Literal[float]):
         return f"FloatLiteral(value={self.value})"
 
 
+class RangeLiteral(Expression):
+    __slots__ = ("start", "stop")
+
+    def __init__(self, start: Expression, stop: Expression):
+        self.start = start
+        self.stop = stop
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RangeLiteral)
+            and self.start == other.start
+            and self.stop == other.stop
+        )
+
+    def __str__(self) -> str:
+        return f"({self.start}..{self.stop})"
+
+    def __repr__(self) -> str:
+        return f"RangeLiteral(start={self.start}, stop={self.stop})"
+
+    def __hash__(self) -> int:
+        return hash((self.start, self.stop))
+
+    def evaluate(self, context: Context) -> range:
+        start: Any = self.start.evaluate(context)
+        stop: Any = self.stop.evaluate(context)
+
+        # Floats get cast to integers
+
+        try:
+            start = int(start)
+        except ValueError as err:
+            raise LiquidTypeError(f"expected an int or float, found '{start}'") from err
+
+        try:
+            stop = int(stop)
+        except ValueError as err:
+            raise LiquidTypeError(f"expected an int or float, found '{stop}'") from err
+
+        # Decending ranges don't work
+        if start > stop:
+            return range(0)
+
+        return range(start, stop + 1)
+
+    async def evaluate_async(self, context: Context) -> range:
+        start: Any = await self.start.evaluate_async(context)
+        stop: Any = await self.stop.evaluate_async(context)
+
+        # Floats get cast to integers
+
+        try:
+            start = int(start)
+        except ValueError as err:
+            raise LiquidTypeError(f"expected an int or float, found {start}") from err
+
+        try:
+            stop = int(stop)
+        except ValueError as err:
+            raise LiquidTypeError(f"expected an int or float, found {stop}") from err
+
+        if start > stop:
+            return range(0)
+
+        return range(start, stop + 1)
+
+
 class IdentifierPathElement(Literal[Union[int, str]]):
     __slots__ = ()
 
@@ -547,7 +614,10 @@ class AssignmentExpression(Expression):
         return ""
 
 
-LoopArgument = Optional[Union[IntegerLiteral, Identifier, Continue]]
+LoopArgument = Optional[Union[IntegerLiteral, FloatLiteral, Identifier, Continue]]
+
+# An identifier that resolves to an iterable or a range expression.
+LoopIterable = Union[Identifier, RangeLiteral]
 
 
 class LoopExpression(Expression):
@@ -562,9 +632,7 @@ class LoopExpression(Expression):
 
     __slots__ = (
         "name",
-        "identifier",
-        "start",
-        "stop",
+        "iterable",
         "limit",
         "offset",
         "cols",
@@ -574,18 +642,14 @@ class LoopExpression(Expression):
     def __init__(
         self,
         name: str,
-        identifier: LoopArgument = None,
-        start: LoopArgument = None,
-        stop: LoopArgument = None,
+        iterable: LoopIterable,
         limit: LoopArgument = None,
         offset: LoopArgument = None,
         cols: LoopArgument = None,
         reversed_: bool = False,
     ):
         self.name = name
-        self.identifier = identifier
-        self.start = start
-        self.stop = stop
+        self.iterable = iterable
         self.limit = limit
         self.offset = offset
         self.cols = cols
@@ -595,9 +659,7 @@ class LoopExpression(Expression):
         return (
             isinstance(other, LoopExpression)
             and self.name == other.name
-            and self.identifier == other.identifier
-            and self.start == other.start
-            and self.stop == other.stop
+            and self.iterable == other.iterable
             and self.limit == other.limit
             and self.offset == other.offset
             and self.cols == other.cols
@@ -605,12 +667,7 @@ class LoopExpression(Expression):
         )
 
     def __str__(self) -> str:
-        buf = [f"{self.name} in"]
-
-        if self.identifier:
-            buf.append(str(self.identifier))
-        elif self.start and self.stop:
-            buf.append(f"({self.start}..{self.stop})")
+        buf = [f"{self.name} in", str(self.iterable)]
 
         if self.limit:
             buf.append(f"limit:{self.limit}")
@@ -628,9 +685,9 @@ class LoopExpression(Expression):
 
     def __repr__(self) -> str:  # pragma: no cover
         return (
-            f"LoopExpression(name='{self.name}', identifier={self.identifier}, "
-            f"start={self.start}, stop={self.stop}, limit={self.limit}, "
-            f"offset={self.offset}, cols={self.cols}, reversed={self.reversed})"
+            f"LoopExpression(name='{self.name}', iterable={self.iterable}, "
+            f"limit={self.limit}, offset={self.offset}, "
+            f"cols={self.cols}, reversed={self.reversed})"
         )
 
     def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
@@ -642,47 +699,22 @@ class LoopExpression(Expression):
         # indexes on the loop item name and the name of the iterable. Not the contents
         # of the iterable. In the case of a range expression, we'll use a string
         # representation of the expression.
-        _offset_key = [
-            self.name,
-        ]
+        _offset_key = [self.name, str(self.iterable)]
+        obj = self.iterable.evaluate(context)
 
-        if self.identifier:
-            # An identifier that must resolve to a list or dict in the current
-            # global or local namespaces.
-            assert isinstance(self.identifier, Identifier)
-            _offset_key.append(str(self.identifier))
-
-            obj = self.identifier.evaluate(context)
-
-            if isinstance(obj, abc.Mapping):
-                length = len(obj)
-                loop_iter: Iterator[Any] = iter(obj.items())
-            elif isinstance(obj, abc.Sequence):
-                length = len(obj)
-                loop_iter = iter(obj)
-
-            else:
-                raise LiquidTypeError(
-                    f"expected array or hash at '{self.identifier}', found '{str(obj)}'"
-                )
+        if isinstance(obj, abc.Mapping):
+            length = len(obj)
+            loop_iter: Iterator[Any] = iter(obj.items())
+        elif isinstance(obj, range):
+            length = obj.stop - obj.start
+            loop_iter = iter(obj)
+        elif isinstance(obj, abc.Sequence):
+            length = len(obj)
+            loop_iter = iter(obj)
         else:
-            assert self.start is not None
-            assert self.stop is not None
-
-            start = self.start.evaluate(context)
-            stop = self.stop.evaluate(context)
-
-            assert isinstance(start, int)
-            assert isinstance(stop, int)
-
-            # Python's range function finishes on `stop - step`, whereas Liquid ranges
-            # are inclusive of stop, and always step by one, so add one.
-            stop = stop + 1
-
-            _offset_key.append(f"{start}..{stop}")
-
-            loop_iter = iter(range(start, stop))
-            length = stop - start
+            raise LiquidTypeError(
+                f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
+            )
 
         limit: Optional[int] = None
         offset: Optional[int] = None
@@ -713,39 +745,22 @@ class LoopExpression(Expression):
         return loop_iter, length
 
     async def evaluate_async(self, context: Context) -> Tuple[Iterator[Any], int]:
-        _offset_key = [self.name]
+        _offset_key = [self.name, str(self.iterable)]
+        obj = await self.iterable.evaluate_async(context)
 
-        if self.identifier:
-            assert isinstance(self.identifier, Identifier)
-            _offset_key.append(str(self.identifier))
-
-            obj = await self.identifier.evaluate_async(context)
-
-            if isinstance(obj, abc.Mapping):
-                length = len(obj)
-                loop_iter: Iterator[Any] = iter(obj.items())
-            elif isinstance(obj, abc.Sequence):
-                length = len(obj)
-                loop_iter = iter(obj)
-
-            else:
-                raise LiquidTypeError(
-                    f"expected array or hash at '{self.identifier}', found '{str(obj)}'"
-                )
+        if isinstance(obj, abc.Mapping):
+            length = len(obj)
+            loop_iter: Iterator[Any] = iter(obj.items())
+        elif isinstance(obj, range):
+            length = obj.stop - obj.start + 1
+            loop_iter = iter(obj)
+        elif isinstance(obj, abc.Sequence):
+            length = len(obj)
+            loop_iter = iter(obj)
         else:
-            assert self.start is not None
-            assert self.stop is not None
-
-            start = await self.start.evaluate_async(context)
-            stop = await self.stop.evaluate_async(context)
-
-            assert isinstance(start, int)
-            assert isinstance(stop, int)
-
-            stop = stop + 1
-            _offset_key.append(f"{start}..{stop}")
-            loop_iter = iter(range(start, stop))
-            length = stop - start
+            raise LiquidTypeError(
+                f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
+            )
 
         limit: Optional[int] = None
         offset: Optional[int] = None

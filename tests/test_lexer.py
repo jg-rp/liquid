@@ -252,6 +252,14 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
+                "assign a range literal",
+                "{% assign foo = (1..5) %}",
+                [
+                    Token(1, TOKEN_TAG, "assign"),
+                    Token(1, TOKEN_EXPRESSION, "foo = (1..5)"),
+                ],
+            ),
+            Case(
                 "capture",
                 "{% capture greeting %}Hello, {{ customer.first_name }}.{% endcapture %}",
                 [
@@ -647,6 +655,50 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_INTEGER, "5"),
                 ],
             ),
+            Case(
+                "range literal",
+                "(1..5)",
+                [
+                    Token(1, TOKEN_LPAREN, "("),
+                    Token(1, TOKEN_INTEGER, "1"),
+                    Token(1, TOKEN_RANGE, ".."),
+                    Token(1, TOKEN_INTEGER, "5"),
+                    Token(1, TOKEN_RPAREN, ")"),
+                ],
+            ),
+            Case(
+                "range literal with float literal start",
+                "(2.4..5)",
+                [
+                    Token(1, TOKEN_LPAREN, "("),
+                    Token(1, TOKEN_FLOAT, "2.4"),
+                    Token(1, TOKEN_RANGE, ".."),
+                    Token(1, TOKEN_INTEGER, "5"),
+                    Token(1, TOKEN_RPAREN, ")"),
+                ],
+            ),
+            Case(
+                "range literal with identifiers",
+                "(a..b)",
+                [
+                    Token(1, TOKEN_LPAREN, "("),
+                    Token(1, TOKEN_IDENTIFIER, "a"),
+                    Token(1, TOKEN_RANGE, ".."),
+                    Token(1, TOKEN_IDENTIFIER, "b"),
+                    Token(1, TOKEN_RPAREN, ")"),
+                ],
+            ),
+            # Case(
+            #     "range literal with float literal start and no decimal places",
+            #     "(1...5)",
+            #     [
+            #         Token(1, TOKEN_LPAREN, "("),
+            #         Token(1, TOKEN_FLOAT, "1."),
+            #         Token(1, TOKEN_RANGE, ".."),
+            #         Token(1, TOKEN_INTEGER, "5"),
+            #         Token(1, TOKEN_RPAREN, ")"),
+            #     ],
+            # ),
         ]
 
         for case in test_cases:
@@ -867,6 +919,19 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
+                "loop over range with float start",
+                "i in (2.4..5)",
+                [
+                    Token(1, TOKEN_IDENTIFIER, "i"),
+                    Token(1, TOKEN_IN, "in"),
+                    Token(1, TOKEN_LPAREN, "("),
+                    Token(1, TOKEN_FLOAT, "2.4"),
+                    Token(1, TOKEN_RANGE, ".."),
+                    Token(1, TOKEN_INTEGER, "5"),
+                    Token(1, TOKEN_RPAREN, ")"),
+                ],
+            ),
+            Case(
                 description="loop over named iterable with continue offset",
                 source="item in array limit: 3 offset: continue",
                 expect=[
@@ -938,6 +1003,21 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_IDENTIFIER, "other"),
                     Token(1, TOKEN_DOT, "."),
                     Token(1, TOKEN_IDENTIFIER, "tags"),
+                ],
+            ),
+            Case(
+                "string literal name with keyword arguments including a range literal",
+                "'product', foo: (1..3)",
+                [
+                    Token(1, TOKEN_STRING, "product"),
+                    Token(1, TOKEN_COMMA, ","),
+                    Token(1, TOKEN_IDENTIFIER, "foo"),
+                    Token(1, TOKEN_COLON, ":"),
+                    Token(1, TOKEN_LPAREN, "("),
+                    Token(1, TOKEN_INTEGER, "1"),
+                    Token(1, TOKEN_RANGE, ".."),
+                    Token(1, TOKEN_INTEGER, "3"),
+                    Token(1, TOKEN_RPAREN, ")"),
                 ],
             ),
             Case(

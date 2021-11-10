@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 0.10.1
+--------------
+
+- Range literals can now be assigned, compared and passed as arguments to ``include`` or
+  ``render`` tags. They can also be filtered as if they were an array.
+- Range literals will accept a float value for start and/or stop values. If a float is
+  given for start or stop, it will be cast to an integer.
+
 Version 0.10.0
 --------------
 

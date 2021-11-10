@@ -173,13 +173,28 @@ class MalformedTemplateTestCase(TestCase):
                 description="missing range or identifier in forloop",
                 template="{% for x in %}{{ x }}foo{% endfor %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="invalid range expression, on line 1",
+                expect_msg="invalid loop expression, on line 1",
             ),
             Case(
-                description="non integer in range",
-                template="{% for x in (2.4..4) %}{{ x }}{% endfor %}",
+                description="float with trailing dot in range literal",
+                template="{% for x in (2...4) %}{{ x }}{% endfor %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg=("expected '..', found '.', on line 1"),
+                expect_msg=(
+                    "invalid range expression, expected an integer, "
+                    "found a dot, on line 1"
+                ),
+            ),
+            Case(
+                description="range start does not cast to int",
+                template="{% for x in (tag..4) %}{{ x }}{% endfor %}",
+                expect_exception=LiquidTypeError,
+                expect_msg=("expected an int or float, found 'goodbye', on line 1"),
+            ),
+            Case(
+                description="range end does not cast to int",
+                template="{% for x in (1..tag) %}{{ x }}{% endfor %}",
+                expect_exception=LiquidTypeError,
+                expect_msg=("expected an int or float, found 'goodbye', on line 1"),
             ),
             Case(
                 description="missing equal in assignment tag",

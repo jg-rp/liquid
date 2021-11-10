@@ -7,8 +7,8 @@ import unittest
 from dataclasses import dataclass
 from dataclasses import field
 
-from typing import Mapping
 from typing import Any
+from typing import Mapping
 
 from liquid.environment import Environment
 from liquid.template import AwareBoundTemplate
@@ -67,7 +67,7 @@ class Case:
 class RenderTestCases(unittest.TestCase):
     """Test cases for testing template renders."""
 
-    def _test(self, test_cases, template_class=AwareBoundTemplate):
+    def _test(self, test_cases, template_class=AwareBoundTemplate, group_name=""):
         """Run all tests in `test_cases` in sync and async modes."""
         self._test_sync(test_cases, template_class)
         self._test_async(test_cases, template_class)
@@ -106,16 +106,17 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="a literal string",
+                    description="plain text gets passed through unchanged",
                     template="a literal string",
                     expect="a literal string",
                 ),
                 Case(
-                    description="some css",
+                    description="css text gets passed through unchanged",
                     template=" div { font-weight: bold; } ",
                     expect=" div { font-weight: bold; } ",
                 ),
-            ]
+            ],
+            group_name="not liquid",
         )
 
     def test_whitespace_control(self):
@@ -124,30 +125,57 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="mixed whitespace control",
+                    description="white space control with newlines and spaces",
                     template="".join(
                         [
                             "\n{% if customer -%}\n",
-                            "Welcome back, {{ customer.first_name -}} !\n",
-                            "{%- endif -%}",
+                            "Welcome back,  {{ customer.first_name -}} !\n",
+                            " {%- endif -%}",
                         ]
                     ),
-                    expect="\nWelcome back, Holly!",
+                    expect="\nWelcome back,  Holly!",
                     globals={"customer": {"first_name": "Holly"}},
                 ),
                 Case(
-                    description="carriage return instead of newline",
+                    description="white space control with carriage return and spaces",
                     template="".join(
                         [
                             "\r{% if customer -%}\r",
-                            "Welcome back, {{ customer.first_name -}} !\r",
-                            "{%- endif -%}",
+                            "Welcome back,  {{ customer.first_name -}} !\r",
+                            " {%- endif -%}",
                         ]
                     ),
-                    expect="\rWelcome back, Holly!",
+                    expect="\rWelcome back,  Holly!",
                     globals={"customer": {"first_name": "Holly"}},
                 ),
-            ]
+                Case(
+                    description=(
+                        "white space control with  carriage return, newline and spaces"
+                    ),
+                    template="".join(
+                        [
+                            "\r\n{% if customer -%}\r\n",
+                            "Welcome back,  {{ customer.first_name -}} !\r\n",
+                            " {%- endif -%}",
+                        ]
+                    ),
+                    expect="\r\nWelcome back,  Holly!",
+                    globals={"customer": {"first_name": "Holly"}},
+                ),
+                Case(
+                    description="white space control with newlines, tabs and spaces",
+                    template="".join(
+                        [
+                            "\n\t{% if customer -%}\t\n",
+                            "Welcome back,  {{ customer.first_name -}}\t !\r\n",
+                            " {%- endif -%}",
+                        ]
+                    ),
+                    expect="\n\tWelcome back,  Holly!",
+                    globals={"customer": {"first_name": "Holly"}},
+                ),
+            ],
+            group_name="whitespace control",
         )
 
     def test_output_statement(self):
@@ -156,66 +184,67 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="string literal",
+                    description="render a string literal",
                     template=r"{{ 'hello' }}",
                     expect="hello",
                 ),
                 Case(
-                    description="integer literal",
+                    description="render an integer literal",
                     template=r"{{ 123 }}",
                     expect="123",
                 ),
                 Case(
-                    description="negative integer literal",
+                    description="render a negative integer literal",
                     template=r"{{ -123 }}",
                     expect="-123",
                 ),
                 Case(
-                    description="float literal",
+                    description="render a float literal",
                     template=r"{{ 1.23 }}",
                     expect="1.23",
                 ),
                 Case(
-                    description="global identifier",
+                    description="render a variable from the global namespace",
                     template=r"{{ product.title }}",
                     expect="foo",
                     globals={"product": {"title": "foo"}},
                 ),
                 Case(
-                    description="local identifier",
+                    description="render a variable from the local namespace",
                     template=r"{% assign name = 'Brian' %}{{ name }}",
                     expect="Brian",
                 ),
                 Case(
-                    description="global identifier does not exist",
+                    description="render an undefined variable",
                     template=r"{{ age }}",
                     expect="",
                 ),
                 Case(
-                    description="local identifier does not exist",
-                    template=r"{{ age }}",
+                    description="render an undefined property",
+                    template=r"{{ product.age }}",
                     expect="",
+                    globals={"product": {"title": "foo"}},
                 ),
                 Case(
-                    description="array item by index",
+                    description="access an array item by index",
                     template=r"{{ product.tags[1] }}",
                     expect="garden",
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="array item by negative index",
+                    description="access an array item by negative index",
                     template=r"{{ product.tags[-2] }}",
                     expect="sports",
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="array item by index from identifier",
+                    description="access array item by index stored in a local variable",
                     template="{% assign i = 1 %}{{ product.tags[i] }}",
                     expect="garden",
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="global identifier with a filter",
+                    description="render a global variable with a filter",
                     template=r"{{ product.title | upcase }}",
                     expect="FOO",
                     globals={"product": {"title": "foo"}},
@@ -227,7 +256,7 @@ class RenderTestCases(unittest.TestCase):
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="assign by value",
+                    description="assign a variable the value of an existing variable",
                     template=(
                         r"{% capture some %}hello{% endcapture %}"
                         r"{% assign other = some %}"
@@ -246,46 +275,82 @@ class RenderTestCases(unittest.TestCase):
                     },
                 ),
                 Case(
-                    description="special built in variable 'now'",
+                    description="render the special built in variable 'now'",
                     template=r"{{ now | date: '%d/%m/%Y' }}",
                     expect=datetime.datetime.now().strftime(r"%d/%m/%Y"),
                 ),
                 Case(
-                    description="special built in variable 'today'",
+                    description="render the special built in variable 'today'",
                     template=r"{{ today | date: '%d/%m/%Y' }}",
                     expect=datetime.date.today().strftime(r"%d/%m/%Y"),
                 ),
                 Case(
-                    description="default filter on false literal",
+                    description="render a default f given a literal false",
                     template=r"{{ false | default: 'bar' }}",
                     expect="bar",
                 ),
                 Case(
-                    description="default filter allow false",
+                    description=(
+                        "render a default filter given a literal false "
+                        "with 'allow false' equal to true"
+                    ),
                     template=r"{{ false | default: 'bar', allow_false: true }}",
                     expect="false",
                 ),
                 Case(
-                    description="default filter don't allow false",
+                    description=(
+                        "render a default filter given a literal false "
+                        "with 'allow false' equal to false"
+                    ),
                     template=r"{{ false | default: 'bar', allow_false: false }}",
                     expect="bar",
                 ),
                 Case(
-                    description="unexpected `join` filter left value passes through",
+                    description=(
+                        "unexpected left value for the `join` filter passes through"
+                    ),
                     template=r"{{ 12 | join: '#' }}",
                     expect="12",
                 ),
                 Case(
-                    description="join a string",
+                    description="joining a string is a noop",
                     template=r"{{ 'a,b' | join: '#' }}",
                     expect="a,b",
                 ),
                 Case(
-                    description="literal output start sequence",
+                    description="render an output start sequence as a string literal",
                     template=r"{{ '{{' }}",
                     expect=r"{{",
                 ),
-            ]
+                Case(
+                    description="access an undefined variable by index",
+                    template=r"{{ nosuchthing[0] }}",
+                    expect="",
+                ),
+                Case(
+                    description="render a range object",
+                    template=r"{{ (1..5) }}",
+                    expect="(1..5)",
+                ),
+                Case(
+                    description="render a range object that uses a float",
+                    template=r"{{ (1.4..5) }}",
+                    expect="(1..5)",
+                ),
+                Case(
+                    description="render a range object that uses an identifier",
+                    template=r"{{ (foo..5) }}",
+                    expect="(2..5)",
+                    globals={"foo": 2},
+                ),
+                Case(
+                    description="reverse a range",
+                    template=r"{{ (foo..5) | reverse }}",
+                    expect="5432",
+                    globals={"foo": 2},
+                ),
+            ],
+            group_name="output statements",
         )
 
     def test_echo_tag(self):
@@ -294,55 +359,62 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="string literal",
+                    description="render a string literal",
                     template=r"{% echo 'hello' %}",
                     expect="hello",
                 ),
                 Case(
-                    description="integer literal",
+                    description="render an integer literal",
                     template=r"{% echo 123 %}",
                     expect="123",
                 ),
                 Case(
-                    description="float literal",
+                    description="render a float literal",
                     template=r"{% echo 1.23 %}",
                     expect="1.23",
                 ),
                 Case(
-                    description="global identifier",
+                    description="render a variable from the global namespace",
                     template=r"{% echo product.title %}",
                     expect="foo",
                     globals={"product": {"title": "foo"}},
                 ),
                 Case(
-                    description="local identifier",
+                    description="render a variable from the local namespace",
                     template=r"{% assign name = 'Brian' %}{% echo name %}",
                     expect="Brian",
                 ),
                 Case(
-                    description="global identifier does not exist",
+                    description="render an undefined variable",
                     template=r"{% echo age %}",
                     expect="",
                 ),
                 Case(
-                    description="local identifier does not exist",
-                    template=r"{% echo age %}",
+                    description="render an undefined property",
+                    template=r"{% echo product.age %}",
                     expect="",
+                    globals={"product": {"title": "foo"}},
                 ),
                 Case(
-                    description="array item by index",
+                    description="access an array item by index",
                     template=r"{% echo product.tags[1] %}",
                     expect="garden",
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="array item by index from identifier",
+                    description="access an array item by negative index",
+                    template=r"{% echo product.tags[-2] %}",
+                    expect="sports",
+                    globals={"product": {"tags": ["sports", "garden"]}},
+                ),
+                Case(
+                    description="access array item by index stored in a local variable",
                     template=r"{% assign i = 1 %}{% echo product.tags[i] %}",
                     expect="garden",
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="global identifier with a filter",
+                    description="render a global identifier with a filter",
                     template=r"{% echo product.title | upcase %}",
                     expect="FOO",
                     globals={"product": {"title": "foo"}},
@@ -354,7 +426,7 @@ class RenderTestCases(unittest.TestCase):
                     globals={"product": {"tags": ["sports", "garden"]}},
                 ),
                 Case(
-                    description="assign by value",
+                    description="assign a variable the value of an existing variable",
                     template=(
                         r"{% capture some %}hello{% endcapture %}"
                         r"{% assign other = some %}"
@@ -373,21 +445,22 @@ class RenderTestCases(unittest.TestCase):
                     },
                 ),
                 Case(
-                    description="special built in variable 'now'",
+                    description="render the special built in variable 'now'",
                     template=r"{% echo now | date: '%d/%m/%Y' %}",
                     expect=datetime.datetime.now().strftime(r"%d/%m/%Y"),
                 ),
                 Case(
-                    description="special built in variable 'today'",
+                    description="render the special built in variable 'today'",
                     template=r"{% echo today | date: '%d/%m/%Y' %}",
                     expect=datetime.date.today().strftime(r"%d/%m/%Y"),
                 ),
                 Case(
-                    description="index of undefined",
-                    template=r"{{ nosuchthing[0] }}",
+                    description="access an undefined variable by index",
+                    template=r"{% echo nosuchthing[0] %}",
                     expect="",
                 ),
-            ]
+            ],
+            group_name="echo tag",
         )
 
     def test_assign_tag(self):
@@ -395,11 +468,23 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="assing a filtered literal",
+                    description="assign a filtered literal",
                     template="{% assign foo = 'foo' | upcase %}{{ foo }}",
                     expect="FOO",
                 ),
-            ]
+                Case(
+                    description="local variables shadow global variables",
+                    template="{{ foo }}{% assign foo = 'foo' | upcase %}{{ foo }}",
+                    expect="barFOO",
+                    globals={"foo": "bar"},
+                ),
+                Case(
+                    description="assign a range literal",
+                    template="{% assign foo = (1..3) %}{{ foo }}",
+                    expect="(1..3)",
+                ),
+            ],
+            group_name="assign tag",
         )
 
     def test_if_tag(self):
@@ -412,8 +497,12 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}},
             ),
             Case(
-                description="condition with literal consequence and literal alternative",
-                template=r"{% if product.title == 'hello' %}bar{% else %}baz{% endif %}",
+                description=(
+                    "condition with literal consequence and literal alternative"
+                ),
+                template=(
+                    r"{% if product.title == 'hello' %}bar{% else %}baz{% endif %}"
+                ),
                 expect="baz",
                 globals={"product": {"title": "foo"}},
             ),
@@ -430,7 +519,9 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}},
             ),
             Case(
-                description="condition with conditional alternative and final alternative",
+                description=(
+                    "condition with conditional alternative and final alternative"
+                ),
                 template=(
                     r"{% if product.title == 'hello' %}"
                     r"foo"
@@ -444,24 +535,30 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}},
             ),
             Case(
-                description="truthy-ness of a dictionary",
+                description="non-empty dictionary is truthy",
                 template=r"{% if product %}bar{% else %}foo{% endif %}",
                 expect="bar",
                 globals={"product": {"title": "foo"}},
             ),
             Case(
-                description="falsey-ness of a literal nil",
+                description="literal nil is falsy",
                 template=r"{% if nil %}bar{% else %}foo{% endif %}",
                 expect="foo",
             ),
             Case(
-                description="falsey-ness of a non existant name",
+                description="undefined variables are falsy",
                 template=r"{% if nosuchthing %}bar{% else %}foo{% endif %}",
                 expect="foo",
             ),
             Case(
                 description="nested condition in the consequence block",
-                template=r"{% if product %}{% if title == 'Hello' %}baz{% endif %}{% endif %}",
+                template=(
+                    r"{% if product %}"
+                    r"{% if title == 'Hello' %}"
+                    r"baz"
+                    r"{% endif %}"
+                    r"{% endif %}"
+                ),
                 expect="baz",
                 globals={
                     "product": {"title": "foo"},
@@ -483,7 +580,7 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}, "title": "Hello"},
             ),
             Case(
-                description="false",
+                description="literal false condition",
                 template=r"{% if false %}{% endif %}",
                 expect="",
             ),
@@ -506,17 +603,23 @@ class RenderTestCases(unittest.TestCase):
                 globals={"product": {"title": "foo"}},
             ),
             Case(
-                description="blank empty 'if'",
+                description="blocks that contain only whitespace are not rendered",
                 template=r"{% if true %}  {% elsif false %} {% else %} {% endif %}",
                 expect="",
             ),
             Case(
-                description="blank nested block",
-                template=r"{% if true %} {% comment %} this is blank {% endcomment %} {% endif %}",
+                description=(
+                    "blocks that contain only whitespace and comments are not rendered"
+                ),
+                template=(
+                    r"{% if true %} "
+                    r"{% comment %} this is blank {% endcomment %} "
+                    r"{% endif %}"
+                ),
                 expect="",
             ),
             Case(
-                description="compare to blank",
+                description="compare global variable to blank",
                 template=r"{% if username == blank %}username is blank{% endif %}",
                 expect="username is blank",
                 globals={"username": ""},
@@ -531,9 +634,19 @@ class RenderTestCases(unittest.TestCase):
                 ),
                 expect="hello",
             ),
+            Case(
+                description="range equals range",
+                template=(
+                    r"{% assign foo = (1..3) %}"
+                    r"{% if foo == (1..3) %}true"
+                    r"{% else %}false"
+                    r"{% endif %}"
+                ),
+                expect="true",
+            ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="if tag")
 
     def test_comment_tag(self):
         """Test that we can render comment tags."""
@@ -541,12 +654,17 @@ class RenderTestCases(unittest.TestCase):
         self._test(
             [
                 Case(
-                    description="simple comment",
+                    description="don't render comments",
                     template=r"{% comment %}foo{% endcomment %}",
                     expect="",
                 ),
                 Case(
-                    description="comment with tags",
+                    description="respect whitespace control in comments",
+                    template="\n{%- comment %}foo{% endcomment -%}\t \r",
+                    expect="",
+                ),
+                Case(
+                    description="don't render comments with tags",
                     template=(
                         r"{% comment %}"
                         r"{% if true %}"
@@ -556,7 +674,8 @@ class RenderTestCases(unittest.TestCase):
                     ),
                     expect="",
                 ),
-            ]
+            ],
+            group_name="comment tag",
         )
 
     def test_unless_tag(self):
@@ -564,32 +683,32 @@ class RenderTestCases(unittest.TestCase):
 
         test_cases = [
             Case(
-                description="false",
+                description="literal false condition",
                 template=r"{% unless false %}foo{% endunless %}",
                 expect="foo",
             ),
             Case(
-                description="true",
+                description="literal true condition",
                 template=r"{% unless true %}foo{% endunless %}",
                 expect="",
             ),
             Case(
-                description="blank empty block",
+                description="blocks that contain only whitespace are not rendered",
                 template=r"{% unless false %}  {% endunless %}",
                 expect="",
             ),
             Case(
-                description="alternative",
+                description="alternative block",
                 template=r"{% unless true %}foo{% else %}bar{% endunless %}",
                 expect="bar",
             ),
             Case(
-                description="conditional alternative",
+                description="conditional alternative block",
                 template=r"{% unless true %}foo{% elsif true %}bar{% endunless %}",
                 expect="bar",
             ),
             Case(
-                description="conditional alternative with default",
+                description="conditional alternative block with default",
                 template=(
                     r"{% unless true %}foo"
                     r"{% elsif false %}bar"
@@ -600,14 +719,14 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="unless tag")
 
     def test_capture_tag(self):
         """Test that we can render `capture` tags."""
 
         test_cases = [
             Case(
-                description="literal and global variable",
+                description="capture template literal and global variable",
                 template=(
                     r"{% capture greeting %}"
                     r"Hello, {{ customer.first_name }}."
@@ -618,7 +737,7 @@ class RenderTestCases(unittest.TestCase):
                 globals={"customer": {"first_name": "Holly"}},
             ),
             Case(
-                description="hyphen in variable name",
+                description="capture into a variable with a hyphen",
                 template=(
                     r"{% capture this-thing %}"
                     r"Hello, {{ customer.first_name }}."
@@ -629,7 +748,7 @@ class RenderTestCases(unittest.TestCase):
                 globals={"customer": {"first_name": "Holly"}},
             ),
             Case(
-                description="assign from capture",
+                description="assign to a variable from a captured variable",
                 template=(
                     r"{% capture some %}"
                     r"hello"
@@ -641,7 +760,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="capture tag")
 
     def test_case_tag(self):
         """Test that we can render `case` tags."""
@@ -737,7 +856,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="case/when tags")
 
     def test_cycle_tag(self):
         """Test that we can render `cycle` tags."""
@@ -777,7 +896,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="cycle tag")
 
     def test_decrement_tag(self):
         """Test that we can render `decrement` tags."""
@@ -795,7 +914,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="decrement tag")
 
     def test_increment_tag(self):
         """Test that we can render `increment` tags."""
@@ -845,7 +964,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="increment tag")
 
     def test_for_tag(self):
         """Test that we can render `for` tags."""
@@ -1088,6 +1207,19 @@ class RenderTestCases(unittest.TestCase):
                 globals={"array": [1, 2, 3, 4, 5, 6]},
             ),
             Case(
+                description="continue a loop over an assigned range",
+                template=(
+                    r"{% assign nums = (1..5) %}"
+                    r"{% for item in nums limit: 3 %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                    r"{% for item in nums offset: continue %}"
+                    r"{{ item }} "
+                    r"{% endfor %}"
+                ),
+                expect="1 2 3 4 5 ",
+            ),
+            Case(
                 description="continue a loop over a changing array",
                 template=(
                     r"{% assign foo = '1,2,3,4,5,6' | split: ',' %}"
@@ -1208,9 +1340,34 @@ class RenderTestCases(unittest.TestCase):
                 ),
                 globals={},
             ),
+            Case(
+                description="loop over an existing range object",
+                template=(
+                    r"{% assign foo = (1..3) %}"
+                    r"{{ foo }}"
+                    r"{% for i in foo %}"
+                    r"{{ i }}"
+                    r"{% endfor %}"
+                    r"{% for i in foo %}"
+                    r"{{ i }}"
+                    r"{% endfor %}"
+                ),
+                expect="(1..3)123123",
+                globals={},
+            ),
+            Case(
+                description="loop over range with float start",
+                template=(
+                    r"{% assign x = (2.4..5) %}{% for i in x %}"
+                    r"{{ i }}"
+                    r"{% endfor %}"
+                ),
+                expect="2345",
+                globals={},
+            ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="for tag")
 
     def test_raw_tag(self):
         """Test that we can render `raw` tags."""
@@ -1243,7 +1400,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="raw tag")
 
     def test_tablerow_tag(self):
         """Test that we can render `tablerow` tags."""
@@ -1392,7 +1549,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="tablerow tag")
 
     def test_liquid_tag(self):
         """Test that we can render `liquid` tags."""
@@ -1419,7 +1576,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="liquid tag")
 
     def test_illegal(self):
         """Test that we can render an `illegal` token in LAX mode."""
@@ -1525,6 +1682,18 @@ class RenderTestCases(unittest.TestCase):
                 partials={"product-args": r"{{ foo }} {{ bar }}"},
             ),
             Case(
+                description="some keyword arguments with float literals",
+                template=r"{% include 'product-args' foo: 1.1, bar: 'there' %}",
+                expect="1.1 there",
+                partials={"product-args": r"{{ foo }} {{ bar }}"},
+            ),
+            Case(
+                description="some keyword arguments with range literal",
+                template=r"{% include 'product-args' foo: (1..3), bar: 'there' %}",
+                expect="(1..3) there",
+                partials={"product-args": r"{{ foo }} {{ bar }}"},
+            ),
+            Case(
                 description="template drop",
                 template=r"{% include 'some/template-attrs.alt.txt' %}",
                 expect="template-attrs.alt some template-attrs alt",
@@ -1596,7 +1765,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="include tag")
 
     def test_render_tag(self):
         """Test that we can render `render` tags."""
@@ -1657,6 +1826,15 @@ class RenderTestCases(unittest.TestCase):
                 description="some keyword arguments",
                 template=r"{% render 'product-args', foo: 'hello', bar: 'there' %}",
                 expect="hello there",
+                globals={},
+                partials={
+                    "product-args": r"{{ foo }} {{ bar }}",
+                },
+            ),
+            Case(
+                description="some keyword arguments including a range literal",
+                template=r"{% render 'product-args', foo: (1..3), bar: 'there' %}",
+                expect="(1..3) there",
                 globals={},
                 partials={
                     "product-args": r"{{ foo }} {{ bar }}",
@@ -1769,22 +1947,22 @@ class RenderTestCases(unittest.TestCase):
                     ),
                 },
             ),
-            Case(
-                description="for drop",
-                template=r"{% render 'loop-for' for loop as value %}",
-                expect="123",
-                globals={"loop": MockIterableDrop()},
-                partials={
-                    "loop-for": r"{{ value.foo }}",
-                },
-            ),
-            Case(
-                description="with drop",
-                template=r"{% render 'loop-with' with loop as value %}",
-                expect="MockIterableDrop",
-                globals={"loop": MockIterableDrop()},
-                partials={"loop-with": r"{{ value }}"},
-            ),
+            # Case(
+            #     description="for drop",
+            #     template=r"{% render 'loop-for' for loop as value %}",
+            #     expect="123",
+            #     globals={"loop": MockIterableDrop()},
+            #     partials={
+            #         "loop-for": r"{{ value.foo }}",
+            #     },
+            # ),
+            # Case(
+            #     description="with drop",
+            #     template=r"{% render 'loop-with' with loop as value %}",
+            #     expect="MockIterableDrop",
+            #     globals={"loop": MockIterableDrop()},
+            #     partials={"loop-with": r"{{ value }}"},
+            # ),
             Case(
                 description="render loops don't add parentloop",
                 template=r"{% render 'product' for collection.products %}",
@@ -1821,7 +1999,7 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="render tag")
 
     def test_ifchanged_tag(self):
         """Test that we can render `ifchanged` tags."""
@@ -1869,4 +2047,33 @@ class RenderTestCases(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases)
+        self._test(test_cases, group_name="ifchanged tag")
+
+    def test_render_filters(self):
+        """Test that we can render filtered values."""
+
+        test_cases = [
+            Case(
+                description="range literal join filter left value",
+                template=r"{{ (1..3) | join: '#' }}",
+                expect="1#2#3",
+            ),
+            Case(
+                description="range literal concat filter left value",
+                template=r"{{ (1..3) | concat: foo }}",
+                expect="123567",
+                globals={"foo": [5, 6, 7]},
+            ),
+            Case(
+                description="range literal first filter left value",
+                template=r"{{ (1..3) | first }}",
+                expect="1",
+            ),
+            Case(
+                description="range literal last filter left value",
+                template=r"{{ (1..3) | last }}",
+                expect="3",
+            ),
+        ]
+
+        self._test(test_cases, group_name="filters")

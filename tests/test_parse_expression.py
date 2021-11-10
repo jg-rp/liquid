@@ -16,6 +16,7 @@ from liquid.expression import IntegerLiteral
 from liquid.expression import FloatLiteral
 from liquid.expression import PrefixExpression
 from liquid.expression import InfixExpression
+from liquid.expression import RangeLiteral
 
 from liquid.token import Token
 from liquid.token import TOKEN_INITIAL
@@ -733,6 +734,34 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                     ),
                 ),
             ),
+            Case(
+                "assign a range literal",
+                "some = (1..5)",
+                AssignmentExpression(
+                    name="some",
+                    expression=FilteredExpression(
+                        expression=RangeLiteral(
+                            start=IntegerLiteral(1),
+                            stop=IntegerLiteral(5),
+                        ),
+                        filters=[],
+                    ),
+                ),
+            ),
+            Case(
+                "assign a range literal containing float literals",
+                "some = (1.3..5)",
+                AssignmentExpression(
+                    name="some",
+                    expression=FilteredExpression(
+                        expression=RangeLiteral(
+                            start=FloatLiteral(1.3),
+                            stop=IntegerLiteral(5),
+                        ),
+                        filters=[],
+                    ),
+                ),
+            ),
         ]
 
         self._test(
@@ -747,7 +776,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -760,7 +789,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products limit:5",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -774,7 +803,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products limit:max",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -788,7 +817,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products offset:2",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -802,7 +831,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products limit:5 offset:2",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -817,7 +846,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products offset:2 limit:5",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -832,7 +861,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products reversed",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -846,7 +875,7 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in collection.products offset:2 limit:5 reversed",
                 LoopExpression(
                     name="product",
-                    identifier=Identifier(
+                    iterable=Identifier(
                         path=[
                             IdentifierPathElement("collection"),
                             IdentifierPathElement("products"),
@@ -862,8 +891,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..10)",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(1),
-                    stop=IntegerLiteral(10),
+                    iterable=RangeLiteral(
+                        start=IntegerLiteral(1),
+                        stop=IntegerLiteral(10),
+                    ),
                 ),
             ),
             Case(
@@ -871,13 +902,15 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..collection.products.size)",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(1),
-                    stop=Identifier(
-                        path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
-                            IdentifierPathElement("size"),
-                        ],
+                    iterable=RangeLiteral(
+                        start=IntegerLiteral(1),
+                        stop=Identifier(
+                            path=[
+                                IdentifierPathElement("collection"),
+                                IdentifierPathElement("products"),
+                                IdentifierPathElement("size"),
+                            ],
+                        ),
                     ),
                 ),
             ),
@@ -886,13 +919,15 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (num..collection.products.size)",
                 LoopExpression(
                     name="product",
-                    start=Identifier(path=[IdentifierPathElement("num")]),
-                    stop=Identifier(
-                        path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
-                            IdentifierPathElement("size"),
-                        ],
+                    iterable=RangeLiteral(
+                        start=Identifier(path=[IdentifierPathElement("num")]),
+                        stop=Identifier(
+                            path=[
+                                IdentifierPathElement("collection"),
+                                IdentifierPathElement("products"),
+                                IdentifierPathElement("size"),
+                            ],
+                        ),
                     ),
                 ),
             ),
@@ -901,8 +936,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 "product in (1..10) offset:2 limit:5 reversed",
                 LoopExpression(
                     name="product",
-                    start=IntegerLiteral(1),
-                    stop=IntegerLiteral(10),
+                    iterable=RangeLiteral(
+                        start=IntegerLiteral(1),
+                        stop=IntegerLiteral(10),
+                    ),
                     limit=IntegerLiteral(5),
                     offset=IntegerLiteral(2),
                     reversed_=True,

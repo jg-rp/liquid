@@ -248,6 +248,33 @@ def parse_float_literal(stream: TokenStream) -> expression.FloatLiteral:
     return expression.FloatLiteral(value=float(stream.current.value))
 
 
+def parse_range_literal(stream: TokenStream) -> expression.RangeLiteral:
+    """Read a range literal from the token stream."""
+    # Start of a range expression (<int or id>..<int or id>)
+    stream.next_token()
+    start = parse_range_argument(stream)
+
+    expect_peek(stream, TOKEN_RANGE)
+    stream.next_token()
+    stream.next_token()  # Eat TOKEN_RANGE
+
+    stop = parse_range_argument(stream)
+    expect_peek(stream, TOKEN_RPAREN)
+
+    assert isinstance(
+        start,
+        (expression.Identifier, expression.IntegerLiteral, expression.FloatLiteral),
+    )
+    assert isinstance(
+        stop,
+        (expression.Identifier, expression.IntegerLiteral, expression.FloatLiteral),
+    )
+
+    expr = expression.RangeLiteral(start, stop)
+    stream.next_token()
+    return expr
+
+
 def parse_identifier(stream: TokenStream) -> expression.Identifier:
     """Read an identifier from the token stream.
 
@@ -339,7 +366,12 @@ def parse_unchained_identifier(
 
 
 RangeArg = Optional[
-    Union[expression.Identifier, expression.IntegerLiteral, expression.Continue]
+    Union[
+        expression.Identifier,
+        expression.IntegerLiteral,
+        expression.FloatLiteral,
+        expression.Continue,
+    ]
 ]
 
 
@@ -353,6 +385,8 @@ def parse_range_argument(stream: TokenStream) -> RangeArg:
         arg: RangeArg = parse_identifier(stream)
     elif stream.current.type == TOKEN_INTEGER:
         arg = parse_integer_literal(stream)
+    elif stream.current.type == TOKEN_FLOAT:
+        arg = parse_float_literal(stream)
     elif stream.current.type == TOKEN_CONTINUE:
         arg = expression.CONTINUE
     else:
@@ -389,37 +423,23 @@ def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:
     expect(stream, TOKEN_IDENTIFIER)
     expect_peek(stream, TOKEN_IN)
 
-    expr = expression.LoopExpression(name=stream.current.value)
+    # Loop variable name
+    name = stream.current.value
 
     stream.next_token()
     stream.next_token()  # Eat TOKEN_IN
 
     if stream.current.type == TOKEN_IDENTIFIER:
         # Identifier should resolve to an array or hash/map at render time.
-        expr.identifier = parse_identifier(stream)
+        iterable: expression.LoopIterable = parse_identifier(stream)
         stream.next_token()
     elif stream.current.type == TOKEN_LPAREN:
-        # Start of a range expression (<int or id>..<int or id>)
+        iterable = parse_range_literal(stream)
         stream.next_token()
-        start = parse_range_argument(stream)
-
-        # assert stream.peek.type == TOKEN_RANGE
-        expect_peek(stream, TOKEN_RANGE)
-
-        stream.next_token()
-        stream.next_token()  # Eat TOKEN_RANGE
-        stop = parse_range_argument(stream)
-
-        # assert stream.peek.type == TOKEN_RPAREN
-        expect_peek(stream, TOKEN_RPAREN)
-
-        expr.start = start
-        expr.stop = stop
-
-        stream.next_token()
-        stream.next_token()  # Eat TOKEN_RPAREN
     else:
-        raise LiquidSyntaxError("invalid range expression")
+        raise LiquidSyntaxError("invalid loop expression")
+
+    expr = expression.LoopExpression(name=name, iterable=iterable)
 
     # Optional range modifiers can appear in any order.
     while stream.current.type in (
@@ -471,6 +491,7 @@ class ExpressionParser:
             TOKEN_INTEGER: parse_integer_literal,
             TOKEN_FLOAT: parse_float_literal,
             TOKEN_IDENTIFIER: parse_identifier,
+            TOKEN_LPAREN: parse_range_literal,
         }
 
         self.infix_funcs = {

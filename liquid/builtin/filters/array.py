@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from functools import partial
+from itertools import chain
 from operator import getitem
 
 from typing import Any
@@ -10,7 +11,7 @@ from typing import Iterable
 from typing import List
 from typing import Sequence
 from typing import Tuple
-from typing import TypeVar
+from typing import Union
 from typing import TYPE_CHECKING
 
 try:
@@ -29,7 +30,7 @@ from liquid import is_undefined
 if TYPE_CHECKING:
     from liquid import Environment
 
-ArrayT = TypeVar("ArrayT", List[Any], Tuple[Any, ...])
+ArrayT = Union[List[Any], Tuple[Any, ...]]
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
@@ -106,7 +107,8 @@ def concat(array: ArrayT, second_array: ArrayT) -> ArrayT:
 
     if is_undefined(array):
         return second_array
-    return array + second_array
+
+    return list(chain(array, second_array))
 
 
 @array_filter

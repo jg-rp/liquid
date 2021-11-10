@@ -91,7 +91,10 @@ identifier_rules = (
 )
 
 filtered_expression_rules = (
-    (TOKEN_FLOAT, r"\d+\.\d*"),
+    (TOKEN_RANGE, r"\.\."),
+    (TOKEN_LPAREN, r"\("),
+    (TOKEN_RPAREN, r"\)"),
+    (TOKEN_FLOAT, r"\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"\d+"),
     (TOKEN_NEGATIVE, r"-"),
     (TOKEN_STRING, STRING_PATTERN),
@@ -124,7 +127,10 @@ assignment_expression_rules = (
 )
 
 boolean_expression_rules = (
-    (TOKEN_FLOAT, r"\d+\.\d*"),
+    (TOKEN_RANGE, r"\.\."),
+    (TOKEN_LPAREN, r"\("),
+    (TOKEN_RPAREN, r"\)"),
+    (TOKEN_FLOAT, r"\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"\d+"),
     (TOKEN_NEGATIVE, r"-"),
     (TOKEN_STRING, STRING_PATTERN),
@@ -154,6 +160,7 @@ boolean_expression_keywords = frozenset(
 )
 
 loop_expression_rules = (
+    (TOKEN_FLOAT, r"\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"\d+"),
     (TOKEN_IDENTIFIER, IDENTIFIER_PATTERN),
     (TOKEN_RANGE, r"\.\."),
@@ -180,7 +187,10 @@ loop_expression_keywords = frozenset(
 )
 
 include_expression_rules = (
-    (TOKEN_FLOAT, r"\d+\.\d*"),
+    (TOKEN_RANGE, r"\.\."),
+    (TOKEN_LPAREN, r"\("),
+    (TOKEN_RPAREN, r"\)"),
+    (TOKEN_FLOAT, r"\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"\d+"),
     (TOKEN_NEGATIVE, r"-"),
     (TOKEN_STRING, STRING_PATTERN),
