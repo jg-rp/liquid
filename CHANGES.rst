@@ -8,6 +8,8 @@ Version 0.10.1
   ``render`` tags. They can also be filtered as if they were an array.
 - Range literals will accept a float value for start and/or stop values. If a float is
   given for start or stop, it will be cast to an integer.
+- Fixed a bug where the token stream would return the wrong token when peeking
+  immediately after a push.
 
 Version 0.10.0
 --------------

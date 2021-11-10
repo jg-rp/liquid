@@ -73,15 +73,15 @@ class TokenStream:
     @property
     def peek(self) -> Token:
         """Look at the next token."""
-        old_token = next(self)
+        current = next(self)
         result = self.current
-        self.push(result)
-        self.current = old_token
+        self.push(current)
         return result
 
     def push(self, tok: Token) -> None:
         """Push a token back to the stream."""
-        self._pushed.append(tok)
+        self._pushed.append(self.current)
+        self.current = tok
 
     def close(self) -> None:
         """Close the stream."""

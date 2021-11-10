@@ -251,6 +251,7 @@ def parse_float_literal(stream: TokenStream) -> expression.FloatLiteral:
 def parse_range_literal(stream: TokenStream) -> expression.RangeLiteral:
     """Read a range literal from the token stream."""
     # Start of a range expression (<int or id>..<int or id>)
+    expect(stream, TOKEN_LPAREN)
     stream.next_token()
     start = parse_range_argument(stream)
 
