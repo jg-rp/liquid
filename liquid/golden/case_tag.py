@@ -1,0 +1,89 @@
+"""Golden tests cases for testing liquid's `case` tag."""
+
+from liquid.golden.case import Case
+
+cases = [
+    Case(
+        description="simple case/when",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="'when' expression using an identifier",
+        template=(
+            r"{% case title %}"
+            r"{% when other %}foo"
+            r"{% when 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="foo",
+        globals={"title": "Hello", "other": "Hello"},
+    ),
+    Case(
+        description="'when' expression using an out of scope identifier",
+        template=(
+            r"{% case title %}"
+            r"{% when nosuchthing %}foo"
+            r"{% when 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="name not in scope",
+        template=(
+            r"{% case nosuchthing %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="",
+    ),
+    Case(
+        description="no match and no default",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="with default",
+        template=r"{% case title %}{% when 'foo' %}foo{% else %}bar{% endcase %}",
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="no whens",
+        template=r"{% case title %}{% else %}bar{% endcase %}",
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="no whens or default",
+        template=r"{% case title %}{% endcase %}",
+        expect="",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="whitespace",
+        template=(
+            "{% case title %}  \n\t"
+            "{% when 'foo' %}foo\n"
+            "{% when 'Hello' %}bar"
+            "{% endcase %}"
+        ),
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+]

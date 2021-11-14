@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 0.10.2
+--------------
+
+- Moved and organized "render" test cases into importable "golden" test cases.
+
 Version 0.10.1
 --------------
 
