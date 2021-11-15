@@ -94,11 +94,13 @@ cases = [
         description="render the special built in variable 'now'",
         template=r"{% echo now | date: '%d/%m/%Y' %}",
         expect=datetime.datetime.now().strftime(r"%d/%m/%Y"),
+        standard=False,
     ),
     Case(
         description="render the special built in variable 'today'",
         template=r"{% echo today | date: '%d/%m/%Y' %}",
         expect=datetime.date.today().strftime(r"%d/%m/%Y"),
+        standard=False,
     ),
     Case(
         description="access an undefined variable by index",

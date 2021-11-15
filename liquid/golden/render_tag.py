@@ -130,7 +130,7 @@ cases = [
         partials={"loop-scope": r"{{ i }}"},
     ),
     Case(
-        description="assigned variables to not leek into outer scope",
+        description="assigned variables do not leek into outer scope",
         template=r"{% render 'assign-outer-scope' %} {{ last_name }}",
         expect="Hello, Holly ",
         globals={"customer": {"first_name": "Holly"}},

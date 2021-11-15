@@ -99,11 +99,13 @@ cases = [
         description="render the special built in variable 'now'",
         template=r"{{ now | date: '%d/%m/%Y' }}",
         expect=datetime.datetime.now().strftime(r"%d/%m/%Y"),
+        standard=False,
     ),
     Case(
         description="render the special built in variable 'today'",
         template=r"{{ today | date: '%d/%m/%Y' }}",
         expect=datetime.date.today().strftime(r"%d/%m/%Y"),
+        standard=False,
     ),
     Case(
         description="render a default f given a literal false",
