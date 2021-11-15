@@ -49,7 +49,8 @@ A non evaling templating language suitable for end users.
 Installing
 ----------
 
-Install and update using `pip <https://pip.pypa.io/en/stable/quickstart/>`_:
+Install and update using `pip <https://pip.pypa.io/en/stable/getting-started/>`_:
+
 
 .. code-block:: text
 
