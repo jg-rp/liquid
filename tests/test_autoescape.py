@@ -600,14 +600,14 @@ class AutoescapeTestCase(TestCase):
                 ),
                 context={},
                 expect=(
-                    '<tr class="row1">'
+                    '<tr class="row1">\n'
                     '<td class="col1">1 true</td>'
                     '<td class="col2">2 false</td>'
-                    "</tr>"
+                    "</tr>\n"
                     '<tr class="row2">'
                     '<td class="col1">3 true</td>'
                     '<td class="col2">4 false</td>'
-                    "</tr>"
+                    "</tr>\n"
                 ),
             ),
             Case(
@@ -619,14 +619,14 @@ class AutoescapeTestCase(TestCase):
                 ),
                 context={},
                 expect=(
-                    '<tr class="row1">'
+                    '<tr class="row1">\n'
                     '<td class="col1"><b>1</b> true</td>'
                     '<td class="col2"><b>2</b> false</td>'
-                    "</tr>"
+                    "</tr>\n"
                     '<tr class="row2">'
                     '<td class="col1"><b>3</b> true</td>'
                     '<td class="col2"><b>4</b> false</td>'
-                    "</tr>"
+                    "</tr>\n"
                 ),
             ),
             Case(
@@ -637,12 +637,12 @@ class AutoescapeTestCase(TestCase):
                     r"{% endtablerow %}"
                 ),
                 expect=(
-                    '<tr class="row1">'
+                    '<tr class="row1">\n'
                     '<td class="col1">&lt;b&gt;tag1&lt;/b&gt;</td>'
                     '<td class="col2">tag2</td>'
                     '<td class="col3">tag3</td>'
                     '<td class="col4">tag4</td>'
-                    "</tr>"
+                    "</tr>\n"
                 ),
                 context={
                     "collection": {
@@ -663,12 +663,12 @@ class AutoescapeTestCase(TestCase):
                     r"{% endtablerow %}"
                 ),
                 expect=(
-                    '<tr class="row1">'
+                    '<tr class="row1">\n'
                     '<td class="col1"><b>tag1</b></td>'
                     '<td class="col2">tag2</td>'
                     '<td class="col3">tag3</td>'
                     '<td class="col4">tag4</td>'
-                    "</tr>"
+                    "</tr>\n"
                 ),
                 context={
                     "collection": {

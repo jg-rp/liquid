@@ -7,12 +7,12 @@ cases = [
         description="one row",
         template=r"{% tablerow tag in collection.tags %}{{ tag }}{% endtablerow %}",
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">tag1</td>'
             '<td class="col2">tag2</td>'
             '<td class="col3">tag3</td>'
             '<td class="col4">tag4</td>'
-            "</tr>"
+            "</tr>\n"
         ),
         globals={
             "collection": {
@@ -33,10 +33,10 @@ cases = [
             r"{% endtablerow %}"
         ),
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">tag1</td>'
             '<td class="col2">tag2</td>'
-            "</tr>"
+            "</tr>\n"
         ),
         globals={
             "collection": {
@@ -57,10 +57,10 @@ cases = [
             r"{% endtablerow %}"
         ),
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">tag3</td>'
             '<td class="col2">tag4</td>'
-            "</tr>"
+            "</tr>\n"
         ),
         globals={
             "collection": {
@@ -81,14 +81,14 @@ cases = [
             r"{% endtablerow %}"
         ),
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">tag1</td>'
             '<td class="col2">tag2</td>'
-            "</tr>"
+            "</tr>\n"
             '<tr class="row2">'
             '<td class="col1">tag3</td>'
             '<td class="col2">tag4</td>'
-            "</tr>"
+            "</tr>\n"
         ),
         globals={
             "collection": {
@@ -109,14 +109,14 @@ cases = [
             r"{% endtablerow %}"
         ),
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">1 true</td>'
             '<td class="col2">2 false</td>'
-            "</tr>"
+            "</tr>\n"
             '<tr class="row2">'
             '<td class="col1">3 true</td>'
             '<td class="col2">4 false</td>'
-            "</tr>"
+            "</tr>\n"
         ),
     ),
     Case(
@@ -127,17 +127,17 @@ cases = [
             r"{% endtablerow %}"
         ),
         expect=(
-            '<tr class="row1">'
+            '<tr class="row1">\n'
             '<td class="col1">1 true</td>'
             '<td class="col2">2 false</td>'
-            "</tr>"
+            "</tr>\n"
             '<tr class="row2">'
             '<td class="col1">3 true</td>'
             '<td class="col2">4 false</td>'
-            "</tr>"
+            "</tr>\n"
             '<tr class="row3">'
             '<td class="col1">5 true</td>'
-            "</tr>"
+            "</tr>\n"
         ),
     ),
 ]

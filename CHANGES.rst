@@ -5,6 +5,8 @@ Version 0.10.2
 --------------
 
 - Moved and organized "render" test cases into importable "golden" test cases.
+- Change ``RangeLiteral`` string representation to match the reference implementation.
+- Add newlines to ``tablerow`` output. As per the reference implementation.
 
 Version 0.10.1
 --------------

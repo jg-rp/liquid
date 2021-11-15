@@ -189,6 +189,10 @@ class TablerowNode(Node):
             for i, row in enumerate(tablerow):
                 buffer.write(f'<tr class="row{i+1}">')
 
+                # Hack to mimic the odd newlines in the reference implementation.
+                if i == 0:
+                    buffer.write("\n")
+
                 for j, itm in enumerate(row):
                     tablerow.step()
                     namespace[name] = itm
@@ -197,7 +201,8 @@ class TablerowNode(Node):
                     self.block.render(context=context, buffer=buffer)
                     buffer.write("</td>")
 
-                buffer.write("</tr>")
+                # Newline as per reference implementation.
+                buffer.write("</tr>\n")
 
         return None
 
@@ -225,6 +230,9 @@ class TablerowNode(Node):
             for i, row in enumerate(tablerow):
                 buffer.write(f'<tr class="row{i+1}">')
 
+                if i == 0:
+                    buffer.write("\n")
+
                 for j, itm in enumerate(row):
                     tablerow.step()
                     namespace[name] = itm
@@ -233,7 +241,7 @@ class TablerowNode(Node):
                     await self.block.render_async(context=context, buffer=buffer)
                     buffer.write("</td>")
 
-                buffer.write("</tr>")
+                buffer.write("</tr>\n")
 
         return None
 
