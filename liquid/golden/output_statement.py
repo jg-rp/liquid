@@ -132,11 +132,6 @@ cases = [
         expect="12",
     ),
     Case(
-        description="joining a string is a noop",
-        template=r"{{ 'a,b' | join: '#' }}",
-        expect="a,b",
-    ),
-    Case(
         description="render an output start sequence as a string literal",
         template=r"{{ '{{' }}",
         expect=r"{{",
@@ -149,17 +144,17 @@ cases = [
     Case(
         description="render a range object",
         template=r"{{ (1..5) }}",
-        expect="(1..5)",
+        expect="1..5",
     ),
     Case(
         description="render a range object that uses a float",
         template=r"{{ (1.4..5) }}",
-        expect="(1..5)",
+        expect="1..5",
     ),
     Case(
         description="render a range object that uses an identifier",
         template=r"{{ (foo..5) }}",
-        expect="(2..5)",
+        expect="2..5",
         globals={"foo": 2},
     ),
     Case(

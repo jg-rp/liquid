@@ -8,4 +8,9 @@ cases = [
         template=r"{{ (1..3) | join: '#' }}",
         expect="1#2#3",
     ),
+    Case(
+        description="joining a string is a noop",
+        template=r"{{ 'a,b' | join: '#' }}",
+        expect="a,b",
+    ),
 ]

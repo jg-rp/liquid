@@ -404,7 +404,7 @@ cases = [
             r"{{ i }}"
             r"{% endfor %}"
         ),
-        expect="(1..3)123123",
+        expect="1..3123123",
         globals={},
     ),
     Case(

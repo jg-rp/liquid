@@ -27,3 +27,31 @@ from . import concat_filter
 from . import first_filter
 from . import join_filter
 from . import last_filter
+
+all = [
+    assign_tag,
+    capture_tag,
+    case_tag,
+    comment_tag,
+    cycle_tag,
+    decrement_tag,
+    echo_tag,
+    for_tag,
+    if_tag,
+    ifchanged_tag,
+    illegal_tag,
+    include_tag,
+    increment_tag,
+    liquid_tag,
+    not_liquid,
+    output_statement,
+    raw_tag,
+    render_tag,
+    tablerow_tag,
+    unless_tag,
+    whitespace_control,
+    concat_filter,
+    first_filter,
+    join_filter,
+    last_filter,
+]

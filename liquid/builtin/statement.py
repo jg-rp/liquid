@@ -57,7 +57,7 @@ class StatementNode(Node):
             else:
                 val = "".join(soft_str(itm) for itm in val)
         elif isinstance(val, range):
-            val = f"({val.start}..{val.stop - 1})"
+            val = f"{val.start}..{val.stop - 1}"
         else:
             val = str(val)
 

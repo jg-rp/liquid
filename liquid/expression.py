@@ -230,7 +230,7 @@ class RangeLiteral(Expression):
         )
 
     def __str__(self) -> str:
-        return f"({self.start}..{self.stop})"
+        return f"{self.start}..{self.stop}"
 
     def __repr__(self) -> str:
         return f"RangeLiteral(start={self.start}, stop={self.stop})"

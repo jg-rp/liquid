@@ -17,6 +17,6 @@ cases = [
     Case(
         description="assign a range literal",
         template="{% assign foo = (1..3) %}{{ foo }}",
-        expect="(1..3)",
+        expect="1..3",
     ),
 ]

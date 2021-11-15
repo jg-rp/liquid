@@ -6,15 +6,14 @@ from liquid.golden.case import TEMPLATE_DROP_ATTRS
 cases = [
     Case(
         description="string literal name",
-        template=r"{% render 'product-hero' %}{{ partial }}",
-        expect="foo\n- sports - garden \ntruefalse",
+        template=r"{% render 'product-hero' %}",
+        expect="foo\n- sports - garden ",
         globals={"product": {"title": "foo", "tags": ["sports", "garden"]}},
         partials={
             "product-hero": "\n".join(
                 [
                     r"{{ product.title }}",
                     r"{% for tag in product.tags %}- {{ tag }} {% endfor %}",
-                    r"{{ partial }}",
                 ]
             ),
         },
@@ -61,7 +60,7 @@ cases = [
     Case(
         description="some keyword arguments including a range literal",
         template=r"{% render 'product-args', foo: (1..3), bar: 'there' %}",
-        expect="(1..3) there",
+        expect="1..3 there",
         globals={},
         partials={
             "product-args": r"{{ foo }} {{ bar }}",
