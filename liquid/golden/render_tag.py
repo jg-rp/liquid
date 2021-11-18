@@ -6,7 +6,7 @@ from liquid.golden.case import TEMPLATE_DROP_ATTRS
 cases = [
     Case(
         description="string literal name",
-        template=r"{% render 'product-hero' %}",
+        template=r"{% render 'product-hero', product: product %}",
         expect="foo\n- sports - garden ",
         globals={"product": {"title": "foo", "tags": ["sports", "garden"]}},
         partials={
@@ -130,8 +130,10 @@ cases = [
         partials={"loop-scope": r"{{ i }}"},
     ),
     Case(
-        description="assigned variables do not leek into outer scope",
-        template=r"{% render 'assign-outer-scope' %} {{ last_name }}",
+        description="assigned variables do not leak into outer scope",
+        template=(
+            r"{% render 'assign-outer-scope', customer: customer %} {{ last_name }}"
+        ),
         expect="Hello, Holly ",
         globals={"customer": {"first_name": "Holly"}},
         partials={

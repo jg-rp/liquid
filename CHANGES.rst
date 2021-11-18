@@ -5,6 +5,15 @@ Version 0.11.0
 --------------
 
 - Added support for comma separated ``when`` expressions. See #31.
+- The built-in ``join``, ``concat``, ``where``, ``uniq`` and ``compact`` filters now use
+  the new ``sequence_filter`` decorator. ``sequence_filter`` coerces filter left values
+  to array-like objects.
+- The built-in ``first``, ``last`` and ``map`` filters now operate on any array-like
+  objects. Previously they were limited to lists and tuples.
+- The built-in ``uniq`` and ``compact`` filters now accept an optional argument. If an
+  argument is provided, it should be the name of a property and the left value should be
+  a sequence of objects.
+- Added golden test cases for all "array" filters.
 
 
 Version 0.10.2

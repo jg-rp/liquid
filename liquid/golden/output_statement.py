@@ -25,6 +25,11 @@ cases = [
         expect="1.23",
     ),
     Case(
+        description="render nil",
+        template=r"{{ nil }}",
+        expect="",
+    ),
+    Case(
         description="render a variable from the global namespace",
         template=r"{{ product.title }}",
         expect="foo",

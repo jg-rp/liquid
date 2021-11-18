@@ -10,6 +10,8 @@ from typing import List
 from typing import Dict
 
 from liquid.environment import Environment
+from liquid.expression import NIL
+
 
 from liquid.exceptions import Error
 from liquid.exceptions import FilterError
@@ -77,7 +79,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                     "#",
                 ],
                 kwargs={},
-                expect=FilterValueError,
+                expect="a, b",
             ),
             Case(
                 description="lists of integers",
@@ -114,7 +116,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=12,
                 args=[", "],
                 kwargs={},
-                expect=FilterValueError,
+                expect="12",
             ),
             Case(
                 description="value array contains non string",
@@ -178,7 +180,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=12,
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=None,
             ),
             Case(
                 description="first of undefined",
@@ -228,7 +230,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=12,
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=None,
             ),
             Case(
                 description="last of undefined",
@@ -278,7 +280,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val="a, b",
                 args=[["c", "d"]],
                 kwargs={},
-                expect=FilterValueError,
+                expect=["a, b", "c", "d"],
             ),
             Case(
                 description="array contains non string",
@@ -335,14 +337,14 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=[{"title": "foo"}, {"title": "bar"}, {"heading": "baz"}],
                 args=["title"],
                 kwargs={},
-                expect=["foo", "bar", None],
+                expect=["foo", "bar", NIL],
             ),
             Case(
                 description="value not an array",
                 val=123,
                 args=["title"],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterError,
             ),
             Case(
                 description="array contains non object",
@@ -363,7 +365,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=[{"title": "foo"}, {"title": "bar"}, {"title": "baz"}],
                 args=[self.env.undefined("test")],
                 kwargs={},
-                expect=[None, None, None],
+                expect=[NIL, NIL, NIL],
             ),
         ]
 
@@ -506,7 +508,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=["b", "a", None, "C", "B", "A"],
                 args=[],
                 kwargs={},
-                expect=[None, "a", "A", "b", "B", "C"],
+                expect=["a", "A", "b", "B", "C", None],
             ),
             Case(
                 description="lists of objects with key",
@@ -555,7 +557,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=[{"title": "foo"}, {"title": "bar"}, {"title": "Baz"}],
                 args=[self.env.undefined("test")],
                 kwargs={},
-                expect=[{"title": "foo"}, {"title": "bar"}, {"title": "Baz"}],
+                expect=[{"title": "bar"}, {"title": "Baz"}, {"title": "foo"}],
             ),
         ]
 
@@ -584,7 +586,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=1234,
                 args=["title"],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterArgumentError,
             ),
             Case(
                 description="missing argument",
@@ -652,15 +654,15 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
             Case(
                 description="unhashable items",
-                val=["a", "b", [], {}],
-                args=[", "],
+                val=["a", "b", [], {}, {}],
+                args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=["a", "b", {}],
             ),
             Case(
                 description="unexpected argument",
                 val=["a", "b"],
-                args=[", "],
+                args=["foo", "bar"],
                 kwargs={},
                 expect=FilterArgumentError,
             ),
@@ -669,7 +671,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val="a, b",
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=["a, b"],
             ),
             Case(
                 description="undefined left value",
@@ -712,7 +714,7 @@ class ArrayFilterTestCase(unittest.TestCase):
                 val=1,
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=[1],
             ),
             Case(
                 description="undefined left value",

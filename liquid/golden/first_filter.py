@@ -8,4 +8,33 @@ cases = [
         template=r"{{ (1..3) | first }}",
         expect="1",
     ),
+    Case(
+        description="array of strings",
+        template=r"{{ arr | first }}",
+        expect="a",
+        globals={"arr": ["a", "b"]},
+    ),
+    Case(
+        description="array of things",
+        template=r"{{ arr | first }}",
+        expect="a",
+        globals={"arr": ["a", "b", 1, [], {}]},
+    ),
+    Case(
+        description="empty left value",
+        template=r"{{ arr | first }}",
+        expect="",
+        globals={"arr": []},
+    ),
+    Case(
+        description="left value is not an array",
+        template=r"{{ arr | first }}",
+        expect="",
+        globals={"arr": 12},
+    ),
+    Case(
+        description="left value is undefined",
+        template=r"{{ nosuchthing | first }}",
+        expect="",
+    ),
 ]

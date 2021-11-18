@@ -19,7 +19,7 @@ cases = [
         template=(
             r"{% case title %}"
             r"{% when other %}foo"
-            r"{% when 'Hello' %}bar"
+            r"{% when 'goodbye' %}bar"
             r"{% endcase %}"
         ),
         expect="foo",
@@ -85,5 +85,27 @@ cases = [
         ),
         expect="bar",
         globals={"title": "Hello"},
+    ),
+    Case(
+        description="comma separated when expression",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar', 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="evaluate multiple matching blocks",
+        template=(
+            r"{% case title %}"
+            r"{% when 'Hello' %}foo"
+            r"{% when a, 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="foobarbar",
+        globals={"title": "Hello", "a": "Hello"},
     ),
 ]

@@ -50,13 +50,13 @@ class Nil(Expression):
     __slots__ = ()
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Nil)
+        return other is None or isinstance(other, Nil)
 
     def __repr__(self) -> str:  # pragma: no cover
-        return "Nil()"
+        return "NIL()"
 
     def __str__(self) -> str:  # pragma: no cover
-        return "nil"
+        return ""
 
     def evaluate(self, context: Context) -> None:
         return None

@@ -1,7 +1,6 @@
 """Filter functions that operate on arrays."""
 from __future__ import annotations
 
-from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from operator import getitem
@@ -21,6 +20,10 @@ except ImportError:
 
 from liquid.filter import with_environment
 from liquid.filter import array_filter
+from liquid.filter import sequence_filter
+from liquid.filter import liquid_filter
+
+from liquid.expression import NIL
 
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
@@ -61,15 +64,15 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
 def _lower(obj: Any) -> str:
     """Helper for the sort filter"""
     try:
-        return str(obj.lower())
+        return str(obj).lower()
     except AttributeError:
         return ""
 
 
 @with_environment
-@array_filter
+@sequence_filter
 def join(
-    iterable: Iterable[object], separator: object = " ", *, environment: Environment
+    sequence: Iterable[object], separator: object = " ", *, environment: Environment
 ) -> str:
     """Concatenate an array of strings."""
     if not isinstance(separator, str):
@@ -78,45 +81,47 @@ def join(
     if environment.autoescape and separator == " ":
         separator = Markup(" ")
 
-    return separator.join(_str_if_not(item) for item in iterable)
+    return separator.join(_str_if_not(item) for item in sequence)
 
 
-@array_filter
+@liquid_filter
 def first(array: Sequence[Any]) -> object:
     """Return the first item of an array"""
-    if array:
-        return array[0]
-    return None
+    try:
+        return getitem(array, 0)
+    except (TypeError, KeyError, IndexError):
+        return None
 
 
-@array_filter
+@liquid_filter
 def last(array: Sequence[Any]) -> object:
     """Return the last item of an array"""
-    if array:
-        return array[-1]
-    return None
+    try:
+        return getitem(array, -1)
+    except (TypeError, KeyError, IndexError):
+        return None
 
 
-@array_filter
-def concat(array: ArrayT, second_array: ArrayT) -> ArrayT:
+@sequence_filter
+def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
     """Return two arrays joined together."""
     if not isinstance(second_array, (list, tuple)):
         raise FilterArgumentError(
             f"concat expected an array, found {type(second_array).__name__}"
         )
 
-    if is_undefined(array):
+    if is_undefined(sequence):
         return second_array
 
-    return list(chain(array, second_array))
+    return list(chain(sequence, second_array))
 
 
-@array_filter
+@liquid_filter
 def map_(sequence: ArrayT, key: object) -> List[object]:
     """Creates an array of values by extracting the values of a named property
     from another object."""
     try:
-        return [_getitem(itm, str(key)) for itm in sequence]
+        return [_getitem(itm, str(key), default=NIL) for itm in sequence]
     except TypeError as err:
         raise FilterError("can't map sequence") from err
 
@@ -154,7 +159,7 @@ def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
     return list(sorted(sequence, key=_lower))
 
 
-@array_filter
+@sequence_filter
 def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
     """Creates an array including only the objects with a given property value,
     or any truthy value by default."""
@@ -164,15 +169,39 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
     return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
 
 
-@array_filter
-def uniq(iterable: ArrayT) -> List[object]:
-    """Removes any duplicate elements in an array. Input array order is not
-    preserved."""
-    unique = OrderedDict.fromkeys(iterable)
-    return list(unique.keys())
+@sequence_filter
+def uniq(sequence: ArrayT, key: object = None) -> List[object]:
+    """Removes any duplicate elements in an array."""
+    # Note that we're not using a dict or set for deduplication because we need
+    # to handle sequences containing unhashable objects, like dictionaries.
+
+    # This is probably quite slow.
+    if key is not None:
+        keys = []
+        result = []
+        for obj in sequence:
+            try:
+                item = obj[key]
+            except TypeError as err:
+                raise FilterArgumentError(
+                    f"can't read property '{key}' of {obj}"
+                ) from err
+
+            if item not in keys:
+                keys.append(item)
+                result.append(obj)
+
+        return result
+
+    return [obj for i, obj in enumerate(sequence) if sequence.index(obj) == i]
 
 
-@array_filter
-def compact(iterable: ArrayT) -> List[object]:
+@sequence_filter
+def compact(sequence: ArrayT, key: object = None) -> List[object]:
     """Removes any nil values from an array."""
-    return [itm for itm in iterable if itm is not None]
+    if key is not None:
+        try:
+            return [itm for itm in sequence if itm[key] is not None]
+        except TypeError as err:
+            raise FilterArgumentError(f"can't read property '{key}'") from err
+    return [itm for itm in sequence if itm is not None]

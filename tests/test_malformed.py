@@ -202,12 +202,6 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg='invalid assignment expression "x 5", on line 1',
             ),
-            # Case(
-            #     description="wrong data type for filter",
-            #     template="{{ 5 | last }}",
-            #     expect_exception=FilterArgumentError,
-            #     expect_msg="last: expected an array, found <class 'int'>, on line 1",
-            # ),
             Case(
                 description="invalid subscript identifier",
                 template="{{ foo[1.2] }}",

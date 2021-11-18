@@ -27,6 +27,13 @@ from . import concat_filter
 from . import first_filter
 from . import join_filter
 from . import last_filter
+from . import map_filter
+from . import reverse_filter
+from . import sort_filter
+from . import sort_natural_filter
+from . import where_filter
+from . import uniq_filter
+from . import compact_filter
 
 all = [
     assign_tag,
@@ -54,4 +61,11 @@ all = [
     first_filter,
     join_filter,
     last_filter,
+    map_filter,
+    reverse_filter,
+    sort_filter,
+    sort_natural_filter,
+    where_filter,
+    uniq_filter,
+    compact_filter,
 ]

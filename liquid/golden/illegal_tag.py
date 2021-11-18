@@ -7,5 +7,6 @@ cases = [
         description="unknown tag",
         template=r"{% nosuchthing %}",
         expect="",
+        error=True,
     ),
 ]

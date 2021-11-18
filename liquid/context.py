@@ -48,7 +48,7 @@ Namespace = Mapping[str, object]
 _undefined = object()
 
 
-def _getitem(obj: Union[Mapping[Any, Any], Sequence[Any]], key: Any) -> object:
+def _getitem(obj: Any, key: Any) -> Any:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     # NOTE: A runtime checkable protocol was too slow.
     if hasattr(key, "__liquid__"):
@@ -90,7 +90,7 @@ def get_item(
 ) -> Any:
     """Chained item getter."""
     try:
-        itm: Any = functools.reduce(_getitem, items, obj)  # type: ignore
+        itm: Any = functools.reduce(_getitem, items, obj)
     except (KeyError, IndexError, TypeError):
         itm = default
     return itm

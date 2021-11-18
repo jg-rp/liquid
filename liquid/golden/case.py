@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from dataclasses import field
 
 from typing import Any
-from typing import Mapping
+from typing import Dict
 
 
 @dataclass
@@ -12,9 +12,10 @@ class Case:
     description: str
     template: str
     expect: str
-    globals: Mapping[str, Any] = field(default_factory=dict)
-    partials: Mapping[str, Any] = field(default_factory=dict)
+    globals: Dict[str, Any] = field(default_factory=dict)
+    partials: Dict[str, Any] = field(default_factory=dict)
     standard: bool = True
+    error: bool = False
 
 
 TEMPLATE_DROP_ATTRS = (

@@ -6,6 +6,9 @@ from functools import wraps
 
 from typing import Any
 from typing import Callable
+from typing import Iterable
+from typing import Iterator
+from typing import List
 from typing import Union
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -66,6 +69,29 @@ def array_filter(_filter: FilterT) -> FilterT:
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
         if not isinstance(val, (list, tuple, Undefined, range)):
             raise FilterValueError(f"expected an array, found {type(val).__name__}")
+
+        try:
+            return _filter(val, *args, **kwargs)
+        except TypeError as err:
+            raise FilterArgumentError(err) from err
+
+    return wrapper
+
+
+def sequence_filter(_filter: FilterT) -> FilterT:
+    """A filter function decorator that raises a FilterValueError if the filter value
+    is can not be coerced into an array-like object.
+
+    This is intended to mimic the semantics of the reference implementation's
+    ``InputIterator`` class.
+    """
+
+    @wraps(_filter)
+    def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
+        if isinstance(val, (list, tuple)):
+            val = flatten(val)
+        elif isinstance(val, (dict, str)) or not isinstance(val, Iterable):
+            val = [val]
 
         try:
             return _filter(val, *args, **kwargs)
@@ -142,3 +168,16 @@ def math_filter(_filter: FilterT) -> FilterT:
             raise FilterArgumentError(err) from err
 
     return wrapper
+
+
+def flatten(it: Iterable[Any], level: int = 5) -> List[object]:
+    """Flatten nested "liquid arrays" into a list."""
+
+    def _flatten(it: Iterable[Any], level: int = 5) -> Iterator[object]:
+        for obj in it:
+            if not level or not isinstance(obj, (list, tuple)):
+                yield obj
+            else:
+                yield from _flatten(obj, level=level - 1)
+
+    return list(_flatten(it, level))

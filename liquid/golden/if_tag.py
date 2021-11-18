@@ -126,10 +126,10 @@ cases = [
         expect="",
     ),
     Case(
-        description="compare global variable to blank",
-        template=r"{% if username == blank %}username is blank{% endif %}",
-        expect="username is blank",
-        globals={"username": ""},
+        description="compare empty string literal to blank",
+        template=r"{% if '' == blank %}is blank{% endif %}",
+        expect="is blank",
+        standard=False,
     ),
     Case(
         description="conditional alternative with default",
