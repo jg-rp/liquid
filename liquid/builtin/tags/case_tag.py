@@ -72,7 +72,6 @@ class CaseNode(ast.Node):
         for when in self.whens:
             if when.render(context, buffer):
                 rendered = True
-                break
 
         if not rendered and self.default:
             self.default.render(context, buffer)
@@ -87,7 +86,6 @@ class CaseNode(ast.Node):
         for when in self.whens:
             if await when.render_async(context, buffer):
                 rendered = True
-                break
 
         if not rendered and self.default:
             await self.default.render_async(context, buffer)
@@ -105,9 +103,9 @@ class CaseTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
-    def parse_expression(self, case: str, stream: TokenStream) -> Expression:
+    def parse_expression(self, case: str, obj: str, stream: TokenStream) -> Expression:
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_boolean_expression(f"{case} == {stream.current.value}")
+        expr_iter = tokenize_boolean_expression(f"{case} == {obj}")
         return parse_boolean_expression(TokenStream(expr_iter))
 
     def parse(self, stream: TokenStream) -> ast.Node:
@@ -126,22 +124,28 @@ class CaseTag(Tag):
         ):
             stream.next_token()
 
-        whens = []
+        whens: List[ast.ConditionalBlockNode] = []
 
         while stream.current.istag(TAG_WHEN):
-            stream.next_token()  # Eat WHEN
-            expr = self.parse_expression(case, stream)
             when_tok = stream.current
+            stream.next_token()  # Eat WHEN
+
+            # One conditional block for every object in a comma separated list.
+            when_exprs = [
+                self.parse_expression(case, obj, stream)
+                for obj in stream.current.value.split(",")
+            ]
 
             stream.next_token()
             when_block = self.parser.parse_block(stream, ENDWHENBLOCK)
 
-            whens.append(
+            whens.extend(
                 ast.ConditionalBlockNode(
                     tok=when_tok,
                     condition=expr,
                     block=when_block,
                 )
+                for expr in when_exprs
             )
 
         default: Optional[ast.BlockNode] = None

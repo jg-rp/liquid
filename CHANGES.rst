@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 0.11.0
+--------------
+
+- Added support for comma separated ``when`` expressions. See #31.
+
+
 Version 0.10.2
 --------------
 
