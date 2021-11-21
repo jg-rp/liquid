@@ -209,3 +209,167 @@ class RenderFiltersTestCase(RenderTestCase):
     def test_render_compact_filter(self):
         """Test that we render the `compact` filter correctly."""
         self._test(golden.compact_filter.cases)
+
+    def test_render_abs_filter(self):
+        """Test that we render the `abs` filter correctly."""
+        self._test(golden.abs_filter.cases)
+
+    def test_render_at_most_filter(self):
+        """Test that we render the `at_most` filter correctly."""
+        self._test(golden.at_most_filter.cases)
+
+    def test_render_at_least_filter(self):
+        """Test that we render the `at_least` filter correctly."""
+        self._test(golden.at_least_filter.cases)
+
+    def test_render_ceil_filter(self):
+        """Test that we render the `ceil` filter correctly."""
+        self._test(golden.ceil_filter.cases)
+
+    def test_render_floor_filter(self):
+        """Test that we render the `floor` filter correctly."""
+        self._test(golden.floor_filter.cases)
+
+    def test_render_divided_by_filter(self):
+        """Test that we render the `divided_by` filter correctly."""
+        self._test(golden.divided_by_filter.cases)
+
+    def test_render_minus_filter(self):
+        """Test that we render the `minus` filter correctly."""
+        self._test(golden.minus_filter.cases)
+
+    def test_render_plus_filter(self):
+        """Test that we render the `plus` filter correctly."""
+        self._test(golden.plus_filter.cases)
+
+    def test_render_round_filter(self):
+        """Test that we render the `round` filter correctly."""
+        self._test(golden.round_filter.cases)
+
+    def test_render_times_filter(self):
+        """Test that we render the `times` filter correctly."""
+        self._test(golden.times_filter.cases)
+
+    def test_render_modulo_filter(self):
+        """Test that we render the `modulo` filter correctly."""
+        self._test(golden.modulo_filter.cases)
+
+    def test_render_size_filter(self):
+        """Test that we render the `size` filter correctly."""
+        self._test(golden.size_filter.cases)
+
+    def test_render_default_filter(self):
+        """Test that we render the `default` filter correctly."""
+        self._test(golden.default_filter.cases)
+
+    def test_render_date_filter(self):
+        """Test that we render the `date` filter correctly."""
+        self._test(golden.date_filter.cases)
+
+    def test_render_capitalize_filter(self):
+        """Test that we can render the `capitalize` filter correctly."""
+        self._test(golden.capitalize_filter.cases)
+
+    def test_render_append_filter(self):
+        """Test that we can render the `append` filter correctly."""
+        self._test(golden.append_filter.cases)
+
+    def test_render_downcase_filter(self):
+        """Test that we can render the `downcase` filter correctly."""
+        self._test(golden.downcase_filter.cases)
+
+    def test_render_escape_filter(self):
+        """Test that we can render the `escape` filter correctly."""
+        self._test(golden.escape_filter.cases)
+
+    def test_render_escape_once_filter(self):
+        """Test that we can render the `escape_once` filter correctly."""
+        self._test(golden.escape_once_filter.cases)
+
+    def test_render_lstrip_filter(self):
+        """Test that we can render the `lstrip` filter correctly."""
+        self._test(golden.lstrip_filter.cases)
+
+    def test_render_newline_to_br_filter(self):
+        """Test that we can render the `newline_to_br` filter correctly."""
+        self._test(golden.newline_to_br_filter.cases)
+
+    def test_render_prepend_filter(self):
+        """Test that we can render the `prepend` filter correctly."""
+        self._test(golden.prepend_filter.cases)
+
+    def test_render_remove_filter(self):
+        """Test that we can render the `remove` filter correctly."""
+        self._test(golden.remove_filter.cases)
+
+    def test_render_remove_first_filter(self):
+        """Test that we can render the `remove_first` filter correctly."""
+        self._test(golden.remove_first_filter.cases)
+
+    def test_render_replace_filter(self):
+        """Test that we can render the `replace` filter correctly."""
+        self._test(golden.replace_filter.cases)
+
+    def test_render_replace_first_filter(self):
+        """Test that we can render the `replace_first` filter correctly."""
+        self._test(golden.replace_first_filter.cases)
+
+    def test_render_slice__filter(self):
+        """Test that we can render the `slice_` filter correctly."""
+        self._test(golden.slice_filter.cases)
+
+    def test_render_split_filter(self):
+        """Test that we can render the `split` filter correctly."""
+        self._test(golden.split_filter.cases)
+
+    def test_render_upcase_filter(self):
+        """Test that we can render the `upcase` filter correctly."""
+        self._test(golden.upcase_filter.cases)
+
+    def test_render_strip_filter(self):
+        """Test that we can render the `strip` filter correctly."""
+        self._test(golden.strip_filter.cases)
+
+    def test_render_rstrip_filter(self):
+        """Test that we can render the `rstrip` filter correctly."""
+        self._test(golden.rstrip_filter.cases)
+
+    def test_render_strip_html_filter(self):
+        """Test that we can render the `strip_html` filter correctly."""
+        self._test(golden.strip_html_filter.cases)
+
+    def test_render_strip_newlines_filter(self):
+        """Test that we can render the `strip_newlines` filter correctly."""
+        self._test(golden.strip_newlines_filter.cases)
+
+    def test_render_truncate_filter(self):
+        """Test that we can render the `truncate` filter correctly."""
+        self._test(golden.truncate_filter.cases)
+
+    def test_render_truncatewords_filter(self):
+        """Test that we can render the `truncatewords` filter correctly."""
+        self._test(golden.truncatewords_filter.cases)
+
+    def test_render_url_encode_filter(self):
+        """Test that we can render the `url_encode` filter correctly."""
+        self._test(golden.url_encode_filter.cases)
+
+    def test_render_url_decode_filter(self):
+        """Test that we can render the `url_decode` filter correctly."""
+        self._test(golden.url_decode_filter.cases)
+
+    def test_render_base64_encode_filter(self):
+        """Test that we can render the `base64_encode` filter correctly."""
+        self._test(golden.base64_encode_filter.cases)
+
+    def test_render_base64_decode_filter(self):
+        """Test that we can render the `base64_decode` filter correctly."""
+        self._test(golden.base64_decode_filter.cases)
+
+    def test_render_base64_url_safe_encode_filter(self):
+        """Test that we can render the `base64_url_safe_encode` filter correctly."""
+        self._test(golden.base64_url_safe_encode_filter.cases)
+
+    def test_render_base64_url_safe_decode_filter(self):
+        """Test that we can render the `base64_url_safe_decode` filter correctly."""
+        self._test(golden.base64_url_safe_decode_filter.cases)

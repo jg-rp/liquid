@@ -11,6 +11,7 @@ from typing import Dict
 from liquid.environment import Environment
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
+from liquid.exceptions import FilterError
 
 from liquid.builtin.filters.string import capitalize
 from liquid.builtin.filters.string import append
@@ -62,7 +63,7 @@ class StringFilterTestCase(unittest.TestCase):
         for case in test_cases:
             with self.subTest(msg=case.description):
                 if isclass(case.expect) and issubclass(
-                    case.expect, (FilterArgumentError, FilterValueError)
+                    case.expect, (FilterArgumentError, FilterValueError, FilterError)
                 ):
                     with self.assertRaises(case.expect):
                         func(case.val, *case.args, **case.kwargs)
@@ -578,9 +579,9 @@ class StringFilterTestCase(unittest.TestCase):
             Case(
                 description="missing argument",
                 val="hello",
-                args=["my"],
+                args=["ll"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="heo",
             ),
             Case(
                 description="missing arguments",
@@ -605,10 +606,10 @@ class StringFilterTestCase(unittest.TestCase):
             ),
             Case(
                 description="undefined first argument",
-                val="Take my protein pills and put my helmet on",
-                args=[self.env.undefined("test"), "your"],
+                val="Take my protein",
+                args=[self.env.undefined("test"), "#"],
                 kwargs={},
-                expect="your",
+                expect="#T#a#k#e# #m#y# #p#r#o#t#e#i#n#",
             ),
             Case(
                 description="undefined second argument",
@@ -649,9 +650,9 @@ class StringFilterTestCase(unittest.TestCase):
             Case(
                 description="missing argument",
                 val="hello",
-                args=["my"],
+                args=["ll"],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="heo",
             ),
             Case(
                 description="missing arguments",
@@ -679,7 +680,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val="Take my protein pills and put my helmet on",
                 args=[self.env.undefined("test"), "your"],
                 kwargs={},
-                expect="your",
+                expect="yourTake my protein pills and put my helmet on",
             ),
             Case(
                 description="undefined second argument",
@@ -722,14 +723,14 @@ class StringFilterTestCase(unittest.TestCase):
                 val="hello",
                 args=[99],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="",
             ),
             Case(
                 description="not a string",
                 val=5,
-                args=[1],
+                args=[0],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="5",
             ),
             Case(
                 description="first argument not an integer",
@@ -1283,7 +1284,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val="",
                 args=[100000000000000],
                 kwargs={},
-                expect="",
+                expect=FilterArgumentError,
             ),
         ]
 
@@ -1441,7 +1442,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterError,
             ),
             Case(
                 description="unexpected argument",
@@ -1541,7 +1542,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val=5,
                 args=[],
                 kwargs={},
-                expect=FilterValueError,
+                expect=FilterError,
             ),
             Case(
                 description="unexpected argument",

@@ -134,8 +134,10 @@ def num_arg(val: Any, default: Optional[N] = None) -> N:
         return val
 
     if isinstance(val, str):
-        if val.isdecimal():
+        try:
             return int(val)
+        except ValueError:
+            pass
 
         try:
             return float(val)

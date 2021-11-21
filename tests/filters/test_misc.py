@@ -115,7 +115,7 @@ class MiscFilterTestCase(unittest.TestCase):
                 val=1,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect=0,
             ),
             Case(
                 description="undefined left value",
@@ -199,14 +199,7 @@ class MiscFilterTestCase(unittest.TestCase):
                 val=None,
                 args=[],
                 kwargs={},
-                expect=FilterArgumentError,
-            ),
-            Case(
-                description="not an array or string",
-                val={},
-                args=[],
-                kwargs={},
-                expect=FilterArgumentError,
+                expect="",
             ),
             Case(
                 description="false returns default",
@@ -311,7 +304,7 @@ class MiscFilterTestCase(unittest.TestCase):
                 val="March 14, 2016",
                 args=[self.env.undefined("test")],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="March 14, 2016",
             ),
         ]
 

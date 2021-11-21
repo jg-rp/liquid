@@ -9,6 +9,7 @@ import urllib.parse
 
 from typing import Any
 from typing import List
+from typing import Union
 from typing import TYPE_CHECKING
 
 try:
@@ -24,10 +25,11 @@ except ImportError:
 
 from liquid import is_undefined
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
+from liquid.exceptions import FilterError
 
 from liquid.filter import with_environment
 from liquid.filter import string_filter
+from liquid.filter import liquid_filter
 
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
@@ -116,22 +118,16 @@ def remove_first(val: str, arg: str) -> str:
 
 
 @string_filter
-def replace(val: str, seq: str, sub: str) -> str:
+def replace(val: str, seq: str, sub: str = "") -> str:
     """Replaces every occurrence of the first argument in a string with the second
     argument."""
-    if is_undefined(seq):
-        return sub
-
     return val.replace(soft_str(seq), soft_str(sub))
 
 
 @string_filter
-def replace_first(val: str, seq: str, sub: str) -> str:
+def replace_first(val: str, seq: str, sub: str = "") -> str:
     """Replaces the first occurrence of the first argument in a string with the second
     argument."""
-    if is_undefined(seq):
-        return sub
-
     return val.replace(soft_str(seq), soft_str(sub), 1)
 
 
@@ -141,11 +137,16 @@ def upcase(val: str) -> str:
     return val.upper()
 
 
-@string_filter
-def slice_(val: str, start: Any, length: int = 1) -> str:
-    """Return a substring, starting at `start`, containing up to `length` characters."""
-    if not val:
-        return ""
+@liquid_filter
+def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
+    """Return a substring or subsequence, starting at `start`, containing up to
+    `length` characters or items.
+
+    Array-like objects return a list, strings return a substring, all other objects are
+    cast to a string before returning a substring.
+    """
+    if not isinstance(val, (list, tuple, range, str)):
+        val = str(val)
 
     if is_undefined(start):
         raise FilterArgumentError("slice expected an integer, found Undefined")
@@ -167,10 +168,9 @@ def slice_(val: str, start: Any, length: int = 1) -> str:
             f"slice expected an integer, found {type(start).__name__}"
         ) from err
 
-    if start > len(val) - 1:
-        raise FilterArgumentError("slice string index out of range")
-
-    return val[start : start + length]
+    if isinstance(val, str):
+        return val[start : start + length]
+    return list(val[start : start + length])
 
 
 @string_filter
@@ -231,6 +231,10 @@ def truncate(val: str, num: Any, end: str = "...") -> str:
     return truncate_chars(val, num, end)
 
 
+# Mimic reference implementation's limit to the number of words that can be truncated.
+MAX_TRUNC_WORDS = (1 << 31) - 1
+
+
 @string_filter
 def truncatewords(val: str, num: Any, end: str = "...") -> str:
     """Shorten a string down to the given number of words."""
@@ -249,6 +253,9 @@ def truncatewords(val: str, num: Any, end: str = "...") -> str:
     # The reference implementation seems to force a minimum `num` of 1.
     if num <= 0:
         num = 1
+
+    if num > MAX_TRUNC_WORDS:
+        raise FilterArgumentError(f"integer {num} too big for truncatewords")
 
     # Is truncating markup ever safe? Autoescape for now.
     return truncate_words(val, num, end)
@@ -285,7 +292,7 @@ def base64_decode(val: str) -> str:
     try:
         return base64.b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterValueError("Invalid base64-encoded string.") from err
+        raise FilterError("Invalid base64-encoded string.") from err
 
 
 @string_filter
@@ -303,4 +310,4 @@ def base64_url_safe_decode(val: str) -> str:
     try:
         return base64.urlsafe_b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterValueError("Invalid base64-encoded string.") from err
+        raise FilterError("Invalid base64-encoded string.") from err

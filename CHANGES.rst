@@ -4,16 +4,29 @@ Python Liquid Change Log
 Version 0.11.0
 --------------
 
+The following changes in behavior of built-in filters is the result of exporting Python
+Liquid's "golden" test cases, and running them against Ruby Liquid (the reference
+implementation). Both Python Liquid version 0.11.0 and Ruby Liquid version 5.1.0 pass
+all 594 tests currently defined in ``liquid/golden/``.
+
 - Added support for comma separated ``when`` expressions. See #31.
 - The built-in ``join``, ``concat``, ``where``, ``uniq`` and ``compact`` filters now use
   the new ``sequence_filter`` decorator. ``sequence_filter`` coerces filter left values
-  to array-like objects.
+  to array-like objects. ``sequence_filter`` will also flatten nested array-like
+  objects, just like the reference implementation.
 - The built-in ``first``, ``last`` and ``map`` filters now operate on any array-like
-  objects. Previously they were limited to lists and tuples.
+  objects. Previously they were limited to lists and tuples. Strings still don't work.
 - The built-in ``uniq`` and ``compact`` filters now accept an optional argument. If an
   argument is provided, it should be the name of a property and the left value should be
   a sequence of objects.
-- Added golden test cases for all "array" filters.
+- The ``size`` filter now returns a default of ``0`` if its left value does not have a 
+  ``__len__`` method.
+- The ``replace`` and ``replace_first`` filters now treat undefined arguments as an
+  empty string.
+- The ``slice`` filter now works on lists, tuples and ranges, as well as strings.
+- Fixed a bug where the ``math_filter`` decorator would cast strings representations of
+  negative integers to a float rather than an int.
+- Added golden test cases for all filters.
 
 
 Version 0.10.2

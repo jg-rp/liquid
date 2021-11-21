@@ -37,4 +37,15 @@ cases = [
         template=r"{{ nosuchthing | last }}",
         expect="",
     ),
+    Case(
+        description="last of a string",
+        template=r"{{ 'hello' | last }}",
+        expect="",
+    ),
+    Case(
+        description="last of a hash",
+        template=r"{{ a | last }}",
+        expect="",
+        globals={"a": {"b": 1, "c": 2}},
+    ),
 ]

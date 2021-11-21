@@ -59,4 +59,11 @@ cases = [
         expect="ab",
         globals={"arr": ["a", "b"]},
     ),
+    Case(
+        description="too many arguments",
+        template=r"{{ arr | join: '#', 42 }}",
+        expect="",
+        globals={"arr": ["a", "b"]},
+        error=True,
+    ),
 ]

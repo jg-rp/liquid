@@ -34,6 +34,47 @@ from . import sort_natural_filter
 from . import where_filter
 from . import uniq_filter
 from . import compact_filter
+from . import abs_filter
+from . import at_most_filter
+from . import at_least_filter
+from . import ceil_filter
+from . import floor_filter
+from . import divided_by_filter
+from . import minus_filter
+from . import plus_filter
+from . import round_filter
+from . import times_filter
+from . import modulo_filter
+from . import size_filter
+from . import default_filter
+from . import date_filter
+from . import capitalize_filter
+from . import append_filter
+from . import downcase_filter
+from . import escape_filter
+from . import escape_once_filter
+from . import lstrip_filter
+from . import newline_to_br_filter
+from . import prepend_filter
+from . import remove_filter
+from . import remove_first_filter
+from . import replace_filter
+from . import replace_first_filter
+from . import slice_filter
+from . import split_filter
+from . import upcase_filter
+from . import strip_filter
+from . import rstrip_filter
+from . import strip_html_filter
+from . import strip_newlines_filter
+from . import truncate_filter
+from . import truncatewords_filter
+from . import url_encode_filter
+from . import url_decode_filter
+from . import base64_encode_filter
+from . import base64_decode_filter
+from . import base64_url_safe_encode_filter
+from . import base64_url_safe_decode_filter
 
 all = [
     assign_tag,
@@ -68,4 +109,45 @@ all = [
     where_filter,
     uniq_filter,
     compact_filter,
+    abs_filter,
+    at_most_filter,
+    at_least_filter,
+    ceil_filter,
+    floor_filter,
+    divided_by_filter,
+    minus_filter,
+    plus_filter,
+    round_filter,
+    times_filter,
+    modulo_filter,
+    size_filter,
+    default_filter,
+    date_filter,
+    capitalize_filter,
+    append_filter,
+    downcase_filter,
+    escape_filter,
+    escape_once_filter,
+    lstrip_filter,
+    newline_to_br_filter,
+    prepend_filter,
+    remove_filter,
+    remove_first_filter,
+    replace_filter,
+    replace_first_filter,
+    slice_filter,
+    split_filter,
+    upcase_filter,
+    strip_filter,
+    rstrip_filter,
+    strip_html_filter,
+    strip_newlines_filter,
+    truncate_filter,
+    truncatewords_filter,
+    url_encode_filter,
+    url_decode_filter,
+    base64_encode_filter,
+    base64_decode_filter,
+    base64_url_safe_encode_filter,
+    base64_url_safe_decode_filter,
 ]

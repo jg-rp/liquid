@@ -6,6 +6,7 @@ import decimal
 from typing import Optional
 from typing import Union
 
+from liquid.context import is_undefined
 from liquid.exceptions import FilterArgumentError
 
 from liquid.filter import math_filter
@@ -99,7 +100,7 @@ def plus(num: N, other: N) -> N:
 @math_filter
 def round_(num: N, ndigits: Optional[int] = None) -> N:
     """Round a number to a given precision in decimal digits."""
-    if ndigits:
+    if ndigits or is_undefined(ndigits):
         ndigits = int_arg(ndigits, default=0)
         return round(num, ndigits)
     return round(num)

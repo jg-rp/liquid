@@ -30,11 +30,14 @@ if TYPE_CHECKING:
 @liquid_filter
 def size(obj: Any) -> int:
     """Return the length of an array or string."""
-    return len(obj)
+    try:
+        return len(obj)
+    except TypeError:
+        return 0
 
 
 @liquid_filter
-def default(obj: Any, default_: object, *, allow_false: bool = False) -> Any:
+def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> Any:
     """Return a default value if the input is nil, false, or empty."""
     _obj = obj
     if hasattr(obj, "__liquid__"):
@@ -60,9 +63,7 @@ def date(
         return ""
 
     if is_undefined(fmt):
-        raise FilterArgumentError(
-            f"expected a format string, found {type(fmt).__name__}"
-        )
+        return str(dat)
 
     if isinstance(dat, str):
         if dat == "now":

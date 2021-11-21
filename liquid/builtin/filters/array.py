@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain
+from itertools import islice
 from operator import getitem
 
 from typing import Any
@@ -85,19 +86,28 @@ def join(
 
 
 @liquid_filter
-def first(array: Sequence[Any]) -> object:
+def first(obj: Any) -> object:
     """Return the first item of an array"""
+    if isinstance(obj, str):
+        return None
+
+    if isinstance(obj, dict):
+        obj = list(islice(obj.items(), 1))
+
     try:
-        return getitem(array, 0)
+        return getitem(obj, 0)
     except (TypeError, KeyError, IndexError):
         return None
 
 
 @liquid_filter
-def last(array: Sequence[Any]) -> object:
+def last(obj: Sequence[Any]) -> object:
     """Return the last item of an array"""
+    if isinstance(obj, str):
+        return None
+
     try:
-        return getitem(array, -1)
+        return getitem(obj, -1)
     except (TypeError, KeyError, IndexError):
         return None
 

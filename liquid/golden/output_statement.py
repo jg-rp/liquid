@@ -113,13 +113,13 @@ cases = [
         standard=False,
     ),
     Case(
-        description="render a default f given a literal false",
+        description="render a default given a literal false",
         template=r"{{ false | default: 'bar' }}",
         expect="bar",
     ),
     Case(
         description=(
-            "render a default filter given a literal false "
+            "render a default given a literal false "
             "with 'allow false' equal to true"
         ),
         template=r"{{ false | default: 'bar', allow_false: true }}",
@@ -127,7 +127,7 @@ cases = [
     ),
     Case(
         description=(
-            "render a default filter given a literal false "
+            "render a default given a literal false "
             "with 'allow false' equal to false"
         ),
         template=r"{{ false | default: 'bar', allow_false: false }}",

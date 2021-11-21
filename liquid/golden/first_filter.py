@@ -37,4 +37,15 @@ cases = [
         template=r"{{ nosuchthing | first }}",
         expect="",
     ),
+    Case(
+        description="first of a string",
+        template=r"{{ 'hello' | first }}",
+        expect="",
+    ),
+    Case(
+        description="first of a hash",
+        template=r"{% assign x = a | first %}({{ x[0] }},{{ x[1] }})",
+        expect="(b,1)",
+        globals={"a": {"b": 1, "c": 2}},
+    ),
 ]
