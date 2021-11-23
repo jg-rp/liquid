@@ -11,7 +11,7 @@ from . import echo_tag
 from . import for_tag
 from . import if_tag
 from . import ifchanged_tag
-from . import illegal_tag
+from . import illegal
 from . import include_tag
 from . import increment_tag
 from . import liquid_tag
@@ -87,7 +87,7 @@ all = [
     for_tag,
     if_tag,
     ifchanged_tag,
-    illegal_tag,
+    illegal,
     include_tag,
     increment_tag,
     liquid_tag,

@@ -150,7 +150,7 @@ class RenderTagsTestCase(RenderTestCase):
 
     def test_illegal(self):
         """Test that we can render an `illegal` token in LAX mode."""
-        self._test(golden.illegal_tag.cases)
+        self._test(golden.illegal.cases)
 
     def test_include_tag(self):
         """Test that we can render `include` tags."""

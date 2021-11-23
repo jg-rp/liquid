@@ -399,6 +399,42 @@ still being explicit about which properties are exposed to templates.
         def __len__(self):
             return len(self.keys)
 
+By implementing the ``__liquid__`` method, Python class instances can behave like
+primitive Liquid data types. This is useful for situations where you need your Python
+object to act as an array index, or to be compared to a primitive data type, for
+example.
+
+.. code-block:: python
+
+    from liquid import Template
+
+    class IntDrop:
+        def __init__(self, val: int):
+            self.val = val
+
+        def __int__(self) -> int:
+            return self.val
+
+        def __str__(self) -> str:
+            return "one"
+
+        def __liquid__(self) -> int:
+            return self.val
+
+
+    template = Template(
+        "{% if my_drop < 10 %}"
+        "{{ my_drop }} "
+        "{% endif %}"
+        "{{ some_array[my_drop] }}"
+    )
+
+    context_data = {
+        "my_drop": IntDrop(1),
+        "some_array": ["a", "b", "c"],
+    }
+
+    print(template.render(**context_data))  # one b
 
 Async Support
 *************
@@ -542,6 +578,17 @@ Python Liquid faithfully reproduces the following tags.
 - render
 - tablerow
 - unless
+
+Given a ``liquid.Environment``, you could print a list of registered filters, with their
+doc strings, like this.
+
+.. code-block:: python
+
+    from liquid import Environment
+    env = Environment()
+
+    for name, func in env.filters.items():
+        print(f"{name}: {func.__doc__}\n\n")
 
 Known Issues
 ************
@@ -824,15 +871,14 @@ Contributing
 
 - Install development dependencies with `Pipenv <https://github.com/pypa/pipenv>`_
 
-- Python Liquid fully embraces type hints and static type checking. I like to use the
-  `Pylance`_ extension for Visual Studio Code, which includes `Pyright`_ for static type
-  checking.
+- Python Liquid fully embraces type hints and static type checking. Run ``mypy`` or 
+  ``tox -e typing`` to check for issues.
 
 - Format code using `black <https://github.com/psf/black>`_.
 
 - Write tests using ``unittest.TestCase``.
 
-- Run tests with ``make test`` or ``python -m unittest``.
+- Run tests with ``make test`` or ``python -m unittest`` or ``pytest``.
 
 - Check test coverage with ``make coverage`` and open ``htmlcov/index.html`` in your
   browser.

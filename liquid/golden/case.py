@@ -16,6 +16,7 @@ class Case:
     partials: Dict[str, Any] = field(default_factory=dict)
     standard: bool = True
     error: bool = False
+    strict: bool = False
 
 
 TEMPLATE_DROP_ATTRS = (

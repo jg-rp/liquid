@@ -90,7 +90,7 @@ RE_LINETERM = re.compile(r"\r?\n")
 @with_environment
 @string_filter
 def newline_to_br(val: str, *, environment: Environment) -> str:
-    """Convert '\r\n' or '\n' to '<br />\n'."""
+    """Convert '\\r\\n' or '\\n' to '<br />\\n'."""
     # The reference implementation was changed to replace "\r\n" as well as "\n",
     # but they don't seem to care about "\r" (Mac OS).
     if environment.autoescape:

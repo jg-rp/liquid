@@ -4,10 +4,10 @@ Python Liquid Change Log
 Version 0.11.0
 --------------
 
-The following changes in behavior of built-in filters is the result of exporting Python
+The following behavioral changes are the result of feedback gained from exporting Python
 Liquid's "golden" test cases, and running them against Ruby Liquid (the reference
 implementation). Both Python Liquid version 0.11.0 and Ruby Liquid version 5.1.0 pass
-all 594 tests currently defined in ``liquid/golden/``.
+all tests currently defined in ``liquid/golden/``.
 
 - Added support for comma separated ``when`` expressions. See #31.
 - The built-in ``join``, ``concat``, ``where``, ``uniq`` and ``compact`` filters now use

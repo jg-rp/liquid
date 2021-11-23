@@ -19,7 +19,7 @@ N = Union[float, int]
 
 @math_filter
 def abs_(num: N) -> N:
-    """Return that absolute value of a number.
+    """Return the absolute value of a number.
 
     Accepts an int, float or a string representations of an int or float.
     """
