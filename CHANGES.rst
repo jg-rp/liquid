@@ -1,6 +1,13 @@
 Python Liquid Change Log
 ========================
 
+Version 0.11.1
+--------------
+
+- Template loaders can now include additional template meta data using the ``matter``
+  argument of ``liquid.loaders.TemplateSource``. See the example
+  ``FrontMatterFileSystemLoader`` in the README. See #32.
+
 Version 0.11.0
 --------------
 

@@ -46,11 +46,15 @@ class TemplateSource(NamedTuple):
     :param uptodate: Optional callable that will return ``True`` if the template is up
         to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
     :type uptodate: Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
+    :param matter: Optional mapping containing variables associated with the template.
+        Could be "front matter" or other meta data.
+    :type matter: Optional[Mapping[str, object]]
     """
 
     source: str
     filename: str
     uptodate: UpToDate
+    matter: Optional[Mapping[str, object]] = None
 
 
 class BaseLoader(ABC):
@@ -76,12 +80,16 @@ class BaseLoader(ABC):
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         try:
-            source, filename, uptodate = self.get_source(env, name)
+            source, filename, uptodate, matter = self.get_source(env, name)
         except Exception as err:
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
-            source, globals=globals, name=name, path=Path(filename)
+            source,
+            globals=globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
         )
         template.uptodate = uptodate
         return template
@@ -94,12 +102,16 @@ class BaseLoader(ABC):
     ) -> BoundTemplate:
         try:
             template_source = await self.get_source_async(env, name)
-            source, filename, uptodate = template_source
+            source, filename, uptodate, matter = template_source
         except Exception as err:
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
-            source, globals=globals, name=name, path=Path(filename)
+            source,
+            globals=globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
         )
         template.uptodate = uptodate
         return template

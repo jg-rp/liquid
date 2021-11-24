@@ -6,11 +6,16 @@ import unittest
 
 from pathlib import Path
 
-from liquid.environment import Environment
-from liquid.environment import BoundTemplate
+from typing import Dict
+
+from liquid import Environment
+from liquid.template import BoundTemplate
 from liquid.template import AwareBoundTemplate
 
-from liquid.loaders import FileSystemLoader, DictLoader
+from liquid.loaders import FileSystemLoader
+from liquid.loaders import DictLoader
+from liquid.loaders import TemplateSource
+
 from liquid.exceptions import TemplateNotFound
 
 
@@ -230,3 +235,77 @@ class TemplateDropTestCase(unittest.TestCase):
         assert isinstance(template, AwareBoundTemplate)
         keys = list(template.drop)
         self.assertEqual(keys, ["directory", "name", "suffix"])
+
+
+class MatterDictLoader(DictLoader):
+    def __init__(
+        self,
+        templates: Dict[str, str],
+        matter: Dict[str, Dict[str, object]],
+    ):
+        super().__init__(templates)
+        self.matter = matter
+
+    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
+        try:
+            source = self.templates[template_name]
+        except KeyError as err:
+            raise TemplateNotFound(template_name) from err
+
+        return TemplateSource(
+            source=source,
+            filename=template_name,
+            uptodate=None,
+            matter=self.matter.get(template_name),
+        )
+
+
+class MatterLoaderTestCase(unittest.TestCase):
+    def test_matter_loader(self):
+        """Test that template loaders can add to render context."""
+        loader = MatterDictLoader(
+            templates={
+                "some": "Hello, {{ you }}{{ username }}!",
+                "other": "Goodbye, {{ you }}{{ username }}.",
+                "thing": "{{ you }}{{ username }}",
+            },
+            matter={
+                "some": {"you": "World"},
+                "other": {"username": "Smith"},
+            },
+        )
+
+        env = Environment(loader=loader)
+
+        template = env.get_template("some")
+        self.assertEqual(template.render(), "Hello, World!")
+
+        template = env.get_template("other")
+        self.assertEqual(template.render(), "Goodbye, Smith.")
+
+        template = env.get_template("thing")
+        self.assertEqual(template.render(), "")
+
+    def test_matter_global_priority(self):
+        """Test that matter variables take priority over globals."""
+        loader = MatterDictLoader(
+            templates={"some": "Hello, {{ you }}!"},
+            matter={"some": {"you": "Liquid"}},
+        )
+
+        env = Environment(loader=loader, globals={"you": "World"})
+        template = env.get_template("some", globals={"you": "Jinja"})
+
+        self.assertEqual(template.render(), "Hello, Liquid!")
+
+    def test_matter_local_priority(self):
+        """Test that render args take priority over matter variables."""
+        loader = MatterDictLoader(
+            templates={"some": "Hello, {{ you }}!"},
+            matter={"some": {"you": "Liquid"}},
+        )
+
+        env = Environment(loader=loader)
+        template = env.get_template("some")
+
+        self.assertEqual(template.render(you="John"), "Hello, John!")

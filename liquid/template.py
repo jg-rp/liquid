@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from collections import ChainMap
 from collections import abc
-
 from io import StringIO
 from pathlib import Path
 
@@ -19,6 +17,7 @@ from typing import Union
 from typing import TYPE_CHECKING
 
 from liquid.context import Context
+from liquid.context import ReadOnlyChainMap
 
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
@@ -35,9 +34,9 @@ class BoundTemplate:
     """A liquid template that has been parsed and is bound to a
     :class:`liquid.Environment`.
 
-    You probably don't want to be instantiate :class:`BoundTemplate` directly. Instead,
-    use :meth:`liquid.Environment.from_string` or
-    :meth:`liquid.Environment.get_template`.
+    You probably don't want to instantiate :class:`BoundTemplate` directly. Use
+    :meth:`liquid.Environment.from_string` or :meth:`liquid.Environment.get_template`
+    instead.
 
     :param env: The environment this template is bound to.
     :type env: liquid.Environment
@@ -47,24 +46,32 @@ class BoundTemplate:
     :type name: str
     :param path: Optional origin path or identifier for the template.
     :type path: Optional[Union[str, Path]]
+    :param globals: An optional mapping of context variables made available every
+        time the resulting template is rendered. Defaults to ``None``.
+    :type globals: dict
+    :param matter: Optional mapping containing variables associated with the template.
+        Could be "front matter" or other meta data.
+    :type matter: Optional[Mapping[str, object]]
     :param uptodate: Optional callable that will return ``True`` if the template is up
         to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
     :type uptodate: Optional[Callable[[], bool]]
     """
 
-    # pylint: disable=redefined-builtin
+    # pylint: disable=redefined-builtin, too-many-arguments
     def __init__(
         self,
         env: Environment,
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[Dict[str, Any]] = None,
+        globals: Optional[Dict[str, object]] = None,
+        matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):
         self.env = env
         self.tree = parse_tree
         self.globals = globals or {}
+        self.matter = matter or {}
         self.name = name
         self.path = path
         self.uptodate = uptodate
@@ -74,18 +81,14 @@ class BoundTemplate:
 
         Accepts the same arguments as the :class:`dict` constructor.
         """
-        _vars: Dict[str, object] = dict(*args, **kwargs)
-        context = Context(self.env, ChainMap(_vars, self.globals))
-
+        context = Context(self.env, globals=self.make_globals(dict(*args, **kwargs)))
         buf = StringIO()
         self.render_with_context(context, buf)
         return buf.getvalue()
 
     async def render_async(self, *args: Any, **kwargs: Any) -> str:
         """An async version of :meth:`liquid.template.BoundTemplate.render`."""
-        _vars: Dict[str, object] = dict(*args, **kwargs)
-        context = Context(self.env, ChainMap(_vars, self.globals))
-
+        context = Context(self.env, globals=self.make_globals(dict(*args, **kwargs)))
         buf = StringIO()
         await self.render_with_context_async(context, buf)
         return buf.getvalue()
@@ -113,7 +116,7 @@ class BoundTemplate:
             ``False``.
         """
         # "template" could get overridden from args/kwargs, "partial" will not.
-        namespace = self._make_globals(partial, args, kwargs)
+        namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
             for node in self.tree.statements:
@@ -148,7 +151,7 @@ class BoundTemplate:
     ) -> None:
         """An async version of :meth:`liquid.template.BoundTemplate.render_with_context`."""
         # "template" could get overridden from args/kwargs, "partial" will not.
-        namespace = self._make_globals(partial, args, kwargs)
+        namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
             for node in self.tree.statements:
@@ -200,13 +203,22 @@ class BoundTemplate:
             return await uptodate
         return uptodate
 
-    def _make_globals(
-        self, partial: bool, args: Any, kwargs: Any
-    ) -> abc.Mapping[str, object]:
-        return {
-            **dict(*args, **kwargs),
-            "partial": partial,
-        }
+    def make_globals(self, render_args: Mapping[str, object]) -> Mapping[str, object]:
+        """Return a mapping aggregated from render arguments, template globals and
+        matter variables."""
+        return ReadOnlyChainMap(
+            render_args,
+            self.matter,
+            self.globals,
+        )
+
+    def make_partial_namespace(
+        self,
+        partial: bool,
+        render_args: Mapping[str, object],
+    ) -> Mapping[str, object]:
+        """"""
+        return {**render_args, "partial": partial}
 
     def __repr__(self) -> str:
         return (
@@ -220,10 +232,15 @@ class AwareBoundTemplate(BoundTemplate):
         super().__init__(*args, **kwargs)
         self.drop = TemplateDrop(self.name, self.path)
 
-    def _make_globals(
-        self, partial: bool, args: Any, kwargs: Any
+    def make_partial_namespace(
+        self,
+        partial: bool,
+        render_args: Mapping[str, object],
     ) -> abc.Mapping[str, object]:
-        return {"template": self.drop, **super()._make_globals(partial, args, kwargs)}
+        return {
+            "template": self.drop,
+            **super().make_partial_namespace(partial, render_args),
+        }
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):

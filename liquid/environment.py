@@ -206,6 +206,7 @@ class Environment:
         name: str = "",
         path: Optional[Union[str, Path]] = None,
         globals: Optional[Mapping[str, object]] = None,
+        matter: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """Parse the given string as a liquid template.
 
@@ -220,6 +221,9 @@ class Environment:
         :param globals: An optional mapping of context variables made available every
             time the resulting template is rendered. Defaults to ``None``.
         :type globals: dict
+        :param matter: Optional mapping containing variables associated with the
+            template. Could be "front matter" or other meta data.
+        :type matter: Optional[Mapping[str, object]]
         :returns: A parsed template ready to be rendered.
         :rtype: liquid.template.BoundTemplate
         """
@@ -235,6 +239,7 @@ class Environment:
             path=path,
             parse_tree=parse_tree,
             globals=self.make_globals(globals),
+            matter=matter,
         )
 
     # pylint: disable=redefined-builtin
@@ -305,10 +310,9 @@ class Environment:
     ) -> Dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
-            _globals = {**self.globals, **globals}
-        else:
-            _globals = {**self.globals}
-        return _globals
+            # Template globals take priority over environment globals.
+            return {**self.globals, **globals}
+        return dict(self.globals)
 
     def error(
         self,

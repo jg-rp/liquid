@@ -43,6 +43,7 @@ A non evaling templating language suitable for end users.
 - `Custom Filters`_
 - `Custom Tags`_
 - `Custom Loaders`_
+- `Front Matter Loader Example`_
 - `Contributing`_
 
 
@@ -834,7 +835,7 @@ otherwise.
 
 You could then use ``DictLoader`` like this.
 
-.. code-block:: Python
+.. code-block:: python
 
     from liquid import Environment
     from liquid.loaders import DictLoader
@@ -862,6 +863,51 @@ You could then use ``DictLoader`` like this.
     """)
 
     print(template.render(user={"name": "Brian"}))
+
+
+Front Matter Loader Example
+***************************
+
+As of Python Liquid version 0.11.1, loaders can add to a template's render context using
+the ``matter`` argument to ``TemplateSource``. This example implements a Jekyll style
+front matter loader. I've omitted ``get_source_async`` and yaml error checking for
+brevity. 
+
+.. code-block:: python
+
+    import re
+    import yaml  # Assumes pyyaml is installed
+
+    from liquid import Environment
+    from liquid.loaders import FileSystemLoader
+    from liquid.loaders import TemplateSource
+
+    RE_FRONT_MATTER = re.compile(r"\s*---\s*(.*?)\s*---\s*", re.MULTILINE | re.DOTALL)
+
+
+    class FrontMatterFileSystemLoader(FileSystemLoader):
+        def get_source(
+            self,
+            env: Environment,
+            template_name: str,
+        ) -> TemplateSource:
+            source, filename, uptodate, matter = super().get_source(env, template_name)
+            match = RE_FRONT_MATTER.search(source)
+
+            if match:
+                matter = yaml.load(match.group(1), Loader=yaml.Loader)
+                source = source[match.end() :]
+
+            return TemplateSource(
+                source,
+                filename,
+                uptodate,
+                matter,
+            )
+
+By default, matter variables take priority over environment and template globals, but
+not keyword arguments passed to ``.render()``.
+
 
 Contributing
 ------------

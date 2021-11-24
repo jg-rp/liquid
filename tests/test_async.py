@@ -6,7 +6,9 @@ import unittest
 
 from collections import abc
 from pathlib import Path
+
 from typing import NamedTuple
+from typing import Dict
 
 # assert_awaited* were new in Python 3.8, so we're using the backport.
 from mock import patch
@@ -15,6 +17,10 @@ from liquid import Template
 from liquid import Environment
 from liquid import FileSystemLoader
 
+from liquid.loaders import TemplateSource
+from liquid.loaders import DictLoader
+
+from liquid.exceptions import TemplateNotFound
 from liquid.template import BoundTemplate
 
 
@@ -52,6 +58,16 @@ class LoadAsyncTestCase(unittest.TestCase):
         template = asyncio.run(coro())
         self.assertIsInstance(template, BoundTemplate)
 
+    def test_template_not_found_async(self):
+        """Test that non-existent templates raise TemplateNotFound."""
+        env = Environment(loader=FileSystemLoader("tests/fixtures/dropify/"))
+
+        async def coro():
+            return await env.get_template_async("nosuchthing.liquid")
+
+        with self.assertRaises(TemplateNotFound):
+            asyncio.run(coro())
+
     def test_cached_template_async(self):
         """Test that async loaded templates are cached."""
         env = Environment(loader=FileSystemLoader("tests/fixtures/dropify/"))
@@ -63,7 +79,7 @@ class LoadAsyncTestCase(unittest.TestCase):
             "liquid.loaders.FileSystemLoader.get_source_async", autospec=True
         ) as source:
             source.side_effect = [
-                (
+                TemplateSource(
                     r"hello {{ you }}",
                     "some_template",
                     None,
@@ -124,12 +140,12 @@ class LoadAsyncTestCase(unittest.TestCase):
             "liquid.loaders.DictLoader.get_source_async", autospec=True
         ) as source:
             source.side_effect = [
-                (
+                TemplateSource(
                     "{% include 'bar' %}",
                     "bar",
                     None,
                 ),
-                (
+                TemplateSource(
                     "{% for x in (1..3) %}{{x}}-{% endfor %}",
                     "foo",
                     None,
@@ -186,7 +202,7 @@ class LoadAsyncTestCase(unittest.TestCase):
                     "liquid.loaders.DictLoader.get_source_async", autospec=True
                 ) as source:
                     source.side_effect = [
-                        (
+                        TemplateSource(
                             "{% for x in (1..3) %}{{x}}-{% endfor %}",
                             "foo",
                             None,
@@ -237,7 +253,7 @@ class LoadAsyncTestCase(unittest.TestCase):
                     "liquid.loaders.DictLoader.get_source_async", autospec=True
                 ) as source:
                     source.side_effect = [
-                        (
+                        TemplateSource(
                             "{% for x in (1..3) %}{{x}}-{% endfor %}",
                             "foo",
                             None,
@@ -311,3 +327,88 @@ class AsyncDropTestCase(unittest.TestCase):
         self.assertEqual(result, "hello")
         self.assertEqual(self.drop.await_count, 0)
         self.assertEqual(self.drop.call_count, 1)
+
+
+class AsyncMatterDictLoader(DictLoader):
+    def __init__(
+        self,
+        templates: Dict[str, str],
+        matter: Dict[str, Dict[str, object]],
+    ):
+        super().__init__(templates)
+        self.matter = matter
+
+    async def get_source_async(
+        self, _: Environment, template_name: str
+    ) -> TemplateSource:
+        try:
+            source = self.templates[template_name]
+        except KeyError as err:
+            raise TemplateNotFound(template_name) from err
+
+        return TemplateSource(
+            source=source,
+            filename=template_name,
+            uptodate=None,
+            matter=self.matter.get(template_name),
+        )
+
+
+class MatterLoaderTestCase(unittest.TestCase):
+    def test_matter_loader(self):
+        """Test that template loaders can add to render context."""
+        loader = AsyncMatterDictLoader(
+            templates={
+                "some": "Hello, {{ you }}{{ username }}!",
+                "other": "Goodbye, {{ you }}{{ username }}.",
+                "thing": "{{ you }}{{ username }}",
+            },
+            matter={
+                "some": {"you": "World"},
+                "other": {"username": "Smith"},
+            },
+        )
+
+        env = Environment(loader=loader)
+
+        async def coro():
+            template = await env.get_template_async("some")
+            self.assertEqual(await template.render_async(), "Hello, World!")
+
+            template = await env.get_template_async("other")
+            self.assertEqual(await template.render_async(), "Goodbye, Smith.")
+
+            template = await env.get_template_async("thing")
+            self.assertEqual(await template.render_async(), "")
+
+        asyncio.run(coro())
+
+    def test_matter_global_priority(self):
+        """Test that matter variables take priority over globals."""
+        loader = AsyncMatterDictLoader(
+            templates={"some": "Hello, {{ you }}!"},
+            matter={"some": {"you": "Liquid"}},
+        )
+
+        env = Environment(loader=loader, globals={"you": "World"})
+
+        async def coro():
+            template = await env.get_template_async("some", globals={"you": "Jinja"})
+            self.assertEqual(await template.render_async(), "Hello, Liquid!")
+
+        asyncio.run(coro())
+
+    def test_matter_local_priority(self):
+        """Test that render args take priority over matter variables."""
+        loader = AsyncMatterDictLoader(
+            templates={"some": "Hello, {{ you }}!"},
+            matter={"some": {"you": "Liquid"}},
+        )
+
+        env = Environment(loader=loader)
+
+        async def coro():
+            template = await env.get_template_async("some")
+            self.assertEqual(await template.render_async(you="John"), "Hello, John!")
+
+        asyncio.run(coro())
