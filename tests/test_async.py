@@ -18,6 +18,7 @@ from liquid import Environment
 from liquid import FileSystemLoader
 
 from liquid.loaders import TemplateSource
+from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
 
 from liquid.exceptions import TemplateNotFound
@@ -410,5 +411,35 @@ class MatterLoaderTestCase(unittest.TestCase):
         async def coro():
             template = await env.get_template_async("some")
             self.assertEqual(await template.render_async(you="John"), "Hello, John!")
+
+        asyncio.run(coro())
+
+
+class ChoiceLoaderTestCase(unittest.TestCase):
+    def test_choose_between_loaders(self):
+        """Test that we can load templates from a list of loaders."""
+        loader = ChoiceLoader(
+            loaders=[
+                DictLoader({"a": "Hello, {{ you }}!"}),
+                DictLoader(
+                    {
+                        "a": "unreachable",
+                        "b": "the quick brown {{ animal | default: 'fox' }}",
+                    }
+                ),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        async def coro():
+            template = await env.get_template_async("a")
+            self.assertEqual(await template.render_async(you="World"), "Hello, World!")
+
+            template = await env.get_template_async("b")
+            self.assertEqual(await template.render_async(), "the quick brown fox")
+
+            with self.assertRaises(TemplateNotFound):
+                await env.get_template_async("c")
 
         asyncio.run(coro())

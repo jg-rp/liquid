@@ -13,6 +13,7 @@ from liquid.template import BoundTemplate
 from liquid.template import AwareBoundTemplate
 
 from liquid.loaders import FileSystemLoader
+from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
 from liquid.loaders import TemplateSource
 
@@ -309,3 +310,30 @@ class MatterLoaderTestCase(unittest.TestCase):
         template = env.get_template("some")
 
         self.assertEqual(template.render(you="John"), "Hello, John!")
+
+
+class ChoiceLoaderTestCase(unittest.TestCase):
+    def test_choose_between_loaders(self):
+        """Test that we can load templates from a list of loaders."""
+        loader = ChoiceLoader(
+            loaders=[
+                DictLoader({"a": "Hello, {{ you }}!"}),
+                DictLoader(
+                    {
+                        "a": "unreachable",
+                        "b": "the quick brown {{ animal | default: 'fox' }}",
+                    }
+                ),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        template = env.get_template("a")
+        self.assertEqual(template.render(you="World"), "Hello, World!")
+
+        template = env.get_template("b")
+        self.assertEqual(template.render(), "the quick brown fox")
+
+        with self.assertRaises(TemplateNotFound):
+            env.get_template("c")

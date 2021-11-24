@@ -8,8 +8,8 @@
 Python Liquid
 =============
 
-A Python implementation of `Liquid <https://shopify.github.io/liquid/>`_.
-A non evaling templating language suitable for end users.
+A Python implementation of `Liquid <https://shopify.github.io/liquid/>`_, the
+safe, customer-facing template language for flexible web apps.
 
 .. image:: https://img.shields.io/pypi/v/python-liquid.svg
     :target: https://pypi.org/project/python-liquid/
@@ -115,6 +115,10 @@ directory, and that the template file ``index.html`` exists within it.
 
     template = env.get_template("index.html")
     print(template.render(some="variable", other="thing"))
+
+Available loaders are `FileSystemLoader <https://liquid.readthedocs.io/en/latest/api.html#liquid.loaders.FileSystemLoader>`_, 
+`DictLoader <https://liquid.readthedocs.io/en/latest/api.html#liquid.loaders.DictLoader>`_ 
+and `ChoiceLoader <https://liquid.readthedocs.io/en/latest/api.html#liquid.loaders.ChoiceLoader>`_.
 
 You can create templates from strings using an ``Environment`` too. This is often more
 efficient than using ``Template`` directly.

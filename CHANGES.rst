@@ -7,6 +7,8 @@ Version 0.11.1
 - Template loaders can now include additional template meta data using the ``matter``
   argument of ``liquid.loaders.TemplateSource``. See the example
   ``FrontMatterFileSystemLoader`` in the README. See #32.
+- Implemented ``ChoiceLoader``, a loader that tries to load a template from a list of
+  loaders.
 
 Version 0.11.0
 --------------

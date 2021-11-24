@@ -80,6 +80,8 @@ Template Loaders
 
 .. autoclass:: liquid.loaders.DictLoader
 
+.. autoclass:: liquid.loaders.ChoiceLoader
+
 .. autoclass:: liquid.loaders.BaseLoader
     :members: get_source, get_source_async
 

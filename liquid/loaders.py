@@ -19,6 +19,7 @@ from typing import NamedTuple
 from typing import Callable
 from typing import Dict
 from typing import Iterable
+from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import Tuple
@@ -209,3 +210,39 @@ class DictLoader(BaseLoader):
             raise TemplateNotFound(template_name) from err
 
         return TemplateSource(source, template_name, None)
+
+
+class ChoiceLoader(BaseLoader):
+    """A template loader that will try each of a list of loaders until a template is
+    found, or raise a :class:`liquid.exceptions.TemplateNotFound` exception if none of
+    the loaders could find the template.
+
+    :param loaders: A list of loaders implementing :class:`liquid.loaders.BaseLoader`.
+    :type loaders: List[BaseLoader]
+    """
+
+    def __init__(self, loaders: List[BaseLoader]):
+        super().__init__()
+        self.loaders = loaders
+
+    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+        for loader in self.loaders:
+            try:
+                return loader.get_source(env, template_name)
+            except TemplateNotFound:
+                pass
+
+        raise TemplateNotFound(template_name)
+
+    async def get_source_async(
+        self,
+        env: Environment,
+        template_name: str,
+    ) -> TemplateSource:
+        for loader in self.loaders:
+            try:
+                return await loader.get_source_async(env, template_name)
+            except TemplateNotFound:
+                pass
+
+        raise TemplateNotFound(template_name)

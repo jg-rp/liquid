@@ -13,7 +13,10 @@ except ImportError:
 from .mode import Mode as Mode
 from .token import Token
 from .expression import Expression
+
 from .loaders import FileSystemLoader
+from .loaders import DictLoader
+from .loaders import ChoiceLoader
 
 from .context import Context
 from .context import Undefined
