@@ -314,8 +314,8 @@ class RenderFiltersTestCase(RenderTestCase):
         """Test that we can render the `replace_first` filter correctly."""
         self._test(golden.replace_first_filter.cases)
 
-    def test_render_slice__filter(self):
-        """Test that we can render the `slice_` filter correctly."""
+    def test_render_slice_filter(self):
+        """Test that we can render the `slice` filter correctly."""
         self._test(golden.slice_filter.cases)
 
     def test_render_split_filter(self):

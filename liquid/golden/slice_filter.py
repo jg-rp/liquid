@@ -29,6 +29,11 @@ cases = [
         expect="",
     ),
     Case(
+        description="first argument is a sstring",
+        template=r'{{ "hello" | slice: "2" }}',
+        expect="l",
+    ),
+    Case(
         description="first argument not an integer",
         template=r'{{ "hello" | slice: "foo" }}',
         expect="",
@@ -39,6 +44,11 @@ cases = [
         template=r'{{ "hello" | slice: 5, "foo" }}',
         expect="",
         error=True,
+    ),
+    Case(
+        description="second argument is a string",
+        template=r'{{ "hello" | slice: 3, "2" }}',
+        expect="lo",
     ),
     Case(
         description="missing arguments",
@@ -75,9 +85,35 @@ cases = [
         globals={"a": [1, 2, 3, 4, 5]},
     ),
     Case(
-        description="slice a hash",
-        template=r"{{ a | slice: 2, 1 | join: '#' }}",
-        expect="a",
-        globals={"a": {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}},
+        description="first argument is a float",
+        template=r"{{ 'Liquid' | slice: 2.2 }}",
+        expect="",
+        error=True,
+    ),
+    Case(
+        description="second argument is a float",
+        template=r"{{ 'Liquid' | slice: 1, 2.2 }}",
+        expect="",
+        error=True,
+    ),
+    Case(
+        description="negative first argument",
+        template=r"{{ 'Liquid' | slice: -2 }}",
+        expect="i",
+    ),
+    Case(
+        description="negative first argument and positive length",
+        template=r"{{ 'Liquid' | slice: -2, 2 }}",
+        expect="id",
+    ),
+    Case(
+        description="negative first argument and negative length",
+        template=r"{{ 'Liquid' | slice: -2, -1 }}",
+        expect="",
+    ),
+    Case(
+        description="negative first argument and length out of range",
+        template=r"{{ 'Liquid' | slice: -2, 99 }}",
+        expect="id",
     ),
 ]

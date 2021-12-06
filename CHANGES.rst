@@ -13,6 +13,9 @@ Version 0.11.1
   "now".
 - The built-in ``truncate`` filter now has a default length of 50.
 - The built-in ``truncatewords`` filter now has a default number of words of 15.
+- Fixed a bug with the ``slice`` filter where it would return an empty string when
+  presented with a negative start index and length that would have exceeded the length
+  of the sequence. See #35.
 
 Version 0.11.0
 --------------
