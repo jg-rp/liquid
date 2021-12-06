@@ -66,7 +66,7 @@ def date(
         return str(dat)
 
     if isinstance(dat, str):
-        if dat == "now":
+        if dat in ("now", "today"):
             dat = datetime.datetime.now()
         else:
             dat = parser.parse(dat)

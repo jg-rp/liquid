@@ -306,6 +306,20 @@ class MiscFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="March 14, 2016",
             ),
+            Case(
+                description="special 'now' value",
+                val="now",
+                args=["%Y"],
+                kwargs={},
+                expect=datetime.datetime.now().strftime("%Y"),
+            ),
+            Case(
+                description="special 'today' value",
+                val="today",
+                args=["%Y"],
+                kwargs={},
+                expect=datetime.datetime.now().strftime("%Y"),
+            ),
         ]
 
         self._test(date, test_cases)
