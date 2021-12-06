@@ -65,10 +65,9 @@ cases = [
         expect="a#b",
         globals={"a": ["b", "a"]},
     ),
-    # Case(
-    #     description="sort an array of strings by a key",
-    #     template=r"{{ a | sort: 'title' | join: '#' }}",
-    #     expect="Z#b#a#C#A#B",
-    #     globals={"a": ["Z", "b", "a", "C", "A", "B"]},
-    # ),
+    Case(
+        description="sort a string",
+        template=r"{{ 'BzAa4' | sort | join: '#' }}",
+        expect="BzAa4",
+    ),
 ]

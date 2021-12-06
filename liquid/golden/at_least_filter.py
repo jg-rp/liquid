@@ -65,4 +65,14 @@ cases = [
         template=r'{{ "abc" | at_least: 2 }}',
         expect="2",
     ),
+    Case(
+        description="left value not a number negative argument",
+        template=r'{{ "abc" | at_least: -2 }}',
+        expect="0",
+    ),
+    Case(
+        description="argument string not a number",
+        template=r'{{ -1 | at_least: "abc" }}',
+        expect="0",
+    ),
 ]

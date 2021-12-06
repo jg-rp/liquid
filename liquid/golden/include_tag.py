@@ -181,4 +181,10 @@ cases = [
             "break": r" break!{% break %}",
         },
     ),
+    Case(
+        description="keyword arguments go out of scope",
+        template=r"{% include 'product-args', foo: 'hello', bar: 'there' %}{{ foo }}",
+        expect="hello there",
+        partials={"product-args": r"{{ foo }} {{ bar }}"},
+    ),
 ]

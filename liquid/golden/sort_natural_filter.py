@@ -35,6 +35,19 @@ cases = [
         globals={"a": [{"title": "foo"}, {"title": "bar"}, {"title": "Baz"}]},
     ),
     Case(
+        description="array of objects with a key gets stringified",
+        template=(
+            r"{% assign x = a | sort_natural: 'title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(title,1111)(title,87)(title,9)",
+        globals={"a": [{"title": 9}, {"title": 1111}, {"title": 87}]},
+    ),
+    Case(
         description="array of objects with a missing key",
         template=(
             r"{% assign x = a | sort_natural: 'title' %}"

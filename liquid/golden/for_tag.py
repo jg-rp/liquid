@@ -25,6 +25,12 @@ cases = [
         globals={"product": {"tags": ["sports", "garden"]}},
     ),
     Case(
+        description="loop over an array in reverse",
+        template=r"{% for tag in product.tags reversed %}{{ tag }} {% endfor %}",
+        expect="garden sports ",
+        globals={"product": {"tags": ["sports", "garden"]}},
+    ),
+    Case(
         description="simple hash loop",
         template=r"{% for c in collection %}{{ c[0] }} {{ c[1] }} {% endfor %}",
         expect="title foo description bar ",

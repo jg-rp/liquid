@@ -26,6 +26,18 @@ cases = [
         globals={"title": "Hello", "other": "Hello"},
     ),
     Case(
+        description="tags inside when block",
+        template=(
+            r"{% case title %}"
+            r"{% when other %}"
+            r"{% if true %}foo{% endif %}"
+            r"{% when 'goodbye' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="foo",
+        globals={"title": "Hello", "other": "Hello"},
+    ),
+    Case(
         description="'when' expression using an out of scope identifier",
         template=(
             r"{% case title %}"

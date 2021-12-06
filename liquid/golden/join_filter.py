@@ -28,7 +28,7 @@ cases = [
         description="join an array of integers",
         template=r"{{ arr | join: '#' }}",
         expect="1#2",
-        globals={"arr": ["1", "2"]},
+        globals={"arr": [1, 2]},
     ),
     Case(
         description="missing argument defaults to a space",

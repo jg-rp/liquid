@@ -23,7 +23,7 @@ cases = [
         expect="hello",
     ),
     Case(
-        description="no change from assign",
+        description="change from assign",
         template=(
             r"{% assign foo = 'hello' %}"
             r"{% ifchanged %}{{ foo }}{% endifchanged %}"
