@@ -43,12 +43,12 @@ class BoundTemplate:
     :param parse_tree: The parse tree representing this template.
     :type parse_tree: liquid.ast.ParseTree
     :param name: Optional name of the template. Defaults to an empty string.
-    :type name: str
+    :type name: Optional[str]
     :param path: Optional origin path or identifier for the template.
     :type path: Optional[Union[str, Path]]
     :param globals: An optional mapping of context variables made available every
         time the resulting template is rendered. Defaults to ``None``.
-    :type globals: dict
+    :type globals: Optional[Dict[str, object]]
     :param matter: Optional mapping containing variables associated with the template.
         Could be "front matter" or other meta data.
     :type matter: Optional[Mapping[str, object]]

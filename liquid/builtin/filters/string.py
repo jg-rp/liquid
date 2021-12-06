@@ -215,7 +215,7 @@ def strip_newlines(val: str, *, environment: Environment) -> str:
 
 
 @string_filter
-def truncate(val: str, num: Any, end: str = "...") -> str:
+def truncate(val: str, num: Any = 50, end: str = "...") -> str:
     """Truncate a string if it is longer than the specified number of characters."""
     if is_undefined(num):
         raise FilterArgumentError("truncate expected an integer, found Undefined")
@@ -236,7 +236,7 @@ MAX_TRUNC_WORDS = (1 << 31) - 1
 
 
 @string_filter
-def truncatewords(val: str, num: Any, end: str = "...") -> str:
+def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
     """Shorten a string down to the given number of words."""
     if is_undefined(num):
         raise FilterArgumentError("truncate expected an integer, found Undefined")
@@ -292,7 +292,7 @@ def base64_decode(val: str) -> str:
     try:
         return base64.b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("Invalid base64-encoded string.") from err
+        raise FilterError("invalid base64-encoded string") from err
 
 
 @string_filter
@@ -310,4 +310,4 @@ def base64_url_safe_decode(val: str) -> str:
     try:
         return base64.urlsafe_b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("Invalid base64-encoded string.") from err
+        raise FilterError("invalid base64-encoded string") from err

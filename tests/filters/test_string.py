@@ -1173,6 +1173,13 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="Ground control to Ma",
             ),
+            Case(
+                description="default length is 50",
+                val="Ground control to Major Tom. Ground control to Major Tom.",
+                args=[],
+                kwargs={},
+                expect="Ground control to Major Tom. Ground control to ...",
+            ),
         ]
 
         self._test(truncate, test_cases)
@@ -1285,6 +1292,13 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[100000000000000],
                 kwargs={},
                 expect=FilterArgumentError,
+            ),
+            Case(
+                description="default number of words is 15",
+                val="a b c d e f g h i j k l m n o p q",
+                args=[],
+                kwargs={},
+                expect="a b c d e f g h i j k l m n o...",
             ),
         ]
 
