@@ -30,7 +30,6 @@ from liquid.exceptions import FilterError
 from liquid.filter import with_environment
 from liquid.filter import string_filter
 from liquid.filter import liquid_filter
-from liquid.filter import num_arg
 
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
@@ -139,7 +138,7 @@ def upcase(val: str) -> str:
 
 
 @liquid_filter
-def slice_(val: Any, start: int, length: int = 1) -> Union[str, List[object]]:
+def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
     """Return a substring or subsequence, starting at `start`, containing up to
     `length` characters or items.
 
@@ -155,28 +154,41 @@ def slice_(val: Any, start: int, length: int = 1) -> Union[str, List[object]]:
     if is_undefined(length):
         length = 1
 
-    _start = num_arg(start)
-    if isinstance(_start, float):
+    # The reference implementation does not cast floats to int.
+    if isinstance(start, float):
         raise FilterArgumentError(
-            f"slice expected an integer for start, found {type(start).__name__}"
+            f"slice expected an integer start, found {type(start).__name__}"
         )
 
-    _length = num_arg(length)
-    if isinstance(_length, float):
+    if isinstance(length, float):
         raise FilterArgumentError(
             f"slice expected an integer length, found {type(length).__name__}"
         )
 
-    end = _start + _length
+    try:
+        start = int(start)
+    except (ValueError, TypeError) as err:
+        raise FilterArgumentError(
+            f"slice expected an integer start, found {type(start).__name__}"
+        ) from err
+
+    try:
+        length = int(length)
+    except (ValueError, TypeError) as err:
+        raise FilterArgumentError(
+            f"slice expected an integer length, found {type(length).__name__}"
+        ) from err
+
+    end = start + length
 
     # A negative start index and a length that exceeds the theoretical length of the
     # sequence.
-    if _start < 0 and end >= 0:
+    if start < 0 <= end:
         end = None
 
     if isinstance(val, str):
-        return val[_start:end]
-    return list(val[_start:end])
+        return val[start:end]
+    return list(val[start:end])
 
 
 @string_filter
