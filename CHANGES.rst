@@ -9,6 +9,8 @@ Version 0.11.1
   ``FrontMatterFileSystemLoader`` in the README. See #32.
 - Implemented ``ChoiceLoader``, a loader that tries to load a template from a list of
   loaders.
+- Added a ``FileExtensionLoader``, a template loader that inherits from
+  ``FileSystemLoader`` and automatically appends a file extension if one is missing.
 - The built-in ``date`` filter now accepts the special input value of "today" as well as
   "now".
 - The built-in ``truncate`` filter now has a default length of 50.

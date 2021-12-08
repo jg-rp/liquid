@@ -80,7 +80,7 @@ def array_filter(_filter: FilterT) -> FilterT:
 
 def sequence_filter(_filter: FilterT) -> FilterT:
     """A filter function decorator that raises a FilterValueError if the filter value
-    is can not be coerced into an array-like object.
+    can not be coerced into an array-like object.
 
     This is intended to mimic the semantics of the reference implementation's
     ``InputIterator`` class.
@@ -157,7 +157,7 @@ def num_arg(val: Any, default: Optional[N] = None) -> N:
 
 
 def math_filter(_filter: FilterT) -> FilterT:
-    """A filter function that raises a FilterArgumentError if the filter value is not
+    """A filter function decorator that raises a FilterArgumentError if the filter value is not
     a number."""
 
     @wraps(_filter)

@@ -139,7 +139,7 @@ class FileSystemLoader(BaseLoader):
         self.search_path = [Path(path) for path in search_path]
         self.encoding = encoding
 
-    def _resolve_path(self, template_name: str) -> Path:
+    def resolve_path(self, template_name: str) -> Path:
         template_path = Path(template_name)
 
         if os.path.pardir in template_path.parts:
@@ -159,7 +159,7 @@ class FileSystemLoader(BaseLoader):
         return source, source_path.stat().st_mtime
 
     def get_source(self, _: Environment, template_name: str) -> TemplateSource:
-        source_path = self._resolve_path(template_name)
+        source_path = self.resolve_path(template_name)
         source, mtime = self._read(source_path)
 
         return TemplateSource(
@@ -178,15 +178,44 @@ class FileSystemLoader(BaseLoader):
     ) -> TemplateSource:
         loop = asyncio.get_running_loop()
 
-        source_path = await loop.run_in_executor(
-            None, self._resolve_path, template_name
-        )
+        source_path = await loop.run_in_executor(None, self.resolve_path, template_name)
 
         source, mtime = await loop.run_in_executor(None, self._read, source_path)
 
         return TemplateSource(
             source, str(source_path), partial(self._uptodate, source_path, mtime)
         )
+
+
+class FileExtensionLoader(FileSystemLoader):
+    """A file system loader that adds a file name extension if one is missing."""
+
+    def __init__(
+        self,
+        search_path: Union[str, Path, Iterable[Union[str, Path]]],
+        encoding: str = "utf-8",
+        ext: str = ".liquid",
+    ):
+        super().__init__(search_path, encoding=encoding)
+        self.ext = ext
+
+    def resolve_path(self, template_name: str) -> Path:
+        template_path = Path(template_name)
+
+        if not template_path.suffix:
+            template_path = template_path.with_suffix(self.ext)
+
+        # Don't allow "../" to escape the search path.
+        if os.path.pardir in template_path.parts:
+            raise TemplateNotFound(template_name)
+
+        for path in self.search_path:
+            source_path = path.joinpath(template_path)
+
+            if not source_path.exists():
+                continue
+            return source_path
+        raise TemplateNotFound(template_name)
 
 
 class DictLoader(BaseLoader):

@@ -12,7 +12,9 @@ from liquid import Environment
 from liquid.template import BoundTemplate
 from liquid.template import AwareBoundTemplate
 
+from liquid.loaders import BaseLoader
 from liquid.loaders import FileSystemLoader
+from liquid.loaders import FileExtensionLoader
 from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
 from liquid.loaders import TemplateSource
@@ -313,6 +315,8 @@ class MatterLoaderTestCase(unittest.TestCase):
 
 
 class ChoiceLoaderTestCase(unittest.TestCase):
+    """Test loading templates from a list of loaders."""
+
     def test_choose_between_loaders(self):
         """Test that we can load templates from a list of loaders."""
         loader = ChoiceLoader(
@@ -337,3 +341,73 @@ class ChoiceLoaderTestCase(unittest.TestCase):
 
         with self.assertRaises(TemplateNotFound):
             env.get_template("c")
+
+
+class FileExtensionLoaderTestCase(unittest.TestCase):
+    """Test loading templates from the file system with automatic extensions."""
+
+    def test_load_template_with_missing_extension(self):
+        """Test that we can load a template from the file system when a file extension
+        is missing."""
+        env = Environment(
+            loader=FileExtensionLoader(
+                search_path="tests/fixtures/",
+                ext=".liquid",
+            )
+        )
+        template = env.get_template(name="dropify/index")
+        self.assertIsInstance(template, BoundTemplate)
+
+    def test_stay_in_search_path(self):
+        """Test that we can't stray above the search path"""
+        env = Environment(
+            loader=FileExtensionLoader(
+                search_path="tests/fixtures/subfolder",
+                ext=".liquid",
+            )
+        )
+
+        with self.assertRaises(TemplateNotFound):
+            _ = env.get_template(name="../dropify/index")
+
+    def test_multiple_search_paths(self):
+        """Test that we can search multiple directories for templates."""
+        env = Environment(
+            loader=FileExtensionLoader(
+                search_path=[
+                    "tests/fixtures/",
+                    "tests/fixtures/subfolder/",
+                ],
+                ext=".liquid",
+            )
+        )
+
+        template = env.get_template(name="fallback.html")
+        self.assertIsInstance(template, BoundTemplate)
+        self.assertEqual(template.path, Path("tests/fixtures/subfolder/fallback.html"))
+
+    def test_template_not_found(self):
+        """Test that we get an error if the template does not exist."""
+        env = Environment(
+            loader=FileExtensionLoader(
+                search_path="tests/fixtures/",
+                ext=".liquid",
+            )
+        )
+        with self.assertRaises(TemplateNotFound):
+            env.get_template(name="dropify/nosuchthing")
+
+
+class BadLoader(BaseLoader):
+    pass
+
+
+class BaseLoaderTestCase(unittest.TestCase):
+    """Test case for the abstract base loader."""
+
+    def test_get_source_is_required(self):
+        """Test that the `get_source` method is required."""
+        env = Environment(loader=BadLoader())
+
+        with self.assertRaises(TemplateNotFound):
+            env.get_template(name="somename")
