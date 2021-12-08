@@ -23,7 +23,7 @@ $ python -m pip install -U python-liquid
 
 ## Render
 
-Render a template string by creating a [Template](../api/Template) and calling its `render` method.
+Render a template string by creating a [Template](/api/Template) and calling its `render` method.
 
 ```python
 from liquid import Template
@@ -57,7 +57,7 @@ print(template.render(**context_data))
 ## Configure
 
 Configure template parsing and rendering behavior with extra arguments to
-[Template](../api/Template). The following example renders a template in
+[Template](/api/Template). The following example renders a template in
 [strict mode](introduction/strictness) and will raise an exception whenever an undefined variable is
 used. See [liquid.Template](api/Template) for all available options.
 
@@ -81,11 +81,11 @@ Keep reading to see how to configure an environment once, then load and render t
 
 ## Environment
 
-While [Template](../api/Template) can be convenient, more often than not an application will want
-to configure a single [Environment](../api/Environment), then load and render templates from it.
-This is usually more efficient than using [Template](../api/Template) directly.
+While [Template](/api/Template) can be convenient, more often than not an application will want
+to configure a single [Environment](/api/Environment), then load and render templates from it.
+This is usually more efficient than using [Template](/api/Template) directly.
 
-All templates rendered from an [Environment](../api/Environment) will share the environment's
+All templates rendered from an [Environment](/api/Environment) will share the environment's
 configuration. See [liquid.Environment](api/Environment) for all available options.
 
 ```python
@@ -105,6 +105,6 @@ result = template.render(you="World")
 ```
 
 :::note
-Notice that [Environment](../api/Environment) accepts a `loader` argument, whereas
-[Template](../api/Template) does not.
+Notice that [Environment](/api/Environment) accepts a `loader` argument, whereas
+[Template](/api/Template) does not.
 :::

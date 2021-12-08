@@ -187,7 +187,7 @@ Load and parse a template using the configured loader.
 
 **Returns:** A parsed template bound to the environment and ready to be rendered.  
 **Return type:** [liquid.template.BoundTemplate](BoundTemplate)  
-**Raises:** [liquid.exceptions.TemplateNotFound](template-not-found): If a template with the given
+**Raises:** [liquid.exceptions.TemplateNotFound](exceptions#liquidexceptionstemplatenotfound): If a template with the given
 name can not be found.
 
 ### `get_template_async`
