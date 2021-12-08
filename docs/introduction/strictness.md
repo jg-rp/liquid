@@ -1,0 +1,38 @@
+# Strictness
+
+Templates are parsed and rendered in strict mode by default. Where syntax and render-time type
+errors raise an exception as soon as possible. You can change the error tolerance mode with the
+`tolerance` argument to [Environment](../api/Environment) or [Template](../api/Template).
+
+Available modes are `Mode.STRICT`, `Mode.WARN` and `Mode.LAX`.
+
+```python
+from liquid import Environment, FileSystemLoader, Mode
+
+env = Environment(
+    loader=FileSystemLoader("templates/"),
+    tolerance=Mode.LAX,
+)
+```
+
+## Undefined Variables
+
+By default, references to undefined variables are silently ignored. Pass `StrictUndefined` as the
+`undefined` argument to [Template](../api/Template) or [Environment](../api/Environment), and
+any operation on an undefined variable will raise an `UndefinedError`.
+
+```python
+from liquid import Environment, StrictUndefined
+env = Environment(undefined=StrictUndefined)
+```
+
+## Undefined Filters
+
+Undefined filters raise a `NoSuchFilterFunc` exception by default. Set the `strict_filters`
+argument to [Template](../api/Template) or [Environment](../api/Environment) to `False` and
+undefined filters will be silently ignored.
+
+```python
+from liquid import Environment
+env = Environment(strict_filters=False)
+```
