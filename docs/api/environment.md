@@ -10,7 +10,7 @@ with every template.
 
 ## `Environment`
 
-`class Environment([[options]])`
+`class Environment([options])`
 
 **Parameters:**
 
@@ -56,53 +56,53 @@ with every template.
 
 ## Properties
 
-### undefined
+### `undefined`
 
 **Type**: `Type[liquid.Undefined]`
 
 The undefined type. When an identifier can not be resolved, an instance of undefined is returned.
 
-### strict_filters
+### `strict_filters`
 
 **Type**: `bool`
 
 Indicates if an undefined filter should raise an exception or be ignored.
 
-### autoescape
+### `autoescape`
 
 **Type**: `bool`
 
 Indicates if auto-escape is enabled.
 
-### tags
+### `tags`
 
 **Type**: `Dict[str, liquid.tag.Tag]`
 
 A dictionary mapping tag names to liquid.tag.Tag instances.
 
-### filters
+### `filters`
 
 **Type**: `Dict[str, Callable[..., Any]`
 
 A dictionary mapping filter names to callable objects implementing a filter's behavior.
 
-### mode
+### `mode`
 
 **Type**: `liquid.Mode`
 
 The current tolerance mode.
 
-### cache
+### `cache`
 
 **Type**: `MutableMapping[Any, Any]`
 
 The template cache.
 
-### auto_reload
+### `auto_reload`
 
 Indicates if automatic reloading of templates is enabled.
 
-### template_class
+### `template_class`
 
 **Type**: `Type[liquid.template.BoundTemplate]`
 
@@ -110,7 +110,7 @@ Indicates if automatic reloading of templates is enabled.
 instance of [Environment.template_class](#template_class). Defaults to
 [liquid.template.BoundTemplate](BoundTemplate).
 
-### globals
+### `globals`
 
 A dictionary of variables that will be added to the context of every template rendered from the
 environment.

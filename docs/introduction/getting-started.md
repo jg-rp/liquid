@@ -23,7 +23,7 @@ $ python -m pip install -U python-liquid
 
 ## Render
 
-Render a template string by creating a [Template](/api/Template) and calling its `render` method.
+Render a template string by creating a [Template](/api/Template) and calling its [render()](/api/BoundTemplate#render) method.
 
 ```python
 from liquid import Template
@@ -33,8 +33,8 @@ print(template.render(you="World"))  # Hello, World!
 print(template.render(you="Liquid"))  # Hello, Liquid!
 ```
 
-Keyword arguments passed to `render` are available as variables for templates to use in Liquid
-expressions.
+Keyword arguments passed to [render()](/api/BoundTemplate#render) are available as variables for
+templates to use in Liquid expressions.
 
 ```python
 from liquid import Template
@@ -56,10 +56,10 @@ print(template.render(**context_data))
 
 ## Configure
 
-Configure template parsing and rendering behavior with extra arguments to
-[Template](/api/Template). The following example renders a template in
-[strict mode](introduction/strictness) and will raise an exception whenever an undefined variable is
-used. See [liquid.Template](api/Template) for all available options.
+Configure template parsing and rendering behavior with extra arguments to [Template](/api/Template).
+The following example renders a template in [strict mode](introduction/strictness) and will raise an
+exception whenever an undefined variable is used. See [liquid.Template](api/Template) for all
+available options.
 
 ```python
 from liquid import Template

@@ -584,7 +584,14 @@ to `true`.
 
 ### Truthy and Falsy
 
-`false` and `nil` are falsy, everything else is truthy. Even empty string and arrays.
+`false` and `nil` are falsy, everything else is truthy. Even empty string and arrays. Compare
+strings and arrays to `empty` to check for emptiness.
+
+```liquid
+{% if somearray != empty %}
+  Do something with the array.
+{% endif %}
+```
 
 ## ifchanged
 

@@ -80,11 +80,17 @@ There is no literal syntax for creating arrays or hashes, although these types (
 equivalents) can be added to a template's render context, and many tags and filters are designed to
 work with them.
 
-### Nil
+A _range_ literal is a start and stop integer, separated by two periods (`..`), and enclosed in parentheses. The resulting range is inclusive of its stop value. Ranges can be iterated and many of
+the built-in filters that accept an array will also work with a range.
+
+```liquid
+{% assign foo = (1..5) %}
+{{ foo | join: ',' }}
+
+{% for i in (3..6) %}
+    {{ i | plus: forloop.index }}
+{% endfor %}
+```
 
 The reserved word `nil` is used to represent the absence of a value. In Python Liquid, `nil` is
 equal to `None`.
-
-### Empty
-
-TODO
