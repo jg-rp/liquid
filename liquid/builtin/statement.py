@@ -1,4 +1,5 @@
 """Parse tree node and pseudo "tag" for output statements."""
+from typing import Any
 from typing import Optional
 from typing import TextIO
 
@@ -43,9 +44,8 @@ class StatementNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"StatementNode(tok={self.tok}, expression={self.expression!r})"
 
-    def _to_liquid_string(self, val: object, autoescape: bool) -> str:
-        if isinstance(val, str):
-            # shortcut for common case.
+    def _to_liquid_string(self, val: Any, autoescape: bool) -> str:
+        if isinstance(val, str) or (autoescape and hasattr(val, "__html__")):
             pass
         elif isinstance(val, bool):
             val = str(val).lower()
@@ -61,11 +61,10 @@ class StatementNode(Node):
         else:
             val = str(val)
 
-        assert isinstance(val, str)
-
         if autoescape:
             val = escape(val)
 
+        assert isinstance(val, str)
         return val
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:

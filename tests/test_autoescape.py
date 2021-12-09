@@ -3,6 +3,7 @@ from unittest import skipIf
 
 from typing import NamedTuple
 from typing import Dict
+from typing import List
 
 try:
     import markupsafe
@@ -26,6 +27,18 @@ class Case(NamedTuple):
     expect: str
 
 
+class SafeHTMLDrop:
+    def __init__(self, somelist: List[object]):
+        self.items = somelist
+
+    def __str__(self):
+        return "SafeHTMLDrop"
+
+    def __html__(self):
+        lis = "\n".join(f"<li>{item}</li>" for item in self.items)
+        return f"<ul>\n{lis}\n</ul>"
+
+
 @skipIf(markupsafe is None, "this test requires markupsafe")
 class AutoescapeTestCase(TestCase):
     def test_do_not_escape_output(self):
@@ -36,7 +49,13 @@ class AutoescapeTestCase(TestCase):
                 template=r"{{ name }}",
                 context={"name": '<script>alert("XSS!");</script>'},
                 expect='<script>alert("XSS!");</script>',
-            )
+            ),
+            Case(
+                description="__html__ is ignored",
+                template=r"{{ foo }}",
+                context={"foo": SafeHTMLDrop([1, 2, 3])},
+                expect="SafeHTMLDrop",
+            ),
         ]
 
         env = Environment(autoescape=False)
@@ -84,6 +103,12 @@ class AutoescapeTestCase(TestCase):
                     "&lt;script&gt;alert(&#34;XSS!&#34;);&lt;/script&gt;"
                     "</p>"
                 ),
+            ),
+            Case(
+                description="drops with __html__ are safe",
+                template=(r"{{ foo }}"),
+                context={"foo": SafeHTMLDrop([1, 2, 3])},
+                expect="<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n</ul>",
             ),
         ]
 
@@ -463,6 +488,12 @@ class AutoescapeTestCase(TestCase):
                 template=r"{{ some | escape_once }}",
                 context={"some": Markup("&lt;p&gt;test&lt;/p&gt;<p>test</p>")},
                 expect="&lt;p&gt;test&lt;/p&gt;&lt;p&gt;test&lt;/p&gt;",
+            ),
+            Case(
+                description="escape __html__",
+                template=r"{{ some | escape }}",
+                context={"some": SafeHTMLDrop([1, 2, 3])},
+                expect="SafeHTMLDrop",
             ),
         ]
 

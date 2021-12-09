@@ -143,7 +143,7 @@ def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
     return WARNINGS.get(exc, LiquidWarning)
 
 
-def escape(val: object) -> str:
+def escape(val: Any) -> str:
     """A dummy escape function that always raises an exception."""
     raise Error("autoescape requires Markupsafe to be installed")
 
