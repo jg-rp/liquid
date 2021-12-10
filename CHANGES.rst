@@ -18,6 +18,7 @@ Version 0.11.1
 - Fixed a bug with the ``slice`` filter where it would return an empty string when
   presented with a negative start index and length that would have exceeded the length
   of the sequence. See #35.
+- Drops can now define safe HTML string representations using a ``__html__`` method. 
 
 Version 0.11.0
 --------------

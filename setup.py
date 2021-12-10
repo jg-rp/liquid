@@ -16,7 +16,7 @@ setuptools.setup(
     description="A Python template engine for the Liquid markup language.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    url="https://github.com/jg-rp/liquid",
+    url="https://jg-rp.github.io/liquid/",
     packages=setuptools.find_packages(exclude=["tests*"]),
     include_package_data=True,
     zip_safe=False,
@@ -38,7 +38,7 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
     project_urls={
-        "API Reference": "https://liquid.readthedocs.io/en/latest/api.html",
+        "Documentation": "https://jg-rp.github.io/liquid/",
         "Issue Tracker": "https://github.com/jg-rp/liquid/issues",
         "Source Code": "https://github.com/jg-rp/liquid",
         "Change Log": "https://github.com/jg-rp/liquid/blob/main/CHANGES.rst",

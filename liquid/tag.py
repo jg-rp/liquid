@@ -42,4 +42,4 @@ class Tag(ABC):
 
     @abstractmethod
     def parse(self, stream: TokenStream) -> Node:
-        """Return a parse tree node py parsing tokens from the given stream."""
+        """Return a parse tree node by parsing tokens from the given stream."""
