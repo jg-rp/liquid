@@ -28,6 +28,7 @@ const sidebars = {
         "introduction/objects-and-drops",
         "introduction/strictness",
         "introduction/auto-escape",
+        "introduction/async-support",
       ]
     },
     {

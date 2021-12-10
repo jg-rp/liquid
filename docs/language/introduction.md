@@ -44,7 +44,7 @@ end tag. See the [tag reference](tags) for details of all tags built-in to Liqui
 
 ## Template Literals
 
-`, ` and `!\n` are template literals. That's anything not inside `{%` and `%}` or `{{` and `}}` With
+`, ` and `!\n` are template literals. That's anything not inside `{%` and `%}` or `{{` and `}}`. With
 the exception of [whitespace control](#whitespace-control), template literals are output unchanged.
 
 ## Filters

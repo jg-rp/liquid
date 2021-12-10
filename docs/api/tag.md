@@ -18,19 +18,19 @@ Base class for all built-in and [custom template tags](/guides/custom-tags).
 
 ### `block`
 
-**Type**: `block: bool = True`
+**Type**: `bool = True`
 
 Indicates if the tag is a block tag.
 
 ### `name`
 
-**Type**: `name: str = ""`
+**Type**: `str = ""`
 
 The name of the tag. Like `"if"` or `"for"`.
 
 ### `end`
 
-**Type**: `end: str = ""`
+**Type**: `str = ""`
 
 The end or closing tag name. If `block` is `True`, `end` must be set. By convention it is
 `"end<tag.name>"`.
@@ -39,7 +39,7 @@ The end or closing tag name. If `block` is `True`, `end` must be set. By convent
 
 ### `env`
 
-**Type**: `env: liquid.Environment`
+**Type**: `liquid.Environment`
 
 The [Environment](Environment) that manages this tag.
 

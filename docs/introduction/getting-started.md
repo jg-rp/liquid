@@ -7,6 +7,10 @@ slug: /
 Python Liquid is a [Python](https://www.python.org/) engine for [Liquid](https://shopify.github.io/liquid/),
 the safe, customer-facing template language for flexible web apps.
 
+This page gets you started using Liquid with Python. See [Introduction to Liquid](/language/introduction),
+the [filter reference](/language/filters) and the [tag reference](/language/tags) to learn about
+writing Liquid templates.
+
 ## Install
 
 Install Python Liquid using [Pipenv](https://pipenv.pypa.io/en/latest/):

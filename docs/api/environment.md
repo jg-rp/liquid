@@ -112,6 +112,8 @@ instance of [Environment.template_class](#template_class). Defaults to
 
 ### `globals`
 
+**Type**: `Mapping[str, object]`
+
 A dictionary of variables that will be added to the context of every template rendered from the
 environment.
 

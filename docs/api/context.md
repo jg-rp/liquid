@@ -27,52 +27,52 @@ time a template is rendered. If you're writing custom tags, consider [copying](#
 
 ### `env`
 
-**Type**: `env: liquid.Environment`
+**Type**: `liquid.Environment`
 
 The [Environment](Environment) associated with this context.
 
 ### `locals`
 
-**Type**: `locals: Dict[str, Any]`
+**Type**: `Dict[str, Any]`
 
 A namespace for template local variables. Those that are bound with `assign` or `capture`.
 
 ### `globals`
 
-**Type**: `globals: Mapping[str, object]`
+**Type**: `Mapping[str, object]`
 
 A read-only namespace containing globally available variables. Usually passed down from the
 environment.
 
 ### `counters`
 
-**Type**: `counters: Dict[str, int]`
+**Type**: `Dict[str, int]`
 
 A namespace for `increment` and `decrement` counters.
 
 ### `scope`
 
-**Type**: `scope: ReadOnlyChainMap`
+**Type**: `ReadOnlyChainMap`
 
 Namespaces are searched using this chain map. When a context is extended, the temporary namespace is
 pushed to the front of this chain.
 
 ### `loops`
 
-**Type**: `loops: List[object]`
+**Type**: `List[object]`
 
 As stack of `forloop` objects. Used for populating `forloop.parentloop`.
 
 ### `disabled_tags`
 
-**Type**: `disabled_tags: List[str]`
+**Type**: `List[str]`
 
 A list of tags names that are disallowed in this context. For example, partial templates rendered
 using the "render" tag are not allowed to use "include" tags.
 
 ### `autoescape`
 
-**Type**: `autoescape: bool`
+**Type**: `bool`
 
 Indicates if HTML auto-escaping is enabled.
 
@@ -86,7 +86,7 @@ Add `val` to the local namespace with key `key`.
 
 ### `get`
 
-`get(self, path: Union[str, Sequence[Union[str, int]]], default: object = _undefined) -> object:`
+`get(path: Union[str, Sequence[Union[str, int]]], default: object = _undefined) -> object:`
 
 Return the value at path `path` if it is in scope, else default.
 
@@ -98,14 +98,14 @@ An async version of [get](#get).
 
 ### `resolve`
 
-`resolve(self, name: str, default: object = _undefined) -> Any`
+`resolve(name: str, default: object = _undefined) -> Any`
 
 Return the object at `name` in the current scope. This is like [get](#get), but does a single,
 top-level lookup rather than a chained lookup from a sequence of keys.`
 
 ### `filter`
 
-`filter(self, name: str) -> Callable[..., object]`
+`filter(name: str) -> Callable[..., object]`
 
 Return the filter function with given name.
 
@@ -113,19 +113,19 @@ Return the filter function with given name.
 
 ### `get_template`
 
-`get_template(self, name: str) -> BoundTemplate`
+`get_template(name: str) -> BoundTemplate`
 
 Load a template from the environment.
 
 ### `get_template_async`
 
-`async get_template_async(self, name: str) -> BoundTemplate`
+`async get_template_async(name: str) -> BoundTemplate`
 
 Load a template from the environment asynchronously.
 
 ### `extend`
 
-`extend(self, namespace: Mapping[str, object]) -> Iterator[Context]`
+`extend(namespace: Mapping[str, object]) -> Iterator[Context]`
 
 A context manager that extends this context with the given read-only namespace.
 
@@ -141,6 +141,6 @@ Return a copy of this context without any local variables or other state for sta
 
 ### `error`
 
-`error(self, exc: Error) -> None:`
+`error(exc: Error) -> None:`
 
 Ignore, raise or convert the given exception to a warning, according to the current tolerance mode.
