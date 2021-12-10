@@ -1,6 +1,6 @@
 # Objects and Drops
 
-Python Liquid uses [**getitem**](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)
+Python Liquid uses [`__getitem__`](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)
 internally for resolving property names and accessing items in a sequence. So, if your
 [data](render-context#render-arguments) is some combination of dictionaries and lists, for example,
 templates can reference objects as follows.
@@ -159,9 +159,11 @@ class Drop(abc.Mapping):
         return len(self.keys)
 ```
 
-By implementing the `__liquid__` method, Python class instances can behave like primitive Liquid
-data types. This is useful for situations where you need your Python object to act as an array
-index, or to be compared to a primitive data type, for example.
+## `__liquid__`
+
+By implementing a `__liquid__` method, Python objects can behave like primitive Liquid data types.
+This is useful for situations where you need your Python object to act as an array index, or to be
+compared to a primitive data type, for example.
 
 ```python
 from liquid import Template
@@ -194,3 +196,39 @@ context_data = {
 
 print(template.render(**context_data))  # one b
 ```
+
+## `__html__`
+
+When [HTML auto-escaping](auto-escape) is enabled, an object can be output as an HTML-safe string by
+implementing an `__html__()` method.
+
+```python
+from liquid import Environment
+
+class ListDrop:
+    def __init__(self, somelist):
+        self.items = somelist
+
+    def __str__(self):
+        return f"ListDrop({self.items})"
+
+    def __html__(self):
+        lis = "\n".join(f"  <li>{item}</li>" for item in self.items)
+        return f"<ul>\n{lis}\n</ul>"
+
+env = Environment(autoescape=True)
+template = env.from_string(r"{{ products }}")
+print(template.render(products=ListDrop(["Shoe", "Hat", "Ball"])))
+```
+
+```html title="output"
+<ul>
+  <li>Shoe</li>
+  <li>Hat</li>
+  <li>Ball</li>
+</ul>
+```
+
+If auto-escaping is not enabled, `__html__` is ignored and the return value of `__str__` is used
+instead. Explicitly escaping an object using the [escape](../language/filters#escape) filter will
+always yield an escaped version of `__str__`.

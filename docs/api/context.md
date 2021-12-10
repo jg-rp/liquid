@@ -23,9 +23,9 @@ time a template is rendered. If you're writing custom tags, consider [copying](#
 
 - `copy_depth: int = 0` - The number times a context was copied to create this one.
 
-## `Properties`
+## Properties
 
-### env
+### `env`
 
 **Type**: `env: liquid.Environment`
 

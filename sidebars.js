@@ -52,7 +52,6 @@ const sidebars = {
         "language/introduction",
         "language/filters",
         "language/tags",
-        "language/whitespace-control",
       ]
     },
   ],
@@ -70,6 +69,8 @@ const sidebars = {
         "api/choiceloader",
         "api/dictloader",
         "api/context",
+        "api/Tag",
+        "api/node",
         "api/exceptions",
       ]
     }

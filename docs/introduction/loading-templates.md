@@ -77,7 +77,7 @@ print(template.render(
 ```
 
 :::info
-Notice how whitespace is output unchanged. See [whitespace control](../language/whitespace-control)
+Notice how whitespace is output unchanged. See [whitespace control](../language/introduction#whitespace-control)
 for more information.
 :::
 

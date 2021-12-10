@@ -42,10 +42,10 @@ block tag must have a matching _end tag_, which, by convention, follows the patt
 `{% assign greeting = "Hello" %}` is an inline tag. Inline tags don't have a block or an associated
 end tag. See the [tag reference](tags) for details of all tags built-in to Liquid.
 
-## Literals
+## Template Literals
 
-`, ` and `!\n` are template literals. With the exception of [whitespace control](whitespace-control),
-template literals are output unchanged.
+`, ` and `!\n` are template literals. That's anything not inside `{%` and `%}` or `{{` and `}}` With
+the exception of [whitespace control](#whitespace-control), template literals are output unchanged.
 
 ## Filters
 
@@ -73,14 +73,55 @@ or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.
 interfaces, respectively.
 :::
 
+Liquid is dynamically typed. New variables are declared, initialized and reassigned with the
+[{% assign %}](tags#assign) and [{% capture %}](tags#capture) tags. Assignment expressions can
+reference existing variables and include literal strings, integers, floats and Booleans.
+
+```liquid
+{% assign title = collection.products.first.title %}
+{% assign user = session.user %}
+
+{% assign greeting = "Hello, user" %}
+{% if user %}
+    {% assign greeting = "Hello," | append: user.name %}
+{% endif %}
+```
+
+Most [built-in filters](filters) will coerce string representations of numbers to an integer or
+float as needed. And filters expecting a string value or argument will usually stringify them
+automatically. Although this behavior is not always consistent.
+
+### Literals
+
 Liquid supports literal strings (`"hello"` or `'hello'`), integers (`1`, `-35`), floats (`0.42`,
 `-99`) and booleans (`true` and `false`).
+
+```liquid
+{% assign first_name = "Sally" %}
+{% assign last_name = 'Smith' %}
+{% assign items_in_basket = 5 %}
+{% assign average_item_price = 3.99 %}
+{% assign discount = -0.47 %}
+{% assign special_offer = false %}
+{% assign more_available = true %}
+```
+
+### Arrays and Hashes
 
 There is no literal syntax for creating arrays or hashes, although these types (or their Python
 equivalents) can be added to a template's render context, and many tags and filters are designed to
 work with them.
 
-A _range_ literal is a start and stop integer, separated by two periods (`..`), and enclosed in parentheses. The resulting range is inclusive of its stop value. Ranges can be iterated and many of
+One common idiom in Liquid is to create an array of strings using the [split](filters#split) filter.
+
+```liquid
+{% assign my_array = "apple, banana, cabbage" | split: ", " %}
+```
+
+### Ranges
+
+A _range_ literal is a start and stop integer, separated by two periods (`..`), and enclosed in
+parentheses. The resulting range is inclusive of its stop value. Ranges can be iterated and many of
 the built-in filters that accept an array will also work with a range.
 
 ```liquid
@@ -92,5 +133,38 @@ the built-in filters that accept an array will also work with a range.
 {% endfor %}
 ```
 
+### nil
+
 The reserved word `nil` is used to represent the absence of a value. In Python Liquid, `nil` is
 equal to `None`.
+
+## Whitespace Control
+
+Optionally include a leading and/or trailing hyphen inside any [output statement](#output) or
+[tag](#tags). When present, Liquid will strip all whitespace from the preceding and/or trailing
+[template literal](#template-literals).
+
+```liquid title="without whitespace control"
+{% assign some_variable = false %}
+{% if some_variable != true %}
+Lets go!
+{% endif %}
+```
+
+```plain title="output"
+
+
+Lets go!
+
+```
+
+```liquid title="with whitespace control"
+{% assign some_variable = false %}
+{%- if some_variable != true -%}
+Lets go!
+{%- endif -%}
+```
+
+```plain title="output"
+Lets go!
+```
