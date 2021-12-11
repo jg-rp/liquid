@@ -5,7 +5,10 @@ from liquid.golden.case import Case
 cases = [
     Case(
         description="replace substrings",
-        template=r'{{ "Take my protein pills and put my helmet on" | replace: "my", "your" }}',
+        template=(
+            r'{{ "Take my protein pills and put my helmet on" '
+            r'| replace: "my", "your" }}'
+        ),
         expect="Take your protein pills and put your helmet on",
     ),
     Case(
@@ -47,7 +50,10 @@ cases = [
     ),
     Case(
         description="undefined second argument",
-        template=r'{{ "Take my protein pills and put my helmet on" | replace: "my", nosuchthing }}',
+        template=(
+            r'{{ "Take my protein pills and put my helmet on" '
+            r'| replace: "my", nosuchthing }}'
+        ),
         expect="Take  protein pills and put  helmet on",
     ),
 ]

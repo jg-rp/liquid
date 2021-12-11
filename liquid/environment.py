@@ -332,7 +332,7 @@ class Environment:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
 
-# pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin,too-many-arguments
 @lru_cache(maxsize=10)
 def get_implicit_environment(
     tag_start_string: str,

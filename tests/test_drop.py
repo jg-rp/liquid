@@ -1,5 +1,5 @@
 """Test the "drop" API."""
-
+# pylint: disable=missing-class-docstring
 import unittest
 
 from typing import Generic
@@ -16,16 +16,16 @@ class Case(NamedTuple):
     expect: str
 
 
-T = TypeVar("T")
+DropT = TypeVar("DropT")
 
 
-class Drop(Generic[T]):
+class Drop(Generic[DropT]):
     """Mock generic drop that wraps a primitive value."""
 
-    def __init__(self, val: T):
+    def __init__(self, val: DropT):
         self.val = val
 
-    def __liquid__(self) -> T:
+    def __liquid__(self) -> DropT:
         return self.val
 
     def __str__(self) -> str:

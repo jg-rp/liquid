@@ -1,3 +1,4 @@
+"""Template error tolerance modes."""
 import warnings
 
 from enum import IntEnum, auto

@@ -56,6 +56,8 @@ class LiquidSyntaxError(Error):
 
     @property
     def name(self) -> str:
+        """Return the name of the template that raised this exception. Return an empty
+        string if a name is not available."""
         if isinstance(self.filename, Path):
             return self.filename.as_posix()
         if self.filename:
@@ -140,6 +142,7 @@ WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {
 
 
 def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
+    """Return a warning equivalent of the given exception."""
     return WARNINGS.get(exc, LiquidWarning)
 
 
@@ -151,12 +154,14 @@ def escape(val: Any) -> str:
 class Markup(str):
     """A dummy markup class that always raises an exception."""
 
-    def __init__(self, val: object):
+    def __init__(self, _: object):
+        super().__init__()
         raise Error("autoescape requires Markupsafe to be installed")
 
     def join(self, _: object) -> str:
         raise Error("autoescape requires Markupsafe to be installed")
 
+    # pylint: disable=no-self-use,missing-function-docstring
     def unescape(self) -> str:
         raise Error("autoescape requires Markupsafe to be installed")
 

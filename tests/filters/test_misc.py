@@ -1,4 +1,5 @@
 """Test miscellaneous filter functions."""
+# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import datetime
 import unittest
 

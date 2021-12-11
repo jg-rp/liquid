@@ -55,8 +55,8 @@ class IfChangedNode(Node):
         # The context will update its namespace if needed.
         if context.ifchanged(val):
             buffer.write(val)
-
-        return None
+            return True
+        return False
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -69,8 +69,8 @@ class IfChangedNode(Node):
         # The context will update its namespace if needed.
         if context.ifchanged(val):
             buffer.write(val)
-
-        return None
+            return True
+        return False
 
 
 class IfChangedTag(Tag):

@@ -35,6 +35,7 @@ from collections import abc, deque
 from threading import Lock
 
 
+# pylint: disable=too-many-instance-attributes,invalid-name,protected-access,consider-using-with
 class LRUCache(abc.MutableMapping):
     """A simple LRU Cache implementation."""
 

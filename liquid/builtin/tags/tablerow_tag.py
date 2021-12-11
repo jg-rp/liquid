@@ -36,6 +36,7 @@ TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
 
 
+# pylint: disable=too-many-instance-attributes
 class TableRow(Mapping[str, object]):
     """Table row helper variables."""
 
@@ -204,7 +205,7 @@ class TablerowNode(Node):
                 # Newline as per reference implementation.
                 buffer.write("</tr>\n")
 
-        return None
+        return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -243,7 +244,7 @@ class TablerowNode(Node):
 
                 buffer.write("</tr>\n")
 
-        return None
+        return True
 
 
 class TablerowTag(Tag):

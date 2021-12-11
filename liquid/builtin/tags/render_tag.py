@@ -1,6 +1,5 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 
-import pathlib
 import sys
 
 from typing import Optional
@@ -94,18 +93,6 @@ class RenderNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         path = self.name.evaluate(context)
         assert isinstance(path, str)
-
-        # XXX: This `render_folder` and forced ".liquid" suffix is to simulate a Shopify
-        # theme structure. If it does actually belong in Python Liquid, it needs to be
-        # documented.
-
-        # TODO: Store this kind of thing on the context object but not the
-        # globals/locals namespace.
-        render_folder = context.get("render_folder", default=None)
-
-        if render_folder:
-            # FIXME: Don't assume ".liquid"
-            path = str(pathlib.Path(str(render_folder), path).with_suffix(".liquid"))
         template = context.get_template(path)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
@@ -155,7 +142,7 @@ class RenderNode(Node):
         else:
             template.render_with_context(ctx, buffer, partial=True, block_scope=True)
 
-        return None
+        return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -164,18 +151,6 @@ class RenderNode(Node):
         asynchronously."""
         path = await self.name.evaluate_async(context)
         assert isinstance(path, str)
-
-        # XXX: This `render_folder` and forced ".liquid" suffix is to simulate a Shopify
-        # theme structure. If it does actually belong in Python Liquid, it needs to be
-        # documented.
-
-        # TODO: Store this kind of thing on the context object but not the
-        # globals/locals namespace.
-        render_folder = context.get("render_folder", default=None)
-
-        if render_folder:
-            # FIXME: Don't assume ".liquid"
-            path = str(pathlib.Path(str(render_folder), path).with_suffix(".liquid"))
         template = await context.get_template_async(path)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
@@ -227,7 +202,7 @@ class RenderNode(Node):
                 ctx, buffer, partial=True, block_scope=True
             )
 
-        return None
+        return True
 
 
 class RenderTag(Tag):

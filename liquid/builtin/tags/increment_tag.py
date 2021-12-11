@@ -35,7 +35,7 @@ class IncrementNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.increment(self.identifier)))
-        return None
+        return True
 
 
 class IncrementTag(Tag):

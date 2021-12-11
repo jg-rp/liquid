@@ -1,4 +1,5 @@
 """Test Python Liquid's async API."""
+# pylint: disable=missing-class-docstring
 import asyncio
 import tempfile
 import time
@@ -101,7 +102,7 @@ class LoadAsyncTestCase(unittest.TestCase):
             template_path = Path(tmpdir) / "some.liquid"
 
             # Initial template content
-            with template_path.open("w") as fd:
+            with template_path.open("w", encoding="UTF-8") as fd:
                 fd.write("hello there\n")
 
             env = Environment(

@@ -1,3 +1,4 @@
+"""Test built-in "undefined" types."""
 import asyncio
 
 from dataclasses import dataclass

@@ -1,3 +1,4 @@
+"""Golden test case definition."""
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -5,6 +6,7 @@ from typing import Any
 from typing import Dict
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Case:
     """Test case dataclass to help with table driven tests."""

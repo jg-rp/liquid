@@ -1,3 +1,5 @@
+"""HTML escape test cases."""
+# pylint: disable=missing-class-docstring
 from unittest import TestCase
 from unittest import skipIf
 

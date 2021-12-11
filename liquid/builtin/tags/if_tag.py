@@ -86,7 +86,7 @@ class IfNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.condition.evaluate(context):
-            self.consequence.render(context, buffer)
+            rendered = self.consequence.render(context, buffer)
         else:
             rendered = False
             for alt in self.conditional_alternatives:
@@ -95,15 +95,15 @@ class IfNode(Node):
                     break
 
             if not rendered and self.alternative:
-                self.alternative.render(context, buffer)
+                return self.alternative.render(context, buffer)
 
-        return None
+        return rendered
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
         if await self.condition.evaluate_async(context):
-            await self.consequence.render_async(context, buffer)
+            rendered = await self.consequence.render_async(context, buffer)
         else:
             rendered = False
             for alt in self.conditional_alternatives:
@@ -112,9 +112,9 @@ class IfNode(Node):
                     break
 
             if not rendered and self.alternative:
-                await self.alternative.render_async(context, buffer)
+                return await self.alternative.render_async(context, buffer)
 
-        return None
+        return rendered
 
 
 class IfTag(Tag):
@@ -127,7 +127,9 @@ class IfTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
+    # pylint: disable=no-self-use
     def parse_expression(self, stream: TokenStream) -> Expression:
+        """Pare a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
         expr_iter = tokenize_boolean_expression(stream.current.value)
         return parse_boolean_expression(TokenStream(expr_iter))

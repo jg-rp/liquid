@@ -8,7 +8,6 @@ from typing import List
 from typing import Optional
 from typing import TextIO
 
-from liquid import __version__
 from liquid.context import Context
 from liquid.expression import Expression
 
@@ -78,7 +77,6 @@ class ParseTree(Node):
 
     def __init__(self) -> None:
         self.statements: List[Node] = []
-        self.version = __version__
 
     def __str__(self) -> str:  # pragma: no cover
         return "".join(str(s) for s in self.statements)
@@ -86,6 +84,7 @@ class ParseTree(Node):
     def __repr__(self) -> str:
         return f"ParseTree({self.statements})"
 
+    # pylint: disable=useless-return
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         for stmt in self.statements:
             stmt.render(context, buffer)
@@ -149,8 +148,8 @@ class BlockNode(Node):
         val = buf.getvalue()
         if not val.isspace():
             buffer.write(val)
-
-        return None
+            return True
+        return False
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -176,8 +175,8 @@ class BlockNode(Node):
         val = buf.getvalue()
         if not val.isspace():
             buffer.write(val)
-
-        return None
+            return True
+        return False
 
 
 class ConditionalBlockNode(Node):

@@ -116,7 +116,7 @@ class IncludeNode(Node):
             else:
                 template.render_with_context(context, buffer, partial=True)
 
-        return None
+        return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -149,7 +149,7 @@ class IncludeNode(Node):
             else:
                 await template.render_with_context_async(context, buffer, partial=True)
 
-        return None
+        return True
 
 
 class IncludeTag(Tag):

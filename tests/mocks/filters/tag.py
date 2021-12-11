@@ -1,3 +1,5 @@
+"""Mock HTML tag related filter functions."""
+# pylint: disable=missing-function-docstring
 from liquid.filter import string_filter
 from liquid.filter import liquid_filter
 from liquid.filter import with_context

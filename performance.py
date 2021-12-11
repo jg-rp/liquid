@@ -5,6 +5,7 @@ theme template. So, given the four fixtures at the time of writing, with a
 total of 34 .liquid files, 4 of which are a theme.liquid, `Template.render`
 and/or `env.from_string` will be called 60 times per loop.
 """
+# pylint: disable=missing-function-docstring
 import cProfile
 import pathlib
 import timeit
@@ -292,9 +293,13 @@ def profile_parse_and_render(search_path: str):
     env, templates = setup_parse(search_path)
 
     cProfile.runctx(
-        "parse_and_render(env, templates)",
-        globals={"parse_and_render": parse_and_render},
-        locals={"env": env, "templates": templates},
+        "[parse_and_render(env, templates) for _ in range(60)]",
+        globals={
+            "parse_and_render": parse_and_render,
+            "env": env,
+            "templates": templates,
+        },
+        locals={},
         sort="cumtime",
     )
 
@@ -413,8 +418,8 @@ def main():
     if n_args == 0:
         benchmark(search_path)
     elif n_args == 1 and args[0] == "--profile":
-        profile_render(search_path)
-        # profile_parse_and_render(search_path)
+        # profile_render(search_path)
+        profile_parse_and_render(search_path)
         # profile_parse(search_path)
         # profile_lex(search_path)
         # profile_compile(search_path)

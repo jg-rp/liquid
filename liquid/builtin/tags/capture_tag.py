@@ -64,7 +64,7 @@ class CaptureNode(ast.Node):
         buf = StringIO()
         self.block.render(context, buf)
         self._assign(context, buf)
-        return None
+        return False
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -72,7 +72,7 @@ class CaptureNode(ast.Node):
         buf = StringIO()
         await self.block.render_async(context, buf)
         self._assign(context, buf)
-        return None
+        return False
 
 
 class CaptureTag(Tag):

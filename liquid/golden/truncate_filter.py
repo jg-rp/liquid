@@ -52,7 +52,10 @@ cases = [
     ),
     Case(
         description="default length is 50",
-        template=r'{{ "Ground control to Major Tom. Ground control to Major Tom." | truncate }}',
+        template=(
+            r'{{ "Ground control to Major Tom. Ground control to Major Tom." '
+            r"| truncate }}"
+        ),
         expect="Ground control to Major Tom. Ground control to ...",
     ),
 ]

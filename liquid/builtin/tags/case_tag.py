@@ -74,9 +74,9 @@ class CaseNode(ast.Node):
                 rendered = True
 
         if not rendered and self.default:
-            self.default.render(context, buffer)
+            return self.default.render(context, buffer)
 
-        return None
+        return rendered
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -88,9 +88,9 @@ class CaseNode(ast.Node):
                 rendered = True
 
         if not rendered and self.default:
-            await self.default.render_async(context, buffer)
+            return await self.default.render_async(context, buffer)
 
-        return None
+        return rendered
 
 
 class CaseTag(Tag):
@@ -103,7 +103,9 @@ class CaseTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
+    # pylint: disable=no-self-use
     def parse_expression(self, case: str, obj: str, stream: TokenStream) -> Expression:
+        """Parse a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
         expr_iter = tokenize_boolean_expression(f"{case} == {obj}")
         return parse_boolean_expression(TokenStream(expr_iter))

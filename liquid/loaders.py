@@ -70,7 +70,8 @@ class BaseLoader(ABC):
         env: Environment,
         template_name: str,
     ) -> TemplateSource:
-        """ """
+        """An async version of `get_source`. The default implementation delegates to
+        `get_source()`."""
         return self.get_source(env, template_name)
 
     # pylint: disable=redefined-builtin
@@ -80,6 +81,12 @@ class BaseLoader(ABC):
         name: str,
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
+        """Load and parse a template. Used internally by `Environment` to load a
+        template source. Delegates to `get_source`.
+
+        A custom loaders would typically implement `get_source` rather than overriding
+        `load`.
+        """
         try:
             source, filename, uptodate, matter = self.get_source(env, name)
         except Exception as err:
@@ -101,6 +108,7 @@ class BaseLoader(ABC):
         name: str,
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
+        """An async version of `load`."""
         try:
             template_source = await self.get_source_async(env, name)
             source, filename, uptodate, matter = template_source
@@ -140,6 +148,12 @@ class FileSystemLoader(BaseLoader):
         self.encoding = encoding
 
     def resolve_path(self, template_name: str) -> Path:
+        """Return a path to the template `template_name`.
+
+        If the search path is a list of paths, returns the first path where
+        `template_name` exists. If none of the search paths contain `template_name`, a
+        `TemplateNotFound` exception is raised.
+        """
         template_path = Path(template_name)
 
         if os.path.pardir in template_path.parts:
@@ -188,7 +202,17 @@ class FileSystemLoader(BaseLoader):
 
 
 class FileExtensionLoader(FileSystemLoader):
-    """A file system loader that adds a file name extension if one is missing."""
+    """A file system loader that adds a file name extension if one is missing.
+
+    :param search_path: One or more paths to search.
+    :type search_path: Union[str, Path, Iterable[Union[str, Path]]]
+    :param encoding: Open template files with the given encoding. Defaults to
+        ``"utf-8"``.
+    :type encoding: str
+    :param ext: A default file extension. Should include a leanding period. Defaults to
+        ``.liquid``.
+    :type ext: str
+    """
 
     def __init__(
         self,

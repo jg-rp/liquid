@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -86,7 +87,9 @@ if TYPE_CHECKING:
     from liquid import Environment
 
 
+# pylint: disable=too-many-statements
 def register(env: Environment) -> None:
+    """Register all built-in tags and filters with an environment."""
     env.add_tag(literal.Literal)
     env.add_tag(statement.Statement)
     env.add_tag(illegal.Illegal)

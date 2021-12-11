@@ -1,3 +1,4 @@
+"""Token stream test cases."""
 from unittest import TestCase
 
 from liquid.token import Token

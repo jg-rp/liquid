@@ -137,7 +137,10 @@ class MalformedTemplateTestCase(TestCase):
                 description="missing end tag at EOF",
                 template="{% if true %}foo{% assign bar = 'baz' %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="expected tag with value 'endif', found eof with value '', on line 1",
+                expect_msg=(
+                    "expected tag with value 'endif', found eof with value '', "
+                    "on line 1"
+                ),
             ),
             Case(
                 description="orphaned break",
@@ -301,7 +304,9 @@ class MalformedTemplateTestCase(TestCase):
         test_cases = [
             Case(
                 description="chained alias identifier",
-                template="{% include 'product.alt' with product['some-tags'] as foo.bar %}",
+                template=(
+                    "{% include 'product.alt' with product['some-tags'] as foo.bar %}"
+                ),
                 expect_exception=LiquidSyntaxError,
                 expect_msg="invalid identifier 'foo.bar', on line 1",
             ),
@@ -427,7 +432,7 @@ class MalformedTemplateTestCase(TestCase):
         self._test_partial(test_cases, templates)
 
     def test_resume_block(self):
-        """Test that we continue to execute a block after a signle statement error."""
+        """Test that we continue to execute a block after a single statement error."""
         source = (
             r"{% if true %}"
             r"before error "
@@ -468,13 +473,19 @@ class MalformedTemplateTestCase(TestCase):
                 description="unexpected character",
                 template=r"{% assign foo+bar = 'hello there'%}{{ foo+bar }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="invalid assignment expression \"foo+bar = 'hello there'\", on line 1",
+                expect_msg=(
+                    "invalid assignment expression \"foo+bar = 'hello there'\", "
+                    "on line 1"
+                ),
             ),
             Case(
                 description="unexpected chained assignment identifier",
                 template=r"{% assign foo.bar = 'hello there' %}{{ foo.bar }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="invalid assignment expression \"foo.bar = 'hello there'\", on line 1",
+                expect_msg=(
+                    "invalid assignment expression \"foo.bar = 'hello there'\", "
+                    "on line 1"
+                ),
             ),
             Case(
                 description="unexpected chained capture identifier",

@@ -38,13 +38,13 @@ class AssignNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         self.expression.evaluate(context)
-        return None
+        return False
 
     async def render_to_output_async(
         self, context: Context, _: TextIO
     ) -> Optional[bool]:
         await self.expression.evaluate_async(context)
-        return None
+        return False
 
 
 class AssignTag(Tag):

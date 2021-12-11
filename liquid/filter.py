@@ -20,7 +20,7 @@ from liquid.exceptions import FilterValueError
 
 if TYPE_CHECKING:
     FilterT = Callable[..., Any]
-    N = Union[float, int]
+    NumberT = Union[float, int]
 
 
 def with_context(_filter: FilterT) -> FilterT:
@@ -127,7 +127,7 @@ def int_arg(val: Any, default: Optional[int] = None) -> int:
         ) from err
 
 
-def num_arg(val: Any, default: Optional[N] = None) -> N:
+def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
     """Return the ``val`` as an int or float. If ``val`` can't be cast to an
     int or float, return ``default`."""
     if isinstance(val, (int, float)):
@@ -157,8 +157,8 @@ def num_arg(val: Any, default: Optional[N] = None) -> N:
 
 
 def math_filter(_filter: FilterT) -> FilterT:
-    """A filter function decorator that raises a FilterArgumentError if the filter value is not
-    a number."""
+    """A filter function decorator that raises a FilterArgumentError if the filter value
+    is not a number."""
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:

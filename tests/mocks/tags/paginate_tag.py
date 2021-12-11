@@ -1,5 +1,5 @@
 """Tag and node definition for the mock "paginate" tag."""
-
+# pylint: disable=missing-function-docstring
 import math
 import sys
 

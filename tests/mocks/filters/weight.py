@@ -1,3 +1,5 @@
+"""Mock filter functions for displaying values as weights."""
+# pylint: disable=missing-function-docstring
 from liquid.filter import math_filter
 
 

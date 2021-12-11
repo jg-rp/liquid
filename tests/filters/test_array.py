@@ -1,4 +1,5 @@
 """Test math filter functions."""
+# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import unittest
 
 from functools import partial

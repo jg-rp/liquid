@@ -452,12 +452,16 @@ class Filter:
         return "".join(buf)
 
     def evaluate_args(self, context: Context) -> List[object]:
+        """Return a list of filter arguments evaluated with the given context."""
         return [arg.evaluate(context) for arg in self.args]
 
     async def evaluate_args_async(self, context: Context) -> List[object]:
+        """An async version of `evaluate_args`."""
         return [await arg.evaluate_async(context) for arg in self.args]
 
     def evaluate_kwargs(self, context: Context) -> Dict[str, object]:
+        """Return a dictionary of filter keyword arguments evaluated with the given
+        context."""
         # Shortcut for the common case. Most filters do not use named
         # parameters.
         if not self.kwargs:
@@ -465,6 +469,7 @@ class Filter:
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
     async def evaluate_kwargs_async(self, context: Context) -> Dict[str, object]:
+        """An async version of `evaluate_kwargs`."""
         # Shortcut for the common case. Most filters do not use named
         # parameters.
         if not self.kwargs:
@@ -529,9 +534,9 @@ class FilteredExpression(Expression):
     def evaluate(self, context: Context) -> object:
         result = self.expression.evaluate(context)
 
-        for fltr in self.filters:
+        for _filter in self.filters:
             try:
-                func = context.filter(fltr.name)
+                func = context.filter(_filter.name)
             except NoSuchFilterFunc:
                 if context.env.strict_filters:
                     raise
@@ -540,8 +545,8 @@ class FilteredExpression(Expression):
             # Any exception causes us to abort the filter chain and discard the result.
             # Nothing will be rendered.
             try:
-                args = fltr.evaluate_args(context)
-                kwargs = fltr.evaluate_kwargs(context)
+                args = _filter.evaluate_args(context)
+                kwargs = _filter.evaluate_kwargs(context)
                 result = func(result, *args, **kwargs)
             except FilterValueError:
                 # Pass over filtered expressions who's left value is not allowed.
@@ -549,16 +554,18 @@ class FilteredExpression(Expression):
             except Error:
                 raise
             except Exception as err:
-                raise Error(f"filter '{fltr.name}': unexpected error: {err}") from err
+                raise Error(
+                    f"filter '{_filter.name}': unexpected error: {err}"
+                ) from err
 
         return result
 
     async def evaluate_async(self, context: Context) -> object:
         result = await self.expression.evaluate_async(context)
 
-        for fltr in self.filters:
+        for _filter in self.filters:
             try:
-                func = context.filter(fltr.name)
+                func = context.filter(_filter.name)
             except NoSuchFilterFunc:
                 if context.env.strict_filters:
                     raise
@@ -567,8 +574,8 @@ class FilteredExpression(Expression):
             # Any exception causes us to abort the filter chain and discard the result.
             # Nothing will be rendered.
             try:
-                args = await fltr.evaluate_args_async(context)
-                kwargs = await fltr.evaluate_kwargs_async(context)
+                args = await _filter.evaluate_args_async(context)
+                kwargs = await _filter.evaluate_kwargs_async(context)
                 result = func(result, *args, **kwargs)
             except FilterValueError:
                 # Pass over filtered expressions who's left value is not allowed.
@@ -576,7 +583,9 @@ class FilteredExpression(Expression):
             except Error:
                 raise
             except Exception as err:
-                raise Error(f"filter '{fltr.name}': unexpected error: {err}") from err
+                raise Error(
+                    f"filter '{_filter.name}': unexpected error: {err}"
+                ) from err
 
         return result
 
@@ -795,6 +804,7 @@ Number = Union[int, float]
 
 
 def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
+    """Return the result of comparing two numbers with the given operator."""
     if operator == "<=":
         return left <= right
     if operator == ">=":
@@ -817,7 +827,9 @@ def is_truthy(obj: Any) -> bool:
     return True
 
 
+# pylint: disable=too-many-return-statements,too-many-branches
 def compare(left: Any, operator: str, right: Any) -> bool:
+    """Return the result of a comparison operation between two objects."""
     if operator == "and":
         return is_truthy(left) and is_truthy(right)
     if operator == "or":
@@ -848,6 +860,7 @@ def compare(left: Any, operator: str, right: Any) -> bool:
     if type(left) in (int, float) and type(right) in (int, float):
         return eval_number_expression(left, operator, right)
 
+    # pylint: disable=unidiomatic-typecheck
     if type(left) != type(right):
         raise LiquidTypeError(
             f"invalid operator for types '{str(left)} {operator} {str(right)}'"

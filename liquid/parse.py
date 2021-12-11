@@ -98,6 +98,7 @@ class Parser:
         return root
 
     def parse_statement(self, stream: TokenStream) -> ast.Node:
+        """Parse a node from a stream of tokens."""
         if stream.current.type == TOKEN_STATEMENT:
             node = self.statement.get_node(stream)
         elif stream.current.type == TOKEN_TAG:
@@ -128,6 +129,8 @@ class Parser:
         return node
 
     def parse_block(self, stream: TokenStream, end: Tuple[str, ...]) -> ast.BlockNode:
+        """Parse multiple nodes from a stream of tokens. Stop parsing nodes when we
+        find a token in `end` or we reach the end of the stream."""
         block = ast.BlockNode(stream.current)
 
         while stream.current.type != TOKEN_EOF:
@@ -156,14 +159,19 @@ def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
 
 
 def expect(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
+    """Raise an excpetion if the current token in the stream does not match the given
+    type and value."""
     _expect(stream.current, typ, value)
 
 
 def expect_peek(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
+    """Raise an excpetion if the next token in the stream does not match the given
+    type and value."""
     _expect(stream.peek, typ, value)
 
 
 def is_end_tag(tok: Token) -> bool:
+    """Return `True` if the current token looks like an end tag."""
     return tok.value.startswith("end")
 
 
@@ -338,6 +346,9 @@ def parse_string_or_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
 ) -> expression.Expression:
+    """Parse an expression from a stream of tokens. If the stream is not at a string or
+    identifier expression, raise a syntax error.
+    """
     if stream.current.type == TOKEN_IDENTIFIER:
         expr: expression.Expression = parse_identifier(stream)
     elif stream.current.type == TOKEN_STRING:
@@ -354,6 +365,8 @@ def parse_unchained_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
 ) -> expression.Identifier:
+    """Parse an identifier from a stream of tokens. If the stream is not at an
+    identifier or the identifier is chained, raise a syntax error."""
     expect(stream, TOKEN_IDENTIFIER)
     tok = stream.current
     ident = parse_identifier(stream)
@@ -366,6 +379,9 @@ def parse_unchained_identifier(
     return ident
 
 
+# NOTE: These names are missleading. The args and options in question can apply to any
+# iterable in a loop expression, not just ranges.
+
 RangeArg = Optional[
     Union[
         expression.Identifier,
@@ -377,11 +393,15 @@ RangeArg = Optional[
 
 
 class RangeOption(NamedTuple):
+    """A token and value representing a keyword argument in a loop expression."""
+
     tok: Token
     arg: RangeArg
 
 
 def parse_range_argument(stream: TokenStream) -> RangeArg:
+    """Parse a loop argument value from a stream of tokens. If the stream is not at a
+    valid token for a loop argument value, raise a syntax error."""
     if stream.current.type == TOKEN_IDENTIFIER:
         arg: RangeArg = parse_identifier(stream)
     elif stream.current.type == TOKEN_INTEGER:
@@ -399,6 +419,8 @@ def parse_range_argument(stream: TokenStream) -> RangeArg:
 
 
 def parse_range_option(stream: TokenStream) -> RangeOption:
+    """Parse a loop keyword argument from a stream of tokens. If the stream is not at a
+    valid loop keyword argument, raise a syntax error."""
     tok = stream.current
     if stream.current.type in (TOKEN_LIMIT, TOKEN_OFFSET, TOKEN_COLS):
         expect_peek(stream, TOKEN_COLON)
@@ -572,6 +594,7 @@ class ExpressionParser:
     def parse_prefix_expression(
         self, stream: TokenStream
     ) -> expression.PrefixExpression:
+        """Parse a prefix expression from a stream of tokens."""
         tok = stream.current
         stream.next_token()
 
@@ -587,6 +610,7 @@ class ExpressionParser:
         stream: TokenStream,
         left: expression.Expression,
     ) -> expression.InfixExpression:
+        """Parse an infix expression from a stream of tokens."""
         tok = stream.current
         precedence = self.current_precedence(stream)
         stream.next_token()
@@ -689,10 +713,12 @@ parse_assignment_expression = STANDARD_EXPRESSION_PARSER.parse_assignment_expres
 
 @lru_cache(maxsize=128)
 def get_parser(env: Environment) -> Parser:
+    """Return a template parser for the given environment."""
     return Parser(env)
 
 
 @lru_cache(maxsize=128)
 def get_expression_parser(_: Environment) -> ExpressionParser:
+    """Return an expression parser for the given environment."""
     # Future proofing.
     return STANDARD_EXPRESSION_PARSER

@@ -1,3 +1,5 @@
+"""Test tokenizing of liquid templates and expressions."""
+# pylint: disable=too-many-lines,missing-class-docstring
 from unittest import TestCase
 from typing import NamedTuple, Any
 
@@ -191,7 +193,7 @@ class LiquidLexerTestCase(TestCase):
                 ],
             ),
             Case(
-                "template literal and control flow, inconsistent whitespace and whitespace control",
+                "inconsistent whitespace and whitespace control",
                 "<HTML>{%if  product %}some  {%- else  %}other{% endif -%}</HTML>",
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
@@ -261,7 +263,11 @@ class LiquidLexerTestCase(TestCase):
             ),
             Case(
                 "capture",
-                "{% capture greeting %}Hello, {{ customer.first_name }}.{% endcapture %}",
+                (
+                    "{% capture greeting %}"
+                    "Hello, {{ customer.first_name }}."
+                    "{% endcapture %}"
+                ),
                 [
                     Token(1, TOKEN_TAG, "capture"),
                     Token(1, TOKEN_EXPRESSION, "greeting"),
@@ -276,7 +282,8 @@ class LiquidLexerTestCase(TestCase):
         self._test(test_cases)
 
     def test_lex_liquid_expression(self):
-        """Test that the liquid expression lexer can tokenize line delimited expressions."""
+        """Test that the liquid expression lexer can tokenize line delimited
+        expressions."""
 
         test_cases = [
             Case(

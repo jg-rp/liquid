@@ -9,6 +9,8 @@ from liquid import Environment
 
 
 class Case(NamedTuple):
+    """Table-driven test helper."""
+
     description: str
     template: str
     context: dict

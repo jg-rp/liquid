@@ -79,9 +79,9 @@ Related Projects
 Compatibility
 -------------
 
-We strive to be 100% compatible with the `reference implementation`_ of Liquid, written in Ruby.
-That is, given an equivalent render context, a template rendered with Python Liquid should produce
-the same output as when rendered with Ruby Liquid.
+We strive to be 100% compatible with the `reference implementation <https://shopify.github.io/liquid/>`_
+of Liquid, written in Ruby. That is, given an equivalent render context, a template rendered with
+Python Liquid should produce the same output as when rendered with Ruby Liquid.
 
 Known Issues
 ************

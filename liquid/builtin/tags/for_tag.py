@@ -43,6 +43,7 @@ ENDFORBLOCK = (TAG_ENDFOR, TAG_ELSE)
 ENDFORELSEBLOCK = (TAG_ENDFOR,)
 
 
+# pylint: disable=too-many-instance-attributes
 class ForLoop(Mapping[str, object]):
     """Loop helper variables."""
 
@@ -132,8 +133,6 @@ class ForLoop(Mapping[str, object]):
         else:
             self.last = False
 
-        return None
-
 
 class ForNode(Node):
     """Parse tree node for the built-in "for" tag."""
@@ -193,9 +192,9 @@ class ForNode(Node):
                         break
 
         elif self.default:
-            self.default.render(context, buffer)
+            return self.default.render(context, buffer)
 
-        return None
+        return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -232,9 +231,9 @@ class ForNode(Node):
                         break
 
         elif self.default:
-            await self.default.render_async(context, buffer)
+            return await self.default.render_async(context, buffer)
 
-        return None
+        return True
 
 
 class BreakNode(Node):

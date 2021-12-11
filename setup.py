@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring
 import re
 import setuptools
 

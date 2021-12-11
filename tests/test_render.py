@@ -1,5 +1,5 @@
 """Liquid render tests."""
-
+# pylint: disable=missing-function-docstring,too-many-public-methods,missing-class-docstring
 import asyncio
 import unittest
 

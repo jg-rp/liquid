@@ -26,6 +26,7 @@ class LiteralNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"LiteralNode(tok={self.tok})"
 
+    # pylint: disable=useless-return
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(self.tok.value)
         return None

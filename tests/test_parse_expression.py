@@ -261,7 +261,10 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
                 ),
             ),
             Case(
-                "chained identifier with object from chained identifier and trailing identifier",
+                (
+                    "chained identifier with object from chained identifier "
+                    "and trailing identifier"
+                ),
                 "linklists[section.settings.menu].links",
                 FilteredExpression(
                     expression=Identifier(
@@ -620,7 +623,12 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
             Case(
                 "equality and logic operators",
                 "user.name == 'bob' and user.age < 50 or collection.title == 'offers'",
-                "((user.name == 'bob') and ((user.age < 50) or (collection.title == 'offers')))",
+                (
+                    "((user.name == 'bob') "
+                    "and ((user.age < 50) "
+                    "or (collection.title == 'offers')"
+                    "))"
+                ),
             ),
         ]
 

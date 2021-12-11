@@ -23,6 +23,7 @@ class StripParser(HTMLParser):  # pylint: disable=abstract-method
         self.dat.append(f"&#{name};")
 
     def get_data(self) -> str:
+        """Return accumulated data."""
         return "".join(self.dat)
 
 

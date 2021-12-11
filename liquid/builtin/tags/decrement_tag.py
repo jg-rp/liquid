@@ -35,7 +35,7 @@ class DecrementNode(ast.Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.decrement(self.identifier)))
-        return None
+        return True
 
 
 class DecrementTag(Tag):

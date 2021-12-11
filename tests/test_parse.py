@@ -1,4 +1,5 @@
 """Liquid template and expression parsing tests."""
+# pylint: disable=missing-class-docstring
 
 import unittest
 from typing import NamedTuple
@@ -126,33 +127,73 @@ class ParserTestCase(unittest.TestCase):
             ),
             Case(
                 "condition with nested condition in the consequence block",
-                "{% if product == 'foo' %}{% if title == 'baz' %}baz{% endif %}{% endif %}",
+                (
+                    "{% if product == 'foo' %}"
+                    "{% if title == 'baz' %}baz{% endif %}"
+                    "{% endif %}"
+                ),
                 "if (product == 'foo') { if (title == 'baz') { baz } }",
             ),
             Case(
                 "condition with nested, alternative condition in the consequence block",
-                "{% if product == 'foo' %}{% if title == 'baz' %}baz{% else %}bar{% endif %}{% endif %}",
+                (
+                    "{% if product == 'foo' %}{% if title == 'baz' %}baz"
+                    "{% else %}bar{% endif %}{% endif %}"
+                ),
                 "if (product == 'foo') { if (title == 'baz') { baz } else { bar } }",
             ),
             Case(
                 "condition with nested condition in the alternative block",
-                "{% if product == 'foo' %}foo{% else %}{% if title == 'baz' %}bar{% endif %}{% endif %}",
+                (
+                    "{% if product == 'foo' %}"
+                    "foo"
+                    "{% else %}"
+                    "{% if title == 'baz' %}bar{% endif %}"
+                    "{% endif %}"
+                ),
                 "if (product == 'foo') { foo } else { if (title == 'baz') { bar } }",
             ),
             Case(
                 "condition with conditional alternative",
-                "{% if product == 'foo' %}foo{% elsif product == 'bar' %}bar{% endif %}",
+                (
+                    "{% if product == 'foo' %}"
+                    "foo"
+                    "{% elsif product == 'bar' %}"
+                    "bar"
+                    "{% endif %}"
+                ),
                 "if (product == 'foo') { foo } elsif (product == 'bar') { bar }",
             ),
             Case(
                 "condition with conditional and final alternatives",
-                "{% if product == 'foo' %}foo{% elsif product == 'bar' %}bar{% else %}baz{% endif %}",
-                "if (product == 'foo') { foo } elsif (product == 'bar') { bar } else { baz }",
+                (
+                    "{% if product == 'foo' %}"
+                    "foo"
+                    "{% elsif product == 'bar' %}"
+                    "bar"
+                    "{% else %}"
+                    "baz"
+                    "{% endif %}"
+                ),
+                (
+                    "if (product == 'foo') { foo } "
+                    "elsif (product == 'bar') { bar } else { baz }"
+                ),
             ),
             Case(
                 "condition with multiple alternatives",
-                "{% if product == 'foo' %}foo{% elsif product == 'bar' %}bar{% elsif x == 1 %}baz{% endif %}",
-                "if (product == 'foo') { foo } elsif (product == 'bar') { bar } elsif (x == 1) { baz }",
+                (
+                    "{% if product == 'foo' %}"
+                    "foo"
+                    "{% elsif product == 'bar' %}"
+                    "bar{% elsif x == 1 %}"
+                    "baz"
+                    "{% endif %}"
+                ),
+                (
+                    "if (product == 'foo') { foo } "
+                    "elsif (product == 'bar') { bar } elsif (x == 1) { baz }"
+                ),
             ),
         ]
 
@@ -255,23 +296,62 @@ class ParserTestCase(unittest.TestCase):
             ),
             Case(
                 "for loop with break",
-                "{% for prod in collection %}{% if prod.title %}{{ prod.title }}{% else %}{% break %}{% endif %}{% endfor %}",
-                "for (prod in collection) { if (prod.title) { `prod.title` } else { `break` } }",
+                (
+                    "{% for prod in collection %}"
+                    "{% if prod.title %}{{ prod.title }}{% else %}{% break %}"
+                    "{% endif %}"
+                    "{% endfor %}"
+                ),
+                (
+                    "for (prod in collection) { "
+                    "if (prod.title) { `prod.title` } else { `break` } "
+                    "}"
+                ),
             ),
             Case(
                 "for loop with continue",
-                "{% for prod in collection %}{% if prod.title %}{{ prod.title }}{% else %}{% continue %}{% endif %}{% endfor %}",
-                "for (prod in collection) { if (prod.title) { `prod.title` } else { `continue` } }",
+                (
+                    "{% for prod in collection %}"
+                    "{% if prod.title %}{{ prod.title }}"
+                    "{% else %}{% continue %}"
+                    "{% endif %}"
+                    "{% endfor %}"
+                ),
+                (
+                    "for (prod in collection) { "
+                    "if (prod.title) { `prod.title` } else { `continue` } "
+                    "}"
+                ),
             ),
             Case(
                 "for loop with limit",
-                "{% for prod in collection limit:2 %}{% if prod.title %}{{ prod.title }}{% else %}{% continue %}{% endif %}{% endfor %}",
-                "for (prod in collection limit:2) { if (prod.title) { `prod.title` } else { `continue` } }",
+                (
+                    "{% for prod in collection limit:2 %}"
+                    "{% if prod.title %}{{ prod.title }}"
+                    "{% else %}{% continue %}"
+                    "{% endif %}"
+                    "{% endfor %}"
+                ),
+                (
+                    "for (prod in collection limit:2) { "
+                    "if (prod.title) { `prod.title` } else { `continue` } "
+                    "}"
+                ),
             ),
             Case(
                 "for loop with offset",
-                "{% for prod in collection offset:1 %}{% if prod.title %}{{ prod.title }}{% else %}{% continue %}{% endif %}{% endfor %}",
-                "for (prod in collection offset:1) { if (prod.title) { `prod.title` } else { `continue` } }",
+                (
+                    "{% for prod in collection offset:1 %}"
+                    "{% if prod.title %}{{ prod.title }}"
+                    "{% else %}{% continue %}"
+                    "{% endif %}"
+                    "{% endfor %}"
+                ),
+                (
+                    "for (prod in collection offset:1) { "
+                    "if (prod.title) { `prod.title` } else { `continue` } "
+                    "}"
+                ),
             ),
         ]
 
@@ -282,17 +362,29 @@ class ParserTestCase(unittest.TestCase):
         test_cases = [
             Case(
                 "simple table row",
-                "{% tablerow prod in collection.products %}{{ prod.title }}{% endtablerow %}",
+                (
+                    "{% tablerow prod in collection.products %}"
+                    "{{ prod.title }}"
+                    "{% endtablerow %}"
+                ),
                 "tablerow(prod in collection.products) { `prod.title` }",
             ),
             Case(
                 "table row with whitespace",
-                "{% tablerow prod in collection.products %} {{ prod.title }} {% endtablerow %}",
+                (
+                    "{% tablerow prod in collection.products %} "
+                    "{{ prod.title }} "
+                    "{% endtablerow %}"
+                ),
                 "tablerow(prod in collection.products) {  `prod.title`  }",
             ),
             Case(
                 "table row with arguments",
-                "{% tablerow prod in collection.products cols:2 limit:3 %}{{ prod.title }}{% endtablerow %}",
+                (
+                    "{% tablerow prod in collection.products cols:2 limit:3 %}"
+                    "{{ prod.title }}"
+                    "{% endtablerow %}"
+                ),
                 "tablerow(prod in collection.products limit:3 cols:2) { `prod.title` }",
             ),
         ]
@@ -323,7 +415,11 @@ class ParserTestCase(unittest.TestCase):
             ),
             Case(
                 "capture literal and statement",
-                "{% capture greeting %}Hello, {{ customer.first_name }}.{% endcapture %}",
+                (
+                    "{% capture greeting %}"
+                    "Hello, {{ customer.first_name }}."
+                    "{% endcapture %}"
+                ),
                 "var greeting = { Hello, `customer.first_name`. }",
             ),
         ]

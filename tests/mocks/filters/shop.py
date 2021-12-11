@@ -1,3 +1,5 @@
+"""Mick shop related filters."""
+# pylint: disable=missing-function-docstring
 from liquid.filter import liquid_filter
 from liquid.filter import string_filter
 
@@ -7,16 +9,16 @@ from liquid.exceptions import FilterArgumentError
 TRANSLATION_TABLE = {"'": None, '"': None, "(": None, ")": None, "[": None, "]": None}
 
 
-def to_handle(s):
-    _s = s.lower().translate(TRANSLATION_TABLE)
-    # _s = re.sub(r"\W+", "-", _s)
-    _s = "-".join(_s.split())
-    # if _s.endswith("-"):
-    #     _s = _s[:-1]
-    # if _s.startswith("-"):
-    #     _s = s[1:]
+def to_handle(val):
+    val = val.lower().translate(TRANSLATION_TABLE)
+    # val = re.sub(r"\W+", "-", val)
+    val = "-".join(val.split())
+    # if val.endswith("-"):
+    #     val = val[:-1]
+    # if val.startswith("-"):
+    #     val = s[1:]
 
-    return _s
+    return val
 
 
 def _link_to(link, url, title=""):
@@ -55,7 +57,6 @@ def link_to(val, url, title=""):
 
 @liquid_filter
 def within(url, collection):
-    # XXX: Strip slash
     return f"/collections/{collection['handle']}/{url}"
 
 
@@ -105,7 +106,7 @@ def product_img_url(url, style="small"):
         return f"/files/shops/random_number/{url}"
 
     if style in ("grande", "large", "medium", "compact", "small", "thumb", "icon"):
-        # XXX: Does not attempt to mimic reference implementation URL.
+        # Does not attempt to mimic reference implementation URL.
         return f"/files/shops/random_number/products/{style}"
 
     raise FilterArgumentError(
@@ -126,9 +127,7 @@ def default_pagination(paginate):
         if part["is_link"]:
             link = _link_to(part["title"], part["url"])
             html.append(f'<span class="page">{link}</span>')
-        elif (
-            part["title"] == paginate["current_page"]
-        ):  # XXX: Leading integer comparison.
+        elif part["title"] == paginate["current_page"]:  # Leading integer comparison.
             title = part["title"]
             html.append(f'<span class="page current">{title}</span>')
         else:

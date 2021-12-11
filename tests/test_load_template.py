@@ -1,5 +1,5 @@
 """Template loader test cases."""
-
+# pylint: disable=missing-class-docstring
 import tempfile
 import time
 import unittest
@@ -51,7 +51,7 @@ class FileSystemLoaderTestCase(unittest.TestCase):
             template_path = Path(tmpdir) / "somefile.txt"
 
             # Initial template content
-            with template_path.open("w") as fd:
+            with template_path.open("w", encoding="UTF-8") as fd:
                 fd.write("hello there\n")
 
             env = Environment(
@@ -85,7 +85,7 @@ class FileSystemLoaderTestCase(unittest.TestCase):
             template_path = Path(tmpdir) / "somefile.txt"
 
             # Initial template content
-            with template_path.open("w") as fd:
+            with template_path.open("w", encoding="UTF-8") as fd:
                 fd.write("hello there\n")
 
             env = Environment(
@@ -120,10 +120,10 @@ class FileSystemLoaderTestCase(unittest.TestCase):
             another_template_path = Path(tmpdir) / "otherfile.txt"
 
             # Initial template content
-            with template_path.open("w") as fd:
+            with template_path.open("w", encoding="UTF-8") as fd:
                 fd.write("hello there\n")
 
-            with another_template_path.open("w") as fd:
+            with another_template_path.open("w", encoding="UTF-8") as fd:
                 fd.write("goodbye there\n")
 
             # Cache size of zero sets auto_reload to False

@@ -149,7 +149,7 @@ class BoundTemplate:
         block_scope: bool = False,
         **kwargs: Any,
     ) -> None:
-        """An async version of :meth:`liquid.template.BoundTemplate.render_with_context`."""
+        """An async version of `render_with_context`."""
         # "template" could get overridden from args/kwargs, "partial" will not.
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
@@ -212,12 +212,14 @@ class BoundTemplate:
             self.globals,
         )
 
+    # pylint: disable=no-self-use
     def make_partial_namespace(
         self,
         partial: bool,
         render_args: Mapping[str, object],
     ) -> Mapping[str, object]:
-        """"""
+        """Return a namespace dictionary. This is used by `render_with_context` to
+        extend an existing context."""
         return {**render_args, "partial": partial}
 
     def __repr__(self) -> str:
@@ -228,6 +230,9 @@ class BoundTemplate:
 
 
 class AwareBoundTemplate(BoundTemplate):
+    """A `BoundTemplate` subclass that automatically includes a `TemplateDrop` in the
+    global namespace."""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.drop = TemplateDrop(self.name, self.path)

@@ -23,6 +23,7 @@ jobs:
           - {name: '3.7-autoescape', python: '3.7', os: ubuntu-latest, tox: py37-autoescape}
           - {name: 'PyPy-autoescape', python: pypy-3.7, os: ubuntu-latest, tox: pypy37-autoescape}
           - {name: 'Typing', python: '3.9', os: ubuntu-latest, tox: typing}
+          - {name: 'Lint', python: '3.9', os: ubuntu-latest, tox: lint}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
