@@ -61,11 +61,12 @@ class ParserTestCase(unittest.TestCase):
         """Test that we can parse output statements."""
         test_cases = [
             Case("string literal", r"{{ 'hello' }}", "`'hello'`"),
+            Case("negative integer", r"{{ -5 }}", "`(-5)`"),
             Case("identifier", r"{{ product }}", "`product`"),
             Case(
-                "identifier with a filter",
-                r"{{ product.title | upcase }}",
-                "`product.title | upcase`",
+                "identifier with a filter with args and kwargs",
+                r"{{ product.title | default: 'foo', allow_false:true }}",
+                "`product.title | default: 'foo', allow_false: True`",
             ),
         ]
 

@@ -18,7 +18,7 @@ from liquid.context import Undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     FilterT = Callable[..., Any]
     NumberT = Union[float, int]
 

@@ -145,13 +145,16 @@ class IfTag(Tag):
         consequence = self.parser.parse_block(stream, ENDIFBLOCK)
         conditional_alternatives = []
 
+        parse_block = self.parser.parse_block
+        parse_expression = self.parse_expression
+
         while stream.current.istag(TAG_ELSIF):
             stream.next_token()
 
             # If the expression can't be parsed, eat the "elsif" block and
             # continue to parse more "elsif" expression, if any.
             try:
-                expr = self.parse_expression(stream)
+                expr = parse_expression(stream)
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)
@@ -159,7 +162,7 @@ class IfTag(Tag):
 
             alt_tok = stream.current
             stream.next_token()
-            alt_block = self.parser.parse_block(stream, ENDELSIFBLOCK)
+            alt_block = parse_block(stream, ENDELSIFBLOCK)
 
             conditional_alternatives.append(
                 ConditionalBlockNode(alt_tok, condition=expr, block=alt_block)
@@ -169,7 +172,7 @@ class IfTag(Tag):
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
-            alternative = self.parser.parse_block(stream, ENDIFELSEBLOCK)
+            alternative = parse_block(stream, ENDIFELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDIF)
         return IfNode(

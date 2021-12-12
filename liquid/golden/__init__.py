@@ -76,6 +76,8 @@ from . import base64_decode_filter
 from . import base64_url_safe_encode_filter
 from . import base64_url_safe_decode_filter
 
+from . import range_objects
+
 test_cases = [
     assign_tag,
     capture_tag,
@@ -150,4 +152,5 @@ test_cases = [
     base64_decode_filter,
     base64_url_safe_encode_filter,
     base64_url_safe_decode_filter,
+    range_objects,
 ]

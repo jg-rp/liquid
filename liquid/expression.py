@@ -147,6 +147,9 @@ class Literal(Expression, Generic[T]):
     def __str__(self) -> str:
         return repr(self.value)
 
+    def __eq__(self, other: object) -> bool:
+        return self.value == other
+
     def __hash__(self) -> int:
         return hash(self.value)
 
@@ -180,6 +183,9 @@ class StringLiteral(Literal[str]):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, StringLiteral) and self.value == other.value
 
+    def __hash__(self) -> int:
+        return hash(self.value)
+
     def __repr__(self) -> str:  # pragma: no cover
         return f"StringLiteral(value='{self.value}')"
 
@@ -197,6 +203,9 @@ class IntegerLiteral(Literal[int]):
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, IntegerLiteral) and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash(self.value)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"IntegerLiteral(value={self.value})"
@@ -232,7 +241,7 @@ class RangeLiteral(Expression):
     def __str__(self) -> str:
         return f"{self.start}..{self.stop}"
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"RangeLiteral(start={self.start}, stop={self.stop})"
 
     def __hash__(self) -> int:
@@ -288,6 +297,9 @@ class IdentifierPathElement(Literal[Union[int, str]]):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, IdentifierPathElement) and self.value == other.value
 
+    def __hash__(self) -> int:
+        return hash(self.value)
+
     def __repr__(self) -> str:  # pragma: no cover
         return f"IdentifierPathElement(value={self.value})"
 
@@ -321,7 +333,7 @@ class Identifier(Expression):
         return ".".join(buf)
 
     def __hash__(self) -> int:
-        return hash(str(self))
+        return hash(tuple(self.path))
 
     def evaluate(self, context: Context) -> object:
         path: List[Any] = [elem.evaluate(context) for elem in self.path]
@@ -444,10 +456,7 @@ class Filter:
 
         kwargs_str = ", ".join([f"{k}: {v}" for k, v in self.kwargs.items()])
         if kwargs_str:
-            if len(buf) == 1:
-                buf.append(f": {kwargs_str}")
-            else:
-                buf.append(f", {kwargs_str}")
+            buf.append(f", {kwargs_str}")
 
         return "".join(buf)
 

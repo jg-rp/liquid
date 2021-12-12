@@ -6,10 +6,10 @@ test:
 
 .PHONY: coverage
 coverage:
-	coverage erase
+	python -m coverage erase
 	tox -c tox_cov.ini
-	coverage combine
-	coverage html
+	python -m coverage combine
+	python -m coverage html
 
 .PHONY: benchmark
 benchmark:

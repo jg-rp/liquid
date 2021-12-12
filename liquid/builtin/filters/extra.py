@@ -10,7 +10,7 @@ except ImportError:
 from liquid.filter import string_filter
 from liquid.filter import with_environment
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
 
 

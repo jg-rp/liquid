@@ -159,11 +159,17 @@ class Markup(str):
         raise Error("autoescape requires Markupsafe to be installed")
 
     def join(self, _: object) -> str:
-        raise Error("autoescape requires Markupsafe to be installed")
+        raise Error(
+            "autoescape requires Markupsafe to be installed"
+        )  # pragma: no cover
 
     # pylint: disable=no-self-use,missing-function-docstring
     def unescape(self) -> str:
-        raise Error("autoescape requires Markupsafe to be installed")
+        raise Error(
+            "autoescape requires Markupsafe to be installed"
+        )  # pragma: no cover
 
     def format(self, *args: Any, **kwargs: Any) -> str:
-        raise Error("autoescape requires Markupsafe to be installed")
+        raise Error(
+            "autoescape requires Markupsafe to be installed"
+        )  # pragma: no cover

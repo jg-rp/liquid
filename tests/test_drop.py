@@ -45,7 +45,7 @@ class IntDrop:
         return "one"
 
     def __liquid__(self) -> int:
-        return self.val
+        return int(self)
 
 
 class ConfusedDrop:
@@ -151,6 +151,12 @@ class DropAPITestCase(unittest.TestCase):
                 template=r"{{ drop | upcase }}",
                 context={"drop": ConfusedDrop(False)},
                 expect="NAY",
+            ),
+            Case(
+                description="compare confused drop",
+                template=r"{% if drop %}{{ drop | upcase }}{% endif %}",
+                context={"drop": ConfusedDrop(False)},
+                expect="",
             ),
         ]
 

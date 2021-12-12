@@ -14,10 +14,13 @@ except ImportError:
 
 try:
     from markupsafe import Markup
+    from markupsafe import escape
 except ImportError:
-    from liquid.exceptions import Markup
+    from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import escape  # type: ignore
 
 from liquid import Environment
+from liquid.exceptions import Error
 
 
 class Case(NamedTuple):
@@ -621,6 +624,13 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
+    def test_safe_filter_with_no_autoescape(self):
+        """Test that the safe filter is a no-op if autoescape is disabled."""
+        env = Environment(autoescape=False)
+        template = env.from_string(r"{{ '<p>Hello</p>' | safe }}")
+        result = template.render()
+        self.assertEqual(result, "<p>Hello</p>")
+
     def test_tablerow_tag(self):
         """Test that the tablerow tag behaves well with autoescape."""
         tests = [
@@ -772,3 +782,16 @@ class AutoescapeTestCase(TestCase):
                 template = env.from_string(case.template)
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
+
+
+@skipIf(markupsafe is not None, "this tests exceptions raise by the lack of markupsafe")
+class DummyMarkupSafeTestCase(TestCase):
+    def test_dummy_escape(self):
+        """Test that the dummy definition of escape raises an exception."""
+        with self.assertRaises(Error):
+            escape("foo")
+
+    def test_dummy_markup(self):
+        """Test that the dummy definition of Markup raises an exception."""
+        with self.assertRaises(Error):
+            Markup("foo")

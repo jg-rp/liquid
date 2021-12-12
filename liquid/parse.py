@@ -12,12 +12,14 @@ from typing import Optional
 from typing import NamedTuple
 from typing import TYPE_CHECKING
 
-from liquid.exceptions import LiquidSyntaxError, Error
-from liquid.mode import error
-
 from liquid import expression
+from liquid.expression import IdentifierPathElement
+
 from liquid import ast
 from liquid.stream import TokenStream
+
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import Error
 
 from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_EOF
@@ -71,11 +73,11 @@ if TYPE_CHECKING:
 class Parser:
     """A Liquid template parser. Create a parser tree from a stream of tokens."""
 
-    __slots__ = ("tags", "mode", "illegal", "literal", "statement")
+    __slots__ = ("tags", "illegal", "literal", "statement", "env")
 
     def __init__(self, env: Environment):
         self.tags = env.tags
-        self.mode = env.mode
+        self.env = env
 
         self.illegal = self.tags[TOKEN_ILLEGAL]
         self.literal = self.tags[TOKEN_LITERAL]
@@ -91,7 +93,7 @@ class Parser:
                 if node:
                     root.statements.append(node)
             except Error as err:
-                error(self.mode, err, linenum=stream.current.linenum)
+                self.env.error(err, linenum=stream.current.linenum)
 
             stream.next_token()
 
@@ -299,24 +301,22 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
 
     while stream.current.type in IDENTIFIER_TOKENS:
         if stream.current.type == TOKEN_IDENTIFIER:
-            path.append(expression.IdentifierPathElement(stream.current.value))
+            path.append(IdentifierPathElement(stream.current.value))
 
         elif stream.current.type == TOKEN_INTEGER:
-            path.append(expression.IdentifierPathElement(int(stream.current.value)))
+            path.append(IdentifierPathElement(int(stream.current.value)))
 
         elif stream.current.type == TOKEN_LBRACKET:
             stream.next_token()  # Eat open bracket
 
             if stream.current.type == TOKEN_STRING:
-                path.append(expression.IdentifierPathElement(stream.current.value))
+                path.append(IdentifierPathElement(stream.current.value))
             elif stream.current.type == TOKEN_NEGATIVE:
                 expect_peek(stream, TOKEN_INTEGER)
                 stream.next_token()
-                path.append(
-                    expression.IdentifierPathElement(-int(stream.current.value))
-                )
+                path.append(IdentifierPathElement(-int(stream.current.value)))
             elif stream.current.type == TOKEN_INTEGER:
-                path.append(expression.IdentifierPathElement(int(stream.current.value)))
+                path.append(IdentifierPathElement(int(stream.current.value)))
 
             elif stream.current.type == TOKEN_IDENTIFIER:
                 # Recursive call to parse_identifier. If it's not a string or

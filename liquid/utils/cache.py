@@ -57,18 +57,18 @@ class LRUCache(abc.MutableMapping):
         self._wlock = Lock()
         self._append = self._queue.append
 
-    def __getstate__(self):
+    def __getstate__(self):  # pragma: no cover
         return {
             "capacity": self.capacity,
             "_mapping": self._mapping,
             "_queue": self._queue,
         }
 
-    def __setstate__(self, d):
+    def __setstate__(self, d):  # pragma: no cover
         self.__dict__.update(d)
         self._postinit()
 
-    def __getnewargs__(self):
+    def __getnewargs__(self):  # pragma: no cover
         return (self.capacity,)
 
     def copy(self):
@@ -112,7 +112,7 @@ class LRUCache(abc.MutableMapping):
         """Return the current size of the cache."""
         return len(self._mapping)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f"<{self.__class__.__name__} {self._mapping!r}>"
 
     def __getitem__(self, key):
@@ -126,7 +126,7 @@ class LRUCache(abc.MutableMapping):
             if self._queue[-1] != key:
                 try:
                     self._remove(key)
-                except ValueError:
+                except ValueError:  # pragma: no cover
                     # if something removed the key from the container
                     # when we read, ignore the ValueError that we would
                     # get otherwise.
@@ -160,7 +160,7 @@ class LRUCache(abc.MutableMapping):
             del self._mapping[key]
             try:
                 self._remove(key)
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 pass
         finally:
             self._wlock.release()
