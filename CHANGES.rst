@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 1.0.0
+-------------
+
+Version bump. First stable release.
+
 Version 0.11.1
 --------------
 

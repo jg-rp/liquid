@@ -14,7 +14,7 @@ with open("README.rst", "r") as fd:
 setuptools.setup(
     name="python-liquid",
     version=__version__,
-    description="A Python template engine for the Liquid markup language.",
+    description="A Python engine for the Liquid template language.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://jg-rp.github.io/liquid/",
@@ -27,7 +27,7 @@ setuptools.setup(
     python_requires=">=3.7",
     licence="MIT",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
