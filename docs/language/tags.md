@@ -127,7 +127,7 @@ is turned into a comment.
 
 ## cycle
 
-`{% cycle [<string>:] object [, object ... ] %}`
+`{% cycle [ <string>: ] object [, object ... ] %}`
 
 Yield the next in a sequence of objects each time `cycle` appears. When the sequence is exhausted,
 it will start again from the beginning.
