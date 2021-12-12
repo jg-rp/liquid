@@ -1,3 +1,5 @@
+.. _Pipenv: https://pipenv.pypa.io/en/latest/
+
 Python Liquid
 =============
 
@@ -36,7 +38,7 @@ template language for flexible web apps.
 Installing
 ----------
 
-Install Python Liquid using `Pipenv <https://pipenv.pypa.io/en/latest/>`_:
+Install Python Liquid using `Pipenv`_:
 
 .. code-block:: text
 
@@ -159,7 +161,7 @@ I wouldn't be surprised if their usage has changed subtly since the benchmark fi
 Contributing
 ------------
 
-- Install development dependencies with `Pipenv <https://github.com/pypa/pipenv>`_
+- Install development dependencies with `Pipenv`_
 
 - Python Liquid uses type hints and static type checking. Run ``mypy`` or  ``tox -e typing`` to
 - check for typing issues.
