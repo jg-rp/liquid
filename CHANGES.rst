@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 1.0.1
+-------------
+
+- Added ``py.typed``
+
 Version 1.0.0
 -------------
 
@@ -250,4 +255,3 @@ Version 0.6.0
 - The ``truncate_words`` filter now forces a minimum number of words to 1.
 - The ``newline_to_br`` filter now replaces ``\n`` and ``\r\n`` with ``<br />\n``.
 - The ``strip_newlines`` filter strips ``\r\n``.
-  
