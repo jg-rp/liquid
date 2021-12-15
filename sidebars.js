@@ -55,6 +55,16 @@ const sidebars = {
         "language/tags",
       ]
     },
+    {
+      type: "category",
+      label: "Extra",
+      collapsed: false,
+      items: [
+        "extra/introduction",
+        "extra/filters",
+        "extra/tags",
+      ]
+    }
   ],
 
   apiSidebar: [

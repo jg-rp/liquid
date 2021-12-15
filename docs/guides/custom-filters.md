@@ -20,9 +20,13 @@ rendering your templates from that environment.
 
 A filter function is any callable that accepts at least one argument, the result of the left hand
 side of a filtered expression. The function's return value will be output, assigned or piped to more
-filters. All built-in filters are implemented in this way, so have a look in
-[liquid/builtin/filters/](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/filters) for many
-more examples.
+filters.
+
+:::info
+All built-in filters are implemented in this way, so have a look in
+[liquid/builtin/filters/](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/filters) for
+examples.
+:::
 
 ## Add a Filter
 
