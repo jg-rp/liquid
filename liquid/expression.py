@@ -247,21 +247,17 @@ class RangeLiteral(Expression):
     def __hash__(self) -> int:
         return hash((self.start, self.stop))
 
-    def evaluate(self, context: Context) -> range:
-        start: Any = self.start.evaluate(context)
-        stop: Any = self.stop.evaluate(context)
-
-        # Floats get cast to integers
-
+    # pylint: disable=no-self-use
+    def _make_range(self, start: Any, stop: Any) -> range:
         try:
             start = int(start)
-        except ValueError as err:
-            raise LiquidTypeError(f"expected an int or float, found '{start}'") from err
+        except ValueError:
+            start = 0
 
         try:
             stop = int(stop)
-        except ValueError as err:
-            raise LiquidTypeError(f"expected an int or float, found '{stop}'") from err
+        except ValueError:
+            stop = 0
 
         # Decending ranges don't work
         if start > stop:
@@ -269,26 +265,15 @@ class RangeLiteral(Expression):
 
         return range(start, stop + 1)
 
+    def evaluate(self, context: Context) -> range:
+        start: Any = self.start.evaluate(context)
+        stop: Any = self.stop.evaluate(context)
+        return self._make_range(start, stop)
+
     async def evaluate_async(self, context: Context) -> range:
         start: Any = await self.start.evaluate_async(context)
         stop: Any = await self.stop.evaluate_async(context)
-
-        # Floats get cast to integers
-
-        try:
-            start = int(start)
-        except ValueError as err:
-            raise LiquidTypeError(f"expected an int or float, found {start}") from err
-
-        try:
-            stop = int(stop)
-        except ValueError as err:
-            raise LiquidTypeError(f"expected an int or float, found {stop}") from err
-
-        if start > stop:
-            return range(0)
-
-        return range(start, stop + 1)
+        return self._make_range(start, stop)
 
 
 class IdentifierPathElement(Literal[Union[int, str]]):

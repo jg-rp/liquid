@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 1.0.4
+-------------
+
+- A range literal will now use a default of ``0`` rather than raising a
+ ``LiquidTypeError`` if either its start or stop values can't be cast to an integer.
+
 Version 1.0.3
 -------------
 

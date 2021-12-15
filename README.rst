@@ -163,8 +163,8 @@ Contributing
 
 - Install development dependencies with `Pipenv`_
 
-- Python Liquid uses type hints and static type checking. Run ``mypy`` or  ``tox -e typing`` to
-- check for typing issues.
+- Python Liquid uses type hints and static type checking. Run ``mypy`` or  
+  ``tox -e typing`` to check for typing issues.
 
 - Format code using `black <https://github.com/psf/black>`_.
 
