@@ -1,4 +1,4 @@
-include README.rst CHANGES.rst LICENSE Pipfile Pipfile.lock py.typed
+include README.rst CHANGES.rst LICENSE Pipfile Pipfile.lock liquid/py.typed
 include liquid/resources/*
 graft tests
 global-exclude *.py[cod]

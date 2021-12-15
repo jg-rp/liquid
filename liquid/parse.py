@@ -492,7 +492,7 @@ class ExpressionParser:
     parsing behavior. Such as adding a logical `NOT` operator.
     """
 
-    END_EXPRESSION = (
+    END_EXPRESSION: Tuple[str, ...] = (
         TOKEN_PIPE,
         TOKEN_COMMA,
         TOKEN_EOF,

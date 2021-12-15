@@ -298,7 +298,7 @@ class Context:
         "counters",
         "scope",
         "loops",
-        "_tag_namespace",
+        "tag_namespace",
         "disabled_tags",
         "autoescape",
         "_copy_depth",
@@ -330,7 +330,7 @@ class Context:
 
         # A namspace supporting stateful tags. Such as `cycle`, `increment`,
         # `decrement` and `ifchanged`.
-        self._tag_namespace: Dict[str, Any] = {
+        self.tag_namespace: Dict[str, Any] = {
             "cycles": {},
             "ifchanged": "",
             "stopindex": {},
@@ -468,15 +468,15 @@ class Context:
         """Return the next item in the given cycle. Initialise the cycle first if this
         is the first time we're seeing this combination of group name and arguments."""
         key = (group_name, tuple(args))
-        if key not in self._tag_namespace["cycles"]:
-            self._tag_namespace["cycles"][key] = cycle(args)
-        it: Iterator[Any] = self._tag_namespace["cycles"][key]
+        if key not in self.tag_namespace["cycles"]:
+            self.tag_namespace["cycles"][key] = cycle(args)
+        it: Iterator[Any] = self.tag_namespace["cycles"][key]
         return it
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
-        if val != self._tag_namespace["ifchanged"]:
-            self._tag_namespace["ifchanged"] = val
+        if val != self.tag_namespace["ifchanged"]:
+            self.tag_namespace["ifchanged"] = val
             return True
 
         return False
@@ -484,10 +484,10 @@ class Context:
     def stopindex(self, key: str, index: Optional[int] = None) -> int:
         """Set or return the stop index of a for loop."""
         if index is not None:
-            self._tag_namespace["stopindex"][key] = index
+            self.tag_namespace["stopindex"][key] = index
             return index
 
-        idx: int = self._tag_namespace["stopindex"].get(key, 0)
+        idx: int = self.tag_namespace["stopindex"].get(key, 0)
         return idx
 
     @contextmanager

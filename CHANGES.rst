@@ -1,6 +1,17 @@
 Python Liquid Change Log
 ========================
 
+Version 1.0.3
+-------------
+
+- Explicit re-export
+- Changed ``Context._tag_namespace`` to ``Context.tag_namespace``.
+
+Version 1.0.2
+-------------
+
+- Fixed manifest error.
+
 Version 1.0.1
 -------------
 
