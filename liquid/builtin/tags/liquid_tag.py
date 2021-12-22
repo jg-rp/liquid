@@ -20,6 +20,7 @@ from liquid.tag import Tag
 from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_EOF
 
 
 TAG_LIQUID = sys.intern("liquid")
@@ -60,9 +61,17 @@ class LiquidTag(Tag):
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
-        expr_stream = TokenStream(tokenize_liquid_expression(stream.current.value))
+        if stream.current.type == TOKEN_EOF:
+            # Empty liquid tag. Empty block.
+            block = BlockNode(tok, [])
+        else:
+            expect(stream, TOKEN_EXPRESSION)
+            expr_stream = TokenStream(
+                tokenize_liquid_expression(
+                    stream.current.value, line_count=stream.current.linenum
+                )
+            )
+            parser = get_parser(self.env)
+            block = parser.parse_block(expr_stream, end=())
 
-        parser = get_parser(self.env)
-        block = parser.parse_block(expr_stream, end=())
         return LiquidNode(tok, block=block)

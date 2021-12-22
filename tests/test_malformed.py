@@ -253,6 +253,21 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg="unexpected '~', on line 1",
             ),
+            Case(
+                description="junk in `liquid` tag",
+                template="\n".join(
+                    [
+                        r"{{ 'hello' }}",
+                        r"{% liquid",
+                        r"echo 'foo'",
+                        r"aiu34bseu",
+                        r"%}",
+                    ]
+                ),
+                expect_exception=LiquidSyntaxError,
+                expect_render="hello\n",
+                expect_msg="unexpected tag 'aiu34bseu', on line 3",
+            ),
         ]
 
         self._test(test_cases, mode=Mode.STRICT)

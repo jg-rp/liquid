@@ -5,6 +5,10 @@ import sys
 
 from liquid.ast import Node
 from liquid.builtin.statement import StatementNode
+
+from liquid.expression import NIL
+from liquid.expression import Expression
+
 from liquid.lex import tokenize_filtered_expression
 
 from liquid.parse import parse_filtered_expression
@@ -15,6 +19,7 @@ from liquid.tag import Tag
 
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_EOF
 
 TAG_ECHO = sys.intern("echo")
 
@@ -39,8 +44,10 @@ class EchoTag(Tag):
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_filtered_expression(stream.current.value)
-
-        expr = parse_filtered_expression(TokenStream(expr_iter))
+        if stream.current.type == TOKEN_EOF:
+            expr: Expression = NIL
+        else:
+            expect(stream, TOKEN_EXPRESSION)
+            expr_iter = tokenize_filtered_expression(stream.current.value)
+            expr = parse_filtered_expression(TokenStream(expr_iter))
         return EchoNode(tok, expression=expr)

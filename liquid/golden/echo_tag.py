@@ -107,4 +107,9 @@ cases = [
         template=r"{% echo nosuchthing[0] %}",
         expect="",
     ),
+    Case(
+        description="nothing to echo",
+        template=r"{% echo %}",
+        expect="",
+    ),
 ]

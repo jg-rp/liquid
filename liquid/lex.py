@@ -86,7 +86,7 @@ identifier_rules = (
     (TOKEN_LBRACKET, r"\["),
     (TOKEN_RBRACKET, r"]"),
     ("NEWLINE", r"\n"),
-    ("SKIP", r"[ \t]+"),
+    ("SKIP", r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
 )
 
@@ -106,7 +106,7 @@ filtered_expression_rules = (
     (TOKEN_COLON, r":"),
     (TOKEN_PIPE, r"\|"),
     ("NEWLINE", r"\n"),
-    ("SKIP", r"[ \t]+"),
+    ("SKIP", r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
 )
 
@@ -141,7 +141,7 @@ boolean_expression_rules = (
     (TOKEN_COLON, r":"),
     ("NEWLINE", r"\n"),
     ("OP", r"[!=<>]{1,2}"),
-    ("SKIP", r"[ \t]+"),
+    ("SKIP", r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
 )
 
@@ -171,7 +171,7 @@ loop_expression_rules = (
     (TOKEN_RPAREN, r"\)"),
     (TOKEN_COLON, r":"),
     ("NEWLINE", r"\n"),
-    ("SKIP", r"[ \t]+"),
+    ("SKIP", r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
 )
 
@@ -201,7 +201,7 @@ include_expression_rules = (
     (TOKEN_RBRACKET, r"]"),
     (TOKEN_COLON, r":"),
     ("NEWLINE", r"\n"),
-    ("SKIP", r"[ \t]+"),
+    ("SKIP", r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
 )
 
@@ -253,13 +253,16 @@ def _compile_rules(rules: Iterable[Tuple[str, str]]) -> Pattern[str]:
 # NOTE: Here we're talking about the expression found in "liquid" tags only.
 # Each line starts with a tag name, optionally followed by zero or more space
 # or tab characters and an expression, which is terminated by a newline.
-LIQUID_EXPRESSION_RE = re.compile(r"[ \t]*(?P<name>\w+)[ \t]*(?P<expr>.*)[ \t]*?(\n|$)")
+LIQUID_EXPRESSION_RE = re.compile(
+    r"[ \t]*(?P<name>\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n|$)", re.DOTALL
+)
 
 
-def tokenize_liquid_expression(source: str) -> Iterator[Token]:
+def tokenize_liquid_expression(
+    source: str,
+    line_count: int = 1,
+) -> Iterator[Token]:
     """Tokenize a "liquid" tag expression."""
-    line_count = 1
-
     for match in LIQUID_EXPRESSION_RE.finditer(source):
 
         line_num = line_count

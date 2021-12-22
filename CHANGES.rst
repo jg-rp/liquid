@@ -5,7 +5,10 @@ Version 1.0.4
 -------------
 
 - A range literal will now use a default of ``0`` rather than raising a
- ``LiquidTypeError`` if either its start or stop values can't be cast to an integer.
+  ``LiquidTypeError`` if either its start or stop values can't be cast to an integer.
+- Gracefully handle ``liquid`` tags that are empty or only contain whitespace.
+- Gracefully handle empty ``echo`` tags.
+
 
 Version 1.0.3
 -------------
