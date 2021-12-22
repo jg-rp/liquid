@@ -52,6 +52,18 @@ class Environment:
     :param statement_end_string: The sequence of characters indicating the end of an
         output statement. Defaults to ``}}``
     :type statement_end_string: str
+    :param template_comments: If ``True``, enable template comments. Where, by default,
+        anything between ``{#`` and ``#}`` is considered a comment. Defaults to
+        ``False``.
+    :type template_comments: bool
+    :param comment_start_string: The sequence of characters indicating the start of a
+        comment. Defaults to ``{#``. ``template_comments`` must be ``True`` for
+        ``comment_start_string`` to have any effect.
+    :type comment_start_string: str
+    :param comment_end_string: The sequence of characters indicating the end of a
+        comment. Defaults to ``#}``. ``template_comments`` must be ``True`` for
+        ``comment_end_string`` to have any effect.
+    :type comment_end_string: str
     :param tolerance: Indicates how tolerant to be of errors. Must be one of
         ``Mode.LAX``, ``Mode.WARN`` or ``Mode.STRICT``. Defaults to ``Mode.STRICT``.
     :type tolerance: Mode
@@ -87,7 +99,7 @@ class Environment:
     :type globals: dict
     """
 
-    # pylint: disable=redefined-builtin too-many-arguments
+    # pylint: disable=redefined-builtin too-many-arguments too-many-locals
     def __init__(
         self,
         tag_start_string: str = r"{%",
@@ -103,6 +115,9 @@ class Environment:
         auto_reload: bool = True,
         cache_size: int = 300,
         globals: Optional[Mapping[str, object]] = None,
+        template_comments: bool = False,
+        comment_start_string: str = "{#",
+        comment_end_string: str = "#}",
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
@@ -111,6 +126,13 @@ class Environment:
         self.strip_tags = strip_tags
         self.loader = loader or loaders.DictLoader({})
         self.globals: Mapping[str, object] = globals or {}
+
+        self.template_comments = template_comments
+        self.comment_start_string = comment_start_string
+        self.comment_end_string = comment_end_string
+        if not self.template_comments:
+            self.comment_start_string = ""
+            self.comment_end_string = ""
 
         # The undefined type. When an identifier can not be resolved, the returned value
         # is ``Undefined`` or a subclass of ``Undefined``.
@@ -150,6 +172,8 @@ class Environment:
                 self.statement_end_string,
                 self.tag_start_string,
                 self.tag_end_string,
+                self.comment_start_string,
+                self.comment_end_string,
                 self.mode,
                 self.strip_tags,
                 # Necessary when replacing the standard output statement implementation.
@@ -192,6 +216,8 @@ class Environment:
             self.tag_end_string,
             self.statement_start_string,
             self.statement_end_string,
+            self.comment_start_string,
+            self.comment_end_string,
         )
         parser = get_parser(self)
 
@@ -332,7 +358,7 @@ class Environment:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
 
-# pylint: disable=redefined-builtin,too-many-arguments
+# pylint: disable=redefined-builtin too-many-arguments too-many-locals
 @lru_cache(maxsize=10)
 def get_implicit_environment(
     tag_start_string: str,
@@ -348,6 +374,9 @@ def get_implicit_environment(
     auto_reload: bool,
     cache_size: int,
     globals: Optional[Mapping[str, object]],
+    template_comments: bool,
+    comment_start_string: str,
+    comment_end_string: str,
 ) -> Environment:
     """Return an :class:`Environment` initialized with the given arguments."""
     return Environment(
@@ -364,6 +393,9 @@ def get_implicit_environment(
         auto_reload=auto_reload,
         cache_size=cache_size,
         globals=globals,
+        template_comments=template_comments,
+        comment_start_string=comment_start_string,
+        comment_end_string=comment_end_string,
     )
 
 
@@ -371,7 +403,7 @@ def get_implicit_environment(
 # an intuitive API and to please the static type checker outweighs this abuse of
 # Python naming conventions. At least for now.
 
-# pylint: disable=redefined-builtin too-many-arguments invalid-name
+# pylint: disable=redefined-builtin too-many-arguments invalid-name too-many-locals
 def Template(
     source: str,
     tag_start_string: str = r"{%",
@@ -386,6 +418,9 @@ def Template(
     auto_reload: bool = True,
     cache_size: int = 300,
     globals: Optional[Mapping[str, object]] = None,
+    template_comments: bool = False,
+    comment_start_string: str = "{#",
+    comment_end_string: str = "#}",
 ) -> BoundTemplate:
     """Returns a :class:`liquid.template.BoundTemplate`, automatically creating an
     :class:`Environment` to bind it to.
@@ -407,6 +442,18 @@ def Template(
     :param statement_end_string: The sequence of characters indicating the end of an
         output statement. Defaults to ``}}``
     :type statement_end_string: str
+    :param template_comments: If ``True``, enable template comments. Where, by default,
+        anything between ``{#`` and ``#}`` is considered a comment. Defaults to
+        ``False``.
+    :type template_comments: bool
+    :param comment_start_string: The sequence of characters indicating the start of a
+        comment. Defaults to ``{#``. ``template_comments`` must be ``True`` for
+        ``comment_start_string`` to have any effect.
+    :type comment_start_string: str
+    :param comment_end_string: The sequence of characters indicating the end of a
+        comment. Defaults to ``#}``. ``template_comments`` must be ``True`` for
+        ``comment_end_string`` to have any effect.
+    :type comment_end_string: str
     :param tolerance: Indicates how tolerant to be of errors. Must be one of
         `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`. Defaults to ``Mode.STRICT``.
     :type tolerance: Mode
@@ -453,6 +500,9 @@ def Template(
         auto_reload=auto_reload,
         cache_size=cache_size,
         globals=None,
+        template_comments=template_comments,
+        comment_start_string=comment_start_string,
+        comment_end_string=comment_end_string,
     )
 
     return env.from_string(source, globals=globals)

@@ -73,6 +73,7 @@ __all__ = (
     "tokenize_paginate_expression",
     "tokenize_liquid_expression",
     "get_lexer",
+    "get_liquid_expression_lexer",
 )
 
 IDENTIFIER_PATTERN = r"\w[a-zA-Z0-9_\-]*"
@@ -220,26 +221,51 @@ include_expression_keywords = frozenset(
 )
 
 
+# pylint: disable=too-many-locals
 def compile_liquid_rules(
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
+    comment_start_string: str = r"",
+    comment_end_string: str = r"",
 ) -> Pattern[str]:
     """Compile rules for lexing liquid templates."""
     tag_s = re.escape(tag_start_string)
     tag_e = re.escape(tag_end_string)
     stmt_s = re.escape(statement_start_string)
     stmt_e = re.escape(statement_end_string)
+    comment_s = re.escape(comment_start_string)
+    comment_e = re.escape(comment_end_string)
 
-    liquid_rules = [
-        ("RAW", rf"{tag_s}\s*raw\s*{tag_e}(?P<raw>.*?){tag_s}\s*endraw\s*{tag_e}"),
-        (TOKEN_STATEMENT, rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"),
-        # The "name" group is zero or more characters so that a malformed tag (one
-        # with no name) does not get treated as a literal.
-        ("TAG", rf"{tag_s}-?\s*(?P<name>\w*)\s*(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"),
-        (TOKEN_LITERAL, rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"),
-    ]
+    raw_pattern = rf"{tag_s}\s*raw\s*{tag_e}(?P<raw>.*?){tag_s}\s*endraw\s*{tag_e}"
+    statement_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
+
+    # The "name" group is zero or more characters so that a malformed tag (one
+    # with no name) does not get treated as a literal.
+    tag_pattern = rf"{tag_s}-?\s*(?P<name>\w*)\s*(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
+
+    if not comment_start_string:
+        # Do not support shorthand comment syntax
+        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"
+
+        liquid_rules = [
+            ("RAW", raw_pattern),
+            (TOKEN_STATEMENT, statement_pattern),
+            ("TAG", tag_pattern),
+            (TOKEN_LITERAL, literal_pattern),
+        ]
+    else:
+        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s}|{comment_s})(?P<rstrip>-?))|$)"
+        comment_pattern = rf"{comment_s}(?P<comment>.*?)(?P<rsc>-?){comment_e}"
+
+        liquid_rules = [
+            ("RAW", raw_pattern),
+            ("COMMENT", comment_pattern),
+            (TOKEN_STATEMENT, statement_pattern),
+            ("TAG", tag_pattern),
+            (TOKEN_LITERAL, literal_pattern),
+        ]
 
     return _compile_rules(liquid_rules)
 
@@ -250,29 +276,75 @@ def _compile_rules(rules: Iterable[Tuple[str, str]]) -> Pattern[str]:
     return re.compile(pattern, re.DOTALL)
 
 
-# NOTE: Here we're talking about the expression found in "liquid" tags only.
-# Each line starts with a tag name, optionally followed by zero or more space
-# or tab characters and an expression, which is terminated by a newline.
-LIQUID_EXPRESSION_RE = re.compile(
-    r"[ \t]*(?P<name>\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n|$)", re.DOTALL
-)
+# NOTE: Here we're talking about expressions found in "liquid" tags only. Each line
+# starts with a tag name, optionally followed by zero or more space or tab characters
+# and an expression, which is terminated by a newline.
 
 
-def tokenize_liquid_expression(
+def _tokenize_liquid_expression(
     source: str,
+    rules: Pattern[str],
     line_count: int = 1,
+    comment_start_string: str = "",
 ) -> Iterator[Token]:
     """Tokenize a "liquid" tag expression."""
-    for match in LIQUID_EXPRESSION_RE.finditer(source):
+    for match in rules.finditer(source):
+        kind = match.lastgroup
+        assert kind is not None
 
         line_num = line_count
         value = match.group()
         line_count += value.count("\n")
 
-        yield Token(line_num, TOKEN_TAG, match.group("name"))
+        if kind == "LIQUID_EXPR":
+            name = match.group("name")
+            if name == comment_start_string:
+                continue
 
-        if match.group("expr"):
-            yield Token(line_num, TOKEN_EXPRESSION, match.group("expr"))
+            yield Token(line_num, TOKEN_TAG, name)
+
+            if match.group("expr"):
+                yield Token(line_num, TOKEN_EXPRESSION, match.group("expr"))
+        elif kind == "SKIP":
+            continue
+        else:
+            raise LiquidSyntaxError(
+                f"expected newline delimited tag expressions, found {value!r}"
+            )
+
+
+@lru_cache(maxsize=128)
+def get_liquid_expression_lexer(
+    comment_start_string: str = "",
+) -> Callable[..., Iterator[Token]]:
+    """Return a tokenizer that yields tokens from a `liquid` tag's expression."""
+    # Dubious assumption here.
+    comment_start_string = comment_start_string.replace("{", "")
+    if comment_start_string:
+        comment = re.escape(comment_start_string)
+        rules = (
+            (
+                "LIQUID_EXPR",
+                rf"[ \t]*(?P<name>(\w+|{comment}))[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
+            ),
+            ("SKIP", r"[\r\n]+"),
+            (TOKEN_ILLEGAL, r"."),
+        )
+    else:
+        rules = (
+            ("LIQUID_EXPR", r"[ \t]*(?P<name>\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)"),
+            ("SKIP", r"[\r\n]+"),
+            (TOKEN_ILLEGAL, r"."),
+        )
+    return partial(
+        _tokenize_liquid_expression,
+        rules=_compile_rules(rules),
+        comment_start_string=comment_start_string,
+    )
+
+
+# For backaward compatibility. No line comments.
+tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string="")
 
 
 def _tokenize(
@@ -385,6 +457,10 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
             if not value:
                 continue
 
+        elif kind == "COMMENT":
+            lstrip = bool(match.group("rsc"))
+            continue
+
         elif kind == "RAW":
             kind = TOKEN_LITERAL
             value = match.group("raw")
@@ -416,6 +492,8 @@ def get_lexer(
     tag_end_string: str = r"%}",
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
+    comment_start_string: str = "",
+    comment_end_string: str = "",
 ) -> Callable[[str], Iterator[Token]]:
     """Return a template lexer using the given tag and statement delimiters."""
     rules = compile_liquid_rules(
@@ -423,5 +501,7 @@ def get_lexer(
         tag_end_string,
         statement_start_string,
         statement_end_string,
+        comment_start_string,
+        comment_end_string,
     )
     return partial(_tokenize_template, rules=rules)

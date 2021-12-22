@@ -1,6 +1,13 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.0
+-------------
+
+- Added new comment syntax. Disabled by default, enable shorthand comments with the
+  ``template_comments`` argument to ``liquid.Template`` or ``liquid.Environment``.
+  When ``True``, anything between ``{#`` and ``#}`` will be considered a comment.
+
 Version 1.0.4
 -------------
 
@@ -8,7 +15,6 @@ Version 1.0.4
   ``LiquidTypeError`` if either its start or stop values can't be cast to an integer.
 - Gracefully handle ``liquid`` tags that are empty or only contain whitespace.
 - Gracefully handle empty ``echo`` tags.
-
 
 Version 1.0.3
 -------------

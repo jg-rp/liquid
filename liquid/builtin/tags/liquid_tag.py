@@ -4,12 +4,13 @@ import sys
 
 from typing import Optional
 from typing import TextIO
+from typing import TYPE_CHECKING
 
 from liquid.ast import Node
 from liquid.ast import BlockNode
 
 from liquid.context import Context
-from liquid.lex import tokenize_liquid_expression
+from liquid.lex import get_liquid_expression_lexer
 
 from liquid.parse import expect
 from liquid.parse import get_parser
@@ -22,6 +23,9 @@ from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
 
+
+if TYPE_CHECKING:  # pragma: no cover
+    from liquid import Environment
 
 TAG_LIQUID = sys.intern("liquid")
 
@@ -56,6 +60,12 @@ class LiquidTag(Tag):
     name = TAG_LIQUID
     block = False
 
+    def __init__(self, env: "Environment"):
+        super().__init__(env)
+        self.tokenize_liquid_expression = get_liquid_expression_lexer(
+            comment_start_string=env.comment_start_string
+        )
+
     def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_LIQUID)
         tok = stream.current
@@ -67,7 +77,7 @@ class LiquidTag(Tag):
         else:
             expect(stream, TOKEN_EXPRESSION)
             expr_stream = TokenStream(
-                tokenize_liquid_expression(
+                self.tokenize_liquid_expression(
                     stream.current.value, line_count=stream.current.linenum
                 )
             )
