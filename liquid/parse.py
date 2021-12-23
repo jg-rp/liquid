@@ -387,13 +387,12 @@ def parse_unchained_identifier(
 # NOTE: These names are missleading. The args and options in question can apply to any
 # iterable in a loop expression, not just ranges.
 
-RangeArg = Optional[
-    Union[
-        expression.Identifier,
-        expression.IntegerLiteral,
-        expression.FloatLiteral,
-        expression.Continue,
-    ]
+RangeArg = Union[
+    expression.Identifier,
+    expression.IntegerLiteral,
+    expression.FloatLiteral,
+    expression.Continue,
+    expression.Nil,
 ]
 
 
@@ -437,7 +436,7 @@ def parse_range_option(stream: TokenStream) -> RangeOption:
     else:
         expect(stream, TOKEN_REVERSED)
         stream.next_token()  # Eat REVERSED
-        opt = RangeOption(tok=tok, arg=None)
+        opt = RangeOption(tok=tok, arg=expression.NIL)
 
     return opt
 

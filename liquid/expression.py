@@ -617,7 +617,7 @@ class AssignmentExpression(Expression):
         return ""
 
 
-LoopArgument = Optional[Union[IntegerLiteral, FloatLiteral, Identifier, Continue]]
+LoopArgument = Union[IntegerLiteral, FloatLiteral, Identifier, Continue, Nil]
 
 # An identifier that resolves to an iterable or a range expression.
 LoopIterable = Union[Identifier, RangeLiteral]
@@ -646,9 +646,9 @@ class LoopExpression(Expression):
         self,
         name: str,
         iterable: LoopIterable,
-        limit: LoopArgument = None,
-        offset: LoopArgument = None,
-        cols: LoopArgument = None,
+        limit: LoopArgument = NIL,
+        offset: LoopArgument = NIL,
+        cols: LoopArgument = NIL,
         reversed_: bool = False,
     ):
         self.name = name
@@ -672,13 +672,13 @@ class LoopExpression(Expression):
     def __str__(self) -> str:
         buf = [f"{self.name} in", str(self.iterable)]
 
-        if self.limit:
+        if self.limit != NIL:
             buf.append(f"limit:{self.limit}")
 
-        if self.offset:
+        if self.offset != NIL:
             buf.append(f"offset:{self.offset}")
 
-        if self.cols:
+        if self.cols != NIL:
             buf.append(f"cols:{self.cols}")
 
         if self.reversed:
@@ -693,7 +693,17 @@ class LoopExpression(Expression):
             f"cols={self.cols}, reversed={self.reversed})"
         )
 
-    def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
+    def _limit_and_offset(
+        self,
+        it: Iterator[Any],
+        size: int,
+        limit: Optional[int],
+        offset: Optional[int | Continue],
+        context: Context,
+    ) -> Tuple[Iterator[Any], int]:
+        """Slice iterable `it` according to `limit` and `offset`."""
+        length = size
+
         # For the sake of the special for loop offset `continue`, we need to derive an
         # identifier for this loop and store the theoretical stop index on the render
         # context using that identifier.
@@ -702,96 +712,88 @@ class LoopExpression(Expression):
         # indexes on the loop item name and the name of the iterable. Not the contents
         # of the iterable. In the case of a range expression, we'll use a string
         # representation of the expression.
-        _offset_key = [self.name, str(self.iterable)]
-        obj = self.iterable.evaluate(context)
+        offset_key = "-".join([self.name, str(self.iterable)])
 
-        if isinstance(obj, abc.Mapping):
-            length = len(obj)
-            loop_iter: Iterator[Any] = iter(obj.items())
-        elif isinstance(obj, range):
-            length = obj.stop - obj.start
-            loop_iter = iter(obj)
-        elif isinstance(obj, abc.Sequence):
-            length = len(obj)
-            loop_iter = iter(obj)
-        else:
-            raise LiquidTypeError(
-                f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
-            )
+        if limit is None and offset is None:
+            context.stopindex(key=offset_key, index=length)
+            if self.reversed:
+                return reversed(list(it)), length
+            return it, length
 
-        limit: Optional[int] = None
-        offset: Optional[int] = None
-        offset_key = "-".join(_offset_key)
-
-        if self.offset:
-            if self.offset == CONTINUE:
-                offset = context.stopindex(key=offset_key)
-            else:
-                _offset = self.offset.evaluate(context)
-                assert isinstance(_offset, int)
-                offset = _offset
-
+        if offset == CONTINUE:
+            offset = context.stopindex(key=offset_key)
+            length = max(length - offset, 0)
+        elif offset is not None:
+            assert isinstance(offset, int)
             length = max(length - offset, 0)
 
-        if self.limit:
-            _limit = self.limit.evaluate(context)
-            assert isinstance(_limit, int)
-            limit = _limit
+        if limit is not None:
             length = min(length, limit)
+            context.stopindex(key=offset_key, index=length)
+        else:
+            context.stopindex(key=offset_key, index=size)
 
-        context.stopindex(key=offset_key, index=length)
-        loop_iter = islice(loop_iter, offset, limit)
+        it = islice(it, offset, limit)
 
         if self.reversed:
-            loop_iter = reversed(list(loop_iter))
+            return reversed(list(it)), length
+        return it, length
 
-        return loop_iter, length
+    def _obj_to_iter(self, obj: object) -> Tuple[Iterator[Any], int]:
+        if isinstance(obj, abc.Mapping):
+            return iter(obj.items()), len(obj)
+        if isinstance(obj, range):
+            return iter(obj), len(obj)
+        if isinstance(obj, abc.Sequence):
+            return iter(obj), len(obj)
+
+        raise LiquidTypeError(
+            f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
+        )
+
+    def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
+        obj = self.iterable.evaluate(context)
+        it, length = self._obj_to_iter(obj)
+
+        limit = self.limit.evaluate(context)
+        assert isinstance(limit, int) or limit is None
+
+        if self.offset != CONTINUE:
+            offset = self.offset.evaluate(context)
+            assert isinstance(offset, int) or offset is None
+        else:
+            offset = self.offset
+            assert isinstance(offset, Continue)
+
+        return self._limit_and_offset(
+            it,
+            size=length,
+            limit=limit,
+            offset=offset,
+            context=context,
+        )
 
     async def evaluate_async(self, context: Context) -> Tuple[Iterator[Any], int]:
-        _offset_key = [self.name, str(self.iterable)]
         obj = await self.iterable.evaluate_async(context)
+        it, length = self._obj_to_iter(obj)
 
-        if isinstance(obj, abc.Mapping):
-            length = len(obj)
-            loop_iter: Iterator[Any] = iter(obj.items())
-        elif isinstance(obj, range):
-            length = obj.stop - obj.start + 1
-            loop_iter = iter(obj)
-        elif isinstance(obj, abc.Sequence):
-            length = len(obj)
-            loop_iter = iter(obj)
+        limit = await self.limit.evaluate_async(context)
+        assert isinstance(limit, int) or limit is None
+
+        if self.offset != CONTINUE:
+            offset = await self.offset.evaluate_async(context)
+            assert isinstance(offset, int) or offset is None
         else:
-            raise LiquidTypeError(
-                f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
-            )
+            offset = self.offset
+            assert isinstance(offset, Continue)
 
-        limit: Optional[int] = None
-        offset: Optional[int] = None
-        offset_key = "-".join(_offset_key)
-
-        if self.offset:
-            if self.offset == CONTINUE:
-                offset = context.stopindex(key=offset_key)
-            else:
-                _offset = await self.offset.evaluate_async(context)
-                assert isinstance(_offset, int)
-                offset = _offset
-
-            length = max(length - offset, 0)
-
-        if self.limit:
-            _limit = await self.limit.evaluate_async(context)
-            assert isinstance(_limit, int)
-            limit = _limit
-            length = min(length, limit)
-
-        context.stopindex(key=offset_key, index=length)
-        loop_iter = islice(loop_iter, offset, limit)
-
-        if self.reversed:
-            loop_iter = reversed(list(loop_iter))
-
-        return loop_iter, length
+        return self._limit_and_offset(
+            it,
+            size=length,
+            limit=limit,
+            offset=offset,
+            context=context,
+        )
 
 
 Number = Union[int, float]

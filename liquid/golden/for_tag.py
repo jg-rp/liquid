@@ -321,6 +321,12 @@ cases = [
         globals={"array": [1, 2, 3, 4, 5, 6]},
     ),
     Case(
+        description="offset continue without preceding loop",
+        template=r"{% for item in array offset: continue %}{{ item }} {% endfor %}",
+        expect="1 2 3 4 5 6 ",
+        globals={"array": [1, 2, 3, 4, 5, 6]},
+    ),
+    Case(
         description="continue from a limit that is greater than length",
         template=(
             r"{% for item in array limit: 99 %}"
@@ -345,6 +351,92 @@ cases = [
         ),
         expect="1 2 3 4 5 6 ",
         globals={"array": [1, 2, 3, 4, 5, 6]},
+    ),
+    Case(
+        description="offset continue twice with limit",
+        template=(
+            r"{% for item in (1..6) limit: 2 %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) limit: 2 offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+        ),
+        expect="1 2 3 4 5 6 ",
+    ),
+    Case(
+        description="offset continue twice with changing limit",
+        template=(
+            r"{% for item in (1..6) limit: 2 %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) limit: 3 offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+        ),
+        expect="1 2 3 4 5 6 ",
+    ),
+    Case(
+        description="offset continue twice with no second limit",
+        template=(
+            r"{% for item in (1..6) limit: 2 %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+        ),
+        expect="1 2 3 4 5 6 ",
+    ),
+    Case(
+        description="offset continue from a broken loop",
+        template=(
+            r"{% for item in (1..6) %}"
+            r"{% if item == 3 %}{% break %}{% endif %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+        ),
+        expect="1 2 ",
+    ),
+    Case(
+        description="offset continue from a broken loop with preceding limit",
+        template=(
+            r"{% for item in (1..6) limit: 3 %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) %}"
+            r"{% if item == 3 %}{% break %}{% endif %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} "
+            r"{% endfor %}"
+        ),
+        expect="1 2 3 1 2 ",
+    ),
+    Case(
+        description="offset continue forloop length",
+        template=(
+            r"{% for item in (1..6) limit: 2 %}"
+            r"{{ item }} - {{ forloop.length }}, "
+            r"{% endfor %}"
+            r"{% for item in (1..6) offset: continue %}"
+            r"{{ item }} - {{ forloop.length }}, "
+            r"{% endfor %}"
+        ),
+        expect="1 - 2, 2 - 2, 3 - 4, 4 - 4, 5 - 4, 6 - 4, ",
     ),
     Case(
         description="parentloop is normally undefined",

@@ -10,6 +10,8 @@ Version 1.1.0
 - New expression cache. Distinct from the existing template cache, optionally cache
   common Liquid expression types (conditions, loops and filtered expressions) to
   avoid lexing and parsing the same expression multiple times.
+- Fixed a bug where, in some cases, ``forloop.length`` would be incorrect when using
+  ``offsset: continue`` in a loop expression.
 
 Version 1.0.4
 -------------

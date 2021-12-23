@@ -22,8 +22,11 @@ from liquid.ast import BlockNode
 
 from liquid.context import Context
 from liquid.expression import LoopExpression
+from liquid.expression import NIL
+from liquid.lex import tokenize_loop_expression
 
 from liquid.parse import expect
+from liquid.parse import parse_loop_expression
 from liquid.parse import get_parser
 
 from liquid.tag import Tag
@@ -170,7 +173,7 @@ class TablerowNode(Node):
         name = self.expression.name
         loop_iter, length = self.expression.evaluate(context)
 
-        if self.expression.cols:
+        if self.expression.cols and self.expression.cols != NIL:
             cols = self.expression.cols.evaluate(context)
             assert isinstance(cols, int)
         else:
@@ -211,7 +214,7 @@ class TablerowNode(Node):
         name = self.expression.name
         loop_iter, length = await self.expression.evaluate_async(context)
 
-        if self.expression.cols:
+        if self.expression.cols and self.expression.cols != NIL:
             cols = await self.expression.cols.evaluate_async(context)
             assert isinstance(cols, int)
         else:
@@ -259,7 +262,8 @@ class TablerowTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        loop_expression = self.env.parse_loop_expression_value(stream.current.value)
+        expr_iter = tokenize_loop_expression(stream.current.value)
+        loop_expression = parse_loop_expression(TokenStream(expr_iter))
         stream.next_token()
 
         block = parser.parse_block(stream, (TAG_ENDTABLEROW,))
