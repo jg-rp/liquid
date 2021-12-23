@@ -12,10 +12,15 @@ from typing import Optional
 from typing import NamedTuple
 from typing import TYPE_CHECKING
 
+from liquid import ast
+
 from liquid import expression
 from liquid.expression import IdentifierPathElement
 
-from liquid import ast
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_loop_expression
+from liquid.lex import tokenize_filtered_expression
+
 from liquid.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
@@ -437,6 +442,11 @@ def parse_range_option(stream: TokenStream) -> RangeOption:
     return opt
 
 
+def parse_loop_expression_value(value: str) -> expression.LoopExpression:
+    """Parse the given string as a loop expression."""
+    return parse_loop_expression(TokenStream(tokenize_loop_expression(value)))
+
+
 def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:
     """Parse a liquid loop expression, as one might find in a `for` tag.
 
@@ -648,6 +658,14 @@ class ExpressionParser:
 
         return left
 
+    def parse_filtered_expression_value(
+        self, value: str
+    ) -> expression.FilteredExpression:
+        """Parse the given value as a filtered expression."""
+        return self.parse_filtered_expression(
+            TokenStream(tokenize_filtered_expression(value))
+        )
+
     def parse_filtered_expression(
         self, stream: TokenStream
     ) -> expression.FilteredExpression:
@@ -660,6 +678,12 @@ class ExpressionParser:
         stream.next_token()
         filters = self.parse_filters(stream)
         return expression.FilteredExpression(expr, filters)
+
+    def parse_boolean_expression_value(self, value: str) -> expression.Expression:
+        """Parse the given string as a boolean expression."""
+        return self.parse_boolean_expression(
+            TokenStream(tokenize_boolean_expression(value))
+        )
 
     def parse_boolean_expression(self, stream: TokenStream) -> expression.Expression:
         """Parse a liquid expression that evaluates to a Boolean value.
@@ -707,7 +731,13 @@ parse_prefix_expression = STANDARD_EXPRESSION_PARSER.parse_prefix_expression
 parse_infix_expression = STANDARD_EXPRESSION_PARSER.parse_infix_expression
 parse_expression = STANDARD_EXPRESSION_PARSER.parse_expression
 parse_filtered_expression = STANDARD_EXPRESSION_PARSER.parse_filtered_expression
+parse_filtered_expression_value = (
+    STANDARD_EXPRESSION_PARSER.parse_filtered_expression_value
+)
 parse_boolean_expression = STANDARD_EXPRESSION_PARSER.parse_boolean_expression
+parse_boolean_expression_value = (
+    STANDARD_EXPRESSION_PARSER.parse_boolean_expression_value
+)
 parse_assignment_expression = STANDARD_EXPRESSION_PARSER.parse_assignment_expression
 
 

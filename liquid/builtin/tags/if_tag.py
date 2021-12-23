@@ -17,10 +17,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ConditionalBlockNode
 
 from liquid.exceptions import LiquidSyntaxError
-from liquid.lex import tokenize_boolean_expression
 
 from liquid.parse import expect
-from liquid.parse import parse_boolean_expression
 from liquid.parse import get_parser
 from liquid.parse import eat_block
 
@@ -131,8 +129,7 @@ class IfTag(Tag):
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Pare a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_boolean_expression(stream.current.value)
-        return parse_boolean_expression(TokenStream(expr_iter))
+        return self.env.parse_boolean_expression_value(stream.current.value)
 
     def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_IF)

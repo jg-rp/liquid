@@ -24,6 +24,10 @@ from liquid.stream import TokenStream
 from liquid.parse import get_parser
 from liquid.utils import LRUCache
 
+from liquid.parse import parse_filtered_expression_value
+from liquid.parse import parse_boolean_expression_value
+from liquid.parse import parse_loop_expression_value
+
 from liquid import ast
 from liquid import builtin
 from liquid import loaders
@@ -94,6 +98,9 @@ class Environment:
         Defaults to 300. If ``cache_size`` is ``None`` or less than ``1``, it has the
         effect of setting ``auto_reload`` to ``False``.
     :type cache_size: int
+    :param expression_cache_size: The capacity of each of the common expression caches.
+        Defaults to ``0``, disabling expression caching.
+    :type expression_cache_size: int
     :param globals: An optional mapping that will be added to the context of any
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
@@ -118,15 +125,26 @@ class Environment:
         template_comments: bool = False,
         comment_start_string: str = "{#",
         comment_end_string: str = "#}",
+        expression_cache_size: int = 0,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
         self.statement_start_string = statement_start_string
         self.statement_end_string = statement_end_string
+
+        # Automatic tag stripping is not yet implemented. Chaning this has no effect.
         self.strip_tags = strip_tags
+
+        # An instance of a template loader implementing ``liquid.loaders.BaseLoader``.
+        # ``get_template()`` will delegate to this loader.
         self.loader = loader or loaders.DictLoader({})
+
+        # A mapping of template variable names to python objects. These variables will
+        # be added to the global namespace of any template rendered from this
+        # environment using ``from_string`` or ``get_template``.
         self.globals: Mapping[str, object] = globals or {}
 
+        # Extended template comment syntax control.
         self.template_comments = template_comments
         self.comment_start_string = comment_start_string
         self.comment_end_string = comment_end_string
@@ -161,6 +179,16 @@ class Environment:
             self.cache = {}
             self.auto_reload = False
 
+        # Common expression parsing functions that might be cached.
+        self.expression_cache_size = expression_cache_size
+        self.parse_filtered_expression_value = parse_filtered_expression_value
+        self.parse_boolean_expression_value = parse_boolean_expression_value
+        self.parse_loop_expression_value = parse_loop_expression_value
+        self.set_expression_cache_size(expression_cache_size)
+
+        # Instances if ``template_class`` are returned from ``from_string``,
+        # ``get_template`` and ``get_template_async``. It should be the
+        # ``BoundTemplate`` class of a subslass of it.
         self.template_class = BoundTemplate
 
         builtin.register(self)
@@ -346,7 +374,7 @@ class Environment:
         msg: Optional[str] = None,
         linenum: Optional[int] = None,
     ) -> None:
-        """Raise ,warn or ignore the given exception according to the current mode."""
+        """Raise, warn or ignore the given exception according to the current mode."""
         if not isinstance(exc, Error):
             exc = exc(msg, linenum=linenum)
         elif not exc.linenum:
@@ -356,6 +384,30 @@ class Environment:
             raise exc
         if self.mode == Mode.WARN:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
+
+    def set_expression_cache_size(self, maxsize: int = 0) -> None:
+        """Create or replace cached versions of the common expression parsers. If
+        `maxsize` is less than ``1``, no expression caching will happen.
+
+        :param maxsize: The maximum size of each expression cache.
+        :type maxsize: int
+        """
+        if maxsize >= 1:
+            self.parse_filtered_expression_value = lru_cache(maxsize=maxsize)(
+                parse_filtered_expression_value
+            )
+            self.parse_boolean_expression_value = lru_cache(maxsize=maxsize)(
+                parse_boolean_expression_value
+            )
+            self.parse_loop_expression_value = lru_cache(maxsize=maxsize)(
+                parse_loop_expression_value
+            )
+        else:
+            self.parse_filtered_expression_value = parse_filtered_expression_value
+            self.parse_boolean_expression_value = parse_boolean_expression_value
+            self.parse_loop_expression_value = parse_loop_expression_value
+
+        self.expression_cache_size = maxsize
 
 
 # pylint: disable=redefined-builtin too-many-arguments too-many-locals
@@ -377,6 +429,7 @@ def get_implicit_environment(
     template_comments: bool,
     comment_start_string: str,
     comment_end_string: str,
+    expression_cache_size: int,
 ) -> Environment:
     """Return an :class:`Environment` initialized with the given arguments."""
     return Environment(
@@ -396,12 +449,13 @@ def get_implicit_environment(
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
+        expression_cache_size=expression_cache_size,
     )
 
 
-# `Template` is a factory function masquerading as a class. The desire to have
-# an intuitive API and to please the static type checker outweighs this abuse of
-# Python naming conventions. At least for now.
+# ``Template`` is a factory function masquerading as a class. The desire to have an
+# intuitive API and to please the static type checker outweighs this abuse of Python
+# naming conventions. At least for now.
 
 # pylint: disable=redefined-builtin too-many-arguments invalid-name too-many-locals
 def Template(
@@ -421,6 +475,7 @@ def Template(
     template_comments: bool = False,
     comment_start_string: str = "{#",
     comment_end_string: str = "#}",
+    expression_cache_size: int = 0,
 ) -> BoundTemplate:
     """Returns a :class:`liquid.template.BoundTemplate`, automatically creating an
     :class:`Environment` to bind it to.
@@ -480,6 +535,9 @@ def Template(
         Defaults to 300. If ``cache_size`` is ``None`` or less than ``1``, it has the
         effect of setting ``auto_reload`` to ``False``.
     :type cache_size: int
+    :param expression_cache_size: The capacity of each of the common expression caches.
+        Defaults to ``0``, disabling expression caching.
+    :type expression_cache_size: int
     :param globals: An optional mapping that will be added to the context of any
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
@@ -503,6 +561,7 @@ def Template(
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
+        expression_cache_size=expression_cache_size,
     )
 
     return env.from_string(source, globals=globals)

@@ -22,10 +22,8 @@ from liquid.ast import BlockNode
 
 from liquid.context import Context
 from liquid.expression import LoopExpression
-from liquid.lex import tokenize_loop_expression
 
 from liquid.parse import expect
-from liquid.parse import parse_loop_expression
 from liquid.parse import get_parser
 
 from liquid.tag import Tag
@@ -261,8 +259,7 @@ class TablerowTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_loop_expression(stream.current.value)
-        loop_expression = parse_loop_expression(TokenStream(expr_iter))
+        loop_expression = self.env.parse_loop_expression_value(stream.current.value)
         stream.next_token()
 
         block = parser.parse_block(stream, (TAG_ENDTABLEROW,))

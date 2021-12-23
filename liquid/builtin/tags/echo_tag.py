@@ -8,10 +8,6 @@ from liquid.builtin.statement import StatementNode
 
 from liquid.expression import NIL
 from liquid.expression import Expression
-
-from liquid.lex import tokenize_filtered_expression
-
-from liquid.parse import parse_filtered_expression
 from liquid.parse import expect
 
 from liquid.stream import TokenStream
@@ -48,6 +44,5 @@ class EchoTag(Tag):
             expr: Expression = NIL
         else:
             expect(stream, TOKEN_EXPRESSION)
-            expr_iter = tokenize_filtered_expression(stream.current.value)
-            expr = parse_filtered_expression(TokenStream(expr_iter))
+            expr = self.env.parse_filtered_expression_value(stream.current.value)
         return EchoNode(tok, expression=expr)

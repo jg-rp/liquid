@@ -16,14 +16,12 @@ from liquid.ast import IllegalNode
 
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
-from liquid.lex import tokenize_boolean_expression
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 
 from liquid.parse import eat_block
 from liquid.parse import expect
 from liquid.parse import get_parser
-from liquid.parse import parse_boolean_expression
 
 from liquid.token import Token
 from liquid.token import TOKEN_EOF
@@ -128,8 +126,7 @@ class UnlessTag(Tag):
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Parse a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_boolean_expression(stream.current.value)
-        return parse_boolean_expression(TokenStream(expr_iter))
+        return self.env.parse_boolean_expression_value(stream.current.value)
 
     def parse(self, stream: TokenStream) -> Union[UnlessNode, IllegalNode]:
 

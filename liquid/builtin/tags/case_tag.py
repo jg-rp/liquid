@@ -15,13 +15,11 @@ from liquid.token import TOKEN_TAG
 
 from liquid.parse import get_parser
 from liquid.parse import expect
-from liquid.parse import parse_boolean_expression
 
 from liquid import ast
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
-from liquid.lex import tokenize_boolean_expression
 
 if TYPE_CHECKING:
     from liquid import Environment
@@ -107,8 +105,7 @@ class CaseTag(Tag):
     def parse_expression(self, case: str, obj: str, stream: TokenStream) -> Expression:
         """Parse a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_boolean_expression(f"{case} == {obj}")
-        return parse_boolean_expression(TokenStream(expr_iter))
+        return self.env.parse_boolean_expression_value(f"{case} == {obj}")
 
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG, value=TAG_CASE)

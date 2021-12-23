@@ -7,6 +7,9 @@ Version 1.1.0
 - Added new comment syntax. Disabled by default, enable shorthand comments with the
   ``template_comments`` argument to ``liquid.Template`` or ``liquid.Environment``.
   When ``True``, anything between ``{#`` and ``#}`` will be considered a comment.
+- New expression cache. Distinct from the existing template cache, optionally cache
+  common Liquid expression types (conditions, loops and filtered expressions) to
+  avoid lexing and parsing the same expression multiple times.
 
 Version 1.0.4
 -------------

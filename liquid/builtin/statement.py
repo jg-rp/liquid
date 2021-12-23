@@ -17,9 +17,6 @@ except ImportError:
 from liquid.ast import Node
 from liquid.context import Context
 from liquid.expression import Expression
-from liquid.lex import tokenize_filtered_expression
-
-from liquid.parse import parse_filtered_expression
 from liquid.parse import expect
 
 from liquid.stream import TokenStream
@@ -90,7 +87,4 @@ class Statement(Tag):
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
-
-        expr_iter = tokenize_filtered_expression(tok.value)
-        node = StatementNode(tok, parse_filtered_expression(TokenStream(expr_iter)))
-        return node
+        return StatementNode(tok, self.env.parse_filtered_expression_value(tok.value))

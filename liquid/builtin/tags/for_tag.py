@@ -18,11 +18,8 @@ from liquid.expression import LoopExpression
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
 
-from liquid.lex import tokenize_loop_expression
-
 from liquid.parse import get_parser
 from liquid.parse import expect
-from liquid.parse import parse_loop_expression
 
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -288,9 +285,7 @@ class ForTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_loop_expression(stream.current.value)
-        expr = parse_loop_expression(TokenStream(expr_iter))
-
+        expr = self.env.parse_loop_expression_value(stream.current.value)
         stream.next_token()
 
         block = parser.parse_block(stream, ENDFORBLOCK)
