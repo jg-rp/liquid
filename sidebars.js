@@ -27,8 +27,10 @@ const sidebars = {
         "introduction/render-context",
         "introduction/objects-and-drops",
         "introduction/strictness",
+        "introduction/comments",
         "introduction/auto-escape",
         "introduction/async-support",
+        "introduction/caching",
       ]
     },
     {
@@ -39,7 +41,7 @@ const sidebars = {
         "guides/custom-filters",
         "guides/custom-tags",
         "guides/custom-loaders",
-        "guides/custom-template-cache",
+        // "guides/custom-template-cache",
       ]
     }
   ],

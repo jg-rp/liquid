@@ -27,6 +27,16 @@ a [liquid.Environment](Environment) to bind it to.
 - `statement_end_string: str` - The sequence of characters indicating the end of an output
   statement. Defaults to `}}`.
 
+- `comment_start_string: str` - The sequence of characters indicating the start of a comment.
+  Defaults to `{#`. `template_comments` must be `True` for `comment_start_string` to have any
+  effect.
+
+- `comment_end_string: str` - The sequence of characters indicating the end of a comment. Defaults
+  to `#}`. `template_comments` must be `True` for `comment_end_string` to have any effect.
+
+- `template_comments: bool` - If `True`, enable template comments. Where, by default, anything
+  between `{#` and `#}` is considered a comment. Defaults to `False`.
+
 - `tolerance: Mode` - Indicates how tolerant to be of errors. Must be one of `Mode.LAX`, `Mode.WARN`
   or `Mode.STRICT`. Defaults to `Mode.STRICT`.
 
@@ -47,6 +57,9 @@ a [liquid.Environment](Environment) to bind it to.
 
 - `cache_size: int` - The capacity of the template cache in number of templates. Defaults to `300`.
   If `cache_size` is `None` or less than `1`, it has the effect of setting `auto_reload` to `False`.
+
+- `expression_cache_size: int` - The capacity of each of the common expression caches. Defaults to
+  `0`, disabling expression caching.
 
 - `globals: Optional[Mapping[str, object]]` - An optional mapping that will be added to the context
   every time the resulting `BoundTemplate` is rendered. Defaults to `None`.

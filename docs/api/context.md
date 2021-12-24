@@ -92,7 +92,7 @@ Return the value at path `path` if it is in scope, else default.
 
 ### `get_async`
 
-`async assign_async(key: str, val: Any) -> None`
+`async get_async(key: str, val: Any) -> None`
 
 An async version of [get](#get).
 

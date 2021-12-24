@@ -8,7 +8,7 @@ That is, available variables and their values, and options set on the bound [Env
 You can add _global_ variables to an environment using the `globals` argument to the
 [Environment](../api/Environment) constructor. `globals` should be a dictionary (or any Mapping)
 mapping strings to Python objects. Environment globals are automatically added to the render
-context of every template rendered with [Environment.from_string()](../api/Environment#from_string)
+context of every [template](../api/BoundTemplate) created with [Environment.from_string()](../api/Environment#from_string)
 and [Environment.get_template()](../api/Environment#get_template), including templates rendered with
 the [render tag](../language/tags#render).
 
@@ -18,11 +18,11 @@ from liquid import Environment
 env = Environment(globals={"site_name": "MySite"})
 
 template = env.from_string("""\
-    <html>
-    <head>
-        <title>{{ site_name }}</title>
-    </head>
-    </html>
+<html>
+<head>
+    <title>{{ site_name }}</title>
+</head>
+</html>
 """)
 
 print(template.render())

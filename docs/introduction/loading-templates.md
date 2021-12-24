@@ -6,7 +6,7 @@ you want to use the built-in [include](../language/tags#include) or [render](../
 tags.
 
 [Environment.get_template()](../api/Environment#get_template) and [Environment.get_template_async()](../api/Environment#get_template_async)
-accept a template name, and return a [BoundTemplate](../api/BoundTemplate). That is a template bound
+accept a template name and return a [BoundTemplate](../api/BoundTemplate). That is a template bound
 to the environment, ready to be rendered. It is up to the loader to interpret a template name. In
 the case of [FileSystemLoader](../api/FileSystemLoader), the name would be a file name, possibly
 preceded by a path relative to the configured search path.
@@ -82,8 +82,6 @@ for more information.
 :::
 
 Available, built-in loaders are [FileSystemLoader](../api/FileSystemLoader), [DictLoader](../api/DictLoader)
-and [ChoiceLoader](../api/ChoiceLoader).
-
-See also [custom loaders](../guides/custom-loaders),
+and [ChoiceLoader](../api/ChoiceLoader). See also [custom loaders](../guides/custom-loaders),
 and examples of a [FrontMatterFileSystemLoader](../guides/custom-loaders#front-matter-loader)
 and an [AsyncDatabaseLoader](../guides/custom-loaders#async-database-loader).

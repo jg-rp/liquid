@@ -93,7 +93,7 @@ All templates rendered from an [Environment](/api/Environment) will share the en
 configuration. See [liquid.Environment](api/Environment) for all available options.
 
 ```python
-from liquid import Template
+from liquid import Environment
 from liquid import Mode
 from liquid import StrictUndefined
 from liquid import FileSystemLoader
