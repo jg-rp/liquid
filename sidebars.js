@@ -41,6 +41,7 @@ const sidebars = {
         "guides/custom-filters",
         "guides/custom-tags",
         "guides/custom-loaders",
+        "guides/django-liquid",
         "guides/flask-liquid",
         // "guides/custom-template-cache",
       ]
