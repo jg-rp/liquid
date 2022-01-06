@@ -5,8 +5,8 @@ from liquid.golden.case import Case
 cases = [
     Case(
         description="range literal concat filter left value",
-        template=r"{{ (1..3) | concat: foo }}",
-        expect="123567",
+        template=r"{{ (1..3) | concat: foo | join: '#' }}",
+        expect="1#2#3#5#6#7",
         globals={"foo": [5, 6, 7]},
     ),
     Case(

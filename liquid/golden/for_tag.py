@@ -494,7 +494,7 @@ cases = [
         description="loop over an existing range object",
         template=(
             r"{% assign foo = (1..3) %}"
-            r"{{ foo }}"
+            r"{{ foo | join: '#' }}"
             r"{% for i in foo %}"
             r"{{ i }}"
             r"{% endfor %}"
@@ -502,7 +502,7 @@ cases = [
             r"{{ i }}"
             r"{% endfor %}"
         ),
-        expect="1..3123123",
+        expect="1#2#3123123",
         globals={},
     ),
     Case(

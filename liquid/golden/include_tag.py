@@ -105,8 +105,8 @@ cases = [
     Case(
         description="some keyword arguments with range literal",
         template=r"{% include 'product-args' foo: (1..3), bar: 'there' %}",
-        expect="1..3 there",
-        partials={"product-args": r"{{ foo }} {{ bar }}"},
+        expect="1#2#3 there",
+        partials={"product-args": r"{{ foo | join: '#' }} {{ bar }}"},
     ),
     Case(
         description="template drop",

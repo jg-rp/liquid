@@ -74,6 +74,12 @@ cases = [
         expect="false",
     ),
     Case(
+        description="allow false from context",
+        template=r"{{ false | default: 'bar', allow_false:foo }}",
+        expect="false",
+        globals={"foo": True},
+    ),
+    Case(
         description="undefined left value",
         template=r'{{ nosuchthing | default: "bar" }}',
         expect="bar",

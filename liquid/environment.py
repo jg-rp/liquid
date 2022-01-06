@@ -186,7 +186,7 @@ class Environment:
         self.parse_loop_expression_value = parse_loop_expression_value
         self.set_expression_cache_size(expression_cache_size)
 
-        # Instances if ``template_class`` are returned from ``from_string``,
+        # Instances of ``template_class`` are returned from ``from_string``,
         # ``get_template`` and ``get_template_async``. It should be the
         # ``BoundTemplate`` class of a subslass of it.
         self.template_class = BoundTemplate

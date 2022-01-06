@@ -77,8 +77,8 @@ cases = [
     ),
     Case(
         description="dump an array from the global context",
-        template=r"{{ product.tags }}",
-        expect="sportsgarden",
+        template=r"{{ product.tags | join: '#' }}",
+        expect="sports#garden",
         globals={"product": {"tags": ["sports", "garden"]}},
     ),
     Case(
@@ -150,24 +150,24 @@ cases = [
     ),
     Case(
         description="render a range object",
-        template=r"{{ (1..5) }}",
-        expect="1..5",
+        template=r"{{ (1..5) | join: '#' }}",
+        expect="1#2#3#4#5",
     ),
     Case(
         description="render a range object that uses a float",
-        template=r"{{ (1.4..5) }}",
-        expect="1..5",
+        template=r"{{ (1.4..5) | join: '#' }}",
+        expect="1#2#3#4#5",
     ),
     Case(
         description="render a range object that uses an identifier",
-        template=r"{{ (foo..5) }}",
-        expect="2..5",
+        template=r"{{ (foo..5) | join: '#' }}",
+        expect="2#3#4#5",
         globals={"foo": 2},
     ),
     Case(
         description="reverse a range",
-        template=r"{{ (foo..5) | reverse }}",
-        expect="5432",
+        template=r"{{ (foo..5) | reverse | join: '#' }}",
+        expect="5#4#3#2",
         globals={"foo": 2},
     ),
 ]

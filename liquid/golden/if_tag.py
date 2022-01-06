@@ -151,4 +151,9 @@ cases = [
         ),
         expect="true",
     ),
+    Case(
+        description="logical operators are right associative",
+        template=(r"{% if true and false and false or true %}hello{% endif %}"),
+        expect="",
+    ),
 ]

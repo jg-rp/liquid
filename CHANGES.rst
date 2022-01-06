@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.1
+-------------
+
+- Avoid testing string representations of Liquid arrays.
+
 Version 1.1.0
 -------------
 

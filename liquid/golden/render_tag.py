@@ -60,10 +60,10 @@ cases = [
     Case(
         description="some keyword arguments including a range literal",
         template=r"{% render 'product-args', foo: (1..3), bar: 'there' %}",
-        expect="1..3 there",
+        expect="1#2#3 there",
         globals={},
         partials={
-            "product-args": r"{{ foo }} {{ bar }}",
+            "product-args": r"{{ foo | join: '#' }} {{ bar }}",
         },
     ),
     Case(
