@@ -97,6 +97,12 @@ const config = {
         darkTheme: darkCodeTheme,
         additionalLanguages: ['liquid']
       },
+      algolia: {
+        appId: 'SY0LPESLUP',
+        apiKey: '5f0c1de3dad3648085c7bcd9fd6c4997',
+        indexName: 'jg-rp',
+        contextualSearch: false,
+      },
     }),
 };
 
