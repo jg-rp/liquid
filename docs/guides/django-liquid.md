@@ -18,7 +18,7 @@ $ python -m pip install -U django-liquid
 
 ## Configure
 
-Configure Django Liquid with the [`TEMPLATES`](https://docs.djangoproject.com/en/4.0/topics/templates/#configuration) setting in your `settings.py` file. Use `django_liquid.liquid.liquid` for the `BACKEND` setting. This example keeps the default Django template backend configuration, as created with [startproject](https://docs.djangoproject.com/en/4.0/ref/django-admin/#django-admin-startproject), and adds configuration for a Liquid template backend.
+Configure Django Liquid with the [`TEMPLATES`](https://docs.djangoproject.com/en/4.0/topics/templates/#configuration) setting in your `settings.py` file, using `django_liquid.liquid.liquid` for the `BACKEND` setting. This example keeps the default Django template backend configuration, as created with [startproject](https://docs.djangoproject.com/en/4.0/ref/django-admin/#django-admin-startproject), and adds configuration for a Liquid template backend.
 
 ```python title="settings.py"
 TEMPLATES = [

@@ -48,7 +48,7 @@ Given a value that can't be cast to an integer or float, `0` will be returned.
 
 `<string> | append: <string>`
 
-Returns the input value concatenated with the argument value.
+Return the input value concatenated with the argument value.
 
 ```liquid
 {{ 'Hello, ' | append: 'World!' }}
@@ -58,8 +58,7 @@ Returns the input value concatenated with the argument value.
 Hello, World!
 ```
 
-If either the input value or argument are not a string, they will be coerced to a string before
-concatenation.
+If either the input value or argument are not a string, they will be coerced to a string before concatenation.
 
 ```liquid
 {% assign a_number = 7.5 -%}
@@ -76,9 +75,7 @@ World!
 
 `<number> | at_least: <number>`
 
-Returns the maximum of the filter's input value and its argument. If either input value or argument
-are string representations of an integer or float, they will be case to an integer or float prior to
-comparison.
+Return the maximum of the filter's input value and its argument. If either input value or argument are string representations of an integer or float, they will be cast to an integer or float prior to comparison.
 
 ```liquid
 {{ -5.1 | at_least: 8 }}
@@ -108,9 +105,7 @@ If either input value or argument can not be cast to an integer or float, `0` wi
 
 `<number> | at_most: <number>`
 
-Returns the minimum of the filter's input value and its argument. If either input value or argument
-are string representations of an integer or float, they will be cast to an integer or float prior to
-comparison.
+Return the minimum of the filter's input value and its argument. If either input value or argument are string representations of an integer or float, they will be cast to an integer or float prior to comparison.
 
 ```liquid
 {{ 5 | at_most: 8 }}
@@ -140,8 +135,7 @@ If either input value or argument can not be cast to an integer or float, `0` wi
 
 `<string> | base64_decode`
 
-Decode a base64 encoded string. The decoded value is assumed to be UTF-8 and will be decoded as
-UTF-8.
+Decode a base64 encoded string. The decoded value is assumed to be UTF-8 and will be decoded as UTF-8.
 
 :::caution
 While Python Liquid assumes UTF-8 character encoding, Ruby Liquid does not seem to do so,
@@ -257,7 +251,7 @@ NQ==
 
 `<string> | capitalize`
 
-Returns the input string with the first character in upper case and the rest lowercase.
+Return the input string with the first character in upper case and the rest lowercase.
 
 ```liquid
 {{ 'heLLO, World!' | capitalize }}
@@ -281,8 +275,7 @@ If the input value is not a string, it will be converted to a string.
 
 `<number> | ceil`
 
-Round the input value up to the nearest whole number. The input value will be converted to a number
-if it is not an integer or float.
+Round the input value up to the nearest whole number. The input value will be converted to a number if it is not an integer or float.
 
 ```liquid
 {{ 5.1 | ceil }}
@@ -314,8 +307,7 @@ If the input is undefined or can't be converted to a number, `0` is returned.
 
 `<array> | compact[: <string>]`
 
-Remove `nil` (or `None` in Python) values from an array-like object. If given, the argument should
-be the name of a property that exists on each object (hash, dict etc.) in the array-like sequence.
+Remove `nil` (or `None` in Python) values from an array-like object. If given, the argument should be the name of a property that exists on each object (hash, dict etc.) in the array-like sequence.
 
 If `pages` is an array of objects, some of which have a `category` property:
 
@@ -371,8 +363,7 @@ With `compact`, we can remove those missing categories before the loop.
 - technology
 ```
 
-Using the optional argument to `compact`, we could avoid using `map` and create an array of pages
-with a `category` property, rather than an array of categories.
+Using the optional argument to `compact`, we could avoid using `map` and create an array of pages with a `category` property, rather than an array of categories.
 
 ```liquid
 {% assign pages_with_category = pages | compact: "category" %}
@@ -416,8 +407,7 @@ Create a new array by joining one array-like object with another.
 - potatoes
 ```
 
-If the input value is not array-like, it will be converted to an array. No conversion is attempted
-for the argument value.
+If the input value is not array-like, it will be converted to an array. No conversion is attempted for the argument value.
 
 ```liquid
 {% assign fruits = "apples, oranges, peaches" | split: ", " %}
@@ -435,8 +425,7 @@ for the argument value.
 - peaches
 ```
 
-If the input is a nested array, it will be flattened before concatenation. The argument is not
-flattened.
+If the input is a nested array, it will be flattened before concatenation. The argument is not flattened.
 
 ```json title="data"
 {
@@ -460,8 +449,7 @@ a#x#b#y#z#c#d
 
 `<datetime> | date: <string>`
 
-Format a date and/or time according the the given format string. The input can be a string, in
-which case the string will be parsed as a date/time before formatting.
+Format a date and/or time according the the given format string. The input can be a string, in which case the string will be parsed as a date/time before formatting.
 
 :::caution
 Python Liquid uses [dateutil](https://dateutil.readthedocs.io/en/stable/) for parsing strings to
@@ -481,8 +469,7 @@ and/or time. Whereas Ruby Liquid will usually return something without erroring.
 Mar 14, 16
 ```
 
-The special `'now'` or `'today'` input values can be used to get the current timestamp. `'today'` is
-an alias for `'now'`. Both include time information.
+The special `'now'` or `'today'` input values can be used to get the current timestamp. `'today'` is an alias for `'now'`. Both include time information.
 
 ```liquid
 {{ "now" | date: "%Y-%m-%d %H:%M" }}
@@ -506,8 +493,7 @@ If the input is undefined, an empty string is returned.
 
 `<object> | default[: <object>[, allow_false:<bool>]]`
 
-Return a default value if the input is undefined, `nil`, `false` or empty, or return the input
-unchanged otherwise.
+Return a default value if the input is undefined, `nil`, `false` or empty, or return the input unchanged otherwise.
 
 :::info
 The `default` filter is the only built-in filter to use a keyword argument.
@@ -529,8 +515,7 @@ The `default` filter is the only built-in filter to use a keyword argument.
 4.99
 ```
 
-If the optional `allow_false` argument is `true`, an input of `false` will not return the default.
-`allow_false` defaults to `false`.
+If the optional `allow_false` argument is `true`, an input of `false` will not return the default. `allow_false` defaults to `false`.
 
 ```liquid
 {% assign product_reduced = false -%}
@@ -555,8 +540,7 @@ If no argument is given, the default value will be an empty string.
 
 `<number> | divided_by: <number>`
 
-Divide a number by another number. The result is rounded down to the nearest integer if the divisor
-is an integer.
+Divide a number by another number. The result is rounded down to the nearest integer if the divisor is an integer.
 
 ```liquid
 {{ 16 | divided_by: 4 }}
@@ -580,9 +564,7 @@ If you divide by a float, the result will be a float.
 2.857142857142857
 ```
 
-If either the input or argument are not an integer or float, Liquid will try to convert them to an
-integer or float. If the input can't be converted, `0` will be used instead. If the argument can't
-be converted, and exception is raised.
+If either the input or argument are not an integer or float, Liquid will try to convert them to an integer or float. If the input can't be converted, `0` will be used instead. If the argument can't be converted, and exception is raised.
 
 ```liquid
 {{ "20" | divided_by: "7" }}
@@ -608,8 +590,7 @@ Return the input string with all characters in lowercase.
 hello, world!
 ```
 
-If the input is not a string, Liquid will convert it to a string before forcing characters to
-lowercase.
+If the input is not a string, Liquid will convert it to a string before forcing characters to lowercase.
 
 ```liquid
 {{ 5 | downcase }}
@@ -625,7 +606,7 @@ If the input is undefined, an empty string is returned.
 
 `<string> | escape`
 
-Returns the input string with characters `&`, `<` and `>` converted to HTML-safe sequences.
+Return the input string with characters `&`, `<` and `>` converted to HTML-safe sequences.
 
 ```liquid
 {{ "Have you read 'James & the Giant Peach'?" | escape }}
@@ -639,7 +620,7 @@ Have you read &#39;James &amp; the Giant Peach&#39;?
 
 `<string> | escape_once`
 
-Returns the input string with characters `&`, `<` and `>` converted to HTML-safe sequences, while
+Return the input string with characters `&`, `<` and `>` converted to HTML-safe sequences, while
 preserving existing HTML escape sequences.
 
 ```liquid

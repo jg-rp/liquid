@@ -17,7 +17,7 @@ template.
 ```liquid
 {% assign greeting = "Hello" %}
 {% for person in people %}
-{{ greeting }}, {{ person.name }}!
+  {{ greeting }}, {{ person.name }}!
 {% endfor %}
 ```
 
