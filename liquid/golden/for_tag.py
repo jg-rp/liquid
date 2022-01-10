@@ -511,4 +511,16 @@ cases = [
         expect="2345",
         globals={},
     ),
+    Case(
+        description="share outer scope",
+        template=(
+            r"{% assign foo = 'hello' %}"
+            r"{% for x in (1..3) %}"
+            r"{% assign foo = x %}"
+            r"{% endfor %}"
+            r"{{ foo }}"
+        ),
+        expect="3",
+        globals={},
+    ),
 ]

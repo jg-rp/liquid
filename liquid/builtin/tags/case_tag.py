@@ -1,7 +1,8 @@
 """Tag and node definition for the built-in "case" tag."""
 from __future__ import annotations
-
 import sys
+
+from io import StringIO
 
 from typing import List
 from typing import Optional
@@ -37,7 +38,7 @@ ENDCASEBLOCK = (TAG_ENDCASE,)
 class CaseNode(ast.Node):
     """Parse tree node for the built-in "case" tag."""
 
-    __slots__ = ("tok", "whens", "default")
+    __slots__ = ("tok", "whens", "default", "forced_output")
 
     def __init__(
         self,
@@ -48,6 +49,10 @@ class CaseNode(ast.Node):
         self.tok = tok
         self.whens = whens
         self.default = default
+
+        self.forced_output = any(
+            n.forced_output for n in (*self.whens, self.default) if n
+        )
 
     def __str__(self) -> str:
         if not self.whens:
@@ -65,28 +70,38 @@ class CaseNode(ast.Node):
         return " ".join(buf)
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        rendered = False
+        buf = StringIO()
+        rendered: Optional[bool] = False
 
         for when in self.whens:
-            if when.render(context, buffer):
+            if when.render(context, buf):
                 rendered = True
 
         if not rendered and self.default:
-            return self.default.render(context, buffer)
+            rendered = self.default.render(context, buf)
+
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
 
         return rendered
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        rendered = False
+        buf = StringIO()
+        rendered: Optional[bool] = False
 
         for when in self.whens:
-            if await when.render_async(context, buffer):
+            if await when.render_async(context, buf):
                 rendered = True
 
         if not rendered and self.default:
-            return await self.default.render_async(context, buffer)
+            rendered = await self.default.render_async(context, buf)
+
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
 
         return rendered
 

@@ -31,6 +31,8 @@ class StatementNode(Node):
 
     __slots__ = ("tok", "expression")
 
+    force_output = True
+
     def __init__(self, tok: Token, expression: Expression):
         self.tok = tok
         self.expression = expression

@@ -1,7 +1,7 @@
 """Common parse tree nodes."""
 
-from abc import ABC, abstractmethod
-from io import StringIO
+from abc import ABC
+from abc import abstractmethod
 
 from typing import Collection
 from typing import List
@@ -23,6 +23,10 @@ class Node(ABC):
     """Base class for all nodes in a parse tree."""
 
     __slots__ = ()
+
+    # Indicates that nodes that do automatic whitespace suppression should output this
+    # node regardless of its contents.
+    force_output = False
 
     def token(self) -> Token:
         """The token that started this node."""
@@ -117,78 +121,48 @@ class IllegalNode(Node):
 class BlockNode(Node):
     """A parse tree node representing a sequence of statements."""
 
-    __slots__ = ("tok", "statements")
+    __slots__ = ("tok", "statements", "forced_output")
 
     def __init__(self, tok: Token, statements: Optional[List[Node]] = None):
         self.tok = tok
         self.statements = statements or []
+        self.forced_output = False
 
     def __str__(self) -> str:
         return "".join(str(s) for s in self.statements)
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        # This intermediate buffer is used to suppress blocks that, when rendered,
-        # contain only whitespace.
-        buf = StringIO()
-
         for stmt in self.statements:
             try:
-                stmt.render(context, buf)
+                stmt.render(context, buffer)
             except Error as err:
                 # Maybe resume rendering the block after an error.
                 context.error(err)
-            except Exception:
-                # Write what we have so far and stop rendering the block.
-                val = buf.getvalue()
-                if not val.isspace():
-                    buffer.write(val)
-                raise
-
-        # Don't write to the output buffer if the block contains only whitespace.
-        val = buf.getvalue()
-        if not val.isspace():
-            buffer.write(val)
-            return True
-        return False
+        return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        # This intermediate buffer is used to suppress blocks that, when rendered,
-        # contain only whitespace.
-        buf = StringIO()
-
         for stmt in self.statements:
             try:
-                await stmt.render_async(context, buf)
+                await stmt.render_async(context, buffer)
             except Error as err:
                 # Maybe resume rendering the block after an error.
                 context.error(err)
-            except Exception:
-                # Write what we have so far and stop rendering the block.
-                val = buf.getvalue()
-                if not val.isspace():
-                    buffer.write(val)
-                raise
-
-        # Don't write to the output buffer if the block contains only whitespace.
-        val = buf.getvalue()
-        if not val.isspace():
-            buffer.write(val)
-            return True
-        return False
+        return True
 
 
 class ConditionalBlockNode(Node):
     """A parse tree node representing a sequence of statements and a conditional
     expression."""
 
-    __slots__ = ("tok", "condition", "block")
+    __slots__ = ("tok", "condition", "block", "forced_output")
 
     def __init__(self, tok: Token, condition: Expression, block: BlockNode):
         self.tok = tok
         self.condition = condition
         self.block = block
+        self.forced_output = block.forced_output
 
     def __str__(self) -> str:
         return f"{self.condition} {{ {self.block} }}"

@@ -2,6 +2,8 @@
 from __future__ import annotations
 import sys
 
+from io import StringIO
+
 from typing import Optional
 from typing import Any
 from typing import List
@@ -134,7 +136,7 @@ class ForLoop(Mapping[str, object]):
 class ForNode(Node):
     """Parse tree node for the built-in "for" tag."""
 
-    __slots__ = ("tok", "expression", "block", "default")
+    __slots__ = ("tok", "expression", "block", "default", "forced_output")
 
     def __init__(
         self,
@@ -148,6 +150,10 @@ class ForNode(Node):
         self.block = block
         self.default = default
 
+        self.forced_output = any(
+            b.forced_output for b in (self.block, self.default) if b
+        )
+
     def __str__(self) -> str:
         tag_str = f"for ({self.expression}) {{ {self.block} }}"
 
@@ -157,9 +163,15 @@ class ForNode(Node):
         return tag_str
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+        # This intermediate buffer is used to detect and possibly suppress blocks that,
+        # when rendered, contain only whitespace.
+        buf = StringIO()
+        rendered: Optional[bool] = False
+
         loop_iter, length = self.expression.evaluate(context)
 
         if length:
+            rendered = True
             name = self.expression.name
 
             forloop = ForLoop(
@@ -177,28 +189,34 @@ class ForNode(Node):
             # Extend the context. Essentially giving priority to `ForLoopDrop`, then
             # delegating `get` and `assign` to the outer context.
             with context.loop(namespace, forloop):
-
                 for itm in forloop:
                     namespace[name] = itm
-
                     try:
-                        self.block.render(context, buffer)
+                        self.block.render(context, buf)
                     except ContinueLoop:
                         continue
                     except BreakLoop:
                         break
 
         elif self.default:
-            return self.default.render(context, buffer)
+            rendered = self.default.render(context, buf)
 
-        return True
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
+
+        return rendered
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
+        buf = StringIO()
+        rendered: Optional[bool] = False
+
         loop_iter, length = await self.expression.evaluate_async(context)
 
         if length:
+            rendered = True
             name = self.expression.name
 
             forloop = ForLoop(
@@ -216,21 +234,23 @@ class ForNode(Node):
             # Extend the context. Essentially giving priority to `ForLoopDrop`, then
             # delegating `get` and `assign` to the outer context.
             with context.loop(namespace, forloop):
-
                 for itm in forloop:
                     namespace[name] = itm
-
                     try:
-                        await self.block.render_async(context, buffer)
+                        await self.block.render_async(context, buf)
                     except ContinueLoop:
                         continue
                     except BreakLoop:
                         break
 
         elif self.default:
-            return await self.default.render_async(context, buffer)
+            rendered = await self.default.render_async(context, buf)
 
-        return True
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
+
+        return rendered
 
 
 class BreakNode(Node):

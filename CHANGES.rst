@@ -3,8 +3,11 @@ Python Liquid Change Log
 
 Version 1.1.1
 -------------
-
-- Avoid testing string representations of Liquid arrays.
+ 
+- Fixed a bug where blocks that contain whitespace only were being suppressed when the
+  whitespace was explicitly output. Automatic whitespace suppression now only occurs in
+  ``if``, ``unlesss`` and ``for`` blocks that don't contain an output statement or
+  ``echo`` tags, even if the output is whitespace. See #38.
 
 Version 1.1.0
 -------------

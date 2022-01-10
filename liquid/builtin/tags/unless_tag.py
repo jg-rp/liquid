@@ -1,7 +1,8 @@
 """Tag and node definition for the built-in "unless" tag."""
 from __future__ import annotations
-
 import sys
+
+from io import StringIO
 
 from typing import List
 from typing import Optional
@@ -51,6 +52,7 @@ class UnlessNode(Node):
         "consequence",
         "conditional_alternatives",
         "alternative",
+        "forced_output",
     )
 
     def __init__(
@@ -67,6 +69,16 @@ class UnlessNode(Node):
         self.conditional_alternatives = conditional_alternatives or []
         self.alternative = alternative
 
+        self.forced_output = any(
+            getattr(n, "forced_output", False)
+            for n in (
+                self.consequence,
+                *self.conditional_alternatives,
+                self.alternative,
+            )
+            if n
+        )
+
     def __str__(self) -> str:
         buf = [
             f"if !{self.condition} {{ {self.consequence} }}",
@@ -80,34 +92,50 @@ class UnlessNode(Node):
         return " ".join(buf)
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+        # This intermediate buffer is used to detect and possibly suppress blocks that,
+        # when rendered, contain only whitespace.
+        buf = StringIO()
+
         if not self.condition.evaluate(context):
-            rendered = self.consequence.render(context, buffer)
+            rendered = self.consequence.render(context, buf)
         else:
             rendered = False
             for alt in self.conditional_alternatives:
-                if alt.render(context, buffer):
+                if alt.render(context, buf):
                     rendered = True
                     break
 
             if not rendered and self.alternative:
-                return self.alternative.render(context, buffer)
+                rendered = self.alternative.render(context, buf)
+
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
 
         return rendered
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
+        # This intermediate buffer is used to detect and possibly suppress blocks that,
+        # when rendered, contain only whitespace.
+        buf = StringIO()
+
         if not await self.condition.evaluate_async(context):
-            rendered = await self.consequence.render_async(context, buffer)
+            rendered = await self.consequence.render_async(context, buf)
         else:
             rendered = False
             for alt in self.conditional_alternatives:
-                if await alt.render_async(context, buffer):
+                if await alt.render_async(context, buf):
                     rendered = True
                     break
 
             if not rendered and self.alternative:
-                return await self.alternative.render_async(context, buffer)
+                rendered = await self.alternative.render_async(context, buf)
+
+        val = buf.getvalue()
+        if self.forced_output or not val.isspace():
+            buffer.write(val)
 
         return rendered
 

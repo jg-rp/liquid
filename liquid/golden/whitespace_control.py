@@ -51,4 +51,220 @@ cases = [
         expect="\n\tWelcome back,  Holly!",
         globals={"customer": {"first_name": "Holly"}},
     ),
+    Case(
+        description="suppress whitespace only if blocks",
+        template="\n".join(
+            [
+                "!{% if true %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "{% if true %}",
+                "",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "{% endif %}",
+                "",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!!",
+        globals={},
+    ),
+    Case(
+        description="suppress whitespace only unless blocks",
+        template="\n".join(
+            [
+                "!{% unless false %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "{% unless false %}",
+                "",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "{% endunless %}",
+                "",
+                "",
+                "{% endunless %}!",
+            ]
+        ),
+        expect="!!",
+        globals={},
+    ),
+    Case(
+        description="suppress whitespace only case blocks",
+        template="\n".join(
+            [
+                "!{% assign x = 1 %}{% case x %}",
+                "",
+                "  {% when 1 %}",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "",
+                "{% endcase %}!",
+            ]
+        ),
+        expect="!!",
+        globals={},
+    ),
+    Case(
+        description="don't suppress whitespace only blocks containing output",
+        template="\n".join(
+            [
+                "!{% if true %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "    {{ '' }}",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!\n\n\n    \n\n    \n\n\n\n!",
+        globals={},
+    ),
+    Case(
+        description="don't suppress whitespace only blocks containing echo",
+        template="\n".join(
+            [
+                "!{% if true %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "    {% echo '' %}",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!\n\n\n    \n\n    \n\n\n\n!",
+        globals={},
+    ),
+    Case(
+        description=(
+            "don't suppress whitespace only blocks containing output in nested block"
+        ),
+        template="\n".join(
+            [
+                "!{% if 1 %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "{% if 2 %}",
+                "    {{ '' }}",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "{% endif %}",
+                "",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!\n\n\n\n    \n\n    \n\n\n\n\n!",
+        globals={},
+    ),
+    Case(
+        description=(
+            "don't suppress whitespace only unless blocks containing output in nested "
+            "blocks"
+        ),
+        template="\n".join(
+            [
+                "!{% unless false %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "{% unless false %}",
+                "    {{ '' }}",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "{% endunless %}",
+                "",
+                "",
+                "{% endunless %}!",
+            ]
+        ),
+        expect="!\n\n\n\n    \n\n    \n\n\n\n\n!",
+        globals={},
+    ),
+    Case(
+        description=(
+            "don't suppress whitespace only blocks containing output in "
+            "unreachable blocks"
+        ),
+        template="\n".join(
+            [
+                "!{% if 1 %}",
+                "",
+                "{% assign bar = 'foo' %}",
+                "{% if true %}",
+                "",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "{% else %}",
+                "    {{ '' }}",
+                "{% endif %}",
+                "",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!\n\n\n\n\n    \n\n\n\n\n!",
+        globals={},
+    ),
+    Case(
+        description="suppress whitespace surrounding an empty capture block",
+        template="\n".join(
+            [
+                "!{% if true %}",
+                "",
+                "{% capture foo %}{% endcapture %}",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!!",
+        globals={},
+    ),
+    Case(
+        description="suppress whitespace surrounding a capture block",
+        template="\n".join(
+            [
+                "!{% if true %}",
+                "",
+                "{% capture foo %}",
+                "{{ '' }}",
+                "{% endcapture %}",
+                "",
+                "{% endif %}!",
+            ]
+        ),
+        expect="!!",
+        globals={},
+    ),
+    Case(
+        description="don't suppress whitespace only case blocks containing output",
+        template="\n".join(
+            [
+                "!{% assign x = 1 %}{% case x %}",
+                "",
+                "  {% when 1 %}",
+                "    {% assign foo = 'bar' %}",
+                "",
+                "  {% when 2 %}",
+                "    {{ '' }}",
+                "",
+                "{% endcase %}!",
+            ]
+        ),
+        expect="!\n    \n\n  !",
+        globals={},
+    ),
 ]

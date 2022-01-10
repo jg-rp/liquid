@@ -146,6 +146,11 @@ class Parser:
             stmt = self.parse_statement(stream)
             if stmt:
                 block.statements.append(stmt)
+                # Detect output nodes in any of this block's children. This is used by
+                # some tags to automatically suppress whitespace when no other output is
+                # present.
+                if stmt.force_output or getattr(stmt, "forced_output", False):
+                    block.forced_output = True
             stream.next_token()
 
         return block
@@ -224,6 +229,17 @@ RIGHT_ASSOCIATIVE = frozenset((TOKEN_AND, TOKEN_OR))
 IDENTIFIER_TOKENS = frozenset(
     (TOKEN_IDENTIFIER, TOKEN_INTEGER, TOKEN_DOT, TOKEN_LBRACKET, TOKEN_STRING)
 )
+
+LOOP_TOKENS = frozenset(
+    (
+        TOKEN_LIMIT,
+        TOKEN_OFFSET,
+        TOKEN_COLS,
+        TOKEN_REVERSED,
+    )
+)
+
+FILTER_END_TOKENS = frozenset((TOKEN_PIPE, TOKEN_EOF))
 
 
 def parse_boolean(stream: TokenStream) -> expression.Boolean:
@@ -474,12 +490,7 @@ def parse_loop_expression(stream: TokenStream) -> expression.LoopExpression:
     expr = expression.LoopExpression(name=name, iterable=iterable)
 
     # Optional range modifiers can appear in any order.
-    while stream.current.type in (
-        TOKEN_LIMIT,
-        TOKEN_OFFSET,
-        TOKEN_COLS,
-        TOKEN_REVERSED,
-    ):
+    while stream.current.type in LOOP_TOKENS:
         opt = parse_range_option(stream)
 
         if opt.tok.type == TOKEN_REVERSED:
@@ -579,7 +590,7 @@ class ExpressionParser:
         if stream.current.type == TOKEN_COLON:
             stream.next_token()
 
-            while stream.current.type not in (TOKEN_PIPE, TOKEN_EOF):
+            while stream.current.type not in FILTER_END_TOKENS:
                 if stream.peek.type == TOKEN_COLON:
                     # A named parameter
                     param_name = stream.current.value
