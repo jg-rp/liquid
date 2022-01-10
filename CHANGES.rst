@@ -7,7 +7,11 @@ Version 1.1.1
 - Fixed a bug where blocks that contain whitespace only were being suppressed when the
   whitespace was explicitly output. Automatic whitespace suppression now only occurs in
   ``if``, ``unlesss`` and ``for`` blocks that don't contain an output statement or
-  ``echo`` tags, even if the output is whitespace. See #38.
+  ``echo`` tag, even if the output itself is whitespace. See #38.
+- Fixed a bug where the behavior of the special ``.first`` and ``.last`` properties did
+  not match that of the ``first`` and ``last`` filters. Now, if given a string,
+  ``.first`` and ``.last`` will return an undefined, and the ``first`` and ``last``
+  filters will return ``None``. See #34.
 
 Version 1.1.0
 -------------

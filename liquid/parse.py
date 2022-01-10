@@ -91,12 +91,11 @@ class Parser:
     def parse(self, stream: TokenStream) -> ast.ParseTree:
         """Parse the given stream of tokens into a tree."""
         root = ast.ParseTree()
+        statements = root.statements
 
         while stream.current.type != TOKEN_EOF:
             try:
-                node = self.parse_statement(stream)
-                if node:
-                    root.statements.append(node)
+                statements.append(self.parse_statement(stream))
             except Error as err:
                 self.env.error(err, linenum=stream.current.linenum)
 
@@ -139,18 +138,18 @@ class Parser:
         """Parse multiple nodes from a stream of tokens. Stop parsing nodes when we
         find a token in `end` or we reach the end of the stream."""
         block = ast.BlockNode(stream.current)
+        statements = block.statements
 
         while stream.current.type != TOKEN_EOF:
             if stream.current.type == TOKEN_TAG and stream.current.value in end:
                 break
             stmt = self.parse_statement(stream)
-            if stmt:
-                block.statements.append(stmt)
-                # Detect output nodes in any of this block's children. This is used by
-                # some tags to automatically suppress whitespace when no other output is
-                # present.
-                if stmt.force_output or getattr(stmt, "forced_output", False):
-                    block.forced_output = True
+            statements.append(stmt)
+            # Detect output nodes in any of this block's children. This is used by
+            # some tags to automatically suppress whitespace when no other output is
+            # present.
+            if stmt.force_output or getattr(stmt, "forced_output", False):
+                block.forced_output = True
             stream.next_token()
 
         return block
@@ -648,6 +647,9 @@ class ExpressionParser:
         precedence: Precedence = Precedence.LOWEST,
     ) -> expression.Expression:
         """Parse a literal or logical expression."""
+        end_expression = self.END_EXPRESSION
+        infix_funcs = self.infix_funcs
+
         prefix = self.prefix_funcs.get(stream.current.type)
         if prefix is None:
             operator = reverse_operators.get(stream.current.type, stream.current.value)
@@ -656,10 +658,10 @@ class ExpressionParser:
         left = prefix(stream)
 
         while (
-            stream.peek.type not in self.END_EXPRESSION
+            stream.peek.type not in end_expression
             and precedence < self.peek_precedence(stream)
         ):
-            infix = self.infix_funcs.get(stream.peek.type)
+            infix = infix_funcs.get(stream.peek.type)
             if infix is None:
                 return left
 

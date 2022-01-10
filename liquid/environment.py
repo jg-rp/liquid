@@ -188,7 +188,7 @@ class Environment:
 
         # Instances of ``template_class`` are returned from ``from_string``,
         # ``get_template`` and ``get_template_async``. It should be the
-        # ``BoundTemplate`` class of a subslass of it.
+        # ``BoundTemplate`` class or a subslass of it.
         self.template_class = BoundTemplate
 
         builtin.register(self)

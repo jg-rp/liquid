@@ -56,9 +56,17 @@ def _getitem(obj: Any, key: Any) -> Any:
 
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
-    if key == "first" and isinstance(obj, collections.abc.Sequence):
+    if (
+        key == "first"
+        and not isinstance(obj, str)
+        and isinstance(obj, collections.abc.Sequence)
+    ):
         return obj[0]
-    if key == "last" and isinstance(obj, collections.abc.Sequence):
+    if (
+        key == "last"
+        and not isinstance(obj, str)
+        and isinstance(obj, collections.abc.Sequence)
+    ):
         return obj[-1]
 
     return getitem(obj, key)
@@ -72,9 +80,17 @@ async def _getitem_async(obj: Any, key: Any) -> object:
 
     if key == "size" and isinstance(obj, collections.abc.Sized):
         return len(obj)
-    if key == "first" and isinstance(obj, collections.abc.Sequence):
+    if (
+        key == "first"
+        and not isinstance(obj, str)
+        and isinstance(obj, collections.abc.Sequence)
+    ):
         return obj[0]
-    if key == "last" and isinstance(obj, collections.abc.Sequence):
+    if (
+        key == "last"
+        and not isinstance(obj, str)
+        and isinstance(obj, collections.abc.Sequence)
+    ):
         return obj[-1]
 
     if hasattr(obj, "__getitem_async__"):
@@ -304,6 +320,9 @@ class Context:
         "_copy_depth",
     )
 
+    getitem = _getitem
+    getitem_async = _getitem_async
+
     def __init__(
         self,
         env: Environment,
@@ -368,7 +387,7 @@ class Context:
 
         if items:
             try:
-                return functools.reduce(_getitem, items, obj)
+                return functools.reduce(Context.getitem, items, obj)
             except (KeyError, IndexError, TypeError) as err:
                 if isinstance(err, KeyError):
                     hint = (
@@ -398,9 +417,10 @@ class Context:
         obj = self.resolve(name, default)
 
         if items:
+            _gi = Context.getitem_async
             try:
                 for item in items:
-                    obj = await _getitem_async(obj, item)
+                    obj = await _gi(obj, item)
             except (KeyError, IndexError, TypeError) as err:
                 if default == _undefined:
                     return self.env.undefined(

@@ -379,3 +379,7 @@ class RenderMiscTestCase(RenderTestCase):
     def test_render_range_objects(self):
         """Test that we can render range objects."""
         self._test(golden.range_objects.cases)
+
+    def test_special_properties(self):
+        """Test that we can use special, built-in properties."""
+        self._test(golden.special.cases)
