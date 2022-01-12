@@ -50,6 +50,30 @@ When `APP_DIRS` is `True`, Liquid will look for templates in the `liquid` subdir
 - `loader`: a `FileSystemLoader` configured for `DIRS` and `APP_DIRS`
 - `undefined`: `DebugUndefined` if `settings.DEBUG` else `Undefined`
 
+For example, if `myapp` is a Django app, Django will look for Liquid templates in `mysite/myapp/liquid/`, Django templates in `mysite/myapp/templates/` and, if configured, [Jinja2 templates](https://docs.djangoproject.com/en/4.0/topics/templates/#django.template.backends.jinja2.Jinja2) in `mysite/myapp/jinja2/`.
+
+```
+mysite/
+    manage.py
+    mysite/
+        __init__.py
+        settings.py
+        urls.py
+        asgi.py
+        wsgi.py
+    myapp/
+        __init__.py
+        admin.py
+        apps.py
+        liquid/
+        models.py
+        templates/
+        tests.py
+        views.py
+```
+
+See Django's [Template.render](https://docs.djangoproject.com/en/4.0/topics/templates/#django.template.backends.base.Template.render) documentation for an explanation of how Django searches `DIRS` when multiple template engines are configured.
+
 ## Render
 
 Render Liquid templates from your app views just like any other Django template backend.
@@ -74,7 +98,7 @@ def index(request):
 
 ## Environment Factory
 
-You can configure your [liquid.Environment](/api/Environment) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the [json](http://localhost:3000/liquid/extra/introduction) filter from [python-liquid-extra](/extra/introduction). If the following is saved as `myproject/liquid.py`:
+You can configure your [liquid.Environment](/api/Environment) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the [json](/extra/filters#json) filter from [python-liquid-extra](/extra/introduction). If the following is saved as `myproject/liquid.py`:
 
 ```python title="myproject/liquid.py"
 from liquid import Environment
