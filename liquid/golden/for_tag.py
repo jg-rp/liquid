@@ -100,44 +100,32 @@ cases = [
     ),
     Case(
         description="forloop length with limit",
-        template=(
-            r"{% for tag in product.tags limit:3 %}"
-            r"{{ forloop.length }} "
-            r"{% endfor %}"
-        ),
+        template=r"{% for tag in tags limit:3 %}{{ forloop.length }} {% endfor %}",
         expect="3 3 3 ",
         globals={
-            "product": {
-                "tags": [
-                    "sports",
-                    "garden",
-                    "sports",
-                    "garden",
-                    "sports",
-                    "garden",
-                ]
-            }
+            "tags": [
+                "sports",
+                "garden",
+                "home",
+                "diy",
+                "motoring",
+                "fashion",
+            ]
         },
     ),
     Case(
         description="forloop length with offset",
-        template=(
-            r"{% for tag in product.tags offset:3 %}"
-            r"{{ forloop.length }} "
-            r"{% endfor %}"
-        ),
+        template=r"{% for tag in tags offset:3 %}{{ forloop.length }} {% endfor %}",
         expect="3 3 3 ",
         globals={
-            "product": {
-                "tags": [
-                    "sports",
-                    "garden",
-                    "sports",
-                    "garden",
-                    "sports",
-                    "garden",
-                ]
-            }
+            "tags": [
+                "sports",
+                "garden",
+                "home",
+                "diy",
+                "motoring",
+                "fashion",
+            ]
         },
     ),
     Case(
@@ -356,59 +344,59 @@ cases = [
         description="offset continue twice with limit",
         template=(
             r"{% for item in (1..6) limit: 2 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) limit: 2 offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"c{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 b3 b4 c5 c6 ",
     ),
     Case(
         description="offset continue twice with changing limit",
         template=(
             r"{% for item in (1..6) limit: 2 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) limit: 3 offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"c{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 b3 b4 b5 c6 ",
     ),
     Case(
         description="offset continue twice with no second limit",
         template=(
             r"{% for item in (1..6) limit: 2 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"c{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 b3 b4 b5 b6 ",
     ),
     Case(
         description="offset continue from a broken loop",
         template=(
             r"{% for item in (1..6) %}"
             r"{% if item == 3 %}{% break %}{% endif %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 ",
+        expect="a1 a2 ",
     ),
     Case(
         description="offset continue from a broken loop with preceding limit",
@@ -522,5 +510,37 @@ cases = [
         ),
         expect="3",
         globals={},
+    ),
+    Case(
+        description="offset and limit",
+        template=r"{% for tag in tags limit: 3 offset: 1 %}{{ tag }} {% endfor %}",
+        expect="garden home diy ",
+        globals={"tags": ["sports", "garden", "home", "diy", "motoring", "fashion"]},
+    ),
+    Case(
+        description="first and last with an offset and limit",
+        template=(
+            r"{% for tag in tags limit: 2 offset: 1 %}"
+            r"{{ tag }} {{ forloop.first }} {{ forloop.last }} "
+            r"{% endfor %}"
+        ),
+        expect="garden true false home false true ",
+        globals={"tags": ["sports", "garden", "home", "diy", "motoring", "fashion"]},
+    ),
+    Case(
+        description="first and last with offset continue",
+        template=(
+            r"{% for tag in product.tags limit: 1 %}"
+            r"{% endfor %}"
+            r"{% for tag in product.tags offset: continue %}"
+            r"{{ forloop.first }} {{ forloop.last }} "
+            r"{% endfor %}"
+        ),
+        expect="true false false false false false false false false true ",
+        globals={
+            "product": {
+                "tags": ["sports", "garden", "home", "diy", "motoring", "fashion"]
+            }
+        },
     ),
 ]

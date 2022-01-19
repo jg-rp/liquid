@@ -1,6 +1,13 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.2
+-------------
+
+- Fixed a bug where a for loop's limit would be incorrect when using
+  ``offset: continue`` multiple times (three or more ``for`` tags looping over the same
+  sequence). See #41.
+
 Version 1.1.1
 -------------
  

@@ -724,16 +724,19 @@ class LoopExpression(Expression):
             offset = context.stopindex(key=offset_key)
             length = max(length - offset, 0)
         elif offset is not None:
-            assert isinstance(offset, int)
+            assert isinstance(offset, int), f"found {offset!r}"
             length = max(length - offset, 0)
 
         if limit is not None:
             length = min(length, limit)
-            context.stopindex(key=offset_key, index=length)
-        else:
-            context.stopindex(key=offset_key, index=size)
 
-        it = islice(it, offset, limit)
+        if offset:
+            stop = offset + length
+        else:
+            stop = length
+
+        context.stopindex(key=offset_key, index=stop)
+        it = islice(it, offset, stop)
 
         if self.reversed:
             return reversed(list(it)), length
