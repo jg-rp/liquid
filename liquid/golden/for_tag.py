@@ -245,13 +245,13 @@ cases = [
         description="continue a loop",
         template=(
             r"{% for item in array limit: 3 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in array offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 a3 b4 b5 b6 ",
         globals={"array": [1, 2, 3, 4, 5, 6]},
     ),
     Case(
@@ -259,13 +259,13 @@ cases = [
         template=(
             r"{% assign nums = (1..5) %}"
             r"{% for item in nums limit: 3 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in nums offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 ",
+        expect="a1 a2 a3 b4 b5 ",
     ),
     Case(
         description="continue a loop over a changing array",
@@ -299,13 +299,13 @@ cases = [
         description="nothing to continue from",
         template=(
             r"{% for item in array %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in array offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 a3 a4 a5 a6 ",
         globals={"array": [1, 2, 3, 4, 5, 6]},
     ),
     Case(
@@ -318,26 +318,26 @@ cases = [
         description="continue from a limit that is greater than length",
         template=(
             r"{% for item in array limit: 99 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in array offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 a3 a4 a5 a6 ",
         globals={"array": [1, 2, 3, 4, 5, 6]},
     ),
     Case(
         description="continue from a range expression",
         template=(
             r"{% for item in (1..6) limit: 3 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 4 5 6 ",
+        expect="a1 a2 a3 b4 b5 b6 ",
         globals={"array": [1, 2, 3, 4, 5, 6]},
     ),
     Case(
@@ -388,7 +388,7 @@ cases = [
     Case(
         description="offset continue from a broken loop",
         template=(
-            r"{% for item in (1..6) %}"
+            r"{% for item in (1..6) limit: 4 %}"
             r"{% if item == 3 %}{% break %}{% endif %}"
             r"a{{ item }} "
             r"{% endfor %}"
@@ -396,35 +396,35 @@ cases = [
             r"b{{ item }} "
             r"{% endfor %}"
         ),
-        expect="a1 a2 ",
+        expect="a1 a2 b5 b6 ",
     ),
     Case(
         description="offset continue from a broken loop with preceding limit",
         template=(
             r"{% for item in (1..6) limit: 3 %}"
-            r"{{ item }} "
+            r"a{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) %}"
             r"{% if item == 3 %}{% break %}{% endif %}"
-            r"{{ item }} "
+            r"b{{ item }} "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} "
+            r"c{{ item }} "
             r"{% endfor %}"
         ),
-        expect="1 2 3 1 2 ",
+        expect="a1 a2 a3 b1 b2 ",
     ),
     Case(
         description="offset continue forloop length",
         template=(
             r"{% for item in (1..6) limit: 2 %}"
-            r"{{ item }} - {{ forloop.length }}, "
+            r"a{{ item }} - {{ forloop.length }}, "
             r"{% endfor %}"
             r"{% for item in (1..6) offset: continue %}"
-            r"{{ item }} - {{ forloop.length }}, "
+            r"b{{ item }} - {{ forloop.length }}, "
             r"{% endfor %}"
         ),
-        expect="1 - 2, 2 - 2, 3 - 4, 4 - 4, 5 - 4, 6 - 4, ",
+        expect="a1 - 2, a2 - 2, b3 - 4, b4 - 4, b5 - 4, b6 - 4, ",
     ),
     Case(
         description="parentloop is normally undefined",
