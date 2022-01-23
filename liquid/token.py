@@ -7,6 +7,8 @@ __all__ = (
     "TOKEN_ILLEGAL",
     "TOKEN_INITIAL",
     "TOKEN_EOF",
+    "TOKEN_NEWLINE",
+    "TOKEN_SKIP",
     "TOKEN_TAG",
     "TOKEN_EXPRESSION",
     "TOKEN_STATEMENT",
@@ -60,6 +62,8 @@ __all__ = (
 TOKEN_ILLEGAL = sys.intern("illegal")
 TOKEN_INITIAL = sys.intern("initial")
 TOKEN_EOF = sys.intern("eof")
+TOKEN_NEWLINE = sys.intern("newline")
+TOKEN_SKIP = sys.intern("skip")
 
 TOKEN_TAG = sys.intern("tag")
 TOKEN_EXPRESSION = sys.intern("expression")
@@ -67,6 +71,8 @@ TOKEN_STATEMENT = sys.intern("statement")
 TOKEN_LITERAL = sys.intern("literal")
 
 TOKEN_IDENTIFIER = sys.intern("identifier")
+TOKEN_IDENTINDEX = sys.intern("identindex")
+TOKEN_IDENTSTRING = sys.intern("identstring")
 TOKEN_STRING = sys.intern("string")
 TOKEN_INTEGER = sys.intern("integer")
 TOKEN_FLOAT = sys.intern("float")

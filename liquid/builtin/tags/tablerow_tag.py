@@ -23,10 +23,8 @@ from liquid.ast import BlockNode
 from liquid.context import Context
 from liquid.expression import LoopExpression
 from liquid.expression import NIL
-from liquid.lex import tokenize_loop_expression
 
 from liquid.parse import expect
-from liquid.parse import parse_loop_expression
 from liquid.parse import get_parser
 
 from liquid.tag import Tag
@@ -35,6 +33,8 @@ from liquid.stream import TokenStream
 
 TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
+
+END_TAGBLOCK = frozenset((TAG_ENDTABLEROW,))
 
 
 # pylint: disable=too-many-instance-attributes
@@ -262,11 +262,10 @@ class TablerowTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr_iter = tokenize_loop_expression(stream.current.value)
-        loop_expression = parse_loop_expression(TokenStream(expr_iter))
+        loop_expression = self.env.parse_loop_expression_value(stream.current.value)
         stream.next_token()
 
-        block = parser.parse_block(stream, (TAG_ENDTABLEROW,))
+        block = parser.parse_block(stream, END_TAGBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDTABLEROW)
 
         return TablerowNode(tok, expression=loop_expression, block=block)

@@ -32,6 +32,8 @@ from liquid.exceptions import LiquidTypeError
 TAG_PAGINATE = sys.intern("paginate")
 TAG_ENDPAGINATE = sys.intern("endpaginate")
 
+END_PAGINATEBLOCK = frozenset((TAG_ENDPAGINATE,))
+
 
 class PaginateNode(ast.Node):
     """Parse tree node for the mock "paginate" tag."""
@@ -139,7 +141,7 @@ class PaginateTag(Tag):
 
         # Advance the stream passed the expression and read the block.
         stream.next_token()
-        block = parser.parse_block(stream, end=(TAG_ENDPAGINATE,))
+        block = parser.parse_block(stream, end=END_PAGINATEBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDPAGINATE)
 
         return PaginateNode(

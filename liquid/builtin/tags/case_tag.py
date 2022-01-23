@@ -31,8 +31,8 @@ TAG_ENDCASE = sys.intern("endcase")
 TAG_WHEN = sys.intern("when")
 TAG_ELSE = sys.intern("else")
 
-ENDWHENBLOCK = (TAG_ENDCASE, TAG_WHEN, TAG_ELSE, TOKEN_EOF)
-ENDCASEBLOCK = (TAG_ENDCASE,)
+ENDWHENBLOCK = frozenset((TAG_ENDCASE, TAG_WHEN, TAG_ELSE, TOKEN_EOF))
+ENDCASEBLOCK = frozenset((TAG_ENDCASE,))
 
 
 class CaseNode(ast.Node):

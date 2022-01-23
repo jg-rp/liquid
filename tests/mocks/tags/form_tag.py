@@ -28,6 +28,8 @@ from liquid.parse import parse_identifier
 TAG_FORM = sys.intern("form")
 TAG_ENDFORM = sys.intern("endform")
 
+END_FORMBLOCK = frozenset((TAG_ENDFORM,))
+
 
 class CommentFormNode(ast.Node):
     """Parse tree node for the mock "form" tag."""
@@ -87,7 +89,7 @@ class CommentFormTag(Tag):
 
         # Advance the stream passed the expression and read the block.
         stream.next_token()
-        block = parser.parse_block(stream, end=(TAG_ENDFORM,))
+        block = parser.parse_block(stream, end=END_FORMBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDFORM)
 
         return CommentFormNode(tok, article=article, block=block)

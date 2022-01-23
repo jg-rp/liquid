@@ -38,8 +38,8 @@ TAG_ELSE = sys.intern("else")
 TAG_BREAK = sys.intern("break")
 TAG_CONTINUE = sys.intern("continue")
 
-ENDFORBLOCK = (TAG_ENDFOR, TAG_ELSE)
-ENDFORELSEBLOCK = (TAG_ENDFOR,)
+ENDFORBLOCK = frozenset((TAG_ENDFOR, TAG_ELSE))
+ENDFORELSEBLOCK = frozenset((TAG_ENDFOR,))
 
 
 # pylint: disable=too-many-instance-attributes

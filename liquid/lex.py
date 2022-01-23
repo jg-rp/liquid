@@ -3,6 +3,14 @@
 The template lexer generates a stream of template literals, tags, output statements and
 expressions, where each expression token is an unscanned string. Lexing of expression
 tokens is delegated to the "parse" method of each registered Tag.
+
+As of Python Liquid 1.2.0 we are in the process of refactoring and optimizing expression
+tokenization. All `tokenize_*` functions and expression rules are being migrated to
+`liquid.expressions`. Those defined here will be depreciated as we approach version 2.0.
+At which point this module will be reserved for tokenizing templates, not expressions.
+
+All built-in tags now use lexers (and parsers) found in the `liquid.expressions`
+package.
 """
 
 from __future__ import annotations

@@ -522,7 +522,7 @@ class FilteredExpression(Expression):
     def __repr__(self) -> str:  # pragma: no cover
         return (
             f"FilteredExpression(expression={self.expression!r}, "
-            "filters={self.filters})"
+            f"filters={self.filters})"
         )
 
     def evaluate(self, context: Context) -> object:
@@ -539,9 +539,16 @@ class FilteredExpression(Expression):
             # Any exception causes us to abort the filter chain and discard the result.
             # Nothing will be rendered.
             try:
-                args = _filter.evaluate_args(context)
-                kwargs = _filter.evaluate_kwargs(context)
-                result = func(result, *args, **kwargs)
+                if not _filter.args and not _filter.kwargs:
+                    result = func(result)
+                elif _filter.args and not _filter.kwargs:
+                    result = func(result, *_filter.evaluate_args(context))
+                else:
+                    result = func(
+                        result,
+                        *_filter.evaluate_args(context),
+                        **_filter.evaluate_kwargs(context),
+                    )
             except FilterValueError:
                 # Pass over filtered expressions who's left value is not allowed.
                 continue
@@ -568,9 +575,19 @@ class FilteredExpression(Expression):
             # Any exception causes us to abort the filter chain and discard the result.
             # Nothing will be rendered.
             try:
-                args = await _filter.evaluate_args_async(context)
-                kwargs = await _filter.evaluate_kwargs_async(context)
-                result = func(result, *args, **kwargs)
+                if not _filter.args and not _filter.kwargs:
+                    result = func(result)
+                elif _filter.args and not _filter.kwargs:
+                    result = func(
+                        result,
+                        *(await _filter.evaluate_args_async(context)),
+                    )
+                else:
+                    result = func(
+                        result,
+                        *(await _filter.evaluate_args_async(context)),
+                        **(await _filter.evaluate_kwargs_async(context)),
+                    )
             except FilterValueError:
                 # Pass over filtered expressions who's left value is not allowed.
                 continue
@@ -607,13 +624,14 @@ class AssignmentExpression(Expression):
         )
 
     def evaluate(self, context: Context) -> str:
-        result = self.expression.evaluate(context)
-        context.assign(key=self.name, val=result)
+        context.assign(key=self.name, val=self.expression.evaluate(context))
         return ""
 
     async def evaluate_async(self, context: Context) -> str:
-        result = await self.expression.evaluate_async(context)
-        context.assign(key=self.name, val=result)
+        context.assign(
+            key=self.name,
+            val=(await self.expression.evaluate_async(context)),
+        )
         return ""
 
 

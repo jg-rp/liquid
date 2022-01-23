@@ -382,7 +382,6 @@ class Context:
 
         name, items = path[0], path[1:]
         assert isinstance(name, str)
-
         obj = self.resolve(name, default)
 
         if items:

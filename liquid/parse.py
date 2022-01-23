@@ -1,4 +1,22 @@
-"""Liquid template parser."""
+"""Liquid template parser.
+
+As of Python Liquid 1.2.0 we are transitioning away from the expression parser defined
+here. Instead opting for separate, specialized parsers (and lexers) for each of the
+three built-in expression types.
+
+The `ExpressionParser` class will become depreciated as we approach version 2.0 and then
+removed. At which time this module will be reserved for parsing templates (not
+expressions), possibly with some explicit re-exports of the expression parsers found in
+`liquid.expressions`.
+
+Developers of custom tags are encouraged to use or follow the example of:
+
+- `liquid.expressions.parse_boolean_expression`
+- `liquid.expressions.parse_filtered_expression`
+- `liquid.expressions.parse_loop_expression`
+
+And make use of `liquid.expressions.common` and `liquid.expressions.TokenStream`.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +28,7 @@ from typing import List
 from typing import Union
 from typing import Optional
 from typing import NamedTuple
+from typing import Container
 from typing import TYPE_CHECKING
 
 from liquid import ast
@@ -76,7 +95,7 @@ if TYPE_CHECKING:
 
 
 class Parser:
-    """A Liquid template parser. Create a parser tree from a stream of tokens."""
+    """A Liquid template parser. Create a parse tree from a stream of tokens."""
 
     __slots__ = ("tags", "illegal", "literal", "statement", "env")
 
@@ -134,7 +153,7 @@ class Parser:
 
         return node
 
-    def parse_block(self, stream: TokenStream, end: Tuple[str, ...]) -> ast.BlockNode:
+    def parse_block(self, stream: TokenStream, end: Container[str]) -> ast.BlockNode:
         """Parse multiple nodes from a stream of tokens. Stop parsing nodes when we
         find a token in `end` or we reach the end of the stream."""
         block = ast.BlockNode(stream.current)
@@ -153,6 +172,28 @@ class Parser:
             stream.next_token()
 
         return block
+
+
+def eat_block(stream: TokenStream, end: Container[str]) -> None:
+    """Advance the stream pointer past the next end tag.
+
+    This is used to discard blocks after a syntax error is found, in the hope
+    that we can continue to parse more of the stream after the offending block.
+    """
+    while stream.current.type != TOKEN_EOF:
+        if stream.current.type == TOKEN_TAG and stream.current.value in end:
+            break
+        stream.next_token()
+
+
+@lru_cache(maxsize=128)
+def get_parser(env: Environment) -> Parser:
+    """Return a template parser for the given environment."""
+    return Parser(env)
+
+
+# NOTE: Everything from here on is flagged for future depreciation. See the comments at
+# the top of this module.
 
 
 def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
@@ -184,18 +225,6 @@ def expect_peek(stream: TokenStream, typ: str, value: Optional[str] = None) -> N
 def is_end_tag(tok: Token) -> bool:
     """Return `True` if the current token looks like an end tag."""
     return tok.value.startswith("end")
-
-
-def eat_block(stream: TokenStream, end: Tuple[str, ...]) -> None:
-    """Advance the stream pointer past the next end tag.
-
-    This is used to discard blocks after a syntax error is found, in the hope
-    that we can continue to parse more of the stream after the offending block.
-    """
-    while stream.current.type != TOKEN_EOF:
-        if stream.current.type == TOKEN_TAG and stream.current.value in end:
-            break
-        stream.next_token()
 
 
 class Precedence(IntEnum):
@@ -751,12 +780,6 @@ parse_boolean_expression_value = (
     STANDARD_EXPRESSION_PARSER.parse_boolean_expression_value
 )
 parse_assignment_expression = STANDARD_EXPRESSION_PARSER.parse_assignment_expression
-
-
-@lru_cache(maxsize=128)
-def get_parser(env: Environment) -> Parser:
-    """Return a template parser for the given environment."""
-    return Parser(env)
 
 
 @lru_cache(maxsize=128)

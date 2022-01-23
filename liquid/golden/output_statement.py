@@ -119,8 +119,7 @@ cases = [
     ),
     Case(
         description=(
-            "render a default given a literal false "
-            "with 'allow false' equal to true"
+            "render a default given a literal false " "with 'allow false' equal to true"
         ),
         template=r"{{ false | default: 'bar', allow_false: true }}",
         expect="false",
@@ -169,5 +168,25 @@ cases = [
         template=r"{{ (foo..5) | reverse | join: '#' }}",
         expect="5#4#3#2",
         globals={"foo": 2},
+    ),
+    Case(
+        description="chained bracketed identifier index",
+        template=r"{{ products[0].title }}",
+        expect="shoe",
+        globals={"products": [{"title": "shoe"}, {"title": "hat"}]},
+    ),
+    Case(
+        description="chained bracketed identifier index no dot",
+        template=r"{{ products[0]title }}",
+        expect="shoe",
+        globals={"products": [{"title": "shoe"}, {"title": "hat"}]},
+    ),
+    Case(
+        description="chained identifier dot separated index",
+        template=r"{{ products.0.title }}",
+        expect="",
+        globals={"products": [{"title": "shoe"}, {"title": "hat"}]},
+        strict=True,
+        error=True,
     ),
 ]

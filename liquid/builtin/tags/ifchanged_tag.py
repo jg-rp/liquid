@@ -28,7 +28,7 @@ if TYPE_CHECKING:  # pragma: no cover
 TAG_IFCHANGED = sys.intern("ifchanged")
 TAG_ENDIFCHANGED = sys.intern("endifchanged")
 
-ENDIFCHANGEDBLOCK = (TAG_ENDIFCHANGED,)
+ENDIFCHANGEDBLOCK = frozenset((TAG_ENDIFCHANGED,))
 
 
 class IfChangedNode(Node):

@@ -1,6 +1,27 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.3
+-------------
+
+- Refactored expression lexers. New, subtly different, tag expression tokenizers are now
+  in ``liquid.expressions``. Built-in tags use these lexers indirectly via new 
+  specialized expression parsers. Older expression lexers and parsers will be maintained
+  until at least Python Liquid version 2.0 for those that use them in custom tags.
+  See #42.
+- Specialized expression parsers. Each of the three built-in expression types now have a
+  dedicated parser defined in ``liquid.expressions``, whereas before all expression
+  parsing went through ``liquid.parse.ExpressionParser.parse_expression()``. Built-in
+  tags now use these new parsers. The more general parser will be maintained until at
+  least Python Liquid Version 2.0. See #42.
+- ``liquid.parse.Parser.parse_block()`` now accepts any container as its ``end``
+  argument. Benchmarks show that using a ``frozenset`` for ``end`` instead of a tuple
+  gives a small performance improvement.
+- Fixed an incompatibility with the reference implementation where Python Liquid would
+  not recognize identifiers with a trailing question mark. This seems to be a common
+  idiom in Ruby to indicate something returns a Boolean value.
+
+
 Version 1.1.1
 -------------
  

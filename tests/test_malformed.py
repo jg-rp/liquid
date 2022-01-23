@@ -1,9 +1,15 @@
 """Malformed template test cases."""
+# pylint: disable=missing-class-docstring missing-function-docstring
 
 from unittest import TestCase
 
+from typing import Iterable
+from typing import Dict
+from typing import List
+from typing import Union
 from typing import NamedTuple
 from typing import Type
+from typing import Tuple
 
 from liquid import Template
 from liquid.environment import Environment
@@ -22,13 +28,21 @@ from liquid.loaders import DictLoader
 
 
 class Case(NamedTuple):
-    """Table driven test case helper."""
-
     description: str
     template: str
-    expect_exception: Type[Error]
-    expect_msg: str
+    expect_exception: Union[Type[Error], Tuple[Type[Error], ...]]
+    expect_msg: Union[str, List[str]]
     expect_render: str = ""
+
+    @property
+    def exceptions(self):
+        if isinstance(self.expect_exception, tuple):
+            return self.expect_exception
+        return (self.expect_exception,)
+
+    @property
+    def warnings(self):
+        return tuple(lookup_warning(e) for e in self.exceptions)
 
 
 class MalformedTemplateTestCase(TestCase):
@@ -40,7 +54,7 @@ class MalformedTemplateTestCase(TestCase):
             "tag": "goodbye",
         }
 
-    def _test(self, test_cases, mode: Mode = Mode.STRICT):
+    def _test(self, test_cases: Iterable[Case], mode: Mode = Mode.STRICT):
         """Helper method for running lists of `Case`s in each render mode."""
         env = Environment()
         env.mode = mode
@@ -48,16 +62,19 @@ class MalformedTemplateTestCase(TestCase):
         for case in test_cases:
             with self.subTest(msg=case.description, mode=mode):
                 if mode == Mode.STRICT:
-                    with self.assertRaises(case.expect_exception) as raised:
+                    with self.assertRaises(case.exceptions) as raised:
                         template = env.from_string(
                             case.template, globals=self.global_context
                         )
                         template.render()
 
-                    self.assertEqual(str(raised.exception), case.expect_msg)
+                    if isinstance(case.expect_msg, list):
+                        self.assertIn(str(raised.exception), case.expect_msg)
+                    else:
+                        self.assertEqual(str(raised.exception), case.expect_msg)
 
                 elif mode == Mode.WARN:
-                    with self.assertWarns(lookup_warning(case.expect_exception)):
+                    with self.assertWarns(case.warnings):
                         template = env.from_string(
                             case.template, globals=self.global_context
                         )
@@ -69,23 +86,26 @@ class MalformedTemplateTestCase(TestCase):
                     result = template.render()
                     self.assertEqual(result, case.expect_render)
 
-    def _test_partial(self, test_cases, templates):
+    def _test_partial(self, test_cases: Iterable[Case], templates: Dict[str, str]):
         """Helper method for testing lists of 'include' or 'render' cases."""
         env = Environment(loader=DictLoader(templates))
         for case in test_cases:
             with self.subTest(msg=case.description):
-                with self.assertRaises(case.expect_exception) as raised:
+                with self.assertRaises(case.exceptions) as raised:
                     template = env.from_string(
                         case.template, globals=self.global_context
                     )
                     template.render()
 
-                self.assertEqual(str(raised.exception), case.expect_msg)
+                if isinstance(case.expect_msg, list):
+                    self.assertIn(str(raised.exception), case.expect_msg)
+                else:
+                    self.assertEqual(str(raised.exception), case.expect_msg)
 
         env = Environment(loader=DictLoader(templates), tolerance=Mode.WARN)
         for case in test_cases:
             with self.subTest(msg=case.description):
-                with self.assertWarns(lookup_warning(case.expect_exception)):
+                with self.assertWarns(case.warnings):
                     template = env.from_string(
                         case.template, globals=self.global_context
                     )
@@ -182,10 +202,17 @@ class MalformedTemplateTestCase(TestCase):
                 description="float with trailing dot in range literal",
                 template="{% for x in (2...4) %}{{ x }}{% endfor %}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg=(
+                expect_msg=[
                     "invalid range expression, expected an integer, "
-                    "found a dot, on line 1"
-                ),
+                    "found a dot, on line 1",
+                    "unexpected '.' in range expression, on line 1",
+                ],
+            ),
+            Case(
+                description="chained identifier for loop variable",
+                template="{% for x.y in (2...4) %}{{ x }}{% endfor %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="expected 'in', found '.', on line 1",
             ),
             Case(
                 description="missing equal in assignment tag",
@@ -197,19 +224,28 @@ class MalformedTemplateTestCase(TestCase):
                 description="invalid subscript identifier",
                 template="{{ foo[1.2] }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="invalid identifier, found float, on line 1",
+                expect_msg=[
+                    "invalid identifier, found float, on line 1",
+                    "expected 'identifier', found 'float', on line 1",
+                ],
             ),
             Case(
                 description="nil subscript identifier",
                 template="{{ foo[nil] }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="invalid identifier, found nil, on line 1",
+                expect_msg=[
+                    "invalid identifier, found nil, on line 1",
+                    "expected 'identifier', found 'nil', on line 1",
+                ],
             ),
             Case(
                 description="minus string",
                 template="{{ -'foo' }}",
-                expect_exception=LiquidTypeError,
-                expect_msg="unknown operator -'foo', on line 1",
+                expect_exception=(LiquidTypeError, LiquidSyntaxError),
+                expect_msg=[
+                    "unknown operator -'foo', on line 1",
+                    "unexpected '-', on line 1",
+                ],
             ),
             Case(
                 description="unknown prefix operator",
@@ -221,7 +257,10 @@ class MalformedTemplateTestCase(TestCase):
                 description="float literal without a leading zero",
                 template="{{ .1 }}",
                 expect_exception=LiquidSyntaxError,
-                expect_msg="unknown prefix operator '.', on line 1",
+                expect_msg=[
+                    "unknown prefix operator '.', on line 1",
+                    "unexpected '.', on line 1",
+                ],
             ),
             Case(
                 description="unknown infix operator",
@@ -267,6 +306,20 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_render="hello\n",
                 expect_msg="unexpected tag 'aiu34bseu', on line 3",
+            ),
+            Case(
+                description="bad token in loop expression",
+                template="{% for i$ in (1..3) %}{% endfor %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '$', on line 1",
+            ),
+            Case(
+                description="invalid loop argument",
+                template=(
+                    "{% for product in collections[0]['tags'] limit:| %}{% endfor %}"
+                ),
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '|', on line 1",
             ),
         ]
 

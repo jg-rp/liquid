@@ -35,7 +35,7 @@ RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
 
-ENDCAPTUREBLOCK = (TAG_ENDCAPTURE, TOKEN_EOF)
+ENDCAPTUREBLOCK = frozenset((TAG_ENDCAPTURE, TOKEN_EOF))
 
 
 class CaptureNode(ast.Node):

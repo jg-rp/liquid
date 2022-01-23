@@ -8,10 +8,12 @@ from typing import Callable
 from typing import Dict
 from typing import Any
 from typing import Type
+from typing import Tuple
 from typing import Union
 from typing import Optional
 from typing import Mapping
 from typing import MutableMapping
+from typing import TYPE_CHECKING
 
 import warnings
 
@@ -24,9 +26,9 @@ from liquid.stream import TokenStream
 from liquid.parse import get_parser
 from liquid.utils import LRUCache
 
-from liquid.parse import parse_filtered_expression_value
-from liquid.parse import parse_boolean_expression_value
-from liquid.parse import parse_loop_expression_value
+from liquid.expressions import parse_filtered_expression
+from liquid.expressions import parse_boolean_expression
+from liquid.expressions import parse_loop_expression
 
 from liquid import ast
 from liquid import builtin
@@ -35,6 +37,11 @@ from liquid import loaders
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import lookup_warning
+
+if TYPE_CHECKING:
+    from liquid.expression import BooleanExpression
+    from liquid.expression import FilteredExpression
+    from liquid.expression import LoopExpression
 
 
 # pylint: disable=too-many-instance-attributes
@@ -181,10 +188,11 @@ class Environment:
 
         # Common expression parsing functions that might be cached.
         self.expression_cache_size = expression_cache_size
-        self.parse_filtered_expression_value = parse_filtered_expression_value
-        self.parse_boolean_expression_value = parse_boolean_expression_value
-        self.parse_loop_expression_value = parse_loop_expression_value
-        self.set_expression_cache_size(expression_cache_size)
+        (
+            self.parse_boolean_expression_value,
+            self.parse_filtered_expression_value,
+            self.parse_loop_expression_value,
+        ) = self._get_expression_parsers(self.expression_cache_size)
 
         # Instances of ``template_class`` are returned from ``from_string``,
         # ``get_template`` and ``get_template_async``. It should be the
@@ -392,22 +400,32 @@ class Environment:
         :param maxsize: The maximum size of each expression cache.
         :type maxsize: int
         """
-        if maxsize >= 1:
-            self.parse_filtered_expression_value = lru_cache(maxsize=maxsize)(
-                parse_filtered_expression_value
-            )
-            self.parse_boolean_expression_value = lru_cache(maxsize=maxsize)(
-                parse_boolean_expression_value
-            )
-            self.parse_loop_expression_value = lru_cache(maxsize=maxsize)(
-                parse_loop_expression_value
-            )
-        else:
-            self.parse_filtered_expression_value = parse_filtered_expression_value
-            self.parse_boolean_expression_value = parse_boolean_expression_value
-            self.parse_loop_expression_value = parse_loop_expression_value
-
         self.expression_cache_size = maxsize
+        (
+            self.parse_boolean_expression_value,
+            self.parse_filtered_expression_value,
+            self.parse_loop_expression_value,
+        ) = self._get_expression_parsers(self.expression_cache_size)
+
+    # pylint: disable=no-self-use
+    def _get_expression_parsers(
+        self, cache_size: int = 0
+    ) -> Tuple[
+        Callable[[str], "BooleanExpression"],
+        Callable[[str], "FilteredExpression"],
+        Callable[[str], "LoopExpression"],
+    ]:
+        if cache_size >= 1:
+            return (
+                lru_cache(maxsize=cache_size)(parse_boolean_expression),
+                lru_cache(maxsize=cache_size)(parse_filtered_expression),
+                lru_cache(maxsize=cache_size)(parse_loop_expression),
+            )
+        return (
+            parse_boolean_expression,
+            parse_filtered_expression,
+            parse_loop_expression,
+        )
 
 
 # pylint: disable=redefined-builtin too-many-arguments too-many-locals

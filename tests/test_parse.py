@@ -1,8 +1,12 @@
 """Liquid template and expression parsing tests."""
-# pylint: disable=missing-class-docstring
+# pylint: disable=missing-class-docstring missing-function-docstring
 
 import unittest
+
+from typing import Iterable
+from typing import List
 from typing import NamedTuple
+from typing import Union
 
 from liquid.environment import Environment
 from liquid.mode import Mode
@@ -29,12 +33,18 @@ from liquid.builtin import ifchanged_tag
 class Case(NamedTuple):
     description: str
     template: str
-    expect: str
+    expect: Union[str, List[str]]
     expect_statements: int = 1
+
+    @property
+    def expected(self):
+        if isinstance(self.expect, str):
+            return [self.expect]
+        return self.expect
 
 
 class ParserTestCase(unittest.TestCase):
-    def _test(self, test_cases, instance, mode: Mode = Mode.STRICT):
+    def _test(self, test_cases: Iterable[Case], instance, mode: Mode = Mode.STRICT):
         """Helper method for testing lists of `Case`s."""
         env = Environment()
         env.mode = mode
@@ -47,7 +57,7 @@ class ParserTestCase(unittest.TestCase):
                 self.assertEqual(len(template.tree.statements), case.expect_statements)
                 if case.expect_statements:
                     self.assertIsInstance(template.tree.statements[0], instance)
-                    self.assertEqual(str(template.tree), case.expect)
+                    self.assertIn(str(template.tree), case.expected)
 
     def test_template_literal(self):
         """Test that we can parse a template literal."""
@@ -61,7 +71,7 @@ class ParserTestCase(unittest.TestCase):
         """Test that we can parse output statements."""
         test_cases = [
             Case("string literal", r"{{ 'hello' }}", "`'hello'`"),
-            Case("negative integer", r"{{ -5 }}", "`(-5)`"),
+            Case("negative integer", r"{{ -5 }}", ["`(-5)`", "`-5`"]),
             Case("identifier", r"{{ product }}", "`product`"),
             Case(
                 "identifier with a filter with args and kwargs",

@@ -1,5 +1,4 @@
 """Tag and node definition for the built-in "assign" tag."""
-
 import re
 import sys
 
@@ -14,12 +13,13 @@ from liquid.ast import Node
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
-from liquid.lex import tokenize_filtered_expression
 from liquid.expression import AssignmentExpression
 from liquid.exceptions import LiquidSyntaxError
-from liquid.parse import expect, parse_filtered_expression
 
-RE_ASSIGNMENT = re.compile(r"^(\w[a-zA-Z0-9_\-]*)\s*=\s*(.+)$")
+from liquid.parse import expect
+from liquid.expressions.common import ASSIGN_IDENTIFIER_PATTERN
+
+RE_ASSIGNMENT = re.compile(rf"^({ASSIGN_IDENTIFIER_PATTERN})\s*=\s*(.+)$")
 
 TAG_ASSIGN = sys.intern("assign")
 
@@ -70,6 +70,5 @@ class AssignTag(Tag):
                 linenum=stream.current.linenum,
             )
 
-        expr_iter = tokenize_filtered_expression(expression)
-        expr = parse_filtered_expression(TokenStream(expr_iter))
+        expr = self.env.parse_filtered_expression_value(expression)
         return AssignNode(tok, AssignmentExpression(name, expr))

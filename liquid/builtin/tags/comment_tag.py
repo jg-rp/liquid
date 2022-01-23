@@ -18,7 +18,9 @@ from liquid.token import TOKEN_TAG
 
 
 TAG_COMMENT = sys.intern("comment")
-RAG_ENDCOMMENT = sys.intern("endcomment")
+TAG_ENDCOMMENT = sys.intern("endcomment")
+
+END_COMMENTBLOCK = frozenset((TAG_ENDCOMMENT,))
 
 
 class CommentNode(ast.Node):
@@ -44,14 +46,11 @@ class CommentTag(Tag):
     """The built-in "comment" tag."""
 
     name = TAG_COMMENT
-    end = RAG_ENDCOMMENT
+    end = TAG_ENDCOMMENT
 
     def parse(self, stream: TokenStream) -> CommentNode:
         expect(stream, TOKEN_TAG, value=TAG_COMMENT)
         stream.next_token()
-
         tag = CommentNode(stream.current)
-        eat_block(stream, end=(RAG_ENDCOMMENT,))
-
-        expect(stream, TOKEN_TAG, value=RAG_ENDCOMMENT)
+        eat_block(stream, end=END_COMMENTBLOCK)
         return tag
