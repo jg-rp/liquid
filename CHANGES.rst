@@ -21,6 +21,12 @@ Version 1.1.3
   not recognize identifiers with a trailing question mark. This seems to be a common
   idiom in Ruby to indicate something returns a Boolean value.
 
+Version 1.1.2
+-------------
+
+- Fixed a bug where a for loop's limit would be incorrect when using
+  ``offset: continue`` multiple times (three or more ``for`` tags looping over the same
+  sequence). See #41.
 
 Version 1.1.1
 -------------
