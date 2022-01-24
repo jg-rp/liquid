@@ -3,6 +3,7 @@ import sys
 
 from typing import Callable
 from typing import Tuple
+from typing import Union
 from typing import TYPE_CHECKING
 
 from liquid.expression import Expression
@@ -23,6 +24,7 @@ from liquid.expression import IntegerLiteral
 from liquid.expression import FloatLiteral
 from liquid.expression import RangeLiteral
 
+from liquid.token import reverse_operators
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
@@ -34,6 +36,7 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_STRING
 
 from liquid.exceptions import LiquidSyntaxError
 
@@ -153,6 +156,35 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
         stream.next_token()
 
     return Identifier(path)
+
+
+def parse_string_or_identifier(
+    stream: "TokenStream",
+) -> Union[StringLiteral, Identifier]:
+    """Parse an expression from a stream of tokens. If the stream is not at a string or
+    identifier expression, raise a syntax error.
+    """
+    typ = stream.current[1]
+    if typ == TOKEN_IDENTIFIER:
+        expr: Union[StringLiteral, Identifier] = parse_identifier(stream)
+    elif typ == TOKEN_STRING:
+        expr = parse_string_literal(stream)
+    else:
+        _typ = reverse_operators.get(typ, typ)
+        msg = f"expected identifier or string, found {_typ}"
+        raise LiquidSyntaxError(msg, linenum=stream.current[0])
+
+    return expr
+
+
+def parse_unchained_identifier(stream: "TokenStream") -> Identifier:
+    """Parse an identifier from a stream of tokens. If the stream is not at an
+    identifier or the identifier is chained, raise a syntax error."""
+    tok = stream.current
+    ident = parse_identifier(stream)
+    if len(ident.path) != 1:
+        raise LiquidSyntaxError(f"invalid identifier '{ident}'", linenum=tok[0])
+    return ident
 
 
 def make_parse_range(

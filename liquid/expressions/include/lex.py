@@ -1,4 +1,4 @@
-"""Tokenize filtered liquid expressions."""
+"""Tokenize include expressions."""
 import re
 from typing import Iterator
 
@@ -30,11 +30,13 @@ from liquid.token import TOKEN_RBRACKET
 from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_AS
 
 from liquid.exceptions import LiquidSyntaxError
 
@@ -54,7 +56,6 @@ token_rules = (
     (TOKEN_RBRACKET, r"]"),
     (TOKEN_COMMA, r","),
     (TOKEN_COLON, r":"),
-    (TOKEN_PIPE, r"\|"),
     (TOKEN_NEWLINE, r"\n"),
     (TOKEN_SKIP, r"[ \t\r]+"),
     (TOKEN_ILLEGAL, r"."),
@@ -68,6 +69,9 @@ keywords = frozenset(
         TOKEN_NULL,
         TOKEN_EMPTY,
         TOKEN_BLANK,
+        TOKEN_WITH,
+        TOKEN_FOR,
+        TOKEN_AS,
     ]
 )
 

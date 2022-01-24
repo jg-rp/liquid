@@ -117,14 +117,12 @@ def parse_infix_expression(stream: TokenStream, left: Expression) -> InfixExpres
 def parse_obj(stream: TokenStream, precedence: int = PRECEDENCE_LOWEST) -> Expression:
     """Parse the next object from the stream of tokens."""
     try:
-        func = TOKEN_MAP[stream.current[1]]
+        left = TOKEN_MAP[stream.current[1]](stream)
     except KeyError as err:
         raise LiquidSyntaxError(
             f"unexpected {stream.current[2]!r}",
             linenum=stream.current[0],
         ) from err
-
-    left = func(stream)
 
     while True:
         peek_typ = stream.peek[1]
@@ -146,6 +144,6 @@ def parse_obj(stream: TokenStream, precedence: int = PRECEDENCE_LOWEST) -> Expre
 TOKEN_MAP[TOKEN_LPAREN] = make_parse_range(parse_simple_obj)
 
 
-def parse(expr: str) -> BooleanExpression:
+def parse(expr: str, linenum: int = 1) -> BooleanExpression:
     """Parse boolean expression string."""
-    return BooleanExpression(parse_obj(TokenStream(tokenize(expr))))
+    return BooleanExpression(parse_obj(TokenStream(tokenize(expr, linenum))))

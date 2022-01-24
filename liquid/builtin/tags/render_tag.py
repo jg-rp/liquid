@@ -1,5 +1,4 @@
 """Parse tree node and tag definition for the built in "render" tag."""
-
 import sys
 
 from typing import Optional
@@ -22,19 +21,11 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Identifier
 
-from liquid.lex import tokenize_include_expression
-
 from liquid.parse import expect
-from liquid.parse import parse_identifier
-from liquid.parse import parse_expression
-from liquid.parse import parse_unchained_identifier
-from liquid.parse import parse_string_literal
-
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 
 from liquid.token import Token
-from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_WITH
@@ -44,6 +35,13 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_STRING
+
+from liquid.expressions import TokenStream as ExprTokenStream
+from liquid.expressions.common import parse_string_literal
+from liquid.expressions.common import parse_unchained_identifier
+from liquid.expressions.common import parse_identifier
+from liquid.expressions.include.lex import tokenize
+from liquid.expressions.filtered.parse import parse_obj
 
 
 TAG_RENDER = sys.intern("render")
@@ -205,23 +203,23 @@ class RenderNode(Node):
         return True
 
 
+BIND_TAGS = frozenset((TOKEN_WITH, TOKEN_FOR))
+
+
 class RenderTag(Tag):
     """The built-in "render" tag."""
 
     name = TAG_RENDER
     block = False
 
-    def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_RENDER)
-        tok = stream.current
-        stream.next_token()
-
+    def parse(self, stream: TokenStream) -> RenderNode:
+        tok = next(stream)
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = TokenStream(tokenize_include_expression(stream.current.value))
+        expr_stream = ExprTokenStream(tokenize(stream.current.value))
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
         # This is the name of the template to be included.
-        expect(expr_stream, TOKEN_STRING)
+        expr_stream.expect(TOKEN_STRING)
         name = parse_string_literal(expr_stream)
         expr_stream.next_token()
 
@@ -230,18 +228,18 @@ class RenderTag(Tag):
         loop: bool = False
 
         # Optionally bind a variable to the included template context
-        if expr_stream.current.type in (TOKEN_WITH, TOKEN_FOR):
-            loop = expr_stream.current.type == TOKEN_FOR
+        if expr_stream.current[1] in BIND_TAGS:
+            loop = expr_stream.current[1] == TOKEN_FOR
             expr_stream.next_token()  # Eat 'with' or 'for'
-            expect(expr_stream, TOKEN_IDENTIFIER)
+            expr_stream.expect(TOKEN_IDENTIFIER)
             identifier = parse_identifier(expr_stream)
             expr_stream.next_token()
 
             # The bound variable will take the name of the template by default,
             # or an alias if an identifier follows the "as" keyword.
-            if expr_stream.current.type == TOKEN_AS:
+            if expr_stream.current[1] == TOKEN_AS:
                 expr_stream.next_token()  # Eat 'as'
-                expect(expr_stream, TOKEN_IDENTIFIER)
+                expr_stream.expect(TOKEN_IDENTIFIER)
                 alias = str(parse_unchained_identifier(expr_stream))
                 expr_stream.next_token()
 
@@ -249,17 +247,17 @@ class RenderTag(Tag):
         args = {}
 
         # The first keyword argument might follow immediately or after a comma.
-        if expr_stream.current.type == TOKEN_IDENTIFIER:
+        if expr_stream.current[1] == TOKEN_IDENTIFIER:
             key, val = parse_argument(expr_stream)
             args[key] = val
 
-        while expr_stream.current.type != TOKEN_EOF:
-            if expr_stream.current.type == TOKEN_COMMA:
+        while expr_stream.current[1] != TOKEN_EOF:
+            if expr_stream.current[1] == TOKEN_COMMA:
                 expr_stream.next_token()  # Eat comma
                 key, val = parse_argument(expr_stream)
                 args[key] = val
             else:
-                typ = expr_stream.current.type
+                typ = expr_stream.current[1]
                 raise LiquidSyntaxError(
                     f"expected a comma separated list of arguments, found {typ}",
                     linenum=tok.linenum,
@@ -275,16 +273,13 @@ class RenderTag(Tag):
         )
 
 
-def parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
+def parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:
     """Return the next key/value pair from the stream where key and value
     are separated by a colon."""
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
-
-    expect(stream, TOKEN_COLON)
+    stream.expect(TOKEN_COLON)
     stream.next_token()  # Eat colon
-
-    val = parse_expression(stream)
+    val = parse_obj(stream)
     stream.next_token()
-
     return key, val

@@ -92,10 +92,9 @@ def parse_loop_arguments(stream: TokenStream) -> Tuple[Dict[str, LoopArgument], 
     return arguments, _reversed
 
 
-def parse(expr: str) -> LoopExpression:
+def parse(expr: str, linenum: int = 1) -> LoopExpression:
     """Parse a loop expression string."""
-    stream = TokenStream(tokenize(expr))
-
+    stream = TokenStream(tokenize(expr, linenum))
     stream.expect(TOKEN_IDENTIFIER)
     name = next(stream)[2]
 

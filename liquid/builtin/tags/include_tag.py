@@ -15,18 +15,12 @@ from liquid.expression import Expression
 from liquid.expression import Identifier
 
 from liquid.exceptions import LiquidSyntaxError
-from liquid.lex import tokenize_include_expression
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 
 from liquid.parse import expect
-from liquid.parse import parse_identifier
-from liquid.parse import parse_expression
-from liquid.parse import parse_string_or_identifier
-from liquid.parse import parse_unchained_identifier
 
 from liquid.token import Token
-from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_WITH
@@ -35,6 +29,13 @@ from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_EOF
+
+from liquid.expressions import TokenStream as ExprTokenStream
+from liquid.expressions.common import parse_string_or_identifier
+from liquid.expressions.common import parse_unchained_identifier
+from liquid.expressions.common import parse_identifier
+from liquid.expressions.include.lex import tokenize
+from liquid.expressions.filtered.parse import parse_obj
 
 
 TAG_INCLUDE = sys.intern("include")
@@ -152,6 +153,9 @@ class IncludeNode(Node):
         return True
 
 
+BIND_TOKENS = frozenset((TOKEN_WITH, TOKEN_FOR))
+
+
 class IncludeTag(Tag):
     """The built-in "include" tag."""
 
@@ -160,51 +164,53 @@ class IncludeTag(Tag):
 
     def parse(self, stream: TokenStream) -> IncludeNode:
         """Read an IncludeNode from the given stream of tokens."""
-        expect(stream, TOKEN_TAG, value=self.name)
-        tok = stream.current
-        stream.next_token()
-
+        tok = next(stream)
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = TokenStream(tokenize_include_expression(stream.current.value))
+        expr_stream = ExprTokenStream(
+            tokenize(
+                stream.current.value,
+                linenum=tok.linenum,
+            )
+        )
 
         # Need a string or identifier that resolves to a string. This is the name
         # of the template to be included.
-        name = parse_string_or_identifier(expr_stream, linenum=tok.linenum)
-        expr_stream.next_token()
+        name = parse_string_or_identifier(expr_stream)
+        next(expr_stream)
 
         identifier: Optional[Identifier] = None
         alias: Optional[str] = None
 
         # Optionally bind a variable to the included template context
-        if expr_stream.current.type in (TOKEN_WITH, TOKEN_FOR):
-            expr_stream.next_token()  # Eat 'with' or 'for'
-            expect(expr_stream, TOKEN_IDENTIFIER)
+        if expr_stream.current[1] in BIND_TOKENS:
+            next(expr_stream)  # Eat 'with' or 'for'
+            expr_stream.expect(TOKEN_IDENTIFIER)
             identifier = parse_identifier(expr_stream)
-            expr_stream.next_token()
+            next(expr_stream)
 
             # The bound variable will take the name of the template by default,
             # or an alias if an identifier follows the "as" keyword.
-            if expr_stream.current.type == TOKEN_AS:
-                expr_stream.next_token()  # Eat 'as'
-                expect(expr_stream, TOKEN_IDENTIFIER)
+            if expr_stream.current[1] == TOKEN_AS:
+                next(expr_stream)  # Eat 'as'
+                expr_stream.expect(TOKEN_IDENTIFIER)
                 alias = str(parse_unchained_identifier(expr_stream))
-                expr_stream.next_token()
+                next(expr_stream)
 
         # Zero or more keyword arguments
         args = {}
 
         # The first keyword argument might follow immediately or after a comma.
-        if expr_stream.current.type == TOKEN_IDENTIFIER:
+        if expr_stream.current[1] == TOKEN_IDENTIFIER:
             key, val = _parse_argument(expr_stream)
             args[key] = val
 
-        while expr_stream.current.type != TOKEN_EOF:
-            if expr_stream.current.type == TOKEN_COMMA:
-                expr_stream.next_token()  # Eat comma
+        while expr_stream.current[1] != TOKEN_EOF:
+            if expr_stream.current[1] == TOKEN_COMMA:
+                next(expr_stream)  # Eat comma
                 key, val = _parse_argument(expr_stream)
                 args[key] = val
             else:
-                typ = expr_stream.current.type
+                typ = expr_stream.current[1]
                 raise LiquidSyntaxError(
                     f"expected a comma separated list of arguments, found {typ}",
                     linenum=tok.linenum,
@@ -213,14 +219,11 @@ class IncludeTag(Tag):
         return IncludeNode(tok, name=name, var=identifier, alias=alias, args=args)
 
 
-def _parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
+def _parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
-
-    expect(stream, TOKEN_COLON)
+    stream.expect(TOKEN_COLON)
     stream.next_token()  # Eat colon
-
-    val = parse_expression(stream)
+    val = parse_obj(stream)
     stream.next_token()
-
     return key, val

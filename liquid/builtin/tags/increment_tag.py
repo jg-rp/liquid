@@ -7,16 +7,17 @@ from typing import TextIO
 
 from liquid.ast import Node
 from liquid.context import Context
-from liquid.lex import tokenize_identifier
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
 from liquid.parse import expect
-from liquid.parse import parse_unchained_identifier
 
 from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
+
+from liquid.expressions import TokenStream as ExprTokenStream
+from liquid.expressions.common import parse_unchained_identifier
+from liquid.expressions.filtered.lex import tokenize
 
 TAG_INCREMENT = sys.intern("increment")
 
@@ -48,9 +49,12 @@ class IncrementTag(Tag):
         expect(stream, TOKEN_TAG, value=TAG_INCREMENT)
         tok = stream.current
         stream.next_token()
-
         expect(stream, TOKEN_EXPRESSION)
-        tokens = TokenStream(tokenize_identifier(stream.current.value))
-        ident = parse_unchained_identifier(tokens)
-
-        return IncrementNode(tok=tok, identifier=str(ident))
+        return IncrementNode(
+            tok=tok,
+            identifier=str(
+                parse_unchained_identifier(
+                    ExprTokenStream(tokenize(stream.current.value))
+                )
+            ),
+        )

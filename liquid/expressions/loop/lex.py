@@ -71,7 +71,7 @@ OUTPUT_RE = re.compile(
 )
 
 
-def tokenize(source: str, line_num: int = 1) -> Iterator[Token]:
+def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
     """Yield tokens from a loop expression."""
     _keywords = keywords
     for match in OUTPUT_RE.finditer(source):
@@ -89,12 +89,12 @@ def tokenize(source: str, line_num: int = 1) -> Iterator[Token]:
             kind = TOKEN_IDENTIFIER
             value = match.group(GROUP_IDENTQUOTED)
         elif kind == TOKEN_NEWLINE:
-            line_num += 1
+            linenum += 1
             continue
         elif kind == TOKEN_SKIP:
             continue
         elif kind == TOKEN_ILLEGAL:
-            raise LiquidSyntaxError(f"unexpected {value!r}", linenum=line_num)
+            raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
 
-        line_num += newlines
-        yield (line_num, kind, value)
+        linenum += newlines
+        yield (linenum, kind, value)

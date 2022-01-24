@@ -152,9 +152,9 @@ def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:
     return "", parse_obj(TokenStream(iter(tokens)))
 
 
-def parse(expr: str) -> FilteredExpression:
+def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     """Parse an expression string with zero or more filters."""
-    tokens = tokenize(expr)
+    tokens = tokenize(expr, linenum)
     parts = list(split_at_first_pipe(tokens))
     if len(parts) == 1:
         stream = TokenStream(iter(parts[0]))
