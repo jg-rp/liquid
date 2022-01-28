@@ -16,7 +16,7 @@ A loader that loads templates from a dictionary mapping template names to templa
 
 `get_source(environment, template_name)`
 
-Return a template source by looping up the given name in the dictionary of templates.
+Return a template source by looking up the given name in the dictionary of templates.
 
 **Raises**: `liquid.exceptions.TemplateNotFound` if a template with the given name can not be
 found.  

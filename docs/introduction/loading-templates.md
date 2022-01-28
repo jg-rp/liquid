@@ -81,7 +81,4 @@ Notice how whitespace is output unchanged. See [whitespace control](../language/
 for more information.
 :::
 
-Available, built-in loaders are [FileSystemLoader](../api/FileSystemLoader), [DictLoader](../api/DictLoader)
-and [ChoiceLoader](../api/ChoiceLoader). See also [custom loaders](../guides/custom-loaders),
-and examples of a [FrontMatterFileSystemLoader](../guides/custom-loaders#front-matter-loader)
-and an [AsyncDatabaseLoader](../guides/custom-loaders#async-database-loader).
+Available, built-in loaders are [FileSystemLoader](../api/FileSystemLoader), [FileExtensionLoader](../api/FileExtensionLoader), [DictLoader](../api/DictLoader) and [ChoiceLoader](../api/ChoiceLoader). See also [custom loaders](../guides/custom-loaders), and examples of a [FrontMatterFileSystemLoader](../guides/custom-loaders#front-matter-loader) and an [AsyncDatabaseLoader](../guides/custom-loaders#async-database-loader).

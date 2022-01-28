@@ -1,9 +1,7 @@
 # Custom Loaders
 
 Loaders are responsible for finding a template's source text given a name or identifier. Built-in
-loaders include a [FileSystemLoader](../api/filesystemloader), a [ChoiceLoader](../api/choiceloader)
-and a [DictLoader](../api/dictloader). You might want to write a custom loader to load templates
-from a database or add extra meta data to the template context, for example.
+loaders include a [FileSystemLoader](../api/filesystemloader), a [FileExtensionLoader](../api/FileExtensionLoader), a [ChoiceLoader](../api/choiceloader) and a [DictLoader](../api/dictloader). You might want to write a custom loader to load templates from a database or add extra meta data to the template context, for example.
 
 Write a custom loader class by inheriting from `liquid.loaders.BaseLoader` and implementing its
 `get_source` method. Then pass an instance of your loader to a [liquid.Environment](../api/Environment)
@@ -70,10 +68,181 @@ template = env.from_string("""
 print(template.render(user={"name": "Brian"}))
 ```
 
+## Loading Sections and Snippets
+
+**_New in version 1.1.3_**
+
+Custom loaders can reference the name of the tag that's trying to load a template, if used from a tag like `{% include 'template_name' %}` or `{% render 'template_name' %}`, or any custom tag the uses `Context.get_template_with_context()`.
+
+This is useful for situations where you want to load partial templates (or "snippets" or "sections") from sub folders within an existing search path, without requiring template authors to include sub folder names in every `include` or `render` tag.
+
+`BaseLoader.get_source_with_context()` and `BaseLoader.get_source_with_context_async()` where added in Python Liquid version 1.1.3. These methods are similar to `get_source()` and `get_source_async()`, but are passed the active render context instead of an environment, and arbitrary keyword arguments that can be used by a loader to modify its search space. Their default implementations ignore context and keyword arguments, simply delegating to `get_source()` or `get_source_async()`.
+
+:::note
+`Context.get_template_with_context()` and `Context.get_template_with_context_async()` do not use the default template cache. The environment that manages the default template cache does not know what context variables and keyword arguments might be used to manipulate the search space or loaded template.
+:::
+
+This example extends [FileExtensionLoader](../api/FileExtensionLoader), making `.liquid` optional, and searches `./snippets/` (relative to the loaders search path) for templates when rendering with the built-in `include` tag.
+
+```python
+from pathlib import Path
+
+from liquid import Context
+from liquid.loaders import TemplateSource
+from liquid.loaders import FileExtensionLoader
+
+class SnippetsFileSystemLoader(FileExtensionLoader):
+    def get_source_with_context(
+        self,
+        context: Context,
+        template_name: str,
+        **kwargs: str,
+    ) -> TemplateSource:
+        if kwargs.get("tag") == "include":
+            section = Path("snippets").joinpath(template_name)
+            return super().get_source(context.env, str(section))
+        return super().get_source(context.env, template_name)
+```
+
+`tag` being parse as a keyword argument is a convention used by the built-in `include` and `render` tags. Any custom tag is free to pass whatever keyword arguments they wish to `Context.get_template_with_context()`, and they will be passed on to `get_source_with_context()` of the configured loader.
+
+:::tip
+These examples could easily have used the `render` tag instead of or as well as `include`.
+:::
+
+This example leaves the `include` tag's search path alone, instead defining a `section` tag that inherits from `include` and searches for templates in the `sections/` subfolder of `templates/`.
+
+```python
+from pathlib import Path
+
+from liquid import Context
+from liquid import Environment
+from liquid.loaders import FileExtensionLoader
+from liquid.loaders import TemplateSource
+from liquid.builtin.tags.include_tag import IncludeNode
+from liquid.builtin.tags.include_tag import IncludeTag
+
+class SectionNode(IncludeNode):
+    tag = "section"
+
+class SectionTag(IncludeTag):
+    name = "section"
+    node_class = SectionNode
+
+class SectionFileSystemLoader(FileExtensionLoader):
+    def get_source_with_context(
+        self,
+        context: Context,
+        template_name: str,
+        **kwargs: str,
+    ) -> TemplateSource:
+        if kwargs.get("tag") == "section":
+            section = Path("sections").joinpath(template_name)
+            return super().get_source(context.env, str(section))
+        return super().get_source(context.env, template_name)
+
+env = Environment(loader=SectionFileSystemLoader(search_path="templates/"))
+env.add_tag(SectionTag)
+```
+
+## Loading with Context
+
+**_New in version 1.1.3_**
+
+When using Liquid in multi-user applications, a loader might need to narrow its search space depending on the current user. The classic example being Shopify, where, to be able to find the appropriate template, the loader must know what the current store ID is.
+
+A loader can reference the current render context by implementing `BaseLoader.get_source_with_context()` and/or `BaseLoader.get_source_with_context_async()`. This example gets a `site_id` from the active render context and uses it in combination with the template's name to query an SQLite database. It assumes a table called `templates` exists with columns `source`, `updated`, `name` and `site_id`.
+
+```python
+import sqlite3
+import functools
+
+from liquid import Context
+from liquid.loaders import BaseLoader
+from liquid.loaders import TemplateSource
+from liquid.exceptions import TemplateNotFound
+
+class SQLiteLoader(BaseLoader):
+    def __init__(self, con: sqlite3.Connection):
+        self.con = con
+
+    def get_source_with_context(
+        self, context: Context, template_name: str, **kwargs: str
+    ) -> TemplateSource:
+        site_id = context.resolve("site_id")
+        cur = self.con.cursor()
+        cur.execute(
+            "SELECT source, updated "
+            "FROM templates "
+            "WHERE name = ? "
+            "AND site_id = ?",
+            [template_name, site_id],
+        )
+
+        source = cur.fetchone()
+        if not source:
+            raise TemplateNotFound(template_name)
+
+        return TemplateSource(
+            source=source[0],
+            filename=template_name,
+            uptodate=functools.partial(
+                self._is_site_up_to_date,
+                name=template_name,
+                site_id=site_id,
+                updated=source[1],
+            ),
+        )
+
+    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+        cur = self.con.cursor()
+        cur.execute(
+            "SELECT source, updated FROM templates WHERE name = ?",
+            [template_name],
+        )
+
+        source = cur.fetchone()
+        if not source:
+            raise TemplateNotFound(template_name)
+
+        return TemplateSource(
+            source=source[0],
+            filename=template_name,
+            uptodate=functools.partial(
+                self._is_up_to_date,
+                name=template_name,
+                updated=source[1],
+            ),
+        )
+
+    def _is_site_up_to_date(self, name: str, site_id: int, updated: str) -> bool:
+        cur = self.con.cursor()
+        cur.execute(
+            "SELECT updated FROM templates WHERE name = ? AND site_id = ?",
+            [name, site_id],
+        )
+
+        row = cur.fetchone()
+        if not row:
+            return False
+        return updated == row[0]
+
+    def _is_up_to_date(self, name: str, updated: str) -> bool:
+        cur = self.con.cursor()
+        cur.execute(
+            "SELECT updated FROM templates WHERE name = ?",
+            [name],
+        )
+
+        row = cur.fetchone()
+        if not row:
+            return False
+        return updated == row[0]
+```
+
 ## Front Matter Loader
 
-Loaders can add to a template's render context using the `matter` argument to `TemplateSource`. This
-example implements a Jekyll style front matter loader.
+Loaders can add to a template's render context using the `matter` argument to `TemplateSource`. This example implements a Jekyll style front matter loader.
 
 ```python
 import re
