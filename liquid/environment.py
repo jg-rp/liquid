@@ -38,10 +38,11 @@ from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import lookup_warning
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid.expression import BooleanExpression
     from liquid.expression import FilteredExpression
     from liquid.expression import LoopExpression
+    from liquid.context import Context
 
 
 # pylint: disable=too-many-instance-attributes
@@ -351,6 +352,27 @@ class Environment:
             self.cache[name] = template
 
         return template
+
+    def get_template_with_context(
+        self,
+        context: "Context",
+        name: str,
+        **kwargs: str,
+    ) -> BoundTemplate:
+        """Load and parse a template using the configured loader, optionally referencing
+        a render context."""
+        # No template caching. How would we know what context variables a loader needs?
+        # A custom loader that uses context could implement its own cache.
+        return self.loader.load_with_context(context, name, **kwargs)
+
+    async def get_template_with_context_async(
+        self,
+        context: "Context",
+        name: str,
+        **kwargs: str,
+    ) -> BoundTemplate:
+        """An async version of ``get_template_with_context``."""
+        return await self.loader.load_with_context_async(context, name, **kwargs)
 
     def _check_cache(
         self,

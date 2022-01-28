@@ -45,6 +45,7 @@ class IncludeNode(Node):
     """Parse tree node for the built-in "include" tag."""
 
     __slots__ = ("tok", "name", "var", "alias", "args")
+    tag = TAG_INCLUDE
 
     def __init__(
         self,
@@ -75,14 +76,14 @@ class IncludeNode(Node):
         args = (f"{key}={val}" for key, val in self.args.items())
         buf.append(", ".join(args))
 
-        return f"include({''.join(buf)})"
+        return f"{self.tag}({''.join(buf)})"
 
     def __repr__(self) -> str:
         return f"IncludeNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.name.evaluate(context)
-        template = context.get_template(str(name))
+        template = context.get_template_with_context(str(name), tag=self.tag)
 
         namespace: Dict[str, object] = {}
 
@@ -125,7 +126,9 @@ class IncludeNode(Node):
         """Same as ``render_to_output`` but uses async versions of get_template and
         render_with_context."""
         name = await self.name.evaluate_async(context)
-        template = await context.get_template_async(str(name))
+        template = await context.get_template_with_context_async(
+            str(name), tag=self.tag
+        )
         namespace: Dict[str, object] = {}
 
         for key, val in self.args.items():
@@ -161,8 +164,9 @@ class IncludeTag(Tag):
 
     name = TAG_INCLUDE
     block = False
+    node_class = IncludeNode
 
-    def parse(self, stream: TokenStream) -> IncludeNode:
+    def parse(self, stream: TokenStream) -> Node:
         """Read an IncludeNode from the given stream of tokens."""
         tok = next(stream)
         expect(stream, TOKEN_EXPRESSION)
@@ -216,7 +220,7 @@ class IncludeTag(Tag):
                     linenum=tok.linenum,
                 )
 
-        return IncludeNode(tok, name=name, var=identifier, alias=alias, args=args)
+        return self.node_class(tok, name=name, var=identifier, alias=alias, args=args)
 
 
 def _parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:

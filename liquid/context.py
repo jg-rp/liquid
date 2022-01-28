@@ -471,6 +471,20 @@ class Context:
         """Load a template from the environment asynchronously."""
         return await self.env.get_template_async(name)
 
+    def get_template_with_context(self, name: str, **kwargs: str) -> BoundTemplate:
+        """Load a template from the environment, optionally referencing the current
+        render context."""
+        return self.env.get_template_with_context(self, name, **kwargs)
+
+    async def get_template_with_context_async(
+        self,
+        name: str,
+        **kwargs: str,
+    ) -> BoundTemplate:
+        """Load a template from the environment asynchronously, optionally referencing
+        the current render context."""
+        return await self.env.get_template_with_context_async(self, name, **kwargs)
+
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
         val: int = self.counters.get(name, 0)

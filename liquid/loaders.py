@@ -32,6 +32,7 @@ from liquid.exceptions import TemplateNotFound
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
+    from liquid import Context
 
 UpToDate = Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
 
@@ -61,7 +62,11 @@ class TemplateSource(NamedTuple):
 class BaseLoader(ABC):
     """Base template loader from which all template loaders are derived."""
 
-    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+    def get_source(
+        self,
+        env: Environment,
+        template_name: str,
+    ) -> TemplateSource:
         """Get the template source, filename and reload helper for a template"""
         raise NotImplementedError("template loaders must implement a get_source method")
 
@@ -73,6 +78,26 @@ class BaseLoader(ABC):
         """An async version of `get_source`. The default implementation delegates to
         `get_source()`."""
         return self.get_source(env, template_name)
+
+    # pylint: disable=unused-argument
+    def get_source_with_context(
+        self,
+        context: Context,
+        template_name: str,
+        **kwargs: str,
+    ) -> TemplateSource:
+        """Get a template's source, optionally referencing a render context."""
+        return self.get_source(context.env, template_name)
+
+    # pylint: disable=unused-argument
+    async def get_source_with_context_async(
+        self,
+        context: Context,
+        template_name: str,
+        **kwargs: str,
+    ) -> TemplateSource:
+        """An async version of `get_source_with_context`."""
+        return await self.get_source_async(context.env, template_name)
 
     # pylint: disable=redefined-builtin
     def load(
@@ -118,6 +143,57 @@ class BaseLoader(ABC):
         template = env.from_string(
             source,
             globals=globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
+        )
+        template.uptodate = uptodate
+        return template
+
+    def load_with_context(
+        self,
+        context: Context,
+        name: str,
+        **kwargs: str,
+    ) -> BoundTemplate:
+        """Load and parse a template, optionally referencing a render context."""
+        try:
+            source, filename, uptodate, matter = self.get_source_with_context(
+                context, name, **kwargs
+            )
+        except Exception as err:
+            raise TemplateNotFound(name) from err
+
+        template = context.env.from_string(
+            source,
+            globals=context.globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
+        )
+        template.uptodate = uptodate
+        return template
+
+    async def load_with_context_async(
+        self,
+        context: Context,
+        name: str,
+        **kwargs: str,
+    ) -> BoundTemplate:
+        """An async version of `load_with_context`."""
+        try:
+            (
+                source,
+                filename,
+                uptodate,
+                matter,
+            ) = await self.get_source_with_context_async(context, name, **kwargs)
+        except Exception as err:
+            raise TemplateNotFound(name) from err
+
+        template = context.env.from_string(
+            source,
+            globals=context.globals,
             name=name,
             path=Path(filename),
             matter=matter,
@@ -209,7 +285,7 @@ class FileExtensionLoader(FileSystemLoader):
     :param encoding: Open template files with the given encoding. Defaults to
         ``"utf-8"``.
     :type encoding: str
-    :param ext: A default file extension. Should include a leanding period. Defaults to
+    :param ext: A default file extension. Should include a leading period. Defaults to
         ``.liquid``.
     :type ext: str
     """

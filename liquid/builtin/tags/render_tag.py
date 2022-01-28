@@ -51,6 +51,7 @@ class RenderNode(Node):
     """Parse tree node for the built-in "render" tag."""
 
     __slots__ = ("tok", "name", "var", "loop", "alias", "args")
+    tag = TAG_RENDER
 
     def __init__(
         self,
@@ -83,7 +84,7 @@ class RenderNode(Node):
         args = (f"{key}={val}" for key, val in self.args.items())
         buf.append(", ".join(args))
 
-        return f"render({''.join(buf)})"
+        return f"{self.tag}({''.join(buf)})"
 
     def __repr__(self) -> str:
         return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
@@ -91,7 +92,7 @@ class RenderNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         path = self.name.evaluate(context)
         assert isinstance(path, str)
-        template = context.get_template(path)
+        template = context.get_template_with_context(path, tag=self.tag)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -149,7 +150,7 @@ class RenderNode(Node):
         asynchronously."""
         path = await self.name.evaluate_async(context)
         assert isinstance(path, str)
-        template = await context.get_template_async(path)
+        template = await context.get_template_with_context_async(path, tag=self.tag)
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -211,8 +212,9 @@ class RenderTag(Tag):
 
     name = TAG_RENDER
     block = False
+    node_class = RenderNode
 
-    def parse(self, stream: TokenStream) -> RenderNode:
+    def parse(self, stream: TokenStream) -> Node:
         tok = next(stream)
         expect(stream, TOKEN_EXPRESSION)
         expr_stream = ExprTokenStream(tokenize(stream.current.value))
@@ -263,7 +265,7 @@ class RenderTag(Tag):
                     linenum=tok.linenum,
                 )
 
-        return RenderNode(
+        return self.node_class(
             tok,
             name=name,
             var=identifier,

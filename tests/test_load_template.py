@@ -1,5 +1,6 @@
 """Template loader test cases."""
 # pylint: disable=missing-class-docstring
+import asyncio
 import tempfile
 import time
 import unittest
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Dict
 
 from liquid import Environment
+from liquid import Context
 from liquid.template import BoundTemplate
 from liquid.template import AwareBoundTemplate
 
@@ -411,3 +413,70 @@ class BaseLoaderTestCase(unittest.TestCase):
 
         with self.assertRaises(TemplateNotFound):
             env.get_template(name="somename")
+
+
+class MockContextLoader(DictLoader):
+    def __init__(self, templates: Dict[str, str]):
+        self.kwargs = {}
+        super().__init__(templates)
+
+    def get_source_with_context(
+        self, context: Context, template_name: str, **kwargs: str
+    ) -> TemplateSource:
+        self.kwargs.update(kwargs)
+        self.kwargs["uid"] = context.resolve("uid", default=None)
+        return super().get_source(context.env, template_name)
+
+    async def get_source_with_context_async(
+        self, context: Context, template_name: str, **kwargs: str
+    ) -> TemplateSource:
+        self.kwargs.update(kwargs)
+        self.kwargs["uid"] = context.resolve("uid", default=None)
+        return await super().get_source_async(context.env, template_name)
+
+
+class ContextLoaderTestCase(unittest.TestCase):
+    """Test case for a loader that used context."""
+
+    def test_keyword_arguments(self):
+        """Test that keyword arguments passed to `get_template_with_context` are
+        available to a context loader."""
+        loader = MockContextLoader({"snippet": "hello"})
+        env = Environment(loader=loader, cache_size=0)
+        template = env.from_string("{% include 'snippet' %}")
+
+        template.render()
+        self.assertIn("tag", loader.kwargs)
+        self.assertEqual(loader.kwargs["tag"], "include")
+
+        # and async
+        loader.kwargs.clear()
+        self.assertNotIn("tag", loader.kwargs)
+
+        async def coro():
+            return await template.render_async()
+
+        asyncio.run(coro())
+        self.assertIn("tag", loader.kwargs)
+        self.assertEqual(loader.kwargs["tag"], "include")
+
+    def test_resolve_from_context(self):
+        """Test context loaders can resolve render context variables."""
+        loader = MockContextLoader({"snippet": "hello"})
+        env = Environment(loader=loader, cache_size=0)
+        template = env.from_string("{% include 'snippet' %}", globals={"uid": 1234})
+
+        template.render()
+        self.assertIn("uid", loader.kwargs)
+        self.assertEqual(loader.kwargs["uid"], 1234)
+
+        # and async
+        loader.kwargs.clear()
+        self.assertNotIn("uid", loader.kwargs)
+
+        async def coro():
+            return await template.render_async()
+
+        asyncio.run(coro())
+        self.assertIn("uid", loader.kwargs)
+        self.assertEqual(loader.kwargs["uid"], 1234)

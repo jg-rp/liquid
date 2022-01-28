@@ -20,6 +20,18 @@ Version 1.1.3
 - Fixed an incompatibility with the reference implementation where Python Liquid would
   not recognize identifiers with a trailing question mark. This seems to be a common
   idiom in Ruby to indicate something returns a Boolean value.
+- Added ``get_source_with_context()`` and ``get_source_with_context_async()`` to 
+  ``liquid.loaders.BaseLoader``. Custom loaders can now use the active render context to
+  dynamically modify their search space when used from ``include`` or ``render``, or any
+  custom tag using ``Context.get_template_with_context()``.
+
+  ``Context.get_template_with_context()`` also accepts arbitrary keyword arguments that
+  are passed along to ``get_source_with_context()``. The build-in ``include`` and
+  ``render`` tags add a ``tag`` argument with their tag name, so custom loaders and 
+  modify their search space depending on which tag was used.
+
+  See the `Custom Loaders <https://jg-rp.github.io/liquid/guides/custom-loaders>`_
+  documentation for examples.
 
 Version 1.1.2
 -------------
