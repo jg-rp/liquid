@@ -176,6 +176,18 @@ cases = [
         globals={"product": {"tags": ["sports", "garden"]}},
     ),
     Case(
+        description="forloop name",
+        template=r"{% for tag in product.tags limit:1 %}{{ forloop.name }}{% endfor %}",
+        expect="tag-product.tags",
+        globals={"product": {"tags": ["sports", "garden"]}},
+    ),
+    Case(
+        description="forloop name of a range",
+        template=r"{% for i in (1..3) limit:1 %}{{ forloop.name }}{% endfor %}",
+        expect="i-(1..3)",
+        globals={},
+    ),
+    Case(
         description="forloop no such attribute",
         template=r"{% for tag in product.tags %}{{ forloop.nosuchthing }}{% endfor %}",
         expect="",

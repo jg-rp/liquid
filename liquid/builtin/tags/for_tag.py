@@ -6,7 +6,6 @@ from io import StringIO
 
 from typing import Optional
 from typing import Any
-from typing import List
 from typing import Mapping
 from typing import TextIO
 from typing import Iterator
@@ -51,14 +50,22 @@ class ForLoop(Mapping[str, object]):
         "it",
         "length",
         "item",
-        "first",
-        "last",
-        "index",
-        "index0",
-        "rindex",
-        "rindex0",
-        "_keys",
+        "_index",
         "parentloop",
+    )
+
+    _keys = frozenset(
+        [
+            "name",
+            "length",
+            "index",
+            "index0",
+            "rindex",
+            "rindex0",
+            "first",
+            "last",
+            "parentloop",
+        ]
     )
 
     def __init__(
@@ -73,24 +80,8 @@ class ForLoop(Mapping[str, object]):
         self.length = length
 
         self.item = None
-        self.first = False
-        self.last = False
-        self.index = 0
-        self.index0 = -1
-        self.rindex = self.length + 1
-        self.rindex0 = self.length
+        self._index = -1  # Step is called before `next(it)`
         self.parentloop = parentloop
-
-        self._keys: List[str] = [
-            "length",
-            "index",
-            "index0",
-            "rindex",
-            "rindex0",
-            "first",
-            "last",
-            "parentloop",
-        ]
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"ForLoop(name='{self.name}', length={self.length})"
@@ -113,24 +104,39 @@ class ForLoop(Mapping[str, object]):
     def __str__(self) -> str:
         return "ForLoop"
 
+    @property
+    def index(self) -> int:
+        """The 1-based index of the current loop iteration."""
+        return self._index + 1
+
+    @property
+    def index0(self) -> int:
+        """The 0-based index of the current loop iteration."""
+        return self._index
+
+    @property
+    def rindex(self) -> int:
+        """The 1-based index, counting from the right, of the current loop iteration."""
+        return self.length - self._index
+
+    @property
+    def rindex0(self) -> int:
+        """The 0-based index, counting from the right, of the current loop iteration."""
+        return self.length - self._index - 1
+
+    @property
+    def first(self) -> bool:
+        """True is this is the first iteration, false otherwise."""
+        return self._index == 0
+
+    @property
+    def last(self) -> bool:
+        """True is this is the last iteration, false otherwise."""
+        return self._index == self.length - 1
+
     def step(self) -> None:
-        """Set the value for the current/next loop iteration and update forloop
-        helper variables."""
-
-        self.index += 1
-        self.index0 += 1
-        self.rindex -= 1
-        self.rindex0 -= 1
-
-        if self.index0 == 0:
-            self.first = True
-        else:
-            self.first = False
-
-        if self.rindex0 == 0:
-            self.last = True
-        else:
-            self.last = False
+        """Move the for loop helper forward to the next iteration."""
+        self._index += 1
 
 
 class ForNode(Node):
@@ -175,7 +181,7 @@ class ForNode(Node):
             name = self.expression.name
 
             forloop = ForLoop(
-                name=name,
+                name=f"{name}-{self.expression.iterable}",
                 it=loop_iter,
                 length=length,
                 parentloop=context.parentloop(),
@@ -220,7 +226,7 @@ class ForNode(Node):
             name = self.expression.name
 
             forloop = ForLoop(
-                name=name,
+                name=f"{name}-{self.expression.iterable}",
                 it=loop_iter,
                 length=length,
                 parentloop=context.parentloop(),

@@ -1,6 +1,15 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.4
+-------------
+
+- Lazy ``forloop`` helper variables. Don't calculate ``index``, ``rindex`` etc. unless
+  accessed.
+- Implemented ``forloop.name``, as per the reference implementation. ``forloop.name`` is
+  the concatenation of the loop variable identifier and the target iterable identifier,
+  or a string representation of a range literal, separated by a hyphen.
+
 Version 1.1.3
 -------------
 
@@ -27,7 +36,7 @@ Version 1.1.3
 
   ``Context.get_template_with_context()`` also accepts arbitrary keyword arguments that
   are passed along to ``get_source_with_context()``. The build-in ``include`` and
-  ``render`` tags add a ``tag`` argument with their tag name, so custom loaders and 
+  ``render`` tags add a ``tag`` argument with their tag name, so custom loaders can 
   modify their search space depending on which tag was used.
 
   See the `Custom Loaders <https://jg-rp.github.io/liquid/guides/custom-loaders>`_

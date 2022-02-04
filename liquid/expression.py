@@ -98,7 +98,6 @@ class Blank(Expression):
             return True
         if isinstance(other, Blank):
             return True
-
         return False
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -239,7 +238,7 @@ class RangeLiteral(Expression):
         )
 
     def __str__(self) -> str:
-        return f"{self.start}..{self.stop}"
+        return f"({self.start}..{self.stop})"
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"RangeLiteral(start={self.start}, stop={self.stop})"
@@ -309,7 +308,6 @@ class Identifier(Expression):
 
     def __str__(self) -> str:
         buf = []
-
         for elem in self.path:
             if isinstance(elem, Identifier):
                 buf.append(f"[{elem}]")
