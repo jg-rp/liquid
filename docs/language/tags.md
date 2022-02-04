@@ -346,16 +346,17 @@ No products available
 
 A `forloop` object is available inside every `for` loop block.
 
-| Property     | Description                                                     | Type    |
-| ------------ | --------------------------------------------------------------- | ------- |
-| `length`     | The length of the sequence being iterated                       | integer |
-| `index`      | The 1-base index of the current iteration                       | integer |
-| `index0`     | The 0-base index of the current iteration                       | integer |
-| `rindex`     | The 1-base index of the current iteration counting from the end | integer |
-| `rindex0`    | The 0-base index of the current iteration counting from the end | integer |
-| `first`      | true if the current iteration is the first, false otherwise     | bool    |
-| `last`       | true is the current iteration is the last, false otherwise      | bool    |
-| `parentloop` | the `forloop` object of an enclosing `for` loop                 | forloop |
+| Property     | Description                                                          | Type    |
+| ------------ | -------------------------------------------------------------------- | ------- |
+| `name`       | The loop variable name and target identifier, separated by a hyphen. | string  |
+| `length`     | The length of the sequence being iterated.                           | integer |
+| `index`      | The 1-base index of the current iteration.                           | integer |
+| `index0`     | The 0-base index of the current iteration.                           | integer |
+| `rindex`     | The 1-base index of the current iteration counting from the end.     | integer |
+| `rindex0`    | The 0-base index of the current iteration counting from the end.     | integer |
+| `first`      | `true` if the current iteration is the first, `false` otherwise.     | bool    |
+| `last`       | `true` is the current iteration is the last, `false` otherwise.      | bool    |
+| `parentloop` | the `forloop` object of an enclosing `for` loop.                     | forloop |
 
 ```liquid title="template"
 {% for product in collection.products %}
@@ -364,7 +365,6 @@ A `forloop` object is available inside every `for` loop block.
     {% else %}
       {{ product.title }} - {{ forloop.index0 }}
     {% endif %}
-
 {% endfor %}
 ```
 
