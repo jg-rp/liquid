@@ -265,14 +265,15 @@ class RangeLiteral(Expression):
         return range(start, stop + 1)
 
     def evaluate(self, context: Context) -> range:
-        start: Any = self.start.evaluate(context)
-        stop: Any = self.stop.evaluate(context)
-        return self._make_range(start, stop)
+        return self._make_range(
+            self.start.evaluate(context), self.stop.evaluate(context)
+        )
 
     async def evaluate_async(self, context: Context) -> range:
-        start: Any = await self.start.evaluate_async(context)
-        stop: Any = await self.stop.evaluate_async(context)
-        return self._make_range(start, stop)
+        return self._make_range(
+            await self.start.evaluate_async(context),
+            await self.stop.evaluate_async(context),
+        )
 
 
 class IdentifierPathElement(Literal[Union[int, str]]):
@@ -356,12 +357,10 @@ class PrefixExpression(Expression):
         raise LiquidTypeError(f"unknown operator {self.operator}")
 
     def evaluate(self, context: Context) -> object:
-        right = self.right.evaluate(context)
-        return self._evaluate(right)
+        return self._evaluate(self.right.evaluate(context))
 
     async def evaluate_async(self, context: Context) -> object:
-        right = await self.right.evaluate_async(context)
-        return self._evaluate(right)
+        return self._evaluate(await self.right.evaluate_async(context))
 
 
 class InfixExpression(Expression):
@@ -395,14 +394,16 @@ class InfixExpression(Expression):
         return f"({self.left} {self.operator} {self.right})"
 
     def evaluate(self, context: Context) -> object:
-        left = self.left.evaluate(context)
-        right = self.right.evaluate(context)
-        return compare(left, self.operator, right)
+        return compare(
+            self.left.evaluate(context), self.operator, self.right.evaluate(context)
+        )
 
     async def evaluate_async(self, context: Context) -> object:
-        left = await self.left.evaluate_async(context)
-        right = await self.right.evaluate_async(context)
-        return compare(left, self.operator, right)
+        return compare(
+            await self.left.evaluate_async(context),
+            self.operator,
+            await self.right.evaluate_async(context),
+        )
 
 
 class Filter:
