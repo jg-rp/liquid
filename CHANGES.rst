@@ -11,6 +11,7 @@ Version 1.1.4
   or a string representation of a range literal, separated by a hyphen.
 - Fixed a bug with the ``divided_by`` filter. Given a float value and integer argument,
   it was incorrectly doing integer division.
+- Simplified ``tablerowloop`` and ``tablerow`` HTML generation.
 
 Version 1.1.3
 -------------

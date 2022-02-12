@@ -126,12 +126,12 @@ class ForLoop(Mapping[str, object]):
 
     @property
     def first(self) -> bool:
-        """True is this is the first iteration, false otherwise."""
+        """True if this is the first iteration, false otherwise."""
         return self._index == 0
 
     @property
     def last(self) -> bool:
-        """True is this is the last iteration, false otherwise."""
+        """True if this is the last iteration, false otherwise."""
         return self._index == self.length - 1
 
     def step(self) -> None:

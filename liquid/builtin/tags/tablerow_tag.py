@@ -1,13 +1,8 @@
 """Tag and node definition for the built-in "tablerow" tag."""
-
-import math
 import sys
-
-from itertools import islice
 
 from typing import Any
 from typing import Dict
-from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
@@ -46,46 +41,13 @@ class TableRow(Mapping[str, object]):
         "it",
         "length",
         "ncols",
-        "item",
-        "first",
-        "last",
-        "index",
-        "index0",
-        "rindex",
-        "rindex0",
-        "col",
-        "col0",
-        "col_first",
-        "col_last",
-        "_keys",
-        "row",
-        "nrows",
+        "_index",
+        "_row",
+        "_col",
     )
 
-    def __init__(self, name: str, it: Iterator[Any], length: int, ncols: int) -> None:
-        self.name = name
-        self.it = it
-        self.length = length
-        self.ncols = ncols
-        self.item = None
-
-        self.first = False
-        self.last = False
-        self.index = 0
-        self.index0 = -1
-        self.rindex = self.length + 1
-        self.rindex0 = self.length
-
-        self.col = 0
-        self.col0 = -1
-        self.col_first = True
-        self.col_last = False
-
-        # Zero based row counter is not exposed to templates.
-        self.row = 0
-        self.nrows = math.ceil(self.length / self.ncols)
-
-        self._keys: List[str] = [
+    _keys = frozenset(
+        [
             "length",
             "index",
             "index0",
@@ -98,6 +60,16 @@ class TableRow(Mapping[str, object]):
             "col_first",
             "col_last",
         ]
+    )
+
+    def __init__(self, name: str, it: Iterator[Any], length: int, ncols: int) -> None:
+        self.name = name
+        self.it = it
+        self.length = length
+        self.ncols = ncols
+        self._index = -1
+        self._row = 1
+        self._col = 0
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"TableRow(name='{self.name}', length={self.length})"
@@ -114,41 +86,72 @@ class TableRow(Mapping[str, object]):
         return self
 
     def __next__(self) -> object:
+        self.step()
         return next(self.it)
 
+    @property
+    def index(self) -> int:
+        """The 1-based index of the current loop iteration."""
+        return self._index + 1
+
+    @property
+    def index0(self) -> int:
+        """The 0-based index of the current loop iteration."""
+        return self._index
+
+    @property
+    def rindex(self) -> int:
+        """The 1-based index, counting from the right, of the current loop iteration."""
+        return self.length - self._index
+
+    @property
+    def rindex0(self) -> int:
+        """The 0-based index, counting from the right, of the current loop iteration."""
+        return self.length - self._index - 1
+
+    @property
+    def first(self) -> bool:
+        """True if this is the first iteration, false otherwise."""
+        return self._index == 0
+
+    @property
+    def last(self) -> bool:
+        """True if this is the last iteration, false otherwise."""
+        return self._index == self.length - 1
+
+    @property
+    def col(self) -> int:
+        """The 1-based index of the current column."""
+        return self._col
+
+    @property
+    def col0(self) -> int:
+        """The 0-based index of the current column."""
+        return self._col - 1
+
+    @property
+    def col_first(self) -> bool:
+        """True if this is the first column. False otherwise"""
+        return self._col == 1
+
+    @property
+    def col_last(self) -> bool:
+        """True if this is the last iteration, false otherwise."""
+        return self._col == self.ncols
+
+    @property
+    def row(self) -> int:
+        """The current row number."""
+        return self._row
+
     def step(self) -> None:
-        """Set the value for the current/next loop iteration and update forloop
-        helper variables."""
-        self.index += 1
-        self.index0 += 1
-        self.rindex -= 1
-        self.rindex0 -= 1
-
-        if self.index0 == 0:
-            self.first = True
+        """Step the forloop forward."""
+        self._index += 1
+        if self._col == self.ncols:
+            self._col = 1
+            self._row += 1
         else:
-            self.first = False
-
-        if self.rindex0 == 0:
-            self.last = True
-        else:
-            self.last = False
-
-        self.col0 = self.index0 % self.ncols
-        self.col = self.col0 + 1
-
-        if self.col == 1:
-            self.col_first = True
-        else:
-            self.col_first = False
-
-        if self.col == self.ncols:
-            self.col_last = True
-        else:
-            self.col_last = False
-
-        if self.col == 1:
-            self.row += 1
+            self._col += 1
 
 
 class TablerowNode(Node):
@@ -179,33 +182,25 @@ class TablerowNode(Node):
         else:
             cols = length
 
-        loop_iter = grouper(loop_iter, cols)
         tablerow = TableRow(name, loop_iter, length, cols)
 
         namespace: Dict[str, object] = {
             "tablerowloop": tablerow,
-            name: None,
         }
 
+        buffer.write('<tr class="row1">\n')
+
         with context.extend(namespace):
-            for i, row in enumerate(tablerow):
-                buffer.write(f'<tr class="row{i+1}">')
+            for item in tablerow:
+                namespace[name] = item
+                buffer.write(f'<td class="col{tablerow.col}">')
+                self.block.render(context=context, buffer=buffer)
+                buffer.write("</td>")
 
-                # Hack to mimic the odd newlines in the reference implementation.
-                if i == 0:
-                    buffer.write("\n")
+                if tablerow.col_last and not tablerow.last:
+                    buffer.write(f'</tr>\n<tr class="row{tablerow.row + 1}">')
 
-                for j, itm in enumerate(row):
-                    tablerow.step()
-                    namespace[name] = itm
-
-                    buffer.write(f'<td class="col{j+1}">')
-                    self.block.render(context=context, buffer=buffer)
-                    buffer.write("</td>")
-
-                # Newline as per reference implementation.
-                buffer.write("</tr>\n")
-
+            buffer.write("</tr>\n")
         return True
 
     async def render_to_output_async(
@@ -220,31 +215,25 @@ class TablerowNode(Node):
         else:
             cols = length
 
-        loop_iter = grouper(loop_iter, cols)
         tablerow = TableRow(name, loop_iter, length, cols)
 
         namespace: Dict[str, object] = {
             "tablerowloop": tablerow,
-            name: None,
         }
 
+        buffer.write('<tr class="row1">\n')
+
         with context.extend(namespace):
-            for i, row in enumerate(tablerow):
-                buffer.write(f'<tr class="row{i+1}">')
+            for item in tablerow:
+                namespace[name] = item
+                buffer.write(f'<td class="col{tablerow.col}">')
+                await self.block.render_async(context=context, buffer=buffer)
+                buffer.write("</td>")
 
-                if i == 0:
-                    buffer.write("\n")
+                if tablerow.col_last and not tablerow.last:
+                    buffer.write(f'</tr>\n<tr class="row{tablerow.row + 1}">')
 
-                for j, itm in enumerate(row):
-                    tablerow.step()
-                    namespace[name] = itm
-
-                    buffer.write(f'<td class="col{j+1}">')
-                    await self.block.render_async(context=context, buffer=buffer)
-                    buffer.write("</td>")
-
-                buffer.write("</tr>\n")
-
+            buffer.write("</tr>\n")
         return True
 
 
@@ -269,9 +258,3 @@ class TablerowTag(Tag):
         expect(stream, TOKEN_TAG, value=TAG_ENDTABLEROW)
 
         return TablerowNode(tok, expression=loop_expression, block=block)
-
-
-def grouper(iterator: Iterator[Any], n: int) -> Iterator[Any]:
-    "Collect data into fixed-length chunks or blocks"
-    # grouper('ABCDEFG', 3) --> ABC DEF G"
-    return iter(lambda: tuple(islice(iterator, n)), ())
