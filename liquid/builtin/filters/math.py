@@ -61,7 +61,7 @@ def divided_by(num: NumberT, other: object) -> NumberT:
     other = num_arg(other, default=0)
 
     try:
-        if isinstance(other, int):
+        if isinstance(other, int) and isinstance(num, int):
             return num // other
         return num / other
     except ZeroDivisionError as err:

@@ -9,6 +9,8 @@ Version 1.1.4
 - Implemented ``forloop.name``, as per the reference implementation. ``forloop.name`` is
   the concatenation of the loop variable identifier and the target iterable identifier,
   or a string representation of a range literal, separated by a hyphen.
+- Fixed a bug with the ``divided_by`` filter. Given a float value and integer argument,
+  it was incorrectly doing integer division.
 
 Version 1.1.3
 -------------
