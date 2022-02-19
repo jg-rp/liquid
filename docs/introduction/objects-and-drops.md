@@ -1,46 +1,29 @@
 # Objects and Drops
 
-Python Liquid uses [`__getitem__`](https://docs.python.org/3/reference/datamodel.html#object.__getitem__)
-internally for resolving property names and accessing items in a sequence. So, if your
-[data](render-context#render-arguments) is some combination of dictionaries and lists, for example,
-templates can reference objects as follows.
+Python Liquid uses [`__getitem__`](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) internally for resolving property names and accessing items in a sequence. So, if your [data](render-context#render-arguments) is some combination of dictionaries and lists, for example, templates can reference objects as follows.
 
-```liquid title="templates/some.liquid"
-{{ products[0]title }}
+```json title="data"
+{
+  "products": [
+    {
+      "title": "Some Shoes",
+      "available": 5,
+      "colors": ["blue", "red"]
+    },
+    {
+      "title": "A Hat",
+      "available": 2,
+      "colors": ["grey", "brown"]
+    }
+  ]
+}
+```
+
+```liquid title="template"
+{{ products[0].title }}
 {{ products[-2]['available'] }}
 {{ products.last.title }}
 {{ products.first.colors | join: ', ' }}
-```
-
-```python
-from liquid import Environment
-from liquid import FileSystemLoader
-
-example_data = {
-    "products": [
-        {
-            "title": "Some Shoes",
-            "available": 5,
-            "colors": [
-                "blue",
-                "red",
-            ],
-        },
-        {
-            "title": "A Hat",
-            "available": 2,
-            "colors": [
-                "grey",
-                "brown",
-            ],
-        },
-    ]
-}
-
-env = Environment(loader=FileSystemLoader("./templates/"))
-template = env.get_template("some.liquid")
-
-print(template.render(**example_data))
 ```
 
 ```plain title="output"
@@ -50,10 +33,10 @@ A Hat
 blue, red
 ```
 
-Attempting to access properties from a Python class or class instance will not work.
+Attempting to access properties from a Python class or class instance **will not work**.
 
 ```python
-from liquid import Template, StrictUndefined
+from liquid import Template
 
 class Product:
     def __init__(self, title, colors):
@@ -72,9 +55,7 @@ Template("{{ products.first.title }}!").render(products=products)
 !
 ```
 
-This is by design, and is one of the reasons Liquid is considered "safe" and "suitable
-for end users". To expose an object's properties we can implement Python's `Mapping`
-or `Sequence` interface.
+This is by design, and is one of the reasons Liquid is considered "safe" and "suitable for end users". To expose an object's properties we can implement Python's [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interface.
 
 :::info
 Python Liquid's equivalent of a "drop", as found in Ruby Liquid, is a Python object that implements
@@ -136,6 +117,8 @@ print(Template("{{ user.is_admin }}").render(user=user))  # true
 print(Template("{{ user.perms[0] }}", undefined=StrictUndefined).render(user=user))
 # UndefinedError: key error: 'perms', user[perms][0], on line 1
 ```
+
+## Drop Wrapper
 
 One could implement a simple "Drop" wrapper for data access objects like this, while
 still being explicit about which properties are exposed to templates.
