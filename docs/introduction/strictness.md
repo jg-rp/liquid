@@ -17,14 +17,14 @@ env = Environment(
 
 ## Undefined Variables
 
-By default, references to undefined variables are silently ignored. Pass `StrictUndefined` as the
-`undefined` argument to [Template](../api/Template) or [Environment](../api/Environment), and
-any operation on an undefined variable will raise an `UndefinedError`.
+By default, references to undefined variables are silently ignored. Pass `StrictUndefined` as the `undefined` argument to [Template](../api/Template) or [Environment](../api/Environment), and any operation on an undefined variable will raise an `UndefinedError`.
 
 ```python
 from liquid import Environment, StrictUndefined
 env = Environment(undefined=StrictUndefined)
 ```
+
+See [Undefined Variables](../guides/undefined-variables) for more information and example of how to customize undefined variable handling.
 
 ## Undefined Filters
 
