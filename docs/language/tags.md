@@ -129,13 +129,14 @@ is turned into a comment.
 
 `{% cycle [ <string>: ] object [, object ... ] %}`
 
-Yield the next in a sequence of objects each time `cycle` appears. When the sequence is exhausted,
-it will start again from the beginning.
+Yield the next in a sequence of objects each time `cycle` appears. When the sequence is exhausted, it will start again from the beginning.
 
 :::info
-Ruby Liquid's documentation says `cycle` must be used within a `for` loop. Running the
-[golden-liquid](https://github.com/jg-rp/golden-liquid) test suit against Ruby Liquid suggests this
-is not the case. `cycle` tags in Python Liquid do not require a `for` loop.
+Ruby Liquid's documentation says `cycle` must be used within a `for` loop. Running the [golden-liquid](https://github.com/jg-rp/golden-liquid) test suit against Ruby Liquid suggests this is not the case. `cycle` tags in Python Liquid do not require a `for` loop.
+:::
+
+:::caution
+While Python Liquid will accept `cycle` arguments of any type, including identifiers to be resolved, this behavior is considered "unintended" or "undefined" in Ruby Liquid (see [issue #1519](https://github.com/Shopify/liquid/issues/1519)). If you need interoperability between Python Liquid and Ruby Liquid, only use strings or number as arguments to `cycle`.
 :::
 
 ```liquid

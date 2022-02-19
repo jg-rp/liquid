@@ -72,7 +72,7 @@ print(template.render(user={"name": "Brian"}))
 
 **_New in version 1.1.3_**
 
-Custom loaders can reference the name of the tag that's trying to load a template, if used from a tag like `{% include 'template_name' %}` or `{% render 'template_name' %}`, or any custom tag the uses `Context.get_template_with_context()`.
+Custom loaders can reference the name of the tag that's trying to load a template, if used from a tag like `{% include 'template_name' %}` or `{% render 'template_name' %}`, or any custom tag that uses `Context.get_template_with_context()`.
 
 This is useful for situations where you want to load partial templates (or "snippets" or "sections") from sub folders within an existing search path, without requiring template authors to include sub folder names in every `include` or `render` tag.
 
