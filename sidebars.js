@@ -31,7 +31,7 @@ const sidebars = {
         "introduction/auto-escape",
         "introduction/async-support",
         "introduction/caching",
-      ]
+      ],
     },
     {
       type: "category",
@@ -41,11 +41,12 @@ const sidebars = {
         "guides/custom-filters",
         "guides/custom-tags",
         "guides/custom-loaders",
+        "guides/undefined-variables",
         "guides/django-liquid",
         "guides/flask-liquid",
         // "guides/custom-template-cache",
-      ]
-    }
+      ],
+    },
   ],
 
   languageSidebar: [
@@ -53,22 +54,14 @@ const sidebars = {
       type: "category",
       label: "Language",
       collapsed: false,
-      items: [
-        "language/introduction",
-        "language/filters",
-        "language/tags",
-      ]
+      items: ["language/introduction", "language/filters", "language/tags"],
     },
     {
       type: "category",
       label: "Extra",
       collapsed: false,
-      items: [
-        "extra/introduction",
-        "extra/filters",
-        "extra/tags",
-      ]
-    }
+      items: ["extra/introduction", "extra/filters", "extra/tags"],
+    },
   ],
 
   apiSidebar: [
@@ -88,9 +81,9 @@ const sidebars = {
         "api/Tag",
         "api/node",
         "api/exceptions",
-      ]
-    }
-  ]
+      ],
+    },
+  ],
 
   // But you can create a sidebar manually
   /*
