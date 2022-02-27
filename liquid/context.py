@@ -48,50 +48,86 @@ Namespace = Mapping[str, object]
 _undefined = object()
 
 
+# pylint: disable=too-many-return-statements
 def _getitem(obj: Any, key: Any) -> Any:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     # NOTE: A runtime checkable protocol was too slow.
     if hasattr(key, "__liquid__"):
         key = key.__liquid__()
 
-    if key == "size" and isinstance(obj, collections.abc.Sized):
-        return len(obj)
-    if (
-        key == "first"
-        and not isinstance(obj, str)
-        and isinstance(obj, collections.abc.Sequence)
-    ):
-        return obj[0]
-    if (
-        key == "last"
-        and not isinstance(obj, str)
-        and isinstance(obj, collections.abc.Sequence)
-    ):
-        return obj[-1]
+    if key == "size":
+        try:
+            return getitem(obj, "size")
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Sized):
+                return len(obj)
+            raise
+
+    if key == "first" and not isinstance(obj, str):
+        try:
+            return getitem(obj, "first")
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Mapping) and obj:
+                return list(itertools.islice(obj.items(), 1))[0]
+            if isinstance(obj, collections.abc.Sequence):
+                return obj[0]
+            raise
+
+    if key == "last" and not isinstance(obj, str):
+        try:
+            return getitem(obj, "last")
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Sequence):
+                return obj[-1]
+            raise
 
     return getitem(obj, key)
 
 
+# pylint: disable=too-many-return-statements
 async def _getitem_async(obj: Any, key: Any) -> object:
     """Item getter with special methods for arrays/lists and hashes/dicts."""
     # NOTE: A runtime checkable protocol was too slow.
     if hasattr(key, "__liquid__"):
         key = key.__liquid__()
 
-    if key == "size" and isinstance(obj, collections.abc.Sized):
-        return len(obj)
-    if (
-        key == "first"
-        and not isinstance(obj, str)
-        and isinstance(obj, collections.abc.Sequence)
-    ):
-        return obj[0]
-    if (
-        key == "last"
-        and not isinstance(obj, str)
-        and isinstance(obj, collections.abc.Sequence)
-    ):
-        return obj[-1]
+    if key == "size":
+        try:
+            return (
+                await obj.__getitem_async__(key)
+                if hasattr(obj, "__getitem_async__")
+                else getitem(obj, "size")
+            )
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Sized):
+                return len(obj)
+            raise
+
+    if key == "first" and not isinstance(obj, str):
+        try:
+            return (
+                await obj.__getitem_async__(key)
+                if hasattr(obj, "__getitem_async__")
+                else getitem(obj, "first")
+            )
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Mapping) and obj:
+                return list(itertools.islice(obj.items(), 1))[0]
+            if isinstance(obj, collections.abc.Sequence):
+                return obj[0]
+            raise
+
+    if key == "last" and not isinstance(obj, str):
+        try:
+            return (
+                await obj.__getitem_async__(key)
+                if hasattr(obj, "__getitem_async__")
+                else getitem(obj, "last")
+            )
+        except (KeyError, IndexError, TypeError):
+            if isinstance(obj, collections.abc.Sequence):
+                return obj[-1]
+            raise
 
     if hasattr(obj, "__getitem_async__"):
         return await obj.__getitem_async__(key)

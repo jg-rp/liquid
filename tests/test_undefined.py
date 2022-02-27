@@ -77,7 +77,7 @@ class TestUndefined(TestCase):
             Case(
                 description="access `size` from undefined",
                 template=r"{{ nosuchthing.size }}",
-                expect="0",
+                expect="",
             ),
             Case(
                 description="filtered undefined",
