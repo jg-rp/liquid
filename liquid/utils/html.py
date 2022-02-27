@@ -3,6 +3,8 @@
 from html.parser import HTMLParser
 
 from typing import List
+from typing import Tuple
+from typing import Optional
 
 
 class StripParser(HTMLParser):  # pylint: disable=abstract-method
@@ -15,7 +17,7 @@ class StripParser(HTMLParser):  # pylint: disable=abstract-method
         self.style_depth = 0
         self.dat: List[str] = []
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
         if tag == "script":
             self.script_depth += 1
         elif tag == "style":
