@@ -63,4 +63,25 @@ cases = [
             ]
         },
     ),
+    Case(
+        description="array of objects with missing key property",
+        template=(
+            r"{% assign x = a | uniq: 'title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(title,foo)(name,a)(title,bar)(name,c)(heading,bar)(name,c)",
+        globals={
+            "a": [
+                {"title": "foo", "name": "a"},
+                {"title": "foo", "name": "b"},
+                {"title": "bar", "name": "c"},
+                {"heading": "bar", "name": "c"},
+                {"heading": "baz", "name": "d"},
+            ]
+        },
+    ),
 ]

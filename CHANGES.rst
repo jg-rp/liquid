@@ -1,6 +1,15 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.5
+-------------
+
+- Prioritise object properties and keys named ``size``, ``first`` and ``last`` over the
+  special built-in properties of the same names. See #46.
+- Fixed a bug with the ``uniq`` filter. It no longer raises an exception when given a 
+  key argument and a sequence containing objects that don't have that key/property.
+  See #47.
+
 Version 1.1.4
 -------------
 

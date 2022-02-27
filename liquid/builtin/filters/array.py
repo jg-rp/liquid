@@ -39,6 +39,9 @@ ArrayT = Union[List[Any], Tuple[Any, ...]]
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
 
+# Unique object for use with the uniq filter.
+MISSING = object()
+
 
 def _str_if_not(val: object) -> str:
     if not isinstance(val, str):
@@ -192,6 +195,8 @@ def uniq(sequence: ArrayT, key: object = None) -> List[object]:
         for obj in sequence:
             try:
                 item = obj[key]
+            except KeyError:
+                item = MISSING
             except TypeError as err:
                 raise FilterArgumentError(
                     f"can't read property '{key}' of {obj}"
