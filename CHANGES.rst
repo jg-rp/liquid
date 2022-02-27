@@ -9,6 +9,8 @@ Version 1.1.5
 - Fixed a bug with the ``uniq`` filter. It no longer raises an exception when given a 
   key argument and a sequence containing objects that don't have that key/property.
   See #47.
+- The ``strip_html`` filter now removes ``style`` and ``script`` tag blocks in their
+  entirety, including everything in between. See #45.
 
 Version 1.1.4
 -------------

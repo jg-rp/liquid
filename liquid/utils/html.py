@@ -11,16 +11,35 @@ class StripParser(HTMLParser):  # pylint: disable=abstract-method
     def __init__(self) -> None:
         super().__init__(convert_charrefs=False)
         self.reset()
+        self.script_depth = 0
+        self.style_depth = 0
         self.dat: List[str] = []
 
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "script":
+            self.script_depth += 1
+        elif tag == "style":
+            self.style_depth += 1
+        return super().handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "script":
+            self.script_depth -= 1
+        elif tag == "style":
+            self.style_depth -= 1
+        return super().handle_endtag(tag)
+
     def handle_data(self, data: str) -> None:
-        self.dat.append(data)
+        if not self.script_depth and not self.style_depth:
+            self.dat.append(data)
 
     def handle_entityref(self, name: str) -> None:
-        self.dat.append(f"&{name};")
+        if not self.script_depth and not self.style_depth:
+            self.dat.append(f"&{name};")
 
     def handle_charref(self, name: str) -> None:
-        self.dat.append(f"&#{name};")
+        if not self.script_depth and not self.style_depth:
+            self.dat.append(f"&#{name};")
 
     def get_data(self) -> str:
         """Return accumulated data."""
