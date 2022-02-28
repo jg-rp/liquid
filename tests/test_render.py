@@ -306,6 +306,10 @@ class RenderFiltersTestCase(RenderTestCase):
         """Test that we can render the `remove_first` filter correctly."""
         self._test(golden.remove_first_filter.cases)
 
+    def test_render_remove_last_filter(self):
+        """Test that we can render the `remove_last` filter correctly."""
+        self._test(golden.remove_last_filter.cases)
+
     def test_render_replace_filter(self):
         """Test that we can render the `replace` filter correctly."""
         self._test(golden.replace_filter.cases)
@@ -313,6 +317,10 @@ class RenderFiltersTestCase(RenderTestCase):
     def test_render_replace_first_filter(self):
         """Test that we can render the `replace_first` filter correctly."""
         self._test(golden.replace_first_filter.cases)
+
+    def test_render_replace_last_filter(self):
+        """Test that we can render the `replace_last` filter correctly."""
+        self._test(golden.replace_last_filter.cases)
 
     def test_render_slice_filter(self):
         """Test that we can render the `slice` filter correctly."""

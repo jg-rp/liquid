@@ -113,8 +113,21 @@ def remove(val: str, arg: str) -> str:
 
 @string_filter
 def remove_first(val: str, arg: str) -> str:
-    """Remove the first occurrences of the argument string from value."""
+    """Remove the first occurrence of the argument string from value."""
     return val.replace(soft_str(arg), "", 1)
+
+
+@string_filter
+def remove_last(val: str, arg: str) -> str:
+    """Remove the last occurrence of the argument string from value."""
+    try:
+        before, _, after = val.rpartition(soft_str(arg))
+    except ValueError:
+        # empty separator
+        return val
+    if before:
+        return before + after
+    return val
 
 
 @string_filter
@@ -129,6 +142,20 @@ def replace_first(val: str, seq: str, sub: str = "") -> str:
     """Replaces the first occurrence of the first argument in a string with the second
     argument."""
     return val.replace(soft_str(seq), soft_str(sub), 1)
+
+
+@string_filter
+def replace_last(val: str, seq: str, sub: str) -> str:
+    """Replace the last occurrence of the first argument in a string with the second
+    argument."""
+    try:
+        before, _, after = val.rpartition(soft_str(seq))
+    except ValueError:
+        # empty separator
+        return val + soft_str(sub)
+    if before:
+        return before + soft_str(sub) + after
+    return val
 
 
 @string_filter

@@ -35,4 +35,36 @@ cases = [
         template=r"{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}",
         expect="123",
     ),
+    # Case(
+    #     description="some global variables",
+    #     template=r"{% cycle a, b, c %}{% cycle a, b, c %}{% cycle a, b, c %}",
+    #     expect="123",
+    #     globals={"a": 1, "b": 2, "c": 3},
+    # ),
+    Case(
+        description="variable name",
+        template=r"{% cycle a: 1, 2, 3 %}{% cycle a: 1, 2, 3 %}{% cycle a: 1, 2, 3 %}",
+        expect="123",
+        globals={"a": "foo"},
+    ),
+    Case(
+        description="changing variable name",
+        template=(
+            r"{% cycle a: 1, 2, 3 %}"
+            r"{% assign a = 'bar' %}"
+            r"{% cycle a: 1, 2, 3 %}"
+            r"{% cycle a: 1, 2, 3 %}"
+        ),
+        expect="112",
+        globals={"a": "foo"},
+    ),
+    # Case(
+    #     description="named with different items",
+    #     template=(
+    #         r"{% cycle 'a': 1, 2, 3 %}"
+    #         r"{% cycle 'a': 7, 8, 9 %}"
+    #         r"{% cycle 'a': 1, 2, 3 %}"
+    #     ),
+    #     expect="183",
+    # ),
 ]

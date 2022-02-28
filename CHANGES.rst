@@ -11,6 +11,7 @@ Version 1.1.5
   See #47.
 - The ``strip_html`` filter now removes ``style`` and ``script`` tag blocks in their
   entirety, including everything in between. See #45.
+- Added ``remove_last`` and ``replace_last`` filters.
 
 Version 1.1.4
 -------------

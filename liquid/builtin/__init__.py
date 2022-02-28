@@ -46,8 +46,10 @@ from .filters.string import newline_to_br
 from .filters.string import prepend
 from .filters.string import remove
 from .filters.string import remove_first
+from .filters.string import remove_last
 from .filters.string import replace
 from .filters.string import replace_first
+from .filters.string import replace_last
 from .filters.string import slice_
 from .filters.string import split
 from .filters.string import upcase
@@ -134,8 +136,10 @@ def register(env: Environment) -> None:
     env.add_filter("prepend", prepend)
     env.add_filter("remove", remove)
     env.add_filter("remove_first", remove_first)
+    env.add_filter("remove_last", remove_last)
     env.add_filter("replace", replace)
     env.add_filter("replace_first", replace_first)
+    env.add_filter("replace_last", replace_last)
     env.add_filter("slice", slice_)
     env.add_filter("split", split)
     env.add_filter("upcase", upcase)

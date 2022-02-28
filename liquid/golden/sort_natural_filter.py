@@ -96,4 +96,10 @@ cases = [
         template=r"{{ nosuchthing | sort_natural }}",
         expect="",
     ),
+    Case(
+        description="incompatible types",
+        template=r"{{ a | sort_natural }}",
+        expect="14{}",
+        globals={"a": [{}, 1, "4"]},
+    ),
 ]

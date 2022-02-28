@@ -30,4 +30,9 @@ cases = [
         template=r"{{ 'March 14, 2016' | date: nosuchthing }}",
         expect="March 14, 2016",
     ),
+    Case(
+        description="literal percent",
+        template=r"{{ 'March 14, 2016' | date: '%%%b %d, %y' }}",
+        expect="%Mar 14, 16",
+    ),
 ]

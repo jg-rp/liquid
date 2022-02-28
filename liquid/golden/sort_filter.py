@@ -70,4 +70,17 @@ cases = [
         template=r"{{ 'BzAa4' | sort | join: '#' }}",
         expect="BzAa4",
     ),
+    Case(
+        description="array of integers",
+        template=r"{{ a | sort | join: '#' }}",
+        expect="1#3#30#1000",
+        globals={"a": [1, 1000, 3, 30]}
+    ),
+    Case(
+        description="incompatible types",
+        template=r"{{ a | sort }}",
+        expect="",
+        globals={"a": [[], {}, 1, "4"]},
+        error=True,
+    ),
 ]

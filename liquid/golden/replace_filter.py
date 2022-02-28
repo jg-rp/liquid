@@ -17,6 +17,12 @@ cases = [
         expect="5",
     ),
     Case(
+        description="left value is an object",
+        template=r"{{ a | replace: '{', '!' }}",
+        expect="!}",
+        globals={"a": {}},
+    ),
+    Case(
         description="argument not a string",
         template=r'{{ "hello" | replace: 5, "your" }}',
         expect="hello",

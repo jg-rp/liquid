@@ -58,8 +58,10 @@ from . import newline_to_br_filter
 from . import prepend_filter
 from . import remove_filter
 from . import remove_first_filter
+from . import remove_last_filter
 from . import replace_filter
 from . import replace_first_filter
+from . import replace_last_filter
 from . import slice_filter
 from . import split_filter
 from . import upcase_filter
@@ -136,8 +138,10 @@ test_cases = [
     prepend_filter,
     remove_filter,
     remove_first_filter,
+    remove_last_filter,
     replace_filter,
     replace_first_filter,
+    replace_last_filter,
     slice_filter,
     split_filter,
     upcase_filter,

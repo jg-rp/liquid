@@ -27,6 +27,7 @@ from liquid.builtin.filters.string import remove
 from liquid.builtin.filters.string import remove_first
 from liquid.builtin.filters.string import replace
 from liquid.builtin.filters.string import replace_first
+from liquid.builtin.filters.string import replace_last
 from liquid.builtin.filters.string import slice_
 from liquid.builtin.filters.string import split
 from liquid.builtin.filters.string import upcase
@@ -626,7 +627,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_replace_first(self):
         """Test replace_first filter function."""
-
         test_cases = [
             Case(
                 description="replace substrings",
@@ -694,6 +694,76 @@ class StringFilterTestCase(unittest.TestCase):
         ]
 
         self._test(replace_first, test_cases)
+
+    def test_replace_last(self):
+        """Test replace_last filter function."""
+        test_cases = [
+            Case(
+                description="not a string",
+                val=5,
+                args=["rain", "foo"],
+                kwargs={},
+                expect="5",
+            ),
+            Case(
+                description="replace substrings",
+                val="Take my protein pills and put my helmet on",
+                args=["my", "your"],
+                kwargs={},
+                expect="Take my protein pills and put your helmet on",
+            ),
+            Case(
+                description="argument not a string",
+                val="hello5",
+                args=[5, "your"],
+                kwargs={},
+                expect="helloyour",
+            ),
+            Case(
+                description="missing argument",
+                val="hello",
+                args=["ll"],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="missing arguments",
+                val="hello",
+                args=[],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="too many arguments",
+                val="hello",
+                args=["how", "are", "you"],
+                kwargs={},
+                expect=FilterArgumentError,
+            ),
+            Case(
+                description="undefined left value",
+                val=self.env.undefined("test"),
+                args=["my", "your"],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="undefined first argument",
+                val="Take my protein pills and put my helmet on",
+                args=[self.env.undefined("test"), "your"],
+                kwargs={},
+                expect="Take my protein pills and put my helmet onyour",
+            ),
+            Case(
+                description="undefined second argument",
+                val="Take my protein pills and put my helmet on",
+                args=["my", self.env.undefined("test")],
+                kwargs={},
+                expect="Take my protein pills and put  helmet on",
+            ),
+        ]
+
+        self._test(replace_last, test_cases)
 
     def test_slice(self):
         """Test slice filter function."""

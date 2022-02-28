@@ -29,7 +29,7 @@ cases = [
         expect="",
     ),
     Case(
-        description="first argument is a sstring",
+        description="first argument is a string",
         template=r'{{ "hello" | slice: "2" }}',
         expect="l",
     ),
