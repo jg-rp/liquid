@@ -905,7 +905,7 @@ substring removal.
 
 `<string> | remove_first: <string>`
 
-Return the input with the first occurrence of the argument string removed.
+Return a copy of the input string with the first occurrence of the argument string removed.
 
 ```liquid
 {{ "I strained to see the train through the rain" | remove_first: "rain" }}
@@ -915,8 +915,23 @@ Return the input with the first occurrence of the argument string removed.
 I sted to see the train through the rain
 ```
 
-If either the filter input or argument are not a string, they will be coerced to a string before
-substring removal.
+If either the filter input or argument are not a string, they will be coerced to a string before substring removal.
+
+## remove_last
+
+`<string> | remove_last: <string>`
+
+Return a copy of the input string with the last occurrence of the argument string removed.
+
+```liquid
+{{ "I strained to see the train through the rain" | remove_last: "rain" }}
+```
+
+```plain title="output"
+I strained to see the train through the
+```
+
+If either the filter input or argument are not a string, they will be coerced to a string before substring removal.
 
 ## replace
 
@@ -941,9 +956,7 @@ replacement.
 
 `<string> | replace_first: <string>[, <string>]`
 
-Return the input with the first occurrence of the first argument replaced with the second argument.
-If the second argument is omitted, it will default to an empty string, making `replace_first` behave
-like `remove_first`.
+Return a copy of the input string with the first occurrence of the first argument replaced with the second argument. If the second argument is omitted, it will default to an empty string, making `replace_first` behave like `remove_first`.
 
 ```liquid
 {{ "Take my protein pills and put my helmet on" | replace_first: "my", "your" }}
@@ -953,8 +966,23 @@ like `remove_first`.
 Take your protein pills and put my helmet on
 ```
 
-If either the filter input or argument are not a string, they will be coerced to a string before
-replacement.
+If either the filter input or argument are not a string, they will be coerced to a string before replacement.
+
+## replace_last
+
+`<string> | replace_last: <string>, <string>`
+
+Return a copy of the input string with the last occurrence of the first argument replaced with the second argument.
+
+```liquid
+{{ "Take my protein pills and put my helmet on" | replace_first: "my", "your" }}
+```
+
+```plain title="output"
+Take my protein pills and put your helmet on
+```
+
+If either the filter input or argument are not a string, they will be coerced to a string before replacement.
 
 ## reverse
 
