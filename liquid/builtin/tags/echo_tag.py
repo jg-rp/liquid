@@ -23,8 +23,6 @@ TAG_ECHO = sys.intern("echo")
 class EchoNode(StatementNode):
     """Parse tree node for the built-in "echo" tag."""
 
-    __slots__ = ("tok", "expression")
-
     def __repr__(self) -> str:  # pragma: no cover
         return f"EchoNode(tok={self.tok}, expression={self.expression!r})"
 
