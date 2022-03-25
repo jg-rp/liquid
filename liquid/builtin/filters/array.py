@@ -176,7 +176,7 @@ def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
 def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
     """Creates an array including only the objects with a given property value,
     or any truthy value by default."""
-    if value:
+    if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) == value]
 
     return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]

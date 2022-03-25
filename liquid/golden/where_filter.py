@@ -75,9 +75,48 @@ cases = [
         globals={"a": [{"title": "foo"}, {"title": "bar"}, {"title": None}]},
     ),
     Case(
+        description="second argument is undefined",
+        template=(
+            r"{% assign x = a | where: 'title', nosuchthing %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(title,foo)(title,bar)",
+        globals={"a": [{"title": "foo"}, {"title": "bar"}, {"title": None}]},
+    ),
+    Case(
         description="both arguments are undefined",
         template=r"{{ a | where: nosuchthing, nothing }}",
         expect="",
         globals={"a": [{"title": "foo"}, {"title": "bar"}, {"title": None}]},
+    ),
+    Case(
+        description="value is false",
+        template=(
+            r"{% assign x =  a | where: 'b', false %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(b,false)",
+        globals={"a": [{"b": False}, {"b": "bar"}, {"b": None}]},
+    ),
+    Case(
+        description="value is explicit nil",
+        template=(
+            r"{% assign x =  a | where: 'b', nil %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(b,bar)",
+        globals={"a": [{"b": False}, {"b": "bar"}, {"b": None}]},
     ),
 ]

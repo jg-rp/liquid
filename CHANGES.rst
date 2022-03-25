@@ -1,6 +1,12 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.6
+-------------
+
+- Fixed a bug where the `where` filter would incorrectly ignore an explicit `false`
+  given as the target value. See #51.
+
 Version 1.1.5
 -------------
 
