@@ -11,22 +11,23 @@ text. Any block can contain more variables, conditions and loops.
 Output text is the result of _rendering_ a template given some data model. It is that data model
 that provides the variables and objects referenced in a template's expressions.
 
+Liquid is distinct from most other template languages in that it is designed for _users_, who may or may not be developers, and are untrusted. As such, when compared to other template engines, Liquid has a deliberately simple and restrictive syntax and feature set.
+
 Liquid is most commonly used with HTML, but can be used with any text-based content. Consider this
 template.
 
 ```liquid
 {% assign greeting = "Hello" %}
 {% for person in people %}
-  {{ greeting }}, {{ person.name }}!
+  {{ greeting }}, {{ person.name | capitalize }}!
 {% endfor %}
 ```
 
 ## Output
 
-`{{ person.name }}` and `{{ greeting }}` are output statements. Expressions inside double curly
-braces are evaluated and the result is inserted into the output text at that location. These
-expressions can be simple variables, elements from Liquid arrays (Python lists or tuples) or objects
-(Python dicts or classes) with properties.
+`{{ person.name | capitalize }}` and `{{ greeting }}` are output statements. Expressions inside double curly braces are evaluated and the result is inserted into the output text at that location. These expressions can be simple variables, elements from Liquid arrays (Python lists or tuples) or objects (Python dicts or classes) with properties.
+
+`capitalize` is a [filter](#filters), which is applied to the value at `person.name` prior to output.
 
 ## Tags
 
