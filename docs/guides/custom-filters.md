@@ -14,7 +14,7 @@ filters to get the cheapest item in a collection of products.
 
 Filter arguments appear after a colon (`:`) and are separated by commas (`,`).
 
-You can add to, remove or modify Liquid's [built-in filters](../language/filters) to suite your
+You can add to, remove or modify Liquid's [built-in filters](../language/filters) to suit your
 needs by registering filter functions with a [liquid.Environment](../api/Environment), then
 rendering your templates from that environment.
 
