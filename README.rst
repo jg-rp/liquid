@@ -6,23 +6,23 @@ Python Liquid
 A Python implementation of `Liquid <https://shopify.github.io/liquid/>`_, the safe, customer-facing
 template language for flexible web apps.
 
-.. image:: https://img.shields.io/pypi/v/python-liquid.svg
+.. image:: https://img.shields.io/pypi/v/python-liquid?style=flat-square
     :target: https://pypi.org/project/python-liquid/
     :alt: Version
 
-.. image:: https://github.com/jg-rp/liquid/actions/workflows/tests.yaml/badge.svg
+.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Tests?style=flat-square
     :target: https://github.com/jg-rp/liquid/tree/main/tests
     :alt: Tests
 
-.. image:: https://img.shields.io/pypi/l/python-liquid.svg
+.. image:: https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square
     :target: https://pypi.org/project/python-liquid/
     :alt: Licence
 
-.. image:: https://img.shields.io/pypi/pyversions/python-liquid.svg
+.. image:: https://img.shields.io/pypi/pyversions/python-liquid.svg?style=flat-square
     :target: https://pypi.org/project/python-liquid/
     :alt: Python versions
 
-.. image:: https://img.shields.io/badge/pypy-3.7%20%7C%203.8-blue
+.. image:: https://img.shields.io/badge/pypy-3.7%20%7C%203.8-blue?style=flat-square
     :target: https://pypi.org/project/python-liquid/
     :alt: PyPy versions
 
