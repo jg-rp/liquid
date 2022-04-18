@@ -62,6 +62,8 @@ Links
 Related Projects
 ----------------
 
+- `LiquidScript <https://github.com/jg-rp/liquidscript>`_: A JavaScript and TypeScript engine for
+  Liquid with a similar high-level API to Python Liquid.
 - `django-liquid <https://github.com/jg-rp/django-liquid>`_: A Django template backend for Liquid.
   Render Liquid templates in your Django apps.
 - `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render
