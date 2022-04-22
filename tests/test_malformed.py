@@ -321,6 +321,12 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg="unexpected '|', on line 1",
             ),
+            Case(
+                description="double pipe characters in filtered expression",
+                template=r'{{ "failure" || upcase }}',
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected pipe or missing filter name, on line 1",
+            ),
         ]
 
         self._test(test_cases, mode=Mode.STRICT)

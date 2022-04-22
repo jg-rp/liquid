@@ -15,6 +15,8 @@ from liquid.expression import RangeLiteral
 
 from liquid.expressions import parse_filtered_expression
 
+from liquid.exceptions import LiquidSyntaxError
+
 
 @dataclass
 class Case:
@@ -435,3 +437,12 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             with self.subTest(msg=case.description):
                 expr = parse_filtered_expression(case.expression)
                 self.assertEqual(expr, case.expect)
+
+    def test_double_pipe(self):
+        """Test that a two consecutive pipe characters raises a syntax error."""
+        expr = r'"failure" || upcase'
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(
+            str(raised.exception), "unexpected pipe or missing filter name, on line 1"
+        )

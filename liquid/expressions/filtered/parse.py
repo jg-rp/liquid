@@ -125,9 +125,15 @@ def bucket_args(
     return args, kwargs
 
 
-def parse_filter(tokens: List[Token]) -> Filter:
+def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:
     """Parse a Liquid filter from a list of tokens."""
+    if not tokens:
+        raise LiquidSyntaxError(
+            "unexpected pipe or missing filter name", linenum=linenum
+        )
+
     name = tokens[0][2]
+
     if len(tokens) > 1:
         if tokens[1][1] != TOKEN_COLON:
             raise LiquidSyntaxError(
@@ -161,5 +167,5 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
         return FilteredExpression(parse_obj(stream))
 
     left = parse_obj(TokenStream(iter(parts[0])))
-    filters = [parse_filter(_tokens) for _tokens in split_at_pipe(parts[1])]
+    filters = [parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
     return FilteredExpression(left, filters)

@@ -296,6 +296,8 @@ class Environment:
             err.filename = path
             err.source = source
             raise err
+        except Exception as err:
+            raise Error("unexpected liquid parsing error") from err
         return self.template_class(
             env=self,
             name=name,
