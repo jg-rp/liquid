@@ -1,10 +1,20 @@
 Python Liquid Change Log
 ========================
 
+Version 1.1.7
+-------------
+
+- Fixed a bug where double pipe characters (``||``) in a filtered expression would cause
+  an ``IndexError``. A ``LiquidSyntaxError`` is now raised in such cases, including the
+  line number of the offending expression.
+- Changed ``Environment.fromString`` to catch unexpected parsing errors. A Liquid
+  ``Error`` will now be raised with a message of "unexpected liquid parsing error"
+  and its ``__cause__`` set to the offending exception.
+
 Version 1.1.6
 -------------
 
-- Fixed a bug where the `where` filter would incorrectly ignore an explicit `false`
+- Fixed a bug where the ``where`` filter would incorrectly ignore an explicit ``false``
   given as the target value. See #51.
 
 Version 1.1.5
