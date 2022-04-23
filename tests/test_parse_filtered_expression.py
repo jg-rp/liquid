@@ -446,3 +446,42 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
         self.assertEqual(
             str(raised.exception), "unexpected pipe or missing filter name, on line 1"
         )
+
+    def test_double_comma(self):
+        """Test that two consecutive comma characters raises a syntax error."""
+        expr = r'"hello" | slice: 2,, 4'
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(str(raised.exception), "unexpected ',', on line 1")
+
+    def test_double_colon(self):
+        """Test that two consecutive colon characters raises a syntax error."""
+        expr = r'"hello" | slice:: 2'
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(str(raised.exception), "unexpected ':', on line 1")
+
+    def test_invalid_filter_name(self):
+        """Test that an invalid filter name raises a syntax error."""
+        expr = r'"hello" | £%1 '
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(str(raised.exception), "unexpected '£', on line 1")
+
+    def test_missing_comma(self):
+        """Test that a missing comma raises a syntax error."""
+        expr = r'"hello" | slice: 1 3 '
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(
+            str(raised.exception), "expected ',', found 'integer', on line 1"
+        )
+
+    def test_missing_colon(self):
+        """Test that a missing colon raises a syntax error."""
+        expr = r'"hello" | slice 1, 3 '
+        with self.assertRaises(LiquidSyntaxError) as raised:
+            parse_filtered_expression(expr)
+        self.assertEqual(
+            str(raised.exception), "expected ':', found 'integer', on line 1"
+        )

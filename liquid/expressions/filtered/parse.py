@@ -29,6 +29,7 @@ from liquid.expressions.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
 
+from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_FALSE
@@ -69,7 +70,9 @@ def parse_obj(stream: TokenStream) -> Expression:
     try:
         return TOKEN_MAP[stream.current[1]](stream)
     except KeyError as err:
-        raise LiquidSyntaxError(f"unexpected {stream.current[2]!r}") from err
+        raise LiquidSyntaxError(
+            f"unexpected {stream.current[2]!r}", linenum=stream.current[0]
+        ) from err
 
 
 TOKEN_MAP[TOKEN_LPAREN] = make_parse_range(parse_obj)
@@ -158,6 +161,54 @@ def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:
     return "", parse_obj(TokenStream(iter(tokens)))
 
 
+# _parse_filter has replaced the parse_* functions above in the name of better syntax
+# error handling. On the off chance someone is using them, the parse_* functions will
+# be depreciated as we approach Python Liquid version 2 and then removed.
+
+
+def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
+    if not tokens:
+        raise LiquidSyntaxError(
+            "unexpected pipe or missing filter name", linenum=linenum
+        )
+
+    stream = TokenStream(iter(tokens))
+    stream.expect(TOKEN_IDENTIFIER)
+    name = stream.current[2]
+
+    next(stream)
+    # Shortcut for filters with no arguments.
+    if stream.current[1] == TOKEN_EOF:
+        return Filter(name, [])
+
+    # Eat colon
+    stream.expect(TOKEN_COLON)
+    next(stream)
+
+    args: List[Expression] = []
+    kwargs: Dict[str, Expression] = {}
+
+    while stream.current[1] != TOKEN_EOF:
+        if stream.peek[1] == TOKEN_COLON:
+            # A keyword argument
+            stream.expect(TOKEN_IDENTIFIER)
+            key = next(stream)[2]
+            # Eat colon
+            next(stream)
+            kwargs[key] = parse_obj(stream)
+        else:
+            # A positional argument
+            args.append(parse_obj(stream))
+
+        # Eat comma
+        next(stream)
+        if stream.current[1] != TOKEN_EOF:
+            stream.expect(TOKEN_COMMA)
+            next(stream)
+
+    return Filter(name, args, kwargs)
+
+
 def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     """Parse an expression string with zero or more filters."""
     tokens = tokenize(expr, linenum)
@@ -167,5 +218,5 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
         return FilteredExpression(parse_obj(stream))
 
     left = parse_obj(TokenStream(iter(parts[0])))
-    filters = [parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
+    filters = [_parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
     return FilteredExpression(left, filters)
