@@ -84,4 +84,14 @@ cases = [
         template=r'{{ nosuchthing | default: "bar" }}',
         expect="bar",
     ),
+    Case(
+        description="true keyword argument before positional",
+        template=r'{{ false | default: allow_false: true, "bar" }}',
+        expect="false",
+    ),
+    Case(
+        description="false keyword argument before positional",
+        template=r'{{ false | default: allow_false: false, "bar" }}',
+        expect="bar",
+    ),
 ]
