@@ -251,7 +251,9 @@ def compile_liquid_rules(
 
     # The "name" group is zero or more characters so that a malformed tag (one
     # with no name) does not get treated as a literal.
-    tag_pattern = rf"{tag_s}-?\s*(?P<name>\w*)\s*(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
+    #
+    # The `#` in the `name` group is specifically for the inline comment tag.
+    tag_pattern = rf"{tag_s}-?\s*(?P<name>#|\w*)\s*(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
 
     if not comment_start_string:
         # Do not support shorthand comment syntax
@@ -340,7 +342,10 @@ def get_liquid_expression_lexer(
         )
     else:
         rules = (
-            ("LIQUID_EXPR", r"[ \t]*(?P<name>\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)"),
+            (
+                "LIQUID_EXPR",
+                r"[ \t]*(?P<name>#|\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
+            ),
             ("SKIP", r"[\r\n]+"),
             (TOKEN_ILLEGAL, r"."),
         )

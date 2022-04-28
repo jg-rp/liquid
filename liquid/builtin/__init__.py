@@ -23,6 +23,7 @@ from .tags import liquid_tag
 from .tags import include_tag
 from .tags import render_tag
 from .tags import ifchanged_tag
+from .tags import inline_comment_tag
 
 from .filters.math import abs_
 from .filters.math import at_most
@@ -113,6 +114,7 @@ def register(env: Environment) -> None:
     env.add_tag(include_tag.IncludeTag)
     env.add_tag(render_tag.RenderTag)
     env.add_tag(ifchanged_tag.IfChangedTag)
+    env.add_tag(inline_comment_tag.InlineCommentTag)
 
     env.add_filter("abs", abs_)
     env.add_filter("at_most", at_most)

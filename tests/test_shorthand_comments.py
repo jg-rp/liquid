@@ -81,20 +81,6 @@ class ShorthandCommentTestCase(TestCase):
                 template=r"Hello, {# this is a comment #} World!",
                 expect="Hello, {# this is a comment #} World!",
             ),
-            Case(
-                description="liquid expression line comments are disabled",
-                template="\n".join(
-                    (
-                        r"{% liquid ",
-                        r"if true",
-                        r"echo 'foo'",
-                        r"endif",
-                        r"# this is a comment",
-                        r"%}",
-                    )
-                ),
-                expect=Error,
-            ),
         ]
 
         self._test(test_cases)

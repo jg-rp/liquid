@@ -22,6 +22,7 @@ from . import render_tag
 from . import tablerow_tag
 from . import unless_tag
 from . import whitespace_control
+from . import inline_comment_tag
 
 from . import concat_filter
 from . import first_filter
@@ -159,4 +160,5 @@ test_cases = [
     base64_url_safe_decode_filter,
     range_objects,
     special,
+    inline_comment_tag,
 ]

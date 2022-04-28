@@ -277,6 +277,14 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_TAG, "endcapture"),
                 ],
             ),
+            Case(
+                "inline comment tag",
+                "{% # this is a comment %}",
+                [
+                    Token(1, TOKEN_TAG, "#"),
+                    Token(1, TOKEN_EXPRESSION, "this is a comment"),
+                ],
+            ),
         ]
 
         self._test(test_cases)

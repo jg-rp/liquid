@@ -164,6 +164,10 @@ class RenderTagsTestCase(RenderTestCase):
         """Test that we can render `ifchanged` tags."""
         self._test(golden.ifchanged_tag.cases)
 
+    def test_inline_comment_tag(self):
+        """Test that we can render `#` tags."""
+        self._test(golden.inline_comment_tag.cases)
+
 
 class RenderFiltersTestCase(RenderTestCase):
     def test_render_concat_filter(self):

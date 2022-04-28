@@ -4,6 +4,7 @@ Python Liquid Change Log
 Version 1.1.8 (unreleased)
 --------------------------
 
+- New inline comment tag using ``#``. See `Shopify Liquid PR #1498 <https://github.com/Shopify/liquid/pull/1498>`_
 - More robust syntax error handling when parsing Liquid expression filters.
 
 Version 1.1.7
