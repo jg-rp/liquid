@@ -1,7 +1,7 @@
 # flake8: noqa
 # pylint: disable=useless-import-alias,missing-module-docstring
 
-__version__ = "1.1.8"
+__version__ = "1.2.0"
 
 try:
     from markupsafe import escape as escape

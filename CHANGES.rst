@@ -1,7 +1,7 @@
 Python Liquid Change Log
 ========================
 
-Version 1.1.8 (unreleased)
+Version 1.2.0 (unreleased)
 --------------------------
 
 - New inline comment tag using ``#``. See `Shopify Liquid PR #1498 <https://github.com/Shopify/liquid/pull/1498>`_
@@ -12,7 +12,7 @@ Version 1.1.7
 
 - Fixed a bug where double pipe characters (``||``) in a filtered expression would cause
   an ``IndexError``. A ``LiquidSyntaxError`` is now raised in such cases, including the
-  line number of the offending expression.
+  line number of the offending error.
 - Changed ``Environment.fromString`` to catch unexpected parsing errors. A Liquid
   ``Error`` will now be raised with a message of "unexpected liquid parsing error"
   and its ``__cause__`` set to the offending exception.
