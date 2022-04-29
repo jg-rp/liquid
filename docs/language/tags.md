@@ -13,6 +13,50 @@ This page documents the standard tags built-in to Liquid. See [custom tags](../g
 for examples of how to write your own and the [liquid-extra](https://github.com/jg-rp/liquid-extra)
 project for some non-standard tags.
 
+## `#` (inline comment)
+
+`{% # ... %}`
+
+**_New in Python Liquid version 1.2.0_**  
+**_New in Ruby Liquid version 5.4.0_**
+
+Comment out one or more lines with a single inline tag.
+
+```liquid
+{% # This is a comment %}
+{%-
+  # Comments can span multiple lines,
+  # but every line must start with a hash.
+-%}
+```
+
+```plain title="output"
+
+```
+
+Inside [liquid](#liquid) tags, any line starting with a hash will be considered a comment.
+
+```liquid
+{% liquid
+  # This is a comment
+  echo "Hello"
+%}
+```
+
+```plain title="output"
+Hello
+```
+
+You can't comment out other Liquid tags using an inline comment.
+
+```liquid
+{%- # {% echo 'Hello, World!' %} -%}
+```
+
+```plain title="output"
+ -%}
+```
+
 ## assign
 
 `{% assign <identifier> = <primitive,identifier> [| <filter> [| <filter> ... ]] %}`
@@ -136,7 +180,7 @@ Ruby Liquid's documentation says `cycle` must be used within a `for` loop. Runni
 :::
 
 :::caution
-While Python Liquid will accept `cycle` arguments of any type, including identifiers to be resolved, this behavior is considered "unintended" or "undefined" in Ruby Liquid (see [issue #1519](https://github.com/Shopify/liquid/issues/1519)). If you need interoperability between Python Liquid and Ruby Liquid, only use strings or number as arguments to `cycle`.
+While Python Liquid will accept `cycle` arguments of any type, including identifiers to be resolved, this behavior is considered "unintended" or "undefined" in Ruby Liquid (see [issue #1519](https://github.com/Shopify/liquid/issues/1519)). If you need interoperability between Python Liquid and Ruby Liquid, only use strings or numbers as arguments to `cycle`.
 :::
 
 ```liquid

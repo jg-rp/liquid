@@ -1,9 +1,14 @@
 (function (Prism) {
   Prism.languages.liquid = {
-    comment: {
-      pattern: /(^\{%\s*comment\s*%\})[\s\S]+(?=\{%\s*endcomment\s*%\}$)/,
-      lookbehind: true,
-    },
+    comment: [
+      {
+        pattern: /(^\{%\s*comment\s*%\})[\s\S]+(?=\{%\s*endcomment\s*%\}$)/,
+        lookbehind: true,
+      },
+      {
+        pattern: /(^\{%-?\s*#([\s\S]*?)-?%\}$)/,
+      },
+    ],
     delimiter: {
       pattern: /^\{[{%][+-]?|[+-]?[}%]\}$/,
       alias: "punctuation",
@@ -52,7 +57,7 @@
       "liquid",
       liquidPattern,
       function (match) {
-        var tagMatch = /^\{%-?\s*(\w+)/.exec(match);
+        var tagMatch = /^\{%-?\s*(#|\w+)/.exec(match);
         if (tagMatch) {
           var tag = tagMatch[1];
           if (tag === "raw" && !insideRaw) {

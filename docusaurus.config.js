@@ -94,7 +94,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-        additionalLanguages: ["django"],
+        additionalLanguages: [],
       },
       algolia: {
         appId: "SY0LPESLUP",
