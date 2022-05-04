@@ -2,7 +2,6 @@
 # pylint: disable=missing-class-docstring
 
 from dataclasses import dataclass
-from inspect import isclass
 from unittest import TestCase
 
 from typing import List
@@ -12,8 +11,6 @@ from typing import Union
 from liquid import Environment
 from liquid import Template
 from liquid import Mode
-
-from liquid.exceptions import Error
 
 
 @dataclass
