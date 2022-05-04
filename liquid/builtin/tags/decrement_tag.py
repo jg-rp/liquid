@@ -2,6 +2,7 @@
 
 import sys
 
+from typing import List
 from typing import TextIO
 from typing import Optional
 
@@ -37,6 +38,14 @@ class DecrementNode(ast.Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.decrement(self.identifier)))
         return True
+
+    def children(self) -> List[ast.ChildNode]:
+        return [
+            ast.ChildNode(
+                linenum=self.tok.linenum,
+                template_scope=[self.identifier],
+            )
+        ]
 
 
 class DecrementTag(Tag):

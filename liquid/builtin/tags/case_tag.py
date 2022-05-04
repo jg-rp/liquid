@@ -105,6 +105,25 @@ class CaseNode(ast.Node):
 
         return rendered
 
+    def children(self) -> List[ast.ChildNode]:
+        _children = [
+            ast.ChildNode(
+                linenum=alt.tok.linenum,
+                node=alt.block,
+                expression=alt.condition,
+            )
+            for alt in self.whens
+        ]
+        if self.default:
+            _children.append(
+                ast.ChildNode(
+                    linenum=self.default.tok.linenum,
+                    node=self.default,
+                    expression=None,
+                )
+            )
+        return _children
+
 
 class CaseTag(Tag):
     """The built-in cycle tag."""

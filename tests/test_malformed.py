@@ -305,7 +305,7 @@ class MalformedTemplateTestCase(TestCase):
                 ),
                 expect_exception=LiquidSyntaxError,
                 expect_render="hello\n",
-                expect_msg="unexpected tag 'aiu34bseu', on line 3",
+                expect_msg="unexpected tag 'aiu34bseu', on line 4",
             ),
             Case(
                 description="bad token in loop expression",

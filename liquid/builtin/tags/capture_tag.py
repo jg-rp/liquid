@@ -5,6 +5,7 @@ import sys
 
 from io import StringIO
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -73,6 +74,15 @@ class CaptureNode(ast.Node):
         await self.block.render_async(context, buf)
         self._assign(context, buf)
         return False
+
+    def children(self) -> List[ast.ChildNode]:
+        return [
+            ast.ChildNode(
+                linenum=self.tok.linenum,
+                node=self.block,
+                template_scope=[self.name],
+            )
+        ]
 
 
 class CaptureTag(Tag):

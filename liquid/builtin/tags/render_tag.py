@@ -1,12 +1,13 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 import sys
 
+from typing import List
 from typing import Optional
 from typing import Dict
-from typing import Any
 from typing import TextIO
 from typing import Tuple
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.builtin.drops import IterableDrop
@@ -18,7 +19,7 @@ from liquid.context import ReadOnlyChainMap
 
 from liquid.exceptions import LiquidSyntaxError
 
-from liquid.expression import Expression
+from liquid.expression import Expression, Literal
 from liquid.expression import Identifier
 
 from liquid.parse import expect
@@ -60,7 +61,7 @@ class RenderNode(Node):
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[str] = None,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Dict[str, Expression]] = None,
     ):
         self.tok = tok
         self.name = name
@@ -202,6 +203,33 @@ class RenderNode(Node):
             )
 
         return True
+
+    def children(self) -> List[ChildNode]:
+        block_scope: List[str] = list(self.args.keys())
+        _children = [
+            ChildNode(
+                linenum=self.tok.linenum,
+                node=None,
+                expression=self.name,
+                block_scope=block_scope,
+                load_mode="render",
+                load_context={"tag": "render"},
+            )
+        ]
+        if self.var:
+            if self.alias:
+                block_scope.append(self.alias)
+            elif isinstance(self.name, Literal):
+                block_scope.append(str(self.name.value).split(".", 1)[0])
+            _children.append(
+                ChildNode(
+                    linenum=self.tok.linenum,
+                    expression=self.var,
+                )
+            )
+        for expr in self.args.values():
+            _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
+        return _children
 
 
 BIND_TAGS = frozenset((TOKEN_WITH, TOKEN_FOR))

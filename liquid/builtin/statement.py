@@ -1,5 +1,6 @@
 """Parse tree node and pseudo "tag" for output statements."""
 from typing import Any
+from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -14,7 +15,9 @@ except ImportError:
     # pylint: disable=invalid-name
     soft_str = str  # type: ignore
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.context import Context
 from liquid.expression import Expression
 from liquid.parse import expect
@@ -79,6 +82,9 @@ class StatementNode(Node):
         val = await self.expression.evaluate_async(context)
         buffer.write(self._to_liquid_string(val, context.autoescape))
         return None
+
+    def children(self) -> List[ChildNode]:
+        return [ChildNode(linenum=self.tok.linenum, expression=self.expression)]
 
 
 class Statement(Tag):

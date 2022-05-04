@@ -156,7 +156,7 @@ class LiquidLexerTestCase(TestCase):
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
-                    Token(1, TOKEN_EXPRESSION, "product"),
+                    Token(2, TOKEN_EXPRESSION, "product"),
                     Token(2, TOKEN_LITERAL, "some"),
                     Token(2, TOKEN_TAG, "else"),
                     Token(3, TOKEN_LITERAL, "other"),
@@ -184,7 +184,7 @@ class LiquidLexerTestCase(TestCase):
                 [
                     Token(1, TOKEN_LITERAL, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
-                    Token(1, TOKEN_EXPRESSION, "product"),
+                    Token(2, TOKEN_EXPRESSION, "product"),
                     Token(2, TOKEN_LITERAL, "some"),
                     Token(2, TOKEN_TAG, "else"),
                     Token(3, TOKEN_LITERAL, "other"),

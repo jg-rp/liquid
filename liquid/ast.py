@@ -4,9 +4,13 @@ from abc import ABC
 from abc import abstractmethod
 
 from typing import Collection
+from typing import Dict
 from typing import List
+from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
+
+from typing_extensions import Literal
 
 from liquid.context import Context
 from liquid.expression import Expression
@@ -72,6 +76,49 @@ class Node(ABC):
     ) -> Optional[bool]:
         """An async version of :meth:`liquid.ast.Node.render_to_output`."""
         return self.render_to_output(context, buffer)
+
+    def children(self) -> List["ChildNode"]:
+        """Return a list of child nodes and/or expressions associated with this node."""
+        raise NotImplementedError(f"{self.__class__.__name__}.children")
+
+
+class ChildNode(NamedTuple):
+    """An AST node and expression pair with optional scope and load data.
+
+    :param linenum: The line number of the child's first token in the template source
+        text.
+    :type linenum: int
+    :param expression: An :class:`liquid.expression.Expression`. If not ``None``, this
+        expression is expected to be related to the given :class:`liquid.ast.Node`.
+    :type expression: Optional[liquid.expression.Expression]
+    :param node: A :class:`liquid.ast.Node`. Typically a ``BlockNode`` or
+        ``ConditionalBlockNode``.
+    :type node: Optional[liquid.ast.Node]
+    :param template_scope: A list of names the parent node adds to the template "local"
+        scope. For example, the built-in ``assign``, ``capture``, ``increment`` and
+        ``decrement`` tags all add names to the template scope. This helps us identify,
+        through static analysis, names that are assumed to be "global".
+    :type template_scope: Optional[List[str]]
+    :param block_scope: A list of names available to the given child node. For example,
+        the ``for`` tag adds the name "forloop" for the duration of its block.
+    :type block_scope: Optional[List[str]]
+    :param load_mode: If not ``None``, indicates that the given expression should be
+        used to load a partial template. In "render" mode, the partial will be analyzed
+        in an isolated namespace, without access to the parent's template local scope.
+        In "include" mode, the partial will have access to the parents template local
+        scope and the parent's scope can be updated by the partial template too.
+    :type load_mode: Optional[Literal["render", "include"]]
+    :param load_context: Meta data a template ``Loader`` might need to find the source
+        of a partial template.
+    """
+
+    linenum: int
+    expression: Optional[Expression] = None
+    node: Optional[Node] = None
+    template_scope: Optional[List[str]] = None
+    block_scope: Optional[List[str]] = None
+    load_mode: Optional[Literal["render", "include"]] = None
+    load_context: Optional[Dict[str, str]] = None
 
 
 class ParseTree(Node):
@@ -151,6 +198,15 @@ class BlockNode(Node):
                 context.error(err)
         return True
 
+    def children(self) -> List["ChildNode"]:
+        return [
+            ChildNode(
+                linenum=self.tok.linenum,
+                node=stmt,
+            )
+            for stmt in self.statements
+        ]
+
 
 class ConditionalBlockNode(Node):
     """A parse tree node representing a sequence of statements and a conditional
@@ -180,3 +236,12 @@ class ConditionalBlockNode(Node):
             await self.block.render_async(context, buffer)
             return True
         return False
+
+    def children(self) -> List["ChildNode"]:
+        return [
+            ChildNode(
+                linenum=self.tok.linenum,
+                node=self.block,
+                expression=self.condition,
+            )
+        ]

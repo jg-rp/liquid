@@ -2,10 +2,13 @@
 
 import sys
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.context import Context
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -37,6 +40,9 @@ class IncrementNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(str(context.increment(self.identifier)))
         return True
+
+    def children(self) -> List[ChildNode]:
+        return [ChildNode(linenum=self.tok.linenum, template_scope=[self.identifier])]
 
 
 class IncrementTag(Tag):

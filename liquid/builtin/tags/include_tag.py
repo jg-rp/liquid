@@ -1,17 +1,19 @@
 """Parse tree node and tag definition for the built in "include" tag."""
 import sys
 
+from typing import List
 from typing import Optional
 from typing import Dict
-from typing import Any
 from typing import TextIO
 from typing import Tuple
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.builtin.drops import IterableDrop
 from liquid.context import Context
 
-from liquid.expression import Expression
+from liquid.expression import Expression, Literal
 from liquid.expression import Identifier
 
 from liquid.exceptions import LiquidSyntaxError
@@ -53,7 +55,7 @@ class IncludeNode(Node):
         name: Expression,
         var: Optional[Identifier] = None,
         alias: Optional[str] = None,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Dict[str, Expression]] = None,
     ):
         self.tok = tok
         self.name = name
@@ -88,8 +90,8 @@ class IncludeNode(Node):
         namespace: Dict[str, object] = {}
 
         # Add any keyword arguments to the new template context.
-        for key, val in self.args.items():
-            namespace[key] = val.evaluate(context)
+        for _key, _val in self.args.items():
+            namespace[_key] = _val.evaluate(context)
 
         with context.extend(namespace):
             # Bind a variable to the included template.
@@ -131,8 +133,8 @@ class IncludeNode(Node):
         )
         namespace: Dict[str, object] = {}
 
-        for key, val in self.args.items():
-            namespace[key] = await val.evaluate_async(context)
+        for _key, _val in self.args.items():
+            namespace[_key] = await _val.evaluate_async(context)
 
         with context.extend(namespace):
             if self.var is not None:
@@ -154,6 +156,33 @@ class IncludeNode(Node):
                 await template.render_with_context_async(context, buffer, partial=True)
 
         return True
+
+    def children(self) -> List[ChildNode]:
+        block_scope: List[str] = list(self.args.keys())
+        _children = [
+            ChildNode(
+                linenum=self.tok.linenum,
+                node=None,
+                expression=self.name,
+                block_scope=block_scope,
+                load_mode="include",
+                load_context={"tag": "include"},
+            )
+        ]
+        if self.var:
+            if self.alias:
+                block_scope.append(self.alias)
+            elif isinstance(self.name, Literal):
+                block_scope.append(str(self.name.value).split(".", 1)[0])
+            _children.append(
+                ChildNode(
+                    linenum=self.tok.linenum,
+                    expression=self.var,
+                )
+            )
+        for expr in self.args.values():
+            _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
+        return _children
 
 
 BIND_TOKENS = frozenset((TOKEN_WITH, TOKEN_FOR))
@@ -201,7 +230,7 @@ class IncludeTag(Tag):
                 next(expr_stream)
 
         # Zero or more keyword arguments
-        args = {}
+        args: Dict[str, Expression] = {}
 
         # The first keyword argument might follow immediately or after a comma.
         if expr_stream.current[1] == TOKEN_IDENTIFIER:

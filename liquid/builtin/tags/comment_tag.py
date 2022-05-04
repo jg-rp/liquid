@@ -2,6 +2,7 @@
 
 import sys
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -40,6 +41,9 @@ class CommentNode(ast.Node):
         buffer: TextIO,
     ) -> Optional[bool]:
         return False
+
+    def children(self) -> List[ast.ChildNode]:
+        return []
 
 
 class CommentTag(Tag):

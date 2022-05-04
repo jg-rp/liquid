@@ -1,9 +1,12 @@
 """Pseudo tag and node definition for template literals."""
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.context import Context
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -30,6 +33,9 @@ class LiteralNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write(self.tok.value)
         return None
+
+    def children(self) -> List[ChildNode]:
+        return []
 
 
 class Literal(Tag):

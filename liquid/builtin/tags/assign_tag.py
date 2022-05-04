@@ -2,6 +2,7 @@
 import re
 import sys
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -9,7 +10,9 @@ from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
@@ -45,6 +48,15 @@ class AssignNode(Node):
     ) -> Optional[bool]:
         await self.expression.evaluate_async(context)
         return False
+
+    def children(self) -> List[ChildNode]:
+        return [
+            ChildNode(
+                linenum=self.tok.linenum,
+                expression=self.expression,
+                template_scope=[self.expression.name],
+            )
+        ]
 
 
 class AssignTag(Tag):

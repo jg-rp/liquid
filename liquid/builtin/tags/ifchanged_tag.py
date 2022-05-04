@@ -4,6 +4,7 @@ import sys
 
 from io import StringIO
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
@@ -11,6 +12,7 @@ from typing import TYPE_CHECKING
 from liquid.token import Token
 from liquid.token import TOKEN_TAG
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import BlockNode
 
@@ -71,6 +73,9 @@ class IfChangedNode(Node):
             buffer.write(val)
             return True
         return False
+
+    def children(self) -> List[ChildNode]:
+        return self.block.children()
 
 
 class IfChangedTag(Tag):

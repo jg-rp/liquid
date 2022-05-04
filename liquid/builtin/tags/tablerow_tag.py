@@ -3,6 +3,7 @@ import sys
 
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
@@ -12,6 +13,7 @@ from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import BlockNode
 
@@ -235,6 +237,16 @@ class TablerowNode(Node):
 
             buffer.write("</tr>\n")
         return True
+
+    def children(self) -> List[ChildNode]:
+        return [
+            ChildNode(
+                linenum=self.block.tok.linenum,
+                node=self.block,
+                expression=self.expression,
+                block_scope=["tablerowloop", self.expression.name],
+            )
+        ]
 
 
 class TablerowTag(Tag):

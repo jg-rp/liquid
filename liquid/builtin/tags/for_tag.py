@@ -4,12 +4,14 @@ import sys
 
 from io import StringIO
 
+from typing import List
 from typing import Optional
 from typing import Any
 from typing import Mapping
 from typing import TextIO
 from typing import Iterator
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import BlockNode
 
@@ -257,6 +259,24 @@ class ForNode(Node):
             buffer.write(val)
 
         return rendered
+
+    def children(self) -> List[ChildNode]:
+        _children = [
+            ChildNode(
+                linenum=self.block.tok.linenum,
+                node=self.block,
+                expression=self.expression,
+                block_scope=[self.expression.name, "forloop"],
+            )
+        ]
+        if self.default:
+            _children.append(
+                ChildNode(
+                    linenum=self.default.tok.linenum,
+                    node=self.default,
+                )
+            )
+        return _children
 
 
 class BreakNode(Node):

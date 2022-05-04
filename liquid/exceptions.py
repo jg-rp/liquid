@@ -82,7 +82,7 @@ class FilterError(Error):
 
 
 class FilterArgumentError(Error):
-    """Exception raised when a filters arguments are invalid."""
+    """Exception raised when a filter's arguments are invalid."""
 
 
 class FilterValueError(Error):
@@ -90,7 +90,7 @@ class FilterValueError(Error):
 
 
 class TemplateNotFound(Error):
-    """Excpetions raised when a template could not be found."""
+    """Excpetion raised when a template could not be found."""
 
     def __str__(self) -> str:
         msg = super().__str__()
@@ -115,6 +115,10 @@ class BreakLoop(LiquidInterrupt):
 
 class ContinueLoop(LiquidInterrupt):
     """Exception raised when a ContinueNode is rendered."""
+
+
+class TemplateTraversalError(Error):
+    """Exception raised when an AST node or expression can not be visited."""
 
 
 class LiquidWarning(UserWarning):

@@ -267,11 +267,8 @@ class FileSystemLoader(BaseLoader):
         self, env: Environment, template_name: str
     ) -> TemplateSource:
         loop = asyncio.get_running_loop()
-
         source_path = await loop.run_in_executor(None, self.resolve_path, template_name)
-
         source, mtime = await loop.run_in_executor(None, self._read, source_path)
-
         return TemplateSource(
             source, str(source_path), partial(self._uptodate, source_path, mtime)
         )

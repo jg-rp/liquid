@@ -4,8 +4,23 @@ Python Liquid Change Log
 Version 1.2.0 (unreleased)
 --------------------------
 
-- New inline comment tag using ``#``. See `Shopify Liquid PR #1498 <https://github.com/Shopify/liquid/pull/1498>`_
-- More robust syntax error handling when parsing Liquid expression filters.
+**Features**
+
+- New inline comment tag ``{% # .. }``. See `Shopify Liquid PR #1498 <https://github.com/Shopify/liquid/pull/1498>`_
+- Template static analysis. ``BoundTemplate.analyze()`` and ``BoundTemplate.analyze_async()``
+  traverse a template's abstract syntax tree an report template variable usage. Static 
+  tree traversal (without rendering or evaluating expressions) is supported by the new,
+  optional ``children()`` methods of ``liquid.expression.Expression`` and ``liquid.ast.Node``.
+
+**Fixes**
+
+- Fixed a bug where the lexer would incorrectly calculate an expression's line number
+  if there were one or more newlines between a tag name and it's expression. Most 
+  notable with ``liquid`` tags where it is common to put a newline immediately after
+  "liquid".
+- More robust syntax error handling when parsing Liquid expression filters. The 
+  refactored expression lexers from version 1.1.3 failed to account for some classes of
+  syntax error.
 
 Version 1.1.7
 -------------

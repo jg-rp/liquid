@@ -1,14 +1,15 @@
 """Tag and node definition for the built-in "cycle" tag."""
 import sys
 
-from typing import Any
 from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import TextIO
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
+
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
@@ -37,7 +38,7 @@ class CycleNode(Node):
 
     __slots__ = ("tok", "group", "args", "key")
 
-    def __init__(self, tok: Token, group: Optional[Expression], args: List[Any]):
+    def __init__(self, tok: Token, group: Optional[Expression], args: List[Expression]):
         self.tok = tok
         self.group = group
         self.args = args
@@ -72,6 +73,20 @@ class CycleNode(Node):
         args = [await arg.evaluate_async(context) for arg in self.args]
         buffer.write(str(next(context.cycle(group_name, args))))
         return True
+
+    def children(self) -> List[ChildNode]:
+        _children: List[ChildNode] = []
+        if self.group:
+            _children.append(
+                ChildNode(
+                    linenum=self.tok.linenum,
+                    node=None,
+                    expression=self.group,
+                )
+            )
+        for arg in self.args:
+            _children.append(ChildNode(linenum=self.tok.linenum, expression=arg))
+        return _children
 
 
 def split_at_first_colon(tokens: Iterable[ExprToken]) -> Iterator[List[ExprToken]]:

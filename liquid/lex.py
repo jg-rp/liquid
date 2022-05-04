@@ -253,7 +253,9 @@ def compile_liquid_rules(
     # with no name) does not get treated as a literal.
     #
     # The `#` in the `name` group is specifically for the inline comment tag.
-    tag_pattern = rf"{tag_s}-?\s*(?P<name>#|\w*)\s*(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
+    tag_pattern = (
+        rf"{tag_s}-?(?P<pre>\s*(?P<name>#|\w*)\s*)(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
+    )
 
     if not comment_start_string:
         # Do not support shorthand comment syntax
@@ -465,6 +467,8 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
             kind = TOKEN_EXPRESSION
             value = match.group("expr")
+            # Need to count newlines before and after the tag name.
+            line_num += match.group("pre").count("\n")
             lstrip = bool(match.group("rst"))
 
             if not value:

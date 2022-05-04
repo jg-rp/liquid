@@ -19,6 +19,8 @@ mypy = "*"
 mock = "*"
 pytest = "*"
 types-python-dateutil = "*"
+typing-extensions = "*"
+ipython = "*"
 
 [packages]
 python-dateutil = "*"

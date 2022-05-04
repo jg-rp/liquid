@@ -2,10 +2,12 @@
 
 import sys
 
+from typing import List
 from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import BlockNode
 
@@ -52,6 +54,9 @@ class LiquidNode(Node):
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
         return await self.block.render_async(context, buffer)
+
+    def children(self) -> List[ChildNode]:
+        return self.block.children()
 
 
 class LiquidTag(Tag):

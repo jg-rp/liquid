@@ -1,27 +1,41 @@
 """Liquid template definition."""
-
 from __future__ import annotations
 
+import re
+
 from collections import abc
+from collections import defaultdict
+
 from io import StringIO
 from pathlib import Path
 
 from typing import Awaitable
+from typing import DefaultDict
 from typing import Dict
+from typing import List
 from typing import Any
 from typing import Iterator
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
+from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
+
+from liquid.ast import ChildNode
+from liquid.ast import Node
 
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 
-from liquid.exceptions import LiquidInterrupt
+from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
+from liquid.exceptions import TemplateNotFound
+
+from liquid.expression import Expression, StringLiteral
+from liquid.expression import Identifier
+from liquid.expression import Literal
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -228,6 +242,58 @@ class BoundTemplate:
             f"path='{self.path}', uptodate={self.is_up_to_date})"
         )  # pragma: no cover
 
+    def analyze(
+        self, follow_partials: bool = True, raise_for_failures: bool = True
+    ) -> TemplateAnalysis:
+        """Statically analyze this template and any included/rendered templates.
+
+        Currently we only analyze references to template variables.
+
+        :param follow_partials: If ``True``, we will try to load partial templates and
+            analyze those templates too. Default's to ``True``.
+        :type follow_partials: bool
+        :param raise_for_failures: If ``True``, will raise an exception if an
+            ``ast.Node`` or ``expression.Expression`` does not define a ``children()``
+            method, or if a partial template can not be loaded. When ``False``, no
+            expection is raised and a mapping of failed nodes and expressions is
+            available as the ``failed_visits`` property. A mapping of unloadable partial
+            templates is stored in the ``unloadable_partials`` property.
+        :type raised_for_failed_visits: bool
+        :returns: A object containing analysis results.
+        :rtype: :class:`liquid.template.TemplateAnalysis`
+        """
+        refs = _TemplateVariableCounter(
+            self,
+            follow_partials=follow_partials,
+            raise_for_failures=raise_for_failures,
+        ).analyze()
+
+        return TemplateAnalysis(
+            variables=dict(refs.variables),
+            local_variables=dict(refs.template_locals),
+            global_variables=dict(refs.template_globals),
+            failed_visits=dict(refs.failed_visits),
+            unloadable_partials=dict(refs.unloadable_partials),
+        )
+
+    async def analyze_async(
+        self, follow_partials: bool = True, raise_for_failures: bool = True
+    ) -> TemplateAnalysis:
+        """An async version of :meth:`analyse`."""
+        refs = await _TemplateVariableCounter(
+            self,
+            follow_partials=follow_partials,
+            raise_for_failures=raise_for_failures,
+        ).analyze_async()
+
+        return TemplateAnalysis(
+            variables=dict(refs.variables),
+            local_variables=dict(refs.template_locals),
+            global_variables=dict(refs.template_globals),
+            failed_visits=dict(refs.failed_visits),
+            unloadable_partials=dict(refs.unloadable_partials),
+        )
+
 
 class AwareBoundTemplate(BoundTemplate):
     """A `BoundTemplate` subclass that automatically includes a `TemplateDrop` in the
@@ -290,3 +356,420 @@ class TemplateDrop(Mapping[str, Optional[str]]):
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._items)
+
+
+RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
+
+Refs = Dict[str, List[Tuple[str, int]]]
+ReferenceMap = DefaultDict[str, List[Tuple[str, int]]]
+
+
+# pylint: disable=too-few-public-methods
+class TemplateAnalysis:
+    """The result of analyzing a template's variables using
+    :meth:`BoundTemplate.analyze`.
+
+    Each of the following properties is a dictionary mapping variable names to a list of
+    two-tuples. Each tuple holds the location of a reference to the name as (<template
+    name>, <line number>). If a name is referenced multiple times, it will appear
+    multiple times in the list. If a name is referenced before it is "assigned", it will
+    appear in ``template_locals`` and ``template_globals``.
+
+    :ivar variables: All referenced variables, whether they are in scope or not.
+        Including references to names such as ``forloop`` from the ``for`` tag.
+    :ivar local_variables: Template variables that are added to the template local
+        scope, whether they are subsequently used or not.
+    :ivar global_variables: Template variables that, on the given line number and
+        "file", are out of scope or are assumed to be "global". That is, expected to be
+        included by the application developer rather than a template author.
+    :ivar failed_visits: Names of AST ``Node`` and ``Expression`` objects that could not
+        be visited, probably because they do not implement a ``children`` method.
+    :ivar unloadable_partials: Names or identifiers of partial templates that could not
+        be loaded. This will be empty if ``follow_partials`` is ``False``.
+    """
+
+    __slots__ = (
+        "variables",
+        "local_variables",
+        "global_variables",
+        "failed_visits",
+        "unloadable_partials",
+    )
+
+    def __init__(
+        self,
+        *,
+        variables: Refs,
+        local_variables: Refs,
+        global_variables: Refs,
+        failed_visits: Refs,
+        unloadable_partials: Refs,
+    ) -> None:
+        self.variables = variables
+        self.local_variables = local_variables
+        self.global_variables = global_variables
+        self.failed_visits = failed_visits
+        self.unloadable_partials = unloadable_partials
+
+
+# pylint: disable=too-many-instance-attributes
+class _TemplateVariableCounter:
+    """Count references to variable names in a Liquid template.
+
+    :param template: The Liquid template to analyze.
+    :type template: liquid.BoundTemplate
+    :param follow_partials: If ``True``, the reference counter will try to load partial
+        templates and count variable references in those partials too. Default's to
+        ``True``.
+    :type follow_partials: bool
+    :param raise_for_failures: If ``True``, will raise an exception if an ``ast.Node``
+        or ``expression.Expression`` does not define a ``children()`` method, or if a
+        partial template can not be loaded.
+
+        When ``False``, no expection is raised and a mapping of failed nodes/expressions
+        is available as the ``failed_visits`` property. A mapping of unloadable partial
+        templates are stored in the ``unloadable_partials`` property.
+    :type: raised_for_failed_visits: bool
+    """
+
+    def __init__(
+        self,
+        template: BoundTemplate,
+        *,
+        follow_partials: bool = True,
+        raise_for_failures: bool = True,
+        scope: Optional[ReadOnlyChainMap] = None,
+        template_locals: Optional[ReferenceMap] = None,
+        partials: Optional[List[Tuple[str, Optional[Dict[str, str]]]]] = None,
+    ) -> None:
+        self.template = template
+        self._template_name = self.template.name or "<string>"
+
+        self.follow_partials = follow_partials
+        self.raise_for_failures = raise_for_failures
+
+        # Names that are added to the template "local" scope.
+        self.template_locals: ReferenceMap = (
+            template_locals if template_locals is not None else defaultdict(list)
+        )
+        # Names that are referenced but are not in the template local scope
+        self.template_globals: ReferenceMap = defaultdict(list)
+        # Names that are referenced by a Liquid expression.
+        self.variables: ReferenceMap = defaultdict(list)
+
+        # Nodes and Expressions that don't implement a `children()` method.
+        self.failed_visits: ReferenceMap = defaultdict(list)
+
+        # Tags that load templates with an expression that can not be analyzed
+        # statically.
+        self.unloadable_partials: ReferenceMap = defaultdict(list)
+
+        # Block scoped names.
+        self._scope = scope if scope is not None else ReadOnlyChainMap()
+
+        # Partial templates (include, render, etc.)
+        self._partials = partials if partials is not None else []
+
+        # get_template_with_context requires a `Context`.
+        self._empty_context = Context(self.template.env)
+
+    def analyze(self) -> _TemplateVariableCounter:
+        """Traverse the template's syntax tree and count variables as we go.
+
+        It is not safe to call this method multuple times.
+        """
+        for node in self.template.tree.statements:
+            self._analyze(node)
+
+        self._raise_for_failures()
+        return self
+
+    async def analyze_async(self) -> _TemplateVariableCounter:
+        """An async version of :meth:`_TemplateVariableCounter.analyze`"""
+        for node in self.template.tree.statements:
+            await self._analyze_async(node)
+
+        self._raise_for_failures()
+        return self
+
+    def _analyze(self, root: Node) -> None:
+        try:
+            children = root.children()
+        except NotImplementedError:
+            name = root.__class__.__name__
+            self.failed_visits[name].append((self._template_name, root.token().linenum))
+            return
+
+        for child in children:
+            self._analyze_child(child)
+
+            if child.block_scope:
+                self._scope.push({n: None for n in child.block_scope})
+
+            if self.follow_partials:
+                if child.load_mode == "include":
+                    self._analyze_include(child)
+                elif child.load_mode == "render":
+                    self._analyze_render(child)
+                elif child.load_mode is not None:
+                    raise TemplateTraversalError(
+                        f"unknown load mode '{child.load_mode}'"
+                    )
+
+            # Recurse
+            if child.node:
+                self._analyze(child.node)
+
+            if child.block_scope:
+                self._scope.pop()
+
+    async def _analyze_async(self, root: Node) -> None:
+        try:
+            children = root.children()
+        except NotImplementedError:
+            name = root.__class__.__name__
+            self.failed_visits[name].append((self._template_name, root.token().linenum))
+            return
+
+        for child in children:
+            self._analyze_child(child)
+
+            if child.block_scope:
+                self._scope.push({n: None for n in child.block_scope})
+
+            if self.follow_partials:
+                if child.load_mode == "include":
+                    await self._analyze_include_async(child)
+                elif child.load_mode == "render":
+                    await self._analyze_render_async(child)
+                elif child.load_mode is not None:
+                    raise TemplateTraversalError(
+                        f"unknown load mode '{child.load_mode}'"
+                    )
+
+            # Recurse
+            if child.node:
+                await self._analyze_async(child.node)
+
+            if child.block_scope:
+                self._scope.pop()
+
+    def _analyze_child(self, child: ChildNode) -> None:
+        if child.expression:
+            try:
+                refs = self._analyze_expression(child.expression)
+            except NotImplementedError:
+                name = child.expression.__class__.__name__
+                self.failed_visits[name].append((self._template_name, child.linenum))
+                return
+
+            for ref in refs:
+                self.variables[ref].append((self._template_name, child.linenum))
+
+            # Check refs that are not in scope or in the local namespace before
+            # pushing the next block scope. This should highlight names that are
+            # expected to be "global".
+            for ref in refs:
+                _ref = RE_SPLIT_IDENT.split(ref, 1)[0]
+                if _ref not in self._scope and _ref not in self.template_locals:
+                    self.template_globals[ref].append(
+                        (self._template_name, child.linenum)
+                    )
+
+        if child.template_scope:
+            for name in child.template_scope:
+                self.template_locals[name].append((self._template_name, child.linenum))
+
+    def _analyze_expression(self, expression: Expression) -> List[str]:
+        """Return a list of references used in the given expression."""
+        refs: List[str] = []
+
+        if isinstance(expression, Identifier):
+            refs.append(str(expression))
+
+        for expr in expression.children():
+            refs.extend(self._analyze_expression(expr))
+
+        return refs
+
+    def _analyze_include(self, child: ChildNode) -> None:
+        name, load_context = self._include_context(child)
+        if name is None or load_context is None:
+            return
+
+        try:
+            template = self._empty_context.get_template_with_context(
+                name, **load_context
+            )
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((self._template_name, child.linenum))
+            return
+
+        # Partial templates rendered in "include" mode share the same template local
+        # namespace as their parent template. Note that block scoped variables have
+        # already been pushed and will be popped by the caller.
+        refs = _TemplateVariableCounter(
+            template,
+            follow_partials=self.follow_partials,
+            scope=self._scope,
+            template_locals=self.template_locals,
+            partials=self._partials,
+        ).analyze()
+
+        self._update_reference_counters(refs)
+
+    async def _analyze_include_async(self, child: ChildNode) -> None:
+        name, load_context = self._include_context(child)
+        if name is None or load_context is None:
+            return
+
+        try:
+            template = await self._empty_context.get_template_with_context_async(
+                name, **load_context
+            )
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((self._template_name, child.linenum))
+            return
+
+        refs = await _TemplateVariableCounter(
+            template,
+            follow_partials=self.follow_partials,
+            scope=self._scope,
+            template_locals=self.template_locals,
+            partials=self._partials,
+        ).analyze_async()
+
+        self._update_reference_counters(refs)
+
+    def _include_context(
+        self, child: ChildNode
+    ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
+        # Partial templates rendered in "include" mode might use a variable template
+        # name. We can't statically analyze a partial template unless it's name is a
+        # literal string (or possibly an integer, but unlikely).
+        if not isinstance(child.expression, Literal):
+            key = str(child.expression)
+            self.unloadable_partials[key].append((self._template_name, child.linenum))
+            return None, None
+
+        name = str(child.expression.value)
+        load_context = child.load_context or {}
+
+        # Keep track of partial templates that have already been analyzed. This prevents
+        # us from analysing the same template twice and protects us against recursive
+        # includes/renders.
+        if (name, load_context) in self._partials:
+            return None, None
+
+        self._partials.append((name, load_context))
+        return (name, load_context)
+
+    def _analyze_render(self, child: ChildNode) -> None:
+        name, load_context = self._render_context(child)
+        if name is None or load_context is None:
+            return
+
+        try:
+            template = self._empty_context.get_template_with_context(
+                name, **load_context
+            )
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((self._template_name, child.linenum))
+            return
+
+        # Partial templates rendered in "render" mode do not share the parent template
+        # local namespace. We do not pass the current block scope stack to "rendered"
+        # templates either.
+        scope = {n: None for n in child.block_scope} if child.block_scope else {}
+        refs = _TemplateVariableCounter(
+            template,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap(scope),
+            partials=self._partials,
+        ).analyze()
+
+        self._update_reference_counters(refs)
+
+    async def _analyze_render_async(self, child: ChildNode) -> None:
+        name, load_context = self._render_context(child)
+        if name is None or load_context is None:
+            return None
+
+        try:
+            template = await self._empty_context.get_template_with_context_async(
+                name, **load_context
+            )
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((self._template_name, child.linenum))
+            return
+
+        # Partial templates rendered in "render" mode do not share the parent template
+        # local namespace. We do not pass the current block scope stack to "rendered"
+        # templates either.
+        scope = {n: None for n in child.block_scope} if child.block_scope else {}
+        refs = await _TemplateVariableCounter(
+            template,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap(scope),
+            partials=self._partials,
+        ).analyze_async()
+
+        self._update_reference_counters(refs)
+
+    def _render_context(
+        self, child: ChildNode
+    ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
+        if not isinstance(child.expression, StringLiteral):
+            raise TemplateTraversalError(
+                "can't load from a variable expression when in 'render' mode"
+            )
+
+        name = child.expression.value
+        load_context = child.load_context or {}
+
+        # Keep track of partial templates that have already been analyzed. This prevents
+        # us from analysing the same template twice and protects us against recursive
+        # includes/renders.
+        if (name, load_context) in self._partials:
+            return None, None
+
+        self._partials.append((name, load_context))
+        return name, load_context
+
+    def _update_reference_counters(self, refs: _TemplateVariableCounter) -> None:
+        # Accumulate references from the partial/child template into its parent.
+        for _name, _refs in refs.variables.items():
+            self.variables[_name].extend(_refs)
+
+        for _name, _refs in refs.template_globals.items():
+            self.template_globals[_name].extend(_refs)
+
+        for _name, _refs in refs.failed_visits.items():
+            self.failed_visits[_name].extend(_refs)
+
+        for _name, _refs in refs.unloadable_partials.items():
+            self.unloadable_partials[_name].extend(_refs)
+
+    def _raise_for_failures(self) -> None:
+        if self.raise_for_failures and self.failed_visits:
+            msg_target = next(iter(self.failed_visits.keys()))
+            if len(self.failed_visits) > 1:
+                msg = (
+                    f"{msg_target} (+{len(self.failed_visits) -1} more) "
+                    "does not implement a 'children' method"
+                )
+            else:
+                msg = f"{msg_target} does not implement a 'children' method"
+            raise TemplateTraversalError(f"failed visit: {msg}")
+
+        if self.raise_for_failures and self.unloadable_partials:
+            msg_target = next(iter(self.unloadable_partials.keys()))
+            if len(self.unloadable_partials) > 1:
+                msg = (
+                    f"partial template '{msg_target}' "
+                    f"(+{len(self.unloadable_partials) -1} more) "
+                    "could not be loaded"
+                )
+            else:
+                msg = f"partial template '{msg_target}' could not be loaded"
+            raise TemplateTraversalError(f"failed visit: {msg}")

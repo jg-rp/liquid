@@ -10,6 +10,7 @@ from typing import TextIO
 from typing import TYPE_CHECKING
 from typing import Union
 
+from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import BlockNode
 from liquid.ast import ConditionalBlockNode
@@ -138,6 +139,34 @@ class UnlessNode(Node):
             buffer.write(val)
 
         return rendered
+
+    def children(self) -> List[ChildNode]:
+        _children = [
+            ChildNode(
+                linenum=self.consequence.tok.linenum,
+                node=self.consequence,
+                expression=self.condition,
+            )
+        ]
+        _children.extend(
+            [
+                ChildNode(
+                    linenum=alt.tok.linenum,
+                    node=alt.block,
+                    expression=alt.condition,
+                )
+                for alt in self.conditional_alternatives
+            ]
+        )
+        if self.alternative:
+            _children.append(
+                ChildNode(
+                    linenum=self.alternative.tok.linenum,
+                    node=self.alternative,
+                    expression=None,
+                )
+            )
+        return _children
 
 
 class UnlessTag(Tag):

@@ -45,6 +45,10 @@ class Expression(ABC):
         """An async version of :meth:`liquid.expression.Expression.evaluate`."""
         return self.evaluate(context)
 
+    def children(self) -> List[Expression]:
+        """Return a list of child expressions."""
+        raise NotImplementedError(f"{self.__class__.__name__}.children")
+
 
 class Nil(Expression):
     __slots__ = ()
@@ -60,6 +64,9 @@ class Nil(Expression):
 
     def evaluate(self, context: Context) -> None:
         return None
+
+    def children(self) -> List[Expression]:
+        return []
 
 
 NIL = Nil()
@@ -83,6 +90,9 @@ class Empty(Expression):
 
     def evaluate(self, context: Context) -> Empty:
         return self
+
+    def children(self) -> List[Expression]:
+        return []
 
 
 EMPTY = Empty()
@@ -109,6 +119,9 @@ class Blank(Expression):
     def evaluate(self, context: Context) -> Blank:
         return self
 
+    def children(self) -> List[Expression]:
+        return []
+
 
 BLANK = Blank()
 
@@ -129,6 +142,9 @@ class Continue(Expression):
 
     def evaluate(self, context: Context) -> int:
         return 0
+
+    def children(self) -> List[Expression]:
+        return []
 
 
 CONTINUE = Continue()
@@ -154,6 +170,9 @@ class Literal(Expression, Generic[T]):
 
     def evaluate(self, context: Context) -> object:
         return self.value
+
+    def children(self) -> List[Expression]:
+        return []
 
 
 class Boolean(Literal[bool]):
@@ -275,6 +294,9 @@ class RangeLiteral(Expression):
             await self.stop.evaluate_async(context),
         )
 
+    def children(self) -> List[Expression]:
+        return [self.start, self.stop]
+
 
 class IdentifierPathElement(Literal[Union[int, str]]):
     __slots__ = ()
@@ -327,6 +349,9 @@ class Identifier(Expression):
         path: List[Any] = [await elem.evaluate_async(context) for elem in self.path]
         return await context.get_async(path)
 
+    def children(self) -> List[Expression]:
+        return [el for el in self.path if isinstance(el, Expression)]
+
 
 class PrefixExpression(Expression):
     __slots__ = ("operator", "right")
@@ -361,6 +386,9 @@ class PrefixExpression(Expression):
 
     async def evaluate_async(self, context: Context) -> object:
         return self._evaluate(await self.right.evaluate_async(context))
+
+    def children(self) -> List[Expression]:
+        return [self.right]
 
 
 class InfixExpression(Expression):
@@ -404,6 +432,9 @@ class InfixExpression(Expression):
             self.operator,
             await self.right.evaluate_async(context),
         )
+
+    def children(self) -> List[Expression]:
+        return [self.left, self.right]
 
 
 class Filter:
@@ -495,6 +526,9 @@ class BooleanExpression(Expression):
 
     async def evaluate_async(self, context: Context) -> bool:
         return is_truthy(await self.expression.evaluate_async(context))
+
+    def children(self) -> List[Expression]:
+        return [self.expression]
 
 
 class FilteredExpression(Expression):
@@ -599,6 +633,13 @@ class FilteredExpression(Expression):
 
         return result
 
+    def children(self) -> List[Expression]:
+        _children = [self.expression]
+        for fltr in self.filters:
+            _children.extend(fltr.args)
+            _children.extend(fltr.kwargs.values())
+        return _children
+
 
 class AssignmentExpression(Expression):
     __slots__ = ("name", "expression")
@@ -632,6 +673,9 @@ class AssignmentExpression(Expression):
             val=(await self.expression.evaluate_async(context)),
         )
         return ""
+
+    def children(self) -> List[Expression]:
+        return [self.expression]
 
 
 LoopArgument = Union[IntegerLiteral, FloatLiteral, Identifier, Continue, Nil]
@@ -814,6 +858,14 @@ class LoopExpression(Expression):
             offset=offset,
             context=context,
         )
+
+    def children(self) -> List[Expression]:
+        return [
+            self.iterable,
+            self.limit,
+            self.offset,
+            self.cols,
+        ]
 
 
 Number = Union[int, float]

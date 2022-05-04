@@ -4,7 +4,10 @@ import math
 import sys
 
 from collections import abc
-from typing import Optional, TextIO
+
+from typing import List
+from typing import Optional
+from typing import TextIO
 
 from liquid.token import Token
 from liquid.token import TOKEN_EXPRESSION
@@ -92,6 +95,16 @@ class PaginateNode(ast.Node):
 
         with context.extend({"paginate": pagination}):
             self.block.render(context, buffer)
+
+    def children(self) -> List[ast.ChildNode]:
+        return [
+            ast.ChildNode(
+                linenum=self.tok.linenum,
+                expression=self.identifier,
+                node=self.block,
+                block_scope=["paginate"],
+            )
+        ]
 
 
 def link(title, page):
