@@ -63,6 +63,36 @@ a template loader. They are kept separate so subclasses can choose how to merge 
 
 ## Methods
 
+### `analyze`
+
+`analyze(follow_partials, raise_for_failures)`
+
+Statically analyze the template and any included/rendered templates.
+
+**Parameters:**
+
+- `follow_partials: bool` - If `True`, we will try to load partial templates and analyze those templates too. Default's to `True`.
+
+- `raise_for_failures: bool` - If `True`, will raise an exception if an `ast.Node` or `expression.Expression` does not define a `children()` method, or if a partial template can not be loaded. When `False`, no exception is raised and a mapping of failed nodes and expressions is available as the `failed_visits` property. A mapping of unloadable partial templates is stored in the `unloadable_partials` property.
+
+**Returns**: An object containing analysis results.  
+**Return Type**: [liquid.template.TemplateAnalysis](./template-analysis.md)
+
+### `analyze_async`
+
+`async analyze_async(follow_partials, raise_for_failures)`
+
+Statically analyze the template and any included/rendered templates.
+
+**Parameters:**
+
+- `follow_partials: bool` - If `True`, we will try to load partial templates and analyze those templates too. Default's to `True`.
+
+- `raise_for_failures: bool` - If `True`, will raise an exception if an `ast.Node` or `expression.Expression` does not define a `children()` method, or if a partial template can not be loaded. When `False`, no exception is raised and a mapping of failed nodes and expressions is available as the `failed_visits` property. A mapping of unloadable partial templates is stored in the `unloadable_partials` property.
+
+**Returns**: An object containing analysis results.  
+**Return Type**: [liquid.template.TemplateAnalysis](./template-analysis.md)
+
 ### `render`
 
 `render(*args, **kwargs) -> str`

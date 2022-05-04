@@ -40,13 +40,13 @@ Base class of all filter related errors.
 
 `class liquid.exceptions.FilterArgumentError(*args, linenum=None, filename=None)`
 
-Exception raised when a filters arguments are invalid.
+Exception raised when a filter's arguments are invalid.
 
 ## liquid.exceptions.FilterValueError
 
 `class liquid.exceptions.FilterValueError(*args, linenum=None, filename=None)`
 
-Exception raised when a filters value is invalid.
+Exception raised when a filter'ss value is invalid.
 
 ## liquid.exceptions.TemplateNotFound
 
@@ -61,6 +61,12 @@ Exception raised when a template could not be found.
 Exception raised when the maximum context depth is reached.
 
 Usually indicates recursive use of render or include tags.
+
+## liquid.exceptions.TemplateTraversalError
+
+`class liquid.exceptions.TemplateTraversalError(*args, linenum=None, filename=None)`
+
+Exception raised when an AST node or expression can not be visited..
 
 ## liquid.exceptions.UndefinedError
 

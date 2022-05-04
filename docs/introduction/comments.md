@@ -21,7 +21,7 @@ Python Liquid will raise a `LiquidSyntaxError` if it finds the string `{% endcom
 
 Similarly, with the [inline comment tag](../language/tags.md#inline-comment) added in Python Liquid version 1.2.0, one or more lines can be commented out in a single inline tag.
 
-Both the traditional comment block and the new inline comment tag suffer from problems when commenting out other liquid tags.
+Both the traditional comment block and the newer inline comment tag suffer from problems when commenting out other liquid tags.
 
 ## Alternative Comment Syntax
 
