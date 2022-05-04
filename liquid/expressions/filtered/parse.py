@@ -102,7 +102,9 @@ def split_at_first_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
     yield buf
 
 
-def split_at_comma(tokens: Iterable[Token]) -> Iterator[List[Token]]:
+def split_at_comma(
+    tokens: Iterable[Token],
+) -> Iterator[List[Token]]:  # pragma: no cover
     """Split tokens on into lists, using TOKEN_COMMA as the delimiter."""
     buf: List[Token] = []
     for token in tokens:
@@ -116,7 +118,7 @@ def split_at_comma(tokens: Iterable[Token]) -> Iterator[List[Token]]:
 
 def bucket_args(
     arguments: Iterable[Tuple[str, Expression]]
-) -> Tuple[List[Expression], Dict[str, Expression]]:
+) -> Tuple[List[Expression], Dict[str, Expression]]:  # pragma: no cover
     """Split filter arguments into positional and keyword arguments."""
     args = []
     kwargs = {}
@@ -128,7 +130,7 @@ def bucket_args(
     return args, kwargs
 
 
-def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:
+def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:  # pragma: no cover
     """Parse a Liquid filter from a list of tokens."""
     if not tokens:
         raise LiquidSyntaxError(
@@ -147,13 +149,15 @@ def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:
     return Filter(name, [])
 
 
-def parse_args(tokens: Iterator[Token]) -> Iterator[Tuple[str, Expression]]:
+def parse_args(
+    tokens: Iterator[Token],
+) -> Iterator[Tuple[str, Expression]]:  # pragma: no cover
     """Parse a filter's arguments from the given token iterator."""
     for arg_tokens in split_at_comma(tokens):
         yield parse_arg(arg_tokens)
 
 
-def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:
+def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:  # pragma: no cover
     """Parse a single argument from a list of tokens."""
     if len(tokens) > 1 and tokens[1][1] == TOKEN_COLON:
         # A named/keyword parameter/argument

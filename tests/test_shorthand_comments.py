@@ -41,37 +41,21 @@ class ShorthandCommentTestCase(TestCase):
                     comment_end_string=comment_end_string,
                 )
 
-                if isclass(case.expect) and issubclass(case.expect, Error):
-                    with self.assertRaises(case.expect):
-                        template = env.from_string(case.template)
-                        template.render()
-                else:
-                    template = env.from_string(case.template)
-                    result = template.render()
-                    self.assertEqual(result, case.expect)
+                template = env.from_string(case.template)
+                result = template.render()
+                self.assertEqual(result, case.expect)
 
             # Test using the Template API too.
             with self.subTest(msg=case.description, Template=True):
-                if isclass(case.expect) and issubclass(case.expect, Error):
-                    with self.assertRaises(case.expect):
-                        template = Template(
-                            case.template,
-                            tolerance=Mode.STRICT,
-                            template_comments=template_comments,
-                            comment_start_string=comment_start_string,
-                            comment_end_string=comment_end_string,
-                        )
-                        template.render()
-                else:
-                    template = Template(
-                        case.template,
-                        tolerance=Mode.STRICT,
-                        template_comments=template_comments,
-                        comment_start_string=comment_start_string,
-                        comment_end_string=comment_end_string,
-                    )
-                    result = template.render()
-                    self.assertEqual(result, case.expect)
+                template = Template(
+                    case.template,
+                    tolerance=Mode.STRICT,
+                    template_comments=template_comments,
+                    comment_start_string=comment_start_string,
+                    comment_end_string=comment_end_string,
+                )
+                result = template.render()
+                self.assertEqual(result, case.expect)
 
     def test_no_shorthand_comment_syntax(self):
         """Test that a default environment does not support shorthand comment syntax."""

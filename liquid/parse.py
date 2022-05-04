@@ -90,7 +90,7 @@ from liquid.token import TOKEN_GE
 from liquid.token import reverse_operators
 from liquid.token import Token
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
 
 
