@@ -1,6 +1,11 @@
 Python Liquid Change Log
 ========================
 
+Version 1.2.1
+-------------
+
+- Add ``typing-extensions`` dependency.
+
 Version 1.2.0
 -------------
 

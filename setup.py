@@ -21,7 +21,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests*"]),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["python-dateutil>=2.8.1"],
+    install_requires=["python-dateutil>=2.8.1", "typing-extensions>=4.2.0"],
     extras_require={"autoescape": ["MarkupSafe>=2.0.0"]},
     test_suite="tests",
     python_requires=">=3.7",

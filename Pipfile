@@ -19,13 +19,13 @@ mypy = "*"
 mock = "*"
 pytest = "*"
 types-python-dateutil = "*"
-typing-extensions = "*"
 ipython = "*"
 
 [packages]
 python-dateutil = "*"
 liquid = {editable = true, path = "."}
 markupsafe = "*"
+typing-extensions = "*"
 
 [requires]
 python_version = "3.10"
