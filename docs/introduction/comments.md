@@ -45,7 +45,7 @@ env = Environment(template_comments=True)
 Because this comment syntax is not implemented as a tag, there are no issues commenting out
 arbitrary chunks of Liquid.
 
-```plain title="template"
+```liquid title="template"
 {# note: comment this out for now
   {% for x in (1..5) %}
     {{ x }}
@@ -55,7 +55,7 @@ arbitrary chunks of Liquid.
 
 Inside [liquid](/language/tags#liquid) tags any line starting with a hash is considered a comment.
 
-```plain title="template"
+```liquid title="template"
 {% liquid
   # greetings
   echo 'Hello, World!'

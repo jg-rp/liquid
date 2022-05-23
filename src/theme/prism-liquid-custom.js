@@ -6,7 +6,10 @@
       lookbehind: true,
       alias: "comment",
     },
-
+    "alt-comment": {
+      pattern: /^\{#[\s\S]*?#\}$/,
+      alias: "comment",
+    },
     "inline-comment-tag": {
       pattern: /(^\{%-?\s*)#.*?(?=-?%\})/s,
       lookbehind: true,
@@ -78,7 +81,7 @@
   liquid_tag.inside.punctuation = Prism.languages.liquid.punctuation;
 
   const pattern =
-    /\{%?-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|\{\{.*?\}\}|\{%.*?%\}/gs;
+    /\{%?-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|\{\{.*?\}\}|\{%.*?%\}|\{#.*?#\}/gs;
   const markupTemplating = Prism.languages["markup-templating"];
   let insideRaw = false;
 
