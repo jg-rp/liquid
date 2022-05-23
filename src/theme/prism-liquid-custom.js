@@ -1,65 +1,96 @@
-(function (Prism) {
+(function liquidPrism(Prism) {
   Prism.languages.liquid = {
-    comment: [
-      {
-        pattern: /(^\{%\s*comment\s*%\})[\s\S]+(?=\{%\s*endcomment\s*%\}$)/,
-        lookbehind: true,
+    "comment-tag": {
+      pattern:
+        /(^\{%-?\s*comment\s*-?%\})[\s\S]+(?=\{%-?\s*endcomment\s*-?%\}$)/,
+      lookbehind: true,
+      alias: "comment",
+    },
+
+    "inline-comment-tag": {
+      pattern: /(^\{%-?\s*)#.*?(?=-?%\})/s,
+      lookbehind: true,
+      inside: {
+        comment: {
+          pattern: /(^\s*)#.*?(?=\n|$)/m,
+          lookbehind: true,
+        },
       },
-      {
-        pattern: /(^\{%-?\s*#([\s\S]*?)-?%\}$)/,
+    },
+    "liquid-tag": {
+      pattern: /(\{%-?\s*liquid)\s+.*?(?=-?%\})/s,
+      greedy: true,
+      lookbehind: true,
+      inside: {
+        comment: {
+          pattern: /(\n\s*)#.*?$/ms,
+          lookbehind: true,
+        },
+        tag: {
+          pattern: /(\n\s*)\w+/,
+          lookbehind: true,
+          alias: "keyword",
+        },
       },
-    ],
-    delimiter: {
-      pattern: /^\{[{%][+-]?|[+-]?[}%]\}$/,
-      alias: "punctuation",
+    },
+    tag: {
+      pattern: /(^\{%-?\s*)\w+/,
+      lookbehind: true,
+      alias: "keyword",
     },
     string: {
       pattern: /"[^"]*"|'[^']*'/,
       greedy: true,
     },
+    delimiter: {
+      pattern: /^\{[{%]-?|-?[}%]\}$/,
+      alias: "punctuation",
+    },
+    filter: {
+      pattern: /(\|\s*)\w+/,
+      lookbehind: true,
+      alias: "function",
+    },
+    operator: /!?=|<=?|>=?|<>|\.\./,
     keyword:
-      /\b(?:as|assign|break|(?:end)?(?:capture|case|comment|for|form|if|ifchanged|raw|tablerow|unless)|continue|cycle|decrement|echo|else|elsif|in|include|increment|limit|liquid|offset|range|render|reversed|when|with)\b/,
-    object: /\b(?:forloop|tablerowloop)\b/,
-    function: [
-      {
-        pattern: /(\|\s*)\w+/,
-        lookbehind: true,
-        alias: "filter",
-      },
-      {
-        // array functions
-        pattern: /(\.\s*)(?:first|last|size)/,
-        lookbehind: true,
-      },
-    ],
-    boolean: /\b(?:false|nil|true)\b/,
-    range: {
-      pattern: /\.\./,
-      alias: "operator",
+      /\b(?:and|contains|in|limit|offset|or|reversed|with|empty|blank)\b/,
+    builtin: {
+      pattern: /(\b\.)(?:first|last|size)\b/,
+      lookbehind: true,
     },
-    // https://github.com/Shopify/liquid/blob/698f5e0d967423e013f6169d9111bd969bd78337/lib/liquid/lexer.rb#L21
     number: /\b\d+(?:\.\d+)?\b/,
-    operator: /[!=]=|<>|[<>]=?|[|?:=-]|\b(?:and|contains(?=\s)|or)\b/,
-    punctuation: /[.,\[\]()]/,
-    empty: {
-      pattern: /\bempty\b/,
-      alias: "keyword",
-    },
+    boolean: /\b(?:false|nil|true)\b/,
+    "attr-name": /\b\w+(?=\s*:)/,
+    variable: /\b\w+\b/,
+    punctuation: /[[\](),.:]/,
   };
 
-  Prism.hooks.add("before-tokenize", function (env) {
-    var liquidPattern =
-      /\{%\s*comment\s*%\}[\s\S]*?\{%\s*endcomment\s*%\}|\{(?:%[\s\S]*?%|\{\{[\s\S]*?\}\}|\{[\s\S]*?\})\}/g;
-    var insideRaw = false;
+  const liquid_tag = Prism.languages.liquid["liquid-tag"];
+  liquid_tag.inside.string = Prism.languages.liquid.string;
+  liquid_tag.inside.filter = Prism.languages.liquid.filter;
+  liquid_tag.inside.operator = Prism.languages.liquid.operator;
+  liquid_tag.inside.keyword = Prism.languages.liquid.keyword;
+  liquid_tag.inside.builtin = Prism.languages.liquid.builtin;
+  liquid_tag.inside.number = Prism.languages.liquid.number;
+  liquid_tag.inside.boolean = Prism.languages.liquid.boolean;
+  liquid_tag.inside["attr-name"] = Prism.languages.liquid["attr-name"];
+  liquid_tag.inside.variable = Prism.languages.liquid.variable;
+  liquid_tag.inside.punctuation = Prism.languages.liquid.punctuation;
 
-    Prism.languages["markup-templating"].buildPlaceholders(
+  const pattern =
+    /\{%?-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|\{\{.*?\}\}|\{%.*?%\}/gs;
+  const markupTemplating = Prism.languages["markup-templating"];
+  let insideRaw = false;
+
+  Prism.hooks.add("before-tokenize", function (env) {
+    markupTemplating.buildPlaceholders(
       env,
       "liquid",
-      liquidPattern,
+      pattern,
       function (match) {
-        var tagMatch = /^\{%-?\s*(#|\w+)/.exec(match);
+        let tagMatch = /^\{%-?\s*(\w+)/.exec(match);
         if (tagMatch) {
-          var tag = tagMatch[1];
+          let tag = tagMatch[1];
           if (tag === "raw" && !insideRaw) {
             insideRaw = true;
             return true;
@@ -73,8 +104,7 @@
       }
     );
   });
-
   Prism.hooks.add("after-tokenize", function (env) {
-    Prism.languages["markup-templating"].tokenizePlaceholders(env, "liquid");
+    markupTemplating.tokenizePlaceholders(env, "liquid");
   });
 })(Prism);
