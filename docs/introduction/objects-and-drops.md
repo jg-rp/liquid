@@ -1,6 +1,6 @@
 # Objects and Drops
 
-Python Liquid uses [`__getitem__`](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) internally for resolving property names and accessing items in a sequence. So, if your [data](render-context#render-arguments) is some combination of dictionaries and lists, for example, templates can reference objects as follows.
+Python Liquid uses [`__getitem__`](https://docs.python.org/3/reference/datamodel.html#object.__getitem__) internally for resolving property names and accessing items in a sequence. So, if your [data](./render-context.md#render-arguments) is some combination of dictionaries and lists, for example, templates can reference objects as follows.
 
 ```json title="data"
 {
@@ -58,9 +58,7 @@ Template("{{ products.first.title }}!").render(products=products)
 This is by design, and is one of the reasons Liquid is considered "safe" and "suitable for end users". To expose an object's properties we can implement Python's [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interface.
 
 :::info
-Python Liquid's equivalent of a "drop", as found in Ruby Liquid, is a Python object that implements
-the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or
-[Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interface.
+Python Liquid's equivalent of a "drop", as found in Ruby Liquid, is a Python object that implements the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interface.
 :::
 
 ```python
@@ -120,8 +118,7 @@ print(Template("{{ user.perms[0] }}", undefined=StrictUndefined).render(user=use
 
 ## Drop Wrapper
 
-One could implement a simple "Drop" wrapper for data access objects like this, while
-still being explicit about which properties are exposed to templates.
+One could implement a simple "Drop" wrapper for data access objects like this, while still being explicit about which properties are exposed to templates.
 
 ```python
 class Drop(abc.Mapping):
@@ -144,9 +141,7 @@ class Drop(abc.Mapping):
 
 ## `__liquid__`
 
-By implementing a `__liquid__` method, Python objects can behave like primitive Liquid data types.
-This is useful for situations where you need your Python object to act as an array index, or to be
-compared to a primitive data type, for example.
+By implementing a `__liquid__` method, Python objects can behave like primitive Liquid data types. This is useful for situations where you need your Python object to act as an array index, or to be compared to a primitive data type, for example.
 
 ```python
 from liquid import Template
@@ -182,8 +177,7 @@ print(template.render(**context_data))  # one b
 
 ## `__html__`
 
-When [HTML auto-escaping](auto-escape) is enabled, an object can be output as an HTML-safe string by
-implementing an `__html__()` method.
+When [HTML auto-escaping](./auto-escape.md) is enabled, an object can be output as an HTML-safe string by implementing an `__html__()` method.
 
 ```python
 from liquid import Environment
@@ -212,6 +206,4 @@ print(template.render(products=ListDrop(["Shoe", "Hat", "Ball"])))
 </ul>
 ```
 
-If auto-escaping is not enabled, `__html__` is ignored and the return value of `__str__` is used
-instead. Explicitly escaping an object using the [escape](../language/filters#escape) filter will
-always yield an escaped version of `__str__`.
+If auto-escaping is not enabled, `__html__` is ignored and the return value of `__str__` is used instead. Explicitly escaping an object using the [escape](../language/filters#escape) filter will always yield an escaped version of `__str__`.

@@ -4,11 +4,9 @@ id: BoundTemplate
 
 # liquid.BoundTemplate
 
-A liquid template that has been parsed and is bound to a [liquid.Environment](Environment).
+A liquid template that has been parsed and is bound to a [`liquid.Environment`](./environment.md).
 
-You probably don't want to instantiate `BoundTemplate` directly. Use
-[liquid.Environment.from_string()](Environment#from_string) or
-[liquid.Environment.get_template()](Environment#get_template) instead.
+You probably don't want to instantiate `BoundTemplate` directly. Use [`liquid.Environment.from_string()`](./environment.md#from_string) or [`liquid.Environment.get_template()`](./environment.md#get_template) instead.
 
 ## `BoundTemplate`
 
@@ -24,20 +22,17 @@ You probably don't want to instantiate `BoundTemplate` directly. Use
 
 - `path: Optional[Union[str, Path]]` - Optional origin path or identifier for the template.
 
-- `globals: Optional[Dict[str, object]]` - An optional mapping of context variables made available
-  every time the resulting template is rendered. Defaults to `None`.
+- `globals: Optional[Dict[str, object]]` - An optional mapping of context variables made available every time the resulting template is rendered. Defaults to `None`.
 
-- `matter: Optional[Mapping[str, object]]` - Optional mapping containing variables associated with
-  the template. Could be "front matter" or other meta data.
+- `matter: Optional[Mapping[str, object]]` - Optional mapping containing variables associated with the template. Could be "front matter" or other meta data.
 
-- `uptodate: Optional[Callable[[], bool]]` - Optional callable that will return `True` if the
-  template is up to date, or `False` if it needs to be reloaded. Defaults to `None`.
+- `uptodate: Optional[Callable[[], bool]]` - Optional callable that will return `True` if the template is up to date, or `False` if it needs to be reloaded. Defaults to `None`.
 
 ## Properties
 
 ### `name`
 
-The template's name. As it would been passed to [liquid.Environment.get_template()](Environment#get_template).
+The template's name. As it would been passed to [`liquid.Environment.get_template()`](Environment#get_template).
 
 **Type**: `str`
 
@@ -49,9 +44,7 @@ A dictionary of context variables made available every time this template is ren
 
 ### `matter`
 
-Similar to `globals`, a dictionary of context variables made available every time this template is
-rendered. `globals` is usually passed down from the environment, `matter` usually originates from
-a template loader. They are kept separate so subclasses can choose how to merge them.
+Similar to `globals`, a dictionary of context variables made available every time this template is rendered. `globals` is usually passed down from the environment, `matter` usually originates from a template loader. They are kept separate so subclasses can choose how to merge them.
 
 **Type**: `Mapping[str, object]`
 
@@ -76,7 +69,7 @@ Statically analyze the template and any included/rendered templates.
 - `raise_for_failures: bool` - If `True`, will raise an exception if an `ast.Node` or `expression.Expression` does not define a `children()` method, or if a partial template can not be loaded. When `False`, no exception is raised and a mapping of failed nodes and expressions is available as the `failed_visits` property. A mapping of unloadable partial templates is stored in the `unloadable_partials` property.
 
 **Returns**: An object containing analysis results.  
-**Return Type**: [liquid.template.TemplateAnalysis](./template-analysis.md)
+**Return Type**: [`liquid.template.TemplateAnalysis`](./template-analysis.md)
 
 ### `analyze_async`
 
@@ -91,14 +84,13 @@ Statically analyze the template and any included/rendered templates.
 - `raise_for_failures: bool` - If `True`, will raise an exception if an `ast.Node` or `expression.Expression` does not define a `children()` method, or if a partial template can not be loaded. When `False`, no exception is raised and a mapping of failed nodes and expressions is available as the `failed_visits` property. A mapping of unloadable partial templates is stored in the `unloadable_partials` property.
 
 **Returns**: An object containing analysis results.  
-**Return Type**: [liquid.template.TemplateAnalysis](./template-analysis.md)
+**Return Type**: [`liquid.template.TemplateAnalysis`](./template-analysis.md)
 
 ### `render`
 
 `render(*args, **kwargs) -> str`
 
-Render the template with `args` and `kwargs` included in the render context. Accepts the same
-arguments as `dict()`.
+Render the template with `args` and `kwargs` included in the render context. Accepts the same arguments as `dict()`.
 
 **Returns**: The rendered template as a string.  
 **Return Type**: `str`
@@ -107,7 +99,7 @@ arguments as `dict()`.
 
 `async render_async(*args, **kwargs) -> str`
 
-An async version of [liquid.BoundTemplate.render()](#render)
+An async version of [`liquid.BoundTemplate.render()`](#render)
 
 **Returns**: The rendered template as a string.  
 **Return Type**: `str`
@@ -116,8 +108,7 @@ An async version of [liquid.BoundTemplate.render()](#render)
 
 `render_with_context(context, buffer, *args, **kwargs) -> None`
 
-Render the template using an existing [liquid.Context](Context) and output buffer. `args` and
-`kwargs` are passed to `dict()`. The resulting dictionary is added to the render context.
+Render the template using an existing [`liquid.Context`](./context.md) and output buffer. `args` and `kwargs` are passed to `dict()`. The resulting dictionary is added to the render context.
 
 **Parameters**:
 
@@ -131,7 +122,7 @@ Render the template using an existing [liquid.Context](Context) and output buffe
 
 `async render_with_context_async(context, buffer, *args, **kwargs) -> None`
 
-An async version of [liquid.BoundTemplate.render_with_context_async()](#async-render_with_context_async)
+An async version of [`liquid.BoundTemplate.render_with_context_async()`](#async-render_with_context_async)
 
 **Return Type**: `None`
 

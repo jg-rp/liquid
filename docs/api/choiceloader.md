@@ -27,7 +27,7 @@ found.
 
 `async get_source(environment, template_name)`
 
-An async version of [get_source](#get_source).
+An async version of [`get_source()`](#get_source).
 
 **Returns**: The source, filename and reload function for the named template.  
 **Return Type**: `liquid.loaders.TemplateSource`

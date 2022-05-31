@@ -18,8 +18,7 @@ A loader that loads templates from a dictionary mapping template names to templa
 
 Return a template source by looking up the given name in the dictionary of templates.
 
-**Raises**: `liquid.exceptions.TemplateNotFound` if a template with the given name can not be
-found.  
+**Raises**: `liquid.exceptions.TemplateNotFound` if a template with the given name can not be found.  
 **Returns**: The source, filename and reload function for the named template.  
 **Return Type**: `liquid.loaders.TemplateSource`
 
@@ -27,7 +26,7 @@ found.
 
 `async get_source(environment, template_name)`
 
-An async version of [get_source](#get_source).
+An async version of [`get_source()`](#get_source).
 
 **Returns**: The source, filename and reload function for the named template.  
 **Return Type**: `liquid.loaders.TemplateSource`

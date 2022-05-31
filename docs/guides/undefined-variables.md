@@ -22,7 +22,7 @@ Hello
 
 ## Strict Undefined
 
-When `liquid.StrictUndefined` is passed as the `undefined` argument to [Environment()](../api/Environment) or [Template()](../api/Template), any operation on an undefined variable will raise an `UndefinedError`.
+When `liquid.StrictUndefined` is passed as the `undefined` argument to [`Environment`](../api/environment.md) or [`Template`](../api/template.md), any operation on an undefined variable will raise an `UndefinedError`.
 
 ```python
 from liquid import Environment, StrictUndefined
@@ -35,7 +35,7 @@ template.render()
 
 ## The default filter
 
-With `StrictUndefined`, the built-in [default filter](../language//filters.md#default) does not handle undefined variables the [way you might expect](https://github.com/Shopify/liquid/issues/1404). The following example will raise an `UndefinedError` if `username` is undefined.
+With `StrictUndefined`, the built-in [`default`](../language/filters.md#default) filter does not handle undefined variables the [way you might expect](https://github.com/Shopify/liquid/issues/1404). The following example will raise an `UndefinedError` if `username` is undefined.
 
 ```liquid
 Hello {{ username | default: "user" }}
@@ -89,7 +89,7 @@ def default_undefined(
     return obj
 ```
 
-Use `StrictDefaultUndefined` and `default_undefined` by registering them with an [Environment](../api/Environment), then loading and rendering templates from that environment.
+Use `StrictDefaultUndefined` and `default_undefined` by registering them with an [`Environment`](../api/environment.md), then loading and rendering templates from that environment.
 
 ```python
 from liquid import Environment
@@ -102,9 +102,7 @@ env.add_filter("default", default_undefined)
 
 ## Falsy StrictUndefined
 
-It's usually [not possible](https://github.com/Shopify/liquid/issues/1034) to detect undefined variables in a template using an [if tag](../language/tags#if), for example.
-
-In Python Liquid we can implement an `Undefined` type that allows us to write `{% if nosuchthing %}`, but still get some strictness when undefined variables are used elsewhere.
+It's usually [not possible](https://github.com/Shopify/liquid/issues/1034) to detect undefined variables in a template using an [`if`](../language/tags#if) tag. In Python Liquid we can implement an `Undefined` type that allows us to write `{% if nosuchthing %}`, but still get some strictness when undefined variables are used elsewhere.
 
 ```python
 from liquid import Environment

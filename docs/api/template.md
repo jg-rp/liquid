@@ -4,8 +4,7 @@ id: Template
 
 # liquid.Template
 
-A factory function. Create a [liquid.template.BoundTemplate](BoundTemplate), automatically creating
-a [liquid.Environment](Environment) to bind it to.
+A factory function. Create a [`liquid.template.BoundTemplate`](./bound-template.md), automatically creating a [`liquid.Environment`](./environment.md) to bind it to.
 
 ## `Template`
 
@@ -64,4 +63,4 @@ a [liquid.Environment](Environment) to bind it to.
 - `globals: Optional[Mapping[str, object]]` - An optional mapping that will be added to the context
   every time the resulting `BoundTemplate` is rendered. Defaults to `None`.
 
-**Return type:** [liquid.template.BoundTemplate](BoundTemplate)
+**Return type:** [`liquid.template.BoundTemplate`](./bound-template.md)

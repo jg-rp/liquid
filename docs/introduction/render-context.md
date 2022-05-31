@@ -1,16 +1,16 @@
 # Render Context
 
-The result of rendering a template depends on the [context](../api/context) in which it is rendered.
-That is, available variables and their values, and options set on the bound [Environment](../api/Environment).
+The result of rendering a template depends on the [context](../api/context.md) in which it is rendered. That is, available variables and their values, and options set on the bound [`Environment`](../api/environment.md).
+
+Template _global_ variables are those added to a render context by application developers. From a template author's perspective, _globals_ are read-only and are available to all templates, including those rendered with the [`{% render %}`](../language/tags.md#render) tag.
+
+Template _Local_ variables are those defined by template authors using [`{% assign %}`](../language/tags.md#assign) and [`{% capture %}`](../language/tags.md#capture). Local variables can mask names defined in the global namespace, but never change them.
+
+Named counters created with [`{% increment %}`](../language/tags.md#increment) and [`{% decrement %}`](../language/tags.md#decrement) have their own namespace. Outside of `increment` or `decrement`, Liquid will look in the counters namespace last, after _locals_ and _globals_.
 
 ## Environment Globals
 
-You can add _global_ variables to an environment using the `globals` argument to the
-[Environment](../api/Environment) constructor. `globals` should be a dictionary (or any Mapping)
-mapping strings to Python objects. Environment globals are automatically added to the render
-context of every [template](../api/BoundTemplate) created with [Environment.from_string()](../api/Environment#from_string)
-and [Environment.get_template()](../api/Environment#get_template), including templates rendered with
-the [render tag](../language/tags#render).
+You can add _global_ variables to an environment using the `globals` argument to the [`Environment`](../api/environment.md) constructor. `globals` should be a dictionary (or any Mapping) mapping strings to Python objects. Environment globals are automatically added to the render context of every [`Template`](../api/bound-template.md) created with [`Environment.from_string()`](../api/environment.md#from_string) and [`Environment.get_template()`](../api/environment.md#get_template), including templates rendered with the [render tag](../language/tags.md#render).
 
 ```python
 from liquid import Environment
@@ -38,9 +38,7 @@ print(template.render())
 
 ## Template Globals
 
-Similar to [Environment Globals](#environment-globals), you can add global template variables to a
-[liquid.template.BoundTemplate](../api/BoundTemplate). Globals set on a template will be merged with
-any set on its environment and added to the render context automatically.
+Similar to [Environment Globals](#environment-globals), you can pin global template variables to a [`liquid.template.BoundTemplate`](../api/bound-template.md). Globals set on a template will be merged with any set on its environment and added to each render context automatically.
 
 If environment and template globals have conflicting names, template variables take priority over
 environment variables.
@@ -72,9 +70,7 @@ print(template.render())
 
 ## Render Arguments
 
-Keyword arguments passed to [liquid.template.BoundTemplate.render()](../api/BoundTemplate#render)
-are also added to the _global_ namespace, although, unlike environment and template globals, they do
-not persist between calls to `render()`.
+Keyword arguments passed to [`liquid.template.BoundTemplate.render()`](../api/bound-template.md#render) are also added to the _global_ namespace, although, unlike environment and template globals, they do not persist between calls to `render()`.
 
 `render()` keyword arguments take priority over environment and template globals.
 
@@ -111,42 +107,7 @@ print(template.render(user = {"name": "Sally"}))
 
 ## Matter
 
-Matter variables are those that are added to a [template](../api/BoundTemplate) by a
-[loader](loading-templates). They could be from a [front matter loader](../guides/custom-loaders#front-matter-loader)
-or extra meta data from a [database loader](../guides/custom-loaders#async-database-loader).
+Matter variables are those that are added to a [`Template`](../api/bound-template.md) by a [loader](./loading-templates.md). They could be from a [front matter loader](../guides/custom-loaders.md#front-matter-loader) or extra meta data from a [database loader](../guides/custom-loaders.md#async-database-loader).
 
 These, too, are merged into the _global_ context namespace, taking priority over template globals,
 but not `render()` keyword arguments.
-
-## Namespaces
-
-A new [liquid.Context](../api/context) is created automatically every time a template is rendered.
-Each context manages multiple namespaces.
-
-### globals
-
-From a template designer's perspective, the _globals_ namespace is read-only. The built-in
-[assign](../language/tags#assign) and [capture](../language/tags#capture) tags can _mask_ names
-defined in the global namespace, but never change them.
-
-Built from [environment globals](#environment-globals), [template globals](#template-globals),
-[matter variables](#matter) and [keyword arguments](#render-arguments) passed to `render()`, the
-global namespace is available to all templates, including those rendered with
-[`{% render %}`](../language/tags#render).
-
-### locals
-
-The _local_ namespace is where variables set using [`{% assign %}`](../language/tags#assign) and
-[`{% capture %}`](../language/tags#capture) are stored. When Liquid resolves a name, it looks in the
-local namespace first, then the global namespace.
-
-Some tags extend the local namespace for the duration of their block. For example, the
-[`{% for %}`](../language/tags/#for) tag adds a `forloop` object, which goes out of scope when the
-for loop has finished.
-
-### counters
-
-Named counters created with [`{% increment %}`](../language/tags#increment) and
-[`{% decrement %}`](../language/tags#increment) have their own namespace. Outside of an `increment`
-or `decrement` tag, Liquid will look in the counters namespace last, after [locals](#locals) and
-[globals](#globals).

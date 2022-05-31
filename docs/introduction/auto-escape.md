@@ -1,7 +1,6 @@
 # HTML Auto-Escape
 
-Python Liquid offers HTML auto-escaping. Where context variables are automatically escaped on
-output. Install optional dependencies for auto-escaping using the `autoescape` extra.
+Python Liquid offers HTML auto-escaping. Where render context variables are automatically escaped on output. Install optional dependencies for auto-escaping using the `autoescape` extra.
 
 ```shell
 $ pipenv install python-liquid[autoescape]
@@ -13,8 +12,7 @@ Or
 $ python -m pip install -U python-liquid[autoescape]
 ```
 
-Auto-escaping is disabled by default. Enable it by setting the [Environment](../api/Environment) or
-[Template](../api/Template) `autoescape` argument to `True`.
+Auto-escaping is disabled by default. Enable it by setting the [`Environment`](../api/environment.md) or [`Template`](../api/template.md) `autoescape` argument to `True`.
 
 ```python
 from liquid import Environment
@@ -29,7 +27,7 @@ print(template.render(you='</p><script>alert("XSS!");</script>'))
 
 ## Markup
 
-Mark a string as "safe" by making it `Markup`.
+Mark a string as "safe" by wrapping it in a `Markup` object.
 
 ```python
 from liquid import Environment, Markup
@@ -44,7 +42,7 @@ print(template.render(you=Markup("<em>World!</em>")))
 
 ## Safe
 
-Alternatively use the non-standard [safe](../language/filters#safe) filter.
+Alternatively use the non-standard [safe](../language/filters.md#safe) filter.
 
 :::caution
 The `safe` filter is not available in "standard" Liquid.

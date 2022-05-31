@@ -78,7 +78,7 @@ from flask_liquid import render_template as render_liquid_template
 
 ## Auto Escape
 
-Unlike a standard [liquid.Environment()](/api/Environment), Flask Liquid enables HTML auto-escaping by default. You can disable auto-escaping by passing `autoescape=False` to `flask_liquid.Liquid()` or setting the `LIQUID_AUTOESCAPE` configuration value to `False`.
+Unlike a standard [`liquid.Environment()`](../api/environment.md), Flask Liquid enables HTML auto-escaping by default. You can disable auto-escaping by passing `autoescape=False` to `flask_liquid.Liquid()` or setting the `LIQUID_AUTOESCAPE` configuration value to `False`.
 
 To render markup from a Liquid snippet inside a Jinja template (or vice versa), mark the string returned by `render_liquid_template` as safe using `Markup`, then include it in the Jinja template context. That is assuming you trust values in the Liquid render context or have HTML escaped them already.
 
@@ -124,7 +124,7 @@ def index(name=None):
 When the `LIQUID_FLASK_CONTEXT_PROCESSORS` configuration value is set to `True`, Flask context processors will update Liquid template contexts too.
 
 :::info
-Remember that Python Liquid uses the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) and [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interfaces for resolving object properties. See [Objects and Drops](/introduction/objects-and-drops).
+Remember that Python Liquid uses the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) and [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interfaces for resolving object properties. See [Objects and Drops](../introduction/objects-and-drops.md).
 :::
 
 ```python title="app.py"
@@ -199,4 +199,4 @@ The following [configuration values](https://flask.palletsprojects.com/en/2.0.x/
 | LIQUID_FLASK_CONTEXT_PROCESSORS | flask_context_processors | `False`                                 |
 | LIQUID_FLASK_SIGNALS            | flask_signals            | `True`                                  |
 
-Note that if you specify a [loader](/introduction/loading-templates) with the `loader` argument to `flask_liquid.Liquid()`, Flask Liquid will use that instead of creating a [FileSystemLoader](/api/FileSystemLoader) pointing to `LIQUID_TEMPLATE_FOLDER`.
+Note that if you specify a [loader](../introduction/loading-templates.md) with the `loader` argument to `flask_liquid.Liquid()`, Flask Liquid will use that instead of creating a [`FileSystemLoader`](../api/filesystemloader.md) pointing to `LIQUID_TEMPLATE_FOLDER`.

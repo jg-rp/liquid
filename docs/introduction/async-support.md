@@ -1,8 +1,7 @@
 # Async Support
 
-Python Liquid supports loading and rendering templates asynchronously. When [Template.render_async()](../api/BoundTemplate)
-is awaited, [render](../language/tags#render) and [include](../language/tags#include) tags will use
-[Environment.get_template_async()](../api/Environment#get-template-async), which delegates to [get_source_async()](../api/filesystemloader#get_source_async) of the configured template loader.
+Python Liquid supports loading and rendering templates asynchronously. When [`BoundTemplate.render_async()`](../api/bound-template.md)
+is awaited, [`{% render %}`](../language/tags.md#render) and [`{% include %}`](../language/tags.md#include) tags will use [`Environment.get_template_async()`](../api/environment.md#get-template-async), which delegates to [`get_source_async()`](../api/filesystemloader.md#get_source_async) of the configured template loader.
 
 ```python
 import asyncio
@@ -19,20 +18,17 @@ result = asyncio.run(coro())
 
 ## Async Loaders
 
-Custom template loaders should implement [get_source_async()](../api/filesystemloader#get_source_async)
+Custom template loaders should implement [`get_source_async()`](../api/filesystemloader.md#get_source_async)
 and pass a coroutine as the `uptodate` argument to `TemplateSource`.
 
-See [AsyncDatabaseLoader](../guides/custom-loaders#async-database-loader) for an example that loads
+See [`AsyncDatabaseLoader`](../guides/custom-loaders.md#async-database-loader) for an example that loads
 templates from a PostgreSQL database asynchronously.
 
 ## Async Drops
 
-Custom [drops](objects-and-drops) can implement `__getitem_async__()`. If an instance of a drop that
-implements `__getitem_async__()` appears in a [render_async()](../api/BoundTemplate#render_async)
-context, `__getitem_async__()` will be awaited instead of calling `__getitem__()`.
+Custom [drops](./objects-and-drops.md) can implement `__getitem_async__()`. If an instance of a drop that implements `__getitem_async__()` appears in a [`render_async()`](../api/bound-template.md#render_async) context, `__getitem_async__()` will be awaited instead of calling `__getitem__()`.
 
-Most likely used for lazy loading objects from a database, an async drop could look something like
-this.
+Most likely used for lazy loading objects from a database, an async drop could look something like this.
 
 ```python
 class AsyncCollection(abc.Mapping):

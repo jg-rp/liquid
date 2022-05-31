@@ -1,47 +1,32 @@
 # Custom Tags
 
-Tags allow us to include logic, like loops and conditions, in our Liquid templates. A tag can be
-an _inline_ tag or a _block_ tag, and can add to rendered output text or not.
+A Liquid [tag](../language/introduction.md#tags) is defined by a pair of Python classes. One a subclass of [`liquid.tag.Tag`](../api/tag.md) and one a subclass of [`liquid.ast.Node`](../api/node.md). The required `parse()` method of a `Tag` is responsible for parsing a tag's expression and returning a `Node`, which will be added to a template's parse tree.
 
-Block tags have a start and end tag, with any number of statements in between. Here, the `if` tag
-is a block tag (notice the `endif`), whereas `render` is not.
+You can add to, remove or modify Liquid's built-in tags to suit your needs by registering tags with an [`Environment`](../api/environment.md), then rendering your templates from that environment.
 
-```liquid
-{% if product.available %}
-  {% render "product.html" with product %}
-{% endif %}
-```
-
-See [the tag reference](../language/tags) for an explanation of each built-in tag. Also see the
-[python-liquid-extra](https://github.com/jg-rp/liquid-extra) project, where several additional tags
-and filters are maintained.
+:::info
+All built-in tags are implemented in this way, so have a look in [liquid/builtin/tags/](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/tags) for examples.
+:::
 
 ## Add a Tag
 
-Register a new tag with an [Environment](../api/Environment) by calling its [add_tag](../api/Environment#add_tag)
-method. Then render templates from that environment.
+Taking inspiration from [Django's Template Language](https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#with), lets implement a `with` tag, which extends the local scope for the duration of its block. Our `with` tag's expressions consists of one or more named arguments separated by commas. Each argument is a variable name, followed by a colon, then a Liquid keyword, string, integer, float, range expression or identifier.
 
-:::info
-API documentation for `liquid.tag.Tag`, `liquid.ast.Node` and `liquid.expression.Expression` is a
-work in progress. Please do ask questions on the [issue tracker](https://github.com/jg-rp/liquid/issues)
-if you need assistance.
-:::
+```plain
+{% with <identifier>: <object> [, <identifier>: object ... ] %}
+  <literal,statement,tag> ...
+{% endwith %}
+```
 
-All tags must inherit from `liquid.tag.Tag` and implement its `parse` method. `parse` takes a single
-argument of type `TokenStream` that wraps an iterator of `Token`s, and returns an `ast.Node`
-instance. More often than not, a new subclass of `ast.node` will accompany each `Tag`. These
-`Node`s make up the parse tree, and are responsible for writing rendered text to the output stream
-via the required `render_to_output` method.
+This implementation keeps any variables set inside the `with` block (using `assign` or `capture`) alive after the block has been rendered.
 
-Taking inspiration from [Django's Template Language](https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#with),
-lets implement a `with` tag, which extends the active context for the life of its block.
+### Example Tag
 
-This implementation sticks with Liquid style arguments, using colons rather than equals like Django.
-And any variables set inside the `with` block using `assign` or `capture` will persist after it
-ends. We could have copied rather than extended the `context` passed to `render_to_output`, creating
-a proper block scope.
+A [`Tag`](../api/tag.md) is free to parse its expression any way it chooses. Built in tags use regular expressions to generate a stream of tokens, then step through those tokens yielding `Expression` objects.
 
-```python title="withblock.py"
+Here we'll reuse the tokenizer from the [`include`](../language/tags.md#include) tag, as it, too, accepts any number of comma separated named arguments. We will, however, supply a different set of allowed keywords to the tokenizer function.
+
+```python title="with_tag.py"
 from __future__ import annotations
 
 import sys
@@ -101,8 +86,6 @@ with_expression_keywords = frozenset(
     ]
 )
 
-# We're borrowing token rules from the `include` tag, with our own set of valid
-# keywords.
 tokenize_with_expression = partial(
     _tokenize,
     rules=_compile_rules(include_expression_rules),
@@ -114,20 +97,18 @@ class WithKeywordArg(NamedTuple):
     name: str
     expr: Expression
 
+# ...
+```
 
-class WithNode(Node):
-    def __init__(self, tok: Token, args: Dict[str, Expression], block: BlockNode):
-        self.tok = tok
-        self.args = args
-        self.block = block
+The [`parse()`](../api/tag.md#parse) method of a `Tag` object receives a `TokenStream` as its only argument. This stream of tokens includes template literals, output statements, tags and unparsed tag expressions.
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        namespace = {k: v.evaluate(context) for k, v in self.args.items()}
+The current token in the stream will always be of the type `TOKEN_TAG`, representing the start of the tag we're parsing. By convention, this token is used to populate the `token` property of the associated `Node` object. If the tag has an expression (anything after the tag's name), it will immediately follow the `TOKEN_TAG` in the stream as a `TOKEN_EXPRESSION`. In the example bellow we use `expect()` to confirm that an expression has been provided.
 
-        with context.extend(namespace):
-            self.block.render(context, buffer)
+We retrieve a `Parser` from the active [`Environment`](../api/environment.md), then use its `parse_block` method parse our `with` tag's block, which could contain any number of other tags and output statements. Every block tag is expected to leave the stream with it's "end" tag as the current token.
 
+Note that `parse_argument` is an implementation detail and a required method of [`liquid.tag.Tag`](../api/tag.md).
 
+```python title="with_tag.py (continued)"
 class WithTag(Tag):
     name = TAG_WITH
     end = TAG_ENDWITH
@@ -171,52 +152,61 @@ class WithTag(Tag):
         stream.next_token()
 
         return WithKeywordArg(key, val)
+
+# ...
 ```
 
-We can then add `WithTag` tag to an environment like this. Notice that `add_tag` take a class, not
-a class instance.
+### Example Node
+
+Every [`Node`](../api/node.md) must implement a [`render_to_output()`](../api/node.md#rendertooutput) method and, optionally, a [`render_to_output_async()`](../api/node.md#rendertooutputasync) method. By referencing its `Expression`'s and the active render context, `render_to_output()` is responsible for writing text to the output buffer.
+
+Our `WithNode` simply evaluates each of its arguments and uses the results to extend the scope of the active render context before rendering its block.
+
+```python title="with_tag.py (continued)"
+class WithNode(Node):
+    def __init__(self, tok: Token, args: Dict[str, Expression], block: BlockNode):
+        self.tok = tok
+        self.args = args
+        self.block = block
+
+    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+        namespace = {k: v.evaluate(context) for k, v in self.args.items()}
+
+        with context.extend(namespace):
+            self.block.render(context, buffer)
+
+```
+
+### Example Tag Usage
+
+We can add `WithTag` tag to an [`Environment`](../api/environment.md) like this. Notice that [`Environment.add_tag()`](../api/environment.md#addtag) takes a class, not a class instance.
 
 ```python
 from liquid import Environment
-from withblock import WithTag
+from with_tag import WithTag
 
 env = Environment()
 env.add_tag(WithTag)
+
+template = env.from_string(
+    "{% with greeting: 'Hello', name: 'Sally' -%}"
+    "  {{ greeting }}, {{ name }}!"
+    "{%- endwith %}"
+)
+
+print(template.render()) # Hello, Sally
 ```
-
-Things worthy of note:
-
-- Block tags (those that have a start and end tag with any number of statements in
-  between) are expected to leave the stream with their closing tag as the current token.
-
-- The template lexer does not attempt to tokenize tag expressions. It is up to the
-  `Tag` to tokenize and parse its expression, if any, possibly using or extending a
-  built-in expression lexer found in `liquid.lex`.
-
-- The `expect` and `expect_peek` helper functions inspect tokens from the stream and
-  raise an appropriate exception should a token's type or value not meet a tag's
-  expectations.
-
-- You can find parsers for common expression types in `liquid.parse`, all of which return a
-  `liquid.expression.Expression`. `Expression`s have an `evaluate(context)` method for use from
-  `ast.Node.render_to_output`.
-
-All built-in tags are implemented in this way, so have a look in [liquid/builtin/tags/](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/tags) for examples.
 
 ## Replace a Tag
 
-[Environment.add_tag()](../api/Environment#add_tag) registers a tag using the `name` property
-defined on the `Tag` class. If you register a tag with the same name as an existing tag, it will be
-replaced without warning.
+[Environment.add_tag()](../api/environment.md#add_tag) registers a tag using the `name` property
+defined on the `Tag` class. If you register a tag with the same name as an existing tag, it will be replaced without warning.
 
-For example, the [if (not)](https://github.com/jg-rp/liquid-extra#if-not) tag from
-[python-liquid-extra](https://github.com/jg-rp/liquid-extra) is a drop-in replacement for the
-standard `if` tag.
+For example, the [if (not)](https://github.com/jg-rp/liquid-extra#if-not) tag from [python-liquid-extra](https://github.com/jg-rp/liquid-extra) is a drop-in replacement for the standard `if` tag.
 
 ## Remove a Tag
 
-Remove a tag, either built-in or custom, by deleting it from [Environment.tags](../api/Environment).
-It's a regular dictionary mapping tag names to `Tag` classes.
+Remove a tag, either built-in or custom, by deleting it from [Environment.tags](../api/environment.md). It's a regular dictionary mapping tag names to `Tag` classes.
 
 ```python
 from liquid import Environment

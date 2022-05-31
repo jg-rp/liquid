@@ -5,11 +5,35 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg887"
    version="1.1"
    viewBox="0 0 16 16"
    height="16"
-   width="16">
+   width="16"
+   sodipodi:docname="droplet_blue_with_yellow_liquid.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1172"
+     id="namedview959"
+     showgrid="false"
+     inkscape:zoom="60"
+     inkscape:cx="8"
+     inkscape:cy="8"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg887" />
   <metadata
      id="metadata893">
     <rdf:RDF>
@@ -18,7 +42,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -31,14 +55,16 @@
   <g
      id="g885"
      fill-rule="evenodd"
-     fill="#3776ab">
+     fill="#3776ab"
+     style="fill:#0969da;fill-opacity:1">
     <path
-       style="fill-rule:evenodd"
+       style="fill-rule:evenodd;fill:#0969da;fill-opacity:1"
        id="path881"
        d="M 7.21,0.8 C 7.69,0.295 8,0 8,0 c 0.109,0.363 0.234,0.708 0.371,1.038 0.812,1.946 2.073,3.35 3.197,4.6 C 12.878,7.096 14,8.345 14,10 14,13.313711 11.313708,15.999997 8,15.999997 4.6862916,15.999997 2,13.313711 2,10 2,6.668 5.58,2.517 7.21,0.8 Z M 7.623,1.821 C 6.9808099,2.5159368 6.3705144,3.2396825 5.794,3.99 5.068,4.94 4.358,5.998 3.834,7.06 1.5269218,10.481832 4.5178132,14.95 8.0333333,14.95 11.154366,14.95 15.760749,10.525312 10.819,6.3 L 10.789,6.268 C 9.75,5.11 8.5,3.72 7.623,1.82 Z" />
     <path
        id="path883"
        d="M4.553 7.776c.82-1.641 1.717-2.753 2.093-3.13l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448z"
-       fill-rule="evenodd" />
+       fill-rule="evenodd"
+       style="fill:#0969da;fill-opacity:1" />
   </g>
 </svg>

@@ -44,7 +44,7 @@ TEMPLATES = [
 ]
 ```
 
-When `APP_DIRS` is `True`, Liquid will look for templates in the `liquid` subdirectory of installed applications. `OPTIONS` are passed to the [liquid.Environment()](/api/Environment) constructor. The default environment is configured as follows.
+When `APP_DIRS` is `True`, Liquid will look for templates in the `liquid` subdirectory of installed applications. `OPTIONS` are passed to the [`liquid.Environment()`](../api/environment.md) constructor. The default environment is configured as follows.
 
 - `autoescape`: `True`
 - `loader`: a `FileSystemLoader` configured for `DIRS` and `APP_DIRS`
@@ -72,7 +72,7 @@ mysite/
         views.py
 ```
 
-See Django's [Template.render](https://docs.djangoproject.com/en/4.0/topics/templates/#django.template.backends.base.Template.render) documentation for an explanation of how Django searches `DIRS` when multiple template engines are configured.
+See Django's [`Template.render`](https://docs.djangoproject.com/en/4.0/topics/templates/#django.template.backends.base.Template.render) documentation for an explanation of how Django searches `DIRS` when multiple template engines are configured.
 
 ## Render
 
@@ -98,7 +98,7 @@ def index(request):
 
 ## Environment Factory
 
-You can configure your [liquid.Environment](/api/Environment) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the [json](/extra/filters#json) filter from [python-liquid-extra](/extra/introduction). If the following is saved as `myproject/liquid.py`:
+You can configure your [`liquid.Environment`](../api/environment.md) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the [`json`](../extra/filters.md#json) filter from [python-liquid-extra](../extra/introduction.md). If the following is saved as `myproject/liquid.py`:
 
 ```python title="myproject/liquid.py"
 from liquid import Environment

@@ -3,8 +3,7 @@
 Python Liquid Extra is a repository of extra tags and filters for Python Liquid.
 
 :::caution
-These tags and filters are not part of "standard" Liquid. If you choose to use them in your
-templates, those templates are unlikely to render correctly with other implementations of Liquid.
+These tags and filters are not part of "standard" Liquid. If you choose to use them in your templates, those templates are unlikely to render correctly with other implementations of Liquid.
 :::
 
 ## Install
@@ -23,19 +22,13 @@ $ python -m pip install -U python-liquid-extra
 
 ## Usage
 
-Unlike [standard tags and filters](/language/tags), which are registered for you automatically,
-you must register any extra tags and/or filters with an [Environment](/#environment)
-explicitly. Just like you would with [custom tags or filters](/guides/custom-tags).
+Unlike [standard tags and filters](../language/tags.md), which are registered for you automatically, you must register any extra tags and/or filters with an [`Environment`](../api/environment.md) explicitly. Just like you would with [custom tags or filters](../guides/custom-tags.md).
 
 ### Filters
 
-A filter function is any callable that accepts at least one argument, the result of the left hand
-side of a filtered expression. They can be implemented as simple functions, classes with a
-`__call__` method or closures that return a function or callable object. The latter two could take
-additional arguments. Refer to the [extra filter reference](filters) to see what, if any, additional
-arguments they support.
+A filter function is any callable that accepts at least one argument, the result of the left hand side of a filtered expression. They can be implemented as simple functions, classes with a `__call__` method or closures that return a function or callable object. The latter two could take additional arguments. Refer to the [extra filter reference](./filters.md) to see what, if any, additional arguments they support.
 
-Add a template filter to an [Environment](../api/Environment) by calling its [add_filter()](../api/Environment#add_filter) method. For example:
+Add a template filter to an [`Environment`](../api/environment.md) by calling its [`add_filter()`](../api/environment.md#add_filter) method. For example:
 
 ```python
 from liquid import Environment
@@ -47,13 +40,9 @@ env.add_filter("json", filters.JSON())
 
 ### Tags
 
-Some tags, like [if (not)](tags#if-not), will replace standard, built-in tags. Others will introduce
-new tags. Refer to the [extra tag reference](tags) to see what features each tags adds and/or
-removes.
+Some tags, like [if (not)](./tags.md#if-not), will replace standard, built-in tags. Others will introduce new tags. Refer to the [extra tag reference](./tags.md) to see what features each tags adds and/or removes.
 
-Register a tag with an [Environment](../api/Environment) by calling its [add_tag](../api/Environment#add_tag)
-method. Then render templates from that environment. Notice that `add_tag` expects the tag class,
-not an instance of it.
+Register a tag with an [`Environment`](../api/environment.md) by calling its [`add_tag()`](../api/environment.md#add_tag) method. Then render templates from that environment. Notice that `add_tag()` expects the tag class, not an instance of it.
 
 ```python
 from liquid import Environment
@@ -65,8 +54,7 @@ env.add_tag(IfNotTag)
 
 ### Flask-Liquid
 
-If you're using [Flask-Liquid](https://github.com/jg-rp/Flask-Liquid), you can get hold of the
-active [liquid.Environment](../api/Environment) from an instance of the `Liquid` extension.
+If you're using [Flask-Liquid](https://github.com/jg-rp/Flask-Liquid), you can get hold of the active [`liquid.Environment`](../api/environment.md) from an instance of the `Liquid` extension.
 
 ```python title="app.py"
 from flask import Flask
@@ -91,9 +79,7 @@ def index(name=None):
 
 ### django-liquid
 
-Using [django-liquid](https://github.com/jg-rp/django-liquid), the [liquid.Environment](../api/Environment)
-needs to be configured with a factory function. In `settings.py`, when configuring your `TEMPLATES`
-backend, set the `environment` option to the path of your environment factory function.
+Using [django-liquid](https://github.com/jg-rp/django-liquid), the [`liquid.Environment`](../api/environment.md) needs to be configured with a factory function. In `settings.py`, when configuring your `TEMPLATES` backend, set the `environment` option to the path of your environment factory function.
 
 ```python title="myproject/liquid.py"
 from liquid import Environment

@@ -1,13 +1,14 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+// const lightCodeTheme = require("./src/theme/prismLight.js");
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/vsDark");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Python Liquid",
-  tagline: "Python Liquid Template Engine",
+  tagline: "Safe, customer-facing template engine",
   url: "https://jg-rp.github.io/",
   baseUrl: "/liquid/", // /liquid/ for gh-pages?
   onBrokenLinks: "throw",

@@ -85,7 +85,7 @@ for name, location in analysis.global_variables.items():
 
 ## Local Template Variables
 
-The `local_variables` property of [`TemplateAnalysis`](../api/template-analysis.md) is, again, a dictionary mapping template variable names to their locations. Each entry is the location of an `assign`, `capture`, `increment`, or `decrement` (or any custom tag that introduces names into the template local namespace) tag that initializes or updates the variable.
+The `local_variables` property of [`TemplateAnalysis`](../api/template-analysis.md) is, again, a dictionary mapping template variable names to their locations. Each entry is the location of an `assign`, `capture`, `increment`, or `decrement` tag (or any custom tag that introduces names into the template local namespace) that initializes or updates the variable.
 
 ```python
 from liquid import Template

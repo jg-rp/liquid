@@ -1,18 +1,12 @@
 # Loading Templates
 
-You can load templates from a file system or database, for example, by creating an
-[Environment](../api/Environment) and configuring a template _loader_. You'd also need a loader if
-you want to use the built-in [include](../language/tags#include) or [render](../language/tags#render)
-tags.
+You can load templates from a file system or database, for example, by creating an [`Environment`](../api/environment.md) and configuring a template _loader_. You'd also need a loader if you want to use the built-in [`{% include %}`](../language/tags.md#include) or [`{% render %}`](../language/tags.md#render) tags.
 
-[Environment.get_template()](../api/Environment#get_template) and [Environment.get_template_async()](../api/Environment#get_template_async)
-accept a template name and return a [BoundTemplate](../api/BoundTemplate). That is a template bound
-to the environment, ready to be rendered. It is up to the loader to interpret a template name. In
-the case of [FileSystemLoader](../api/FileSystemLoader), the name would be a file name, possibly
-preceded by a path relative to the configured search path.
+[`Environment.get_template()`](../api/environment.md#get_template) and [`Environment.get_template_async()`](../api/environment.md#get_template_async) accept a template name and return a [`BoundTemplate`](../api/bound-template.md). That is a template bound to the environment, ready to be rendered. It is up to the loader to interpret a template name. In the case of [`FileSystemLoader`](../api/filesystemloader.md), the name would be a file name, possibly preceded by a path relative to the configured search path.
 
-This example assumes a folder called `templates` exists in the current working directory, and that
-template files `index.html` and `some-list.html` exist within it.
+Available, built-in loaders are [`FileSystemLoader`](../api/filesystemloader.md), [`FileExtensionLoader`](../api/fileextensionloader.md), [`DictLoader`](../api/dictloader.md) and [`ChoiceLoader`](../api/choiceloader.md). See also [custom loaders](../guides/custom-loaders.md), and examples of a [`FrontMatterFileSystemLoader`](../guides/custom-loaders.md#front-matter-loader) and an [`AsyncDatabaseLoader`](../guides/custom-loaders.md#async-database-loader).
+
+This example assumes a folder called `templates` exists in the current working directory, and that template files `index.html` and `some-list.html` exist within it.
 
 ```html title="templates/index.html"
 <!DOCTYPE html>
@@ -35,8 +29,7 @@ template files `index.html` and `some-list.html` exist within it.
 </ul>
 ```
 
-By default, every [Environment](../api/Environment) is created with an empty [DictLoader](../api/DictLoader).
-Specify an alternative template loader using the `loader` argument.
+By default, every [`Environment`](../api/environment.md) is created with an empty [`DictLoader`](../api/dictloader.md). Specify an alternative template loader using the `loader` argument.
 
 ```python
 from liquid import Environment
@@ -50,6 +43,7 @@ people = [
 ]
 
 template = env.get_template("index.html")
+
 print(template.render(
     heading="Some List",
     page_title="Awesome Title",
@@ -57,7 +51,7 @@ print(template.render(
 ))
 ```
 
-```
+```html title="output"
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -77,8 +71,5 @@ print(template.render(
 ```
 
 :::info
-Notice how whitespace is output unchanged. See [whitespace control](../language/introduction#whitespace-control)
-for more information.
+Notice how whitespace is output unchanged. See [`whitespace control`](../language/introduction.md#whitespace-control) for more information.
 :::
-
-Available, built-in loaders are [FileSystemLoader](../api/FileSystemLoader), [FileExtensionLoader](../api/FileExtensionLoader), [DictLoader](../api/DictLoader) and [ChoiceLoader](../api/ChoiceLoader). See also [custom loaders](../guides/custom-loaders), and examples of a [FrontMatterFileSystemLoader](../guides/custom-loaders#front-matter-loader) and an [AsyncDatabaseLoader](../guides/custom-loaders#async-database-loader).

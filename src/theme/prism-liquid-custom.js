@@ -32,14 +32,14 @@
         tag: {
           pattern: /(\n\s*)\w+/,
           lookbehind: true,
-          alias: "keyword",
+          alias: "class",
         },
       },
     },
     tag: {
       pattern: /(^\{%-?\s*)\w+/,
       lookbehind: true,
-      alias: "keyword",
+      alias: "class",
     },
     string: {
       pattern: /"[^"]*"|'[^']*'/,
@@ -64,7 +64,7 @@
     number: /\b\d+(?:\.\d+)?\b/,
     boolean: /\b(?:false|nil|true)\b/,
     "attr-name": /\b\w+(?=\s*:)/,
-    variable: /\b\w+\b/,
+    object: /\b\w+\b/,
     punctuation: /[[\](),.:]/,
   };
 
@@ -77,7 +77,7 @@
   liquid_tag.inside.number = Prism.languages.liquid.number;
   liquid_tag.inside.boolean = Prism.languages.liquid.boolean;
   liquid_tag.inside["attr-name"] = Prism.languages.liquid["attr-name"];
-  liquid_tag.inside.variable = Prism.languages.liquid.variable;
+  liquid_tag.inside.object = Prism.languages.liquid.object;
   liquid_tag.inside.punctuation = Prism.languages.liquid.punctuation;
 
   const pattern =

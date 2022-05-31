@@ -1,11 +1,9 @@
 # Extra Tags
 
-This page documents extra tags that are not included in standard Liquid. See the
-[tag reference](/language/tags) for a details of all standard tags.
+This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for a details of all standard tags.
 
 :::caution
-These tags are not part of "standard" Liquid. If you choose to use them in your templates, those
-templates are unlikely to render correctly with other implementations of Liquid.
+These tags are not part of "standard" Liquid. If you choose to use them in your templates, those templates are unlikely to render correctly with other implementations of Liquid.
 :::
 
 ## if (not)
@@ -18,12 +16,9 @@ templates are unlikely to render correctly with other implementations of Liquid.
 {% endif %}
 ```
 
-A drop-in replacement for the standard [if](/language/tags#if) tag that supports logical `not` and
-grouping with parentheses. See [the tag reference](/language/tags#expressions) for a description of
-standard if expressions.
+A drop-in replacement for the standard [`if`](../language/tags.md#if) tag that supports logical `not` and grouping with parentheses. See [the tag reference](../language/tags.md#expressions) for a description of standard if expressions.
 
-Register `IfNotTag` with a [liquid.Environment](/api/Environment) to make it available to templates
-rendered from that environment.
+Register `IfNotTag` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -58,9 +53,7 @@ A logical `not` operator. Reverse the truthiness of an object.
 hello user
 ```
 
-The `not` prefix operator uses Liquid _truthiness_. Only `false` and `nil` are not truthy. Empty
-strings, arrays and objects all evaluate to `true`. You can, however, use `not` in front of a
-comparison to `empty` or `blank`.
+The `not` prefix operator uses Liquid _truthiness_. Only `false` and `nil` are not truthy. Empty strings, arrays and objects all evaluate to `true`. You can, however, use `not` in front of a comparison to `empty` or `blank`.
 
 ```liquid
 {% if not something == empty %}
@@ -106,14 +99,9 @@ user is special
 denied
 ```
 
-`and` and `or` operators in Liquid are right associative. Where `true and false and false or true`
-is equivalent to `(true and (false and (false or true)))`, evaluating to `false`. Python, on the
-other hand, would parse the same expression as `(((true and false) and false) or true)`, evaluating
-to `true`.
+`and` and `or` operators in Liquid are right associative. Where `true and false and false or true` is equivalent to `(true and (false and (false or true)))`, evaluating to `false`. Python, on the other hand, would parse the same expression as `(((true and false) and false) or true)`, evaluating to `true`.
 
-This implementation of `if` maintains that right associativity so that any standard `if` expression
-will behave the same, with or without non-standard `if`. Only when `not` or parentheses are used
-will behavior deviate from the standard.
+This implementation of `if` maintains that right associativity so that any standard `if` expression will behave the same, with or without non-standard `if`. Only when `not` or parentheses are used will behavior deviate from the standard.
 
 ## inline if / else
 
@@ -132,16 +120,11 @@ will behavior deviate from the standard.
     [ if <expression> [ else <primitive,identifier> [| <filter> [| <filter> ... ]]]] %}
 ```
 
-Drop-in replacements for the standard output statement and [assign](/language/tags#assign) and
-[echo](/language/tags#echo) tags that supports inline `if`/`else` expressions.
+Drop-in replacements for the standard output statement and [`assign`](../language/tags.md#assign) and [`echo`](../language/tags.md#echo) tags that supports inline `if`/`else` expressions.
 
-If the condition evaluates to `false` (Liquid truthiness), the leading object is not evaluated.
-Equally, if the condition evaluates to `true`, any `else` object is not evaluated. This is not
-terribly important if the objects are Liquid literals or simple Python objects, but could matter if
-the objects are custom drops that do time consuming IO or processing.
+If the condition evaluates to `false` (Liquid truthiness), the leading object is not evaluated. Equally, if the condition evaluates to `true`, any `else` object is not evaluated. This is not terribly important if the objects are Liquid literals or simple Python objects, but could matter if the objects are custom drops that do time consuming IO or processing.
 
-Register `InlineIfAssignTag`, `InlineIfEchoTag` and `InlineIfStatement` with a [liquid.Environment](/api/Environment)
-to make them available to templates rendered from that environment.
+Register `InlineIfAssignTag`, `InlineIfEchoTag` and `InlineIfStatement` with a [`liquid.Environment`](../api/environment.md) to make them available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -171,7 +154,7 @@ env.add_tag(InlineIfStatement)
 please log in
 ```
 
-The `else` part of an inline expression defaults to [undefined](/introduction/strictness#undefined-variables).
+The `else` part of an inline expression defaults to [undefined](../introduction/strictness.md#undefined-variables).
 
 ```liquid title="template"
 {{ 'hello user' if user.logged_in }}!
@@ -193,8 +176,7 @@ Filters can appear before an inline `if` expression.
 please log in
 ```
 
-Or after an inline `if` expression. In which case filters will be applied even if the else clause is
-triggered.
+Or after an inline `if` expression. In which case filters will be applied even if the else clause is triggered.
 
 ```liquid title="template"
 {% assign param = 'hello user' if user.logged_in else 'please log in' | url_encode %}
@@ -216,28 +198,17 @@ Or both.
 {% call <string> [[,] [ <object>, ... ] [ <identifier>: <object>, ... ]] %}
 ```
 
-Define parameterized Liquid snippets using the `macro` tag and call them using the `call` tag.
-Macros are intended to make code reuse easier, especially for small Liquid snippets that are only
-needed within one template.
+Define parameterized Liquid snippets using the `macro` tag and call them using the `call` tag. Macros are intended to make code reuse easier, especially for small Liquid snippets that are only needed within one template.
 
-`macro` is a bit like the standard [capture tag](/language/tags#capture), where a block is stored on
-the render context for later use. Unlike `capture`, `macro` accepts parameters, possibly with
-default values, and the block is not evaluated until it is called using a `call` tag.
+`macro` is a bit like the standard [`capture`](../language/tags.md#capture) tag, where a block is stored on the render context for later use. Unlike `capture`, `macro` accepts parameters, possibly with default values, and the block is not evaluated until it is called using a `call` tag.
 
-`call` is a bit like [render](/language/tags#render), in that a new context is created including any
-arguments supplied in the `call` expression. That context is then used to render the named macro.
-Unlike `render`, `call` can take positional arguments and does not hit any template loader or the
-template cache.
+`call` is a bit like [`render`](../language/tags.md#render), in that a new context is created including any arguments supplied in the `call` expression. That context is then used to render the named macro. Unlike `render`, `call` can take positional arguments and does not hit any template loader or the template cache.
 
-Similar to [include](/language/tags#include) and [render](/language/tags#render), `macro` and `call`
-take a string literal identifying the macro, followed by zero or more arguments. Neither `macro` or
-`call` accept `for` or `with`/`as` style expressions.
+Similar to [`include`](../language/tags.md#include) and [`render`](../language/tags.md#render), `macro` and `call` take a string literal identifying the macro, followed by zero or more arguments. Neither `macro` or `call` accept `for` or `with`/`as` style expressions.
 
-Note that argument defaults are bound late. Defaults are evaluated when a `call` expression is
-evaluated, not when the macro is defined.
+Note that argument defaults are bound late. Defaults are evaluated when a `call` expression is evaluated, not when the macro is defined.
 
-Register `MacroTag` and `CallTag` with a [liquid.Environment](/api/Environment) to make `macro` and
-`call` available to templates rendered from that environment.
+Register `MacroTag` and `CallTag` with a [`liquid.Environment`](../api/environment.md) to make `macro` and `call` available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -333,8 +304,7 @@ Excess arguments passed to `call` are collected into `args` and `kwargs`.
 
 Extend the local namespace with block scoped variables.
 
-Register `WithTag` with a [liquid.Environment](/api/Environment) to make `with` available to
-templates rendered from that environment.
+Register `WithTag` with a [`liquid.Environment`](../api/environment.md) to make `with` available to templates rendered from that environment.
 
 ```python
 from liquid import Environment

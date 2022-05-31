@@ -1,11 +1,9 @@
 # Custom Loaders
 
-Loaders are responsible for finding a template's source text given a name or identifier. Built-in
-loaders include a [FileSystemLoader](../api/filesystemloader), a [FileExtensionLoader](../api/FileExtensionLoader), a [ChoiceLoader](../api/choiceloader) and a [DictLoader](../api/dictloader). You might want to write a custom loader to load templates from a database or add extra meta data to the template context, for example.
+Loaders are responsible for finding a template's source text given a name or identifier. Built-in loaders include a [`FileSystemLoader`](../api/filesystemloader.md), a [`FileExtensionLoader`](../api/fileextensionloader.md), a [`ChoiceLoader`](../api/choiceloader.md) and a [`DictLoader`](../api/dictloader.md). You might want to write a custom loader to load templates from a database or add extra meta data to the template context, for example.
 
 Write a custom loader class by inheriting from `liquid.loaders.BaseLoader` and implementing its
-`get_source` method. Then pass an instance of your loader to a [liquid.Environment](../api/Environment)
-as the `loader` argument.
+`get_source` method. Then pass an instance of your loader to a [liquid.Environment](../api/environment.md) as the `loader` argument.
 
 We could implement our own version of `DictLoader` like this.
 
@@ -33,9 +31,7 @@ class DictLoader(BaseLoader):
         return TemplateSource(source, template_name, None)
 ```
 
-`TemplateSource` is a named tuple containing the template source as a string, its name and an
-optional `uptodate` callable. If `uptodate` is not `None` it should be a callable that returns
-`False` if the template needs to be loaded again, or `True` otherwise.
+`TemplateSource` is a named tuple containing the template source as a string, its name and an optional `uptodate` callable. If `uptodate` is not `None` it should be a callable that returns `False` if the template needs to be loaded again, or `True` otherwise.
 
 You could then use `DictLoader` like this.
 
@@ -82,7 +78,7 @@ This is useful for situations where you want to load partial templates (or "snip
 `Context.get_template_with_context()` and `Context.get_template_with_context_async()` do not use the default template cache. The environment that manages the default template cache does not know what context variables and keyword arguments might be used to manipulate the search space or loaded template.
 :::
 
-This example extends [FileExtensionLoader](../api/FileExtensionLoader), making `.liquid` optional, and searches `./snippets/` (relative to the loaders search path) for templates when rendering with the built-in `include` tag.
+This example extends [`FileExtensionLoader`](../api/fileextensionloader.md), making `.liquid` optional, and searches `./snippets/` (relative to the loaders search path) for templates when rendering with the built-in `include` tag.
 
 ```python
 from pathlib import Path
@@ -104,11 +100,7 @@ class SnippetsFileSystemLoader(FileExtensionLoader):
         return super().get_source(context.env, template_name)
 ```
 
-`tag` being parse as a keyword argument is a convention used by the built-in `include` and `render` tags. Any custom tag is free to pass whatever keyword arguments they wish to `Context.get_template_with_context()`, and they will be passed on to `get_source_with_context()` of the configured loader.
-
-:::tip
-These examples could easily have used the `render` tag instead of or as well as `include`.
-:::
+`tag` being parse as a keyword argument is a convention used by the built-in [`{% include %}`](../language/tags.md#include) and [`{% render %}`](../language/tags.md#render) tags. Custom tags are free to pass whatever keyword arguments they wish to `Context.get_template_with_context()`, and they will be passed on to `get_source_with_context()` of the configured loader.
 
 This example leaves the `include` tag's search path alone, instead defining a `section` tag that inherits from `include` and searches for templates in the `sections/` subfolder of `templates/`.
 
@@ -279,13 +271,9 @@ class FrontMatterFileSystemLoader(FileSystemLoader):
 
 ## Async Database Loader
 
-Template loaders can implement `get_source_async`. When a template is rendered by awaiting
-`render_async` instead of calling `render`, `{% render %}` and `{% include %}` tags will use
-`get_template_async` of the bound `Environment`, which delegates to `get_source_async` of the
-configured loader.
+Template loaders can implement `get_source_async()`. When a template is rendered by awaiting [`BoundTemplate.render_async()`](../api/bound-template.md#renderasync) instead of calling [`BoundTemplate.render()`](../api/bound-template.md#render), `{% render %}` and `{% include %}` tags will use `get_template_async` of the bound [`Environment`](../api/environment.md), which delegates to `get_source_async` of the configured loader.
 
-For example, `AsyncDatabaseLoader` will load templates from a PostgreSQL database using
-[asyncpg](https://github.com/MagicStack/asyncpg).
+For example, `AsyncDatabaseLoader` will load templates from a PostgreSQL database using [asyncpg](https://github.com/MagicStack/asyncpg).
 
 ```python
 import datetime
@@ -334,8 +322,7 @@ class AsyncDatabaseLoader(BaseLoader):
 
 ## File Extension Loader
 
-This example extends `FileSystemLoader` to automatically append a file extension if one is
-missing.
+This example extends `FileSystemLoader` to automatically append a file extension if one is missing.
 
 ```python
 from pathlib import Path

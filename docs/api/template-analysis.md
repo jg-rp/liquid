@@ -1,6 +1,6 @@
 # liquid.template.TemplateAnalysis
 
-The result of analyzing a template's variables using [BoundTemplate.analyze()](./bound-template.md#analyze).
+The result of analyzing a template's variables using [`BoundTemplate.analyze()`](./bound-template.md#analyze).
 
 ## `TemplateAnalysis`
 

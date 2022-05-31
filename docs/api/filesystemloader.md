@@ -1,6 +1,6 @@
 # liquid.loaders.FileSystemLoader
 
-A loader that loads templates from one or more directories on the file system.
+A loader that loads templates from one or more directories on a file system.
 
 ## `FileSystemLoader`
 
@@ -37,7 +37,7 @@ found.
 
 `async get_source(environment, template_name)`
 
-An async version of [get_source](#get_source).
+An async version of [`get_source()`](#get_source).
 
 **Returns**: The source, filename and reload function for the named template.  
 **Return Type**: `liquid.loaders.TemplateSource`

@@ -10,6 +10,13 @@
   overflow: hidden;
 }
 
+.heroCodeBlock {
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @media screen and (max-width: 966px) {
   .heroBanner {
     padding: 2rem;
@@ -20,4 +27,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.hero {
+  background-color: #2b3137;
+  padding: 48px;
+}
+
+.heroInner {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 0 20px;
+}
+
+.heroProjectTagline {
+  /* color: #fff; */
+  font-size: 60px;
+  margin: 0;
 }

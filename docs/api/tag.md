@@ -4,7 +4,7 @@ id: Tag
 
 # liquid.tag.Tag
 
-Base class for all built-in and [custom template tags](/guides/custom-tags).
+Base class for all built-in and [custom template tags](../guides/custom-tags.md).
 
 ## `Tag`
 
@@ -12,7 +12,7 @@ Base class for all built-in and [custom template tags](/guides/custom-tags).
 
 **Parameters**:
 
-- `env: liquid.Environment` - The [Environment](Environment) that manages this tag.
+- `env: liquid.Environment` - The [`Environment`](./environment.md) that manages this tag.
 
 ## Class Attributes
 
@@ -41,7 +41,7 @@ The end or closing tag name. If `block` is `True`, `end` must be set. By convent
 
 **Type**: `liquid.Environment`
 
-The [Environment](Environment) that manages this tag.
+The [`Environment`](./environment.md) that manages this tag.
 
 ## Methods
 
@@ -55,5 +55,4 @@ Used internally to delegate to `Tag.parse`.
 
 `parse(self, stream: TokenStream) -> Node:`
 
-Abstract method. Return a parse tree node by parsing tokens from the given stream. Every tag must
-implement `parse`.
+Abstract method. Return a parse tree node by parsing tokens from the given stream. Every tag must implement `parse`.

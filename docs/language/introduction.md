@@ -4,17 +4,13 @@ sidebar_position: 1
 
 # Introduction to Liquid
 
-Liquid is a template language, where source text (the template) contains placeholders for variables,
-conditional expressions for including or excluding blocks of text, and loops for repeating blocks of
-text. Any block can contain more variables, conditions and loops.
+Liquid is a template language, where source text (the template) contains placeholders for variables, conditional expressions for including or excluding blocks of text, and loops for repeating blocks of text. Any block can contain more variables, conditions and loops.
 
-Output text is the result of _rendering_ a template given some data model. It is that data model
-that provides the variables and objects referenced in a template's expressions.
+Output text is the result of _rendering_ a template given some data model. It is that data model that provides the variables and objects referenced in a template's expressions.
 
-Liquid is distinct from most other template languages in that it is designed for _users_, who may or may not be developers, and are untrusted. As such, when compared to other template engines, Liquid has a deliberately simple and restrictive syntax and feature set.
+Liquid is distinct from most other template languages in that it is designed for _end users_, who may or may not be developers, and are untrusted. As such, when compared to other template engines, Liquid has a deliberately simple and restrictive syntax and feature set.
 
-Liquid is most commonly used with HTML, but can be used with any text-based content. Consider this
-template.
+Liquid is most commonly used with HTML, but can be used with any text-based content. Consider this template.
 
 ```liquid
 {% assign greeting = "Hello" %}
@@ -31,52 +27,35 @@ template.
 
 ## Tags
 
-Tags allow us to include logic, like loops and conditions, in our Liquid templates. A tag can be
-an _inline_ tag or a _block_ tag, and can add to rendered output text or not.
+Tags allow us to include logic, like loops and conditions, in our Liquid templates. A tag can be an _inline_ tag or a _block_ tag, and can add to rendered output text or not.
 
-`{% for person in people %}` is the start of a block tag. Enclosed by `{%` and `%}` by default.
-Where `for` is the name of the tag and `person in people` is the tag's expression. The `for` tag
-behaves like a for-each loop, rendering its block once for each item in an iterable object. Every
-block tag must have a matching _end tag_, which, by convention, follows the pattern
-`{% end<tag name> %}`.
+`{% for person in people %}` is the start of a block tag. Enclosed by `{%` and `%}` by default. Where `for` is the name of the tag and `person in people` is the tag's expression. The `for` tag behaves like a for-each loop, rendering its block once for each item in an iterable object. Every block tag must have a matching _end tag_, which, by convention, follows the pattern `{% end<tag name> %}`.
 
-`{% assign greeting = "Hello" %}` is an inline tag. Inline tags don't have a block or an associated
-end tag. See the [tag reference](tags) for details of all tags built-in to Liquid.
+`{% assign greeting = "Hello" %}` is an inline tag. Inline tags don't have a block or an associated end tag. See the [tag reference](./tags.md) for details of all tags built-in to Liquid.
 
 ## Template Literals
 
-`, ` and `!\n` are template literals. That's anything not inside `{%` and `%}` or `{{` and `}}`. With
-the exception of [whitespace control](#whitespace-control), template literals are output unchanged.
+`, ` and `!\n` are template literals. That's anything not inside `{%` and `%}` or `{{` and `}}`. With the exception of [whitespace control](#whitespace-control), template literals are output unchanged.
 
 ## Filters
 
-Variables can be modified prior to output or assignment using _filters_. Filters are applied to a
-variable using the pipe symbol (`|`), followed by the filter's name and, possibly, some filter
-arguments. Filter arguments appear after a colon (`:`) and are separated by commas (`,`).
+Variables can be modified prior to output or assignment using _filters_. Filters are applied to a variable using the pipe symbol (`|`), followed by the filter's name and, possibly, some filter arguments. Filter arguments appear after a colon (`:`) and are separated by commas (`,`).
 
-Multiple filters can be chained, effectively piping the output of one filter into the input of
-another. Here we use the [sort](../language/filters#sort) and [first](../language/filters#first)
-filters to get the cheapest item in a collection of products.
+Multiple filters can be chained, effectively piping the output of one filter into the input of another. Here we use the [sort](./filters.md#sort) and [first](./filters.md#first) filters to get the cheapest item in a collection of products.
 
 ```liquid
 {% assign cheapest = collection.products | sort: "price" | first %}
 ```
 
-See the [filter reference](filters) for details of all filters built-in to Liquid.
+See the [filter reference](./filters.md) for details of all filters built-in to Liquid.
 
 ## Types
 
 :::info
-Being a Ruby project, the reference implementation of Liquid borrows terms and types found in Ruby.
-Like "array" and "hash". Python equivalents would be "list" and "dictionary", or anything that
-implements the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence)
-or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping)
-interfaces, respectively.
+Being a Ruby project, the reference implementation of Liquid borrows terms and types found in Ruby. Like "array" and "hash". Python equivalents would be "list" and "dictionary", or anything that implements the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interfaces, respectively.
 :::
 
-Liquid is dynamically typed. New variables are declared, initialized and reassigned with the
-[{% assign %}](tags#assign) and [{% capture %}](tags#capture) tags. Assignment expressions can
-reference existing variables and include literal strings, integers, floats and Booleans.
+Liquid is dynamically typed. New variables are declared, initialized and reassigned with the [{% assign %}](./tags.md#assign) and [{% capture %}](./tags.md#capture) tags. Assignment expressions can reference existing variables and include literal strings, integers, floats and Booleans.
 
 ```liquid
 {% assign title = collection.products.first.title %}
@@ -88,9 +67,7 @@ reference existing variables and include literal strings, integers, floats and B
 {% endif %}
 ```
 
-Most [built-in filters](filters) will coerce string representations of numbers to an integer or
-float as needed. And filters expecting a string value or argument will usually stringify them
-automatically. Although this behavior is not always consistent.
+Most [built-in filters](./filters.md) will coerce string representations of numbers to an integer or float as needed. And filters expecting a string value or argument will usually stringify them automatically. Although this behavior is not always consistent.
 
 ### Literals
 
@@ -113,7 +90,7 @@ There is no literal syntax for creating arrays or hashes, although these types (
 equivalents) can be added to a template's render context, and many tags and filters are designed to
 work with them.
 
-One common idiom in Liquid is to create an array of strings using the [split](filters#split) filter.
+One common idiom in Liquid is to create an array of strings using the [split](./filters.md#split) filter.
 
 ```liquid
 {% assign my_array = "apple, banana, cabbage" | split: ", " %}

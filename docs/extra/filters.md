@@ -1,22 +1,18 @@
 # Extra Filters
 
-This page documents extra filters that are not included in standard Liquid. See the
-[filter reference](/language/filters) for a details of all standard filters.
+This page documents extra filters that are not included in standard Liquid. See the [filter reference](../language/filters.md) for a details of all standard filters.
 
 :::caution
-These filters are not part of "standard" Liquid. If you choose to use them in your templates, those
-templates are unlikely to render correctly with other implementations of Liquid.
+These filters are not part of "standard" Liquid. If you choose to use them in your templates, those templates are unlikely to render correctly with other implementations of Liquid.
 :::
 
 ## index
 
 `<array> | index: <object>`
 
-Return the zero-based index of the first occurrence of the argument object in the input array. If
-the argument object is not in the array, `nil` is returned.
+Return the zero-based index of the first occurrence of the argument object in the input array. If the argument object is not in the array, `nil` is returned.
 
-Register `index` with a [liquid.Environment](/api/Environment) to make it available to templates
-rendered from that environment.
+Register `index` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -41,11 +37,9 @@ env.add_filter("index", filters.index)
 
 Serialize objects as a JSON (JavaScript Object Notation) formatted string.
 
-The `json` filter uses Python's default [JSONEncoder](https://docs.python.org/3.8/library/json.html#json.JSONEncoder),
-supporting `dict`, `list`, `tuple`, `str`, `int`, `float`, some Enums, `True`, `False` and `None`.
+The `json` filter uses Python's default [`JSONEncoder`](https://docs.python.org/3.8/library/json.html#json.JSONEncoder), supporting `dict`, `list`, `tuple`, `str`, `int`, `float`, some Enums, `True`, `False` and `None`.
 
-Register `json` with a [liquid.Environment](/api/Environment) to make it available to templates
-rendered from that environment. Notice that `filters.JSON` is a class that need instantiating.
+Register `json` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment. Notice that `filters.JSON` is a class that need instantiating.
 
 ```python
 from liquid import Environment
@@ -76,10 +70,7 @@ env.add_filter("json", filters.JSON())
 </script>
 ```
 
-When registering the `JSON` filter, you can optionally pass a `default` argument. `default` will be
-passed to `json.dumps` and should be a function that gets called for objects that can't otherwise be
-serialized. For example, this default function adds support for serializing
-[data classes](https://docs.python.org/3/library/dataclasses.html).
+When registering the `JSON` filter, you can optionally pass a `default` argument. `default` will be passed to `json.dumps` and should be a function that gets called for objects that can't otherwise be serialized. For example, this default function adds support for serializing [data classes](https://docs.python.org/3/library/dataclasses.html).
 
 ```python
 from dataclasses import dataclass
@@ -103,11 +94,9 @@ env.add_filter("json", filters.JSON(default=default))
 
 `<string> | stylesheet_tag`
 
-Return an HTML `link` tag, as a string, with `href` equal to the input string, which should be a
-URL.
+Return an HTML `link` tag, as a string, with `href` equal to the input string, which should be a URL.
 
-Register `stylesheet_tag` with a [liquid.Environment](/api/Environment) to make it available to
-templates rendered from that environment.
+Register `stylesheet_tag` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -135,11 +124,9 @@ env.add_filter("stylesheet_tag", filters.stylesheet_tag)
 
 `<string> | script_tag`
 
-Return an HTML `script` tag, as a string, with `src` equal to the input string, which should be a
-URL.
+Return an HTML `script` tag, as a string, with `src` equal to the input string, which should be a URL.
 
-Register `script_tag` with a [liquid.Environment](/api/Environment) to make it available to
-templates rendered from that environment.
+Register `script_tag` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -169,12 +156,9 @@ env.add_filter("script_tag", filters.script_tag)
 
 Replace translation keys with strings for the current locale.
 
-Pass a mapping of locales to translations to the `Translate` filter when you register it. The
-current locale is read from the template context at render time, by looking for a variable named
-`locale`. `locale` will default to `default` if it is undefined.
+Pass a mapping of locales to translations to the `Translate` filter when you register it. The current locale is read from the template context at render time, by looking for a variable named `locale`. `locale` will default to `default` if it is undefined.
 
-Register `t` with a [liquid.Environment](/api/Environment) to make it available to templates
-rendered from that environment.
+Register `t` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ```python
 from liquid import Environment
@@ -232,8 +216,6 @@ Warenkorb
 Hallo Welt
 ```
 
-Notice that the `t` filter accepts arbitrary named parameters. Named parameters can be used to
-substitute fields in translation strings with values from the template context.
+Notice that the `t` filter accepts arbitrary named parameters. Named parameters can be used to substitute fields in translation strings with values from the template context.
 
-It you don't give `Translate` any locales or you leave it empty, you'll always get the translation
-key back unchanged.
+It you don't give `Translate` any locales or you leave it empty, you'll always get the translation key back unchanged.

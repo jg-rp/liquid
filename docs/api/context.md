@@ -1,11 +1,8 @@
 # liquid.Context
 
-The result of rendering a template depends on the _context_ in which it is rendered. That is,
-available variables and their values, and options set on the bound [Environment](Environment).
+A render context, containing namespaces for template variables and a references to the bound environment.
 
-You probably don't want to instantiate a context directly. A new one is created automatically every
-time a template is rendered. If you're writing custom tags, consider [copying](#copy) or
-[extending](#extend) an existing context.
+You probably don't want to instantiate a context directly. A new one is created automatically every time a template is rendered. If you're writing custom tags, consider [copying](#copy) or [extending](#extend) an existing context.
 
 ## `Context`
 
@@ -13,7 +10,7 @@ time a template is rendered. If you're writing custom tags, consider [copying](#
 
 **Parameters**:
 
-- `env: liquid.Environment` - The [Environment](Environment) associated with this context.
+- `env: liquid.Environment` - The [`Environment`](./environment.md) associated with this context.
 
 - `globals: Optional[Mapping[str, object]]` - Template global variables.
 
@@ -29,7 +26,7 @@ time a template is rendered. If you're writing custom tags, consider [copying](#
 
 **Type**: `liquid.Environment`
 
-The [Environment](Environment) associated with this context.
+The [`Environment`](./environment.md) associated with this context.
 
 ### `locals`
 
@@ -94,13 +91,13 @@ Return the value at path `path` if it is in scope, else default.
 
 `async get_async(key: str, val: Any) -> None`
 
-An async version of [get](#get).
+An async version of [`get()`](#get).
 
 ### `resolve`
 
 `resolve(name: str, default: object = _undefined) -> Any`
 
-Return the object at `name` in the current scope. This is like [get](#get), but does a single,
+Return the object at `name` in the current scope. This is like [`get()`](#get), but does a single,
 top-level lookup rather than a chained lookup from a sequence of keys.`
 
 ### `filter`

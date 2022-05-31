@@ -1,6 +1,6 @@
 # Comments
 
-Using the standard [comment](/language/tags#comment) tag you can mark a block of template text as a comment. Python Liquid does not parse or render anything between `{% comment %}` and `{% endcomment %}`.
+Using the standard [`{% comment %}`](../language/tags.md#comment) tag you can mark a block of template text as a comment. Python Liquid does not parse or render anything between `{% comment %}` and `{% endcomment %}`.
 
 ```liquid title="template"
 {% comment %} Determine if the current product is on sale. {% endcomment %}
@@ -27,10 +27,7 @@ Both the traditional comment block and the newer inline comment tag suffer from 
 
 **_New in version 1.1.0_**
 
-Python Liquid offers an alternative, non-standard template comment syntax. When enabled, anything
-between `{#` and `#}` will be treated as a comment. It is disabled by default. Enable it using the
-[template_comments](/api/Environment#template_comments) argument to [liquid.Evironment](/api/Environment)
-or [liquid.Template](/api/Template).
+Python Liquid offers an alternative, non-standard template comment syntax. When enabled, anything between `{#` and `#}` will be treated as a comment. It is disabled by default. Enable it using the [`template_comments`](../api/environment.md#template_comments) argument to [`liquid.Environment`](../api/environment.md) or [`liquid.Template`](../api/template.md).
 
 :::caution
 This alternative comment syntax is non-standard. If you choose to use it in your templates, those
@@ -53,7 +50,7 @@ arbitrary chunks of Liquid.
 #}
 ```
 
-Inside [liquid](/language/tags#liquid) tags any line starting with a hash is considered a comment.
+Inside [`{% liquid %}`](../language/tags.md#liquid) tags any line starting with a hash is considered a comment.
 
 ```liquid title="template"
 {% liquid
