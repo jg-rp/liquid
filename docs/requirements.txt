@@ -1,2 +1,2 @@
 python-dateutil==2.8.1
-Sphinx==3.5.4
+Sphinx==5.0.1

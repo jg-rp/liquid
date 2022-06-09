@@ -60,7 +60,7 @@ Rendering Templates
 .. autofunction:: Template(source: str, [options])
 
 .. autoclass:: liquid.template.BoundTemplate
-    :members: render, render_async, render_with_context, render_with_context_async, count_variables, count_variables_async
+    :members: render, render_async, render_with_context, render_with_context_async, analyze, analyze_async
 
     .. attribute:: name
 
@@ -72,7 +72,7 @@ Rendering Templates
         A dictionary of variables that will be added to the context of every template
         rendered from the environment.
 
-.. autoclass:: liquid.template.TemplateVariables
+.. autoclass:: liquid.template.TemplateAnalysis
 
 
 Template Loaders
