@@ -255,7 +255,7 @@ class BoundTemplate:
         :param raise_for_failures: If ``True``, will raise an exception if an
             ``ast.Node`` or ``expression.Expression`` does not define a ``children()``
             method, or if a partial template can not be loaded. When ``False``, no
-            expection is raised and a mapping of failed nodes and expressions is
+            exception is raised and a mapping of failed nodes and expressions is
             available as the ``failed_visits`` property. A mapping of unloadable partial
             templates is stored in the ``unloadable_partials`` property.
         :type raised_for_failed_visits: bool
@@ -373,7 +373,7 @@ class TemplateAnalysis:
     two-tuples. Each tuple holds the location of a reference to the name as (<template
     name>, <line number>). If a name is referenced multiple times, it will appear
     multiple times in the list. If a name is referenced before it is "assigned", it will
-    appear in ``template_locals`` and ``template_globals``.
+    appear in ``local_variables`` and ``global_variables``.
 
     :ivar variables: All referenced variables, whether they are in scope or not.
         Including references to names such as ``forloop`` from the ``for`` tag.
@@ -476,7 +476,7 @@ class _TemplateVariableCounter:
     def analyze(self) -> _TemplateVariableCounter:
         """Traverse the template's syntax tree and count variables as we go.
 
-        It is not safe to call this method multuple times.
+        It is not safe to call this method multiple times.
         """
         for node in self.template.tree.statements:
             self._analyze(node)
