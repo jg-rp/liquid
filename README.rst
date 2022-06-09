@@ -178,3 +178,16 @@ Contributing
   browser.
 
 - Check your changes have not adversely affected performance with ``make benchmark``.
+
+Docs
+****
+
+`Documentation <https://jg-rp.github.io/liquid/>`_ is built using `Docusaurus <https://docusaurus.io/>`_.
+Find the source in the `docs branch <https://github.com/jg-rp/liquid/tree/docs>`_ of this repository.
+
+The ``docs`` folder in the root of this repository contains older, sphinx-based docs, still hosted
+on `Read the Docs <https://liquid.readthedocs.io/en/latest/>`_.
+
+The plan is to generate API Documentation for Docusaurus from Python doc comments. The older docs
+will be kept until such time that better Docusaurus/sphinx integration is available or a workaround
+is found.
