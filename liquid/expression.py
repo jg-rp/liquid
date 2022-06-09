@@ -265,7 +265,6 @@ class RangeLiteral(Expression):
     def __hash__(self) -> int:
         return hash((self.start, self.stop))
 
-    # pylint: disable=no-self-use
     def _make_range(self, start: Any, stop: Any) -> range:
         try:
             start = int(start)

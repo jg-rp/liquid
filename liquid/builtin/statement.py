@@ -46,7 +46,6 @@ class StatementNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"StatementNode(tok={self.tok}, expression={self.expression!r})"
 
-    # pylint: disable=no-self-use
     def _to_liquid_string(self, val: Any, autoescape: bool) -> str:
         if isinstance(val, str) or (autoescape and hasattr(val, "__html__")):
             pass

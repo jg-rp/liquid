@@ -182,7 +182,6 @@ class IfTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
-    # pylint: disable=no-self-use
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Pare a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)

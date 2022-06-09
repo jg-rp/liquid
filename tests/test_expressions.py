@@ -21,14 +21,15 @@ from liquid.exceptions import LiquidTypeError
 class CompareExpressionTestCase(TestCase):
     def test_compare_nil_to_none(self):
         """Test that nil is equal to None."""
-        self.assertTrue(NIL.__eq__(None))
+        self.assertTrue(NIL.__eq__(None))  # pylint: disable=unnecessary-dunder-call
 
     def test_compare_blank_to_blank(self):
         """Test that blank is equal to blank."""
-        self.assertTrue(BLANK.__eq__(BLANK))
+        self.assertTrue(BLANK.__eq__(BLANK))  # pylint: disable=unnecessary-dunder-call
 
     def test_compare_continue(self):
         """Test that continue is only equal to itself."""
+        # pylint: disable=unnecessary-dunder-call
         self.assertFalse(CONTINUE.__eq__(object()))
 
 
@@ -60,19 +61,15 @@ class EvaluateExpressionTestCase(TestCase):
 
 
 class HashExpressionTestCase(TestCase):
-
-    # pylint: disable=no-self-use
     def test_hash_literal(self):
         """Test that literals are hashable."""
         hash(StringLiteral("foo"))
 
-    # pylint: disable=no-self-use
     def test_hash_range(self):
         """Test that range literals are hashable."""
         rng = RangeLiteral(IntegerLiteral(9), IntegerLiteral(1))
         hash(rng)
 
-    # pylint: disable=no-self-use
     def test_hash_identifier(self):
         """Test that range identifiers are hashable."""
         ident = Identifier([IdentifierPathElement(0)])

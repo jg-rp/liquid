@@ -167,7 +167,7 @@ class Markup(str):
             "autoescape requires Markupsafe to be installed"
         )  # pragma: no cover
 
-    # pylint: disable=no-self-use,missing-function-docstring
+    # pylint: disable=missing-function-docstring
     def unescape(self) -> str:
         raise Error(
             "autoescape requires Markupsafe to be installed"

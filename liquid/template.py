@@ -226,7 +226,6 @@ class BoundTemplate:
             self.globals,
         )
 
-    # pylint: disable=no-self-use
     def make_partial_namespace(
         self,
         partial: bool,

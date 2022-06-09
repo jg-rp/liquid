@@ -431,7 +431,6 @@ class Environment:
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
 
-    # pylint: disable=no-self-use
     def _get_expression_parsers(
         self, cache_size: int = 0
     ) -> Tuple[
