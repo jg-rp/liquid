@@ -90,6 +90,92 @@ const config = {
       },
       footer: {
         style: "dark",
+        links: [
+          {
+            title: "Docs",
+            items: [
+              {
+                label: "Introduction",
+                to: "/introduction/getting-started",
+              },
+              {
+                label: "Installation",
+                to: "/introduction/getting-started#install",
+              },
+              {
+                label: "Filter Reference",
+                to: "/language/filters",
+              },
+              {
+                label: "Tag Reference",
+                to: "/language/tags",
+              },
+            ],
+          },
+          {
+            title: "Features",
+            items: [
+              {
+                label: "HTML Auto-Escape",
+                to: "/introduction/auto-escape",
+              },
+              {
+                label: "Async Support",
+                to: "/introduction/async-support",
+              },
+              {
+                label: "Caching",
+                to: "/introduction/caching",
+              },
+              {
+                label: "Static Template Analysis",
+                to: "/guides/static-template-analysis",
+              },
+            ],
+          },
+          {
+            title: "Links",
+            items: [
+              {
+                label: "GitHub",
+                href: "https://github.com/jg-rp/liquid",
+              },
+              {
+                label: "Change Log",
+                href: "https://github.com/jg-rp/liquid/blob/main/CHANGES.rst",
+              },
+              {
+                label: "PyPi",
+                href: "https://pypi.org/project/python-liquid/",
+              },
+            ],
+          },
+          {
+            title: "Related Projects",
+            items: [
+              {
+                label: "LiquidScript",
+                href: "https://github.com/jg-rp/liquidscript",
+              },
+              {
+                label: "Django Liquid",
+                href: "https://github.com/jg-rp/django-liquid",
+              },
+              {
+                label: "Flask Liquid",
+                href: "https://github.com/jg-rp/Flask-Liquid",
+              },
+              {
+                label: "Python Liquid Extra",
+                href: "https://github.com/jg-rp/liquid-extra",
+              },
+              {
+                label: "Golden Liquid",
+                href: "https://github.com/jg-rp/golden-liquid",
+              },
+            ],
+          },
+        ],
         copyright: `Copyright © ${new Date().getFullYear()} James Prior. Built with Docusaurus.`,
       },
       prism: {

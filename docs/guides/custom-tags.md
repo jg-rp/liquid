@@ -106,7 +106,7 @@ The current token in the stream will always be of the type `TOKEN_TAG`, represen
 
 We retrieve a `Parser` from the active [`Environment`](../api/environment.md), then use its `parse_block` method parse our `with` tag's block, which could contain any number of other tags and output statements. Every block tag is expected to leave the stream with it's "end" tag as the current token.
 
-Note that `parse_argument` is an implementation detail and a required method of [`liquid.tag.Tag`](../api/tag.md).
+Note that `parse_argument` is an implementation detail and not a required method of [`liquid.tag.Tag`](../api/tag.md).
 
 ```python title="with_tag.py (continued)"
 class WithTag(Tag):
