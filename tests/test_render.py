@@ -395,3 +395,7 @@ class RenderMiscTestCase(RenderTestCase):
     def test_special_properties(self):
         """Test that we can use special, built-in properties."""
         self._test(golden.special.cases)
+
+    def test_identifiers(self):
+        """Test permitted identifiers."""
+        self._test(golden.identifiers.cases)

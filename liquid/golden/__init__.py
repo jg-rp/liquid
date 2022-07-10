@@ -81,6 +81,7 @@ from . import base64_url_safe_decode_filter
 
 from . import range_objects
 from . import special
+from . import identifiers
 
 test_cases = [
     assign_tag,
@@ -161,4 +162,5 @@ test_cases = [
     range_objects,
     special,
     inline_comment_tag,
+    identifiers,
 ]
