@@ -555,4 +555,14 @@ cases = [
             }
         },
     ),
+    Case(
+        description="range start and stop are the same",
+        template=r"{% for i in (1..1) %}{{ i }} {% endfor %}",
+        expect="1 ",
+    ),
+    Case(
+        description="range start and stop are zero",
+        template=r"{% for i in (0..0) %}{{ i }} {% endfor %}",
+        expect="0 ",
+    ),
 ]
