@@ -428,7 +428,7 @@ def parse_unchained_identifier(
     return ident
 
 
-# NOTE: These names are missleading. The args and options in question can apply to any
+# NOTE: These names are misleading. The args and options in question can apply to any
 # iterable in a loop expression, not just ranges.
 
 RangeArg = Union[
