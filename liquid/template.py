@@ -425,7 +425,7 @@ class _TemplateVariableCounter:
         or ``expression.Expression`` does not define a ``children()`` method, or if a
         partial template can not be loaded.
 
-        When ``False``, no expection is raised and a mapping of failed nodes/expressions
+        When ``False``, no exception is raised and a mapping of failed nodes/expressions
         is available as the ``failed_visits`` property. A mapping of unloadable partial
         templates are stored in the ``unloadable_partials`` property.
     :type: raised_for_failed_visits: bool
