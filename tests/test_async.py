@@ -55,10 +55,10 @@ class LoadAsyncTestCase(unittest.TestCase):
         env = Environment(loader=FileSystemLoader("tests/fixtures/dropify/"))
 
         async def coro():
-            return await env.get_template_async("index.liquid")
+            template = await env.get_template_async("index.liquid")
+            self.assertIsInstance(template, BoundTemplate)
 
-        template = asyncio.run(coro())
-        self.assertIsInstance(template, BoundTemplate)
+        asyncio.run(coro())
 
     def test_template_not_found_async(self):
         """Test that non-existent templates raise TemplateNotFound."""
@@ -111,31 +111,32 @@ class LoadAsyncTestCase(unittest.TestCase):
             )
 
             async def coro():
-                return await env.get_template_async("some.liquid")
+                template = await env.get_template_async("some.liquid")
+                self.assertIsInstance(template, BoundTemplate)
+                uptodate = await template.is_up_to_date_async()
+                self.assertTrue(uptodate)
 
-            template = asyncio.run(coro())
-            self.assertIsInstance(template, BoundTemplate)
-            uptodate = asyncio.run(template.is_up_to_date_async())
-            self.assertTrue(uptodate)
+                # Update template content.
+                time.sleep(0.01)  # Make sure some time has passed.
+                template_path.touch()
 
-            # Update template content.
-            time.sleep(0.01)  # Make sure some time has passed.
-            template_path.touch()
+                # Template is not up to date.
+                uptodate = await template.is_up_to_date_async()
+                self.assertFalse(uptodate)
 
-            # Template is not up to date.
-            uptodate = asyncio.run(template.is_up_to_date_async())
-            self.assertFalse(uptodate)
+                template = await env.get_template_async("some.liquid")
+                self.assertIsInstance(template, BoundTemplate)
 
-            template = asyncio.run(coro())
-            self.assertIsInstance(template, BoundTemplate)
-            # Template is up to date.
-            uptodate = asyncio.run(template.is_up_to_date_async())
-            self.assertTrue(uptodate)
+                # Template is up to date.
+                uptodate = await template.is_up_to_date_async()
+                self.assertTrue(uptodate)
+
+            asyncio.run(coro())
 
     def test_nested_include_async(self):
         """Test that nested includes are rendered asynchronously."""
 
-        async def coro(template):
+        async def coro(template: BoundTemplate):
             return await template.render_async()
 
         with patch(
@@ -192,7 +193,7 @@ class LoadAsyncTestCase(unittest.TestCase):
             ),
         ]
 
-        async def coro(template):
+        async def coro(template: BoundTemplate):
             return await template.render_async()
 
         for case in test_cases:
@@ -246,7 +247,7 @@ class LoadAsyncTestCase(unittest.TestCase):
             ),
         ]
 
-        async def coro(template):
+        async def coro(template: BoundTemplate):
             return await template.render_async()
 
         for case in test_cases:
