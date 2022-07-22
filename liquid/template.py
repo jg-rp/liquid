@@ -71,6 +71,10 @@ class BoundTemplate:
     :type uptodate: Optional[Callable[[], bool]]
     """
 
+    # Subclass `BoundTemplate` and override `context_class` to use a subclass of
+    # `Context` when rendering templates.
+    context_class = Context
+
     # pylint: disable=redefined-builtin, too-many-arguments
     def __init__(
         self,
@@ -95,14 +99,18 @@ class BoundTemplate:
 
         Accepts the same arguments as the :class:`dict` constructor.
         """
-        context = Context(self.env, globals=self.make_globals(dict(*args, **kwargs)))
+        context = self.context_class(
+            self.env, globals=self.make_globals(dict(*args, **kwargs))
+        )
         buf = StringIO()
         self.render_with_context(context, buf)
         return buf.getvalue()
 
     async def render_async(self, *args: Any, **kwargs: Any) -> str:
         """An async version of :meth:`liquid.template.BoundTemplate.render`."""
-        context = Context(self.env, globals=self.make_globals(dict(*args, **kwargs)))
+        context = self.context_class(
+            self.env, globals=self.make_globals(dict(*args, **kwargs))
+        )
         buf = StringIO()
         await self.render_with_context_async(context, buf)
         return buf.getvalue()

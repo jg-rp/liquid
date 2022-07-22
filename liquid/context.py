@@ -383,7 +383,7 @@ class Context:
         # temporary namespace is pushed to the front of this chain.
         self.scope = ReadOnlyChainMap(self.locals, self.globals, builtin, self.counters)
 
-        # A namspace supporting stateful tags. Such as `cycle`, `increment`,
+        # A namespace supporting stateful tags. Such as `cycle`, `increment`,
         # `decrement` and `ifchanged`.
         self.tag_namespace: Dict[str, Any] = {
             "cycles": {},
@@ -595,13 +595,13 @@ class Context:
         self, namespace: Namespace, disabled_tags: Optional[List[str]] = None
     ) -> Context:
         """Return a copy of this context without any local variables or other state
-        for statefull tags."""
+        for stateful tags."""
         if self._copy_depth > MAX_CONTEXT_DEPTH:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive render"
             )
 
-        return Context(
+        return type(self)(
             self.env,
             globals=ReadOnlyChainMap(namespace, self.globals),
             disabled_tags=disabled_tags,

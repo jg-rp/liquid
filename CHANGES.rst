@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.3.0
+-------------
+
+**Features**
+
+- Allow render context customization by subclassing ``Context`` and ``BoundTemplate``.
+
+
 Version 1.2.1
 -------------
 
