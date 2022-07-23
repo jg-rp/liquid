@@ -414,11 +414,11 @@ class Context:
     def get(self, path: ContextPath, default: object = _undefined) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
-            return self.resolve(path, default)
+            return self._resolve(path, default)
 
         name, items = path[0], path[1:]
         assert isinstance(name, str)
-        obj = self.resolve(name, default)
+        obj = self._resolve(name, default)
 
         if items:
             try:
@@ -445,11 +445,11 @@ class Context:
     ) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
-            return self.resolve(path, default)
+            return self._resolve(path, default)
 
         name, items = path[0], path[1:]
         assert isinstance(name, str)
-        obj = self.resolve(name, default)
+        obj = self._resolve(name, default)
 
         if items:
             _gi = Context.getitem_async
@@ -471,6 +471,9 @@ class Context:
         This is like `get`, but does a single, top-level lookup rather than a
         chained lookup from a sequence of keys.
         """
+        return self._resolve(name, default)
+
+    def _resolve(self, name: str, default: object = _undefined) -> Any:
         try:
             return self.scope[name]
         except KeyError:
