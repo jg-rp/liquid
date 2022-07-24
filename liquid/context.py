@@ -6,6 +6,7 @@ import collections.abc
 import datetime
 import functools
 import itertools
+import re
 import warnings
 
 from collections import deque
@@ -354,6 +355,7 @@ class Context:
         "disabled_tags",
         "autoescape",
         "_copy_depth",
+        "parent_context",
     )
 
     getitem = _getitem
@@ -365,6 +367,7 @@ class Context:
         globals: Optional[Namespace] = None,
         disabled_tags: Optional[List[str]] = None,
         copy_depth: int = 0,
+        parent_context: Optional[Context] = None,
     ):
         self.env = env
 
@@ -406,6 +409,9 @@ class Context:
         # helps us guard against recursive use of the "render" tag, or at least fail
         # gracefully.
         self._copy_depth = copy_depth
+
+        # A reference to a parent render context, if this one has been copied.
+        self.parent_context = parent_context
 
     def assign(self, key: str, val: Any) -> None:
         """Add `val` to the context with key `key`."""
@@ -609,6 +615,7 @@ class Context:
             globals=ReadOnlyChainMap(namespace, self.globals),
             disabled_tags=disabled_tags,
             copy_depth=self._copy_depth + 1,
+            parent_context=self,
         )
 
     def error(self, exc: Error) -> None:
@@ -617,3 +624,81 @@ class Context:
             raise exc
         if self.env.mode == Mode.WARN:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
+
+
+class VariableCaptureContext(Context):
+    """A render context that captures template variable names."""
+
+    # Used for formatting context path strings.
+    re_ident = re.compile(r"^[\w_][\w_\-]*$")
+
+    def __init__(
+        self,
+        env: Environment,
+        globals: Optional[Namespace] = None,
+        disabled_tags: Optional[List[str]] = None,
+        copy_depth: int = 0,
+        parent_context: Optional[VariableCaptureContext] = None,
+    ):
+        super().__init__(env, globals, disabled_tags, copy_depth, parent_context)
+        self.local_references: List[str] = []
+        self.all_references: List[str] = []
+        self.undefined_references: List[str] = []
+
+        root_context: VariableCaptureContext = self
+        while root_context.parent_context and isinstance(
+            root_context.parent_context, VariableCaptureContext
+        ):
+            root_context = root_context.parent_context
+        self.root_context = root_context
+
+    def assign(self, key: str, val: Any) -> None:
+        self.local_references.append(key)
+        return super().assign(key, val)
+
+    def get(self, path: ContextPath, default: object = _undefined) -> object:
+        result = super().get(path, default)
+        self._count_reference(path, result)
+        return result
+
+    async def get_async(
+        self, path: ContextPath, default: object = _undefined
+    ) -> object:
+        result = await super().get_async(path, default)
+        self._count_reference(path, result)
+        return result
+
+    def resolve(self, name: str, default: object = _undefined) -> Any:
+        result = super().resolve(name, default)
+        self._count_reference(name, result)
+        return result
+
+    def increment(self, name: str) -> int:
+        self.local_references.append(name)
+        return super().increment(name)
+
+    def decrement(self, name: str) -> int:
+        self.local_references.append(name)
+        return super().decrement(name)
+
+    def _count_reference(self, path: ContextPath, result: object) -> None:
+        if isinstance(path, str):
+            ref = path
+        else:
+            _path = []
+            for elem in path:
+                if isinstance(elem, int):
+                    _path.append(f"[{elem}]")
+                else:
+                    if self.re_ident.match(elem):
+                        if _path:
+                            _path.append(f".{elem}")
+                        else:
+                            _path.append(f"{elem}")
+                    else:
+                        _path.append(f'["{elem}"]')
+            ref = "".join(_path)
+
+        if is_undefined(result):
+            self.root_context.undefined_references.append(ref)
+        self.root_context.all_references.append(ref)

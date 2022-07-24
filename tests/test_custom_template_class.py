@@ -86,7 +86,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
                 copy_depth: int = 0,
             ):
                 super().__init__(env, globals, disabled_tags, copy_depth)
-                self.references: List[ContextPath] = []
+                self.references: List[str] = []
 
             def get(self, path: ContextPath, default: object = ...) -> object:
                 self._count_reference(path)

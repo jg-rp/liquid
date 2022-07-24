@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from collections import abc
+from collections import Counter
 from collections import defaultdict
 
 from io import StringIO
@@ -26,6 +27,7 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.context import Context
+from liquid.context import VariableCaptureContext
 from liquid.context import ReadOnlyChainMap
 
 from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
@@ -74,6 +76,7 @@ class BoundTemplate:
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
     # `Context` when rendering templates.
     context_class = Context
+    capture_context_class = VariableCaptureContext
 
     # pylint: disable=redefined-builtin, too-many-arguments
     def __init__(
@@ -286,7 +289,7 @@ class BoundTemplate:
     async def analyze_async(
         self, follow_partials: bool = True, raise_for_failures: bool = True
     ) -> TemplateAnalysis:
-        """An async version of :meth:`analyse`."""
+        """An async version of :meth:`analyze`."""
         refs = await _TemplateVariableCounter(
             self,
             follow_partials=follow_partials,
@@ -299,6 +302,54 @@ class BoundTemplate:
             global_variables=dict(refs.template_globals),
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
+        )
+
+    def analyze_with_context(
+        self, *args: Any, **kwargs: Any
+    ) -> ContextualTemplateAnalysis:
+        """Analyze a path through this template's syntax tree given some context data.
+
+        Unlike :meth:`analyze`, this form of template analysis does perform a render,
+        capturing template variables as we go.
+
+        Python Liquid does not currently support template introspection from within a
+        render context or ``Expression`` object. Meaning line numbers and template names
+        are not available. Only variable names are reported along with the number of
+        times they were referenced.
+
+        It's also, using this method, not currently possible to detect names added to a
+        block's scope. For example, ``forloop.index`` will be included in the results
+        object if referenced within a ``for`` loop block.
+
+        Accepts the same arguments as :meth:`render`.
+
+        :returns: Contextual analysis results.
+        :rtype: :class:`liquid.template.ContextualTemplateAnalysis`
+        """
+        context = self.capture_context_class(
+            self.env, globals=self.make_globals(dict(*args, **kwargs))
+        )
+        buf = StringIO()
+        self.render_with_context(context, buf)
+        return ContextualTemplateAnalysis(
+            all_variables=dict(Counter(context.all_references)),
+            local_variables=dict(Counter(context.local_references)),
+            undefined_variables=dict(Counter(context.undefined_references)),
+        )
+
+    async def analyze_with_context_async(
+        self, *args: Any, **kwargs: Any
+    ) -> ContextualTemplateAnalysis:
+        """An async version of :meth:`analyze_with_context`."""
+        context = self.capture_context_class(
+            self.env, globals=self.make_globals(dict(*args, **kwargs))
+        )
+        buf = StringIO()
+        await self.render_with_context_async(context, buf)
+        return ContextualTemplateAnalysis(
+            all_variables=dict(Counter(context.all_references)),
+            local_variables=dict(Counter(context.local_references)),
+            undefined_variables=dict(Counter(context.undefined_references)),
         )
 
 
@@ -369,6 +420,38 @@ RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
 
 Refs = Dict[str, List[Tuple[str, int]]]
 ReferenceMap = DefaultDict[str, List[Tuple[str, int]]]
+
+
+# pylint: disable=too-few-public-methods
+class ContextualTemplateAnalysis:
+    """The result of analyzing a template's variables using
+    :meth:`BoundTemplate.analyze_with_context`.
+
+    Each of the following properties is a dictionary mapping variable names to the
+    number of times that variable was referenced.
+
+    :ivar all_variables: All variables references along a path through the template's
+        syntax tree.
+    :ivar local_variables: The names of variables assigned using the built-in ``assign``
+        ``capture``, ``increment`` or ``decrement`` tags, or any custom tag that uses
+        ``Context.assign()``.
+    :ivar undefined_variables: The names of variables that could not be resolved. If a
+        name is referenced before it is assigned, it will appear in ``undefined`` and
+        ``assigns``.
+    """
+
+    __slots__ = ("variables", "assigns", "undefined")
+
+    def __init__(
+        self,
+        *,
+        all_variables: Dict[str, int],
+        local_variables: Dict[str, int],
+        undefined_variables: Dict[str, int],
+    ) -> None:
+        self.variables = all_variables
+        self.assigns = local_variables
+        self.undefined = undefined_variables
 
 
 # pylint: disable=too-few-public-methods

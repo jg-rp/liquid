@@ -7,6 +7,10 @@ Version 1.3.0
 **Features**
 
 - Allow render context customization by subclassing ``Context`` and ``BoundTemplate``.
+- Contextual template analysis with ``BoundTemplate.analyze_with_context()``.
+  Complementing static template analysis, released in version 1.2.0, contextual template
+  analysis performs a template `render`, capturing information about template variable
+  usage as it goes.
 
 
 Version 1.2.1
