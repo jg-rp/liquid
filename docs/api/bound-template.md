@@ -86,6 +86,24 @@ Statically analyze the template and any included/rendered templates.
 **Returns**: An object containing analysis results.  
 **Return Type**: [`liquid.template.TemplateAnalysis`](./template-analysis.md)
 
+### `analyze_with_context`
+
+`analyze_with_context(*args, **kwargs)`
+
+Analyze a path through this template's syntax tree given some context data. Accepts the same arguments as [`render`](#render).
+
+**Returns**: Contextual analysis results
+**Return Type**: [`liquid.template.ContextualTemplateAnalysis`](./contextual-template-analysis.md)
+
+### `analyze_with_context_async`
+
+`async analyze_with_context_async(*args, **kwargs)`
+
+Analyze a path through this template's syntax tree given some context data. Accepts the same arguments as [`render`](#render).
+
+**Returns**: Contextual analysis results
+**Return Type**: [`liquid.template.ContextualTemplateAnalysis`](./contextual-template-analysis.md)
+
 ### `render`
 
 `render(*args, **kwargs) -> str`
