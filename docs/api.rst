@@ -60,7 +60,7 @@ Rendering Templates
 .. autofunction:: Template(source: str, [options])
 
 .. autoclass:: liquid.template.BoundTemplate
-    :members: render, render_async, render_with_context, render_with_context_async, analyze, analyze_async
+    :members: render, render_async, render_with_context, render_with_context_async, analyze, analyze_async, analyze_with_context, analyze_with_context_async
 
     .. attribute:: name
 
@@ -73,6 +73,8 @@ Rendering Templates
         rendered from the environment.
 
 .. autoclass:: liquid.template.TemplateAnalysis
+
+.. autoclass:: liquid.template.ContextualTemplateAnalysis
 
 
 Template Loaders
