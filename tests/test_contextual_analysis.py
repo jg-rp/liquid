@@ -26,17 +26,17 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         undefined: Dict[str, int],
     ) -> None:
         refs = template.analyze_with_context(**data)
-        self.assertEqual(refs.variables, variables)
-        self.assertEqual(refs.assigns, assigns)
-        self.assertEqual(refs.undefined, undefined)
+        self.assertEqual(refs.all_variables, variables)
+        self.assertEqual(refs.local_variables, assigns)
+        self.assertEqual(refs.undefined_variables, undefined)
 
         async def coro():
             return await template.analyze_with_context_async(**data)
 
         refs = asyncio.run(coro())
-        self.assertEqual(refs.variables, variables)
-        self.assertEqual(refs.assigns, assigns)
-        self.assertEqual(refs.undefined, undefined)
+        self.assertEqual(refs.all_variables, variables)
+        self.assertEqual(refs.local_variables, assigns)
+        self.assertEqual(refs.undefined_variables, undefined)
 
     def test_analyze_output(self):
         """Test that we count references to variables in output statements."""

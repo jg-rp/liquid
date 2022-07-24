@@ -440,7 +440,7 @@ class ContextualTemplateAnalysis:
         ``assigns``.
     """
 
-    __slots__ = ("variables", "assigns", "undefined")
+    __slots__ = ("all_variables", "local_variables", "undefined_variables")
 
     def __init__(
         self,
@@ -449,9 +449,9 @@ class ContextualTemplateAnalysis:
         local_variables: Dict[str, int],
         undefined_variables: Dict[str, int],
     ) -> None:
-        self.variables = all_variables
-        self.assigns = local_variables
-        self.undefined = undefined_variables
+        self.all_variables = all_variables
+        self.local_variables = local_variables
+        self.undefined_variables = undefined_variables
 
 
 # pylint: disable=too-few-public-methods
