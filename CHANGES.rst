@@ -25,7 +25,7 @@ Version 1.2.0
 
 - New inline comment tag ``{% # .. %}``. See `Shopify Liquid PR #1498 <https://github.com/Shopify/liquid/pull/1498>`_
 - Template static analysis. ``BoundTemplate.analyze()`` and ``BoundTemplate.analyze_async()``
-  traverse a template's abstract syntax tree an report template variable usage. Static 
+  traverse a template's abstract syntax tree and report template variable usage. Static 
   tree traversal (without rendering or evaluating expressions) is supported by the new,
   optional ``children()`` methods of ``liquid.expression.Expression`` and ``liquid.ast.Node``.
 
