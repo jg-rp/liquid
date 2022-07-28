@@ -48,8 +48,7 @@ from liquid import StrictUndefined
 from liquid.exceptions import UndefinedError
 
 class StrictDefaultUndefined(StrictUndefined):
-
-    def __getattribute__(self, name: str) -> Any:
+    def __getattribute__(self, name: str) -> object:
         if name in (
             "__repr__",
             "__liquid__",
@@ -57,11 +56,10 @@ class StrictDefaultUndefined(StrictUndefined):
             "name",
             "hint",
             "obj",
-            "hint",
             "msg",
         ):
-            return super().__getattribute__(name)
-        raise UndefinedError(self.msg)
+            return object.__getattribute__(self, name)
+        raise UndefinedError(object.__getattribute__(self, "msg"))
 ```
 
 ```python title="my_default_filter.py"
