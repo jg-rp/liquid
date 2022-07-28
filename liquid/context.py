@@ -287,24 +287,25 @@ class StrictUndefined(Undefined):
 
     __slots__ = ("msg",)
 
-    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
-        super().__init__(name, obj=obj, hint=hint)
-        if self.hint:
-            self.msg = self.hint
-        else:
-            self.msg = f"'{self.name}' is undefined"
-
-    def __getattribute__(self, name: str) -> Any:
-        if name in (
+    # Properties that don't raise an UndefinedError.
+    allowed_properties = frozenset(
+        [
             "__repr__",
             "name",
             "hint",
             "obj",
-            "hint",
             "msg",
-        ):
-            return super().__getattribute__(name)
-        raise UndefinedError(self.msg)
+        ]
+    )
+
+    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
+        super().__init__(name, obj=obj, hint=hint)
+        self.msg = self.hint if self.hint else f"'{self.name}' is undefined"
+
+    def __getattribute__(self, name: str) -> object:
+        if name in object.__getattribute__(self, "allowed_properties"):
+            return object.__getattribute__(self, name)
+        raise UndefinedError(object.__getattribute__(self, "msg"))
 
     def __contains__(self, item: object) -> bool:
         raise UndefinedError(self.msg)
@@ -338,6 +339,23 @@ class StrictUndefined(Undefined):
 
     def __reversed__(self) -> Iterable[Any]:
         raise UndefinedError(self.msg)
+
+
+class StrictDefaultUndefined(StrictUndefined):
+    """An undefined that plays nicely with the `default` filter."""
+
+    # Properties that don't raise an UndefinedError.
+    allowed_properties = frozenset(
+        [
+            "__repr__",
+            "__liquid__",
+            "__class__",
+            "name",
+            "hint",
+            "obj",
+            "msg",
+        ]
+    )
 
 
 # pylint: disable=too-many-instance-attributes redefined-builtin

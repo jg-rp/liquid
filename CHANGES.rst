@@ -1,6 +1,20 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.0 (unreleased)
+--------------------------
+
+**Features**
+
+- Include ``StrictDefaultUndefined``, and undefined type that plays nicely with the
+  ``default`` filter.
+
+**Fixes**
+
+- Fixed a bug in ``StrictUndefined`` that stopped if from looking at its own ``msg``
+  property. See #57.
+
+
 Version 1.3.0
 -------------
 

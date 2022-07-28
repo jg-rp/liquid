@@ -11,6 +11,7 @@ from liquid import Environment
 from liquid import Undefined
 from liquid import DebugUndefined
 from liquid import StrictUndefined
+from liquid import StrictDefaultUndefined
 
 from liquid.template import BoundTemplate
 
@@ -233,6 +234,24 @@ class TestUndefined(TestCase):
         template = env.from_string(r"{{ nosuchthing }}")
         result = template.render(nosuchthing=undef)
         self.assertEqual(result, "str has no attribute 'nosuchthing'")
+
+    def test_strict_default_undefined(self):
+        """Test that we can use an undefined type with the default filter."""
+        env = Environment(undefined=StrictDefaultUndefined)
+        undef = DebugUndefined(name="nosuchthing", obj="foo")
+        template = env.from_string(r"{{ nosuchthing | default: 'hello' }}")
+        result = template.render(nosuchthing=undef)
+        self.assertEqual(result, "hello")
+
+        template = env.from_string(r"{{ thing | default: 'hello' }}")
+        result = template.render(thing="foo")
+        self.assertEqual(result, "foo")
+
+        template = env.from_string(r"{{ nosuchthing }}")
+        with self.assertRaises(UndefinedError) as raised:
+            template.render()
+
+        self.assertEqual(str(raised.exception), "'nosuchthing' is undefined, on line 1")
 
     def test_lax_filter(self):
         """Test that undefined filters can be silently ignored."""

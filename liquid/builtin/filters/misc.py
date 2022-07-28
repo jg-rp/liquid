@@ -46,7 +46,7 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
     if allow_false is True and _obj is False:
         return obj
 
-    if _obj in (None, False, EMPTY) or is_undefined(_obj):
+    if is_undefined(_obj) or _obj in (None, False, EMPTY):
         return default_
 
     return obj

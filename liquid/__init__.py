@@ -1,7 +1,7 @@
 # flake8: noqa
 # pylint: disable=useless-import-alias,missing-module-docstring
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 try:
     from markupsafe import escape as escape
@@ -26,6 +26,7 @@ from .context import Context as Context
 from .context import Undefined as Undefined
 from .context import DebugUndefined as DebugUndefined
 from .context import StrictUndefined as StrictUndefined
+from .context import StrictDefaultUndefined as StrictDefaultUndefined
 from .context import is_undefined as is_undefined
 
 from .environment import Environment as Environment
