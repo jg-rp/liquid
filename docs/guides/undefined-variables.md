@@ -67,6 +67,7 @@ class StrictDefaultUndefined(StrictUndefined):
 ```python title="my_default_filter.py"
 from liquid.filter import liquid_filter
 from liquid import is_undefined
+from liquid.expression import EMPTY
 
 @liquid_filter
 def default_undefined(
