@@ -65,6 +65,12 @@ const sidebars = {
       collapsed: false,
       items: ["extra/introduction", "extra/filters", "extra/tags"],
     },
+    {
+      type: "category",
+      label: "Babel",
+      collapsed: false,
+      items: ["babel/introduction", "babel/filters"],
+    },
   ],
 
   apiSidebar: [

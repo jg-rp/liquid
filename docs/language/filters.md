@@ -13,8 +13,7 @@ You can find their license [here](https://github.com/Shopify/liquid/blob/master/
 
 `<number> | abs`
 
-Return the absolute value of a number. Works on integers, floats and string representations of
-integers or floats.
+Return the absolute value of a number. Works on integers, floats and string representations of integers or floats.
 
 ```liquid
 {{ -42 | abs }}
