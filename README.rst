@@ -62,6 +62,8 @@ Links
 Related Projects
 ----------------
 
+- `liquid-babel <https://github.com/jg-rp/liquid-babel>`_: Internationalization and localization
+  for Liquid templates.
 - `LiquidScript <https://github.com/jg-rp/liquidscript>`_: A JavaScript and TypeScript engine for
   Liquid with a similar high-level API to Python Liquid.
 - `django-liquid <https://github.com/jg-rp/django-liquid>`_: A Django template backend for Liquid.
@@ -87,27 +89,10 @@ We strive to be 100% compatible with the `reference implementation <https://shop
 of Liquid, written in Ruby. That is, given an equivalent render context, a template rendered with
 Python Liquid should produce the same output as when rendered with Ruby Liquid.
 
-Known Issues
-************
+See the `known issues page <https://jg-rp.github.io/liquid/known_issues>`_ for details of known
+incompatibilities between PYthon Liquid and Ruby Liquid, and please help by raising an issue
+if you notice an incompatibility.
 
-`Please help by raising an issue if you notice an incompatibility.`
-
-- Error handling. Python Liquid might not handle syntax or type errors in the same
-  way as the reference implementation. We might fail earlier or later, and will 
-  almost certainly produce a different error message.
-  
-- The built-in ``date`` filter uses `dateutil <https://dateutil.readthedocs.io/en/stable/>`_ for
-  parsing strings to ``datetime``\s, and ``strftime`` for formatting. There are likely to be some
-  inconsistencies between this and the reference implementation's equivalent parsing and formatting
-  of dates and times.
-
-- In Ruby Liquid, the built-in ``increment`` and ``decrement`` tags can, in some cases,
-  mutate "global" context and keep named counters alive between renders. Although not 
-  difficult to implement, I can't quite bring myself to do it.
-
-- If a range literal uses a float literal as its start or stop value, the float literal 
-  must have something after the decimal point. This is OK ``(1.0..3)``. This is not 
-  ``(1...3)``. Ruby Liquid will accept either, resulting in a sequence of ``[1,2,3]``.
 
 Benchmark
 ---------
