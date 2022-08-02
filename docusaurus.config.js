@@ -170,8 +170,8 @@ const config = {
                 href: "https://github.com/jg-rp/liquid-extra",
               },
               {
-                label: "Golden Liquid",
-                href: "https://github.com/jg-rp/golden-liquid",
+                label: "Python Liquid Babel",
+                href: "https://github.com/jg-rp/liquid-babel",
               },
             ],
           },
