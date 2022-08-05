@@ -1,18 +1,21 @@
 Python Liquid Change Log
 ========================
 
-Version 1.4.0 (unreleased)
+Version 1.4.0
 --------------------------
 
 **Features**
 
-- Include ``StrictDefaultUndefined``, and undefined type that plays nicely with the
-  ``default`` filter.
+- ``StrictDefaultUndefined``, an undefined type that plays nicely with the ``default``
+  filter, is now built in.
+- Configure resource limits with class attributes set on a Liquid ``Environment``. Those
+  class attributes are ``context_depth_limit``, ``loop_iteration_limit``,
+  ``local_namespace_limit`` and ``output_stream_limit``.
 
 **Fixes**
 
-- Fixed a bug in ``StrictUndefined`` that stopped if from looking at its own ``msg``
-  property. See #57.
+- Fixed a bug in ``StrictUndefined`` that, when extended, stopped if from looking at its
+  own ``msg`` property. See #57.
 
 
 Version 1.3.0

@@ -5,6 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from typing import Callable
+from typing import ClassVar
 from typing import Dict
 from typing import Any
 from typing import Type
@@ -114,6 +115,26 @@ class Environment:
     :type globals: dict
     """
 
+    # Maximum number of times a context can be extended or wrapped before raising
+    # a ContextDepthError.
+    context_depth_limit: ClassVar[int] = 30
+
+    # Maximum number of iterations per loop before a LoopIterationLimitError is raised.
+    loop_iteration_limit: ClassVar[int] = 10000
+
+    # Maximum number of names allowed in a template's local namespace before a
+    # LocalNamespaceLimitError is raised.
+    local_namespace_limit: ClassVar[int] = 1000
+
+    # Maximum number of characters (not bytes) that can be written to a template output
+    # stream before raising an OutputStreamLimitError.
+    output_stream_limit: ClassVar[Optional[int]] = None
+
+    # Instances of ``template_class`` are returned from ``from_string``,
+    # ``get_template`` and ``get_template_async``. It should be the ``BoundTemplate``
+    # class or a subclass of it.
+    template_class = BoundTemplate
+
     # pylint: disable=redefined-builtin too-many-arguments too-many-locals
     def __init__(
         self,
@@ -194,11 +215,6 @@ class Environment:
             self.parse_filtered_expression_value,
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
-
-        # Instances of ``template_class`` are returned from ``from_string``,
-        # ``get_template`` and ``get_template_async``. It should be the
-        # ``BoundTemplate`` class or a subclass of it.
-        self.template_class = BoundTemplate
 
         builtin.register(self)
 

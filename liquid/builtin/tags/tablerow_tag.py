@@ -184,6 +184,7 @@ class TablerowNode(Node):
         else:
             cols = length
 
+        context.raise_for_loop_limit(length)
         tablerow = TableRow(name, loop_iter, length, cols)
 
         namespace: Dict[str, object] = {
@@ -217,6 +218,7 @@ class TablerowNode(Node):
         else:
             cols = length
 
+        context.raise_for_loop_limit(length)
         tablerow = TableRow(name, loop_iter, length, cols)
 
         namespace: Dict[str, object] = {

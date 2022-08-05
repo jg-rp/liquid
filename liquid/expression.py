@@ -276,7 +276,7 @@ class RangeLiteral(Expression):
         except ValueError:
             stop = 0
 
-        # Decending ranges don't work
+        # Descending ranges don't work
         if start > stop:
             return range(0)
 

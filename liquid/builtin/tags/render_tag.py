@@ -106,7 +106,11 @@ class RenderNode(Node):
 
         # New context with globals and filters from the parent, plus the read only
         # namespace containing render arguments and bound variable.
-        ctx = context.copy(namespace, disabled_tags=[TAG_INCLUDE])
+        ctx = context.copy(
+            namespace,
+            disabled_tags=[TAG_INCLUDE],
+            carry_loop_iterations=True,
+        )
 
         # Optionally bind a variable to the render namespace.
         if self.var is not None:
@@ -117,6 +121,7 @@ class RenderNode(Node):
             # `self.loop` being True indicates the render expression used "for" not
             # "with". This distinction is not made when using the 'include' tag.
             if self.loop and isinstance(val, (tuple, list, IterableDrop)):
+                ctx.raise_for_loop_limit(len(val))
                 forloop = ForLoop(
                     name=key,
                     it=iter(val),
@@ -164,7 +169,11 @@ class RenderNode(Node):
 
         # New context with globals and filters from the parent, plus the read only
         # namespace containing render arguments and bound variable.
-        ctx = context.copy(namespace, disabled_tags=[TAG_INCLUDE])
+        ctx = context.copy(
+            namespace,
+            disabled_tags=[TAG_INCLUDE],
+            carry_loop_iterations=True,
+        )
 
         # Optionally bind a variable to the render namespace.
         if self.var is not None:
@@ -175,6 +184,7 @@ class RenderNode(Node):
             # `self.loop` being True indicates the render expression used "for" not
             # "with". This distinction is not made when using the 'include' tag.
             if self.loop and isinstance(val, (tuple, list, IterableDrop)):
+                ctx.raise_for_loop_limit(len(val))
                 forloop = ForLoop(
                     name=key,
                     it=iter(val),

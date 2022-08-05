@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import collections.abc
 import datetime
-import functools
 import itertools
 import re
 import warnings
 
 from collections import deque
 from contextlib import contextmanager
+
+from functools import lru_cache
+from functools import partial
+from functools import reduce
+
 from itertools import cycle
 from operator import getitem
+from operator import mul
 
 from typing import Any
 from typing import Callable
@@ -29,6 +34,8 @@ from typing import TYPE_CHECKING
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
 from liquid.exceptions import Error
+from liquid.exceptions import LocalNamespaceLimitError
+from liquid.exceptions import LoopIterationLimitError
 from liquid.exceptions import UndefinedError
 from liquid.exceptions import lookup_warning
 
@@ -39,12 +46,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from liquid.template import BoundTemplate
     from liquid.builtin.tags.for_tag import ForLoop
 
-# Maximum number of times a context can be extended or wrapped.
-MAX_CONTEXT_DEPTH = 30
 
 ContextPath = Union[str, Sequence[Union[str, int]]]
 Namespace = Mapping[str, object]
-
 
 _undefined = object()
 
@@ -143,7 +147,7 @@ def get_item(
 ) -> Any:
     """Chained item getter."""
     try:
-        itm: Any = functools.reduce(_getitem, items, obj)
+        itm: Any = reduce(_getitem, items, obj)
     except (KeyError, IndexError, TypeError):
         itm = default
     return itm
@@ -374,6 +378,7 @@ class Context:
         "autoescape",
         "_copy_depth",
         "parent_context",
+        "loop_iteration_carry",
     )
 
     getitem = _getitem
@@ -386,6 +391,7 @@ class Context:
         disabled_tags: Optional[List[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[Context] = None,
+        loop_iteration_carry: int = 1,
     ):
         self.env = env
 
@@ -413,7 +419,7 @@ class Context:
         }
 
         # As stack of forloop objects. Used for populating forloop.parentloop.
-        self.loops: List[object] = []
+        self.loops: List[ForLoop] = []
 
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
@@ -431,9 +437,16 @@ class Context:
         # A reference to a parent render context, if this one has been copied.
         self.parent_context = parent_context
 
+        # A loop iteration count carried over from a parent context, if this one has
+        # been copied. This helps us adhere to loop iteration limits in templates
+        # rendered with the `render` tag.
+        self.loop_iteration_carry = loop_iteration_carry
+
     def assign(self, key: str, val: Any) -> None:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
+        if len(self.locals) > self.env.local_namespace_limit:
+            raise LocalNamespaceLimitError("local namespace limit reached")
 
     def get(self, path: ContextPath, default: object = _undefined) -> object:
         """Return the value at path `path` if it is in scope, else default."""
@@ -446,7 +459,7 @@ class Context:
 
         if items:
             try:
-                return functools.reduce(Context.getitem, items, obj)
+                return reduce(Context.getitem, items, obj)
             except (KeyError, IndexError, TypeError) as err:
                 if isinstance(err, KeyError):
                     hint = (
@@ -505,7 +518,7 @@ class Context:
                 return self.env.undefined(name)
             return default
 
-    @functools.lru_cache(maxsize=128)
+    @lru_cache(maxsize=128)
     def filter(self, name: str) -> Callable[..., object]:
         """Return the filter function with given name."""
         try:
@@ -522,7 +535,7 @@ class Context:
             kwargs["environment"] = self.env
 
         if kwargs:
-            return functools.partial(filter_func, **kwargs)
+            return partial(filter_func, **kwargs)
 
         return filter_func
 
@@ -589,7 +602,7 @@ class Context:
     @contextmanager
     def extend(self, namespace: Namespace) -> Iterator[Context]:
         """Extend this context with the given read-only namespace."""
-        if self.scope.size() > MAX_CONTEXT_DEPTH:
+        if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive include"
             )
@@ -604,6 +617,7 @@ class Context:
     @contextmanager
     def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[Context]:
         """Just like ``Context.extend``, but keeps track of ForLoop objects too."""
+        self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
         with self.extend(namespace) as context:
             try:
@@ -618,22 +632,52 @@ class Context:
         except IndexError:
             return self.env.undefined("parentloop")
 
+    def raise_for_loop_limit(self, length: int = 1) -> None:
+        """Raise a ``LoopIterationLimitError`` if the product of the loop stack is
+        greater than the configured loop iteration limit.
+        """
+        if (
+            reduce(
+                mul,
+                itertools.chain(
+                    (loop.length for loop in self.loops),
+                    [
+                        length,
+                        self.loop_iteration_carry,
+                    ],
+                ),
+                1,
+            )
+            > self.env.loop_iteration_limit
+        ):
+            raise LoopIterationLimitError("loop iteration limit reached")
+
     def copy(
-        self, namespace: Namespace, disabled_tags: Optional[List[str]] = None
+        self,
+        namespace: Namespace,
+        disabled_tags: Optional[List[str]] = None,
+        carry_loop_iterations: bool = False,
     ) -> Context:
         """Return a copy of this context without any local variables or other state
         for stateful tags."""
-        if self._copy_depth > MAX_CONTEXT_DEPTH:
+        if self._copy_depth > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive render"
             )
 
-        return type(self)(
+        loop_iteration_carry = (
+            reduce(mul, (loop.length for loop in self.loops), 1)
+            if carry_loop_iterations
+            else 1
+        )
+
+        return self.__class__(
             self.env,
             globals=ReadOnlyChainMap(namespace, self.globals),
             disabled_tags=disabled_tags,
             copy_depth=self._copy_depth + 1,
             parent_context=self,
+            loop_iteration_carry=loop_iteration_carry,
         )
 
     def error(self, exc: Error) -> None:
@@ -657,8 +701,16 @@ class VariableCaptureContext(Context):
         disabled_tags: Optional[List[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[VariableCaptureContext] = None,
+        loop_iteration_carry: int = 1,
     ):
-        super().__init__(env, globals, disabled_tags, copy_depth, parent_context)
+        super().__init__(
+            env,
+            globals=globals,
+            disabled_tags=disabled_tags,
+            copy_depth=copy_depth,
+            parent_context=parent_context,
+            loop_iteration_carry=loop_iteration_carry,
+        )
         self.local_references: List[str] = []
         self.all_references: List[str] = []
         self.undefined_references: List[str] = []

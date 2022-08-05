@@ -98,11 +98,30 @@ class TemplateNotFound(Error):
         return msg
 
 
-class ContextDepthError(Error):
+class ResourceLimitError(Error):
+    """Base class for exceptions relating to resource limits."""
+
+
+class ContextDepthError(ResourceLimitError):
     """Exception raised when the maximum context depth is reached.
 
     Usually indicates recursive use of ``render`` or ``include`` tags.
     """
+
+
+class LoopIterationLimitError(ResourceLimitError):
+    """Exception raised when the maximum number of loop iterations has
+    been exceeded.
+    """
+
+
+class OutputStreamLimitError(ResourceLimitError):
+    """Exception raised when an output stream limit has been exceeded."""
+
+
+class LocalNamespaceLimitError(ResourceLimitError):
+    """Exceptions raised when the maximum size of a render context's local namespace
+    has been exceeded."""
 
 
 class UndefinedError(Error):

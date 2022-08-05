@@ -16,7 +16,7 @@ template language for flexible web apps.
 
 .. image:: https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square
     :target: https://pypi.org/project/python-liquid/
-    :alt: Licence
+    :alt: License
 
 .. image:: https://img.shields.io/pypi/pyversions/python-liquid.svg?style=flat-square
     :target: https://pypi.org/project/python-liquid/
@@ -90,7 +90,7 @@ of Liquid, written in Ruby. That is, given an equivalent render context, a templ
 Python Liquid should produce the same output as when rendered with Ruby Liquid.
 
 See the `known issues page <https://jg-rp.github.io/liquid/known_issues>`_ for details of known
-incompatibilities between PYthon Liquid and Ruby Liquid, and please help by raising an issue
+incompatibilities between Python Liquid and Ruby Liquid, and please help by raising an issue
 if you notice an incompatibility.
 
 

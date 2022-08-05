@@ -111,6 +111,7 @@ class IncludeNode(Node):
                     #
                     # The reference implementation seems to evaluate arguments once,
                     # before the loop.
+                    context.raise_for_loop_limit(len(val))
                     for itm in val:
                         namespace[key] = itm
                         template.render_with_context(context, buffer, partial=True)
@@ -142,6 +143,7 @@ class IncludeNode(Node):
                 key = self.alias or template.name.split(".")[0]
 
                 if isinstance(val, (tuple, list, IterableDrop)):
+                    context.raise_for_loop_limit(len(val))
                     for itm in val:
                         namespace[key] = itm
                         await template.render_with_context_async(
