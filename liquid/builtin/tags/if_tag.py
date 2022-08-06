@@ -2,8 +2,6 @@
 from __future__ import annotations
 import sys
 
-from io import StringIO
-
 from typing import Optional
 from typing import List
 from typing import TextIO
@@ -99,7 +97,7 @@ class IfNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         # This intermediate buffer is used to detect and possibly suppress blocks that,
         # when rendered, contain only whitespace.
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
 
         if self.condition.evaluate(context):
             rendered = self.consequence.render(context, buf)
@@ -122,7 +120,7 @@ class IfNode(Node):
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
 
         if await self.condition.evaluate_async(context):
             rendered = await self.consequence.render_async(context, buf)

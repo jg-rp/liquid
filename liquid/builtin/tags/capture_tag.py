@@ -62,7 +62,7 @@ class CaptureNode(ast.Node):
             context.assign(self.name, buf.getvalue())
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         self.block.render(context, buf)
         self._assign(context, buf)
         return False
@@ -70,7 +70,7 @@ class CaptureNode(ast.Node):
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         await self.block.render_async(context, buf)
         self._assign(context, buf)
         return False

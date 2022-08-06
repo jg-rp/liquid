@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from abc import ABC
 from abc import abstractmethod
 
@@ -168,6 +170,9 @@ class Literal(Expression, Generic[T]):
     def __hash__(self) -> int:
         return hash(self.value)
 
+    def __sizeof__(self) -> int:
+        return sys.getsizeof(self.value)
+
     def evaluate(self, context: Context) -> object:
         return self.value
 
@@ -206,6 +211,9 @@ class StringLiteral(Literal[str]):
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"StringLiteral(value='{self.value}')"
+
+    def __sizeof__(self) -> int:
+        return sys.getsizeof(self.value)
 
     def evaluate(self, context: Context) -> Union[str, Markup]:
         if context.autoescape:
@@ -264,6 +272,11 @@ class RangeLiteral(Expression):
 
     def __hash__(self) -> int:
         return hash((self.start, self.stop))
+
+    def __sizeof__(self) -> int:
+        return (
+            super().__sizeof__() + sys.getsizeof(self.start) + sys.getsizeof(self.stop)
+        )
 
     def _make_range(self, start: Any, stop: Any) -> range:
         try:
@@ -339,6 +352,9 @@ class Identifier(Expression):
 
     def __hash__(self) -> int:
         return hash(tuple(self.path))
+
+    def __sizeof__(self) -> int:
+        return super().__sizeof__() + sys.getsizeof(self.path)
 
     def evaluate(self, context: Context) -> object:
         path: List[Any] = [elem.evaluate(context) for elem in self.path]

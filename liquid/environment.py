@@ -120,14 +120,15 @@ class Environment:
     context_depth_limit: ClassVar[int] = 30
 
     # Maximum number of iterations per loop before a LoopIterationLimitError is raised.
-    loop_iteration_limit: ClassVar[int] = 10000
+    loop_iteration_limit: ClassVar[Optional[int]] = None
 
-    # Maximum number of names allowed in a template's local namespace before a
-    # LocalNamespaceLimitError is raised.
-    local_namespace_limit: ClassVar[int] = 1000
+    # Maximum number of bytes (according to sys.getsizeof) allowed in a template's
+    # local namespace before a LocalNamespaceLimitError is raised. We only count the
+    # size of the namespaces values, not the size of keys/names.
+    local_namespace_limit: ClassVar[Optional[int]] = None
 
-    # Maximum number of characters (not bytes) that can be written to a template output
-    # stream before raising an OutputStreamLimitError.
+    # Maximum number of bytes that can be written to a template's output stream before
+    # raising an OutputStreamLimitError.
     output_stream_limit: ClassVar[Optional[int]] = None
 
     # Instances of ``template_class`` are returned from ``from_string``,

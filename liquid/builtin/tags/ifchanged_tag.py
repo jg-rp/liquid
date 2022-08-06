@@ -2,8 +2,6 @@
 from __future__ import annotations
 import sys
 
-from io import StringIO
-
 from typing import List
 from typing import Optional
 from typing import TextIO
@@ -50,7 +48,7 @@ class IfChangedNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         # Render to an intermediate buffer.
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         self.block.render(context, buf)
         val = buf.getvalue()
 
@@ -64,7 +62,7 @@ class IfChangedNode(Node):
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
         # Render to an intermediate buffer.
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         await self.block.render_async(context, buf)
         val = buf.getvalue()
 

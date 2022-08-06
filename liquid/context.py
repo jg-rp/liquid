@@ -6,6 +6,7 @@ import collections.abc
 import datetime
 import itertools
 import re
+import sys
 import warnings
 
 from collections import deque
@@ -16,6 +17,8 @@ from functools import partial
 from functools import reduce
 
 from itertools import cycle
+from io import StringIO
+
 from operator import getitem
 from operator import mul
 
@@ -28,6 +31,7 @@ from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import Sequence
+from typing import TextIO
 from typing import Union
 from typing import TYPE_CHECKING
 
@@ -40,6 +44,7 @@ from liquid.exceptions import UndefinedError
 from liquid.exceptions import lookup_warning
 
 from liquid import Mode
+from liquid.output import LimitedStringIO
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
@@ -362,7 +367,7 @@ class StrictDefaultUndefined(StrictUndefined):
     )
 
 
-# pylint: disable=too-many-instance-attributes redefined-builtin
+# pylint: disable=too-many-instance-attributes redefined-builtin too-many-public-methods
 class Context:
     """Liquid template context."""
 
@@ -379,12 +384,13 @@ class Context:
         "_copy_depth",
         "parent_context",
         "loop_iteration_carry",
-        "local_namespace_length_carry",
+        "local_namespace_size_carry",
     )
 
     getitem = _getitem
     getitem_async = _getitem_async
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         env: Environment,
@@ -393,7 +399,7 @@ class Context:
         copy_depth: int = 0,
         parent_context: Optional[Context] = None,
         loop_iteration_carry: int = 1,
-        local_namespace_length_carry: int = 0,
+        local_namespace_size_carry: int = 0,
     ):
         self.env = env
 
@@ -446,16 +452,24 @@ class Context:
 
         # The cumulative number of names in parent render context local namespaces. We
         # use this to adhere to local namespace limits when copying a render context.
-        self.local_namespace_length_carry = local_namespace_length_carry
+        self.local_namespace_size_carry = local_namespace_size_carry
 
     def assign(self, key: str, val: Any) -> None:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
         if (
-            len(self.locals) + self.local_namespace_length_carry
-            > self.env.local_namespace_limit
+            self.env.local_namespace_limit
+            and self._get_size_of_locals() > self.env.local_namespace_limit
         ):
             raise LocalNamespaceLimitError("local namespace limit reached")
+
+    def _get_size_of_locals(self) -> int:
+        if not self.env.local_namespace_limit:
+            return 0
+        return (
+            sum(sys.getsizeof(obj, default=1) for obj in set(self.locals.values()))
+            + self.local_namespace_size_carry
+        )
 
     def get(self, path: ContextPath, default: object = _undefined) -> object:
         """Return the value at path `path` if it is in scope, else default."""
@@ -646,7 +660,8 @@ class Context:
         greater than the configured loop iteration limit.
         """
         if (
-            reduce(
+            self.env.loop_iteration_limit
+            and reduce(
                 mul,
                 itertools.chain(
                     (loop.length for loop in self.loops),
@@ -684,8 +699,7 @@ class Context:
             copy_depth=self._copy_depth + 1,
             parent_context=self,
             loop_iteration_carry=loop_iteration_carry,
-            local_namespace_length_carry=self.local_namespace_length_carry
-            + len(self.locals),
+            local_namespace_size_carry=self._get_size_of_locals(),
         )
 
     def error(self, exc: Error) -> None:
@@ -695,13 +709,30 @@ class Context:
         if self.env.mode == Mode.WARN:
             warnings.warn(str(exc), category=lookup_warning(exc.__class__))
 
+    def get_buffer(self, buf: Optional[TextIO] = None) -> StringIO:
+        """Return a new StringIO object, possibly limited according to the configured
+        output stream limit."""
+        if self.env.output_stream_limit is None:
+            return StringIO()
+
+        carry = buf.size if isinstance(buf, LimitedStringIO) else 0
+        return LimitedStringIO(limit=self.env.output_stream_limit - carry)
+
 
 class VariableCaptureContext(Context):
     """A render context that captures template variable names."""
 
+    __slots__ = (
+        "local_references",
+        "all_references",
+        "undefined_references",
+        "root_context",
+    )
+
     # Used for formatting context path strings.
     re_ident = re.compile(r"^[\w_][\w_\-]*$")
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         env: Environment,
@@ -710,7 +741,7 @@ class VariableCaptureContext(Context):
         copy_depth: int = 0,
         parent_context: Optional[VariableCaptureContext] = None,
         loop_iteration_carry: int = 1,
-        local_namespace_length_carry: int = 0,
+        local_namespace_size_carry: int = 0,
     ):
         super().__init__(
             env,
@@ -719,7 +750,7 @@ class VariableCaptureContext(Context):
             copy_depth=copy_depth,
             parent_context=parent_context,
             loop_iteration_carry=loop_iteration_carry,
-            local_namespace_length_carry=local_namespace_length_carry,
+            local_namespace_size_carry=local_namespace_size_carry,
         )
         self.local_references: List[str] = []
         self.all_references: List[str] = []

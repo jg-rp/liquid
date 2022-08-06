@@ -33,12 +33,13 @@ from liquid.context import ReadOnlyChainMap
 from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
-from liquid.exceptions import OutputStreamLimitError
 from liquid.exceptions import TemplateNotFound
 
 from liquid.expression import Expression, StringLiteral
 from liquid.expression import Identifier
 from liquid.expression import Literal
+
+from liquid.output import LimitedStringIO
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -122,7 +123,7 @@ class BoundTemplate:
     def _get_buffer(self) -> StringIO:
         if self.env.output_stream_limit is None:
             return StringIO()
-        return _LimitedStringIO(limit=self.env.output_stream_limit)
+        return LimitedStringIO(limit=self.env.output_stream_limit)
 
     def render_with_context(
         self,
@@ -420,24 +421,6 @@ class TemplateDrop(Mapping[str, Optional[str]]):
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._items)
-
-
-class _LimitedStringIO(StringIO):
-    def __init__(
-        self,
-        limit: int,
-        initial_value: Union[str, None] = None,
-        newline: Union[str, None] = None,
-    ) -> None:
-        super().__init__(initial_value, newline)
-        self.limit = limit
-        self.char_count = 0
-
-    def write(self, __s: str) -> int:
-        self.char_count += len(__s)
-        if self.char_count > self.limit:
-            raise OutputStreamLimitError("output stream limit reached")
-        return super().write(__s)
 
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")

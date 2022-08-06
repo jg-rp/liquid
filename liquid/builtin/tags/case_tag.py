@@ -2,8 +2,6 @@
 from __future__ import annotations
 import sys
 
-from io import StringIO
-
 from typing import List
 from typing import Optional
 from typing import TextIO
@@ -70,7 +68,7 @@ class CaseNode(ast.Node):
         return " ".join(buf)
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         rendered: Optional[bool] = False
 
         for when in self.whens:
@@ -89,7 +87,7 @@ class CaseNode(ast.Node):
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        buf = StringIO()
+        buf = context.get_buffer(buffer)
         rendered: Optional[bool] = False
 
         for when in self.whens:

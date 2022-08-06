@@ -1,5 +1,6 @@
 """Resource limit test cases."""
 # pylint: disable=missing-class-docstring
+import platform
 import unittest
 
 from liquid import DictLoader
@@ -87,17 +88,32 @@ class LoopIterationLimitTestCase(unittest.TestCase):
     """Loop iteration limit test cases."""
 
     def test_default_loop_iteration_limit(self):
-        """Test that the default loop limit is 10000."""
+        """Test (effectively) that the default loop limit is None."""
         env = Environment()
         template = env.from_string(
             "{% for i in (1..100) %}"
             "{% for j in (1..100) %}"
-            "{{ i }},{{ j }}"
+            "x"
             "{% endfor %}"
             "{% endfor %}"
         )
 
         template.render()
+
+    def test_set_loop_iteration_limit(self):
+        """Test that we can set the loop iteration limit."""
+
+        class MockEnv(Environment):
+            loop_iteration_limit = 10000
+
+        env = MockEnv()
+        env.from_string(
+            "{% for i in (1..100) %}"
+            "{% for j in (1..100) %}"
+            "{{ i }},{{ j }}"
+            "{% endfor %}"
+            "{% endfor %}"
+        ).render()
 
         template = env.from_string(
             "{% for i in (1..101) %}"
@@ -109,23 +125,6 @@ class LoopIterationLimitTestCase(unittest.TestCase):
 
         with self.assertRaises(LoopIterationLimitError):
             template.render()
-
-    def test_set_loop_iteration_limit(self):
-        """Test that we can set the loop iteration limit."""
-
-        class MockEnv(Environment):
-            loop_iteration_limit = 11000
-
-        env = MockEnv()
-        template = env.from_string(
-            "{% for i in (1..101) %}"
-            "{% for j in (1..100) %}"
-            "{{ i }},{{ j }}"
-            "{% endfor %}"
-            "{% endfor %}"
-        )
-
-        template.render()
 
     def test_render_carries_loop_count(self):
         """Test that a `render`ed template carries the loop count from its parent."""
@@ -201,11 +200,12 @@ class LoopIterationLimitTestCase(unittest.TestCase):
 class LocalNamespaceLimitTestCase(unittest.TestCase):
     """Render context local namespace length limit test cases."""
 
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "no sys.getsizeof")
     def test_set_local_namespace_limit(self):
         """Test that we can set the local namespace limit."""
 
         class MockEnv(Environment):
-            local_namespace_limit = 5
+            local_namespace_limit = 140
 
         env = MockEnv()
         env.from_string(
@@ -263,7 +263,7 @@ class OutputStreamLimitTestCase(unittest.TestCase):
         """Test that we can set an output stream limit."""
 
         class MockEnv(Environment):
-            output_stream_limit = 10
+            output_stream_limit = 5
 
         env = MockEnv()
         env.from_string(
