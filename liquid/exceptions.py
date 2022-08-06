@@ -120,7 +120,7 @@ class OutputStreamLimitError(ResourceLimitError):
 
 
 class LocalNamespaceLimitError(ResourceLimitError):
-    """Exceptions raised when the maximum size of a render context's local namespace
+    """Exception raised when the maximum size of a render context's local namespace
     has been exceeded."""
 
 

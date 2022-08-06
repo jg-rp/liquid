@@ -7,10 +7,11 @@ Version 1.4.0
 **Features**
 
 - ``StrictDefaultUndefined``, an undefined type that plays nicely with the ``default``
-  filter, is now built in.
+  filter, is now built in. (`docs <https://jg-rp.github.io/liquid/guides/undefined-variables#the-default-filter>`_)
 - Configure resource limits with class attributes set on a Liquid ``Environment``. Those
   class attributes are ``context_depth_limit``, ``loop_iteration_limit``,
   ``local_namespace_limit`` and ``output_stream_limit``.
+  (`docs <https://jg-rp.github.io/liquid/guides/resource-limits>`_)
 
 **Fixes**
 
@@ -27,7 +28,7 @@ Version 1.3.0
 - Contextual template analysis with ``BoundTemplate.analyze_with_context()``.
   Complementing static template analysis, released in version 1.2.0, contextual template
   analysis performs a template `render`, capturing information about template variable
-  usage as it goes.
+  usage as it goes. (`docs <https://jg-rp.github.io/liquid/guides/contextual-template-analysis>`_)
 
 
 Version 1.2.1
@@ -45,6 +46,7 @@ Version 1.2.0
   traverse a template's abstract syntax tree and report template variable usage. Static 
   tree traversal (without rendering or evaluating expressions) is supported by the new,
   optional ``children()`` methods of ``liquid.expression.Expression`` and ``liquid.ast.Node``.
+  (`docs <https://jg-rp.github.io/liquid/guides/static-template-analysis>`_)
 
 **Fixes**
 
