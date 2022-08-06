@@ -41,62 +41,21 @@ With `StrictUndefined`, the built-in [`default`](../language/filters.md#default)
 Hello {{ username | default: "user" }}
 ```
 
-We can fix this by implementing our own `Undefined` type and registering an updated version of the `default` filter.
+**_New in version 1.4.0_**
 
-```python title="strict_default_undefined.py"
-from liquid import StrictUndefined
-from liquid.exceptions import UndefinedError
-
-class StrictDefaultUndefined(StrictUndefined):
-    def __getattribute__(self, name: str) -> object:
-        if name in (
-            "__repr__",
-            "__liquid__",
-            "__class__",
-            "name",
-            "hint",
-            "obj",
-            "msg",
-        ):
-            return object.__getattribute__(self, name)
-        raise UndefinedError(object.__getattribute__(self, "msg"))
-```
-
-```python title="my_default_filter.py"
-from liquid.filter import liquid_filter
-from liquid import is_undefined
-from liquid.expression import EMPTY
-
-@liquid_filter
-def default_undefined(
-    obj: object,
-    default_: object = "",
-    *,
-    allow_false: bool = False
-) -> object:
-    """Return a default value if the input is undefined, nil, false, or empty."""
-    _obj = obj
-    if hasattr(obj, "__liquid__"):
-        _obj = obj.__liquid__()
-
-    if allow_false is True and _obj is False:
-        return obj
-
-    if is_undefined(_obj) or _obj in (None, False, EMPTY):
-        return default_
-
-    return obj
-```
-
-Use `StrictDefaultUndefined` and `default_undefined` by registering them with an [`Environment`](../api/environment.md), then loading and rendering templates from that environment.
+We can use the built-in `StrictDefaultUndefined` type, which plays nicely with the `default` filter, while still providing strictness elsewhere.
 
 ```python
 from liquid import Environment
-from strict_default_undefined import StrictDefaultUndefined
-from my_default_filter import default_undefined
+from liquid import StrictDefaultUndefined
 
 env = Environment(undefined=StrictDefaultUndefined)
-env.add_filter("default", default_undefined)
+template = env.from_string('Hello {{ username | default: "user" }}')
+print(template.render())
+```
+
+```plain title="output"
+Hello user
 ```
 
 ## Falsy StrictUndefined
