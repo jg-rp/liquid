@@ -379,6 +379,7 @@ class Context:
         "_copy_depth",
         "parent_context",
         "loop_iteration_carry",
+        "local_namespace_length_carry",
     )
 
     getitem = _getitem
@@ -392,6 +393,7 @@ class Context:
         copy_depth: int = 0,
         parent_context: Optional[Context] = None,
         loop_iteration_carry: int = 1,
+        local_namespace_length_carry: int = 0,
     ):
         self.env = env
 
@@ -442,10 +444,17 @@ class Context:
         # rendered with the `render` tag.
         self.loop_iteration_carry = loop_iteration_carry
 
+        # The cumulative number of names in parent render context local namespaces. We
+        # use this to adhere to local namespace limits when copying a render context.
+        self.local_namespace_length_carry = local_namespace_length_carry
+
     def assign(self, key: str, val: Any) -> None:
         """Add `val` to the context with key `key`."""
         self.locals[key] = val
-        if len(self.locals) > self.env.local_namespace_limit:
+        if (
+            len(self.locals) + self.local_namespace_length_carry
+            > self.env.local_namespace_limit
+        ):
             raise LocalNamespaceLimitError("local namespace limit reached")
 
     def get(self, path: ContextPath, default: object = _undefined) -> object:
@@ -641,10 +650,7 @@ class Context:
                 mul,
                 itertools.chain(
                     (loop.length for loop in self.loops),
-                    [
-                        length,
-                        self.loop_iteration_carry,
-                    ],
+                    [length, self.loop_iteration_carry],
                 ),
                 1,
             )
@@ -678,6 +684,8 @@ class Context:
             copy_depth=self._copy_depth + 1,
             parent_context=self,
             loop_iteration_carry=loop_iteration_carry,
+            local_namespace_length_carry=self.local_namespace_length_carry
+            + len(self.locals),
         )
 
     def error(self, exc: Error) -> None:
@@ -702,6 +710,7 @@ class VariableCaptureContext(Context):
         copy_depth: int = 0,
         parent_context: Optional[VariableCaptureContext] = None,
         loop_iteration_carry: int = 1,
+        local_namespace_length_carry: int = 0,
     ):
         super().__init__(
             env,
@@ -710,6 +719,7 @@ class VariableCaptureContext(Context):
             copy_depth=copy_depth,
             parent_context=parent_context,
             loop_iteration_carry=loop_iteration_carry,
+            local_namespace_length_carry=local_namespace_length_carry,
         )
         self.local_references: List[str] = []
         self.all_references: List[str] = []

@@ -197,6 +197,10 @@ class LoopIterationLimitTestCase(unittest.TestCase):
         with self.assertRaises(LoopIterationLimitError):
             template.render()
 
+
+class LocalNamespaceLimitTestCase(unittest.TestCase):
+    """Render context local namespace length limit test cases."""
+
     def test_set_local_namespace_limit(self):
         """Test that we can set the local namespace limit."""
 
@@ -223,6 +227,37 @@ class LoopIterationLimitTestCase(unittest.TestCase):
 
         with self.assertRaises(LocalNamespaceLimitError):
             template.render()
+
+    def test_copied_context_carries_parent_length(self):
+        """Test that copied render context object cary the length of their parent
+        context's locale namespace."""
+
+        class MockEnv(Environment):
+            local_namespace_limit = 5
+
+        env = MockEnv(
+            loader=DictLoader(
+                {
+                    "foo": (
+                        "{% assign a = 1 %}"
+                        "{% assign b = 2 %}"
+                        "{% assign c = 3 %}"
+                        "{% assign d = 4 %}"
+                        "{% assign e = 5 %}"
+                        "{% assign e = 'five' %}"
+                    )
+                }
+            )
+        )
+
+        template = env.from_string("{% assign f = 6 %}{% render 'foo' %}")
+
+        with self.assertRaises(LocalNamespaceLimitError):
+            template.render()
+
+
+class OutputStreamLimitTestCase(unittest.TestCase):
+    """Template output stream limit test cases."""
 
     def test_set_output_stream_limit(self):
         """Test that we can set an output stream limit."""
