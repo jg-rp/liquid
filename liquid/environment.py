@@ -119,7 +119,8 @@ class Environment:
     # a ContextDepthError.
     context_depth_limit: ClassVar[int] = 30
 
-    # Maximum number of iterations per loop before a LoopIterationLimitError is raised.
+    # Maximum number of loop iterations allowed before a LoopIterationLimitError is
+    # raised.
     loop_iteration_limit: ClassVar[Optional[int]] = None
 
     # Maximum number of bytes (according to sys.getsizeof) allowed in a template's

@@ -4,12 +4,36 @@ API Reference
 
 .. module:: liquid
 
+Also see documentation at https://jg-rp.github.io/liquid/.
 
 Rendering Templates
 -------------------
 
 .. autoclass:: Environment([options])
     :members: from_string, get_template, get_template_async, add_tag, add_filter
+
+    .. attribute:: context_depth_limit
+
+        Class attribute.The maximum number of times a render context can be extended or
+        wrapped before a :class:`liquid.exceptions.ContextDepthError` is raised.
+
+    .. attribute:: local_namespace_limit
+
+        Class attribute. The maximum number of bytes (according to :func:`sys.getsizeof`)
+        allowed in a template's local namespace, per render, before a 
+        :class:`liquid.exceptions.LocalNamespaceLimitError` exception is raised. Note
+        that we only count the size of the local namespace values, not its keys.
+
+    .. attribute:: loop_iteration_limit
+
+        Class attribute. The maximum number of loop iterations allowed before a 
+        :class:`liquid.exceptions.LoopIterationLimitError` is raised.
+
+    .. attribute:: output_stream_limit
+
+        Class attribute. The maximum number of bytes that can be written to a template's
+        output stream, per render, before an :class:`liquid.exceptions.OutputStreamLimitError`
+        exception is raised.
 
     .. attribute:: undefined
 
@@ -98,6 +122,7 @@ Undefined Types
 .. autoclass:: liquid.Undefined
 .. autoclass:: liquid.StrictUndefined
 .. autoclass:: liquid.DebugUndefined
+.. autoclass:: liquid.StrictDefaultUndefined
 
 Exceptions
 ----------
@@ -112,14 +137,8 @@ Exceptions
 .. autoclass:: liquid.exceptions.TemplateNotFound
 .. autoclass:: liquid.exceptions.TemplateTraversalError
 .. autoclass:: liquid.exceptions.ContextDepthError
+.. autoclass:: liquid.exceptions.LocalNamespaceLimitError
+.. autoclass:: liquid.exceptions.LoopIterationLimitError
+.. autoclass:: liquid.exceptions.OutputStreamLimitError
 .. autoclass:: liquid.exceptions.UndefinedError
 
-
-
-Customize and Extend
---------------------
-
-The low level API might be of interest to those wanting to implement custom template
-tags, custom loaders or more advanced custom filters.
-
-TODO:

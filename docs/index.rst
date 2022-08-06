@@ -13,6 +13,8 @@ Release v\ |version|
 A Python implementation of `Liquid`_. A non evaling templating language suitable for
 end users.
 
+Also see documentation at https://jg-rp.github.io/liquid/.
+
 Installation
 ------------
 
@@ -72,17 +74,7 @@ efficient than using ``Template`` directly.
 User's Guide
 ------------
 
-.. toctree::
-    :maxdepth: 2
- 
-    user/rendering
-    user/loading
-    user/context
-    user/strictness
-    user/autoescape
-    user/tags
-    user/filters
-
+See documentation at https://jg-rp.github.io/liquid/.
 
 API Reference
 -------------
