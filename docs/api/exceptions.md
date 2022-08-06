@@ -62,6 +62,24 @@ Exception raised when the maximum context depth is reached.
 
 Usually indicates recursive use of render or include tags.
 
+## liquid.exceptions.LocalNamespaceLimitError
+
+`class liquid.exceptions.LocalNamespaceLimitError(*args, linenum=None, filename=None)`
+
+Exception raised when the maximum size of a render context's local namespace has been exceeded.
+
+## liquid.exceptions.LoopIterationLimitError
+
+`class liquid.exceptions.LoopIterationLimitError(*args, linenum=None, filename=None)`
+
+Exception raised when the maximum number of loop iterations has been exceeded.
+
+## liquid.exceptions.OutputStreamLimitError
+
+`class liquid.exceptions.OutputStreamLimitError(*args, linenum=None, filename=None)`
+
+Exception raised when an output stream limit has been exceeded.
+
 ## liquid.exceptions.TemplateTraversalError
 
 `class liquid.exceptions.TemplateTraversalError(*args, linenum=None, filename=None)`
