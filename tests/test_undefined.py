@@ -267,7 +267,7 @@ class TestUndefined(TestCase):
         __class__."""
         undef = StrictDefaultUndefined("nosuchthing")
         with self.assertRaises(UndefinedError):
-            undef.__class__
+            undef.__class__  # pylint: disable=pointless-statement
 
     def test_lax_filter(self):
         """Test that undefined filters can be silently ignored."""
