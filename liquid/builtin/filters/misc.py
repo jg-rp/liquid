@@ -40,6 +40,12 @@ def size(obj: Any) -> int:
 def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> Any:
     """Return a default value if the input is nil, false, or empty."""
     _obj = obj
+
+    # Return the default value immediately if the object defines a
+    # `force_liquid_default` property.
+    if hasattr(obj, "force_liquid_default") and obj.force_liquid_default:
+        return default_
+
     if hasattr(obj, "__liquid__"):
         _obj = obj.__liquid__()
 

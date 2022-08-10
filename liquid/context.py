@@ -353,12 +353,15 @@ class StrictUndefined(Undefined):
 class StrictDefaultUndefined(StrictUndefined):
     """An undefined that plays nicely with the `default` filter."""
 
+    # Force the `default` filter to return its default value
+    # without inspecting this class type.
+    force_liquid_default = True
+
     # Properties that don't raise an UndefinedError.
     allowed_properties = frozenset(
         [
             "__repr__",
-            "__liquid__",
-            "__class__",
+            "force_liquid_default",
             "name",
             "hint",
             "obj",

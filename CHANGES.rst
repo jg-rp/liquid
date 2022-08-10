@@ -1,8 +1,18 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.1
+-------------
+
+**Hot fix**
+
+- Fixed a bug with the ``StrictDefaultFilter``. It was failing to be strict when
+  accessed by some filter decorators and helpers. Now the ``default`` filter will
+  immediately return its default value if its left value defines a
+  ``force_liquid_default`` property and that property is truthy. See #62.
+
 Version 1.4.0
---------------------------
+-------------
 
 **Features**
 

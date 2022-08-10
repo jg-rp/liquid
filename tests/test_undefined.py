@@ -238,9 +238,8 @@ class TestUndefined(TestCase):
     def test_strict_default_undefined(self):
         """Test that we can use an undefined type with the default filter."""
         env = Environment(undefined=StrictDefaultUndefined)
-        undef = DebugUndefined(name="nosuchthing", obj="foo")
         template = env.from_string(r"{{ nosuchthing | default: 'hello' }}")
-        result = template.render(nosuchthing=undef)
+        result = template.render()
         self.assertEqual(result, "hello")
 
         template = env.from_string(r"{{ thing | default: 'hello' }}")
@@ -252,6 +251,23 @@ class TestUndefined(TestCase):
             template.render()
 
         self.assertEqual(str(raised.exception), "'nosuchthing' is undefined, on line 1")
+
+    def test_filter_strict_default_undefined(self):
+        """Test that the default undefined type raises an exception when used as a
+        filter left value."""
+        env = Environment(undefined=StrictDefaultUndefined)
+        template = env.from_string(r"{{ nosuchthing | floor }}")
+        with self.assertRaises(UndefinedError) as raised:
+            template.render()
+
+        self.assertEqual(str(raised.exception), "'nosuchthing' is undefined, on line 1")
+
+    def test_isinstance_strict_default_filter(self):
+        """Test that the default undefined type raises an exception when accessing
+        __class__."""
+        undef = StrictDefaultUndefined("nosuchthing")
+        with self.assertRaises(UndefinedError):
+            undef.__class__
 
     def test_lax_filter(self):
         """Test that undefined filters can be silently ignored."""
