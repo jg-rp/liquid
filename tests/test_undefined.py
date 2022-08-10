@@ -199,6 +199,11 @@ class TestUndefined(TestCase):
                 expect="key error: 'bar', obj[bar], on line 1",
                 context={"obj": {"foo": 1}},
             ),
+            Case(
+                description="default filter undefined",
+                template=r"hello {{ nosuchthing | default: 'foo' }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
         ]
 
         env = Environment(undefined=StrictUndefined)
@@ -235,7 +240,7 @@ class TestUndefined(TestCase):
         result = template.render(nosuchthing=undef)
         self.assertEqual(result, "str has no attribute 'nosuchthing'")
 
-    def test_strict_default_undefined(self):
+    def test_strict_default_undefined_with_default_filter(self):
         """Test that we can use an undefined type with the default filter."""
         env = Environment(undefined=StrictDefaultUndefined)
         template = env.from_string(r"{{ nosuchthing | default: 'hello' }}")
@@ -268,6 +273,99 @@ class TestUndefined(TestCase):
         undef = StrictDefaultUndefined("nosuchthing")
         with self.assertRaises(UndefinedError):
             undef.__class__  # pylint: disable=pointless-statement
+
+    def test_strict_default_undefined(self):
+        """Test that the strict default undefined type raises an exception for
+        everything other than the default filter."""
+        tests = [
+            Case(
+                description="undefined in output statement",
+                template=r"{{ nosuchthing }}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="undefined in loop expression",
+                template=r"{% for tag in nosuchthing %}{tag}{% endfor %}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="index undefined",
+                template=r"{{ nosuchthing[0] }}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="test undefined for truthy-ness",
+                template=r"{% if nosuchthing %}hello{% endif %}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="compare undefined",
+                template=r"{% if nosuchthing == 'hello' %}hello{% endif %}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="undefined equals undefined",
+                template=r"{% if nosuchthing == noway %}hello{% endif %}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="undefined contains string",
+                template=r"{% if nosuchthing contains 'hello' %}hello{% endif %}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="access `last` from undefined",
+                template=r"{{ nosuchthing.last }}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="access `size` from undefined",
+                template=r"{{ nosuchthing.size }}",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="filtered undefined",
+                template=r"hello {{ nosuchthing | last }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="undefined filter argument",
+                template=r"hello {{ '1,2,3' | split: nosuchthing }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="math filter undefined",
+                template=r"hello {{ nosuchthing | abs }} there",
+                expect="'nosuchthing' is undefined, on line 1",
+            ),
+            Case(
+                description="array index out of range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[100] }}",
+                expect="list index out of range: a[100], on line 1",
+            ),
+            Case(
+                description="negative array index out of range",
+                template=r"{% assign a = '1,2,3,4,5' | split: ',' %}{{ a[-100] }}",
+                expect="list index out of range: a[-100], on line 1",
+            ),
+            Case(
+                description="key error",
+                template=r"{{ obj['bar'] }}",
+                expect="key error: 'bar', obj[bar], on line 1",
+                context={"obj": {"foo": 1}},
+            ),
+        ]
+
+        env = Environment(undefined=StrictDefaultUndefined)
+
+        for case in tests:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+
+                with self.assertRaises(UndefinedError) as raised:
+                    template.render(**case.context)
+
+                self.assertEqual(case.expect, str(raised.exception))
 
     def test_lax_filter(self):
         """Test that undefined filters can be silently ignored."""
