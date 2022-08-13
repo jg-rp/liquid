@@ -10,9 +10,13 @@ template language for flexible web apps.
     :target: https://pypi.org/project/python-liquid/
     :alt: Version
 
-.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Tests?style=flat-square
-    :target: https://github.com/jg-rp/liquid/tree/main/tests
+.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Tests/main?label=tests&style=flat-square
+    :target: https://github.com/jg-rp/liquid/actions/workflows/tests.yaml
     :alt: Tests
+
+.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Coverage/main?label=coverage&style=flat-square
+    :target: https://github.com/jg-rp/liquid/actions/workflows/coverage.yaml
+    :alt: Coverage
 
 .. image:: https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square
     :target: https://pypi.org/project/python-liquid/
@@ -148,31 +152,4 @@ I wouldn't be surprised if their usage has changed subtly since the benchmark fi
 Contributing
 ------------
 
-- Install development dependencies with `Pipenv`_
-
-- Python Liquid uses type hints and static type checking. Run ``mypy`` or  
-  ``tox -e typing`` to check for typing issues.
-
-- Format code using `black <https://github.com/psf/black>`_.
-
-- Write tests using ``unittest.TestCase``.
-
-- Run tests with ``make test`` or ``python -m unittest`` or ``pytest``.
-
-- Check test coverage with ``make coverage`` and open ``htmlcov/index.html`` in your
-  browser.
-
-- Check your changes have not adversely affected performance with ``make benchmark``.
-
-Docs
-****
-
-`Documentation <https://jg-rp.github.io/liquid/>`_ is built using `Docusaurus <https://docusaurus.io/>`_.
-Find the source in the `docs branch <https://github.com/jg-rp/liquid/tree/docs>`_ of this repository.
-
-The ``docs`` folder in the root of this repository contains older, sphinx-based docs, still hosted
-on `Read the Docs <https://liquid.readthedocs.io/en/latest/>`_.
-
-The plan is to generate API Documentation for Docusaurus from Python doc comments. The older docs
-will be kept until such time that better Docusaurus/sphinx integration is available or a workaround
-is found.
+Please see `Contributing to Python Liquid <https://github.com/jg-rp/liquid/blob/main/contributing.md>`_.
