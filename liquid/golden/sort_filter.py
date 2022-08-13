@@ -74,7 +74,7 @@ cases = [
         description="array of integers",
         template=r"{{ a | sort | join: '#' }}",
         expect="1#3#30#1000",
-        globals={"a": [1, 1000, 3, 30]}
+        globals={"a": [1, 1000, 3, 30]},
     ),
     Case(
         description="incompatible types",
