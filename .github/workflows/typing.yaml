@@ -1,0 +1,26 @@
+name: Typing
+on: [push, pull_request]
+
+jobs:
+  typing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+      - name: update pip
+        run: |
+          pip install -U wheel
+          pip install -U setuptools
+          python -m pip install -U pip
+      - name: cache mypy
+        uses: actions/cache@v3
+        with:
+          path: ./.mypy_cache
+          key: mypy|${{ matrix.python }}|${{ hashFiles('setup.cfg') }}
+        if: matrix.tox == 'typing'
+      - run: pip install tox
+      - run: tox -e typing
