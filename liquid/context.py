@@ -12,7 +12,6 @@ import warnings
 from collections import deque
 from contextlib import contextmanager
 
-from functools import lru_cache
 from functools import partial
 from functools import reduce
 
@@ -544,7 +543,6 @@ class Context:
                 return self.env.undefined(name)
             return default
 
-    @lru_cache(maxsize=128)
     def filter(self, name: str) -> Callable[..., object]:
         """Return the filter function with given name."""
         try:

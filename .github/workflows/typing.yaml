@@ -1,8 +1,8 @@
-name: Coverage
+name: Typing
 on: [push, pull_request]
 
 jobs:
-  coverage:
+  typing:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,10 +16,11 @@ jobs:
           pip install -U wheel
           pip install -U setuptools
           python -m pip install -U pip
-      - run: pip install tox coverage
-      - name: combine coverage
-        run: |
-          python -m coverage erase
-          tox -c tox_cov.ini
-          python -m coverage combine
-          python -m coverage report --fail-under=98
+      - name: cache mypy
+        uses: actions/cache@v3
+        with:
+          path: ./.mypy_cache
+          key: mypy|${{ matrix.python }}|${{ hashFiles('setup.cfg') }}
+        if: matrix.tox == 'typing'
+      - run: pip install tox
+      - run: tox -e typing

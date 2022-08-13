@@ -20,6 +20,7 @@ mock = "*"
 pytest = "*"
 types-python-dateutil = "*"
 ipython = "*"
+tox = "*"
 
 [packages]
 python-dateutil = "*"
