@@ -60,6 +60,24 @@ class NoLiquidDrop:
         return "hello no liquid drop"
 
 
+class FalsyDrop:
+    def __init__(self, val):
+        self.val = val
+
+    def __eq__(self, other):
+        if isinstance(other, bool) and self.val == other:
+            return True
+        if isinstance(other, FalsyDrop) and self.val == other.val:
+            return True
+        return False
+
+    def __str__(self):
+        return "falsy drop"
+
+    def __bool__(self):
+        return False
+
+
 class MiscFilterTestCase(unittest.TestCase):
     """Test miscellaneous filter functions."""
 
@@ -250,6 +268,27 @@ class MiscFilterTestCase(unittest.TestCase):
                 args=["bar"],
                 kwargs={},
                 expect=NoLiquidDrop(False),
+            ),
+            Case(
+                description="zero is not false",
+                val=0,
+                args=["bar"],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="one is not false or true",
+                val=1,
+                args=["bar"],
+                kwargs={},
+                expect=1,
+            ),
+            Case(
+                description="falsy drop",
+                val=FalsyDrop(0),
+                args=["bar"],
+                kwargs={},
+                expect="bar",
             ),
         ]
 

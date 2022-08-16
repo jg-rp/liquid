@@ -905,9 +905,47 @@ def is_truthy(obj: Any) -> bool:
     if hasattr(obj, "__liquid__"):
         obj = obj.__liquid__()
 
+    # Liquid zero is not falsy.
+    if isinstance(obj, int) and not isinstance(obj, bool):
+        return True
+
     if obj in (False, None):
         return False
     return True
+
+
+# pylint: disable=too-many-return-statements
+def compare_bool(left: Any, operator: str, right: Any) -> bool:
+    """Compare an object to a boolean value."""
+    if isinstance(left, bool) and (
+        isinstance(right, int) and not isinstance(right, bool)
+    ):
+        if operator in ("==", "<", ">", "<=", ">="):
+            return False
+        if operator in ("!=", "<>"):
+            return True
+        raise LiquidTypeError(
+            f"unknown operator: {type(left)} {operator} {type(right)}"
+        )
+    if isinstance(right, bool) and (
+        isinstance(left, int) and not isinstance(left, bool)
+    ):
+        if operator in ("==", "<", ">", "<=", ">="):
+            return False
+        if operator in ("!=", "<>"):
+            return True
+        raise LiquidTypeError(
+            f"unknown operator: {type(left)} {operator} {type(right)}"
+        )
+
+    if operator == "==":
+        return bool(left == right)
+    if operator in ("!=", "<>"):
+        return bool(left != right)
+    if operator in ("<", ">", "<=", ">="):
+        return False
+
+    raise LiquidTypeError(f"unknown operator: {type(left)} {operator} {type(right)}")
 
 
 # pylint: disable=too-many-return-statements,too-many-branches
@@ -925,6 +963,9 @@ def compare(left: Any, operator: str, right: Any) -> bool:
 
     if isinstance(right, (Empty, Blank)):
         left, right = right, left
+
+    if isinstance(left, bool) or isinstance(right, bool):
+        return compare_bool(left, operator, right)
 
     if operator == "==":
         return bool(left == right)

@@ -489,6 +489,72 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expression="nil == nil",
                 expect=True,
             ),
+            Case(
+                description="zero",
+                context={},
+                expression="0",
+                expect=True,
+            ),
+            Case(
+                description="one",
+                context={},
+                expression="1",
+                expect=True,
+            ),
+            Case(
+                description="zero equals false",
+                context={},
+                expression="0 == false",
+                expect=False,
+            ),
+            Case(
+                description="one equals true",
+                context={},
+                expression="1 == true",
+                expect=False,
+            ),
+            Case(
+                description="true equals one",
+                context={},
+                expression="true == 1",
+                expect=False,
+            ),
+            Case(
+                description="one is less than true",
+                context={},
+                expression="1 < true",
+                expect=False,
+            ),
+            Case(
+                description="zero is less than true",
+                context={},
+                expression="0 < true",
+                expect=False,
+            ),
+            Case(
+                description="one is not equal true",
+                context={},
+                expression="1 != true",
+                expect=True,
+            ),
+            Case(
+                description="zero is not equal false",
+                context={},
+                expression="0 != false",
+                expect=True,
+            ),
+            Case(
+                description="false is not equal zero",
+                context={},
+                expression="false != 0",
+                expect=True,
+            ),
+            Case(
+                description="false is less than string",
+                context={},
+                expression="false < 'false'",
+                expect=False,
+            ),
         ]
 
         self._test(test_cases, tokenize_boolean_expression, parse_boolean_expression)

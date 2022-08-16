@@ -38,4 +38,19 @@ cases = [
         ),
         expect="hello",
     ),
+    Case(
+        description=("zero is not equal to false"),
+        template=(r"{% unless 0 == false %}Hello{% else %}Goodbye{% endunless %}"),
+        expect="Hello",
+    ),
+    Case(
+        description=("zero is truthy"),
+        template=(r"{% unless 0 %}Hello{% else %}Goodbye{% endunless %}"),
+        expect="Goodbye",
+    ),
+    Case(
+        description=("one is not equal to true"),
+        template=(r"{% unless 1 == true %}Hello{% else %}Goodbye{% endunless %}"),
+        expect="Hello",
+    ),
 ]
