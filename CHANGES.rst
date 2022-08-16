@@ -11,6 +11,9 @@ Version 1.4.2
 - Fixed a bug with the ``default`` filter. Liquid zero should not be equal to ``False``.
   The ``default`` filter now returns ``0`` if its left value is zero. Before it would
   have return its default value. See #62.
+- Fixed a bug where boolean expressions would consider Liquid ``0`` and ``false`` to be
+  equal and ``0`` to be falsy. Python Liquid is now consistent with the reference
+  implementation when comparing integers to booleans. See #65.
 
 Version 1.4.1
 -------------

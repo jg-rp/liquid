@@ -156,4 +156,19 @@ cases = [
         template=(r"{% if true and false and false or true %}hello{% endif %}"),
         expect="",
     ),
+    Case(
+        description=("zero is not equal to false"),
+        template=(r"{% if 0 == false %}Hello{% else %}Goodbye{% endif %}"),
+        expect="Goodbye",
+    ),
+    Case(
+        description=("zero is truthy"),
+        template=(r"{% if 0 %}Hello{% else %}Goodbye{% endif %}"),
+        expect="Hello",
+    ),
+    Case(
+        description=("one is not equal to true"),
+        template=(r"{% if 1 == true %}Hello{% else %}Goodbye{% endif %}"),
+        expect="Goodbye",
+    ),
 ]
