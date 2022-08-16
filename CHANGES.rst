@@ -1,6 +1,17 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.2
+-------------
+
+**Fixes**
+
+- Fixed a potential memory leak from using ``functools.lru_cache`` on a class method.
+  See #63.
+- Fixed a bug with the ``default`` filter. Liquid zero should not be equal to ``False``.
+  The ``default`` filter now returns ``0`` if its left value is zero. Before it would
+  have return its default value. See #62.
+
 Version 1.4.1
 -------------
 
