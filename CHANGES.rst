@@ -1,6 +1,16 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.3
+-------------
+
+**Fixes**
+
+- Updated the built-in ``date`` filter to support parsing UNIX timestamps from integers
+  and string representations of integers. For consistency with the reference
+  implementation of Liquid, ``date`` now returns the input string unchanged if it can
+  not be parsed.
+
 Version 1.4.2
 -------------
 
