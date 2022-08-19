@@ -360,6 +360,13 @@ class MiscFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect=datetime.datetime.now().strftime("%Y"),
             ),
+            Case(
+                description="negative timestamp integer",
+                val=-1152098955,
+                args=["%Y"],
+                kwargs={},
+                expect="1933",
+            ),
         ]
 
         self._test(date, test_cases)

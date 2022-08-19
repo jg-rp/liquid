@@ -93,7 +93,12 @@ def date(
                 # with the reference implementation.
                 return str(dat)
     elif isinstance(dat, int):
-        dat = datetime.datetime.fromtimestamp(dat)
+        try:
+            dat = datetime.datetime.fromtimestamp(dat)
+        except OverflowError:
+            # Testing on Windows shows that it can't handle some
+            # negative integers.
+            return str(dat)
 
     if not isinstance(dat, (datetime.datetime, datetime.date)):
         raise FilterArgumentError(
