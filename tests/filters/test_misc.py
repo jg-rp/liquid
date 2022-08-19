@@ -375,5 +375,5 @@ class MiscFilterTestCase(unittest.TestCase):
     @unittest.skipUnless(platform.system() == "Windows", "windows specific test")
     def test_parse_timestamp_on_windows(self):
         """Test that we can handle parsing timestamps on windows."""
-        result = date(-1152098955, "%Y", env=self.env)
+        result = date(-1152098955, "%Y", environment=self.env)
         self.assertEqual(result, "-1152098955")
