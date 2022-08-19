@@ -95,7 +95,7 @@ def date(
     elif isinstance(dat, int):
         try:
             dat = datetime.datetime.fromtimestamp(dat)
-        except OverflowError:
+        except (OverflowError, OSError):
             # Testing on Windows shows that it can't handle some
             # negative integers.
             return str(dat)
