@@ -66,7 +66,10 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
 @liquid_filter
 @functools.lru_cache(maxsize=10)
 def date(
-    dat: Union[datetime.datetime, str], fmt: str, *, environment: Environment
+    dat: Union[datetime.datetime, str, int],
+    fmt: str,
+    *,
+    environment: Environment,
 ) -> str:
     """Formats a datetime according the the given format string."""
     if is_undefined(dat):
@@ -78,8 +81,19 @@ def date(
     if isinstance(dat, str):
         if dat in ("now", "today"):
             dat = datetime.datetime.now()
+        elif dat.isdigit():
+            # The reference implementation does not support string
+            # representations of negative integers either.
+            dat = datetime.datetime.fromtimestamp(int(dat))
         else:
-            dat = parser.parse(dat)
+            try:
+                dat = parser.parse(dat)
+            except parser.ParserError:
+                # Input is returned unchanged. This is consistent
+                # with the reference implementation.
+                return str(dat)
+    elif isinstance(dat, int):
+        dat = datetime.datetime.fromtimestamp(dat)
 
     if not isinstance(dat, (datetime.datetime, datetime.date)):
         raise FilterArgumentError(

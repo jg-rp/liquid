@@ -35,4 +35,24 @@ cases = [
         template=r"{{ 'March 14, 2016' | date: '%%%b %d, %y' }}",
         expect="%Mar 14, 16",
     ),
+    Case(
+        description="timestamp integer",
+        template=r"{{ 1152098955 | date: '%m/%d/%Y' }}",
+        expect="07/05/2006",
+    ),
+    Case(
+        description="timestamp string",
+        template=r"{{ '1152098955' | date: '%m/%d/%Y' }}",
+        expect="07/05/2006",
+    ),
+    Case(
+        description="negative timestamp integer",
+        template=r"{{ -1152098955 | date: '%m/%d/%Y' }}",
+        expect="06/29/1933",
+    ),
+    Case(
+        description="negative timestamp string",
+        template=r"{{ '-1152098955' | date: '%m/%d/%Y' }}",
+        expect="-1152098955",
+    ),
 ]
