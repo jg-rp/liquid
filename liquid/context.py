@@ -664,11 +664,8 @@ class Context:
             self.env.loop_iteration_limit
             and reduce(
                 mul,
-                itertools.chain(
-                    (loop.length for loop in self.loops),
-                    [length, self.loop_iteration_carry],
-                ),
-                1,
+                (loop.length for loop in self.loops),
+                length * self.loop_iteration_carry,
             )
             > self.env.loop_iteration_limit
         ):
@@ -688,7 +685,11 @@ class Context:
             )
 
         loop_iteration_carry = (
-            reduce(mul, (loop.length for loop in self.loops), 1)
+            reduce(
+                mul,
+                (loop.length for loop in self.loops),
+                self.loop_iteration_carry,
+            )
             if carry_loop_iterations
             else 1
         )
