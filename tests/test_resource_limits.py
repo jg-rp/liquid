@@ -152,6 +152,29 @@ class LoopIterationLimitTestCase(unittest.TestCase):
         with self.assertRaises(LoopIterationLimitError):
             template.render()
 
+    def test_nested_renders_carry_loop_count(self):
+        """Test that multiple, nested renders carry the loop count."""
+
+        class MockEnv(Environment):
+            loop_iteration_limit = 3000
+
+        env = MockEnv(
+            loader=DictLoader(
+                {
+                    "foo": (
+                        "{% for i in (1..50) %}" "{% render 'bar' %}" "{% endfor %}"
+                    ),
+                    "bar": ("{% for j in (1..50) %}" "{{ j }}" "{% endfor %}"),
+                }
+            )
+        )
+        template = env.from_string(
+            "{% for i in (1..10) %}{% render 'foo' %}{% endfor %}"
+        )
+
+        with self.assertRaises(LoopIterationLimitError):
+            template.render()
+
     def test_include_contributes_to_count(self):
         """Test that `included`ed templates contribute to the loop count."""
 
