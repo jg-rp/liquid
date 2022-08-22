@@ -9,7 +9,7 @@ Version 1.4.3
 - Updated the built-in ``date`` filter to support parsing UNIX timestamps from integers
   and string representations of integers. For consistency with the reference
   implementation of Liquid, ``date`` now returns the input string unchanged if it can
-  not be parsed. `See #67 <https://github.com/jg-rp/liquid/issues/67>`_.
+  not be parsed. See `#67 <https://github.com/jg-rp/liquid/issues/67>`_.
 - Fixed an issue with the "loop iteration" resource limit. It was failing to carry an
   existing loop counter more than one level deep when using ``Context.copy()``. See
   `#68 <https://github.com/jg-rp/liquid/issues/68>`_.
@@ -20,14 +20,14 @@ Version 1.4.2
 **Fixes**
 
 - Fixed a potential memory leak from using ``functools.lru_cache`` on a class method.
-  `See #63 <https://github.com/jg-rp/liquid/issues/63>`_.
+  See `#63 <https://github.com/jg-rp/liquid/issues/63>`_.
 - Fixed a bug with the ``default`` filter. Liquid zero should not be equal to ``False``.
   The ``default`` filter now returns ``0`` if its left value is zero. Before it would
-  have return its default value. `See #62 <https://github.com/jg-rp/liquid/issues/62>`_.
+  have return its default value. See `#62 <https://github.com/jg-rp/liquid/issues/62>`_.
 - Fixed a bug where boolean expressions would consider Liquid ``0`` and ``false`` to be
   equal and ``0`` to be falsy. Python Liquid is now consistent with the reference
   implementation when comparing integers to booleans.
-  `See #65 <https://github.com/jg-rp/liquid/issues/65>`_.
+  See `#65 <https://github.com/jg-rp/liquid/issues/65>`_.
 
 Version 1.4.1
 -------------
@@ -37,7 +37,8 @@ Version 1.4.1
 - Fixed a bug with the ``StrictDefaultFilter``. It was failing to be strict when
   accessed by some filter decorators and helpers. Now the ``default`` filter will
   immediately return its default value if its left value defines a
-  ``force_liquid_default`` property and that property is truthy. See #62.
+  ``force_liquid_default`` property and that property is truthy.
+  See `#62 <https://github.com/jg-rp/liquid/issues/62>`_.
 
 Version 1.4.0
 -------------
@@ -54,7 +55,7 @@ Version 1.4.0
 **Fixes**
 
 - Fixed a bug in ``StrictUndefined`` that, when extended, stopped if from looking at its
-  own ``msg`` property. See #57.
+  own ``msg`` property. See `#57 <https://github.com/jg-rp/liquid/issues/57>`_.
 
 
 Version 1.3.0

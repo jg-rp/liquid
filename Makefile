@@ -7,7 +7,7 @@ test:
 .PHONY: coverage
 coverage:
 	python -m coverage erase
-	tox -c tox_cov.ini
+	python -m tox -c tox_cov.ini
 	python -m coverage combine
 	python -m coverage html
 
@@ -21,7 +21,7 @@ profile:
 
 .PHONY: build
 build: clean
-	python setup.py sdist bdist_wheel
+	python -m build
 
 .PHONY: clean
 clean:

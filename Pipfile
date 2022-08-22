@@ -21,6 +21,7 @@ pytest = "*"
 types-python-dateutil = "*"
 ipython = "*"
 tox = "*"
+build = "*"
 
 [packages]
 python-dateutil = "*"
