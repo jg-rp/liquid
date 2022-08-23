@@ -59,6 +59,7 @@ class TemplateSource(NamedTuple):
     matter: Optional[Mapping[str, object]] = None
 
 
+# flake8: noqa
 class BaseLoader(ABC):
     """Base template loader from which all template loaders are derived."""
 
