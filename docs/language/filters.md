@@ -531,6 +531,18 @@ If no argument is given, the default value will be an empty string.
 
 ```
 
+Empty strings, arrays and objects all cause the default value to be returned. `0` does not.
+
+```liquid
+{{ "" | default: "hello" }}
+{{ 0 | default: 99 }}
+```
+
+```plain title="output"
+hello
+0
+```
+
 ## divided_by
 
 `<number> | divided_by: <number>`

@@ -86,9 +86,7 @@ Liquid supports literal strings (`"hello"` or `'hello'`), integers (`1`, `-35`),
 
 ### Arrays and Hashes
 
-There is no literal syntax for creating arrays or hashes, although these types (or their Python
-equivalents) can be added to a template's render context, and many tags and filters are designed to
-work with them.
+There is no literal syntax for creating arrays or hashes, although these types (or their Python equivalents) can be added to a template's render context, and many tags and filters are designed to work with them.
 
 One common idiom in Liquid is to create an array of strings using the [split](./filters.md#split) filter.
 
@@ -98,9 +96,7 @@ One common idiom in Liquid is to create an array of strings using the [split](./
 
 ### Ranges
 
-A _range_ literal is a start and stop integer, separated by two periods (`..`), and enclosed in
-parentheses. The resulting range is inclusive of its stop value. Ranges can be iterated and many of
-the built-in filters that accept an array will also work with a range.
+A _range_ literal is a start and stop integer, separated by two periods (`..`), and enclosed in parentheses. The resulting range is inclusive of its stop value. Ranges can be iterated and many of the built-in filters that accept an array will also work with a range.
 
 ```liquid
 {% assign foo = (1..5) %}
@@ -113,14 +109,11 @@ the built-in filters that accept an array will also work with a range.
 
 ### nil
 
-The reserved word `nil` is used to represent the absence of a value. In Python Liquid, `nil` is
-equal to `None`.
+The reserved word `nil` is used to represent the absence of a value. In Python Liquid, `nil` is equal to `None`.
 
 ## Whitespace Control
 
-Optionally include a leading and/or trailing hyphen inside any [output statement](#output) or
-[tag](#tags). When present, Liquid will strip all whitespace from the preceding and/or trailing
-[template literal](#template-literals).
+Optionally include a leading and/or trailing hyphen inside any [output statement](#output) or [tag](#tags). When present, Liquid will strip all whitespace from the preceding and/or trailing [template literal](#template-literals).
 
 ```liquid title="without whitespace control"
 {% assign some_variable = false %}

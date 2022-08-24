@@ -623,14 +623,17 @@ to `true`.
 
 ### Truthy and Falsy
 
-`false` and `nil` are falsy, everything else is truthy. Even empty string and arrays. Compare
-strings and arrays to `empty` to check for emptiness.
+Only `false` and `nil` are falsy, everything else is truthy. Even empty strings and arrays. Compare strings and arrays to `empty` to check for emptiness.
 
 ```liquid
 {% if somearray != empty %}
   Do something with the array.
 {% endif %}
 ```
+
+:::info
+Unlike Python, in Liquid `0` does not equal `false` and `1` does not equal `true`.
+:::
 
 ## ifchanged
 
