@@ -1,3 +1,6 @@
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 # Getting Started
 
 Python Liquid is a [Python](https://www.python.org/) engine for [Liquid](https://shopify.github.io/liquid/), the safe, customer-facing template language for flexible web apps.
@@ -6,17 +9,64 @@ This page gets you started using Liquid with Python. See [Introduction to Liquid
 
 ## Install
 
-Install Python Liquid using [Pipenv](https://pipenv.pypa.io/en/latest/):
+Install Python Liquid from [PyPi](https://pypi.org/project/python-liquid/):
 
-```shell
-$ pipenv install python-liquid
+<Tabs groupId="pypi-manager">
+<TabItem value="pip" label="pip">
+
+```bash
+python -m pip install -U python-liquid
 ```
 
-Or [pip](https://pip.pypa.io/en/stable/getting-started/):
+</TabItem>
+<TabItem value="pipenv" label="pipenv">
 
-```shell
-$ python -m pip install -U python-liquid
+```bash
+pipenv install python-liquid
 ```
+
+</TabItem>
+<TabItem value="poetry" label="poetry">
+
+```bash
+poetry add python-liquid
+```
+
+</TabItem>
+</Tabs>
+
+Or [conda-forge](https://anaconda.org/conda-forge/python-liquid):
+
+<Tabs groupId="conda-manager">
+<TabItem value="anaconda" label="anaconda">
+
+```bash
+conda install -c conda-forge python-liquid
+```
+
+</TabItem>
+<TabItem value="miniconda" label="miniconda">
+
+```bash
+conda install -c conda-forge python-liquid
+```
+
+</TabItem>
+<TabItem value="miniforge" label="miniforge">
+
+```bash
+conda install python-liquid
+```
+
+</TabItem>
+<TabItem value="mamba" label="mamba">
+
+```bash
+conda install python-liquid
+```
+
+</TabItem>
+</Tabs>
 
 ## Render
 
