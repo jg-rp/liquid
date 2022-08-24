@@ -10,6 +10,10 @@ template language for flexible web apps.
     :target: https://pypi.org/project/python-liquid/
     :alt: Version
 
+.. image:: https://img.shields.io/conda/vn/conda-forge/python-liquid?style=flat-square
+    :target: https://anaconda.org/conda-forge/python-liquid
+    :alt: conda-forge
+
 .. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Tests/main?label=tests&style=flat-square
     :target: https://github.com/jg-rp/liquid/actions/workflows/tests.yaml
     :alt: Tests
@@ -53,6 +57,12 @@ Or `pip <https://pip.pypa.io/en/stable/getting-started/>`_:
 .. code-block:: text
 
     $ python -m pip install -U python-liquid
+
+Or from `conda-forge <https://anaconda.org/conda-forge/python-liquid>`_:
+
+.. code-block:: text
+
+    $ conda install -c conda-forge python-liquid
 
 Links
 -----
