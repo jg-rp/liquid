@@ -13,12 +13,18 @@ All built-in tags are implemented in this way, so have a look in [liquid/builtin
 Taking inspiration from [Django's Template Language](https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#with), lets implement a `with` tag, which extends the local scope for the duration of its block. Our `with` tag's expressions consists of one or more named arguments separated by commas. Each argument is a variable name, followed by a colon, then a Liquid keyword, string, integer, float, range expression or identifier.
 
 ```plain
-{% with <identifier>: <object> [, <identifier>: object ... ] %}
+{% with <identifier>: <object> [, <identifier>: <object> ... ] %}
   <literal,statement,tag> ...
 {% endwith %}
 ```
 
 This implementation keeps any variables set inside the `with` block (using `assign` or `capture`) alive after the block has been rendered.
+
+:::tip
+You can find an alternative implementation of the `with` tag in [this gist](https://gist.github.com/jg-rp/4ee5a864b57ea756800786833e4af1ee). It uses [SLY](https://github.com/dabeaz/sly) to tokenize and render `with` expressions.
+
+While this alternative implementation is arguably easier to understand and maintain, it does not lend itself to static type checking and is slower than the approach use by Python Liquid's built-in tags.
+:::
 
 ### Example Tag
 
