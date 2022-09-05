@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.4 (unreleased)
+--------------------------
+
+**Fixes**
+
+- Keep comment text for later static analysis when parsing ``{% comment %}`` block tags.
+  See `#70 <https://github.com/jg-rp/liquid/issues/70>`_.
+
 Version 1.4.3
 -------------
 

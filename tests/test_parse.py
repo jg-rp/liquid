@@ -43,6 +43,7 @@ class Case(NamedTuple):
         return self.expect
 
 
+# pylint: disable=too-many-public-methods
 class ParserTestCase(unittest.TestCase):
     def _test(self, test_cases: Iterable[Case], instance, mode: Mode = Mode.STRICT):
         """Helper method for testing lists of `Case`s."""
@@ -210,14 +211,46 @@ class ParserTestCase(unittest.TestCase):
 
         self._test(test_cases, if_tag.IfNode)
 
-    def test_comment_tag(self):
+    def test_default_comment_tag(self):
         """Test that we can parse comment tags."""
+        test_cases = [
+            Case("simple comment", "{% comment %}foo{% endcomment %}", "/* foo */"),
+            Case(
+                "commented object",
+                "{% comment %}{{ product }}{% endcomment %}",
+                "/* product */",
+            ),
+        ]
+
+        self._test(test_cases, comment_tag.CommentNode)
+
+    def test_base_comment_tag(self):
+        """Test that we can parse the space efficient base comment tag."""
         test_cases = [
             Case("simple comment", "{% comment %}foo{% endcomment %}", "/* */"),
             Case(
                 "commented object",
                 "{% comment %}{{ product }}{% endcomment %}",
                 "/* */",
+            ),
+        ]
+
+        env = Environment()
+        env.add_tag(comment_tag.CommentTag)
+
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+                self.assertIn(str(template.tree), case.expected)
+
+    def test_inline_comment_tag(self):
+        """Test that we can parse inline comment tags."""
+        test_cases = [
+            Case("simple comment", "{% # foo %}", "/* foo */"),
+            Case(
+                "commented object",
+                "{% # {{ product }} %}",
+                "/* {{ product }} */",
             ),
         ]
 

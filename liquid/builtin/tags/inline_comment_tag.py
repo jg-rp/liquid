@@ -21,6 +21,7 @@ class InlineCommentTag(Tag):
 
     def parse(self, stream: TokenStream) -> CommentNode:
         expect(stream, TOKEN_TAG, value=self.name)
+        tok = stream.current
         # Empty comment tag?
         if stream.peek.type == TOKEN_EXPRESSION:
             next(stream)
@@ -29,4 +30,4 @@ class InlineCommentTag(Tag):
                     "every line of an inline comment must start with a '#' character",
                     linenum=stream.current.linenum,
                 )
-        return CommentNode(stream.current)
+        return CommentNode(tok, text=stream.current.value)
