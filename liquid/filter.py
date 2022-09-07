@@ -18,6 +18,8 @@ from liquid.context import Undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
+from liquid.limits import to_int
+
 if TYPE_CHECKING:  # pragma: no cover
     FilterT = Callable[..., Any]
     NumberT = Union[float, int]
@@ -118,7 +120,7 @@ def int_arg(val: Any, default: Optional[int] = None) -> int:
     """Return the ``val`` as an int or ``default`` if ``val`` can't be cast to an
     int."""
     try:
-        return int(val)
+        return to_int(val)
     except ValueError as err:
         if default is not None:
             return default
@@ -135,7 +137,7 @@ def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
 
     if isinstance(val, str):
         try:
-            return int(val)
+            return to_int(val)
         except ValueError:
             pass
 

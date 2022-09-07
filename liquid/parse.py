@@ -40,6 +40,7 @@ from liquid.lex import tokenize_boolean_expression
 from liquid.lex import tokenize_loop_expression
 from liquid.lex import tokenize_filtered_expression
 
+from liquid.limits import to_int
 from liquid.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
@@ -299,7 +300,7 @@ def parse_string_literal(stream: TokenStream) -> expression.StringLiteral:
 
 def parse_integer_literal(stream: TokenStream) -> expression.IntegerLiteral:
     """Read an integer from the token stream."""
-    return expression.IntegerLiteral(value=int(stream.current.value))
+    return expression.IntegerLiteral(value=to_int(stream.current.value))
 
 
 def parse_float_literal(stream: TokenStream) -> expression.FloatLiteral:
@@ -353,7 +354,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
             path.append(IdentifierPathElement(stream.current.value))
 
         elif stream.current.type == TOKEN_INTEGER:
-            path.append(IdentifierPathElement(int(stream.current.value)))
+            path.append(IdentifierPathElement(to_int(stream.current.value)))
 
         elif stream.current.type == TOKEN_LBRACKET:
             stream.next_token()  # Eat open bracket
@@ -363,9 +364,9 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
             elif stream.current.type == TOKEN_NEGATIVE:
                 expect_peek(stream, TOKEN_INTEGER)
                 stream.next_token()
-                path.append(IdentifierPathElement(-int(stream.current.value)))
+                path.append(IdentifierPathElement(-to_int(stream.current.value)))
             elif stream.current.type == TOKEN_INTEGER:
-                path.append(IdentifierPathElement(int(stream.current.value)))
+                path.append(IdentifierPathElement(to_int(stream.current.value)))
 
             elif stream.current.type == TOKEN_IDENTIFIER:
                 # Recursive call to parse_identifier. If it's not a string or

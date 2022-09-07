@@ -33,6 +33,8 @@ from liquid.exceptions import Error
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import FilterValueError
 
+from liquid.limits import to_int
+
 # pylint: disable=missing-class-docstring too-few-public-methods
 
 
@@ -280,12 +282,12 @@ class RangeLiteral(Expression):
 
     def _make_range(self, start: Any, stop: Any) -> range:
         try:
-            start = int(start)
+            start = to_int(start)
         except ValueError:
             start = 0
 
         try:
-            stop = int(stop)
+            stop = to_int(stop)
         except ValueError:
             stop = 0
 
