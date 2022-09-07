@@ -90,7 +90,7 @@ class FilterValueError(Error):
 
 
 class TemplateNotFound(Error):
-    """Excpetion raised when a template could not be found."""
+    """Exception raised when a template could not be found."""
 
     def __str__(self) -> str:
         msg = super().__str__()
@@ -122,6 +122,16 @@ class OutputStreamLimitError(ResourceLimitError):
 class LocalNamespaceLimitError(ResourceLimitError):
     """Exception raised when the maximum size of a render context's local namespace
     has been exceeded."""
+
+
+# LiquidValueError inheriting from LiquidSyntaxError does not make complete sense.
+# The alternative is to have multiple to_int functions that raise more appropriate
+# exceptions depending on whether we are parsing or rendering when attempting to
+# convert long strings to integers.
+
+
+class LiquidValueError(LiquidSyntaxError):
+    """Exception raised when a cast from str to int exceeds the length limit."""
 
 
 class UndefinedError(Error):

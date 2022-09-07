@@ -1,13 +1,17 @@
 Python Liquid Change Log
 ========================
 
-Version 1.4.4 (unreleased)
---------------------------
+Version 1.4.4
+-------------
 
 **Fixes**
 
 - Keep comment text for later static analysis when parsing ``{% comment %}`` block tags.
   See `#70 <https://github.com/jg-rp/liquid/issues/70>`_.
+- Guard against DoS by very large str to int conversion. We honour environment variable
+  ``PYTHONINTMAXSTRDIGITS``, or use ``LIQUIDINTMAXSTRDIGITS`` if you want to set
+  Liquid's max digits independently. The default is 4300.
+  See https://github.com/python/cpython/issues/95778
 
 Version 1.4.3
 -------------

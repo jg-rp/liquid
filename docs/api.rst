@@ -130,6 +130,7 @@ Exceptions
 .. autoclass:: liquid.exceptions.Error
 .. autoclass:: liquid.exceptions.LiquidSyntaxError
 .. autoclass:: liquid.exceptions.LiquidTypeError
+.. autoclass:: liquid.exceptions.LiquidValueError
 .. autoclass:: liquid.exceptions.DisabledTagError
 .. autoclass:: liquid.exceptions.NoSuchFilterFunc
 .. autoclass:: liquid.exceptions.FilterArgumentError

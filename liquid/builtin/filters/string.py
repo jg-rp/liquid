@@ -31,6 +31,8 @@ from liquid.filter import with_environment
 from liquid.filter import string_filter
 from liquid.filter import liquid_filter
 
+from liquid.limits import to_int
+
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
 from liquid.utils.text import truncate_words
@@ -193,14 +195,14 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
         )
 
     try:
-        start = int(start)
+        start = to_int(start)
     except (ValueError, TypeError) as err:
         raise FilterArgumentError(
             f"slice expected an integer start, found {type(start).__name__}"
         ) from err
 
     try:
-        length = int(length)
+        length = to_int(length)
     except (ValueError, TypeError) as err:
         raise FilterArgumentError(
             f"slice expected an integer length, found {type(length).__name__}"
@@ -266,7 +268,7 @@ def truncate(val: str, num: Any = 50, end: str = "...") -> str:
         raise FilterArgumentError("truncate expected an integer, found Undefined")
 
     try:
-        num = int(num)
+        num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
             f"truncate expected an integer, found {type(num).__name__}"
@@ -287,7 +289,7 @@ def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
         raise FilterArgumentError("truncate expected an integer, found Undefined")
 
     try:
-        num = int(num)
+        num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
             f"truncate expected an integer, found {type(num).__name__}"

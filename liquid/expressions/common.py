@@ -39,6 +39,7 @@ from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_STRING
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.limits import to_int
 
 if TYPE_CHECKING:
     from liquid.expressions.stream import TokenStream
@@ -103,7 +104,7 @@ def parse_string_literal(stream: "TokenStream") -> StringLiteral:
 
 def parse_integer_literal(stream: "TokenStream") -> IntegerLiteral:
     """Read an integer from the token stream."""
-    return IntegerLiteral(value=int(stream.current[2]))
+    return IntegerLiteral(value=to_int(stream.current[2]))
 
 
 def parse_float_literal(stream: "TokenStream") -> FloatLiteral:
@@ -135,7 +136,7 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
         if typ == TOKEN_IDENTIFIER:
             path.append(IdentifierPathElement(val))
         elif typ == TOKEN_IDENTINDEX:
-            path.append(IdentifierPathElement(int(val)))
+            path.append(IdentifierPathElement(to_int(val)))
         elif typ == TOKEN_LBRACKET:
             stream.next_token()
             path.append(parse_identifier(stream))
