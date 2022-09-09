@@ -8,6 +8,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from collections import abc
+from decimal import Decimal
 from itertools import islice
 
 from typing import Dict
@@ -902,35 +903,23 @@ def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
     raise LiquidTypeError(f"unknown operator {left} {operator} {right}")
 
 
+def _is_py_falsy_number(obj: object) -> bool:
+    # Liquid 0, 0.0, 0b0, 0X0, 0o0 and Decimal("0") are not falsy.
+    return not isinstance(obj, bool) and isinstance(obj, (int, float, Decimal))
+
+
 def is_truthy(obj: Any) -> bool:
     """Return True if the given object is Liquid truthy."""
     if hasattr(obj, "__liquid__"):
         obj = obj.__liquid__()
-
-    # Liquid zero is not falsy.
-    if isinstance(obj, int) and not isinstance(obj, bool):
-        return True
-
-    if obj in (False, None):
-        return False
-    return True
+    return _is_py_falsy_number(obj) or obj not in (False, None)
 
 
 # pylint: disable=too-many-return-statements
 def compare_bool(left: Any, operator: str, right: Any) -> bool:
     """Compare an object to a boolean value."""
-    if isinstance(left, bool) and (
-        isinstance(right, int) and not isinstance(right, bool)
-    ):
-        if operator in ("==", "<", ">", "<=", ">="):
-            return False
-        if operator in ("!=", "<>"):
-            return True
-        raise LiquidTypeError(
-            f"unknown operator: {type(left)} {operator} {type(right)}"
-        )
-    if isinstance(right, bool) and (
-        isinstance(left, int) and not isinstance(left, bool)
+    if (isinstance(left, bool) and _is_py_falsy_number(right)) or (
+        isinstance(right, bool) and _is_py_falsy_number(left)
     ):
         if operator in ("==", "<", ">", "<=", ">="):
             return False

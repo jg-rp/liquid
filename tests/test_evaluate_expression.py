@@ -1,23 +1,26 @@
 """Liquid expression evaluator test cases."""
 
 import unittest
-from typing import NamedTuple, Any, Mapping
+
+from decimal import Decimal
+
+from typing import Any
+from typing import Mapping
+from typing import NamedTuple
 
 from liquid.environment import Environment
 from liquid.context import Context
 from liquid.stream import TokenStream
-from liquid.lex import (
-    tokenize_filtered_expression,
-    tokenize_boolean_expression,
-    tokenize_loop_expression,
-    tokenize_assignment_expression,
-)
-from liquid.parse import (
-    parse_filtered_expression,
-    parse_boolean_expression,
-    parse_assignment_expression,
-    parse_loop_expression,
-)
+
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_loop_expression
+from liquid.lex import tokenize_assignment_expression
+
+from liquid.parse import parse_filtered_expression
+from liquid.parse import parse_boolean_expression
+from liquid.parse import parse_assignment_expression
+from liquid.parse import parse_loop_expression
 
 
 class Case(NamedTuple):
@@ -496,6 +499,12 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expect=True,
             ),
             Case(
+                description="0.0",
+                context={},
+                expression="0.0",
+                expect=True,
+            ),
+            Case(
                 description="one",
                 context={},
                 expression="1",
@@ -505,6 +514,24 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 description="zero equals false",
                 context={},
                 expression="0 == false",
+                expect=False,
+            ),
+            Case(
+                description="zero equals true",
+                context={},
+                expression="0 == true",
+                expect=False,
+            ),
+            Case(
+                description="0.0 equals false",
+                context={},
+                expression="0.0 == false",
+                expect=False,
+            ),
+            Case(
+                description="0.0 equals true",
+                context={},
+                expression="0.0 == true",
                 expect=False,
             ),
             Case(
@@ -532,6 +559,12 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expect=False,
             ),
             Case(
+                description="0.0 is less than true",
+                context={},
+                expression="0.0 < true",
+                expect=False,
+            ),
+            Case(
                 description="one is not equal true",
                 context={},
                 expression="1 != true",
@@ -544,15 +577,51 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
                 expect=True,
             ),
             Case(
+                description="0.0 is not equal false",
+                context={},
+                expression="0.0 != false",
+                expect=True,
+            ),
+            Case(
                 description="false is not equal zero",
                 context={},
                 expression="false != 0",
                 expect=True,
             ),
             Case(
+                description="false is not equal 0.0",
+                context={},
+                expression="false != 0.0",
+                expect=True,
+            ),
+            Case(
                 description="false is less than string",
                 context={},
                 expression="false < 'false'",
+                expect=False,
+            ),
+            Case(
+                description="decimal zero",
+                context={"n": Decimal("0")},
+                expression="n",
+                expect=True,
+            ),
+            Case(
+                description="decimal non-zero",
+                context={"n": Decimal("1")},
+                expression="n",
+                expect=True,
+            ),
+            Case(
+                description="decimal zero equals false",
+                context={"n": Decimal("0")},
+                expression="n == false",
+                expect=False,
+            ),
+            Case(
+                description="decimal zero equals true",
+                context={"n": Decimal("0")},
+                expression="n == true",
                 expect=False,
             ),
         ]

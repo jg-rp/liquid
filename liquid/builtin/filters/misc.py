@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime
+import decimal
 import functools
 
 from typing import Any
@@ -49,8 +50,8 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
     if hasattr(obj, "__liquid__"):
         _obj = obj.__liquid__()
 
-    # Liquid zero is not falsy.
-    if isinstance(_obj, int) and not isinstance(_obj, bool):
+    # Liquid 0, 0.0, 0b0, 0X0, 0o0 and Decimal("0") are not falsy.
+    if not isinstance(obj, bool) and isinstance(obj, (int, float, decimal.Decimal)):
         return obj
 
     if allow_false is True and _obj is False:

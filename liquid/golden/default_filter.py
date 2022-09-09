@@ -104,4 +104,9 @@ cases = [
         template=r'{{ 0 | default: "bar", allow_false: true }}',
         expect="0",
     ),
+    Case(
+        description="0.0 is not falsy",
+        template=r'{{ 0.0 | default: "bar" }}',
+        expect="0.0",
+    ),
 ]

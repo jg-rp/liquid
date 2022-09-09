@@ -1,6 +1,15 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.5
+-------------
+
+**Hot fix**
+
+- Fixed a bug where boolean expressions and the default filter would treat ``0.0`` and 
+  ``decimal.Decimal("0")`` as ``False``. Python considers these values to be falsy,
+  Liquid does not. See `#74 <https://github.com/jg-rp/liquid/issues/74>`_.
+
 Version 1.4.4
 -------------
 
