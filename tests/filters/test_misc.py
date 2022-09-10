@@ -1,6 +1,7 @@
 """Test miscellaneous filter functions."""
 # pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import datetime
+import decimal
 import platform
 import unittest
 
@@ -276,6 +277,20 @@ class MiscFilterTestCase(unittest.TestCase):
                 args=["bar"],
                 kwargs={},
                 expect=0,
+            ),
+            Case(
+                description="0.0 is not false",
+                val=0.0,
+                args=["bar"],
+                kwargs={},
+                expect=0.0,
+            ),
+            Case(
+                description="Decimal('0') is not false",
+                val=decimal.Decimal("0"),
+                args=["bar"],
+                kwargs={},
+                expect=decimal.Decimal("0"),
             ),
             Case(
                 description="one is not false or true",

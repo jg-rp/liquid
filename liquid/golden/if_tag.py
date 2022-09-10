@@ -167,6 +167,11 @@ cases = [
         expect="Hello",
     ),
     Case(
+        description=("0.0 is truthy"),
+        template=(r"{% if 0.0 %}Hello{% else %}Goodbye{% endif %}"),
+        expect="Hello",
+    ),
+    Case(
         description=("one is not equal to true"),
         template=(r"{% if 1 == true %}Hello{% else %}Goodbye{% endif %}"),
         expect="Goodbye",
