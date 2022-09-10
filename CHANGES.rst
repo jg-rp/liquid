@@ -9,6 +9,9 @@ Version 1.4.5
 - Fixed a bug where boolean expressions and the default filter would treat ``0.0`` and 
   ``decimal.Decimal("0")`` as ``False``. Python considers these values to be falsy,
   Liquid does not. See `#74 <https://github.com/jg-rp/liquid/issues/74>`_.
+- Future-proof str to int conversion limit. We will now use ``sys.get_int_max_str_digits``
+  if it is available and ``LIQUIDINTMAXSTRDIGITS`` is not set. Note that ``sys.get_int_max_str_digits``
+  is called once at startup, so Liquid's limit will change with ``sys.set_int_max_str_digits``.
 
 Version 1.4.4
 -------------
