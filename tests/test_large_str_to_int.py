@@ -40,12 +40,6 @@ class StrToIntTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             _init_int_max_str_digits()
 
-    @patch.dict(os.environ, {"PYTHONINTMAXSTRDIGITS": "hello"})
-    def test_python_max_not_digit(self):
-        """Test that we handle environment variables that not digits."""
-        with self.assertRaises(TypeError):
-            _init_int_max_str_digits()
-
     @patch.dict(os.environ, {"LIQUIDINTMAXSTRDIGITS": "5"})
     def test_max_digits_too_small(self):
         """Test that we handle environment variables that are too small."""
@@ -55,11 +49,6 @@ class StrToIntTestCase(unittest.TestCase):
     @patch.dict(os.environ, {"LIQUIDINTMAXSTRDIGITS": "1000"})
     def test_set_liquid_max(self):
         """Test that we can set LIQUIDINTMAXSTRDIGITS."""
-        self.assertEqual(_init_int_max_str_digits(), 1000)
-
-    @patch.dict(os.environ, {"PYTHONINTMAXSTRDIGITS": "1000"})
-    def test_python_max(self):
-        """Test that we can set PYTHONINTMAXSTRDIGITS."""
         self.assertEqual(_init_int_max_str_digits(), 1000)
 
     @patch.dict(os.environ, {"LIQUIDINTMAXSTRDIGITS": "0"})
