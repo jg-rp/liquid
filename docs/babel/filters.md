@@ -268,3 +268,23 @@ This table shows the available `Number()` constructor arguments.
 | `default_format`               | `Optional[str]` | A fallback currency format that is used if `format_var` can not be resolved. If `None`, the standard format for the current locale will be used. | `None`              |
 | `input_locale_var`             | `str`           | The name of a render context variable that resolves to a locale suitable for parsing input strings to decimals.                                  | `"input_locale"`    |
 | `default_input_locale`         | `str`           | A fallback locale to use if `input_locale_var` can not be resolved.                                                                              | `"en_US"`           |
+
+## Translation
+
+### t
+
+TODO
+
+### gettext
+
+TODO
+
+### ngettext
+
+TODO
+
+### pgettext
+
+TODO
+
+### npgettext

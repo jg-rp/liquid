@@ -70,7 +70,7 @@ const sidebars = {
       type: "category",
       label: "Babel",
       collapsed: false,
-      items: ["babel/introduction", "babel/filters"],
+      items: ["babel/introduction", "babel/filters", "babel/tags"],
     },
   ],
 

@@ -136,3 +136,19 @@ template.render(you="World")
 template.render(you="something longer that exceeds our limit")
 # OutputStreamLimitError: output stream limit reached, on line 4
 ```
+
+## String to Integer Limit
+
+**_New in version 1.4.4_**
+
+[CVE-2020-10735](https://github.com/python/cpython/issues/95778) describes a potential denial of service attack by converting very long strings to integers. As of version 1.4.4, Python Liquid will raise a `LiquidValueError` if an attempt is made to cast a long string to an integer.
+
+Due to some unfortunate early Python Liquid design decisions, this is an interpreter-wide limit, unlike other limits described on this page, which are set per `liquid.Environment`.
+
+Python Liquid will look for a `LIQUIDINTMAXSTRDIGITS` [environment variable](https://en.wikipedia.org/wiki/Environment_variable), giving the maximum number of digits allowed before attempting a str to int conversion. We will fall back to looking for `PYTHONINTMAXSTRDIGITS` before defaulting to `4300`. Use `LIQUIDINTMAXSTRDIGITS` when you want to use a lower limit for Liquid while keeping Python's limit higher.
+
+When using [patched versions](https://github.com/python/cpython/pull/96500/files#diff-08a31a70dd1f6d97aa8dacdce77db4de04c700d9949be1af611a595186aad5b3) of Python, Liquid will **not** honour `sys.set_int_max_str_digits`. If Python's limit is lower than Liquid's, it will be possible to get a `ValueError` exception instead of a `LiquidValueError` when parsing Liquid templates.
+
+:::caution
+Python Liquid's default limit helps guard against malicious templates authors. Be sure to validate user controlled inputs that might appear in a Liquid render context.
+:::

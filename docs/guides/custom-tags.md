@@ -21,9 +21,9 @@ Taking inspiration from [Django's Template Language](https://docs.djangoproject.
 This implementation keeps any variables set inside the `with` block (using `assign` or `capture`) alive after the block has been rendered.
 
 :::tip
-You can find an alternative implementation of the `with` tag in [this gist](https://gist.github.com/jg-rp/4ee5a864b57ea756800786833e4af1ee). It uses [SLY](https://github.com/dabeaz/sly) to tokenize and render `with` expressions.
+You can find an alternative implementation of the `with` tag in [this gist](https://gist.github.com/jg-rp/4ee5a864b57ea756800786833e4af1ee). It uses [SLY](https://github.com/dabeaz/sly) to tokenize and parse `with` expressions.
 
-While this alternative implementation is arguably easier to understand and maintain, it does not lend itself to static type checking and is slower than the approach use by Python Liquid's built-in tags.
+While this alternative implementation is arguably easier to understand and maintain, it does not lend itself to static type checking and is slower than the approach used by Python Liquid's built-in tags.
 :::
 
 ### Example Tag
