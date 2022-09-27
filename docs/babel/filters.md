@@ -3,7 +3,7 @@
 Optional [filters](../language/filters.md) provided by the [liquid-babel](./introduction.md) package.
 
 :::info
-Liquid Babel uses [Python Babel](https://github.com/python-babel/babel). Please refer to the [Babel docs](https://babel.pocoo.org/en/latest/index.html) for more information about locales, currency codes and format strings.
+Liquid Babel uses [Python Babel](https://github.com/python-babel/babel). Please refer to the [Babel docs](https://babel.pocoo.org/en/latest/index.html) for more information about working with message catalogs, locales, currency codes and format strings.
 :::
 
 ## Currency
@@ -260,7 +260,7 @@ This table shows the available `Number()` constructor arguments.
 
 | Argument                       | Type            | Description                                                                                                                                      | Default             |
 | ------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `decimal_quantization_var`     | `str`           | TThe name of a render context variable that resolves to the decimal quantization to be used.                                                     | `"currency_code"`   |
+| `decimal_quantization_var`     | `str`           | The name of a render context variable that resolves to the decimal quantization to be used.                                                      | `"currency_code"`   |
 | `default_decimal_quantization` | `bool`          | A fallback decimal quantization if `decimal_quantization_var` can not be resolved.                                                               | `"USD"`             |
 | `locale_var`                   | `str`           | The name of a render context variable that resolves to the current locale.                                                                       | `"locale"`          |
 | `default_locale`               | `str`           | A fallback locale to use if `locale_var` can not be resolved.                                                                                    | `"en_US"`           |
@@ -271,9 +271,78 @@ This table shows the available `Number()` constructor arguments.
 
 ## Translation
 
+Instances of the following translation filters default to looking for [Translations](./introduction.md#message-catalogs) in a render context variable called `translations`, falling back to an instance of [`NullTranslations`](https://docs.python.org/3.10/library/gettext.html#the-nulltranslations-class) if `translations` can not be resolved.
+
+```python
+from liquid import Environment
+from liquid_babel.filters import GetText
+
+env = Environment()
+# Register an instance of the GetText filter as `t`.
+env.add_filter("t", GetText())
+
+# You'll need to load an appropriate Translations object.
+# `get_translations()` is defined elsewhere.
+translations = get_translations(locale="de")
+
+template = env.from_string("{{ 'Hello, World!' | t }}")
+print(template.render(translations=translations))  # Hallo Welt!
+```
+
+This table show the options available when instantiating `Translate` (aka `t`), `GetText`, `NGetText`, `PGetText` and `NPGetText` filters.
+
+| Argument                | Type                     | Description                                                                                                                | Default            |
+| ----------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `translations_var`      | `str`                    | The name of a render context variable that resolves to a `Translations` object.                                            | `"translations"`   |
+| `default_translations`  | `Optional[Translations]` | A fallback `Translations` object used if `translations_var` can not be resolved.                                           | `NullTranslations` |
+| `message_interpolation` | `bool`                   | If `True`, do percent-style variable substitution when rendering message text.                                             | `True`             |
+| `autoescape_message`    | `bool`                   | If `True` and the current environment has `autoescape` set to `True`, translatable messages will be escaped before output. | `False`            |
+
+To register all included translation filters with an environment, use `register_translation_filters(env)`. It too accepts the arguments described in the table above.
+
+```python
+from liquid import Environment
+from liquid_babel.filters import register_translation_filters
+
+env = Environment()
+# Register `t`, `gettext`, `ngettext`, `pgettext` and `npgettext`
+# with HTML auto escaping enabled.
+register_translation_filters(env, autoescape_message=True)
+```
+
 ### t
 
-TODO
+`<string> | t[: <string>[, <identifier>: <object>, ... ]] -> <string>`
+
+Template internationalization. Return the localized translation of the input message. If a German [Translations](./introduction.md#message-catalogs) object is found in the current render context:
+
+```liquid
+{{ "Hello, World!" | t }}
+```
+
+```plain title="output"
+Hallo Welt!
+```
+
+If given, the first and only positional argument is a message context string. It will be used to give translators extra information about where the message is to be used. With the default configuration, keyword arguments `plural` and `count` are reserved for specifying a pluralizable message.
+
+```liquid
+{{ "Hello, World!" | t: plural: 'Hello, Worlds!', count: 2 }}
+```
+
+```plain title="output"
+Hallo Welten!
+```
+
+The remaining keyword arguments are used to populate translatable message variables. If `user.name` is `"Sally"`:
+
+```liquid
+{{ "Hello, %(you)s" | t: you: user.name }}
+```
+
+```plain title="output"
+Hallo Sally!
+```
 
 ### gettext
 
