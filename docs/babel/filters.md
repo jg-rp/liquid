@@ -312,7 +312,7 @@ register_translation_filters(env, autoescape_message=True)
 
 ### t
 
-`<string> | t[: <string>[, <identifier>: <object>, ... ]] -> <string>`
+`<string> | t[: <string>[, <identifier>: <object> ... ]] -> <string>`
 
 Template internationalization. Return the localized translation of the input message. If a German [Translations](./introduction.md#message-catalogs) object is found in the current render context:
 
@@ -334,26 +334,110 @@ If given, the first and only positional argument is a message context string. It
 Hallo Welten!
 ```
 
-The remaining keyword arguments are used to populate translatable message variables. If `user.name` is `"Sally"`:
+The remaining keyword arguments are used to populate translatable message variables. If `user.name` is `"Sue"`:
 
 ```liquid
 {{ "Hello, %(you)s" | t: you: user.name }}
 ```
 
 ```plain title="output"
-Hallo Sally!
+Hallo Sue!
 ```
 
 ### gettext
 
-TODO
+`<string> | gettext[: <identifier>: <object> ... ]`
+
+Return the localized translation of the input message without pluralization or message context.
+
+```liquid
+{{ "Hello, World!" | gettext }}
+```
+
+```plain title="output"
+Hallo Welt!
+```
+
+Any keyword arguments are used to populate message variables. If `user.name` is `"Sue"`:
+
+```liquid
+{{ "Hello, %(you)s" | gettext: you: user.name }}
+```
+
+```plain title="output"
+Hallo Sue!
+```
 
 ### ngettext
 
-TODO
+`<string> | ngettext: <string>, <number> [, <identifier>: <object> ... ]`
+
+Return the localized translation of the input message with pluralization. The first positional argument is the plural form of the message. The second is a number used to determine if the singular or plural message should be used.
+
+```liquid
+{% assign count = "Earth,Tatooine" | split: "," | size %}
+{{ "Hello, World!" | ngetetxt: "Hello, Worlds!", count }}
+```
+
+```plain title="output"
+Hallo Welten!
+```
+
+Any keyword arguments are used to populate message variables. If `user.name` is `"Sue"` and `count` is `1`:
+
+```liquid
+{{ "Hello, %(you)s" | ngetetxt: "Hello, everyone!", count, you: user.name }}
+```
+
+```plain title="output"
+Hallo Sue!
+```
 
 ### pgettext
 
-TODO
+`<string> | pgettext: <string> [, <identifier>: <object> ... ]`
+
+Return the localized translation of the input message with additional message context. Message context is used to give translators extra information about where the messages is to be used.
+
+```liquid
+{{ "Hello, World!" | pgettext: "extra special greeting" }}
+```
+
+```plain title="output"
+Hallo Welt!
+```
+
+Any keyword arguments are used to populate message variables. If `user.name` is `"Sue"`:
+
+```liquid
+{{ "Hello, %(you)s" | pgettext: "extra special greeting", you: user.name }}
+```
+
+```plain title="output"
+Hallo Sue!
+```
 
 ### npgettext
+
+`<string> | npgettext: <string>, <string>, <number> [, <identifier>: <object> ... ]`
+
+Return the localized translation of the input message with pluralization and a message context. The first positional argument is the message context string, the second is the plural form of the message, and the third is a number used to determine if the singular or plural message should be used.
+
+```liquid
+{% assign count = "Earth,Tatooine" | split: "," | size %}
+{{ "Hello, World!" | ngetetxt: "extra special greeting", "Hello, Worlds!", count }}
+```
+
+```plain title="output"
+Hallo Welten!
+```
+
+Any keyword arguments are used to populate message variables. If `user.name` is `"Sue"` and `count` is `1`:
+
+```liquid
+{{ "Hello, %(you)s" | ngetetxt: "extra special greeting", "Hello, everyone!", count, you: user.name }}
+```
+
+```plain title="output"
+Hallo Sue!
+```
