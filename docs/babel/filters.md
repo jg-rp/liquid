@@ -271,6 +271,8 @@ This table shows the available `Number()` constructor arguments.
 
 ## Translation
 
+**_New in Liquid Babel version 0.3.0_**
+
 Instances of the following translation filters default to looking for [Translations](./introduction.md#message-catalogs) in a render context variable called `translations`, falling back to an instance of [`NullTranslations`](https://docs.python.org/3.10/library/gettext.html#the-nulltranslations-class) if `translations` can not be resolved.
 
 ```python

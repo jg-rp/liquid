@@ -70,11 +70,13 @@ print(template.render())
 
 ## Translations
 
+**_New in Liquid Babel version 0.3.0_**
+
 Liquid Babel includes [`gettext`](./filters.md#gettext), [`ngettext`](./filters.md#ngettext), [`pgettext`](./filters.md#pgettext) and [`npgettext`](./filters.md#npgettext) filter equivalents to the functions found in [Python's gettext module](https://docs.python.org/3.10/library/gettext.html#gnu-gettext-api). Application developers can choose to use any of these filters, possibly using more user friendly filter names, and/or the more general [`t (translate)`](./filters.md#t) filter.
 
 The [`t`](./filters.md#t) filter can behave like any of the \*gettext filters, depending on the arguments it is given. Where the \*gettext filters require positional arguments for `context`, `count` and `plural`, `t` reserves optional `count` and `plural` keyword arguments. See the [Liquid Babel filter reference](./filters.md) for filter configuration and usage examples.
 
-Liquid Babel also offers a [`{% translate %}`](./tags.md#translate) tag. This is similar to the [`{% trans %}`](https://jinja.palletsprojects.com/en/3.1.x/templates/#i18n) tag found in Jinja or the [`{% blocktranslate %}`](https://docs.djangoproject.com/en/4.1/topics/i18n/translation/#blocktranslate-template-tag) tag found in Django's template language. Again, application developers can configure and customize the default `translate` filter to suit an application's needs. See the [Liquid Babel tag reference](./tags.md) for customization and usage examples.
+Liquid Babel also offers a [`{% translate %}`](./tags.md#translate) tag. This is similar to the [`{% trans %}`](https://jinja.palletsprojects.com/en/3.1.x/templates/#i18n) tag found in Jinja or the [`{% blocktranslate %}`](https://docs.djangoproject.com/en/4.1/topics/i18n/translation/#blocktranslate-template-tag) tag found in Django's template language. Again, application developers can configure and customize the included `translate` tag to suit an application's needs. See the [Liquid Babel tag reference](./tags.md) for customization and usage examples.
 
 ### Message Catalogs
 
@@ -120,19 +122,19 @@ Filter keyword arguments are merged with the current render context before being
 The [`translate`](./tags.md#translate) block tag recognizes simplified Liquid output statements as translation message variables. These variables must be valid identifiers without dotted or bracketed property/attribute access, and no filters.
 
 ```liquid
-{% translation %}
+{% translate %}
     Hello, {{ you }}!
-{% endtranslation %}
+{% endtranslate %}
 ```
 
 Keyword arguments passed to the [`translate`](./tags.md#translate) tag will be merged with the current render context before being used to replace variables in message text. These arguments can use simple, no-argument filters, like `size`. You should expect a `TranslationSyntaxError` if unexpected filters or filter arguments are used.
 
 ```liquid
-{% translation you: user.name | capitalize, count: users | size %}
+{% translate you: user.name | capitalize, count: users | size %}
     Hello, {{ you }}!
 {% plural %}
     Hello, {{ you }}s!
-{% endtranslation %}
+{% endtranslate %}
 ```
 
 ### Message Extraction

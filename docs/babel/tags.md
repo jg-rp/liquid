@@ -4,6 +4,8 @@ Optional [tags](../language/tags.md) provided by the [liquid-babel](./introducti
 
 ## translate
 
+**_New in Liquid Babel version 0.3.0_**
+
 ```
 {% translate
     [context: <string>]
