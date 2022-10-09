@@ -1104,6 +1104,7 @@ A `tablerowloop` object is available inside every `tablerow` block.
 | `col0`      | The 0-based column number                                           | integer |
 | `col_first` | `true` if the current column is the first column, `false` otherwise | integer |
 | `col_last`  | `true` if the current column is the last column, `false` otherwise  | integer |
+| `row`       | The current row number of the table                                 | integer |
 
 ```liquid title="template"
 {% tablerow product in collection.products cols:2 %}
