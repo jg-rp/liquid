@@ -140,4 +140,82 @@ cases = [
             "</tr>\n"
         ),
     ),
+    Case(
+        description="two column odd range row numbers",
+        template=(
+            r"{% tablerow i in (1..5) cols:2 %}"
+            r"{{ i }} {{ tablerowloop.row }}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">1 1</td>'
+            '<td class="col2">2 1</td>'
+            "</tr>\n"
+            '<tr class="row2">'
+            '<td class="col1">3 2</td>'
+            '<td class="col2">4 2</td>'
+            "</tr>\n"
+            '<tr class="row3">'
+            '<td class="col1">5 3</td>'
+            "</tr>\n"
+        ),
+    ),
+    Case(
+        description="no cols param",
+        template=(
+            "\n".join(
+                [
+                    "{% tablerow i in (1..2) %}",
+                    "col: {{ tablerowloop.col }}",
+                    "col0: {{ tablerowloop.col0 }}",
+                    "col_first: {{ tablerowloop.col_first }}",
+                    "col_last: {{ tablerowloop.col_last }}",
+                    "first: {{ tablerowloop.first }}",
+                    "index: {{ tablerowloop.index }}",
+                    "index0: {{ tablerowloop.index0 }}",
+                    "last: {{ tablerowloop.last }}",
+                    "length: {{ tablerowloop.length }}",
+                    "rindex: {{ tablerowloop.rindex }}",
+                    "rindex0: {{ tablerowloop.rindex0 }}",
+                    "row: {{ tablerowloop.row }}",
+                    "{% endtablerow %}",
+                ]
+            )
+        ),
+        expect=(
+            "\n".join(
+                [
+                    '<tr class="row1">',
+                    '<td class="col1">',
+                    "col: 1",
+                    "col0: 0",
+                    "col_first: true",
+                    "col_last: false",
+                    "first: true",
+                    "index: 1",
+                    "index0: 0",
+                    "last: false",
+                    "length: 2",
+                    "rindex: 2",
+                    "rindex0: 1",
+                    "row: 1",
+                    '</td><td class="col2">',
+                    "col: 2",
+                    "col0: 1",
+                    "col_first: false",
+                    "col_last: true",
+                    "first: false",
+                    "index: 2",
+                    "index0: 1",
+                    "last: true",
+                    "length: 2",
+                    "rindex: 1",
+                    "rindex0: 0",
+                    "row: 1",
+                    "</td></tr>\n",
+                ]
+            )
+        ),
+    ),
 ]

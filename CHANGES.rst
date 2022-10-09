@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.4.6
+-------------
+
+**Fixes**
+
+- Fixed a bug where the ``tablerowloop`` drop would not expose its ``row`` property.
+  See `#77 <https://github.com/jg-rp/liquid/issues/77>`_.
+
 Version 1.4.5
 -------------
 

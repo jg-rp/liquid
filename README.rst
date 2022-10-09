@@ -30,7 +30,7 @@ template language for flexible web apps.
     :target: https://pypi.org/project/python-liquid/
     :alt: Python versions
 
-.. image:: https://img.shields.io/badge/pypy-3.7%20%7C%203.8-blue?style=flat-square
+.. image:: https://img.shields.io/badge/pypy-3.7%20%7C%203.8%20%7C%203.9-blue?style=flat-square
     :target: https://pypi.org/project/python-liquid/
     :alt: PyPy versions
 

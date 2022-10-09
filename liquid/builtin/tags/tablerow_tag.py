@@ -61,6 +61,7 @@ class TableRow(Mapping[str, object]):
             "col0",
             "col_first",
             "col_last",
+            "row",
         ]
     )
 

@@ -105,7 +105,7 @@ def split_at_first_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
 def split_at_comma(
     tokens: Iterable[Token],
 ) -> Iterator[List[Token]]:  # pragma: no cover
-    """Split tokens on into lists, using TOKEN_COMMA as the delimiter."""
+    """Split tokens into lists, using TOKEN_COMMA as the delimiter."""
     buf: List[Token] = []
     for token in tokens:
         if token[1] == TOKEN_COMMA:
