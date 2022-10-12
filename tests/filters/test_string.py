@@ -860,6 +860,41 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="e",
             ),
+            Case(
+                description="big negative second argument",
+                val="foobar",
+                args=[0, -(1 << 64)],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="big positive second argument",
+                val="foobar",
+                args=[0, 1 << 63],
+                kwargs={},
+                expect="foobar",
+            ),
+            Case(
+                description="big positive first argument",
+                val="foobar",
+                args=[1 << 63, 6],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="big negative first argument",
+                val="foobar",
+                args=[-(1 << 63), 6],
+                kwargs={},
+                expect="",
+            ),
+            Case(
+                description="array input",
+                val=["f", "o", "o", "b", "a", "r"],
+                args=[1, 3],
+                kwargs={},
+                expect=["o", "o", "b"],
+            ),
         ]
 
         self._test(slice_, test_cases)
@@ -1252,6 +1287,20 @@ class StringFilterTestCase(unittest.TestCase):
                 kwargs={},
                 expect="Ground control to Major Tom. Ground control to ...",
             ),
+            Case(
+                description="big positive argument",
+                val="foobar",
+                args=[1 << 63],
+                kwargs={},
+                expect="foobar",
+            ),
+            Case(
+                description="big negative argument",
+                val="foobar",
+                args=[-(1 << 63)],
+                kwargs={},
+                expect="...",
+            ),
         ]
 
         self._test(truncate, test_cases)
@@ -1363,7 +1412,7 @@ class StringFilterTestCase(unittest.TestCase):
                 val="",
                 args=[100000000000000],
                 kwargs={},
-                expect=FilterArgumentError,
+                expect="",
             ),
             Case(
                 description="default number of words is 15",
@@ -1371,6 +1420,20 @@ class StringFilterTestCase(unittest.TestCase):
                 args=[],
                 kwargs={},
                 expect="a b c d e f g h i j k l m n o...",
+            ),
+            Case(
+                description="big positive argument",
+                val="one two three four",
+                args=[1 << 31],
+                kwargs={},
+                expect="one two three four",
+            ),
+            Case(
+                description="big negative argument",
+                val="one two three four",
+                args=[-(1 << 31)],
+                kwargs={},
+                expect="one...",
             ),
         ]
 

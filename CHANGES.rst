@@ -9,6 +9,15 @@ Version 1.4.6
 - Fixed a bug where the ``tablerowloop`` drop would not expose its ``row`` property.
   See `#77 <https://github.com/jg-rp/liquid/issues/77>`_.
 
+**Other**
+
+- The ``truncatewords`` filter no longer raises a ``FilterArgumentError`` if its
+  argument is greater than ``2147483648`` and the number of words in the input string
+  is less than the target number of words. This is inline with recent changes committed
+  to the reference implementation of Liquid.
+- The ``slice`` filter now clamps its arguments to between ``-9223372036854775808`` and
+  ``9223372036854775807``, as does the reference implementation of Liquid.
+
 Version 1.4.5
 -------------
 

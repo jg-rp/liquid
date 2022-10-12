@@ -9,6 +9,7 @@ import urllib.parse
 
 from typing import Any
 from typing import List
+from typing import Optional
 from typing import Union
 from typing import TYPE_CHECKING
 
@@ -35,7 +36,6 @@ from liquid.limits import to_int
 
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
-from liquid.utils.text import truncate_words
 
 if TYPE_CHECKING:
     from liquid import Environment
@@ -166,6 +166,29 @@ def upcase(val: str) -> str:
     return val.upper()
 
 
+MAX_SLICE_ARG = 1 << 63 - 1
+MIN_SLICE_ARG = -(1 << 63)
+
+
+def _slice_arg(val: Any) -> int:
+    # The reference implementation does not cast floats to int.
+    if isinstance(val, float):
+        raise FilterArgumentError(
+            f"slice expected an integer start, found {type(val).__name__}"
+        )
+
+    try:
+        rv = to_int(val)
+    except (ValueError, TypeError) as err:
+        raise FilterArgumentError(
+            f"slice expected an integer start, found {type(val).__name__}"
+        ) from err
+
+    rv = min(rv, MAX_SLICE_ARG)
+    rv = max(rv, MIN_SLICE_ARG)
+    return rv
+
+
 @liquid_filter
 def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
     """Return a substring or subsequence, starting at `start`, containing up to
@@ -183,41 +206,18 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
     if is_undefined(length):
         length = 1
 
-    # The reference implementation does not cast floats to int.
-    if isinstance(start, float):
-        raise FilterArgumentError(
-            f"slice expected an integer start, found {type(start).__name__}"
-        )
+    _start = _slice_arg(start)
+    _length = _slice_arg(length)
+    end: Optional[int] = _start + _length
 
-    if isinstance(length, float):
-        raise FilterArgumentError(
-            f"slice expected an integer length, found {type(length).__name__}"
-        )
-
-    try:
-        start = to_int(start)
-    except (ValueError, TypeError) as err:
-        raise FilterArgumentError(
-            f"slice expected an integer start, found {type(start).__name__}"
-        ) from err
-
-    try:
-        length = to_int(length)
-    except (ValueError, TypeError) as err:
-        raise FilterArgumentError(
-            f"slice expected an integer length, found {type(length).__name__}"
-        ) from err
-
-    end = start + length
-
-    # A negative start index and a length that exceeds the theoretical length of the
-    # sequence.
-    if start < 0 <= end:
+    # A negative start index and a length that exceeds the theoretical length
+    # of the sequence.
+    if isinstance(end, int) and _start < 0 <= end:
         end = None
 
     if isinstance(val, str):
-        return val[start:end]
-    return list(val[start:end])
+        return val[_start:end]
+    return list(val[_start:end])
 
 
 @string_filter
@@ -301,11 +301,19 @@ def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
     if num <= 0:
         num = 1
 
+    # Replaces consecutive whitespace with a single newline.
+    words = val.split()
+
     if num > MAX_TRUNC_WORDS:
+        # This too mimics the reference implementation's big integer work around.
+        if num >= MAX_TRUNC_WORDS:
+            return val
         raise FilterArgumentError(f"integer {num} too big for truncatewords")
 
-    # Is truncating markup ever safe? Autoescape for now.
-    return truncate_words(val, num, end)
+    if len(words) < num:
+        return " ".join(words)
+
+    return " ".join(words[:num]) + end
 
 
 @with_environment

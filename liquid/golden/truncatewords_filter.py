@@ -79,7 +79,7 @@ cases = [
         description="very big argument",
         template=r'{{ "" | truncatewords: 100000000000000 }}',
         expect="",
-        error=True,
+        error=False,
     ),
     Case(
         description="number of words defaults to 15",
