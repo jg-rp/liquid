@@ -166,7 +166,7 @@ def upcase(val: str) -> str:
     return val.upper()
 
 
-MAX_SLICE_ARG = 1 << 63 - 1
+MAX_SLICE_ARG = (1 << 63) - 1
 MIN_SLICE_ARG = -(1 << 63)
 
 
@@ -304,11 +304,9 @@ def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
     # Replaces consecutive whitespace with a single newline.
     words = val.split()
 
-    if num > MAX_TRUNC_WORDS:
-        # This too mimics the reference implementation's big integer work around.
-        if num >= MAX_TRUNC_WORDS:
-            return val
-        raise FilterArgumentError(f"integer {num} too big for truncatewords")
+    # This too mimics the reference implementation's big integer work around.
+    if num >= MAX_TRUNC_WORDS:
+        return val
 
     if len(words) < num:
         return " ".join(words)
