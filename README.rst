@@ -113,16 +113,16 @@ Benchmark
 
 You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if
 you don't have ``make``) from the root of the source tree. On my ropey desktop computer
-with a Ryzen 5 1500X, we get the following results.
+with a Ryzen 5 1500X and Python 3.11.0, we get the following results.
 
 .. code-block:: text
 
     Best of 5 rounds with 100 iterations per round and 60 ops per iteration (6000 ops per round).
-    
-    lex template (not expressions): 1.3s (4727.35 ops/s, 78.79 i/s)
-                     lex and parse: 6.4s (942.15 ops/s, 15.70 i/s)
-                            render: 1.7s (3443.62 ops/s, 57.39 i/s)
-             lex, parse and render: 8.2s (733.30 ops/s, 12.22 i/s)
+
+    lex template (not expressions): 1.2s (5020.85 ops/s, 83.68 i/s)
+                     lex and parse: 5.0s (1197.32 ops/s, 19.96 i/s)
+                            render: 1.4s (4152.92 ops/s, 69.22 i/s)
+             lex, parse and render: 6.5s (922.08 ops/s, 15.37 i/s)
 
 And PyPy3.7 gives us a decent increase in performance.
 
@@ -130,10 +130,10 @@ And PyPy3.7 gives us a decent increase in performance.
 
     Best of 5 rounds with 100 iterations per round and 60 ops per iteration (6000 ops per round).
 
-    lex template (not expressions): 0.58s (10421.14 ops/s, 173.69 i/s)
-                     lex and parse: 2.9s (2036.33 ops/s, 33.94 i/s)
-                            render: 1.1s (5644.80 ops/s, 94.08 i/s)
-             lex, parse and render: 4.2s (1439.43 ops/s, 23.99 i/s)
+    lex template (not expressions): 0.58s (10308.67 ops/s, 171.81 i/s)
+                     lex and parse: 3.6s (1661.20 ops/s, 27.69 i/s)
+                            render: 0.95s (6341.14 ops/s, 105.69 i/s)
+             lex, parse and render: 4.6s (1298.18 ops/s, 21.64 i/s)
 
 
 On the same machine, running ``rake benchmark:run`` from the root of the reference
