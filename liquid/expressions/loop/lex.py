@@ -5,9 +5,11 @@ from typing import Iterator
 from liquid.expressions.common import Token
 from liquid.expressions.common import GROUP_IDENTINDEX
 from liquid.expressions.common import GROUP_IDENTQUOTED
+from liquid.expressions.common import GROUP_QUOTED
 from liquid.expressions.common import IDENTIFIER_PATTERN
 from liquid.expressions.common import IDENTSTRING_PATTERN
 from liquid.expressions.common import IDENTINDEX_PATTERN
+from liquid.expressions.common import STRING_PATTERN
 
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_FLOAT
@@ -31,6 +33,7 @@ from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_STRING
 
 from liquid.exceptions import LiquidSyntaxError
 
@@ -38,6 +41,7 @@ from liquid.exceptions import LiquidSyntaxError
 token_rules = (
     (TOKEN_IDENTINDEX, IDENTINDEX_PATTERN),
     (TOKEN_IDENTSTRING, IDENTSTRING_PATTERN),
+    (TOKEN_STRING, STRING_PATTERN),
     (TOKEN_RANGE, r"\.\."),
     (TOKEN_FLOAT, r"-?\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"-?\d+\b"),
@@ -88,6 +92,8 @@ def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
         elif kind == TOKEN_IDENTSTRING:
             kind = TOKEN_IDENTIFIER
             value = match.group(GROUP_IDENTQUOTED)
+        elif kind == TOKEN_STRING:
+            value = match.group(GROUP_QUOTED)
         elif kind == TOKEN_NEWLINE:
             linenum += 1
             continue

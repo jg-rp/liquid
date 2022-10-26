@@ -565,4 +565,52 @@ cases = [
         template=r"{% for i in (0..0) %}{{ i }} {% endfor %}",
         expect="0 ",
     ),
+    # Case(
+    #     description="limit is a float",
+    #     template=r"{% for i in (1..4) limit: 2.6 %}{{ i }} {% endfor %}",
+    #     expect="",
+    #     error=True,
+    # ),
+    # Case(
+    #     description="offset is a float",
+    #     template=r"{% for i in (1..4) offset: 2.6 %}{{ i }} {% endfor %}",
+    #     expect="",
+    #     error=True,
+    # ),
+    Case(
+        description="limit is a string",
+        template=r"{% for i in (1..4) limit: '2' %}{{ i }} {% endfor %}",
+        expect="1 2 ",
+    ),
+    Case(
+        description="offset is a string",
+        template=r"{% for i in (1..4) offset: '2' %}{{ i }} {% endfor %}",
+        expect="3 4 ",
+    ),
+    Case(
+        description="limit is a non-number string",
+        template=r"{% for i in (1..4) limit: 'foo' %}{{ i }} {% endfor %}",
+        expect="",
+        error=True,
+    ),
+    Case(
+        description="offset is a non-number string",
+        template=r"{% for i in (1..4) offset: 'foo' %}{{ i }} {% endfor %}",
+        expect="",
+        error=True,
+    ),
+    Case(
+        description="limit is not a string or number",
+        template=r"{% for i in (1..4) limit: foo %}{{ i }} {% endfor %}",
+        expect="",
+        globals={"foo": [1, 2, 3]},
+        error=True,
+    ),
+    Case(
+        description="offset is not a string or number",
+        template=r"{% for i in (1..4) offset: foo %}{{ i }} {% endfor %}",
+        expect="",
+        globals={"foo": [1, 2, 3]},
+        error=True,
+    ),
 ]

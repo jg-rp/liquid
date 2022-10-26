@@ -4,6 +4,8 @@ from typing import Callable
 from typing import Dict
 from typing import Tuple
 
+from liquid.limits import to_int
+
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_LPAREN
@@ -16,9 +18,11 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_STRING
 
 from liquid.expression import Continue
 from liquid.expression import CONTINUE
+from liquid.expression import IntegerLiteral
 from liquid.expression import LoopExpression
 from liquid.expression import LoopIterable
 from liquid.expression import LoopArgument
@@ -50,11 +54,22 @@ def parse_continue(_: TokenStream) -> Continue:
     return CONTINUE
 
 
+def parse_string_argument(stream: TokenStream) -> LoopArgument:
+    """Try to parse a string literal as an integer."""
+    try:
+        return IntegerLiteral(to_int(stream.current[2]))
+    except ValueError as err:
+        raise LiquidSyntaxError(
+            f"invalid integer argument {stream.current[2]!r}"
+        ) from err
+
+
 TOKEN_MAP: Dict[str, Callable[[TokenStream], LoopArgument]] = {
     TOKEN_IDENTIFIER: parse_identifier,
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
     TOKEN_CONTINUE: parse_continue,
+    TOKEN_STRING: parse_string_argument,
 }
 
 

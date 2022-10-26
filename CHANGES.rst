@@ -6,8 +6,11 @@ Version 1.4.6
 
 **Fixes**
 
-- Fixed a bug where the ``tablerowloop`` drop would not expose its ``row`` property.
+- The ``tablerowloop`` drop now exposes its ``row`` property.
   See `#77 <https://github.com/jg-rp/liquid/issues/77>`_.
+- ``for`` and ``tablerow`` tag arguments can now be string representations of integers
+  as well as integer literals and variables that resolve to integers.
+  See `#78 <https://github.com/jg-rp/liquid/issues/78>`_.
 
 **Other**
 

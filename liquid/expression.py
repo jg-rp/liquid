@@ -696,7 +696,13 @@ class AssignmentExpression(Expression):
         return [self.expression]
 
 
-LoopArgument = Union[IntegerLiteral, FloatLiteral, Identifier, Continue, Nil]
+LoopArgument = Union[
+    IntegerLiteral,
+    FloatLiteral,
+    Identifier,
+    Continue,
+    Nil,
+]
 
 # An identifier that resolves to an iterable or a range expression.
 LoopIterable = Union[Identifier, RangeLiteral]
@@ -833,15 +839,21 @@ class LoopExpression(Expression):
             f"expected array or hash at '{self.iterable}', found '{str(obj)}'"
         )
 
+    def _raise_for_invalid_argument(self, arg: object) -> None:
+        if arg is not None and not isinstance(arg, int):
+            raise LiquidTypeError(f"expected an integer argument, found {arg!r}")
+
     def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
         obj = self.iterable.evaluate(context)
         it, length = self._obj_to_iter(obj)
 
         limit = self.limit.evaluate(context)
+        self._raise_for_invalid_argument(limit)
         assert isinstance(limit, int) or limit is None
 
         if self.offset != CONTINUE:
             offset = self.offset.evaluate(context)
+            self._raise_for_invalid_argument(offset)
             assert isinstance(offset, int) or offset is None
         else:
             offset = self.offset
@@ -860,10 +872,12 @@ class LoopExpression(Expression):
         it, length = self._obj_to_iter(obj)
 
         limit = await self.limit.evaluate_async(context)
+        self._raise_for_invalid_argument(limit)
         assert isinstance(limit, int) or limit is None
 
         if self.offset != CONTINUE:
             offset = await self.offset.evaluate_async(context)
+            self._raise_for_invalid_argument(offset)
             assert isinstance(offset, int) or offset is None
         else:
             offset = self.offset

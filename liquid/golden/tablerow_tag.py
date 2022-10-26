@@ -218,4 +218,127 @@ cases = [
             )
         ),
     ),
+    Case(
+        description="cols is a string",
+        template=(
+            r"{% tablerow i in (1..4) cols:'2' %}"
+            r"{{ i }} {{ tablerowloop.col_first }}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">1 true</td>'
+            '<td class="col2">2 false</td>'
+            "</tr>\n"
+            '<tr class="row2">'
+            '<td class="col1">3 true</td>'
+            '<td class="col2">4 false</td>'
+            "</tr>\n"
+        ),
+    ),
+    Case(
+        description="cols is a float",
+        template=(
+            r"{% tablerow i in (1..4) cols:2.6 %}"
+            r"{{ i }} {{ tablerowloop.col_first }}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">1 true</td>'
+            '<td class="col2">2 false</td>'
+            "</tr>\n"
+            '<tr class="row2">'
+            '<td class="col1">3 true</td>'
+            '<td class="col2">4 false</td>'
+            "</tr>\n"
+        ),
+    ),
+    Case(
+        description="limit is a string",
+        template=(
+            r"{% tablerow i in (1..4) limit:'2' %}"
+            r"{{ i }} {{ tablerowloop.col_first }}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">1 true</td>'
+            '<td class="col2">2 false</td>'
+            "</tr>\n"
+        ),
+    ),
+    Case(
+        description="offset is a string",
+        template=(
+            r"{% tablerow i in (1..4) offset:'2' %}"
+            r"{{ i }} {{ tablerowloop.col_first }}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">3 true</td>'
+            '<td class="col2">4 false</td>'
+            "</tr>\n"
+        ),
+    ),
+    # Case(
+    #     description="cols is non number string",
+    #     template=(
+    #         r"{% tablerow i in (1..4) cols:'foo' %}"
+    #         r"{{ i }} {{ tablerowloop.col_first }}"
+    #         r"{% endtablerow %}"
+    #     ),
+    #     expect=(
+    #         '<tr class="row1">\n'
+    #         '<td class="col1">1 true</td>'
+    #         '<td class="col2">2 false</td>'
+    #         '<td class="col3">3 false</td>'
+    #         '<td class="col4">4 false</td>'
+    #         "</tr>\n"
+    #     ),
+    # ),
+    # Case(
+    #     description="limit is non number string",
+    #     template=(
+    #         r"{% tablerow i in (1..4) limit:'foo' %}"
+    #         r"{{ i }} {{ tablerowloop.col_first }}"
+    #         r"{% endtablerow %}"
+    #     ),
+    #     expect='<tr class="row1">\n</tr>\n',
+    # ),
+    # Case(
+    #     description="offset is non number string",
+    #     template=(
+    #         r"{% tablerow i in (1..4) offset:'foo' %}"
+    #         r"{{ i }} {{ tablerowloop.col_first }}"
+    #         r"{% endtablerow %}"
+    #     ),
+    #     expect=(
+    #         '<tr class="row1">\n'
+    #         '<td class="col1">1 true</td>'
+    #         '<td class="col2">2 false</td>'
+    #         '<td class="col3">3 false</td>'
+    #         '<td class="col4">4 false</td>'
+    #         "</tr>\n"
+    #     ),
+    # ),
+    # Case(
+    #     description="offset is an array",
+    #     template=(
+    #         r"{% tablerow i in (1..4) offset:foo %}"
+    #         r"{{ i }} {{ tablerowloop.col_first }}"
+    #         r"{% endtablerow %}"
+    #     ),
+    #     expect=(
+    #         '<tr class="row1">\n'
+    #         '<td class="col1">1 true</td>'
+    #         '<td class="col2">2 false</td>'
+    #         '<td class="col3">3 false</td>'
+    #         '<td class="col4">4 false</td>'
+    #         "</tr>\n"
+    #     ),
+    #     globals={"foo": [1, 2, 3]},
+    #     error=True,
+    # ),
 ]

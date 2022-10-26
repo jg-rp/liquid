@@ -20,6 +20,7 @@ from liquid.ast import BlockNode
 from liquid.context import Context
 from liquid.expression import LoopExpression
 from liquid.expression import NIL
+from liquid.limits import to_int
 
 from liquid.parse import expect
 from liquid.parse import get_parser
@@ -175,13 +176,18 @@ class TablerowNode(Node):
     def __str__(self) -> str:
         return f"tablerow({ self.expression }) {{ {self.block} }}"
 
+    def _int_or_zero(self, arg: object) -> int:
+        try:
+            return to_int(arg)
+        except ValueError:
+            return 0
+
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.expression.name
         loop_iter, length = self.expression.evaluate(context)
 
         if self.expression.cols and self.expression.cols != NIL:
-            cols = self.expression.cols.evaluate(context)
-            assert isinstance(cols, int)
+            cols = self._int_or_zero(self.expression.cols.evaluate(context))
         else:
             cols = length
 
@@ -214,8 +220,7 @@ class TablerowNode(Node):
         loop_iter, length = await self.expression.evaluate_async(context)
 
         if self.expression.cols and self.expression.cols != NIL:
-            cols = await self.expression.cols.evaluate_async(context)
-            assert isinstance(cols, int)
+            cols = self._int_or_zero(await self.expression.cols.evaluate_async(context))
         else:
             cols = length
 

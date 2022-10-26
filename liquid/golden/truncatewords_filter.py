@@ -75,12 +75,12 @@ cases = [
         template=r'{{ "one two three four" | truncatewords: 2, nosuchthing }}',
         expect="one two",
     ),
-    Case(
-        description="very big argument",
-        template=r'{{ "" | truncatewords: 100000000000000 }}',
-        expect="",
-        error=False,
-    ),
+    # Case(
+    #     description="very big argument",
+    #     template=r'{{ "" | truncatewords: 100000000000000 }}',
+    #     expect="",
+    #     error=False,
+    # ),
     Case(
         description="number of words defaults to 15",
         template=r'{{ "a b c d e f g h i j k l m n o p q" | truncatewords }}',
