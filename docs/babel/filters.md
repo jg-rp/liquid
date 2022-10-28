@@ -443,3 +443,140 @@ Any keyword arguments are used to populate message variables. If `user.name` is 
 ```plain title="output"
 Hallo Sue!
 ```
+
+## Unit
+
+```
+<number> | unit: <string>
+  [, denominator: <number>]
+  [, denominator_unit: <string>]
+  [, length: <string>]
+  [, format: <string>]
+```
+
+Measurement units formatting. Return the input number formatted with the given units according to the current locale. The first, required positional argument is a [CLDR](https://cldr.unicode.org/) measurement unit [code](https://github.com/unicode-org/cldr/blob/latest/common/validity/unit.xml).
+
+```liquid
+{{ 12 | unit: 'length-meter' }}
+```
+
+```plain title="output"
+12 meters
+```
+
+### length
+
+`length` can be one of "short", "long" or "narrow", defaulting to "long".
+
+```liquid
+{{ 12 | unit: 'length-meter' }}
+{{ 12 | unit: 'length-meter', length: 'short' }}
+{{ 12 | unit: 'length-meter', length: 'long' }}
+{{ 12 | unit: 'length-meter', length: 'narrow' }}
+```
+
+```plain title="output"
+12 meters
+12 m
+12 meters
+12m
+```
+
+Or, if the current locale is set to `fr`.
+
+```liquid
+{% with locale:"fr" %}
+  {{ 12 | unit: 'length-meter' }}
+  {{ 12 | unit: 'length-meter', length: 'short' }}
+  {{ 12 | unit: 'length-meter', length: 'long' }}
+  {{ 12 | unit: 'length-meter', length: 'narrow' }}
+{% endwith %}
+```
+
+```plain title="output"
+12 mètres
+12 m
+12 mètres
+12m
+```
+
+### format
+
+`format` is an optional decimal format string, described in the [Locale Data Markup Language specification (LDML)](https://unicode.org/reports/tr35/).
+
+```liquid
+{{ 12 | unit: 'length-meter', format: '#,##0.00' }}
+```
+
+```plain title="output"
+12.00 meters
+```
+
+### Compound Units
+
+If a `denominator` and/or `denominator_unit` is given, the value will be formatted as a compound unit.
+
+```liquid
+{{ 150 | unit: 'kilowatt', denominator_unit: 'hour' }}
+{{ 32.5 | unit: 'ton', denominator: 15, denominator_unit: 'hour' }}
+```
+
+```plain title="output"
+150 kilowatts per hour
+32.5 tons per 15 hours
+```
+
+Or, if the current locale is set to `fi`.
+
+```liquid
+{% with locale:"fi" %}
+  {{ 150 | unit: 'kilowatt', denominator_unit: 'hour' }}
+  {{ 32.5 | unit: 'ton', denominator: 15, denominator_unit: 'hour' }}
+{% endwith %}
+```
+
+```plain title="output"
+150 kilowattia / tunti
+32,5 am. tonnia/15 tuntia
+```
+
+### Options
+
+Instances of the `Unit` class default to looking for a locale in a render context variable called `locale`, a length in a render context variable called `unit_length`, and a decimal format in a render context variable called `unit_format`.
+
+```python
+from liquid import Environment
+from liquid_babel.filters import Unit
+
+env = Environment()
+env.add_filter("unit", Unit())
+
+template = env.from_string("""\
+  {{ 12 | unit: 'length-meter', format: '#,##0.00' }}
+  {{ 150 | unit: 'kilowatt', denominator_unit: 'hour' }}
+""")
+
+print(template.render(unit_length="long"))
+print(template.render(locale="de", unit_length="long"))
+```
+
+```plain title="output"
+12.00 meters
+150 kilowatts per hour
+
+12,00 Meter
+150 Kilowatt pro Stunde
+```
+
+This table show the available `Unit()` constructor arguments.
+
+| Argument               | Type            | Description                                                                                                                                     | Default          |
+| ---------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `length_var`           | `str`           | The name of a render context variable that resolves to a unit format length.                                                                    | `"unit_length"`  |
+| `default_length`       | `str`           | A fallback format length to use if `length_var` can not be resolved. Should be one of `"short"`, `"long"` or `"narrow"`.                        | `"long"`         |
+| `locale_var`           | `str`           | The name of a render context variable that resolves to the current locale.                                                                      | `"locale"`       |
+| `default_locale`       | `str`           | A fallback locale to use if `locale_var` can not be resolved.                                                                                   | `"en_US"`        |
+| `format_var`           | `str`           | The name of a render context variable that resolves to the current unit decimal format string.                                                  | `"unit_format"`  |
+| `default_format`       | `Optional[str]` | A fallback decimal format that is used if `format_var` can not be resolved. If `None`, the standard format for the current locale will be used. | `None`           |
+| `input_locale_var`     | `str`           | The name of a render context variable that resolves to a locale suitable for parsing input strings to decimals.                                 | `"input_locale"` |
+| `default_input_locale` | `str`           | A fallback locale to use if `input_locale_var` can not be resolved.                                                                             | `"en_US"`        |
