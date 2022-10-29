@@ -253,7 +253,7 @@ class LocalNamespaceLimitTestCase(unittest.TestCase):
 
     def test_copied_context_carries_parent_length(self):
         """Test that copied render context object cary the length of their parent
-        context's locale namespace."""
+        context's local namespace."""
 
         class MockEnv(Environment):
             local_namespace_limit = 5
@@ -277,6 +277,20 @@ class LocalNamespaceLimitTestCase(unittest.TestCase):
 
         with self.assertRaises(LocalNamespaceLimitError):
             template.render()
+
+    def test_sizeof_local_namespace_with_unhashable_values(self):
+        """Test that we can calculate the size of a local namespace when it contains
+        unhashable objects."""
+
+        class MockEnv(Environment):
+            local_namespace_limit = 200
+
+        env = MockEnv()
+        env.from_string("{% assign foo = bar %}").render(bar=[1, 2, 3, 4])
+
+        env.from_string(
+            '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}'
+        ).render()
 
 
 class OutputStreamLimitTestCase(unittest.TestCase):
