@@ -461,15 +461,25 @@ class Context:
         self.locals[key] = val
         if (
             self.env.local_namespace_limit
-            and self._get_size_of_locals() > self.env.local_namespace_limit
+            and self.get_size_of_locals() > self.env.local_namespace_limit
         ):
             raise LocalNamespaceLimitError("local namespace limit reached")
 
-    def _get_size_of_locals(self) -> int:
+    def get_size_of_locals(self) -> int:
+        """Return the "size" or a "score" for the current local namespace.
+
+        This is used by the optional local namespace resource limit. Override
+        `get_size_of_locals` to customize how the limit is calculated. Be sure
+        to consider `self.local_namespace_size_carry` when writing a custom
+        implementation of `get_size_of_locals`.
+
+        The default implementation uses `sys.getsizeof()` on each of the local
+        namespace's values. It is not a reliable measure of size in bytes.
+        """
         if not self.env.local_namespace_limit:
             return 0
         return (
-            sum(sys.getsizeof(obj, default=1) for obj in set(self.locals.values()))
+            sum(sys.getsizeof(obj, default=1) for obj in self.locals.values())
             + self.local_namespace_size_carry
         )
 
@@ -701,7 +711,7 @@ class Context:
             copy_depth=self._copy_depth + 1,
             parent_context=self,
             loop_iteration_carry=loop_iteration_carry,
-            local_namespace_size_carry=self._get_size_of_locals(),
+            local_namespace_size_carry=self.get_size_of_locals(),
         )
 
     def error(self, exc: Error) -> None:
