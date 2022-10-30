@@ -198,4 +198,13 @@ cases = [
             ),
         },
     ),
+    Case(
+        description="assign to keyword argument",
+        template=r"{% render 'product-args', foo: 'hello' %}{{ foo }}",
+        expect="hello goodbye",
+        globals={},
+        partials={
+            "product-args": r"{{ foo }}{% assign foo='goodbye' %} {{ foo }}",
+        },
+    ),
 ]
