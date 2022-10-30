@@ -187,4 +187,10 @@ cases = [
         expect="hello there",
         partials={"product-args": r"{{ foo }} {{ bar }}"},
     ),
+    Case(
+        description="assign to a keyword argument",
+        template=r"{% include 'product-args', foo: 'hello' %} {{ foo }}",
+        expect="hello hello goodbye",
+        partials={"product-args": r"{{ foo }}{% assign foo = 'goodbye' %} {{ foo }}"},
+    ),
 ]
