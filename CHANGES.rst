@@ -7,8 +7,8 @@ Version 1.4.7
 **Hot fix**
 
 - Fixed a bug where use of a `local namespace limit <https://jg-rp.github.io/liquid/guides/resource-limits#local-namespace-limit>`_
-  would raise a `TypeError` when unhashable types were found in a render context's local
-  namespace. . See `#79 <https://github.com/jg-rp/liquid/issues/79>`_.
+  would raise a ``TypeError`` when unhashable types were found in a render context's
+  local namespace. See `#79 <https://github.com/jg-rp/liquid/issues/79>`_.
 
 Version 1.4.6
 -------------
