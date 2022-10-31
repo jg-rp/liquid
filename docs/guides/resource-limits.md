@@ -64,7 +64,6 @@ from liquid import Environment
 class MyEnvironment(Environment):
     local_namespace_limit = 50  # Very low, for demonstration purposes.
 
-
 env = MyEnvironment()
 
 template = env.from_string("""\
@@ -78,6 +77,47 @@ template.render()
 :::caution
 [PyPy](https://doc.pypy.org/en/latest/cpython_differences.html) does not implement `sys.getsizeof`. Instead of a size in bytes, when run with PyPy, `local_namespace_limit` will degrade to being the number of distinct values in a template's local namespace.
 :::
+
+You can customize the namespace size calculation by subclassing [`Context`](../api/context.md) and overriding [`get_size_of_locals()`](../api/context.md#get_size_of_locals). This example simply counts the number of entries in the namespace.
+
+```python
+from liquid import Environment
+from liquid import Context
+from liquid.template import BoundTemplate
+
+class MyRenderContext(Context):
+    def get_size_of_locals(self) -> int:
+        if not self.env.local_namespace_limit:
+            return 0
+        return len(self.locals) + self.local_namespace_size_carry
+
+
+class MyBoundTemplate(BoundTemplate):
+    context_class = MyRenderContext
+
+
+class MyEnvironment(Environment):
+    local_namespace_limit = 2  # XXX: very low, for demonstration purposes
+    template_class = MyBoundTemplate
+
+
+env = MyEnvironment()
+
+template = env.from_string(
+    "{% assign foo = 'hello' %}"
+    "{% assign bar = 'world' %}"
+).render()
+
+
+# raises a LocalNamespaceLimitError
+template = env.from_string(
+    "{% assign foo = 'hello' %}"
+    "{% assign bar = 'world' %}"
+    "{% assign baz = '!' %}"
+).render()
+```
+
+**_Changed in version 1.4.7_:** The default implementation of `get_size_of_locals` no longer attempts to dedupe local namespace values as it would raise a `TypeError` on unhashable types.
 
 ## Loop Iteration Limit
 

@@ -97,8 +97,7 @@ An async version of [`get()`](#get).
 
 `resolve(name: str, default: object = _undefined) -> Any`
 
-Return the object at `name` in the current scope. This is like [`get()`](#get), but does a single,
-top-level lookup rather than a chained lookup from a sequence of keys.`
+Return the object at `name` in the current scope. This is like [`get()`](#get), but does a single, top-level lookup rather than a chained lookup from a sequence of keys.`
 
 ### `filter`
 
@@ -107,6 +106,16 @@ top-level lookup rather than a chained lookup from a sequence of keys.`
 Return the filter function with given name.
 
 **Raises**: NoSuchFilterFunc if a filter with the given name does not exist.
+
+### `get_size_of_locals`
+
+`get_size_of_locals(self) -> int`
+
+Return the "size" or a "score" for the current local namespace.
+
+This is used by the optional local namespace resource limit. Override `get_size_of_locals` to customize how the limit is calculated. Be sure to consider `self.local_namespace_size_carry` when writing a custom implementation of `get_size_of_locals`.
+
+The default implementation uses `sys.getsizeof()` on each of the local namespace's values. It is not a reliable measure of size in bytes.
 
 ### `get_template`
 

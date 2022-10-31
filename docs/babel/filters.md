@@ -446,6 +446,8 @@ Hallo Sue!
 
 ## Unit
 
+**_New in Liquid Babel version 1.0.0_**
+
 ```
 <number> | unit: <string>
   [, denominator: <number>]
