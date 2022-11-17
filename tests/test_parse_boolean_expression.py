@@ -16,6 +16,7 @@ from liquid.expression import RangeLiteral
 from liquid.expression import InfixExpression
 
 from liquid.expressions import parse_boolean_expression
+from liquid.expressions import parse_boolean_expression_with_parens
 
 
 @dataclass
@@ -271,6 +272,10 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expr = parse_boolean_expression(case.expression)
                 self.assertEqual(expr, case.expect)
 
+            with self.subTest(msg="[with parens] " + case.description):
+                expr = parse_boolean_expression_with_parens(case.expression)
+                self.assertEqual(expr, case.expect)
+
     def test_parse_boolean_expression_precedence(self):
         """Test that we get the expected precedence when parsing boolean expressions."""
         test_cases = [
@@ -294,4 +299,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
         for case in test_cases:
             with self.subTest(msg=case.description):
                 expr = parse_boolean_expression(case.expression)
+                self.assertEqual(str(expr), case.expect)
+
+            with self.subTest(msg="[with parens] " + case.description):
+                expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(str(expr), case.expect)

@@ -1,12 +1,15 @@
-"""Functions for parsing boolean expressions. Like those found in `if` and `unless`
-tags.
+"""Functions for parsing boolean expressions. Like those found in `if` and
+unless` tags.
 """
 from typing import Dict
 from typing import Callable
+from typing import Union
 
 from liquid.expression import Expression
 from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
+from liquid.expression import PrefixExpression
+from liquid.expression import is_truthy
 
 from liquid.expressions.common import parse_blank
 from liquid.expressions.common import parse_boolean
@@ -20,9 +23,11 @@ from liquid.expressions.common import make_parse_range
 
 from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
 from liquid.expressions.boolean.lex import tokenize
+from liquid.expressions.boolean.lex import tokenize_with_parens
 from liquid.expressions.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import LiquidTypeError
 
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_FALSE
@@ -36,10 +41,13 @@ from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_RANGE_LPAREN
 
 from liquid.token import TOKEN_EQ
 from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_NOT
 from liquid.token import TOKEN_LT
 from liquid.token import TOKEN_GT
 from liquid.token import TOKEN_NE
@@ -48,7 +56,7 @@ from liquid.token import TOKEN_LE
 from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_CONTAINS
 
-# Note that PREFIX and LOGICAL are not used in any built-in expressions.
+# Note that PREFIX and LOGICAL are not used in any "standard" expressions.
 PRECEDENCE_LOWEST = 1
 PRECEDENCE_LOGICALRIGHT = 3
 PRECEDENCE_LOGICAL = 4
@@ -68,6 +76,8 @@ PRECEDENCES = {
     TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
     TOKEN_AND: PRECEDENCE_LOGICALRIGHT,
     TOKEN_OR: PRECEDENCE_LOGICALRIGHT,
+    TOKEN_NOT: PRECEDENCE_LOGICALRIGHT,
+    TOKEN_RPAREN: PRECEDENCE_LOWEST,
 }
 
 
@@ -99,6 +109,37 @@ BINARY_OPERATORS = frozenset(
     )
 )
 
+PREFIX_OPERATORS = frozenset(
+    [
+        TOKEN_NOT,
+    ]
+)
+
+
+class _PrefixExpression(PrefixExpression):
+    """A prefix expression handling the logical `not` operator."""
+
+    def _evaluate(self, right: object) -> Union[int, float]:
+        if self.operator == TOKEN_NOT:
+            return not is_truthy(right)
+        raise LiquidTypeError(f"unknown operator {self.operator}")
+
+
+def parse_prefix_expression(stream: TokenStream) -> Expression:
+    """Parse a prefix expression from a stream of tokens.
+
+    Note that "standard" Liquid boolean expressions do not have any prefix expressions.
+    """
+    tok = next(stream)
+    assert tok[2] == TOKEN_NOT
+    return _PrefixExpression(
+        operator=tok[2],
+        right=parse_obj(
+            stream,
+            precedence=PRECEDENCE_LOGICALRIGHT,
+        ),
+    )
+
 
 def parse_infix_expression(stream: TokenStream, left: Expression) -> InfixExpression:
     """Parse an infix expression from a stream of tokens."""
@@ -114,8 +155,15 @@ def parse_infix_expression(stream: TokenStream, left: Expression) -> InfixExpres
     return exp
 
 
-def parse_obj(stream: TokenStream, precedence: int = PRECEDENCE_LOWEST) -> Expression:
-    """Parse the next object from the stream of tokens."""
+def parse_obj(
+    stream: TokenStream,
+    precedence: int = PRECEDENCE_LOWEST,
+) -> Expression:
+    """Parse the next object from the stream of tokens.
+
+    This object parser is for "standard" boolean expressions. It does not
+    handle logical `not` or grouping with parentheses.
+    """
     try:
         left = TOKEN_MAP[stream.current[1]](stream)
     except KeyError as err:
@@ -141,9 +189,87 @@ def parse_obj(stream: TokenStream, precedence: int = PRECEDENCE_LOWEST) -> Expre
     return left
 
 
-TOKEN_MAP[TOKEN_LPAREN] = make_parse_range(parse_simple_obj)
+parse_range = make_parse_range(parse_simple_obj)
+TOKEN_MAP[TOKEN_LPAREN] = parse_range
 
 
 def parse(expr: str, linenum: int = 1) -> BooleanExpression:
-    """Parse boolean expression string."""
+    """Parse a string as a "standard" boolean expression."""
     return BooleanExpression(parse_obj(TokenStream(tokenize(expr, linenum))))
+
+
+def parse_grouped_expression(stream: TokenStream) -> Expression:
+    """Parse a group of logical expressions."""
+    next(stream)  # Eat left paren
+    expr = parse_obj_with_parens(stream)
+
+    next(stream)
+    while stream.current[1] == TOKEN_RPAREN:
+        next(stream)
+
+    if stream.current[1] != TOKEN_EOF:
+        expr = parse_infix_expression(stream, left=expr)
+
+    return expr
+
+
+def parse_range_with_parens(stream: TokenStream) -> Expression:
+    """Like `parse_range` but consumes the extra `RANGE_LPAREN` token first."""
+    stream.expect(TOKEN_RANGE_LPAREN)
+    next(stream)  # Eat extra token
+    return parse_range(stream)
+
+
+TOKEN_MAP_WITH_PARENS = {
+    **TOKEN_MAP,
+    TOKEN_NOT: parse_prefix_expression,
+    TOKEN_LPAREN: parse_grouped_expression,
+    TOKEN_RANGE_LPAREN: parse_range_with_parens,
+}
+
+
+def parse_obj_with_parens(
+    stream: TokenStream,
+    precedence: int = PRECEDENCE_LOWEST,
+) -> Expression:
+    """Parse the next object from the stream of tokens.
+
+    This object parser is for the non-standard boolean expression, which does handle
+    the logical `not` operator and grouping terms with parentheses.
+    """
+    try:
+        left = TOKEN_MAP_WITH_PARENS[stream.current[1]](stream)
+    except KeyError as err:
+        raise LiquidSyntaxError(
+            f"unexpected {stream.current[2]!r}",
+            linenum=stream.current[0],
+        ) from err
+
+    while True:
+        peek_typ = stream.peek[1]
+        if (
+            peek_typ == TOKEN_EOF
+            or PRECEDENCES.get(peek_typ, PRECEDENCE_LOWEST) < precedence
+        ):
+            break
+
+        if peek_typ not in BINARY_OPERATORS:
+            return left
+
+        next(stream)
+        left = parse_infix_expression(stream, left)
+
+    return left
+
+
+def parse_with_parens(expr: str, linenum: int = 1) -> BooleanExpression:
+    """Parse a string as a boolean expression, possibly containing the logical `not`
+    operator and parentheses for grouping terms.
+    """
+    return BooleanExpression(
+        parse_obj_with_parens(
+            TokenStream(
+                tokenize_with_parens(expr, linenum),
+            )
+        )
+    )
