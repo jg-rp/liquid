@@ -42,7 +42,7 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_RANGE_LPAREN
+from liquid.token import TOKEN_RANGE_LITERAL
 
 from liquid.token import TOKEN_EQ
 from liquid.token import TOKEN_OR
@@ -134,7 +134,7 @@ def parse_prefix_expression(stream: TokenStream) -> Expression:
     assert tok[2] == TOKEN_NOT
     return _PrefixExpression(
         operator=tok[2],
-        right=parse_obj(
+        right=parse_obj_with_parens(
             stream,
             precedence=PRECEDENCE_LOGICALRIGHT,
         ),
@@ -151,6 +151,23 @@ def parse_infix_expression(stream: TokenStream, left: Expression) -> InfixExpres
         left=left,
         operator=tok[2],
         right=parse_obj(stream, precedence),
+    )
+    return exp
+
+
+def parse_infix_expression_with_parens(
+    stream: TokenStream,
+    left: Expression,
+) -> InfixExpression:
+    """Parse an infix expression from a stream of tokens."""
+    tok = stream.current
+    precedence = PRECEDENCES.get(tok[1], PRECEDENCE_LOWEST)
+    stream.next_token()
+
+    exp = InfixExpression(
+        left=left,
+        operator=tok[2],
+        right=parse_obj_with_parens(stream, precedence),
     )
     return exp
 
@@ -215,7 +232,7 @@ def parse_grouped_expression(stream: TokenStream) -> Expression:
 
 def parse_range_with_parens(stream: TokenStream) -> Expression:
     """Like `parse_range` but consumes the extra `RANGE_LPAREN` token first."""
-    stream.expect(TOKEN_RANGE_LPAREN)
+    stream.expect(TOKEN_RANGE_LITERAL)
     next(stream)  # Eat extra token
     return parse_range(stream)
 
@@ -224,7 +241,7 @@ TOKEN_MAP_WITH_PARENS = {
     **TOKEN_MAP,
     TOKEN_NOT: parse_prefix_expression,
     TOKEN_LPAREN: parse_grouped_expression,
-    TOKEN_RANGE_LPAREN: parse_range_with_parens,
+    TOKEN_RANGE_LITERAL: parse_range_with_parens,
 }
 
 
@@ -257,7 +274,7 @@ def parse_obj_with_parens(
             return left
 
         next(stream)
-        left = parse_infix_expression(stream, left)
+        left = parse_infix_expression_with_parens(stream, left)
 
     return left
 

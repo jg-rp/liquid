@@ -14,7 +14,7 @@ from liquid.expressions.common import STRING_PATTERN
 
 from liquid.token import operators
 from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_RANGE_LPAREN
+from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_TRUE
@@ -81,7 +81,7 @@ keywords = frozenset(
 
 # Rules for a boolean expression that supports grouping with parentheses.
 paren_token_rules = (
-    (TOKEN_RANGE_LPAREN, r"\((?=.+?\.\.)"),
+    (TOKEN_RANGE_LITERAL, r"\((?=.+?\.\.)"),
     *token_rules,
 )
 
@@ -148,7 +148,7 @@ def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
     distinguish the start of a range expression from the start of a logical group.
     """
     _keywords = not_keywords
-    for match in OUTPUT_RE.finditer(source):
+    for match in PAREN_TOKENS_RE.finditer(source):
         kind = match.lastgroup
         assert kind is not None
 
@@ -157,7 +157,7 @@ def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
 
         if kind == TOKEN_IDENTIFIER and value in _keywords:
             kind = value
-        elif kind == TOKEN_RANGE_LPAREN:
+        elif kind == TOKEN_RANGE_LITERAL:
             # Yield a TOKEN_RANGE_LPAREN, then yield a TOKEN_LPAREN
             # via the `yield` at the end of this loop.
             yield (linenum + newlines, kind, kind)
