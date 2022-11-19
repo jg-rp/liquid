@@ -158,7 +158,7 @@ def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
         if kind == TOKEN_IDENTIFIER and value in _keywords:
             kind = value
         elif kind == TOKEN_RANGE_LITERAL:
-            # Yield a TOKEN_RANGE_LPAREN, then yield a TOKEN_LPAREN
+            # Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
             # via the `yield` at the end of this loop.
             yield (linenum + newlines, kind, kind)
             kind = TOKEN_LPAREN

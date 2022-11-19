@@ -212,13 +212,13 @@ def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
 
 
 def expect(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
-    """Raise an excpetion if the current token in the stream does not match the given
+    """Raise an exception if the current token in the stream does not match the given
     type and value."""
     _expect(stream.current, typ, value)
 
 
 def expect_peek(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
-    """Raise an excpetion if the next token in the stream does not match the given
+    """Raise an exception if the next token in the stream does not match the given
     type and value."""
     _expect(stream.peek, typ, value)
 
