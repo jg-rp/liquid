@@ -12,6 +12,10 @@ from liquid.environment import Environment
 from liquid.context import Context
 from liquid.stream import TokenStream
 
+# Note: These are test cases for the legacy expression implementation.
+# See `test_eval_*_expression.py` for expression evaluation test cases
+# as used by all built-in tags.
+
 from liquid.lex import tokenize_filtered_expression
 from liquid.lex import tokenize_boolean_expression
 from liquid.lex import tokenize_loop_expression

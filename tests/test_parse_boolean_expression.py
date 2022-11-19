@@ -1,7 +1,7 @@
 # pylint: disable=missing-class-docstring missing-module-docstring
 import unittest
 
-from dataclasses import dataclass
+from typing import NamedTuple
 from typing import Union
 
 from liquid.expression import Expression
@@ -17,262 +17,268 @@ from liquid.expression import InfixExpression
 
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
+from liquid.expressions.boolean.parse import NotPrefixExpression
 
 
-@dataclass
-class Case:
+class Case(NamedTuple):
     description: str
     expression: str
     expect: Union[Expression, str]
 
 
 class ParseBooleanExpressionTestCase(unittest.TestCase):
-    def test_parse_boolean_expression(self):
-        """Test that we can parse liquid boolean expressions."""
-        test_cases = [
-            Case(
-                "string literal double quotes",
-                '"foobar"',
-                BooleanExpression(
-                    expression=StringLiteral("foobar"),
+    """Test cases for parsing standard boolean expressions."""
+
+    test_cases = [
+        Case(
+            "string literal double quotes",
+            '"foobar"',
+            BooleanExpression(
+                expression=StringLiteral("foobar"),
+            ),
+        ),
+        Case(
+            "integer literal",
+            "7",
+            BooleanExpression(
+                expression=IntegerLiteral(7),
+            ),
+        ),
+        Case(
+            "negative integer literal statement expression",
+            "-7",
+            BooleanExpression(
+                expression=IntegerLiteral(-7),
+            ),
+        ),
+        Case(
+            "float literal statement expression",
+            "3.14",
+            BooleanExpression(
+                expression=FloatLiteral(3.14),
+            ),
+        ),
+        Case(
+            "negative float literal statement expression",
+            "-3.14",
+            BooleanExpression(expression=FloatLiteral(-3.14)),
+        ),
+        Case(
+            "single identifier statement expression",
+            "collection",
+            BooleanExpression(
+                expression=Identifier(
+                    path=[IdentifierPathElement("collection")],
                 ),
             ),
-            Case(
-                "integer literal",
-                "7",
-                BooleanExpression(
-                    expression=IntegerLiteral(7),
+        ),
+        Case(
+            "chained identifier",
+            "collection.products",
+            BooleanExpression(
+                expression=Identifier(
+                    path=[
+                        IdentifierPathElement("collection"),
+                        IdentifierPathElement("products"),
+                    ],
                 ),
             ),
-            Case(
-                "negative integer literal statement expression",
-                "-7",
-                BooleanExpression(
-                    expression=IntegerLiteral(-7),
+        ),
+        Case(
+            "keyword true",
+            "true",
+            BooleanExpression(
+                expression=Boolean(True),
+            ),
+        ),
+        Case(
+            "keyword false",
+            "false",
+            BooleanExpression(
+                expression=Boolean(False),
+            ),
+        ),
+        Case(
+            "boolean equality",
+            "true == true",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="==",
+                    right=Boolean(True),
                 ),
             ),
-            Case(
-                "float literal statement expression",
-                "3.14",
-                BooleanExpression(
-                    expression=FloatLiteral(3.14),
+        ),
+        Case(
+            "boolean inequality",
+            "true != false",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="!=",
+                    right=Boolean(False),
                 ),
             ),
-            Case(
-                "negative float literal statement expression",
-                "-3.14",
-                BooleanExpression(expression=FloatLiteral(-3.14)),
-            ),
-            Case(
-                "single identifier statement expression",
-                "collection",
-                BooleanExpression(
-                    expression=Identifier(
-                        path=[IdentifierPathElement("collection")],
-                    ),
+        ),
+        Case(
+            "boolean inequality alternate",
+            "true <> false",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="<>",
+                    right=Boolean(False),
                 ),
             ),
-            Case(
-                "chained identifier",
-                "collection.products",
-                BooleanExpression(
-                    expression=Identifier(
+        ),
+        Case(
+            "identifier greater than literal",
+            "user.age > 21",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            IdentifierPathElement("user"),
+                            IdentifierPathElement("age"),
                         ],
                     ),
+                    operator=">",
+                    right=IntegerLiteral(21),
                 ),
             ),
-            Case(
-                "keyword true",
-                "true",
-                BooleanExpression(
-                    expression=Boolean(True),
+        ),
+        Case(
+            "identifier less than literal",
+            "age < 18",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[IdentifierPathElement("age")],
+                    ),
+                    operator="<",
+                    right=IntegerLiteral(18),
                 ),
             ),
-            Case(
-                "keyword false",
-                "false",
-                BooleanExpression(
-                    expression=Boolean(False),
+        ),
+        Case(
+            "identifier less than or equal to literal",
+            "age <= 18",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[IdentifierPathElement("age")],
+                    ),
+                    operator="<=",
+                    right=IntegerLiteral(18),
                 ),
             ),
-            Case(
-                "boolean equality",
-                "true == true",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Boolean(True),
-                        operator="==",
-                        right=Boolean(True),
+        ),
+        Case(
+            "identifier greater than or equal to literal",
+            "age >= 18",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[IdentifierPathElement("age")],
+                    ),
+                    operator=">=",
+                    right=IntegerLiteral(18),
+                ),
+            ),
+        ),
+        Case(
+            "boolean or boolean",
+            "true or false",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="or",
+                    right=Boolean(False),
+                ),
+            ),
+        ),
+        Case(
+            "identifier contains string",
+            "product.tags contains 'sale'",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[
+                            IdentifierPathElement("product"),
+                            IdentifierPathElement("tags"),
+                        ],
+                    ),
+                    operator="contains",
+                    right=StringLiteral("sale"),
+                ),
+            ),
+        ),
+        Case(
+            "identifier equals a range expression",
+            "foo == (1..3)",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[
+                            IdentifierPathElement("foo"),
+                        ],
+                    ),
+                    operator="==",
+                    right=RangeLiteral(
+                        IntegerLiteral(1),
+                        IntegerLiteral(3),
                     ),
                 ),
             ),
-            Case(
-                "boolean inequality",
-                "true != false",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Boolean(True),
-                        operator="!=",
-                        right=Boolean(False),
+        ),
+        Case(
+            "chained identifier with bracketed index and string",
+            "users[0]['age'] > 21",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[
+                            IdentifierPathElement("users"),
+                            IdentifierPathElement(0),
+                            IdentifierPathElement("age"),
+                        ],
                     ),
+                    operator=">",
+                    right=IntegerLiteral(21),
                 ),
             ),
-            Case(
-                "boolean inequality alternate",
-                "true <> false",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Boolean(True),
-                        operator="<>",
-                        right=Boolean(False),
+        ),
+        Case(
+            "multiple lines",
+            "users[0]['age'] \n>  \n21",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Identifier(
+                        path=[
+                            IdentifierPathElement("users"),
+                            IdentifierPathElement(0),
+                            IdentifierPathElement("age"),
+                        ],
                     ),
+                    operator=">",
+                    right=IntegerLiteral(21),
                 ),
             ),
-            Case(
-                "identifier greater than literal",
-                "user.age > 21",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[
-                                IdentifierPathElement("user"),
-                                IdentifierPathElement("age"),
-                            ],
-                        ),
-                        operator=">",
-                        right=IntegerLiteral(21),
-                    ),
-                ),
-            ),
-            Case(
-                "identifier less than literal",
-                "age < 18",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[IdentifierPathElement("age")],
-                        ),
-                        operator="<",
-                        right=IntegerLiteral(18),
-                    ),
-                ),
-            ),
-            Case(
-                "identifier less than or equal to literal",
-                "age <= 18",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[IdentifierPathElement("age")],
-                        ),
-                        operator="<=",
-                        right=IntegerLiteral(18),
-                    ),
-                ),
-            ),
-            Case(
-                "identifier greater than or equal to literal",
-                "age >= 18",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[IdentifierPathElement("age")],
-                        ),
-                        operator=">=",
-                        right=IntegerLiteral(18),
-                    ),
-                ),
-            ),
-            Case(
-                "boolean or boolean",
-                "true or false",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Boolean(True),
-                        operator="or",
-                        right=Boolean(False),
-                    ),
-                ),
-            ),
-            Case(
-                "identifier contains string",
-                "product.tags contains 'sale'",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[
-                                IdentifierPathElement("product"),
-                                IdentifierPathElement("tags"),
-                            ],
-                        ),
-                        operator="contains",
-                        right=StringLiteral("sale"),
-                    ),
-                ),
-            ),
-            Case(
-                "identifier equals a range expression",
-                "foo == (1..3)",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[
-                                IdentifierPathElement("foo"),
-                            ],
-                        ),
-                        operator="==",
-                        right=RangeLiteral(
-                            IntegerLiteral(1),
-                            IntegerLiteral(3),
-                        ),
-                    ),
-                ),
-            ),
-            Case(
-                "chained identifier with bracketed index and string",
-                "users[0]['age'] > 21",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[
-                                IdentifierPathElement("users"),
-                                IdentifierPathElement(0),
-                                IdentifierPathElement("age"),
-                            ],
-                        ),
-                        operator=">",
-                        right=IntegerLiteral(21),
-                    ),
-                ),
-            ),
-            Case(
-                "multiple lines",
-                "users[0]['age'] \n>  \n21",
-                BooleanExpression(
-                    expression=InfixExpression(
-                        left=Identifier(
-                            path=[
-                                IdentifierPathElement("users"),
-                                IdentifierPathElement(0),
-                                IdentifierPathElement("age"),
-                            ],
-                        ),
-                        operator=">",
-                        right=IntegerLiteral(21),
-                    ),
-                ),
-            ),
-        ]
+        ),
+    ]
 
-        for case in test_cases:
+    def test_parse_boolean_expression(self):
+        """Test that we can parse standard boolean expressions."""
+        for case in self.test_cases:
             with self.subTest(msg=case.description):
                 expr = parse_boolean_expression(case.expression)
                 self.assertEqual(expr, case.expect)
 
-            with self.subTest(msg="[with parens] " + case.description):
+    def test_parse_boolean_expression_with_parens(self):
+        """Test that the non-standard boolean expression parser is backwards
+        compatible with standard boolean expressions."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(expr, case.expect)
 
@@ -304,3 +310,81 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             with self.subTest(msg="[with parens] " + case.description):
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(str(expr), case.expect)
+
+
+class ParseBooleanNotExpressionTestCase(unittest.TestCase):
+    """Test cases for parsing non-standard boolean expressions."""
+
+    test_cases = [
+        Case(
+            "not true",
+            "not true",
+            BooleanExpression(
+                expression=NotPrefixExpression(
+                    "not",
+                    right=Boolean(True),
+                ),
+            ),
+        ),
+        Case(
+            "right associative",
+            "true and false and false or true",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="and",
+                    right=InfixExpression(
+                        left=Boolean(False),
+                        operator="and",
+                        right=InfixExpression(
+                            left=Boolean(False),
+                            operator="or",
+                            right=Boolean(True),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        Case(
+            "grouped boolean",
+            "(true and false and false) or true",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=InfixExpression(
+                        left=Boolean(True),
+                        operator="and",
+                        right=InfixExpression(
+                            left=Boolean(False),
+                            operator="and",
+                            right=Boolean(False),
+                        ),
+                    ),
+                    operator="or",
+                    right=Boolean(True),
+                ),
+            ),
+        ),
+        Case(
+            "parens",
+            "(true and false and false)",
+            BooleanExpression(
+                expression=InfixExpression(
+                    left=Boolean(True),
+                    operator="and",
+                    right=InfixExpression(
+                        left=Boolean(False),
+                        operator="and",
+                        right=Boolean(False),
+                    ),
+                ),
+            ),
+        ),
+    ]
+
+    def test_parser_with_parens(self) -> None:
+        """Test that we can parse boolean expressions that support logical `not`
+        and grouping terms with parentheses."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_boolean_expression_with_parens(case.expression)
+                self.assertEqual(expr, case.expect)

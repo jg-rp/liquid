@@ -116,7 +116,7 @@ PREFIX_OPERATORS = frozenset(
 )
 
 
-class _PrefixExpression(PrefixExpression):
+class NotPrefixExpression(PrefixExpression):
     """A prefix expression handling the logical `not` operator."""
 
     def _evaluate(self, right: object) -> Union[int, float]:
@@ -132,7 +132,7 @@ def parse_prefix_expression(stream: TokenStream) -> Expression:
     """
     tok = next(stream)
     assert tok[2] == TOKEN_NOT
-    return _PrefixExpression(
+    return NotPrefixExpression(
         operator=tok[2],
         right=parse_obj_with_parens(
             stream,
@@ -225,7 +225,7 @@ def parse_grouped_expression(stream: TokenStream) -> Expression:
         next(stream)
 
     if stream.current[1] != TOKEN_EOF:
-        expr = parse_infix_expression(stream, left=expr)
+        expr = parse_infix_expression_with_parens(stream, left=expr)
 
     return expr
 

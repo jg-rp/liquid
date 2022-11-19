@@ -276,6 +276,25 @@ class LexBooleanNotExpressionTestCase(unittest.TestCase):
                 Token(1, TOKEN_RPAREN, ")"),
             ],
         ),
+        Case(
+            "nested grouped boolean with logic operators",
+            "((true or false) or (false)) and true",
+            [
+                Token(1, TOKEN_LPAREN, "("),
+                Token(1, TOKEN_LPAREN, "("),
+                Token(1, TOKEN_TRUE, "true"),
+                Token(1, TOKEN_OR, "or"),
+                Token(1, TOKEN_FALSE, "false"),
+                Token(1, TOKEN_RPAREN, ")"),
+                Token(1, TOKEN_OR, "or"),
+                Token(1, TOKEN_LPAREN, "("),
+                Token(1, TOKEN_FALSE, "false"),
+                Token(1, TOKEN_RPAREN, ")"),
+                Token(1, TOKEN_RPAREN, ")"),
+                Token(1, TOKEN_AND, "and"),
+                Token(1, TOKEN_TRUE, "true"),
+            ],
+        ),
     ]
 
     def test_lexer_with_parens(self) -> None:
