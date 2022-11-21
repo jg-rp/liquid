@@ -1,7 +1,9 @@
 """Test Liquid boolean expression tokenization."""
 
 import unittest
-from typing import Any, NamedTuple
+
+from typing import Any
+from typing import NamedTuple
 
 from liquid.exceptions import LiquidSyntaxError
 

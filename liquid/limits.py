@@ -24,7 +24,7 @@ def _init_int_max_str_digits() -> int:
 
     if env is None:
         if hasattr(sys, "get_int_max_str_digits"):
-            return sys.get_int_max_str_digits()
+            return sys.get_int_max_str_digits()  # type: ignore
 
         var = "PYTHONINTMAXSTRDIGITS"
         env = os.environ.get(var)

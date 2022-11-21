@@ -124,11 +124,15 @@ TOKEN_GE = sys.intern("ge")
 TOKEN_AND = sys.intern("and")
 TOKEN_OR = sys.intern("or")
 TOKEN_NOT = sys.intern("not")
+TOKEN_ELSE = sys.intern("else")
+TOKEN_IF = sys.intern("if")
+
 
 # Filter symbols
 TOKEN_PIPE = sys.intern("pipe")
 TOKEN_COLON = sys.intern("colon")
 TOKEN_COMMA = sys.intern("comma")
+TOKEN_DPIPE = sys.intern("dpipe")
 
 # Identifier symbols
 TOKEN_DOT = sys.intern("dot")
