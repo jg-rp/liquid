@@ -18,6 +18,7 @@ from liquid.expressions.conditional import (
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_DPIPE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
@@ -32,6 +33,9 @@ from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_ELSE
+from liquid.token import TOKEN_NOT
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_AND
 from liquid.token import Token
 
 
@@ -317,7 +321,7 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
 
     test_cases = [
         Case(
-            description="basic inline if",
+            description="simple condition",
             source="'foo' if true",
             expect=[
                 Token(1, TOKEN_STRING, "foo"),
@@ -326,7 +330,7 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
             ],
         ),
         Case(
-            description="basic inline if with alternative",
+            description="simple condition with alternative",
             source="'foo' if true else 'bar'",
             expect=[
                 Token(1, TOKEN_STRING, "foo"),
@@ -337,7 +341,7 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
             ],
         ),
         Case(
-            description="inline if with filter",
+            description="condition with preceding filter",
             source="'foo' | upcase if true else 'bar'",
             expect=[
                 Token(1, TOKEN_STRING, "foo"),
@@ -350,7 +354,7 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
             ],
         ),
         Case(
-            description="inline if with alternative filter",
+            description="condition with alternative filter",
             source="'foo' if true else 'bar' | upcase",
             expect=[
                 Token(1, TOKEN_STRING, "foo"),
@@ -362,9 +366,20 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
                 Token(1, TOKEN_IDENTIFIER, "upcase"),
             ],
         ),
+        Case(
+            description="condition with tail filter",
+            source="'foo' if true else 'bar' || upcase",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_TRUE, "true"),
+                Token(1, TOKEN_ELSE, "else"),
+                Token(1, TOKEN_STRING, "bar"),
+                Token(1, TOKEN_DPIPE, "||"),
+                Token(1, TOKEN_IDENTIFIER, "upcase"),
+            ],
+        ),
     ]
-
-    # TODO: test double pipe
 
     def test_conditional_lexer(self) -> None:
         """Test that the non-standard conditional expression lexer
@@ -387,4 +402,74 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
                 tokens = list(tokenize_conditional_with_parens(case.source))
                 self.assertEqual(len(tokens) - range_count, len(case.expect))
 
-    # TODO: Test logical `not` and parens
+
+class LexConditionalNotExpressionTestCase(unittest.TestCase):
+    """Test cases for the non-standard filtered expressions with inline conditions
+    and logical `not` with parentheses for grouping terms."""
+
+    test_cases = [
+        Case(
+            description="negated condition",
+            source="'foo' if not true",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_NOT, "not"),
+                Token(1, TOKEN_TRUE, "true"),
+            ],
+        ),
+        Case(
+            description="negated condition with alternative",
+            source="'foo' if not true else 'bar'",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_NOT, "not"),
+                Token(1, TOKEN_TRUE, "true"),
+                Token(1, TOKEN_ELSE, "else"),
+                Token(1, TOKEN_STRING, "bar"),
+            ],
+        ),
+        Case(
+            description="grouped condition with alternative",
+            source="'foo' if not (false and false) else 'bar'",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_NOT, "not"),
+                Token(1, TOKEN_LPAREN, "("),
+                Token(1, TOKEN_FALSE, "false"),
+                Token(1, TOKEN_AND, "and"),
+                Token(1, TOKEN_FALSE, "false"),
+                Token(1, TOKEN_RPAREN, ")"),
+                Token(1, TOKEN_ELSE, "else"),
+                Token(1, TOKEN_STRING, "bar"),
+            ],
+        ),
+        Case(
+            description="condition with preceding filter",
+            source="'foo' | upcase if not true else 'bar'",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_PIPE, "|"),
+                Token(1, TOKEN_IDENTIFIER, "upcase"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_NOT, "not"),
+                Token(1, TOKEN_TRUE, "true"),
+                Token(1, TOKEN_ELSE, "else"),
+                Token(1, TOKEN_STRING, "bar"),
+            ],
+        ),
+    ]
+
+    def test_conditional_lexer_with_parens(self) -> None:
+        """Test that the non-standard conditional expression lexer, including
+        logical `not` and parentheses, is backwards compatible with standard
+        filtered expressions."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                tokens = list(tokenize_conditional_with_parens(case.source))
+                self.assertEqual(len(tokens), len(case.expect))
+
+                for got, want in zip(tokens, case.expect):
+                    self.assertEqual(got, want)
