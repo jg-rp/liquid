@@ -17,7 +17,7 @@ from liquid.expression import InfixExpression
 
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
-from liquid.expressions.boolean.parse import NotPrefixExpression
+from liquid.expressions.boolean.parse import PrefixExpression
 
 
 class Case(NamedTuple):
@@ -320,7 +320,7 @@ class ParseBooleanNotExpressionTestCase(unittest.TestCase):
             "not true",
             "not true",
             BooleanExpression(
-                expression=NotPrefixExpression(
+                expression=PrefixExpression(
                     "not",
                     right=Boolean(True),
                 ),

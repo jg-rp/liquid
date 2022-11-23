@@ -116,15 +116,6 @@ PREFIX_OPERATORS = frozenset(
 )
 
 
-class NotPrefixExpression(PrefixExpression):
-    """A prefix expression handling the logical `not` operator."""
-
-    def _evaluate(self, right: object) -> Union[int, float]:
-        if self.operator == TOKEN_NOT:
-            return not is_truthy(right)
-        raise LiquidTypeError(f"unknown operator {self.operator}")
-
-
 def parse_prefix_expression(stream: TokenStream) -> Expression:
     """Parse a prefix expression from a stream of tokens.
 
@@ -132,7 +123,7 @@ def parse_prefix_expression(stream: TokenStream) -> Expression:
     """
     tok = next(stream)
     assert tok[2] == TOKEN_NOT
-    return NotPrefixExpression(
+    return PrefixExpression(
         operator=tok[2],
         right=parse_obj_with_parens(
             stream,

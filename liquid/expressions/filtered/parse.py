@@ -213,10 +213,9 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
     return Filter(name, args, kwargs)
 
 
-def parse(expr: str, linenum: int = 1) -> FilteredExpression:
-    """Parse an expression string with zero or more filters."""
-    tokens = tokenize(expr, linenum)
-    parts = list(split_at_first_pipe(tokens))
+def parse_from_tokens(tokens: Iterator[Token], linenum: int = 1) -> FilteredExpression:
+    """Parse an expression with zero or more filters from a token iterator."""
+    parts = tuple(split_at_first_pipe(tokens))
     if len(parts) == 1:
         stream = TokenStream(iter(parts[0]))
         return FilteredExpression(parse_obj(stream))
@@ -224,3 +223,8 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     left = parse_obj(TokenStream(iter(parts[0])))
     filters = [_parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
     return FilteredExpression(left, filters)
+
+
+def parse(expr: str, linenum: int = 1) -> FilteredExpression:
+    """Parse an expression string with zero or more filters."""
+    return parse_from_tokens(tokenize(expr, linenum))
