@@ -5,16 +5,20 @@ from typing import Dict
 from typing import List
 from typing import Iterator
 from typing import Iterable
-from typing import Optional
 
+from liquid.expression import BooleanExpression
 from liquid.expression import Expression
 from liquid.expression import Filter
 from liquid.expression import ConditionalExpression
 from liquid.expression import FilteredExpression
 
 from liquid.expressions.boolean.parse import parse_obj as parse_boolean_obj
+from liquid.expressions.boolean.parse import (
+    parse_obj_with_parens as parse_boolean_obj_with_parens,
+)
 from liquid.expressions.common import Token
 from liquid.expressions.conditional.lex import tokenize
+from liquid.expressions.conditional.lex import tokenize_with_parens
 from liquid.expressions.filtered.parse import (
     parse_from_tokens as parse_standard_filtered,
 )
@@ -109,10 +113,10 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
 def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     """Parse a conditional expression string."""
     tokens = tokenize(expr, linenum)
-    filtered_tokens, conditional_tokens = tuple(split_at_first_if(tokens))
+    standard_tokens, conditional_tokens = tuple(split_at_first_if(tokens))
 
     # This expression includes filters.
-    _expr = parse_standard_filtered(iter(filtered_tokens), linenum)
+    _expr = parse_standard_filtered(iter(standard_tokens), linenum)
 
     if not conditional_tokens:
         # A standard filtered expression
@@ -125,29 +129,66 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
         split_at_first_else(iter(conditional_tokens))
     )
 
-    # Note: Might need to define `parse_boolean_obj` here if they diverge.
-    condition = parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
-    alternative: Optional[Expression] = None
+    condition = BooleanExpression(
+        parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
+    )
 
-    if alternative_tokens:
-        alternative_tokens, alternative_filter_tokens = tuple(
-            split_at_first_pipe(iter(alternative_tokens))
-        )
+    # This expression includes filters.
+    alternative = (
+        parse_standard_filtered(iter(alternative_tokens), linenum)
+        if alternative_tokens
+        else None
+    )
 
-        alternative_left = parse_obj(TokenStream(iter(alternative_tokens)))
-        alternative_filters = [
+    if filter_tokens:
+        tail_filters = [
             _parse_filter(_tokens, linenum)
-            for _tokens in split_at_pipe(alternative_filter_tokens)
+            for _tokens in split_at_pipe(iter(filter_tokens))
         ]
-
-        alternative = FilteredExpression(alternative_left, alternative_filters)
-
-    tail_filters = [
-        _parse_filter(_tokens, linenum)
-        for _tokens in split_at_pipe(iter(filter_tokens))
-    ]
+    else:
+        tail_filters = []
 
     return ConditionalExpression(_expr, tail_filters, condition, alternative)
 
 
-# TODO: parse_with_parens
+def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
+    """Parse a conditional expression string that supports logical `not` and
+    grouping terms with parentheses."""
+    tokens = tokenize_with_parens(expr, linenum)
+    standard_tokens, conditional_tokens = tuple(split_at_first_if(tokens))
+
+    # The parens tokenizer adds TOKEN_RANGE_LITERAL tokens
+    # This expression includes filters.
+    _expr = parse_standard_filtered(iter(standard_tokens), linenum)
+
+    if not conditional_tokens:
+        # A standard filtered expression
+        return _expr
+
+    conditional_tokens, filter_tokens = tuple(
+        split_at_first_dpipe(iter(conditional_tokens))
+    )
+    conditional_tokens, alternative_tokens = tuple(
+        split_at_first_else(iter(conditional_tokens))
+    )
+
+    condition = BooleanExpression(
+        parse_boolean_obj_with_parens(TokenStream(iter(conditional_tokens)), linenum)
+    )
+
+    # This expression includes filters.
+    alternative = (
+        parse_standard_filtered(iter(alternative_tokens), linenum)
+        if alternative_tokens
+        else None
+    )
+
+    if filter_tokens:
+        tail_filters = [
+            _parse_filter(_tokens, linenum)
+            for _tokens in split_at_pipe(iter(filter_tokens))
+        ]
+    else:
+        tail_filters = []
+
+    return ConditionalExpression(_expr, tail_filters, condition, alternative)

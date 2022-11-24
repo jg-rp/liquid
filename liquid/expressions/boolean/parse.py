@@ -3,13 +3,11 @@ unless` tags.
 """
 from typing import Dict
 from typing import Callable
-from typing import Union
 
 from liquid.expression import Expression
 from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
 from liquid.expression import PrefixExpression
-from liquid.expression import is_truthy
 
 from liquid.expressions.common import parse_blank
 from liquid.expressions.common import parse_boolean
@@ -27,7 +25,6 @@ from liquid.expressions.boolean.lex import tokenize_with_parens
 from liquid.expressions.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import LiquidTypeError
 
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_FALSE

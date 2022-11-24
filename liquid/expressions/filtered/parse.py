@@ -44,6 +44,7 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_RANGE_LITERAL
 
 
 TOKEN_MAP = {
@@ -75,7 +76,18 @@ def parse_obj(stream: TokenStream) -> Expression:
         ) from err
 
 
-TOKEN_MAP[TOKEN_LPAREN] = make_parse_range(parse_obj)
+parse_range = make_parse_range(parse_obj)
+
+
+def parse_range_with_parens(stream: TokenStream) -> Expression:
+    """Like `parse_range` but consumes the extra `RANGE_LPAREN` token first."""
+    stream.expect(TOKEN_RANGE_LITERAL)
+    next(stream)  # Eat extra token
+    return parse_range(stream)
+
+
+TOKEN_MAP[TOKEN_LPAREN] = parse_range
+TOKEN_MAP[TOKEN_RANGE_LITERAL] = parse_range_with_parens
 
 
 def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:

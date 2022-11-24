@@ -2,8 +2,12 @@
 import unittest
 from dataclasses import dataclass
 
+from liquid.expression import BooleanExpression
+from liquid.expression import ConditionalExpression
 from liquid.expression import Expression
 from liquid.expression import FilteredExpression
+from liquid.expression import InfixExpression
+from liquid.expression import PrefixExpression
 from liquid.expression import IdentifierPathElement
 from liquid.expression import Identifier
 from liquid.expression import Boolean
@@ -12,8 +16,11 @@ from liquid.expression import StringLiteral
 from liquid.expression import IntegerLiteral
 from liquid.expression import FloatLiteral
 from liquid.expression import RangeLiteral
+from liquid.expression import TRUE
 
 from liquid.expressions import parse_filtered_expression
+from liquid.expressions import parse_conditional_expression
+from liquid.expressions import parse_conditional_expression_with_parens
 
 from liquid.exceptions import LiquidSyntaxError
 
@@ -297,6 +304,14 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             ),
         ),
         Case(
+            "string literal with filter and filter arguments",
+            "'foo' | append: 'bar'",
+            FilteredExpression(
+                expression=StringLiteral("foo"),
+                filters=[Filter(name="append", args=[StringLiteral("bar")])],
+            ),
+        ),
+        Case(
             "identifier with filter",
             "collection.title | upcase",
             FilteredExpression(
@@ -433,7 +448,6 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
 
     def test_parse_filtered_expression(self):
         """Test that we can parse liquid statement expressions."""
-
         for case in self.test_cases:
             with self.subTest(msg=case.description):
                 expr = parse_filtered_expression(case.expression)
@@ -442,7 +456,18 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
     def test_parse_conditional_expression(self):
         """Test that the non-standard conditional expression parser is backwards
         compatible with standard filtered expressions."""
-        # TODO:
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_conditional_expression(case.expression)
+                self.assertEqual(expr, case.expect)
+
+    def test_parse_conditional_expression_with_parens(self):
+        """Test that the non-standard conditional expression parser is backwards
+        compatible with standard filtered expressions."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_conditional_expression_with_parens(case.expression)
+                self.assertEqual(expr, case.expect)
 
     def test_double_pipe(self):
         """Test that a two consecutive pipe characters raises a syntax error."""
@@ -493,3 +518,167 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
         self.assertEqual(
             str(raised.exception), "expected ':', found 'integer', on line 1"
         )
+
+
+class ParseConditionalExpressionTestCase(unittest.TestCase):
+    """Test cases for the non-standard filtered expressions with inline conditions."""
+
+    test_cases = [
+        Case(
+            description="string literal with condition",
+            expression="'foo' if true",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(expression=TRUE),
+            ),
+        ),
+        Case(
+            description="string literal with condition and alternative",
+            expression="'foo' if true else 'bar'",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(expression=TRUE),
+                alternative=FilteredExpression(StringLiteral("bar")),
+            ),
+        ),
+        Case(
+            description="identifiers with condition and alternative",
+            expression="products[0] if products else 'bar'",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(
+                    Identifier(
+                        path=[
+                            IdentifierPathElement("products"),
+                            IdentifierPathElement(0),
+                        ]
+                    )
+                ),
+                condition=BooleanExpression(
+                    expression=Identifier(path=[IdentifierPathElement("products")])
+                ),
+                alternative=FilteredExpression(StringLiteral("bar")),
+            ),
+        ),
+        Case(
+            description="string literal with condition, alternative and filter",
+            expression="'foo' | upcase if true else 'bar'",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(
+                    StringLiteral("foo"),
+                    filters=[Filter(name="upcase", args=[])],
+                ),
+                condition=BooleanExpression(expression=TRUE),
+                alternative=FilteredExpression(StringLiteral("bar")),
+                filters=[],
+            ),
+        ),
+        Case(
+            description=("string literal with condition and alternative filter"),
+            expression="'foo' if true else 'bar' | upcase",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(expression=TRUE),
+                alternative=FilteredExpression(
+                    StringLiteral("bar"),
+                    filters=[Filter(name="upcase", args=[])],
+                ),
+                filters=[],
+            ),
+        ),
+        Case(
+            description=("string literal with condition, alternative and tail filter"),
+            expression="'foo' if true else 'bar' || append: 'baz' | upcase",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(expression=TRUE),
+                alternative=FilteredExpression(StringLiteral("bar")),
+                filters=[
+                    Filter(name="append", args=[StringLiteral("baz")]),
+                    Filter(name="upcase", args=[]),
+                ],
+            ),
+        ),
+        Case(
+            description=("tail filter with keyword argument"),
+            expression="'foo' if true else 'bar' || default: 'baz', allow_false:true",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(expression=TRUE),
+                alternative=FilteredExpression(StringLiteral("bar")),
+                filters=[
+                    Filter(
+                        name="default",
+                        args=[StringLiteral("baz")],
+                        kwargs={"allow_false": TRUE},
+                    )
+                ],
+            ),
+        ),
+    ]
+
+    def test_parse_conditional_expression(self):
+        """Test that we can parse conditional expressions."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_conditional_expression(case.expression)
+                self.assertEqual(expr, case.expect)
+
+    def test_parse_conditional_expression_with_parens(self):
+        """Test that the other conditional expression parser is backwards
+        compatible with conditional expressions that don't support parentheses."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_conditional_expression_with_parens(case.expression)
+                self.assertEqual(expr, case.expect)
+
+
+class ParseConditionalNotExpressionTestCase(unittest.TestCase):
+    """Test cases for the non-standard filtered expressions with inline conditions that
+    support logical `not` and grouping with parentheses."""
+
+    test_cases = [
+        Case(
+            description="string literal with condition",
+            expression="'foo' if not true",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(
+                    expression=PrefixExpression(
+                        "not",
+                        right=Boolean(True),
+                    ),
+                ),
+            ),
+        ),
+        Case(
+            description="string literal with condition and alternative",
+            expression="'foo' if (true and false and false) or true else 'bar'",
+            expect=ConditionalExpression(
+                expression=FilteredExpression(StringLiteral("foo")),
+                condition=BooleanExpression(
+                    expression=InfixExpression(
+                        left=InfixExpression(
+                            left=Boolean(True),
+                            operator="and",
+                            right=InfixExpression(
+                                left=Boolean(False),
+                                operator="and",
+                                right=Boolean(False),
+                            ),
+                        ),
+                        operator="or",
+                        right=Boolean(True),
+                    ),
+                ),
+                alternative=FilteredExpression(StringLiteral("bar")),
+            ),
+        ),
+    ]
+
+    def test_parse_conditional_expression_with_parens(self):
+        """Test that the other conditional expression parser is backwards
+        compatible with conditional expressions that don't support parentheses."""
+        for case in self.test_cases:
+            with self.subTest(msg=case.description):
+                expr = parse_conditional_expression_with_parens(case.expression)
+                self.assertEqual(expr, case.expect)

@@ -37,7 +37,7 @@ from liquid.exceptions import FilterValueError
 
 from liquid.limits import to_int
 
-# pylint: disable=missing-class-docstring too-few-public-methods
+# pylint: disable=missing-class-docstring too-few-public-methods too-many-lines
 
 
 class Expression(ABC):
@@ -686,8 +686,6 @@ class FilteredExpression(Expression):
 
 class ConditionalExpression(FilteredExpression):
     __slots__ = (
-        "expression",
-        "filters",
         "condition",
         "alternative",
     )
@@ -733,7 +731,7 @@ class ConditionalExpression(FilteredExpression):
 
     def __repr__(self) -> str:  # pragma: no cover
         return (
-            f"FilteredIfExpression(expression={self.expression!r}, "
+            f"ConditionalExpression(expression={self.expression!r}, "
             f"condition={self.condition}, "
             f"alternative={self.alternative}, "
             f"filters={self.filters})"
