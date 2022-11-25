@@ -71,3 +71,6 @@ class ExpressionCacheTestCase(TestCase):
         assert isinstance(node2, IfNode)
 
         self.assertEqual(id(node1.condition), id(node2.condition))
+
+
+# TODO: test caching of all expression types
