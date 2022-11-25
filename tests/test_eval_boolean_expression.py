@@ -57,25 +57,25 @@ class EvalBooleanExpressionTestCase(unittest.TestCase):
             expect=True,
         ),
         Case(
-            description="falsey identifier",
+            description="falsely identifier",
             context={"collection": {"title": "foo"}},
             expression="collection.tags",
             expect=False,
         ),
         Case(
-            description="truthy comparision",
+            description="truthy comparison",
             context={"user": {"age": 21}},
             expression="user.age >= 21",
             expect=True,
         ),
         Case(
-            description="not equal comparision",
+            description="not equal comparison",
             context={"user": {"age": 21}},
             expression="user.age != 21",
             expect=False,
         ),
         Case(
-            description="truthy comparision and logic operator",
+            description="truthy comparison and logic operator",
             context={
                 "user": {"age": 20},
                 "collection": {
@@ -564,6 +564,12 @@ class EvalBooleanNotExpressionTestCase(unittest.TestCase):
             context={},
             expression="(1..3) == (1..3)",
             expect=True,
+        ),
+        Case(
+            description="negate a group",
+            context={},
+            expression="not (false or true)",
+            expect=False,
         ),
     ]
 
