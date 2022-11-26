@@ -36,6 +36,7 @@ from liquid.token import TOKEN_ELSE
 from liquid.token import TOKEN_NOT
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_LT
 from liquid.token import Token
 
 
@@ -330,6 +331,17 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
             ],
         ),
         Case(
+            description="comparison operator",
+            source="'foo' if x < y",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(1, TOKEN_IF, "if"),
+                Token(1, TOKEN_IDENTIFIER, "x"),
+                Token(1, TOKEN_LT, "<"),
+                Token(1, TOKEN_IDENTIFIER, "y"),
+            ],
+        ),
+        Case(
             description="simple condition with alternative",
             source="'foo' if true else 'bar'",
             expect=[
@@ -377,6 +389,19 @@ class LexConditionalExpressionTestCase(unittest.TestCase):
                 Token(1, TOKEN_STRING, "bar"),
                 Token(1, TOKEN_DPIPE, "||"),
                 Token(1, TOKEN_IDENTIFIER, "upcase"),
+            ],
+        ),
+        Case(
+            description="multi-line condition with tail filter",
+            source="'foo'\nif true\nelse 'bar' || upcase",
+            expect=[
+                Token(1, TOKEN_STRING, "foo"),
+                Token(2, TOKEN_IF, "if"),
+                Token(2, TOKEN_TRUE, "true"),
+                Token(3, TOKEN_ELSE, "else"),
+                Token(3, TOKEN_STRING, "bar"),
+                Token(3, TOKEN_DPIPE, "||"),
+                Token(3, TOKEN_IDENTIFIER, "upcase"),
             ],
         ),
     ]

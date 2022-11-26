@@ -13,7 +13,10 @@ def truncate_chars(val: str, num: int, end: str = "...") -> str:
     return f"{val[:num-end_length]}{end}"
 
 
-def truncate_words(val: str, num: int, end: str = "...") -> str:
+# Note: truncate_words is no longer used by the truncatewords filter.
+
+
+def truncate_words(val: str, num: int, end: str = "...") -> str:  # pragma: no cover
     """Truncates a string down to the number of words passed as the first parameter."""
     # Replaces consecutive whitespace with a single newline.
     words = val.split()

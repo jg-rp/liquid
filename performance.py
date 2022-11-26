@@ -130,7 +130,7 @@ def register_mocks(env: Environment):
 
 
 def load_data() -> Dict[str, Any]:
-    """Mangle the "vision" database fixture into somthing that resembles a Shopify
+    """Mangle the "vision" database fixture into something that resembles a Shopify
     render context.
 
     We're trying hard to transform input data to match that of the reference

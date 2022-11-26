@@ -24,6 +24,10 @@ from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import DisabledTagError
 from liquid.exceptions import ContextDepthError
 
+from liquid.extra import register_inline_if_expressions
+from liquid.extra import register_inline_if_expressions_with_parens
+from liquid.extra import IfNotTag
+
 from liquid.loaders import DictLoader
 
 
@@ -50,18 +54,37 @@ class MalformedTemplateTestCase(TestCase):
 
     def setUp(self):
         self.global_context = {
-            "product": {"some-tags": ["hello", "there"], "tags": ["hello", "there"]},
+            "product": {
+                "some-tags": ["hello", "there"],
+                "tags": ["hello", "there"],
+            },
             "tag": "goodbye",
         }
 
     def _test(self, test_cases: Iterable[Case], mode: Mode = Mode.STRICT):
         """Helper method for running lists of `Case`s in each render mode."""
-        env = Environment()
-        env.mode = mode
+        self._test_with_env(Environment(tolerance=mode), test_cases)
 
+        # Test with non-standard conditional and boolean expressions
+        env = Environment(tolerance=mode)
+        env.add_tag(IfNotTag)
+        register_inline_if_expressions(env)
+        # Skip test cases that are not considered malformed with non-standard
+        # expressions.
+        self._test_with_env(
+            env, [case for case in test_cases if "||" not in case.template]
+        )
+
+        # Same again for conditional expressions that support `not` and parens.
+        register_inline_if_expressions_with_parens(env)
+        self._test_with_env(
+            env, [case for case in test_cases if "||" not in case.template]
+        )
+
+    def _test_with_env(self, env: Environment, test_cases: Iterable[Case]):
         for case in test_cases:
-            with self.subTest(msg=case.description, mode=mode):
-                if mode == Mode.STRICT:
+            with self.subTest(msg=case.description, mode=env.mode):
+                if env.mode == Mode.STRICT:
                     with self.assertRaises(case.exceptions) as raised:
                         template = env.from_string(
                             case.template, globals=self.global_context
@@ -73,13 +96,13 @@ class MalformedTemplateTestCase(TestCase):
                     else:
                         self.assertEqual(str(raised.exception), case.expect_msg)
 
-                elif mode == Mode.WARN:
+                elif env.mode == Mode.WARN:
                     with self.assertWarns(case.warnings):
                         template = env.from_string(
                             case.template, globals=self.global_context
                         )
                         template.render()
-                elif mode == Mode.LAX:
+                elif env.mode == Mode.LAX:
                     template = env.from_string(
                         case.template, globals=self.global_context
                     )

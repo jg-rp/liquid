@@ -12,49 +12,42 @@ from liquid.extra import register_inline_if_expressions_with_parens
 from liquid.extra import IfNotTag
 from liquid.golden.case import Case
 from liquid.loaders import DictLoader
-from liquid.template import AwareBoundTemplate
+from liquid.template import BoundTemplate
 
 
-class RenderExtraTagsTestCase(unittest.TestCase):
-    """Test cases for non-standard tags."""
-
-    # TODO: Split into multiple TestCase classes, one for each environment config
+class BaseRenderTestCase(unittest.TestCase):
+    def setUp(self) -> None:
+        self.partials = {}
+        self.loader = DictLoader(self.partials)
+        self.env = Environment(loader=self.loader)
 
     def _test(self, test_cases: List[Case]) -> None:
         for case in test_cases:
-            env = Environment(loader=DictLoader(case.partials))
-            env.add_tag(IfNotTag)
-            register_inline_if_expressions(env)
-            env.template_class = AwareBoundTemplate
+            self.partials.update(case.partials)
 
             with self.subTest(msg=case.description):
-                if case.error:
-                    with self.assertRaises(Error):
-                        template = env.from_string(case.template, globals=case.globals)
-                        result = template.render()
-                else:
-                    template = env.from_string(case.template, globals=case.globals)
-                    result = template.render()
-                    self.assertEqual(result, case.expect)
+                template = self.env.from_string(case.template, globals=case.globals)
+                result = template.render()
+                self.assertEqual(result, case.expect)
 
-        async def coro(template: AwareBoundTemplate):
+        async def coro(template: BoundTemplate):
             return await template.render_async()
 
         for case in test_cases:
-            env = Environment(loader=DictLoader(case.partials))
-            env.add_tag(IfNotTag)
-            register_inline_if_expressions(env)
-            env.template_class = AwareBoundTemplate
+            self.partials.update(case.partials)
 
             with self.subTest(msg=case.description, asynchronous=True):
-                if case.error:
-                    with self.assertRaises(Error):
-                        template = env.from_string(case.template, globals=case.globals)
-                        result = asyncio.run(coro(template))
-                else:
-                    template = env.from_string(case.template, globals=case.globals)
-                    result = asyncio.run(coro(template))
-                    self.assertEqual(result, case.expect)
+                template = self.env.from_string(case.template, globals=case.globals)
+                result = asyncio.run(coro(template))
+                self.assertEqual(result, case.expect)
+
+
+class RenderIfNotTagTestCase(BaseRenderTestCase):
+    """Test cases for non-standard `if` tag."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.env.add_tag(IfNotTag)
 
     def test_render_standard_if_tag(self) -> None:
         """Test that the `if (not)` tag renders standard `if` tags."""
@@ -128,6 +121,12 @@ class RenderExtraTagsTestCase(unittest.TestCase):
             ),
         ]
         self._test(test_cases)
+
+
+class RenderInlineIfTestCase(BaseRenderTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        register_inline_if_expressions(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""
@@ -270,4 +269,192 @@ class RenderExtraTagsTestCase(unittest.TestCase):
         self._test(test_cases)
 
 
-# TODO: Test inline `if` tags with parens
+class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        register_inline_if_expressions_with_parens(self.env)
+
+    def test_render_inline_if_output_statement(self) -> None:
+        """Test that we can render output statements with inline `if` expressions."""
+        test_cases = [
+            Case(
+                description="string literal with true condition",
+                template=r"{{ 'hello' if true }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="default to undefined",
+                template=r"{{ 'hello' if false }}",
+                expect="",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="early  filter",
+                template=r"{{ 'hello' | upcase if true }}",
+                expect="HELLO",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="string literal with false condition and alternative",
+                template=r"{{ 'hello' if false else 'goodbye' }}",
+                expect="goodbye",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="negate condition",
+                template=r"{{ 'hello' if not false else 'goodbye' }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="group condition terms",
+                template=r"{{ 'hello' if (false and true) or true }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="object and condition from context with tail filter",
+                template=r"{{ greeting if settings.foo else 'bar' || upcase }}",
+                expect="HELLO",
+                globals={"settings": {"foo": True}, "greeting": "hello"},
+                partials={},
+            ),
+        ]
+        self._test(test_cases)
+
+    def test_render_inline_if_assignment_tags(self) -> None:
+        """Test that we can render `assign` tags with inline `if` expressions."""
+        test_cases = [
+            Case(
+                description="string literal",
+                template=r"{% assign foo = 'hello' %}{{ foo }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="string literal with true condition",
+                template=r"{% assign foo = 'hello' if true %}{{ foo }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="default to undefined",
+                template=r"{% assign foo = 'hello' if false %}{{ foo }}",
+                expect="",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="early  filter",
+                template=r"{% assign foo = 'hello' | upcase if true %}{{ foo }}",
+                expect="HELLO",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="string literal with false condition and alternative",
+                template=r"{% assign foo = 'hello' if false else 'goodbye' %}{{ foo }}",
+                expect="goodbye",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="negate condition",
+                template=r"{% assign foo = 'hello' if not false %}{{ foo }}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="group condition terms",
+                template=(
+                    r"{% assign foo = 'hello' if (false and true) or true %}"
+                    r"{{ foo }}"
+                ),
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="object and condition from context with tail filter",
+                template=(
+                    r"{% assign foo = greeting if settings.foo else 'bar' || upcase %}"
+                    r"{{ foo }}"
+                ),
+                expect="HELLO",
+                globals={"settings": {"foo": True}, "greeting": "hello"},
+                partials={},
+            ),
+        ]
+        self._test(test_cases)
+
+    def test_render_inline_if_echo_tags(self) -> None:
+        """Test that we can render `echo` tags with inline `if` expressions."""
+        test_cases = [
+            Case(
+                description="string literal",
+                template=r"{% echo 'hello' %}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="string literal with true condition",
+                template=r"{% echo 'hello' if true %}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="default to undefined",
+                template=r"{% echo 'hello' if false %}",
+                expect="",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="early filter",
+                template=r"{% echo 'hello' | upcase if true %}",
+                expect="HELLO",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="string literal with false condition and alternative",
+                template=r"{% echo 'hello' if false else 'goodbye' %}",
+                expect="goodbye",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="negate condition",
+                template=r"{% echo 'hello' if not false else 'goodbye' %}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="group condition terms",
+                template=r"{% echo 'hello' if (false and true) or true %}",
+                expect="hello",
+                globals={},
+                partials={},
+            ),
+            Case(
+                description="object and condition from context with tail filter",
+                template=(r"{% echo greeting if settings.foo else 'bar' || upcase %}"),
+                expect="HELLO",
+                globals={"settings": {"foo": True}, "greeting": "hello"},
+                partials={},
+            ),
+        ]
+        self._test(test_cases)
