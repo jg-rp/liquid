@@ -1,7 +1,5 @@
 """Liquid expression evaluator test cases."""
-
 import unittest
-
 from decimal import Decimal
 
 from typing import Any

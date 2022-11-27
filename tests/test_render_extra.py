@@ -1,21 +1,22 @@
 """Test cases for rendering non-standard "extra" tags."""
-# pylint: disable=missing-function-docstring,too-many-public-methods,missing-class-docstring
 import asyncio
 import unittest
 from typing import List
 
 from liquid import golden
 from liquid.environment import Environment
-from liquid.exceptions import Error
-from liquid.extra import register_inline_if_expressions
-from liquid.extra import register_inline_if_expressions_with_parens
-from liquid.extra import IfNotTag
 from liquid.golden.case import Case
 from liquid.loaders import DictLoader
 from liquid.template import BoundTemplate
 
+from liquid.extra import IfNotTag
+from liquid.extra import register_inline_if_expressions
+from liquid.extra import register_inline_if_expressions_with_parens
+
 
 class BaseRenderTestCase(unittest.TestCase):
+    """Base class for test cases that render synchronously and asynchronously."""
+
     def setUp(self) -> None:
         self.partials = {}
         self.loader = DictLoader(self.partials)
@@ -124,6 +125,8 @@ class RenderIfNotTagTestCase(BaseRenderTestCase):
 
 
 class RenderInlineIfTestCase(BaseRenderTestCase):
+    """Test cases for rendering inline `if` tags and output statements."""
+
     def setUp(self) -> None:
         super().setUp()
         register_inline_if_expressions(self.env)
@@ -270,6 +273,9 @@ class RenderInlineIfTestCase(BaseRenderTestCase):
 
 
 class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
+    """Test cases for rendering inline `if` tags that support logical `not`
+    and grouping terms with parentheses."""
+
     def setUp(self) -> None:
         super().setUp()
         register_inline_if_expressions_with_parens(self.env)
