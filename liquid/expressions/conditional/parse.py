@@ -5,9 +5,12 @@ from typing import Dict
 from typing import List
 from typing import Iterator
 from typing import Iterable
+from typing import Optional
+from typing import Tuple
 
 from liquid.expression import BooleanExpression
 from liquid.expression import Expression
+from liquid.expression import FALSE
 from liquid.expression import Filter
 from liquid.expression import ConditionalExpression
 from liquid.expression import FilteredExpression
@@ -49,16 +52,16 @@ def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
     yield buf
 
 
-def _split_at_first(tokens: Iterable[Token], _type: str) -> Iterator[List[Token]]:
+def _split_at_first(
+    tokens: Iterator[Token],
+    _type: str,
+) -> Tuple[List[Token], Optional[Iterator[Token]]]:
     buf: List[Token] = []
     for token in tokens:
         if token[1] == _type:
-            yield buf
-            yield list(tokens)
-            return
+            return (buf, tokens)
         buf.append(token)
-    yield buf
-    yield []
+    return (buf, None)
 
 
 split_at_first_pipe = partial(_split_at_first, _type=TOKEN_PIPE)
@@ -113,37 +116,45 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
 def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     """Parse a conditional expression string."""
     tokens = tokenize(expr, linenum)
-    standard_tokens, conditional_tokens = tuple(split_at_first_if(tokens))
+    standard_tokens, _conditional_tokens = split_at_first_if(tokens)
 
     # This expression includes filters.
     _expr = parse_standard_filtered(iter(standard_tokens), linenum)
 
-    if not conditional_tokens:
+    if not _conditional_tokens:
         # A standard filtered expression
         return _expr
 
-    conditional_tokens, filter_tokens = tuple(
-        split_at_first_dpipe(iter(conditional_tokens))
-    )
-    conditional_tokens, alternative_tokens = tuple(
-        split_at_first_else(iter(conditional_tokens))
+    conditional_tokens, _filter_tokens = split_at_first_dpipe(_conditional_tokens)
+    conditional_tokens, _alternative_tokens = split_at_first_else(
+        iter(conditional_tokens)
     )
 
-    condition = BooleanExpression(
-        parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
-    )
+    if conditional_tokens:
+        condition = BooleanExpression(
+            parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
+        )
+    else:
+        # A missing condition (an `if` with nothing after it).
+        condition = BooleanExpression(FALSE)
 
-    # This expression includes filters.
-    alternative = (
-        parse_standard_filtered(iter(alternative_tokens), linenum)
-        if alternative_tokens
-        else None
-    )
+    if _alternative_tokens:
+        # Handle TOKEN_ELSE followed by nothing.
+        alternative_tokens: List[Token] = list(_alternative_tokens)
 
-    if filter_tokens:
+        if alternative_tokens:
+            alternative: Optional[Expression] = parse_standard_filtered(
+                iter(alternative_tokens), linenum
+            )
+        else:
+            alternative = None
+    else:
+        alternative = None
+
+    if _filter_tokens:
         tail_filters = [
             _parse_filter(_tokens, linenum)
-            for _tokens in split_at_pipe(iter(filter_tokens))
+            for _tokens in split_at_pipe(iter(_filter_tokens))
         ]
     else:
         tail_filters = []
@@ -155,38 +166,47 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
     """Parse a conditional expression string that supports logical `not` and
     grouping terms with parentheses."""
     tokens = tokenize_with_parens(expr, linenum)
-    standard_tokens, conditional_tokens = tuple(split_at_first_if(tokens))
+    standard_tokens, _conditional_tokens = split_at_first_if(tokens)
 
-    # The parens tokenizer adds TOKEN_RANGE_LITERAL tokens
     # This expression includes filters.
     _expr = parse_standard_filtered(iter(standard_tokens), linenum)
 
-    if not conditional_tokens:
+    if not _conditional_tokens:
         # A standard filtered expression
         return _expr
 
-    conditional_tokens, filter_tokens = tuple(
-        split_at_first_dpipe(iter(conditional_tokens))
-    )
-    conditional_tokens, alternative_tokens = tuple(
-        split_at_first_else(iter(conditional_tokens))
+    conditional_tokens, _filter_tokens = split_at_first_dpipe(_conditional_tokens)
+    conditional_tokens, _alternative_tokens = split_at_first_else(
+        iter(conditional_tokens)
     )
 
-    condition = BooleanExpression(
-        parse_boolean_obj_with_parens(TokenStream(iter(conditional_tokens)), linenum)
-    )
+    if conditional_tokens:
+        condition = BooleanExpression(
+            parse_boolean_obj_with_parens(
+                TokenStream(iter(conditional_tokens)), linenum
+            )
+        )
+    else:
+        # A missing condition (an `if` with nothing after it).
+        condition = BooleanExpression(FALSE)
 
-    # This expression includes filters.
-    alternative = (
-        parse_standard_filtered(iter(alternative_tokens), linenum)
-        if alternative_tokens
-        else None
-    )
+    if _alternative_tokens:
+        # Handle TOKEN_ELSE followed by nothing.
+        alternative_tokens: List[Token] = list(_alternative_tokens)
 
-    if filter_tokens:
+        if alternative_tokens:
+            alternative: Optional[Expression] = parse_standard_filtered(
+                iter(alternative_tokens), linenum
+            )
+        else:
+            alternative = None
+    else:
+        alternative = None
+
+    if _filter_tokens:
         tail_filters = [
             _parse_filter(_tokens, linenum)
-            for _tokens in split_at_pipe(iter(filter_tokens))
+            for _tokens in split_at_pipe(iter(_filter_tokens))
         ]
     else:
         tail_filters = []

@@ -333,3 +333,46 @@ class EvalConditionalNotExpressionTestCase(unittest.TestCase):
                 context = Context(env, globals=case.context)
                 expr = parse_conditional_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
+
+
+class MalformedConditionalExpressionTestCase(unittest.TestCase):
+    """Test cases for malformed conditional expressions."""
+
+    def test_missing_condition(self) -> None:
+        """Test that we handle conditional expressions with missing conditions."""
+        env = Environment(undefined=Undefined)
+        context = Context(env)
+
+        # Condition defaults to `Undefined`
+        expr = parse_conditional_expression("'foo' if")
+        self.assertEqual(expr.evaluate(context), Undefined(""))
+
+        # Same for extra boolean expressions
+        expr = parse_conditional_expression_with_parens("'foo' if")
+        self.assertEqual(expr.evaluate(context), Undefined(""))
+
+    def test_missing_alternative(self) -> None:
+        """Test that we handle conditional expressions with a missing alternative."""
+        env = Environment(undefined=Undefined)
+        context = Context(env)
+
+        # Alternative defaults to `Undefined`
+        expr = parse_conditional_expression("'foo' if false else")
+        self.assertEqual(expr.evaluate(context), Undefined(""))
+
+        # Same for extra boolean expressions
+        expr = parse_conditional_expression_with_parens("'foo' if false else")
+        self.assertEqual(expr.evaluate(context), Undefined(""))
+
+    def test_missing_condition_followed_by_else(self) -> None:
+        """Test that we handle missing boolean expressions."""
+        env = Environment(undefined=Undefined)
+        context = Context(env)
+
+        # Alternative defaults to `Undefined`
+        expr = parse_conditional_expression("'foo' if else 'bar'")
+        self.assertEqual(expr.evaluate(context), "bar")
+
+        # Same for extra boolean expressions
+        expr = parse_conditional_expression_with_parens("'foo' if else 'bar'")
+        self.assertEqual(expr.evaluate(context), "bar")
