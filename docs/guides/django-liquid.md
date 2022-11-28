@@ -98,11 +98,11 @@ def index(request):
 
 ## Environment Factory
 
-You can configure your [`liquid.Environment`](../api/environment.md) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the [`json`](../extra/filters.md#json) filter from [python-liquid-extra](../extra/introduction.md). If the following is saved as `myproject/liquid.py`:
+You can configure your [`liquid.Environment`](../api/environment.md) with additional tags or filters by setting the `environment` template backend option to the name of an `Environment` factory function. Lets say you want to register the extra [`json`](../extra/filters.md#json) filter. If the following is saved as `myproject/liquid.py`:
 
 ```python title="myproject/liquid.py"
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 def environment(**options):
     env = Environment(**options)

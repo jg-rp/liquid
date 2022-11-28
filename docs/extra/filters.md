@@ -2,10 +2,6 @@
 
 This page documents extra filters that are not included in standard Liquid. See the [filter reference](../language/filters.md) for a details of all standard filters.
 
-:::caution
-These filters are not part of "standard" Liquid. If you choose to use them in your templates, those templates are unlikely to render correctly with other implementations of Liquid.
-:::
-
 ## index
 
 `<array> | index: <object>`
@@ -16,7 +12,7 @@ Register `index` with a [`liquid.Environment`](../api/environment.md) to make it
 
 ```python
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 env = Environment()
 env.add_filter("index", filters.index)
@@ -43,7 +39,7 @@ Register `json` with a [`liquid.Environment`](../api/environment.md) to make it 
 
 ```python
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 env = Environment()
 env.add_filter("json", filters.JSON())
@@ -78,7 +74,7 @@ from dataclasses import asdict
 from dataclasses import is_dataclass
 
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 env = Environment()
 
@@ -100,7 +96,7 @@ Register `stylesheet_tag` with a [`liquid.Environment`](../api/environment.md) t
 
 ```python
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 env = Environment()
 env.add_filter("stylesheet_tag", filters.stylesheet_tag)
@@ -130,7 +126,7 @@ Register `script_tag` with a [`liquid.Environment`](../api/environment.md) to ma
 
 ```python
 from liquid import Environment
-from liquid_extra import filters
+from liquid.extra import filters
 
 env = Environment()
 env.add_filter("script_tag", filters.script_tag)
@@ -162,7 +158,7 @@ Register `t` with a [`liquid.Environment`](../api/environment.md) to make it ava
 
 ```python
 from liquid import Environment
-from liquid_extra.filters import Translate
+from liquid.extra.filters import Translate
 
 some_locales = {
     "default": {

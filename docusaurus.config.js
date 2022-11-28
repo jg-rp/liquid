@@ -170,10 +170,6 @@ const config = {
                 href: "https://github.com/jg-rp/Flask-Liquid",
               },
               {
-                label: "Python Liquid Extra",
-                href: "https://github.com/jg-rp/liquid-extra",
-              },
-              {
                 label: "Python Liquid Babel",
                 href: "https://github.com/jg-rp/liquid-babel",
               },

@@ -208,7 +208,7 @@ print(template.render()) # Hello, Sally
 [Environment.add_tag()](../api/environment.md#add_tag) registers a tag using the `name` property
 defined on the `Tag` class. If you register a tag with the same name as an existing tag, it will be replaced without warning.
 
-For example, the [if (not)](https://github.com/jg-rp/liquid-extra#if-not) tag from [python-liquid-extra](https://github.com/jg-rp/liquid-extra) is a drop-in replacement for the standard `if` tag.
+For example, the non-standard [if (not)](../extra/tags.md#if-not) tag is a drop-in replacement for the standard `if` tag.
 
 ## Remove a Tag
 

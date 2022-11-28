@@ -1,8 +1,6 @@
 # Liquid Filters
 
-This page documents the standard filters built-in to Liquid. See [custom filters](../guides/custom-filters.md)
-for examples of how to write your own and the [liquid-extra](https://github.com/jg-rp/liquid-extra)
-project for some non-standard filters.
+This page documents the standard filters built-in to Liquid. See [custom filters](../guides/custom-filters.md) for examples of how to write your own and the [extra filter reference](../extra/filters.md) for some non-standard filters.
 
 :::info
 Some of the examples here are borrowed from [Shopify's Liquid documentation](https://shopify.github.io/liquid/).

@@ -1,6 +1,6 @@
 # Liquid Tags
 
-This page documents the standard tags built-in to Liquid. See [custom tags](../guides/custom-tags.md) for examples of how to write your own and the [liquid-extra](https://github.com/jg-rp/liquid-extra) project for some non-standard tags.
+This page documents the standard tags built-in to Liquid. See [custom tags](../guides/custom-tags.md) for examples of how to write your own and the [extra tag reference](../extra/tags.md) for some non-standard tags.
 
 :::info
 Some of the examples here are borrowed from [Shopify's Liquid documentation](https://shopify.github.io/liquid/).
@@ -604,8 +604,7 @@ Not sure what this is.
 
 :::info
 Standard Liquid does not have a logical `not` operator, nor does it support grouping terms with
-parentheses. The [liquid-extra](https://github.com/jg-rp/liquid-extra) project maintains an `if` tag
-that supports logical `not` and grouping with parentheses.
+parentheses. The non-standard [if (not)](../extra/tags.md#if-not) tag is a drop-in replacement that does supports a logical `not` operator and grouping terms with parentheses.
 :::
 
 In Liquid, `and` and `or` operators are right associative. Where `true and false and false or true`
@@ -680,12 +679,6 @@ Goodbye, World!
 
 Render the content of a named template. The name can be a string literal or a variable containing a
 string. The included template will share the namespace of the current template.
-
-:::caution
-Shopify have depreciated the `include` tag in favour of the `render` tag. If `include` is ever
-dropped from "standard" Liquid, we'll maintain an implementation in the
-[liquid-extra](https://github.com/jg-rp/liquid-extra) project.
-:::
 
 :::info
 `include` is not allowed inside a template rendered with `render`. You should expect a

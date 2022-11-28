@@ -22,7 +22,7 @@ Register `IfNotTag` with a [`liquid.Environment`](../api/environment.md) to make
 
 ```python
 from liquid import Environment
-from liquid_extra.tags import IfNotTag
+from liquid.extra.tags import IfNotTag
 
 env = Environment()
 env.add_tag(IfNotTag)
@@ -128,9 +128,9 @@ Register `InlineIfAssignTag`, `InlineIfEchoTag` and `InlineIfStatement` with a [
 
 ```python
 from liquid import Environment
-from liquid_extra.tags import InlineIfAssignTag
-from liquid_extra.tags import InlineIfEchoTag
-from liquid_extra.tags import InlineIfStatement
+from liquid.extra.tags import InlineIfAssignTag
+from liquid.extra.tags import InlineIfEchoTag
+from liquid.extra.tags import InlineIfStatement
 
 env = Environment()
 env.add_tag(InlineIfAssignTag)
@@ -214,8 +214,8 @@ Register `MacroTag` and `CallTag` with a [`liquid.Environment`](../api/environme
 from liquid import Environment
 from liquid import StrictUndefined
 
-from liquid_extra.tags import MacroTag
-from liquid_extra.tags import CallTag
+from liquid.extra.tags import MacroTag
+from liquid.extra.tags import CallTag
 
 # Setting strict undefined is strongly recommended.
 env = Environment(undefined=StrictUndefined)
@@ -308,7 +308,7 @@ Register `WithTag` with a [`liquid.Environment`](../api/environment.md) to make 
 
 ```python
 from liquid import Environment
-from liquid_extra.tags import WithTag
+from liquid.extra.tags import WithTag
 
 env = Environment()
 env.add_tag(WithTag)
