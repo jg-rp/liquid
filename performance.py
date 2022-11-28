@@ -319,11 +319,8 @@ def setup_parse(search_path: str):
         strict_filters=True,
     )
     register_mocks(env)
-
     env.template_class = AwareBoundTemplate
-
     templates = load_templates(search_path)
-
     return env, templates
 
 
