@@ -9,6 +9,9 @@ from liquid.stream import TokenStream
 from liquid.exceptions import LiquidSyntaxError
 
 from liquid.lex import tokenize_liquid_expression
+
+# Note: These are the legacy expression lexers.
+# See test_lex_*_expression.py for current, built-in lexer test cases.
 from liquid.lex import tokenize_loop_expression
 from liquid.lex import tokenize_filtered_expression
 from liquid.lex import tokenize_boolean_expression

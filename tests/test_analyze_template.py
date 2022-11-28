@@ -12,6 +12,7 @@ from liquid.ast import ChildNode, Node
 from liquid.context import Context
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
+from liquid.extra import register_inline_if_expressions
 from liquid.mode import Mode
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -909,3 +910,31 @@ class CountTemplateVariablesTestCase(TestCase):
                 failed_visits=expected_failed_visits,
                 raise_for_failures=True,
             )
+
+    def test_analyze_conditional_expression(self) -> None:
+        """Test that we can statically analyze non-standard conditional expressions."""
+        env = Environment()
+        register_inline_if_expressions(env)
+
+        template = env.from_string(r"{{ foo | upcase if a.b else bar || append: baz }}")
+
+        expected_template_globals = {
+            "foo": [("<string>", 1)],
+            "a.b": [("<string>", 1)],
+            "bar": [("<string>", 1)],
+            "baz": [("<string>", 1)],
+        }
+        expected_template_locals: Refs = {}
+        expected_refs = {
+            "foo": [("<string>", 1)],
+            "a.b": [("<string>", 1)],
+            "bar": [("<string>", 1)],
+            "baz": [("<string>", 1)],
+        }
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+        )

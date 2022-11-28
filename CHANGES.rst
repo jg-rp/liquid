@@ -1,6 +1,32 @@
 Python Liquid Change Log
 ========================
 
+Version 1.5.0 (unreleased)
+--------------------------
+
+**Features**
+
+- Added a non-standard ``if`` tag implementation that supports a logical ``not``
+  operator and grouping terms with parentheses. For example:
+
+  ``{% if not product.available %}``
+
+  and
+
+  ``{% if (false and true) or true %}``
+
+- Added drop-in replacements for the standard output statement, ``assign`` tag and
+  ``echo`` tag that support inline conditional expressions. For example:
+
+  ``{{ "foo" if product.available else "bar" }}``
+
+  and, with filters
+
+  ``{% assign x = "foo" | upcase if product.available else "bar" || append "baz" %}``
+
+- Optionally support extended boolean expressions (as described above) within inline
+  conditional expressions (also described above.)
+
 Version 1.4.7
 -------------
 

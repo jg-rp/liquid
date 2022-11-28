@@ -1,5 +1,6 @@
 """Tokenize boolean liquid expressions."""
 import re
+
 from typing import Iterator
 
 from liquid.expressions.common import Token
@@ -13,6 +14,7 @@ from liquid.expressions.common import STRING_PATTERN
 
 from liquid.token import operators
 from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_TRUE
@@ -32,6 +34,7 @@ from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_NOT
 from liquid.token import TOKEN_CONTAINS
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IDENTINDEX
@@ -39,6 +42,8 @@ from liquid.token import TOKEN_DOT
 
 from liquid.exceptions import LiquidSyntaxError
 
+# Rules for the standard boolean expression.
+# Does not support grouping with parentheses.
 token_rules = (
     (TOKEN_IDENTINDEX, IDENTINDEX_PATTERN),
     (TOKEN_IDENTSTRING, IDENTSTRING_PATTERN),
@@ -58,6 +63,8 @@ token_rules = (
     (TOKEN_ILLEGAL, r"."),
 )
 
+# Keywords for the standard boolean expression.
+# Excludes `not`.
 keywords = frozenset(
     [
         TOKEN_TRUE,
@@ -72,8 +79,27 @@ keywords = frozenset(
     ]
 )
 
+# Rules for a boolean expression that supports grouping with parentheses.
+paren_token_rules = (
+    (TOKEN_RANGE_LITERAL, r"\((?=.+?\.\.)"),
+    *token_rules,
+)
+
+# Keywords for a boolean expression that supports logical `not`.
+not_keywords = frozenset(
+    [
+        TOKEN_NOT,
+        *keywords,
+    ]
+)
+
 OUTPUT_RE = re.compile(
     "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_rules),
+    re.DOTALL,
+)
+
+PAREN_TOKENS_RE = re.compile(
+    "|".join(f"(?P<{name}>{pattern})" for name, pattern in paren_token_rules),
     re.DOTALL,
 )
 
@@ -90,6 +116,52 @@ def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
 
         if kind == TOKEN_IDENTIFIER and value in _keywords:
             kind = value
+        elif kind == TOKEN_IDENTINDEX:
+            value = match.group(GROUP_IDENTINDEX)
+        elif kind == TOKEN_IDENTSTRING:
+            kind = TOKEN_IDENTIFIER
+            value = match.group(GROUP_IDENTQUOTED)
+        elif kind == TOKEN_STRING:
+            value = match.group(GROUP_QUOTED)
+        elif kind == "OP":
+            try:
+                kind = operators[value]
+            except KeyError as err:
+                raise LiquidSyntaxError(
+                    f"unknown operator {value!r}",
+                    linenum=linenum,
+                ) from err
+        elif kind == TOKEN_NEWLINE:
+            linenum += 1
+            continue
+        elif kind == TOKEN_SKIP:
+            continue
+        elif kind == TOKEN_ILLEGAL:
+            raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
+
+        linenum += newlines
+        yield (linenum, kind, value)
+
+
+def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
+    """Yield tokens from a boolean expression with extra tokens intended to
+    distinguish the start of a range expression from the start of a logical group.
+    """
+    _keywords = not_keywords
+    for match in PAREN_TOKENS_RE.finditer(source):
+        kind = match.lastgroup
+        assert kind is not None
+
+        value = match.group()
+        newlines = value.count("\n")
+
+        if kind == TOKEN_IDENTIFIER and value in _keywords:
+            kind = value
+        elif kind == TOKEN_RANGE_LITERAL:
+            # Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
+            # via the `yield` at the end of this loop.
+            yield (linenum + newlines, kind, kind)
+            kind = TOKEN_LPAREN
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
         elif kind == TOKEN_IDENTSTRING:

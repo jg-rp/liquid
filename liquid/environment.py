@@ -27,8 +27,11 @@ from liquid.stream import TokenStream
 from liquid.parse import get_parser
 from liquid.utils import LRUCache
 
-from liquid.expressions import parse_filtered_expression
 from liquid.expressions import parse_boolean_expression
+from liquid.expressions import parse_boolean_expression_with_parens
+from liquid.expressions import parse_conditional_expression
+from liquid.expressions import parse_conditional_expression_with_parens
+from liquid.expressions import parse_filtered_expression
 from liquid.expressions import parse_loop_expression
 
 from liquid import ast
@@ -163,7 +166,7 @@ class Environment:
         self.statement_start_string = statement_start_string
         self.statement_end_string = statement_end_string
 
-        # Automatic tag stripping is not yet implemented. Chaning this has no effect.
+        # Automatic tag stripping is not yet implemented. Changing this has no effect.
         self.strip_tags = strip_tags
 
         # An instance of a template loader implementing ``liquid.loaders.BaseLoader``.
@@ -214,6 +217,9 @@ class Environment:
         self.expression_cache_size = expression_cache_size
         (
             self.parse_boolean_expression_value,
+            self.parse_boolean_expression_value_with_parens,
+            self.parse_conditional_expression_value,
+            self.parse_conditional_expression_value_with_parens,
             self.parse_filtered_expression_value,
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
@@ -274,11 +280,10 @@ class Environment:
             self.comment_start_string,
             self.comment_end_string,
         )
-        parser = get_parser(self)
 
+        parser = get_parser(self)
         token_iter = tokenize(source)
-        parse_tree = parser.parse(TokenStream(token_iter))
-        return parse_tree
+        return parser.parse(TokenStream(token_iter))
 
     # pylint: disable=redefined-builtin
     def from_string(
@@ -445,6 +450,9 @@ class Environment:
         self.expression_cache_size = maxsize
         (
             self.parse_boolean_expression_value,
+            self.parse_boolean_expression_value_with_parens,
+            self.parse_conditional_expression_value,
+            self.parse_conditional_expression_value_with_parens,
             self.parse_filtered_expression_value,
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
@@ -453,17 +461,26 @@ class Environment:
         self, cache_size: int = 0
     ) -> Tuple[
         Callable[[str], "BooleanExpression"],
+        Callable[[str], "BooleanExpression"],
+        Callable[[str], "FilteredExpression"],
+        Callable[[str], "FilteredExpression"],
         Callable[[str], "FilteredExpression"],
         Callable[[str], "LoopExpression"],
     ]:
         if cache_size >= 1:
             return (
                 lru_cache(maxsize=cache_size)(parse_boolean_expression),
+                lru_cache(maxsize=cache_size)(parse_boolean_expression_with_parens),
+                lru_cache(maxsize=cache_size)(parse_conditional_expression),
+                lru_cache(maxsize=cache_size)(parse_conditional_expression_with_parens),
                 lru_cache(maxsize=cache_size)(parse_filtered_expression),
                 lru_cache(maxsize=cache_size)(parse_loop_expression),
             )
         return (
             parse_boolean_expression,
+            parse_boolean_expression_with_parens,
+            parse_conditional_expression,
+            parse_conditional_expression_with_parens,
             parse_filtered_expression,
             parse_loop_expression,
         )

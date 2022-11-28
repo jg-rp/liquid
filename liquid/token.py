@@ -33,6 +33,7 @@ __all__ = (
     "TOKEN_LPAREN",
     "TOKEN_RPAREN",
     "TOKEN_RANGE",
+    "TOKEN_RANGE_LITERAL",
     "TOKEN_LIMIT",
     "TOKEN_OFFSET",
     "TOKEN_REVERSED",
@@ -47,6 +48,7 @@ __all__ = (
     "TOKEN_ASSIGN",
     "TOKEN_AND",
     "TOKEN_OR",
+    "TOKEN_NOT",
     "TOKEN_EQ",
     "TOKEN_NE",
     "TOKEN_LG",
@@ -102,6 +104,7 @@ TOKEN_IN = sys.intern("in")
 TOKEN_LPAREN = sys.intern("lparen")
 TOKEN_RPAREN = sys.intern("rparen")
 TOKEN_RANGE = sys.intern("range")
+TOKEN_RANGE_LITERAL = sys.intern("rangeliteral")
 TOKEN_LIMIT = sys.intern("limit")
 TOKEN_OFFSET = sys.intern("offset")
 TOKEN_REVERSED = sys.intern("reversed")
@@ -120,11 +123,16 @@ TOKEN_LE = sys.intern("le")
 TOKEN_GE = sys.intern("ge")
 TOKEN_AND = sys.intern("and")
 TOKEN_OR = sys.intern("or")
+TOKEN_NOT = sys.intern("not")
+TOKEN_ELSE = sys.intern("else")
+TOKEN_IF = sys.intern("if")
+
 
 # Filter symbols
 TOKEN_PIPE = sys.intern("pipe")
 TOKEN_COLON = sys.intern("colon")
 TOKEN_COMMA = sys.intern("comma")
+TOKEN_DPIPE = sys.intern("dpipe")
 
 # Identifier symbols
 TOKEN_DOT = sys.intern("dot")

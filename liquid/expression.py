@@ -11,16 +11,17 @@ from collections import abc
 from decimal import Decimal
 from itertools import islice
 
-from typing import Dict
-from typing import Union
-from typing import List
-from typing import Optional
 from typing import Any
-from typing import Iterator
-from typing import Mapping
-from typing import Tuple
+from typing import Dict
 from typing import Generic
+from typing import Iterable
+from typing import Iterator
+from typing import List
+from typing import Mapping
+from typing import Optional
+from typing import Tuple
 from typing import TypeVar
+from typing import Union
 
 try:
     from markupsafe import Markup
@@ -36,7 +37,7 @@ from liquid.exceptions import FilterValueError
 
 from liquid.limits import to_int
 
-# pylint: disable=missing-class-docstring too-few-public-methods
+# pylint: disable=missing-class-docstring too-few-public-methods too-many-lines
 
 
 class Expression(ABC):
@@ -392,6 +393,8 @@ class PrefixExpression(Expression):
         return f"({self.operator}{self.right})"
 
     def _evaluate(self, right: object) -> Union[int, float]:
+        if self.operator == "not":
+            return not is_truthy(right)
         if self.operator == "-":
             if isinstance(right, (int, float)):
                 return -right
@@ -504,16 +507,14 @@ class Filter:
     def evaluate_kwargs(self, context: Context) -> Dict[str, object]:
         """Return a dictionary of filter keyword arguments evaluated with the given
         context."""
-        # Shortcut for the common case. Most filters do not use named
-        # parameters.
+        # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
             return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
     async def evaluate_kwargs_async(self, context: Context) -> Dict[str, object]:
         """An async version of `evaluate_kwargs`."""
-        # Shortcut for the common case. Most filters do not use named
-        # parameters.
+        # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
             return {}
         return {k: await v.evaluate_async(context) for k, v in self.kwargs.items()}
@@ -576,10 +577,15 @@ class FilteredExpression(Expression):
             f"filters={self.filters})"
         )
 
-    def evaluate(self, context: Context) -> object:
-        result = self.expression.evaluate(context)
-
-        for _filter in self.filters:
+    def apply_filters(
+        self,
+        left: object,
+        filters: Iterable[Filter],
+        context: Context,
+    ) -> object:
+        """Return the result of applying all filters in this expression to an object."""
+        rv = left
+        for _filter in filters:
             try:
                 func = context.filter(_filter.name)
             except NoSuchFilterFunc:
@@ -591,12 +597,12 @@ class FilteredExpression(Expression):
             # Nothing will be rendered.
             try:
                 if not _filter.args and not _filter.kwargs:
-                    result = func(result)
+                    rv = func(rv)
                 elif _filter.args and not _filter.kwargs:
-                    result = func(result, *_filter.evaluate_args(context))
+                    rv = func(rv, *_filter.evaluate_args(context))
                 else:
-                    result = func(
-                        result,
+                    rv = func(
+                        rv,
                         *_filter.evaluate_args(context),
                         **_filter.evaluate_kwargs(context),
                     )
@@ -610,12 +616,17 @@ class FilteredExpression(Expression):
                     f"filter '{_filter.name}': unexpected error: {err}"
                 ) from err
 
-        return result
+        return rv
 
-    async def evaluate_async(self, context: Context) -> object:
-        result = await self.expression.evaluate_async(context)
-
-        for _filter in self.filters:
+    async def apply_filters_async(
+        self,
+        left: object,
+        filters: Iterable[Filter],
+        context: Context,
+    ) -> object:
+        """Return the result of applying all filters in this expression to an object."""
+        rv = left
+        for _filter in filters:
             try:
                 func = context.filter(_filter.name)
             except NoSuchFilterFunc:
@@ -627,15 +638,15 @@ class FilteredExpression(Expression):
             # Nothing will be rendered.
             try:
                 if not _filter.args and not _filter.kwargs:
-                    result = func(result)
+                    rv = func(rv)
                 elif _filter.args and not _filter.kwargs:
-                    result = func(
-                        result,
+                    rv = func(
+                        rv,
                         *(await _filter.evaluate_args_async(context)),
                     )
                 else:
-                    result = func(
-                        result,
+                    rv = func(
+                        rv,
                         *(await _filter.evaluate_args_async(context)),
                         **(await _filter.evaluate_kwargs_async(context)),
                     )
@@ -649,13 +660,134 @@ class FilteredExpression(Expression):
                     f"filter '{_filter.name}': unexpected error: {err}"
                 ) from err
 
+        return rv
+
+    def evaluate(self, context: Context) -> object:
+        return self.apply_filters(
+            self.expression.evaluate(context),
+            self.filters,
+            context,
+        )
+
+    async def evaluate_async(self, context: Context) -> object:
+        return await self.apply_filters_async(
+            await self.expression.evaluate_async(context),
+            self.filters,
+            context,
+        )
+
+    def children(self) -> List[Expression]:
+        _children = [self.expression]
+        for _filter in self.filters:
+            _children.extend(_filter.args)
+            _children.extend(_filter.kwargs.values())
+        return _children
+
+
+class ConditionalExpression(FilteredExpression):
+    __slots__ = (
+        "condition",
+        "alternative",
+    )
+
+    def __init__(
+        self,
+        expression: Expression,
+        filters: Optional[List[Filter]] = None,
+        condition: Optional[Expression] = None,
+        alternative: Optional[Expression] = None,
+    ):
+        super().__init__(expression, filters)
+        self.expression = expression
+        self.condition = condition
+        self.alternative = alternative
+        self.filters = filters or []  # These are "tail" filters
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, ConditionalExpression)
+            and self.expression == other.expression
+            and self.condition == other.condition
+            and self.alternative == other.alternative
+            and self.filters == other.filters
+        )
+
+    def __str__(self) -> str:
+        buf = [str(self.expression)]
+
+        if self.condition:
+            buf.append("if")
+            buf.append(str(self.condition))
+
+        if self.alternative:
+            buf.append("else")
+            buf.append(str(self.alternative))
+
+        if self.filters:
+            buf.append("|")
+            buf.append(" | ".join([str(filter) for filter in self.filters]))
+
+        return " ".join(buf)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return (
+            f"ConditionalExpression(expression={self.expression!r}, "
+            f"condition={self.condition}, "
+            f"alternative={self.alternative}, "
+            f"filters={self.filters})"
+        )
+
+    def evaluate(self, context: Context) -> object:
+        if self.condition:
+            if is_truthy(self.condition.evaluate(context)):
+                result = self.expression.evaluate(context)
+
+            elif self.alternative:
+                result = self.alternative.evaluate(context)
+            else:
+                result = context.env.undefined("")
+        else:
+            result = self.expression.evaluate(context)
+            if self.filters:
+                result = self.apply_filters(result, self.filters, context)
+
+        if self.filters:
+            result = self.apply_filters(result, self.filters, context)
+
+        return result
+
+    async def evaluate_async(self, context: Context) -> object:
+        if self.condition:
+            if is_truthy(await self.condition.evaluate_async(context)):
+                result = await self.expression.evaluate_async(context)
+
+            elif self.alternative:
+                result = await self.alternative.evaluate_async(context)
+            else:
+                result = context.env.undefined("")
+        else:
+            result = await self.expression.evaluate_async(context)
+            if self.filters:
+                result = await self.apply_filters_async(result, self.filters, context)
+
+        if self.filters:
+            result = await self.apply_filters_async(result, self.filters, context)
+
         return result
 
     def children(self) -> List[Expression]:
         _children = [self.expression]
-        for fltr in self.filters:
-            _children.extend(fltr.args)
-            _children.extend(fltr.kwargs.values())
+
+        if self.condition is not None:
+            _children.append(self.condition)
+
+        if self.alternative is not None:
+            _children.append(self.alternative)
+
+        for _filter in self.filters:
+            _children.extend(_filter.args)
+            _children.extend(_filter.kwargs.values())
+
         return _children
 
 

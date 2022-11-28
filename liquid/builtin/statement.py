@@ -90,6 +90,7 @@ class Statement(Tag):
     """Pseudo "tag" to register output statements with the environment."""
 
     name = TOKEN_STATEMENT
+    block = False
 
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current

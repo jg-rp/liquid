@@ -33,6 +33,9 @@ class EchoTag(Tag):
     name = TAG_ECHO
     block = False
 
+    def _parse_expression(self, value: str) -> Expression:
+        return self.env.parse_filtered_expression_value(value)
+
     def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_ECHO)
         tok = stream.current
@@ -42,5 +45,5 @@ class EchoTag(Tag):
             expr: Expression = NIL
         else:
             expect(stream, TOKEN_EXPRESSION)
-            expr = self.env.parse_filtered_expression_value(stream.current.value)
+            expr = self._parse_expression(stream.current.value)
         return EchoNode(tok, expression=expr)

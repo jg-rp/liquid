@@ -12,7 +12,7 @@ from liquid.token import TOKEN_EXPRESSION
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
+from liquid.expression import Expression
 from liquid.tag import Tag
 from liquid.context import Context
 from liquid.stream import TokenStream
@@ -65,8 +65,10 @@ class AssignTag(Tag):
     name = TAG_ASSIGN
     block = False
 
-    def parse(self, stream: TokenStream) -> AssignNode:
+    def _parse_expression(self, value: str) -> Expression:
+        return self.env.parse_filtered_expression_value(value)
 
+    def parse(self, stream: TokenStream) -> AssignNode:
         expect(stream, TOKEN_TAG, value=TAG_ASSIGN)
         tok = stream.current
         stream.next_token()
@@ -82,5 +84,7 @@ class AssignTag(Tag):
                 linenum=stream.current.linenum,
             )
 
-        expr = self.env.parse_filtered_expression_value(expression)
-        return AssignNode(tok, AssignmentExpression(name, expr))
+        return AssignNode(
+            tok,
+            AssignmentExpression(name, self._parse_expression(expression)),
+        )
