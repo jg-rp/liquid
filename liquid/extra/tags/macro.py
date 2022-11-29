@@ -1,12 +1,10 @@
 """Node and tag definitions for `macro` and `call`."""
 from __future__ import annotations
 
-import functools
 import itertools
 import sys
 
 from typing import Optional
-from typing import Tuple
 from typing import Dict
 from typing import List
 from typing import NamedTuple
@@ -25,17 +23,13 @@ from liquid.context import ReadOnlyChainMap
 
 from liquid.expression import Expression
 from liquid.expression import NIL
-from liquid.exceptions import LiquidSyntaxError
 
-from liquid.lex import STRING_PATTERN
-from liquid.lex import _tokenize
-from liquid.lex import _compile_rules
+from liquid.expressions import parse_call_arguments
+from liquid.expressions import parse_macro_arguments
+from liquid.expressions.arguments.parse import Argument
 
 from liquid.parse import expect
 from liquid.parse import get_parser
-from liquid.parse import parse_expression
-from liquid.parse import parse_string_literal
-from liquid.parse import parse_unchained_identifier
 
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -45,24 +39,8 @@ from liquid.builtin.tags.include_tag import TAG_INCLUDE
 from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_NIL
-from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_NEGATIVE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
+
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
@@ -73,59 +51,11 @@ TAG_ENDMACRO = sys.intern("endmacro")
 TAG_CALL = sys.intern("call")
 
 
-class CallKeywordArg(NamedTuple):
-    """A named argument as used in a `call` expression."""
-
-    name: str
-    expr: Expression
-
-
-class MacroArg(NamedTuple):
-    """A macro argument with an optional default value."""
-
-    name: str
-    default: Expression = NIL
-
-
 class Macro(NamedTuple):
     """A macro block and its arguments."""
 
-    args: List[MacroArg]
+    args: List[Argument]
     block: BlockNode
-
-
-macro_expression_rules = (
-    (TOKEN_FLOAT, r"\d+\.\d*"),
-    (TOKEN_INTEGER, r"\d+"),
-    (TOKEN_NEGATIVE, r"-"),
-    (TOKEN_STRING, STRING_PATTERN),
-    (TOKEN_IDENTIFIER, r"\w[a-zA-Z0-9_\-?]*"),
-    (TOKEN_DOT, r"\."),
-    (TOKEN_COMMA, r","),
-    (TOKEN_LBRACKET, r"\["),
-    (TOKEN_RBRACKET, r"]"),
-    (TOKEN_COLON, r":"),
-    ("NEWLINE", r"\n"),
-    ("SKIP", r"[ \t]+"),
-    (TOKEN_ILLEGAL, r"."),
-)
-
-macro_expression_keywords = frozenset(
-    [
-        TOKEN_TRUE,
-        TOKEN_FALSE,
-        TOKEN_NIL,
-        TOKEN_NULL,
-        TOKEN_EMPTY,
-        TOKEN_BLANK,
-    ]
-)
-
-tokenize_macro_expression = functools.partial(
-    _tokenize,
-    rules=_compile_rules(macro_expression_rules),
-    keywords=macro_expression_keywords,
-)
 
 
 class MacroNode(Node):
@@ -137,7 +67,7 @@ class MacroNode(Node):
         self,
         tok: Token,
         name: str,
-        args: List[MacroArg],
+        args: List[Argument],
         block: BlockNode,
     ):
         self.tok = tok
@@ -165,14 +95,11 @@ class MacroNode(Node):
         return False
 
     def children(self) -> List[ChildNode]:
-        # We don't currently have a good, generic way to model the `macro`/`call`
-        # relationship for static analysis. When a macro is called, arguments without
-        # defaults are expected to be `Undefined`.
         _children = [
             ChildNode(
                 linenum=self.tok.linenum,
                 node=self.block,
-                block_scope=[arg.name for arg in self.args],
+                block_scope=[key for key, _ in self.args],
             )
         ]
         for _, expr in self.args:
@@ -191,7 +118,7 @@ class CallNode(Node):
         tok: Token,
         name: str,
         args: List[Expression],
-        kwargs: List[CallKeywordArg],
+        kwargs: List[Argument],
     ):
         self.tok = tok
         self.name = name
@@ -209,7 +136,7 @@ class CallNode(Node):
 
     def _make_context(self, context: Context, macro: Macro) -> Context:
         args = dict(macro.args)
-        macro_names = [arg.name for arg in macro.args]
+        macro_names = [key for key, val in macro.args]
 
         # Bind positional arguments to names. If there are more positional arguments
         # than names defined in the macro, they'll be stored in `excess_args`.
@@ -300,8 +227,8 @@ class CallNode(Node):
                 for expr in self.args
             ],
             *[
-                ChildNode(linenum=self.tok.linenum, expression=arg.expr)
-                for arg in self.kwargs
+                ChildNode(linenum=self.tok.linenum, expression=val)
+                for _, val in self.kwargs
             ],
         ]
 
@@ -321,33 +248,12 @@ class MacroTag(Tag):
         tok = stream.current
         stream.next_token()
 
+        # Parse the expression
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = TokenStream(tokenize_macro_expression(stream.current.value))
-
-        # Name of the macro. Must be a string literal
-        expect(expr_stream, TOKEN_STRING)
-        name = parse_string_literal(expr_stream).value
-        expr_stream.next_token()
-
-        # Args can be positional (no default), or keyword (with default).
-        args = []
-
-        # The argument list might not start with a comma.
-        if expr_stream.current.type == TOKEN_IDENTIFIER:
-            args.append(parse_macro_argument(expr_stream))
-
-        while expr_stream.current.type != TOKEN_EOF:
-            if expr_stream.current.type == TOKEN_COMMA:
-                expr_stream.next_token()  # Eat comma
-                args.append(parse_macro_argument(expr_stream))
-            else:
-                typ = expr_stream.current.type
-                raise LiquidSyntaxError(
-                    f"expected a comma separated list of arguments, found {typ}",
-                    linenum=tok.linenum,
-                )
-
+        name, args = parse_macro_arguments(stream.current.value, linenum=tok.linenum)
         stream.next_token()
+
+        # Parse the block
         block = self.parser.parse_block(stream, (TAG_ENDMACRO, TOKEN_EOF))
         expect(stream, TOKEN_TAG, value=TAG_ENDMACRO)
 
@@ -366,72 +272,16 @@ class CallTag(Tag):
 
         stream.next_token()
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = TokenStream(tokenize_macro_expression(stream.current.value))
-
-        # Name of the macro. Must be a string literal
-        expect(expr_stream, TOKEN_STRING)
-        name = parse_string_literal(expr_stream).value
-        expr_stream.next_token()
+        name, _args = parse_call_arguments(stream.current.value, linenum=tok.linenum)
 
         # Args can be positional (no default), or keyword (with default).
-        args = []
-        kwargs = []
+        args: List[Expression] = []
+        kwargs: List[Argument] = []
 
-        if expr_stream.current.type not in (TOKEN_COMMA, TOKEN_EOF):
-            arg_name, expr = parse_call_argument(expr_stream)
-            if arg_name is None:
-                args.append(expr)
+        for key, val in _args:
+            if key is None:
+                args.append(val)
             else:
-                kwargs.append(CallKeywordArg(arg_name, expr))
-
-        while expr_stream.current.type != TOKEN_EOF:
-            if expr_stream.current.type == TOKEN_COMMA:
-                expr_stream.next_token()  # Eat comma
-
-                arg_name, expr = parse_call_argument(expr_stream)
-                if arg_name is None:
-                    args.append(expr)
-                else:
-                    kwargs.append(CallKeywordArg(arg_name, expr))
-            else:
-                typ = expr_stream.current.type
-                raise LiquidSyntaxError(
-                    f"expected a comma separated list of arguments, found {typ}",
-                    linenum=tok.linenum,
-                )
+                kwargs.append((key, val))
 
         return CallNode(tok=tok, name=name, args=args, kwargs=kwargs)
-
-
-def parse_macro_argument(stream: TokenStream) -> MacroArg:
-    """Return the next argument from the given token stream."""
-    name = str(parse_unchained_identifier(stream))
-    stream.next_token()
-
-    if stream.current.type == TOKEN_COLON:
-        # A keyword argument
-        stream.next_token()  # Eat colon
-        default = parse_expression(stream)
-        stream.next_token()
-    else:
-        # A positional argument
-        default = NIL
-
-    return MacroArg(name, default)
-
-
-def parse_call_argument(stream: TokenStream) -> Tuple[Optional[str], Expression]:
-    """Return the next argument from the given token stream."""
-    if stream.peek.type == TOKEN_COLON:
-        # A keyword argument
-        name: Optional[str] = str(parse_unchained_identifier(stream))
-        stream.next_token()
-        stream.next_token()  # Eat colon
-    else:
-        # A positional argument
-        name = None
-
-    expr = parse_expression(stream)
-    stream.next_token()
-
-    return name, expr

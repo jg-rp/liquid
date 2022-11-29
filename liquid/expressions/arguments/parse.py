@@ -9,6 +9,7 @@ from typing import Tuple
 from liquid.expression import Expression
 from liquid.expression import NIL
 
+from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.arguments.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
@@ -116,11 +117,17 @@ _parse_macro_arguments = make_parse_arguments(parse_macro_argument, TOKEN_COLON)
 _parse_call_arguments = make_parse_arguments(parse_call_argument, TOKEN_COLON)
 
 
-def parse_macro_arguments(expr: str, linenum: int = 1) -> List[Argument]:
+def parse_macro_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
     """Parse a sequence of argument names, possibly with default values."""
-    return _parse_macro_arguments(TokenStream(tokenize(expr, linenum)))
+    stream = TokenStream(tokenize(expr, linenum))
+    name = parse_string_literal(stream).value
+    next(stream)
+    return name, _parse_macro_arguments(stream)
 
 
-def parse_call_arguments(expr: str, linenum: int = 1) -> List[Argument]:
+def parse_call_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
     """Parse a sequence of positional and/or keyword arguments."""
-    return _parse_call_arguments(TokenStream(tokenize(expr, linenum)))
+    stream = TokenStream(tokenize(expr, linenum))
+    name = parse_string_literal(stream).value
+    next(stream)
+    return name, _parse_call_arguments(stream)

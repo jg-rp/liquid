@@ -309,18 +309,19 @@ class ParseCallArgumentsTestCase(unittest.TestCase):
 
         for case in test_cases:
             with self.subTest(msg=case.description):
-                args = parse_call_arguments(case.expression)
+                expr = "'func' " + case.expression  # pretend macro name
+                _, args = parse_call_arguments(expr)
                 self.assertEqual(args, case.expect)
 
     def test_missing_comma(self) -> None:
         """Test that we handle missing commas."""
-        expr = "a: 'hello' b: 'goodbye'"
+        expr = "'func' a: 'hello' b: 'goodbye'"
         with self.assertRaises(LiquidSyntaxError):
             parse_call_arguments(expr)
 
     def test_too_many_commas(self) -> None:
         """Test that we handle excess commas."""
-        expr = "a: 'hello',, b: 'goodbye'"
+        expr = "'func' a: 'hello',, b: 'goodbye'"
         with self.assertRaises(LiquidSyntaxError):
             parse_call_arguments(expr)
 
@@ -437,17 +438,19 @@ class ParseMacroArgumentsTestCase(unittest.TestCase):
 
         for case in test_cases:
             with self.subTest(msg=case.description):
-                args = parse_macro_arguments(case.expression)
+                expr = "'func' " + case.expression  # pretend macro name
+                name, args = parse_macro_arguments(expr)
+                self.assertEqual(name, "func")
                 self.assertEqual(args, case.expect)
 
     def test_missing_comma(self) -> None:
         """Test that we handle missing commas."""
-        expr = "a: 'hello' b: 'goodbye'"
+        expr = "'func' a: 'hello' b: 'goodbye'"
         with self.assertRaises(LiquidSyntaxError):
             parse_macro_arguments(expr)
 
     def test_too_many_commas(self) -> None:
         """Test that we handle excess commas."""
-        expr = "a: 'hello',, b: 'goodbye'"
+        expr = "'func' a: 'hello',, b: 'goodbye'"
         with self.assertRaises(LiquidSyntaxError):
             parse_macro_arguments(expr)
