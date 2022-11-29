@@ -8,6 +8,7 @@ from .if_expressions import InlineIfStatement
 from .if_expressions import InlineIfStatementWithParens
 from .macro import MacroTag
 from .macro import CallTag
+from ._with import WithTag
 
 __all__ = (
     "CallTag",
@@ -19,4 +20,5 @@ __all__ = (
     "InlineIfEchoTagWithParens",
     "InlineIfStatement",
     "InlineIfStatementWithParens",
+    "WithTag",
 )

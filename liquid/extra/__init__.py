@@ -2,6 +2,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from .filters import index
+from .filters import JSON
+from .filters import script_tag
+from .filters import stylesheet_tag
+
+from .tags import CallTag
 from .tags import IfNotTag
 from .tags import InlineIfAssignTag
 from .tags import InlineIfAssignTagWithParens
@@ -9,11 +15,19 @@ from .tags import InlineIfEchoTag
 from .tags import InlineIfEchoTagWithParens
 from .tags import InlineIfStatement
 from .tags import InlineIfStatementWithParens
+from .tags import MacroTag
+from .tags import WithTag
 
-if TYPE_CHECKING:
+
+if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
 
 __all__ = (
+    "index",
+    "JSON",
+    "script_tag",
+    "stylesheet_tag",
+    "CallTag",
     "IfNotTag",
     "InlineIfAssignTag",
     "InlineIfAssignTagWithParens",
@@ -21,12 +35,17 @@ __all__ = (
     "InlineIfEchoTagWithParens",
     "InlineIfStatement",
     "InlineIfStatementWithParens",
-    "register_inline_if_expressions",
-    "register_inline_if_expressions_with_parens",
+    "MacroTag",
+    "WithTag",
+    "add_inline_expressions",
+    "add_extended_inline_expressions",
+    "add_macros",
+    "add_tags",
+    "add_tags_and_filters",
 )
 
 
-def register_inline_if_expressions(env: Environment) -> None:
+def add_inline_expressions(env: Environment) -> None:
     """Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
     expressions."""
@@ -35,10 +54,39 @@ def register_inline_if_expressions(env: Environment) -> None:
     env.add_tag(InlineIfStatement)
 
 
-def register_inline_if_expressions_with_parens(env: Environment) -> None:
+def add_extended_inline_expressions(env: Environment) -> None:
     """Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
     expressions."""
     env.add_tag(InlineIfAssignTagWithParens)
     env.add_tag(InlineIfEchoTagWithParens)
     env.add_tag(InlineIfStatementWithParens)
+
+
+def add_macros(env: Environment) -> None:
+    """Register both the `macro` and `call` tags with an environment."""
+    env.add_tag(CallTag)
+    env.add_tag(MacroTag)
+
+
+def add_tags(env: Environment) -> None:  # pragma: no cover
+    """Register all extra tags with an environment."""
+    env.add_tag(IfNotTag)
+    env.add_tag(WithTag)
+    add_macros(env)
+    add_extended_inline_expressions(env)
+
+
+def add_filters(env: Environment) -> None:
+    """Register all extra filters with an environment with their default
+    and options."""
+    env.add_filter("index", index)
+    env.add_filter("json", JSON())
+    env.add_filter("script_tag", script_tag)
+    env.add_filter("stylesheet_tag", stylesheet_tag)
+
+
+def add_tags_and_filters(env: Environment) -> None:  # pragma: no cover
+    """Register all extra tags and filters with an environment."""
+    add_tags(env)
+    add_filters(env)

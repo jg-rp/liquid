@@ -6,8 +6,14 @@ Version 1.5.0 (unreleased)
 
 **Features**
 
-- Added a non-standard ``if`` tag implementation that supports a logical ``not``
-  operator and grouping terms with parentheses. For example:
+The following non-standard tags and filters are reimplementations of those found in the
+`Python Liquid Extra project <https://github.com/jg-rp/liquid-extra>`_, which is now
+receiving bugfix updates only. Unlike standard tags and filters, which are registered
+for you automatically, extra tags and filters must be explicitly registered with an
+``Environment``. See https://jg-rp.github.io/liquid/extra/introduction.
+
+- Added an ``if`` tag that supports a logical ``not`` operator and grouping
+  terms with parentheses. For example:
 
   ``{% if not product.available %}``
 
@@ -26,6 +32,13 @@ Version 1.5.0 (unreleased)
 
 - Optionally support extended boolean expressions (as described above) within inline
   conditional expressions (also described above.)
+- Added ``macro`` and ``call`` tags that define parameterized Liquid
+  snippets for reuse.
+- Added the ``with`` tag that extends the local namespace with block scoped variables.
+- Added the ``json`` filter.
+- Added the ``index`` filter.
+- Added the ``script_tag`` filter.
+- Added the ``stylesheet_tag`` filter.
 
 Version 1.4.7
 -------------

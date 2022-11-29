@@ -33,7 +33,7 @@ from liquid.builtin.filters.array import where
 from liquid.builtin.filters.array import uniq
 from liquid.builtin.filters.array import compact
 
-from liquid.extra.filters.array import index as _index
+from liquid.extra.filters.array import index
 
 
 class Case(NamedTuple):
@@ -753,4 +753,4 @@ class ArrayFilterTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(_index, test_cases)
+        self._test(index, test_cases)

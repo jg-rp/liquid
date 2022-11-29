@@ -10,8 +10,9 @@ from liquid.loaders import DictLoader
 from liquid.template import BoundTemplate
 
 from liquid.extra import IfNotTag
-from liquid.extra import register_inline_if_expressions
-from liquid.extra import register_inline_if_expressions_with_parens
+from liquid.extra import WithTag
+from liquid.extra import add_inline_expressions
+from liquid.extra import add_extended_inline_expressions
 
 
 class BaseRenderTestCase(unittest.TestCase):
@@ -129,7 +130,7 @@ class RenderInlineIfTestCase(BaseRenderTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        register_inline_if_expressions(self.env)
+        add_inline_expressions(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""
@@ -278,7 +279,7 @@ class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        register_inline_if_expressions_with_parens(self.env)
+        add_extended_inline_expressions(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""
@@ -461,6 +462,46 @@ class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
                 expect="HELLO",
                 globals={"settings": {"foo": True}, "greeting": "hello"},
                 partials={},
+            ),
+        ]
+        self._test(test_cases)
+
+
+class RenderWithTagTestCase(BaseRenderTestCase):
+    """Test cases for non-standard `with` tag."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.env.add_tag(WithTag)
+
+    def test_render_with_tag(self) -> None:
+        """Test that we can render a `with` tag."""
+        test_cases = [
+            Case(
+                description="block scoped variable",
+                template=r"{{ x }}{% with x: 'foo' %}{{ x }}{% endwith %}{{ x }}",
+                expect="foo",
+            ),
+            Case(
+                description="block scoped alias",
+                template=(
+                    r"{% with p: collection.products.first %}"
+                    r"{{ p.title }}"
+                    r"{% endwith %}"
+                    r"{{ p.title }}"
+                    r"{{ collection.products.first.title }}"
+                ),
+                expect="A ShoeA Shoe",
+                globals={"collection": {"products": [{"title": "A Shoe"}]}},
+            ),
+            Case(
+                description="multiple block scoped variables",
+                template=(
+                    r"{% with a: 1, b: 3.4 %}"
+                    r"{{ a }} + {{ b }} = {{ a | plus: b }}"
+                    r"{% endwith %}"
+                ),
+                expect="1 + 3.4 = 4.4",
             ),
         ]
         self._test(test_cases)

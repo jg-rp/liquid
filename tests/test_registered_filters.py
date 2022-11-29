@@ -2,10 +2,10 @@
 
 import datetime
 import unittest
-
 from typing import NamedTuple
 
 from liquid import Environment
+from liquid.extra import add_filters
 
 
 class Case(NamedTuple):
@@ -17,11 +17,11 @@ class Case(NamedTuple):
     expect: str
 
 
-class FilterResgisterTestCase(unittest.TestCase):
+class FilterRegisterTestCase(unittest.TestCase):
     """Test that all standard filters have been registered correctly."""
 
-    def test_filters(self):
-        """Standard filter tests"""
+    def test_filters(self) -> None:
+        """Standard filter tests."""
         test_cases = [
             Case(
                 description="append",
@@ -370,6 +370,51 @@ class FilterResgisterTestCase(unittest.TestCase):
         ]
 
         env = Environment()
+
+        for case in test_cases:
+            with self.subTest(msg=case.description):
+                template = env.from_string(case.template)
+                result = template.render(**case.context)
+                self.assertEqual(result, case.expect)
+
+
+class ExtraFilterRegistrationTestCase(unittest.TestCase):
+    """Test that we can add all extra filters."""
+
+    def test_extra_filters(self) -> None:
+        """Extra filter tests."""
+        test_cases = [
+            Case(
+                description="array index",
+                template="{{ array | index: 'b' }}",
+                context={"array": ["a", "b", "c"]},
+                expect="1",
+            ),
+            Case(
+                description="stylesheet tag",
+                template="{{ url | stylesheet_tag }}",
+                context={"url": "assets/style.css"},
+                expect=(
+                    '<link href="assets/style.css" rel="stylesheet" '
+                    'type="text/css" media="all" />'
+                ),
+            ),
+            Case(
+                description="stylesheet tag",
+                template="{{ url | script_tag }}",
+                context={"url": "assets/app.js"},
+                expect='<script src="assets/app.js" type="text/javascript"></script>',
+            ),
+            Case(
+                description="JSON",
+                template="{{ data | json }}",
+                context={"data": {"foo": [1, 2, 3]}},
+                expect='{"foo": [1, 2, 3]}',
+            ),
+        ]
+
+        env = Environment()
+        add_filters(env)
 
         for case in test_cases:
             with self.subTest(msg=case.description):

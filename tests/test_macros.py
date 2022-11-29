@@ -10,10 +10,8 @@ from typing import Dict
 from liquid.context import StrictUndefined
 from liquid.environment import Environment
 from liquid.exceptions import UndefinedError
+from liquid.extra import add_macros
 from liquid.loaders import DictLoader
-
-from liquid.extra.tags import MacroTag
-from liquid.extra.tags import CallTag
 
 
 class Case(NamedTuple):
@@ -170,8 +168,7 @@ class MacroRenderTestCase(TestCase):
 
         for case in test_cases:
             env = Environment(loader=DictLoader(case.partials))
-            env.add_tag(MacroTag)
-            env.add_tag(CallTag)
+            add_macros(env)
 
             template = env.from_string(case.template, globals=case.globals)
 
@@ -208,8 +205,7 @@ class MacroRenderTestCase(TestCase):
                 loader=DictLoader(case.partials),
                 undefined=StrictUndefined,
             )
-            env.add_tag(MacroTag)
-            env.add_tag(CallTag)
+            add_macros(env)
 
             template = env.from_string(case.template, globals=case.globals)
 
@@ -221,8 +217,7 @@ class MacroRenderTestCase(TestCase):
     def test_render_macro_async(self) -> None:
         """Test that we can render a macro asynchronously."""
         env = Environment()
-        env.add_tag(MacroTag)
-        env.add_tag(CallTag)
+        add_macros(env)
 
         template = env.from_string(
             r"{% macro 'foo', you: 'World' %}"
@@ -246,8 +241,7 @@ class AnalyzeMacroTestCase(TestCase):
     def test_analyze_macro_tag(self) -> None:
         """Test that we can statically analyze macro and call tags."""
         env = Environment()
-        env.add_tag(MacroTag)
-        env.add_tag(CallTag)
+        add_macros(env)
 
         template = env.from_string(
             r"{% macro 'foo', you: 'World', arg: n %}"
