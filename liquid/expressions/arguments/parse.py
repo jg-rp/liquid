@@ -1,4 +1,5 @@
 """Generic argument list parsers."""
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -16,9 +17,10 @@ from liquid.expressions.stream import TokenStream
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EQUALS
 
 
-Argument = Tuple[Optional[str], Expression]
+Argument = Tuple[Any, Expression]
 
 
 def make_parse_arguments(
@@ -60,7 +62,7 @@ def parse_argument(stream: TokenStream, separator_token: str) -> Argument:
 
 
 parse_colon_separated_arguments = make_parse_arguments(parse_argument, TOKEN_COLON)
-parse_equals_separated_arguments = make_parse_arguments(parse_argument, "=")
+parse_equals_separated_arguments = make_parse_arguments(parse_argument, TOKEN_EQUALS)
 
 
 def parse_keyword_arguments(expr: str, linenum: int = 1) -> Dict[str, Expression]:
@@ -85,8 +87,8 @@ def parse_macro_argument(stream: TokenStream, separator_token: str) -> Argument:
     argument. Otherwise it is positional, with an expression of NIL.
     """
     key = str(parse_unchained_identifier(stream))
-    next(stream)
-    if stream.current[1] == separator_token:
+    if stream.peek[1] == separator_token:
+        next(stream)
         # A keyword argument
         next(stream)  # Eat separator
         val = parse_obj(stream)

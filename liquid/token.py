@@ -142,6 +142,9 @@ TOKEN_RBRACKET = sys.intern("rbracket")
 # Assignment
 TOKEN_ASSIGN = sys.intern("assign")
 
+# Non-standard key/value argument separator. Standard liquid uses TOKEN_COLON.
+TOKEN_EQUALS = sys.intern("equals")
+
 operators = {
     "==": TOKEN_EQ,
     "!=": TOKEN_NE,
