@@ -13,32 +13,26 @@ for you automatically, extra tags and filters must be explicitly registered with
 ``Environment``. See https://jg-rp.github.io/liquid/extra/introduction.
 
 - Added an ``if`` tag that supports a logical ``not`` operator and grouping
-  terms with parentheses. For example:
-
-  ``{% if not product.available %}``
-
-  and
-
-  ``{% if (false and true) or true %}``
+  terms with parentheses.
+  (`docs <https://jg-rp.github.io/liquid/extra/tags#if-not>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/if_not.py>`_)
 
 - Added drop-in replacements for the standard output statement, ``assign`` tag and
-  ``echo`` tag that support inline conditional expressions. For example:
+  ``echo`` tag that support inline conditional expressions.
+  (`docs <https://jg-rp.github.io/liquid/extra/tags#inline-if--else>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/if_expressions.py>`_)
 
-  ``{{ "foo" if product.available else "bar" }}``
+- Added ``macro`` and ``call`` tags that define parameterized Liquid snippets for reuse.
+  (`docs <https://jg-rp.github.io/liquid/extra/tags#macro--call>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/macro.py>`_)
 
-  and, with filters
-
-  ``{% assign x = "foo" | upcase if product.available else "bar" || append "baz" %}``
-
-- Optionally support extended boolean expressions (as described above) within inline
-  conditional expressions (also described above.)
-- Added ``macro`` and ``call`` tags that define parameterized Liquid
-  snippets for reuse.
 - Added the ``with`` tag that extends the local namespace with block scoped variables.
-- Added the ``json`` filter.
-- Added the ``index`` filter.
-- Added the ``script_tag`` filter.
-- Added the ``stylesheet_tag`` filter.
+  (`docs <https://jg-rp.github.io/liquid/extra/tags#with>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/_with.py>`_)
+
+- Added the ``json``, ``index``, ``script_tag`` and ``stylesheet_tag`` filters.
+  (`docs <https://jg-rp.github.io/liquid/extra/filters>`_,
+  `source <https://github.com/jg-rp/liquid/tree/main/liquid/extra/filters>`_)
 
 Version 1.4.7
 -------------

@@ -10,7 +10,7 @@ from typing import Dict
 from liquid.context import StrictUndefined
 from liquid.environment import Environment
 from liquid.exceptions import UndefinedError
-from liquid.extra import add_macros
+from liquid.extra import add_macro_tags
 from liquid.loaders import DictLoader
 
 
@@ -168,7 +168,7 @@ class MacroRenderTestCase(TestCase):
 
         for case in test_cases:
             env = Environment(loader=DictLoader(case.partials))
-            add_macros(env)
+            add_macro_tags(env)
 
             template = env.from_string(case.template, globals=case.globals)
 
@@ -205,7 +205,7 @@ class MacroRenderTestCase(TestCase):
                 loader=DictLoader(case.partials),
                 undefined=StrictUndefined,
             )
-            add_macros(env)
+            add_macro_tags(env)
 
             template = env.from_string(case.template, globals=case.globals)
 
@@ -217,7 +217,7 @@ class MacroRenderTestCase(TestCase):
     def test_render_macro_async(self) -> None:
         """Test that we can render a macro asynchronously."""
         env = Environment()
-        add_macros(env)
+        add_macro_tags(env)
 
         template = env.from_string(
             r"{% macro 'foo', you: 'World' %}"
@@ -241,7 +241,7 @@ class AnalyzeMacroTestCase(TestCase):
     def test_analyze_macro_tag(self) -> None:
         """Test that we can statically analyze macro and call tags."""
         env = Environment()
-        add_macros(env)
+        add_macro_tags(env)
 
         template = env.from_string(
             r"{% macro 'foo', you: 'World', arg: n %}"

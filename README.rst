@@ -84,15 +84,6 @@ Related Projects
   Render Liquid templates in your Django apps.
 - `Flask-Liquid <https://github.com/jg-rp/Flask-Liquid>`_: A Flask extension for Liquid. Render
   Liquid templates in your Flask applications.
-- `python-liquid-extra <https://github.com/jg-rp/liquid-extra>`_: A growing collection of extra tags
-  and filters for Python Liquid. Highlights of which are: 
-
-  - an ``if`` tag that supports ``not`` and grouping with parentheses.
-  - ``macro`` and ``call`` tags for defining and calling parameterized Liquid snippets.
-  - inline ``if``/``else`` expressions. For example ``{{ 'active' if link.active else '' }}`` or
-    ``{% assign selected = true if product.selected_variant else false %}``.
-  - a JSON encoding filter.
-
 - `golden-liquid <https://github.com/jg-rp/golden-liquid>`_: A test suite for Liquid. See how
   various Liquid template engines compare to the reference implementation.
 

@@ -11,8 +11,8 @@ from liquid.template import BoundTemplate
 
 from liquid.extra import IfNotTag
 from liquid.extra import WithTag
-from liquid.extra import add_inline_expressions
-from liquid.extra import add_extended_inline_expressions
+from liquid.extra import add_inline_expression_tags
+from liquid.extra import add_extended_inline_expression_tags
 
 
 class BaseRenderTestCase(unittest.TestCase):
@@ -130,7 +130,7 @@ class RenderInlineIfTestCase(BaseRenderTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        add_inline_expressions(self.env)
+        add_inline_expression_tags(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""
@@ -279,7 +279,7 @@ class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        add_extended_inline_expressions(self.env)
+        add_extended_inline_expression_tags(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""

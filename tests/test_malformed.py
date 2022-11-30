@@ -24,8 +24,8 @@ from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import DisabledTagError
 from liquid.exceptions import ContextDepthError
 
-from liquid.extra import add_inline_expressions
-from liquid.extra import add_extended_inline_expressions
+from liquid.extra import add_inline_expression_tags
+from liquid.extra import add_extended_inline_expression_tags
 from liquid.extra import IfNotTag
 
 from liquid.loaders import DictLoader
@@ -68,7 +68,7 @@ class MalformedTemplateTestCase(TestCase):
         # Test with non-standard conditional and boolean expressions
         env = Environment(tolerance=mode)
         env.add_tag(IfNotTag)
-        add_inline_expressions(env)
+        add_inline_expression_tags(env)
         # Skip test cases that are not considered malformed with non-standard
         # expressions.
         self._test_with_env(
@@ -76,7 +76,7 @@ class MalformedTemplateTestCase(TestCase):
         )
 
         # Same again for conditional expressions that support `not` and parens.
-        add_extended_inline_expressions(env)
+        add_extended_inline_expression_tags(env)
         self._test_with_env(
             env, [case for case in test_cases if "||" not in case.template]
         )

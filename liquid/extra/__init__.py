@@ -37,15 +37,16 @@ __all__ = (
     "InlineIfStatementWithParens",
     "MacroTag",
     "WithTag",
-    "add_inline_expressions",
-    "add_extended_inline_expressions",
-    "add_macros",
+    "add_filters",
+    "add_inline_expression_tags",
+    "add_extended_inline_expression_tags",
+    "add_macro_tags",
     "add_tags",
     "add_tags_and_filters",
 )
 
 
-def add_inline_expressions(env: Environment) -> None:
+def add_inline_expression_tags(env: Environment) -> None:
     """Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
     expressions."""
@@ -54,7 +55,7 @@ def add_inline_expressions(env: Environment) -> None:
     env.add_tag(InlineIfStatement)
 
 
-def add_extended_inline_expressions(env: Environment) -> None:
+def add_extended_inline_expression_tags(env: Environment) -> None:
     """Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
     expressions."""
@@ -63,7 +64,7 @@ def add_extended_inline_expressions(env: Environment) -> None:
     env.add_tag(InlineIfStatementWithParens)
 
 
-def add_macros(env: Environment) -> None:
+def add_macro_tags(env: Environment) -> None:
     """Register both the `macro` and `call` tags with an environment."""
     env.add_tag(CallTag)
     env.add_tag(MacroTag)
@@ -73,8 +74,8 @@ def add_tags(env: Environment) -> None:  # pragma: no cover
     """Register all extra tags with an environment."""
     env.add_tag(IfNotTag)
     env.add_tag(WithTag)
-    add_macros(env)
-    add_extended_inline_expressions(env)
+    add_macro_tags(env)
+    add_extended_inline_expression_tags(env)
 
 
 def add_filters(env: Environment) -> None:
