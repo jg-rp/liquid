@@ -258,16 +258,16 @@ print(template.render(locale="en_GB"))
 
 This table shows the available `Number()` constructor arguments.
 
-| Argument                       | Type            | Description                                                                                                                                      | Default             |
-| ------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `decimal_quantization_var`     | `str`           | The name of a render context variable that resolves to the decimal quantization to be used.                                                      | `"currency_code"`   |
-| `default_decimal_quantization` | `bool`          | A fallback decimal quantization if `decimal_quantization_var` can not be resolved.                                                               | `"USD"`             |
-| `locale_var`                   | `str`           | The name of a render context variable that resolves to the current locale.                                                                       | `"locale"`          |
-| `default_locale`               | `str`           | A fallback locale to use if `locale_var` can not be resolved.                                                                                    | `"en_US"`           |
-| `format_var`                   | `str`           | The name of a render context variable that resolves to the current currency format string.                                                       | `"currency_format"` |
-| `default_format`               | `Optional[str]` | A fallback currency format that is used if `format_var` can not be resolved. If `None`, the standard format for the current locale will be used. | `None`              |
-| `input_locale_var`             | `str`           | The name of a render context variable that resolves to a locale suitable for parsing input strings to decimals.                                  | `"input_locale"`    |
-| `default_input_locale`         | `str`           | A fallback locale to use if `input_locale_var` can not be resolved.                                                                              | `"en_US"`           |
+| Argument                       | Type            | Description                                                                                                                                      | Default                  |
+| ------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `decimal_quantization_var`     | `str`           | The name of a render context variable that resolves to the decimal quantization to be used.                                                      | `"decimal_quantization"` |
+| `default_decimal_quantization` | `bool`          | A fallback decimal quantization if `decimal_quantization_var` can not be resolved.                                                               | `False`                  |
+| `locale_var`                   | `str`           | The name of a render context variable that resolves to the current locale.                                                                       | `"locale"`               |
+| `default_locale`               | `str`           | A fallback locale to use if `locale_var` can not be resolved.                                                                                    | `"en_US"`                |
+| `format_var`                   | `str`           | The name of a render context variable that resolves to the current currency format string.                                                       | `"decimal_format"`       |
+| `default_format`               | `Optional[str]` | A fallback currency format that is used if `format_var` can not be resolved. If `None`, the standard format for the current locale will be used. | `None`                   |
+| `input_locale_var`             | `str`           | The name of a render context variable that resolves to a locale suitable for parsing input strings to decimals.                                  | `"input_locale"`         |
+| `default_input_locale`         | `str`           | A fallback locale to use if `input_locale_var` can not be resolved.                                                                              | `"en_US"`                |
 
 ## Translation
 
