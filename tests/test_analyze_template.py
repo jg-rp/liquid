@@ -12,7 +12,8 @@ from liquid.ast import ChildNode, Node
 from liquid.context import Context
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
-from liquid.extra import register_inline_if_expressions
+from liquid.extra import add_inline_expressions
+from liquid.extra import WithTag
 from liquid.mode import Mode
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -914,7 +915,7 @@ class CountTemplateVariablesTestCase(TestCase):
     def test_analyze_conditional_expression(self) -> None:
         """Test that we can statically analyze non-standard conditional expressions."""
         env = Environment()
-        register_inline_if_expressions(env)
+        add_inline_expressions(env)
 
         template = env.from_string(r"{{ foo | upcase if a.b else bar || append: baz }}")
 
@@ -930,6 +931,38 @@ class CountTemplateVariablesTestCase(TestCase):
             "a.b": [("<string>", 1)],
             "bar": [("<string>", 1)],
             "baz": [("<string>", 1)],
+        }
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+        )
+
+    def test_analyze_with_tag(self) -> None:
+        """Test that we can statically analyze non-standard with tags."""
+        env = Environment()
+        env.add_tag(WithTag)
+
+        template = env.from_string(
+            r"{% with p: collection.products.first %}"
+            r"{{ p.title }}"
+            r"{% endwith %}"
+            r"{{ p.title }}"
+            r"{{ collection.products.first.title }}"
+        )
+
+        expected_template_globals = {
+            "collection.products.first": [("<string>", 1)],
+            "p.title": [("<string>", 1)],
+            "collection.products.first.title": [("<string>", 1)],
+        }
+        expected_template_locals: Refs = {}
+        expected_refs = {
+            "collection.products.first": [("<string>", 1)],
+            "collection.products.first.title": [("<string>", 1)],
+            "p.title": [("<string>", 1), ("<string>", 1)],
         }
 
         self._test(

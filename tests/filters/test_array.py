@@ -1,14 +1,16 @@
-"""Test math filter functions."""
-# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
+"""Test array filter functions."""
+# pylint: disable=too-many-public-methods,too-many-lines
 import unittest
 
 from functools import partial
 from inspect import isclass
 
-from typing import NamedTuple
 from typing import Any
-from typing import List
 from typing import Dict
+from typing import Iterable
+from typing import List
+from typing import NamedTuple
+
 
 from liquid.environment import Environment
 from liquid.expression import NIL
@@ -31,8 +33,12 @@ from liquid.builtin.filters.array import where
 from liquid.builtin.filters.array import uniq
 from liquid.builtin.filters.array import compact
 
+from liquid.extra.filters.array import index
+
 
 class Case(NamedTuple):
+    """Table-driven test helper."""
+
     description: str
     val: Any
     args: List[Any]
@@ -46,7 +52,7 @@ class ArrayFilterTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.env = Environment()
 
-    def _test(self, func, test_cases):
+    def _test(self, func, test_cases: Iterable[Case]):
         if getattr(func, "with_environment", False):
             func = partial(func, environment=self.env)
 
@@ -727,3 +733,24 @@ class ArrayFilterTestCase(unittest.TestCase):
         ]
 
         self._test(compact, test_cases)
+
+    def test_index(self):
+        """Test `index` filter function."""
+        test_cases = [
+            Case(
+                description="array of strings",
+                val=["a", "b", "c"],
+                args=["b"],
+                kwargs={},
+                expect=1,
+            ),
+            Case(
+                description="item does not exist",
+                val=["a", "b", "c"],
+                args=["z"],
+                kwargs={},
+                expect=None,
+            ),
+        ]
+
+        self._test(index, test_cases)

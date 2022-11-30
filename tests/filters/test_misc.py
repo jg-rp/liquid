@@ -33,7 +33,7 @@ class Case(NamedTuple):
     expect: Any
 
 
-class MockDrop:
+class MockDrop:  # pragma: no cover
     def __init__(self, val):
         self.val = val
 
@@ -49,7 +49,7 @@ class MockDrop:
         return self.val
 
 
-class NoLiquidDrop:
+class NoLiquidDrop:  # pragma: no cover
     def __init__(self, val):
         self.val = val
 
@@ -62,7 +62,7 @@ class NoLiquidDrop:
         return "hello no liquid drop"
 
 
-class FalsyDrop:
+class FalsyDrop:  # pragma: no cover
     def __init__(self, val):
         self.val = val
 
