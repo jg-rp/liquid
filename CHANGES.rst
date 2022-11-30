@@ -34,6 +34,11 @@ for you automatically, extra tags and filters must be explicitly registered with
   (`docs <https://jg-rp.github.io/liquid/extra/filters>`_,
   `source <https://github.com/jg-rp/liquid/tree/main/liquid/extra/filters>`_)
 
+**Compatibility**
+
+- ``for`` tag arguments can now be separated by commas as well as whitespace.
+  See `Shopify/liquid#1658 <https://github.com/Shopify/liquid/pull/1658>`_
+
 Version 1.4.7
 -------------
 
@@ -54,7 +59,7 @@ Version 1.4.6
   as well as integer literals and variables that resolve to integers.
   See `#78 <https://github.com/jg-rp/liquid/issues/78>`_.
 
-**Other**
+**Compatibility**
 
 - The ``truncatewords`` filter no longer raises a ``FilterArgumentError`` if its
   argument is greater than ``2147483648`` and the number of words in the input string

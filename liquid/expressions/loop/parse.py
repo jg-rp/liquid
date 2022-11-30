@@ -19,6 +19,7 @@ from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_REVERSED
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_COMMA
 
 from liquid.expression import Continue
 from liquid.expression import CONTINUE
@@ -101,6 +102,8 @@ def parse_loop_arguments(stream: TokenStream) -> Tuple[Dict[str, LoopArgument], 
         elif typ == TOKEN_REVERSED:
             next(stream)
             _reversed = True
+        elif typ == TOKEN_COMMA:
+            next(stream)
         else:
             raise LiquidSyntaxError(f"unexpected {val!r}")
 

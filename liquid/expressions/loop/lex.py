@@ -34,6 +34,7 @@ from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_COMMA
 
 from liquid.exceptions import LiquidSyntaxError
 
@@ -52,6 +53,7 @@ token_rules = (
     (TOKEN_LBRACKET, r"\["),
     (TOKEN_RBRACKET, r"]"),
     (TOKEN_COLON, r":"),
+    (TOKEN_COMMA, r","),
     (TOKEN_PIPE, r"\|"),
     (TOKEN_NEWLINE, r"\n"),
     (TOKEN_SKIP, r"[ \t\r]+"),

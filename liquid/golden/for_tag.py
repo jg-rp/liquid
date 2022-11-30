@@ -613,4 +613,16 @@ cases = [
         globals={"foo": [1, 2, 3]},
         error=True,
     ),
+    Case(
+        description="comma separated arguments",
+        template=r"{% for i in (1..6), limit: 4, offset: 2 %}{{ i }} {% endfor %}",
+        expect="3 4 5 6 ",
+        globals={},
+    ),
+    Case(
+        description="some comma separated arguments",
+        template=r"{% for i in (1..6) limit: 4, offset: 2, %}{{ i }} {% endfor %}",
+        expect="3 4 5 6 ",
+        globals={},
+    ),
 ]

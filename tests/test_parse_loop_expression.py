@@ -227,6 +227,20 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     ),
                 ),
             ),
+            Case(
+                "comma separated arguments",
+                "i in array, limit: 4, offset: 2",
+                LoopExpression(
+                    name="i",
+                    iterable=Identifier(
+                        path=[
+                            IdentifierPathElement("array"),
+                        ],
+                    ),
+                    limit=IntegerLiteral(4),
+                    offset=IntegerLiteral(2),
+                ),
+            ),
         ]
 
         for case in test_cases:

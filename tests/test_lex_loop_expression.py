@@ -23,6 +23,7 @@ from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_COMMA
 from liquid.token import Token
 
 
@@ -121,6 +122,23 @@ class LexIncludeExpressionTestCase(unittest.TestCase):
                     Token(1, TOKEN_OFFSET, "offset"),
                     Token(1, TOKEN_COLON, ":"),
                     Token(1, TOKEN_CONTINUE, "continue"),
+                ],
+            ),
+            Case(
+                description="comma separated arguments",
+                source="i in array, limit: 4, offset: 2",
+                expect=[
+                    Token(1, TOKEN_IDENTIFIER, "i"),
+                    Token(1, TOKEN_IN, "in"),
+                    Token(1, TOKEN_IDENTIFIER, "array"),
+                    Token(1, TOKEN_COMMA, ","),
+                    Token(1, TOKEN_LIMIT, "limit"),
+                    Token(1, TOKEN_COLON, ":"),
+                    Token(1, TOKEN_INTEGER, "4"),
+                    Token(1, TOKEN_COMMA, ","),
+                    Token(1, TOKEN_OFFSET, "offset"),
+                    Token(1, TOKEN_COLON, ":"),
+                    Token(1, TOKEN_INTEGER, "2"),
                 ],
             ),
         ]
