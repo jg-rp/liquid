@@ -1,24 +1,14 @@
 # Extra Tags
 
-This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for a details of all standard tags.
+**_New in version 1.5.0_**
 
-:::caution
-These tags are not part of "standard" Liquid. If you choose to use them in your templates, those templates are unlikely to render correctly with other implementations of Liquid.
-:::
+This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for a details of all standard tags. Each tag described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ## if (not)
 
-```
-{% if <expression> %}
-  <literal,statement,tag> ...
-  [ {% elsif <expression> %} <literal,statement,tag> ... [ {% elsif <expression> %} ... ]]
-  [ {% else %} <literal,statement,tag> ... ]
-{% endif %}
-```
+A drop-in replacement for the standard [`if`](../language/tags.md#if) tag that supports a logical `not` operator and grouping terms with parentheses. See [the tag reference](../language/tags.md#expressions) for a description of standard `if` expressions.
 
-A drop-in replacement for the standard [`if`](../language/tags.md#if) tag that supports logical `not` and grouping with parentheses. See [the tag reference](../language/tags.md#expressions) for a description of standard if expressions.
-
-Register `IfNotTag` with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
+In this example, `{% if not user %}` is equivalent to `{% unless user %}`, however, `not` can also be used after `and` and `or`, like `{% if user.active and not user.title %}`, potentially saving nested `if` and `unless` tags.
 
 ```python
 from liquid import Environment
@@ -26,44 +16,36 @@ from liquid.extra.tags import IfNotTag
 
 env = Environment()
 env.add_tag(IfNotTag)
-```
 
-### not
+template = env.from_string("""\
+{% if not user %}
+  please log in
+{% else %}
+  hello user
+{% endif %}
+""")
 
-A logical `not` operator. Reverse the truthiness of an object.
-
-```json title="data"
-{
+data = {
   "user": {
-    "eligible": false,
+    "eligible": False,
     "score": 5
   }
 }
-```
 
-```liquid title="template"
-{% if not user %}
-    please log in
-{% else %}
-    hello user
-{% endif %}
+print(template.render(**data))
 ```
 
 ```plain title="output"
 hello user
 ```
 
-The `not` prefix operator uses Liquid _truthiness_. Only `false` and `nil` are not truthy. Empty strings, arrays and objects all evaluate to `true`. You can, however, use `not` in front of a comparison to `empty` or `blank`.
-
-```liquid
-{% if not something == empty %}
-    ...
-{% endif %}
-```
+The `not` prefix operator uses Liquid truthiness. Only `false` and `nil` are not truthy. Empty strings, arrays and objects all evaluate to `true`.
 
 ### Parentheses
 
-Control the order of evaluation with parentheses.
+`and` and `or` operators in Liquid are right associative. Where `true and false and false or true` is equivalent to `(true and (false and (false or true)))`, evaluating to `false`. Python, on the other hand, would parse the same expression as `(((true and false) and false) or true)`, evaluating to `true`.
+
+This implementation of `if` maintains that right associativity so that any standard `if` expression will behave the same, with or without non-standard `if`. Only when `not` or parentheses are used will behavior deviate from the standard.
 
 ```json title="data"
 {
@@ -99,62 +81,35 @@ user is special
 denied
 ```
 
-`and` and `or` operators in Liquid are right associative. Where `true and false and false or true` is equivalent to `(true and (false and (false or true)))`, evaluating to `false`. Python, on the other hand, would parse the same expression as `(((true and false) and false) or true)`, evaluating to `true`.
-
-This implementation of `if` maintains that right associativity so that any standard `if` expression will behave the same, with or without non-standard `if`. Only when `not` or parentheses are used will behavior deviate from the standard.
-
 ## inline if / else
 
-```
-{{ <primitive,identifier> [| <filter> [| <filter> ... ]]
-    [ if <expression> [ else <primitive,identifier> [| <filter> [| <filter> ... ]]]] }}
-```
+Drop-in replacements for the standard output statement, [`assign`](../language/tags.md#assign) tag, and [`echo`](../language/tags.md#echo) tag that support inline `if`/`else` expressions. You can find a BNF-like description of the inline conditional expression in [this gist](https://gist.github.com/jg-rp/e2dc4da9e5033e087e46016008a9d91c#file-inline_if_expression-bnf).
 
-```
-{% assign <identifier> = <primitive,identifier> [| <filter> [| <filter> ... ]]
-    [ if <expression> [ else <primitive,identifier> [| <filter> [| <filter> ... ]]]] %}
-```
-
-```
-{% echo <primitive,identifier> [| <filter> [| <filter> ... ]]
-    [ if <expression> [ else <primitive,identifier> [| <filter> [| <filter> ... ]]]] %}
-```
-
-Drop-in replacements for the standard output statement and [`assign`](../language/tags.md#assign) and [`echo`](../language/tags.md#echo) tags that supports inline `if`/`else` expressions.
-
-If the condition evaluates to `false` (Liquid truthiness), the leading object is not evaluated. Equally, if the condition evaluates to `true`, any `else` object is not evaluated. This is not terribly important if the objects are Liquid literals or simple Python objects, but could matter if the objects are custom drops that do time consuming IO or processing.
-
-Register `InlineIfAssignTag`, `InlineIfEchoTag` and `InlineIfStatement` with a [`liquid.Environment`](../api/environment.md) to make them available to templates rendered from that environment.
+Inline `if`/`else` expressions are designed to be backwards compatible with standard filtered expressions. As long as there are no template variables called `if` or `else` within a filtered expression, standard output statements, `assign` tags and `echo` tags will behave the same.
 
 ```python
 from liquid import Environment
-from liquid.extra.tags import InlineIfAssignTag
-from liquid.extra.tags import InlineIfEchoTag
-from liquid.extra.tags import InlineIfStatement
+from liquid.extra import add_inline_expression_tags
 
 env = Environment()
-env.add_tag(InlineIfAssignTag)
-env.add_tag(InlineIfEchoTag)
-env.add_tag(InlineIfStatement)
-```
+add_inline_expression_tags(env)
 
-```json title="data"
-{
+template = env.from_string("{{ 'hello user' if user.logged_in else 'please log in' }}")
+
+data = {
   "user": {
     "logged_in": false
   }
 }
-```
 
-```liquid title="template"
-{{ 'hello user' if user.logged_in else 'please log in' }}
+print(template.render(**data))
 ```
 
 ```plain title="output"
 please log in
 ```
 
-The `else` part of an inline expression defaults to [undefined](../introduction/strictness.md#undefined-variables).
+The `else` part of an inline expression is optional, defaulting to [undefined](../introduction/strictness.md#undefined-variables).
 
 ```liquid title="template"
 {{ 'hello user' if user.logged_in }}!
@@ -164,7 +119,13 @@ The `else` part of an inline expression defaults to [undefined](../introduction/
 !
 ```
 
+Inline conditional expressions are evaluated lazily. If the condition is falsy, the leading object is not evaluated. Equally, if the condition is truthy, any expression following `else` will not be evaluated.
+
 ### With Filters
+
+:::caution
+The inline conditional expressions added to Python Liquid 1.5.0 differs slightly from those found in Python Liquid Extra. Previously, trailing filters would be applied regardless of which branch of the condition was taken. Now, "tail filters" are distinguished from alternative branch filters with a double pipe token (`||`). See examples below.
+:::
 
 Filters can appear before an inline `if` expression.
 
@@ -172,11 +133,7 @@ Filters can appear before an inline `if` expression.
 {{ 'hello user' | capitalize if user.logged_in else 'please log in' }}
 ```
 
-```plain title="output"
-please log in
-```
-
-Or after an inline `if` expression. In which case filters will be applied even if the else clause is triggered.
+Or after an inline `if` expression. In which case filters will only be applied to the `else` clause.
 
 ```liquid title="template"
 {% assign param = 'hello user' if user.logged_in else 'please log in' | url_encode %}
@@ -186,6 +143,17 @@ Or both.
 
 ```liquid title="template"
 {{% assign param = 'hello user' | capitalize if user.logged_in else 'please log in' | url_encode %}
+```
+
+Use a double pipe (`||`) to start any filters you want to apply regardless of which branch is taken. Subsequent "tail filters" should be separated by a single pipe (`|`).
+
+```liquid title="template"
+{{% assign name =
+  user.nickname | downcase
+  if user.has_nickname
+  else user.last_name | capitalize
+  || prepend: user.title | strip
+%}
 ```
 
 ## macro / call
@@ -198,49 +166,21 @@ Or both.
 {% call <string> [[,] [ <object>, ... ] [ <identifier>: <object>, ... ]] %}
 ```
 
-Define parameterized Liquid snippets using the `macro` tag and call them using the `call` tag. Macros are intended to make code reuse easier, especially for small Liquid snippets that are only needed within one template.
+Define parameterized Liquid snippets using the `macro` tag, and call them using the `call` tag.
 
-`macro` is a bit like the standard [`capture`](../language/tags.md#capture) tag, where a block is stored on the render context for later use. Unlike `capture`, `macro` accepts parameters, possibly with default values, and the block is not evaluated until it is called using a `call` tag.
+Using the `macro` tag is like defining a function. Its parameter list defines arguments, possibly with default values. A `macro` tag's block has its own scope including its arguments and template global variables, just like the `render` tag.
 
-`call` is a bit like [`render`](../language/tags.md#render), in that a new context is created including any arguments supplied in the `call` expression. That context is then used to render the named macro. Unlike `render`, `call` can take positional arguments and does not hit any template loader or the template cache.
-
-Similar to [`include`](../language/tags.md#include) and [`render`](../language/tags.md#render), `macro` and `call` take a string literal identifying the macro, followed by zero or more arguments. Neither `macro` or `call` accept `for` or `with`/`as` style expressions.
-
-Note that argument defaults are bound late. Defaults are evaluated when a `call` expression is evaluated, not when the macro is defined.
-
-Register `MacroTag` and `CallTag` with a [`liquid.Environment`](../api/environment.md) to make `macro` and `call` available to templates rendered from that environment.
+Note that argument defaults are bound late. They are evaluated when a `call` expression is evaluated, not when the macro is defined.
 
 ```python
 from liquid import Environment
 from liquid import StrictUndefined
+from liquid.extra import add_macro_tags
 
-from liquid.extra.tags import MacroTag
-from liquid.extra.tags import CallTag
-
-# Setting strict undefined is strongly recommended.
 env = Environment(undefined=StrictUndefined)
-env.add_tag(MacroTag)
-env.add_tag(CallTag)
-```
+add_macro_tags(env)
 
-```json title="data"
-{
-  "products": [
-    {
-      "title": "Some Shoes",
-      "regular_price": "5.99",
-      "price": "4.99"
-    },
-    {
-      "title": "A Hat",
-      "regular_price": "16.00",
-      "price": "12.00"
-    }
-  ]
-}
-```
-
-```liquid title="template"
+template = env.from_string("""\
 {% macro 'price' product, on_sale: false %}
   <div class="price-wrapper">
   {% if on_sale %}
@@ -254,6 +194,24 @@ env.add_tag(CallTag)
 
 {% call 'price' products[0], on_sale: true %}
 {% call 'price' products[1] %}
+""")
+
+data = {
+  "products": [
+    {
+      "title": "Some Shoes",
+      "regular_price": "5.99",
+      "price": "4.99"
+    },
+    {
+      "title": "A Hat",
+      "regular_price": "16.00",
+      "price": "12.00"
+    }
+  ]
+}
+
+print(template.render(**data))
 ```
 
 ```html title="output"

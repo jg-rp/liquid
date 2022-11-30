@@ -56,7 +56,7 @@
     },
     operator: /!?=|<=?|>=?|<>|\.\./,
     keyword:
-      /\b(?:and|contains|in|limit|offset|or|reversed|with|empty|blank)\b/,
+      /\b(?:and|contains|in|limit|offset|or|reversed|with|empty|blank|if|else)\b/,
     builtin: {
       pattern: /(\b\.)(?:first|last|size)\b/,
       lookbehind: true,
