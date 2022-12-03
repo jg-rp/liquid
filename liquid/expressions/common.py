@@ -1,7 +1,10 @@
 """Patterns and parse functions common to multiple built-in expression types."""
+from __future__ import annotations
+import re
 import sys
 
 from typing import Callable
+from typing import Iterator
 from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
@@ -28,6 +31,7 @@ from liquid.token import reverse_operators
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_RBRACKET
@@ -37,6 +41,16 @@ from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_NEWLINE
+from liquid.token import TOKEN_SKIP
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_OR
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.limits import to_int
@@ -110,16 +124,6 @@ def parse_integer_literal(stream: "TokenStream") -> IntegerLiteral:
 def parse_float_literal(stream: "TokenStream") -> FloatLiteral:
     """Read a float from the token stream."""
     return FloatLiteral(value=float(stream.current[2]))
-
-
-IDENT_TOKENS = frozenset(
-    (
-        TOKEN_IDENTIFIER,
-        TOKEN_IDENTINDEX,
-        TOKEN_LBRACKET,
-        TOKEN_DOT,
-    )
-)
 
 
 def parse_identifier(stream: "TokenStream") -> Identifier:
@@ -235,3 +239,140 @@ def make_parse_range(
         return expr
 
     return _parse_range_literal
+
+
+_IDENT_TOKENS = frozenset(
+    (
+        TOKEN_IDENTIFIER,
+        TOKEN_IDENTINDEX,
+        TOKEN_DOT,
+        TOKEN_LBRACKET,
+    )
+)
+
+
+def _parse_common_identifier(stream: "TokenStream") -> Identifier:
+    """This is much like `parse_identifier`, but leaves the last ident
+    token on the stream."""
+    path: IdentifierPath = []
+    stream.expect(TOKEN_IDENTIFIER)
+
+    while True:
+        _, _type, value = stream.current
+        if _type == TOKEN_IDENTIFIER:
+            path.append(IdentifierPathElement(value))
+        elif _type == TOKEN_IDENTINDEX:
+            path.append(IdentifierPathElement(to_int(value)))
+        elif _type == TOKEN_LBRACKET:
+            stream.next_token()
+            path.append(_parse_common_identifier(stream))
+            stream.next_token()
+            stream.expect(TOKEN_RBRACKET)
+        elif _type == TOKEN_DOT:
+            pass
+
+        if stream.peek[1] in _IDENT_TOKENS:
+            next(stream)
+        else:
+            break
+
+    return Identifier(path)
+
+
+LITERAL_OR_IDENT_TOKEN_RULES = (
+    (TOKEN_IDENTINDEX, IDENTINDEX_PATTERN),
+    (TOKEN_IDENTSTRING, IDENTSTRING_PATTERN),
+    (TOKEN_STRING, STRING_PATTERN),
+    (TOKEN_RANGE, r"\.\."),
+    (TOKEN_FLOAT, r"-?\d+\.(?!\.)\d*"),
+    (TOKEN_INTEGER, r"-?\d+\b"),
+    (TOKEN_DOT, r"\."),
+    (TOKEN_IDENTIFIER, IDENTIFIER_PATTERN),
+    (TOKEN_LPAREN, r"\("),
+    (TOKEN_RPAREN, r"\)"),
+    (TOKEN_LBRACKET, r"\["),
+    (TOKEN_RBRACKET, r"]"),
+    (TOKEN_COMMA, r","),
+    (TOKEN_NEWLINE, r"\n"),
+    (TOKEN_SKIP, r"[ \t\r]+"),
+    (TOKEN_ILLEGAL, r"."),
+)
+
+LITERAL_OR_IDENT_KEYWORDS = frozenset(
+    [
+        TOKEN_TRUE,
+        TOKEN_FALSE,
+        TOKEN_NIL,
+        TOKEN_NULL,
+        TOKEN_EMPTY,
+        TOKEN_BLANK,
+        TOKEN_OR,
+    ]
+)
+
+LITERAL_OR_IDENT_MAP = {
+    TOKEN_IDENTIFIER: _parse_common_identifier,
+    TOKEN_STRING: parse_string_literal,
+    TOKEN_INTEGER: parse_integer_literal,
+    TOKEN_FLOAT: parse_float_literal,
+    TOKEN_NIL: parse_nil,
+    TOKEN_TRUE: parse_boolean,
+    TOKEN_FALSE: parse_boolean,
+    TOKEN_BLANK: parse_blank,
+    TOKEN_EMPTY: parse_empty,
+}
+
+LITERAL_OR_IDENT_RE = re.compile(
+    "|".join(
+        f"(?P<{name}>{pattern})" for name, pattern in LITERAL_OR_IDENT_TOKEN_RULES
+    ),
+    re.DOTALL,
+)
+
+
+def tokenize_common_expression(expr: str, linenum: int = 1) -> Iterator[Token]:
+    """Yield tokens from a "common" expression."""
+    _keywords = LITERAL_OR_IDENT_KEYWORDS
+    for match in LITERAL_OR_IDENT_RE.finditer(expr):
+        kind = match.lastgroup
+        assert kind is not None
+
+        value = match.group()
+        newlines = value.count("\n")
+
+        if kind == TOKEN_IDENTIFIER and value in _keywords:
+            kind = value
+        elif kind == TOKEN_IDENTINDEX:
+            value = match.group(GROUP_IDENTINDEX)
+        elif kind == TOKEN_IDENTSTRING:
+            kind = TOKEN_IDENTIFIER
+            value = match.group(GROUP_IDENTQUOTED)
+        elif kind == TOKEN_STRING:
+            value = match.group(GROUP_QUOTED)
+        elif kind == TOKEN_NEWLINE:
+            linenum += 1
+            continue
+        elif kind == TOKEN_SKIP:
+            continue
+        elif kind == TOKEN_ILLEGAL:
+            raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
+
+        linenum += newlines
+        yield (linenum, kind, value)
+
+
+def parse_common_expression(stream: TokenStream) -> Expression:
+    """Parse a string, int, float, range, nil, true, false, blank, empty or identifier.
+
+    Raises a LiquidSyntaxError if any other tokens are found.
+    """
+    try:
+        return LITERAL_OR_IDENT_MAP[stream.current[1]](stream)
+    except KeyError as err:
+        raise LiquidSyntaxError(
+            f"expected a literal or variable, found {stream.current[2]}",
+            linenum=stream.current[0],
+        ) from err
+
+
+LITERAL_OR_IDENT_MAP[TOKEN_LPAREN] = make_parse_range(parse_common_expression)

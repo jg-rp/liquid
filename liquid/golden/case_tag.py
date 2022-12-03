@@ -120,4 +120,66 @@ cases = [
         expect="foobarbar",
         globals={"title": "Hello", "a": "Hello"},
     ),
+    Case(
+        description="or separated when expression",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' or 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="bar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="mix or and comma separated when expression",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' or 'Hello', 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="barbar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="mix or and comma separated when expression",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' or 'Hello', 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="barbar",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="unexpected when token",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when 'bar' and 'Hello', 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="",
+        globals={"title": "Hello"},
+    ),
+    Case(
+        description="comma string literal",
+        template=(
+            r"{% case foo %}"
+            r"{% when 'foo' %}bar"
+            r"{% when ',' %}comma"
+            r"{% endcase %}"
+        ),
+        expect="comma",
+        globals={"foo": ","},
+    ),
+    Case(
+        description="empty when tag",
+        template=(r"{% case foo %}{% when %}bar{% endcase %}"),
+        expect="",
+        globals={"foo": "bar"},
+        error=True,
+    ),
 ]

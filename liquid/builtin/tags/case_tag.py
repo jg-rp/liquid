@@ -7,10 +7,20 @@ from typing import Optional
 from typing import TextIO
 from typing import TYPE_CHECKING
 
+from liquid.expression import BooleanExpression
+from liquid.expression import InfixExpression
+
+from liquid.expressions.common import tokenize_common_expression
+from liquid.expressions.common import parse_common_expression
+from liquid.expressions.stream import TokenStream as ExpressionTokenStream
+
 from liquid.token import Token
+from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_TAG
+
 
 from liquid.parse import get_parser
 from liquid.parse import expect
@@ -133,18 +143,14 @@ class CaseTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
-    def parse_expression(self, case: str, obj: str, stream: TokenStream) -> Expression:
-        """Parse a boolean expression from a stream of tokens."""
-        expect(stream, TOKEN_EXPRESSION)
-        return self.env.parse_boolean_expression_value(f"{case} == {obj}")
-
     def parse(self, stream: TokenStream) -> ast.Node:
         expect(stream, TOKEN_TAG, value=TAG_CASE)
         tok = stream.current
         stream.next_token()
 
+        # Parse the case expression.
         expect(stream, TOKEN_EXPRESSION)
-        case = stream.current.value
+        case = self._parse_case_expression(stream.current.value, stream.current.linenum)
         stream.next_token()
 
         # Eat whitespace or junk between `case` and when/else/endcase
@@ -159,11 +165,14 @@ class CaseTag(Tag):
         while stream.current.istag(TAG_WHEN):
             when_tok = stream.current
             stream.next_token()  # Eat WHEN
+            expect(stream, TOKEN_EXPRESSION)
 
-            # One conditional block for every object in a comma separated list.
+            # One conditional block for every object in a comma or `or` separated list.
             when_exprs = [
-                self.parse_expression(case, obj, stream)
-                for obj in stream.current.value.split(",")
+                BooleanExpression(InfixExpression(case, "==", expr))
+                for expr in self._parse_when_expression(
+                    stream.current.value, stream.current.linenum
+                )
             ]
 
             stream.next_token()
@@ -186,3 +195,25 @@ class CaseTag(Tag):
 
         expect(stream, TOKEN_TAG, value=TAG_ENDCASE)
         return CaseNode(tok, whens=whens, default=default)
+
+    def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
+        stream = ExpressionTokenStream(
+            tokenize_common_expression(expr, linenum=linenum)
+        )
+        return parse_common_expression(stream)
+
+    def _parse_when_expression(self, expr: str, linenum: int) -> List[Expression]:
+        expressions = []
+        stream = ExpressionTokenStream(
+            tokenize_common_expression(expr, linenum=linenum)
+        )
+
+        while True:
+            expressions.append(parse_common_expression(stream))
+            next(stream)
+            if stream.current[1] in (TOKEN_COMMA, TOKEN_OR):
+                next(stream)
+            else:
+                break
+
+        return expressions
