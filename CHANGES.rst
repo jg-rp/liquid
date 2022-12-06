@@ -1,13 +1,13 @@
 Python Liquid Change Log
 ========================
 
-Version 1.5.1 (unreleased)
---------------------------
+Version 1.5.1
+-------------
 
 **Fixes**
 
 - Fixed ``case`` and ``when`` tag expression parsing. ``when`` expressions no longer
-  fail when presented with a string containing a comma. Handling of comma and `or`
+  fail when presented with a string containing a comma. Handling of comma and ``or``
   separated "sub-expressions" is now consistent with the reference implementation.
   See `#86 <https://github.com/jg-rp/liquid/issues/86>`_.
 
