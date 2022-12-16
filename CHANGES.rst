@@ -1,15 +1,21 @@
 Python Liquid Change Log
 ========================
 
-Version 1.5.2 (unreleased)
+Version 1.6.0 (unreleased)
 --------------------------
 
 **Fixes**
 
 - Fixed the string representation of ``liquid.expression.Identifier``, which is exposed
-  in the results of ``liquid.Template.analyze()``. We now represent variable path
+  in the results of ``liquid.BoundTemplate.analyze()``. We now represent variable path
   elements containing a ``.`` as quoted strings inside square brackets.
   See `#87 <https://github.com/jg-rp/liquid/issues/87>`_.
+
+**Features**
+
+- The dictionaries returned by ``liquid.BoundTemplate.analyze()`` now use instances of
+  ``ReferencedVariable`` for their keys. ``ReferencedVariable`` is a ``str`` subclass
+  that adds a ``parts`` property, being a tuple representation of the variable.
 
 Version 1.5.1
 -------------

@@ -27,8 +27,8 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.context import Context
-from liquid.context import VariableCaptureContext
 from liquid.context import ReadOnlyChainMap
+from liquid.context import VariableCaptureContext
 
 from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
@@ -38,6 +38,7 @@ from liquid.exceptions import TemplateNotFound
 from liquid.expression import Expression, StringLiteral
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
+from liquid.expression import IdentifierTuple
 from liquid.expression import Literal
 
 from liquid.output import LimitedStringIO
@@ -287,9 +288,13 @@ class BoundTemplate:
         ).analyze()
 
         return TemplateAnalysis(
-            variables={str(k): v for k, v in refs.variables.items()},
-            local_variables={str(k): v for k, v in refs.template_locals.items()},
-            global_variables={str(k): v for k, v in refs.template_globals.items()},
+            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
+            local_variables={
+                ReferencedVariable(k): v for k, v in refs.template_locals.items()
+            },
+            global_variables={
+                ReferencedVariable(k): v for k, v in refs.template_globals.items()
+            },
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
         )
@@ -305,9 +310,13 @@ class BoundTemplate:
         ).analyze_async()
 
         return TemplateAnalysis(
-            variables={str(k): v for k, v in refs.variables.items()},
-            local_variables={str(k): v for k, v in refs.template_locals.items()},
-            global_variables={str(k): v for k, v in refs.template_globals.items()},
+            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
+            local_variables={
+                ReferencedVariable(k): v for k, v in refs.template_locals.items()
+            },
+            global_variables={
+                ReferencedVariable(k): v for k, v in refs.template_globals.items()
+            },
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
         )
@@ -426,7 +435,37 @@ class TemplateDrop(Mapping[str, Optional[str]]):
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
 
-Refs = Dict[str, List[Tuple[str, int]]]
+
+class ReferencedVariable(str):
+    """A str subclass for variables found during static analysis that retains
+    information about a variable's parts.
+    """
+
+    def __new__(cls, obj: object) -> ReferencedVariable:
+        _str = super().__new__(cls, obj)
+        _str.obj = obj
+        return _str
+
+    def __init__(self, _: object) -> None:
+        super().__init__()
+        self.obj: object
+        if isinstance(self.obj, Identifier):
+            self._parts = self.obj.as_tuple()
+        else:
+            self._parts = (str(self.obj),)
+
+    @property
+    def parts(self) -> IdentifierTuple:
+        """A tuple representation of the variable's parts, which might contain
+        nested tuples for nested variables. For example, the variable
+        ``some[foo.bar[a.b]].other`` as a tuple would look like this:
+
+            ("some", ("foo", "bar", ("a", "b")), "other.thing")
+        """
+        return self._parts
+
+
+Refs = Dict[ReferencedVariable, List[Tuple[str, int]]]
 ReferenceMap = DefaultDict[Identifier, List[Tuple[str, int]]]
 NameMap = DefaultDict[str, List[Tuple[str, int]]]
 
@@ -501,8 +540,8 @@ class TemplateAnalysis:
         variables: Refs,
         local_variables: Refs,
         global_variables: Refs,
-        failed_visits: Refs,
-        unloadable_partials: Refs,
+        failed_visits: Dict[str, List[Tuple[str, int]]],
+        unloadable_partials: Dict[str, List[Tuple[str, int]]],
     ) -> None:
         self.variables = variables
         self.local_variables = local_variables

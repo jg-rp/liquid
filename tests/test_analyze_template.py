@@ -1,4 +1,5 @@
 """Test cases for statically counting a template's variables."""
+# pylint: disable=too-many-lines
 import asyncio
 
 from typing import List, Optional, TextIO
@@ -986,3 +987,35 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
         )
+
+    def test_variable_parts(self) -> None:
+        """Test that we can retrieve a variable's parts as a tuple."""
+        template = Template("{{ some['foo.bar'] }}")
+
+        expected_template_globals = {'some["foo.bar"]': [("<string>", 1)]}
+        expected_template_locals = {}
+        expected_refs = {'some["foo.bar"]': [("<string>", 1)]}
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+        )
+
+        refs = template.analyze(raise_for_failures=True)
+        _ref = list(refs.variables.keys())[0]
+        self.assertEqual(_ref.parts, ("some", "foo.bar"))
+
+        global_ref = list(refs.global_variables.keys())[0]
+        self.assertEqual(global_ref.parts, ("some", "foo.bar"))
+
+        async def coro():
+            return await template.analyze_async(raise_for_failures=True)
+
+        refs = asyncio.run(coro())
+        _ref = list(refs.variables.keys())[0]
+        self.assertEqual(_ref.parts, ("some", "foo.bar"))
+
+        global_ref = list(refs.global_variables.keys())[0]
+        self.assertEqual(global_ref.parts, ("some", "foo.bar"))
