@@ -37,6 +37,7 @@ from liquid.exceptions import TemplateNotFound
 
 from liquid.expression import Expression, StringLiteral
 from liquid.expression import Identifier
+from liquid.expression import IdentifierPathElement
 from liquid.expression import Literal
 
 from liquid.output import LimitedStringIO
@@ -286,9 +287,9 @@ class BoundTemplate:
         ).analyze()
 
         return TemplateAnalysis(
-            variables=dict(refs.variables),
-            local_variables=dict(refs.template_locals),
-            global_variables=dict(refs.template_globals),
+            variables={str(k): v for k, v in refs.variables.items()},
+            local_variables={str(k): v for k, v in refs.template_locals.items()},
+            global_variables={str(k): v for k, v in refs.template_globals.items()},
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
         )
@@ -304,9 +305,9 @@ class BoundTemplate:
         ).analyze_async()
 
         return TemplateAnalysis(
-            variables=dict(refs.variables),
-            local_variables=dict(refs.template_locals),
-            global_variables=dict(refs.template_globals),
+            variables={str(k): v for k, v in refs.variables.items()},
+            local_variables={str(k): v for k, v in refs.template_locals.items()},
+            global_variables={str(k): v for k, v in refs.template_globals.items()},
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
         )
@@ -426,7 +427,8 @@ class TemplateDrop(Mapping[str, Optional[str]]):
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
 
 Refs = Dict[str, List[Tuple[str, int]]]
-ReferenceMap = DefaultDict[str, List[Tuple[str, int]]]
+ReferenceMap = DefaultDict[Identifier, List[Tuple[str, int]]]
+NameMap = DefaultDict[str, List[Tuple[str, int]]]
 
 
 # pylint: disable=too-few-public-methods
@@ -555,11 +557,11 @@ class _TemplateVariableCounter:
         self.variables: ReferenceMap = defaultdict(list)
 
         # Nodes and Expressions that don't implement a `children()` method.
-        self.failed_visits: ReferenceMap = defaultdict(list)
+        self.failed_visits: NameMap = defaultdict(list)
 
         # Tags that load templates with an expression that can not be analyzed
         # statically.
-        self.unloadable_partials: ReferenceMap = defaultdict(list)
+        self.unloadable_partials: NameMap = defaultdict(list)
 
         # Block scoped names.
         self._scope = scope if scope is not None else ReadOnlyChainMap()
@@ -667,22 +669,28 @@ class _TemplateVariableCounter:
             # pushing the next block scope. This should highlight names that are
             # expected to be "global".
             for ref in refs:
-                _ref = RE_SPLIT_IDENT.split(ref, 1)[0]
-                if _ref not in self._scope and _ref not in self.template_locals:
+                _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
+                if (
+                    _ref not in self._scope
+                    and Identifier(path=[IdentifierPathElement(_ref)])
+                    not in self.template_locals
+                ):
                     self.template_globals[ref].append(
                         (self._template_name, child.linenum)
                     )
 
         if child.template_scope:
             for name in child.template_scope:
-                self.template_locals[name].append((self._template_name, child.linenum))
+                self.template_locals[
+                    Identifier(path=[IdentifierPathElement(name)])
+                ].append((self._template_name, child.linenum))
 
-    def _analyze_expression(self, expression: Expression) -> List[str]:
+    def _analyze_expression(self, expression: Expression) -> List[Identifier]:
         """Return a list of references used in the given expression."""
-        refs: List[str] = []
+        refs: List[Identifier] = []
 
         if isinstance(expression, Identifier):
-            refs.append(str(expression))
+            refs.append(expression)
 
         for expr in expression.children():
             refs.extend(self._analyze_expression(expr))
@@ -753,7 +761,7 @@ class _TemplateVariableCounter:
         load_context = child.load_context or {}
 
         # Keep track of partial templates that have already been analyzed. This prevents
-        # us from analysing the same template twice and protects us against recursive
+        # us from analyzing the same template twice and protects us against recursive
         # includes/renders.
         if (name, load_context) in self._partials:
             return None, None
@@ -841,11 +849,11 @@ class _TemplateVariableCounter:
         for _name, _refs in refs.template_globals.items():
             self.template_globals[_name].extend(_refs)
 
-        for _name, _refs in refs.failed_visits.items():
-            self.failed_visits[_name].extend(_refs)
+        for node_name, _refs in refs.failed_visits.items():
+            self.failed_visits[node_name].extend(_refs)
 
-        for _name, _refs in refs.unloadable_partials.items():
-            self.unloadable_partials[_name].extend(_refs)
+        for template_name, _refs in refs.unloadable_partials.items():
+            self.unloadable_partials[template_name].extend(_refs)
 
     def _raise_for_failures(self) -> None:
         if self.raise_for_failures and self.failed_visits:
