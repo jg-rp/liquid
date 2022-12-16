@@ -1,8 +1,8 @@
 Python Liquid Change Log
 ========================
 
-Version 1.6.0 (unreleased)
---------------------------
+Version 1.6.0
+-------------
 
 **Fixes**
 
@@ -16,6 +16,7 @@ Version 1.6.0 (unreleased)
 - The dictionaries returned by ``liquid.BoundTemplate.analyze()`` now use instances of
   ``ReferencedVariable`` for their keys. ``ReferencedVariable`` is a ``str`` subclass
   that adds a ``parts`` property, being a tuple representation of the variable.
+  See `#87 <https://github.com/jg-rp/liquid/issues/87>`_.
 
 Version 1.5.1
 -------------
