@@ -14,11 +14,11 @@ template language for flexible web apps.
     :target: https://anaconda.org/conda-forge/python-liquid
     :alt: conda-forge
 
-.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Tests/main?label=tests&style=flat-square
+.. image:: https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/tests.yaml?branch=main&label=tests&style=flat-square
     :target: https://github.com/jg-rp/liquid/actions/workflows/tests.yaml
     :alt: Tests
 
-.. image:: https://img.shields.io/github/workflow/status/jg-rp/liquid/Coverage/main?label=coverage&style=flat-square
+.. image:: https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/coverage.yaml?branch=main&label=coverage&style=flat-square
     :target: https://github.com/jg-rp/liquid/actions/workflows/coverage.yaml
     :alt: Coverage
 
