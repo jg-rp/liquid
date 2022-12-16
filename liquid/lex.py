@@ -358,7 +358,7 @@ def get_liquid_expression_lexer(
     )
 
 
-# For backaward compatibility. No line comments.
+# For backwards compatibility. No line comments.
 tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string="")
 
 

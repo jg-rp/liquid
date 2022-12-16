@@ -148,11 +148,26 @@ class CountTemplateVariablesTestCase(TestCase):
         template = Template("{{ x[y.z].title }}")
 
         expected_template_globals = {
-            "x.[y.z].title": [("<string>", 1)],
+            "x[y.z].title": [("<string>", 1)],
             "y.z": [("<string>", 1)],
         }
         expected_template_locals = {}
-        expected_refs = {"x.[y.z].title": [("<string>", 1)], "y.z": [("<string>", 1)]}
+        expected_refs = {"x[y.z].title": [("<string>", 1)], "y.z": [("<string>", 1)]}
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+        )
+
+    def test_analyze_identifier_with_bracketed_string_literal_containing_dots(self):
+        """Test that we can represent dotted properties."""
+        template = Template("{{ some['foo.bar'] }}")
+
+        expected_template_globals = {'some["foo.bar"]': [("<string>", 1)]}
+        expected_template_locals = {}
+        expected_refs = {'some["foo.bar"]': [("<string>", 1)]}
 
         self._test(
             template,

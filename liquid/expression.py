@@ -351,8 +351,12 @@ class Identifier(Expression):
             if isinstance(elem, Identifier):
                 buf.append(f"[{elem}]")
             else:
-                buf.append(str(elem))
-        return ".".join(buf)
+                _str = str(elem)
+                if "." in _str:
+                    buf.append(f'["{elem}"]')
+                else:
+                    buf.append(str(elem))
+        return ".".join(buf).replace(".[", "[")
 
     def __hash__(self) -> int:
         return hash(tuple(self.path))
