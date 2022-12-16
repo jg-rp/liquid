@@ -331,6 +331,7 @@ class IdentifierPathElement(Literal[Union[int, str]]):
 
 
 IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
+IdentifierTuple = Tuple[Union[str, "IdentifierTuple"], ...]
 
 
 class Identifier(Expression):
@@ -357,6 +358,16 @@ class Identifier(Expression):
                 else:
                     buf.append(str(elem))
         return ".".join(buf).replace(".[", "[")
+
+    def as_tuple(self) -> IdentifierTuple:
+        """Return this identifier's path as a tuple."""
+        parts: List[Union[str, IdentifierTuple]] = []
+        for elem in self.path:
+            if isinstance(elem, Identifier):
+                parts.append(elem.as_tuple())
+            else:
+                parts.append(str(elem))
+        return tuple(parts)
 
     def __hash__(self) -> int:
         return hash(tuple(self.path))

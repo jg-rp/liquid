@@ -48,6 +48,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
 
         self._test(template, data, expect_variables, expect_locals, expect_undefined)
 
+    def test_analyze_output_with_bracketed_properties(self):
+        """Test that we handle bracketed property access with dots."""
+        template = Template("{{ some['foo.bar'].other }}")
+        data = {}
+        expect_variables = {'some["foo.bar"].other': 1}
+        expect_locals = {}
+        expect_undefined = {'some["foo.bar"].other': 1}
+
+        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+
     def test_visit_branches(self):
         """Test that we only count references to variables in visited branches."""
         template = Template(
