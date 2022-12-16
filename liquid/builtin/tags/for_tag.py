@@ -295,6 +295,9 @@ class BreakNode(Node):
     ) -> Optional[bool]:
         raise BreakLoop("break")
 
+    def children(self) -> List[ChildNode]:
+        return []
+
 
 class ContinueNode(Node):
     """Parse tree node for the built-in "continue" tag."""
@@ -313,6 +316,9 @@ class ContinueNode(Node):
         buffer: TextIO,
     ) -> Optional[bool]:
         raise ContinueLoop("continue")
+
+    def children(self) -> List[ChildNode]:
+        return []
 
 
 class ForTag(Tag):

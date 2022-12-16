@@ -315,19 +315,21 @@ class CountTemplateVariablesTestCase(TestCase):
                 [
                     "{% for x in (1..y) %}",
                     "  {{ x }}",
+                    "{% break %}",
                     "{% else %}",
                     "  {{ z }}",
+                    "{% continue %}",
                     "{% endfor %}",
                 ]
             )
         )
 
-        expected_template_globals = {"y": [("<string>", 1)], "z": [("<string>", 4)]}
+        expected_template_globals = {"y": [("<string>", 1)], "z": [("<string>", 5)]}
         expected_template_locals = {}
         expected_refs = {
             "x": [("<string>", 2)],
             "y": [("<string>", 1)],
-            "z": [("<string>", 4)],
+            "z": [("<string>", 5)],
         }
 
         self._test(

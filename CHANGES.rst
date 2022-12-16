@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.6.1
+-------------
+
+**Fixes**
+
+- Fixed static template analysis fails with ``{% break %}`` and ``{% continue %}``.
+  See `#89 <https://github.com/jg-rp/liquid/issues/89>`_.
+
 Version 1.6.0
 -------------
 
