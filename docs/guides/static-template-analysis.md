@@ -36,6 +36,25 @@ for name, location in analysis.variables.items():
 'name' found in '<string>' on line 4
 ```
 
+**_New in version 1.6.0_**
+
+Variable names - the keys of `TemplateAnalysis.variables`, and others - are a `str` subclass that includes a `parts` property, being a tuple representation of a variable's parts.
+
+```python
+from liquid import Template
+
+template = Template("{{ data.some[thing['foo.bar']] }}")
+
+for var, location in template.analyze().variables.items():
+    for template_name, line_number in location:
+        print(f"{var.parts} found in '{template_name}' on line {line_number}")
+```
+
+```plain title="output"
+('data', 'some', ('thing', 'foo.bar')) found in '<string>' on line 1
+('thing', 'foo.bar') found in '<string>' on line 1
+```
+
 ## Global Template Variables
 
 The `global_variables` property of [`TemplateAnalysis`](../api/template-analysis.md) is similar to `variables`, but only includes those variables that are not in scope from previous `assign` or `capture` tags, or added to a block's scope by a block tag.

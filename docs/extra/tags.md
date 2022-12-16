@@ -98,7 +98,7 @@ template = env.from_string("{{ 'hello user' if user.logged_in else 'please log i
 
 data = {
   "user": {
-    "logged_in": false
+    "logged_in": False
   }
 }
 
