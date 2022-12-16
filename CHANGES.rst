@@ -1,14 +1,14 @@
 Python Liquid Change Log
 ========================
 
-Version 1.5.2
--------------
+Version 1.5.2 (unreleased)
+--------------------------
 
 **Fixes**
 
 - Fixed the string representation of ``liquid.expression.Identifier``, which is exposed
   in the results of ``liquid.Template.analyze()``. We now represent variable path
-  elements containing a ``.`` as a quoted string inside square brackets.
+  elements containing a ``.`` as quoted strings inside square brackets.
   See `#87 <https://github.com/jg-rp/liquid/issues/87>`_.
 
 Version 1.5.1
