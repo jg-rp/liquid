@@ -35,7 +35,7 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
 from liquid.exceptions import TemplateNotFound
 
-from liquid.expression import Expression, StringLiteral
+from liquid.expression import Expression, StringLiteral, FilteredExpression
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import IdentifierTuple
@@ -297,6 +297,7 @@ class BoundTemplate:
             },
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
+            filters=dict(refs.filters),
         )
 
     async def analyze_async(
@@ -319,6 +320,7 @@ class BoundTemplate:
             },
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
+            filters=dict(refs.filters),
         )
 
     def analyze_with_context(
@@ -352,6 +354,7 @@ class BoundTemplate:
             all_variables=dict(Counter(context.all_references)),
             local_variables=dict(Counter(context.local_references)),
             undefined_variables=dict(Counter(context.undefined_references)),
+            filters=dict(Counter(context.filters)),
         )
 
     async def analyze_with_context_async(
@@ -367,6 +370,7 @@ class BoundTemplate:
             all_variables=dict(Counter(context.all_references)),
             local_variables=dict(Counter(context.local_references)),
             undefined_variables=dict(Counter(context.undefined_references)),
+            filters=dict(Counter(context.filters)),
         )
 
 
@@ -488,7 +492,7 @@ class ContextualTemplateAnalysis:
         ``assigns``.
     """
 
-    __slots__ = ("all_variables", "local_variables", "undefined_variables")
+    __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
 
     def __init__(
         self,
@@ -496,10 +500,12 @@ class ContextualTemplateAnalysis:
         all_variables: Dict[str, int],
         local_variables: Dict[str, int],
         undefined_variables: Dict[str, int],
+        filters: Dict[str, int],
     ) -> None:
         self.all_variables = all_variables
         self.local_variables = local_variables
         self.undefined_variables = undefined_variables
+        self.filters = filters
 
 
 # pylint: disable=too-few-public-methods
@@ -532,6 +538,7 @@ class TemplateAnalysis:
         "global_variables",
         "failed_visits",
         "unloadable_partials",
+        "filters",
     )
 
     def __init__(
@@ -542,12 +549,14 @@ class TemplateAnalysis:
         global_variables: Refs,
         failed_visits: Dict[str, List[Tuple[str, int]]],
         unloadable_partials: Dict[str, List[Tuple[str, int]]],
+        filters: Dict[str, List[Tuple[str, int]]],
     ) -> None:
         self.variables = variables
         self.local_variables = local_variables
         self.global_variables = global_variables
         self.failed_visits = failed_visits
         self.unloadable_partials = unloadable_partials
+        self.filters = filters
 
 
 # pylint: disable=too-many-instance-attributes
@@ -594,6 +603,9 @@ class _TemplateVariableCounter:
         self.template_globals: ReferenceMap = defaultdict(list)
         # Names that are referenced by a Liquid expression.
         self.variables: ReferenceMap = defaultdict(list)
+
+        # filters used
+        self.filters: NameMap = defaultdict(list)
 
         # Nodes and Expressions that don't implement a `children()` method.
         self.failed_visits: NameMap = defaultdict(list)
@@ -701,13 +713,13 @@ class _TemplateVariableCounter:
                 self.failed_visits[name].append((self._template_name, child.linenum))
                 return
 
-            for ref in refs:
+            for ref in refs.variable_references:
                 self.variables[ref].append((self._template_name, child.linenum))
 
             # Check refs that are not in scope or in the local namespace before
             # pushing the next block scope. This should highlight names that are
             # expected to be "global".
-            for ref in refs:
+            for ref in refs.variable_references:
                 _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
                 if (
                     _ref not in self._scope
@@ -718,18 +730,24 @@ class _TemplateVariableCounter:
                         (self._template_name, child.linenum)
                     )
 
+            for f_ref in refs.filter_references:
+                self.filters[f_ref].append((self._template_name, child.linenum))
+
         if child.template_scope:
             for name in child.template_scope:
                 self.template_locals[
                     Identifier(path=[IdentifierPathElement(name)])
                 ].append((self._template_name, child.linenum))
 
-    def _analyze_expression(self, expression: Expression) -> List[Identifier]:
+    def _analyze_expression(self, expression: Expression) -> References:
         """Return a list of references used in the given expression."""
-        refs: List[Identifier] = []
+        refs: References = References()
 
         if isinstance(expression, Identifier):
-            refs.append(expression)
+            refs.append_variable(expression)
+
+        if isinstance(expression, FilteredExpression):
+            refs.append_filters([f.name for f in expression.filters])
 
         for expr in expression.children():
             refs.extend(self._analyze_expression(expr))
@@ -894,6 +912,9 @@ class _TemplateVariableCounter:
         for template_name, _refs in refs.unloadable_partials.items():
             self.unloadable_partials[template_name].extend(_refs)
 
+        for filter_name, _refs in refs.filters.items():
+            self.filters[filter_name].extend(_refs)
+
     def _raise_for_failures(self) -> None:
         if self.raise_for_failures and self.failed_visits:
             msg_target = next(iter(self.failed_visits.keys()))
@@ -917,3 +938,24 @@ class _TemplateVariableCounter:
             else:
                 msg = f"partial template '{msg_target}' could not be loaded"
             raise TemplateTraversalError(f"failed visit: {msg}")
+
+
+class References:
+    "Collects references for Template.analyze and friends"
+
+    def __init__(self) -> None:
+        self.variable_references: List[Identifier] = []
+        self.filter_references: List[str] = []
+
+    def append_variable(self, var: Identifier) -> None:
+        "Add a variable reference"
+        self.variable_references.append(var)
+
+    def append_filters(self, filters: List[str]) -> None:
+        "Add references to filters"
+        self.filter_references.extend(filters)
+
+    def extend(self, refs: References) -> None:
+        "Incorporate references from another References"
+        self.variable_references.extend(refs.variable_references)
+        self.filter_references.extend(refs.filter_references)

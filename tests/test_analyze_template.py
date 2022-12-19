@@ -2,7 +2,7 @@
 # pylint: disable=too-many-lines
 import asyncio
 
-from typing import List, Optional, TextIO
+from typing import Dict, List, Optional, TextIO, Tuple
 from unittest import TestCase
 
 from liquid import Environment
@@ -85,6 +85,7 @@ class CountTemplateVariablesTestCase(TestCase):
         failed_visits: Optional[Refs] = None,
         unloadable: Optional[Refs] = None,
         raise_for_failures: bool = True,
+        template_filters: Dict[str, List[Tuple[str, int]]] = None,
     ) -> None:
         failed_visits = failed_visits if failed_visits is not None else {}
         unloadable = unloadable if unloadable is not None else {}
@@ -95,6 +96,8 @@ class CountTemplateVariablesTestCase(TestCase):
         self.assertEqual(refs.variables, template_refs)
         self.assertEqual(refs.failed_visits, failed_visits)
         self.assertEqual(refs.unloadable_partials, unloadable)
+        if template_filters:
+            self.assertEqual(refs.filters, template_filters)
 
         async def coro():
             return await template.analyze_async(raise_for_failures=raise_for_failures)
@@ -105,6 +108,8 @@ class CountTemplateVariablesTestCase(TestCase):
         self.assertEqual(refs.variables, template_refs)
         self.assertEqual(refs.failed_visits, failed_visits)
         self.assertEqual(refs.unloadable_partials, unloadable)
+        if template_filters:
+            self.assertEqual(refs.filters, template_filters)
 
     def test_analyze_output(self):
         """Test that we can count references in an output statement."""
@@ -122,11 +127,16 @@ class CountTemplateVariablesTestCase(TestCase):
             "z": [("<string>", 1)],
         }
 
+        expected_filters = {
+            "default": [("<string>", 1)],
+        }
+
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_filters,
         )
 
     def test_analyze_identifier_with_bracketed_string_literal(self):
@@ -184,12 +194,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("<string>", 1)], "z": [("<string>", 1)]}
         expected_template_locals = {"x": [("<string>", 1)]}
         expected_refs = {"y": [("<string>", 1)], "z": [("<string>", 1)]}
+        expected_filters = {"append": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_filters,
         )
 
     def test_analyze_capture_tag(self):
@@ -950,12 +962,17 @@ class CountTemplateVariablesTestCase(TestCase):
             "bar": [("<string>", 1)],
             "baz": [("<string>", 1)],
         }
+        expected_template_filters = {
+            "upcase": [("<string>", 1)],
+            "append": [("<string>", 1)],
+        }
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_with_tag(self) -> None:
