@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.7.0 (unreleased)
+--------------------------
+
+**Features**
+
+- Report filter usage alongside variable usage with template static and contextual
+  analysis. See `#91 <https://github.com/jg-rp/liquid/pull/91>`_.
+
 Version 1.6.1
 -------------
 
