@@ -98,6 +98,8 @@ class CountTemplateVariablesTestCase(TestCase):
         self.assertEqual(refs.unloadable_partials, unloadable)
         if template_filters:
             self.assertEqual(refs.filters, template_filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
         async def coro():
             return await template.analyze_async(raise_for_failures=raise_for_failures)
@@ -110,6 +112,8 @@ class CountTemplateVariablesTestCase(TestCase):
         self.assertEqual(refs.unloadable_partials, unloadable)
         if template_filters:
             self.assertEqual(refs.filters, template_filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
     def test_analyze_output(self):
         """Test that we can count references in an output statement."""
@@ -312,12 +316,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "y": [("<string>", 1)],
             "z": [("<string>", 1)],
         }
+        expected_template_filters = {"default": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_for_tag(self):
@@ -445,12 +451,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "foo": [("<string>", 3)],
             "i": [("<string>", 9)],
         }
+        expected_template_filters = {"upcase": [("<string>", 3), ("<string>", 5)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_tablerow_tag(self):
@@ -466,12 +474,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("<string>", 1)],
             "a": [("<string>", 1)],
         }
+        expected_template_filters = {"append": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_unless_tag(self):
@@ -599,12 +609,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1)],
             "some_name": [("some_name", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_include_tag_with_alias(self):
@@ -620,12 +632,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "foo": [("<string>", 1)],
             "x": [("some_name", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_include_tag_with_arguments(self):
@@ -643,12 +657,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1), ("<string>", 2)],
             "y": [("some_name", 1), ("<string>", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_include_with_variable_name(self):
@@ -782,12 +798,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1)],
             "some_name": [("some_name", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_render_tag_with_alias(self):
@@ -803,12 +821,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "foo": [("<string>", 1)],
             "x": [("some_name", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_render_tag_with_arguments(self):
@@ -826,12 +846,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1), ("<string>", 2)],
             "y": [("some_name", 1), ("<string>", 1)],
         }
+        expected_template_filters = {"append": [("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_filters=expected_template_filters,
         )
 
     def test_analyze_render_tag_scope(self):

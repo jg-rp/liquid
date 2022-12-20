@@ -32,6 +32,8 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         self.assertEqual(refs.undefined_variables, undefined)
         if filters is not None:
             self.assertEqual(refs.filters, filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
         async def coro():
             return await template.analyze_with_context_async(**data)
@@ -42,6 +44,8 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         self.assertEqual(refs.undefined_variables, undefined)
         if filters is not None:
             self.assertEqual(refs.filters, filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
     def test_analyze_output(self):
         """Test that we count references to variables in output statements."""
@@ -262,5 +266,13 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 1}
         expect_locals = {}
         expect_undefined = {}
+        expect_filters = {"mock": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
