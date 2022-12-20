@@ -739,6 +739,7 @@ class VariableCaptureContext(Context):
         "all_references",
         "undefined_references",
         "root_context",
+        "filters",
     )
 
     # Used for formatting context path strings.
@@ -767,6 +768,7 @@ class VariableCaptureContext(Context):
         self.local_references: List[str] = []
         self.all_references: List[str] = []
         self.undefined_references: List[str] = []
+        self.filters: List[str] = []
 
         root_context: VariableCaptureContext = self
         while root_context.parent_context and isinstance(
@@ -803,6 +805,10 @@ class VariableCaptureContext(Context):
     def decrement(self, name: str) -> int:
         self.local_references.append(name)
         return super().decrement(name)
+
+    def filter(self, name: str) -> Callable[..., object]:
+        self.root_context.filters.append(name)
+        return super().filter(name)
 
     def _count_reference(self, path: ContextPath, result: object) -> None:
         if isinstance(path, str):

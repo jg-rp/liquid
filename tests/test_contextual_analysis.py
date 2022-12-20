@@ -3,7 +3,7 @@
 import asyncio
 import unittest
 
-from typing import Dict
+from typing import Dict, Optional
 
 from liquid import Context
 from liquid import DictLoader
@@ -24,11 +24,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         variables: Dict[str, int],
         assigns: Dict[str, int],
         undefined: Dict[str, int],
+        filters: Optional[Dict[str, int]] = None,
     ) -> None:
         refs = template.analyze_with_context(**data)
         self.assertEqual(refs.all_variables, variables)
         self.assertEqual(refs.local_variables, assigns)
         self.assertEqual(refs.undefined_variables, undefined)
+        if filters is not None:
+            self.assertEqual(refs.filters, filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
         async def coro():
             return await template.analyze_with_context_async(**data)
@@ -37,6 +42,10 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         self.assertEqual(refs.all_variables, variables)
         self.assertEqual(refs.local_variables, assigns)
         self.assertEqual(refs.undefined_variables, undefined)
+        if filters is not None:
+            self.assertEqual(refs.filters, filters)
+        else:
+            self.assertEqual(refs.filters, {})
 
     def test_analyze_output(self):
         """Test that we count references to variables in output statements."""
@@ -45,8 +54,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 1, "y": 1, "z": 1}
         expect_locals = {}
         expect_undefined = {"x": 1}
+        expect_filters = {"default": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_analyze_output_with_bracketed_properties(self):
         """Test that we handle bracketed property access with dots."""
@@ -67,8 +84,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {}
         expect_locals = {}
         expect_undefined = {}
+        expect_filters = {}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_analyze_assign(self):
         """Test that we count references to variables in assignment tags."""
@@ -77,8 +102,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 1, "y": 1, "z": 1, "a": 1}
         expect_locals = {"x": 1}
         expect_undefined = {}
+        expect_filters = {"default": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_count_number_of_references(self):
         """Test that we count multiple references to the same variable name."""
@@ -87,8 +120,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 3, "y": 1, "z": 1}
         expect_locals = {}
         expect_undefined = {"x": 3}
+        expect_filters = {"default": 1, "append": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_analyze_included_template(self):
         """Test that we count references to variables in included templates."""
@@ -100,8 +141,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 2, "y": 1}
         expect_locals = {}
         expect_undefined = {"x": 2}
+        expect_filters = {"append": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_analyze_rendered_template(self):
         """Test that we count references to variables in rendered templates."""
@@ -113,8 +162,16 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 2, "y": 1}
         expect_locals = {}
         expect_undefined = {"x": 2}
+        expect_filters = {"append": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
 
     def test_analyze_loop(self):
         """Test that we count variables in every iteration of a for loop."""
@@ -209,5 +266,13 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         expect_variables = {"x": 1}
         expect_locals = {}
         expect_undefined = {}
+        expect_filters = {"mock": 1}
 
-        self._test(template, data, expect_variables, expect_locals, expect_undefined)
+        self._test(
+            template,
+            data,
+            expect_variables,
+            expect_locals,
+            expect_undefined,
+            filters=expect_filters,
+        )
