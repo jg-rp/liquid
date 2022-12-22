@@ -23,6 +23,7 @@ from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
 
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 
@@ -42,6 +43,7 @@ from liquid.expression import IdentifierTuple
 from liquid.expression import Literal
 
 from liquid.output import LimitedStringIO
+from liquid.token import TOKEN_TAG
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -296,6 +298,7 @@ class BoundTemplate:
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
             filters=dict(refs.filters),
+            tags=dict(refs.tags),
         )
 
     async def analyze_async(
@@ -319,6 +322,7 @@ class BoundTemplate:
             failed_visits=dict(refs.failed_visits),
             unloadable_partials=dict(refs.unloadable_partials),
             filters=dict(refs.filters),
+            tags=dict(refs.tags),
         )
 
     def analyze_with_context(
@@ -467,9 +471,18 @@ class ReferencedVariable(str):
         return self._parts
 
 
-Refs = Dict[ReferencedVariable, List[Tuple[str, int]]]
-ReferenceMap = DefaultDict[Identifier, List[Tuple[str, int]]]
-NameMap = DefaultDict[str, List[Tuple[str, int]]]
+# (template_name, line_number).
+Location = Tuple[str, int]
+
+# A mapping of template variables to their (template_name, line_number) locations.
+Refs = Dict[ReferencedVariable, List[Location]]
+
+# A mapping of Identifier expressions to their (template_name, line_number) locations.
+IdentifierMap = DefaultDict[Identifier, List[Location]]
+
+# A mapping of template, tag or filter names to their (template_name, line_number)
+# locations.
+NameRefs = Dict[str, List[Location]]
 
 
 # pylint: disable=too-few-public-methods
@@ -512,9 +525,9 @@ class TemplateAnalysis:
     """The result of analyzing a template's variables using
     :meth:`BoundTemplate.analyze`.
 
-    Each of the following properties is a dictionary mapping variable or filter names
-    to a list of two-tuples. Each tuple holds the location of a reference to the name as
-    (<template name>, <line number>). If a name is referenced multiple times, it will
+    Each of the following properties is a dictionary mapping variable, tag or filter
+    names to a list of tuples. Each tuple holds the location of a reference to the name
+    as (<template name>, <line number>). If a name is referenced multiple times, it will
     appear multiple times in the list. If a name is referenced before it is "assigned",
     it will appear in ``local_variables`` and ``global_variables``.
 
@@ -529,7 +542,8 @@ class TemplateAnalysis:
         be visited, probably because they do not implement a ``children`` method.
     :ivar unloadable_partials: Names or identifiers of partial templates that could not
         be loaded. This will be empty if ``follow_partials`` is ``False``.
-    :ivar filters: Names of filters found during static analysis.
+    :ivar filters: All filters found during static analysis.
+    :ivar tags: All tags found during static analysis.
     """
 
     __slots__ = (
@@ -539,6 +553,7 @@ class TemplateAnalysis:
         "failed_visits",
         "unloadable_partials",
         "filters",
+        "tags",
     )
 
     def __init__(
@@ -547,9 +562,10 @@ class TemplateAnalysis:
         variables: Refs,
         local_variables: Refs,
         global_variables: Refs,
-        failed_visits: Dict[str, List[Tuple[str, int]]],
-        unloadable_partials: Dict[str, List[Tuple[str, int]]],
-        filters: Dict[str, List[Tuple[str, int]]],
+        failed_visits: NameRefs,
+        unloadable_partials: NameRefs,
+        filters: NameRefs,
+        tags: NameRefs,
     ) -> None:
         self.variables = variables
         self.local_variables = local_variables
@@ -557,6 +573,7 @@ class TemplateAnalysis:
         self.failed_visits = failed_visits
         self.unloadable_partials = unloadable_partials
         self.filters = filters
+        self.tags = tags
 
 
 # pylint: disable=too-many-instance-attributes
@@ -586,33 +603,35 @@ class _TemplateVariableCounter:
         follow_partials: bool = True,
         raise_for_failures: bool = True,
         scope: Optional[ReadOnlyChainMap] = None,
-        template_locals: Optional[ReferenceMap] = None,
+        template_locals: Optional[IdentifierMap] = None,
         partials: Optional[List[Tuple[str, Optional[Dict[str, str]]]]] = None,
     ) -> None:
         self.template = template
         self._template_name = self.template.name or "<string>"
-
         self.follow_partials = follow_partials
         self.raise_for_failures = raise_for_failures
 
         # Names that are added to the template "local" scope.
-        self.template_locals: ReferenceMap = (
+        self.template_locals: IdentifierMap = (
             template_locals if template_locals is not None else defaultdict(list)
         )
-        # Names that are referenced but are not in the template local scope
-        self.template_globals: ReferenceMap = defaultdict(list)
-        # Names that are referenced by a Liquid expression.
-        self.variables: ReferenceMap = defaultdict(list)
 
-        # filters used
-        self.filters: NameMap = defaultdict(list)
+        # Names that are referenced but are not in the template local scope
+        self.template_globals: IdentifierMap = defaultdict(list)
+
+        # Names that are referenced by a Liquid expression.
+        self.variables: IdentifierMap = defaultdict(list)
+
+        # Tag and filter names.
+        self.filters: NameRefs = defaultdict(list)
+        self.tags: NameRefs = defaultdict(list)
 
         # Nodes and Expressions that don't implement a `children()` method.
-        self.failed_visits: NameMap = defaultdict(list)
+        self.failed_visits: NameRefs = defaultdict(list)
 
         # Tags that load templates with an expression that can not be analyzed
         # statically.
-        self.unloadable_partials: NameMap = defaultdict(list)
+        self.unloadable_partials: NameRefs = defaultdict(list)
 
         # Block scoped names.
         self._scope = scope if scope is not None else ReadOnlyChainMap()
@@ -643,6 +662,8 @@ class _TemplateVariableCounter:
         return self
 
     def _analyze(self, root: Node) -> None:
+        self._count_tag(root)
+
         try:
             children = root.children()
         except NotImplementedError:
@@ -674,6 +695,8 @@ class _TemplateVariableCounter:
                 self._scope.pop()
 
     async def _analyze_async(self, root: Node) -> None:
+        self._count_tag(root)
+
         try:
             children = root.children()
         except NotImplementedError:
@@ -890,13 +913,18 @@ class _TemplateVariableCounter:
         load_context = child.load_context or {}
 
         # Keep track of partial templates that have already been analyzed. This prevents
-        # us from analysing the same template twice and protects us against recursive
+        # us from analyzing the same template twice and protects us against recursive
         # includes/renders.
         if (name, load_context) in self._partials:
             return None, None
 
         self._partials.append((name, load_context))
         return name, load_context
+
+    def _count_tag(self, node: Node) -> None:
+        token = node.token()
+        if not isinstance(node, BlockNode) and token.type == TOKEN_TAG:
+            self.tags[token.value].append((self._template_name, token.linenum))
 
     def _update_reference_counters(self, refs: _TemplateVariableCounter) -> None:
         # Accumulate references from the partial/child template into its parent.
@@ -914,6 +942,9 @@ class _TemplateVariableCounter:
 
         for filter_name, _refs in refs.filters.items():
             self.filters[filter_name].extend(_refs)
+
+        for tag_name, _refs in refs.tags.items():
+            self.tags[tag_name].extend(_refs)
 
     def _raise_for_failures(self) -> None:
         if self.raise_for_failures and self.failed_visits:

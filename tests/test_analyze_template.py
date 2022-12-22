@@ -2,23 +2,35 @@
 # pylint: disable=too-many-lines
 import asyncio
 
-from typing import Dict, List, Optional, TextIO, Tuple
+from typing import List
+from typing import Optional
+from typing import TextIO
+
 from unittest import TestCase
 
 from liquid import Environment
 from liquid import DictLoader
 from liquid import Template
 
-from liquid.ast import ChildNode, Node
+from liquid.ast import ChildNode
+from liquid.ast import Node
+
 from liquid.context import Context
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
+
 from liquid.extra import add_inline_expression_tags
 from liquid.extra import WithTag
+
 from liquid.mode import Mode
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-from liquid.template import BoundTemplate, Refs
+
+from liquid.template import BoundTemplate
+from liquid.template import NameRefs
+from liquid.template import Refs
+from liquid.template import TemplateAnalysis
+
 from liquid.token import Token
 
 
@@ -72,8 +84,8 @@ class MockChildTag(MockTag):
 
 
 # pylint: disable=too-many-public-methods
-class CountTemplateVariablesTestCase(TestCase):
-    """Test that we can count a template's variable references."""
+class AnalyzeTemplateTestCase(TestCase):
+    """Test that we can count a template's variables, tags and filters."""
 
     # pylint: disable=too-many-arguments
     def _test(
@@ -85,35 +97,41 @@ class CountTemplateVariablesTestCase(TestCase):
         failed_visits: Optional[Refs] = None,
         unloadable: Optional[Refs] = None,
         raise_for_failures: bool = True,
-        template_filters: Dict[str, List[Tuple[str, int]]] = None,
+        template_filters: Optional[NameRefs] = None,
+        template_tags: Optional[NameRefs] = None,
     ) -> None:
-        failed_visits = failed_visits if failed_visits is not None else {}
-        unloadable = unloadable if unloadable is not None else {}
-
-        refs = template.analyze(raise_for_failures=raise_for_failures)
-        self.assertEqual(refs.local_variables, template_locals)
-        self.assertEqual(refs.global_variables, template_globals)
-        self.assertEqual(refs.variables, template_refs)
-        self.assertEqual(refs.failed_visits, failed_visits)
-        self.assertEqual(refs.unloadable_partials, unloadable)
-        if template_filters:
-            self.assertEqual(refs.filters, template_filters)
-        else:
-            self.assertEqual(refs.filters, {})
+        """Template analysis test helper."""
 
         async def coro():
             return await template.analyze_async(raise_for_failures=raise_for_failures)
 
-        refs = asyncio.run(coro())
-        self.assertEqual(refs.local_variables, template_locals)
-        self.assertEqual(refs.global_variables, template_globals)
-        self.assertEqual(refs.variables, template_refs)
-        self.assertEqual(refs.failed_visits, failed_visits)
-        self.assertEqual(refs.unloadable_partials, unloadable)
-        if template_filters:
-            self.assertEqual(refs.filters, template_filters)
-        else:
-            self.assertEqual(refs.filters, {})
+        def assert_refs(refs: TemplateAnalysis) -> None:
+            self.assertEqual(refs.local_variables, template_locals)
+            self.assertEqual(refs.global_variables, template_globals)
+            self.assertEqual(refs.variables, template_refs)
+
+            if failed_visits:
+                self.assertEqual(refs.failed_visits, failed_visits)
+            else:
+                self.assertEqual(refs.failed_visits, {})
+
+            if unloadable:
+                self.assertEqual(refs.unloadable_partials, unloadable)
+            else:
+                self.assertEqual(refs.unloadable_partials, {})
+
+            if template_filters:
+                self.assertEqual(refs.filters, template_filters)
+            else:
+                self.assertEqual(refs.filters, {})
+
+            if template_tags:
+                self.assertEqual(refs.tags, template_tags)
+            else:
+                self.assertEqual(refs.tags, {})
+
+        assert_refs(template.analyze(raise_for_failures=raise_for_failures))
+        assert_refs(asyncio.run(coro()))
 
     def test_analyze_output(self):
         """Test that we can count references in an output statement."""
@@ -199,6 +217,7 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_locals = {"x": [("<string>", 1)]}
         expected_refs = {"y": [("<string>", 1)], "z": [("<string>", 1)]}
         expected_filters = {"append": [("<string>", 1)]}
+        expected_tags = {"assign": [("<string>", 1)]}
 
         self._test(
             template,
@@ -206,6 +225,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_capture_tag(self):
@@ -215,12 +235,17 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("<string>", 1)]}
         expected_template_locals = {"x": [("<string>", 1)]}
         expected_refs = {"y": [("<string>", 1)]}
+        expected_tags = {
+            "capture": [("<string>", 1)],
+            "if": [("<string>", 1)],
+        }
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_case_tag(self):
@@ -255,12 +280,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "z": [("<string>", 4)],
             "b": [("<string>", 5)],
         }
+        expected_tags = {"case": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_cycle_tag(self):
@@ -278,12 +305,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "a": [("<string>", 1)],
             "b": [("<string>", 1)],
         }
+        expected_tags = {"cycle": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_decrement_tag(self):
@@ -293,12 +322,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {}
         expected_template_locals = {"x": [("<string>", 1)]}
         expected_refs = {}
+        expected_tags = {"decrement": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_echo_tag(self):
@@ -317,6 +348,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "z": [("<string>", 1)],
         }
         expected_template_filters = {"default": [("<string>", 1)]}
+        expected_tags = {"echo": [("<string>", 1)]}
 
         self._test(
             template,
@@ -324,6 +356,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_for_tag(self):
@@ -350,11 +383,18 @@ class CountTemplateVariablesTestCase(TestCase):
             "z": [("<string>", 5)],
         }
 
+        expected_tags = {
+            "break": [("<string>", 3)],
+            "continue": [("<string>", 6)],
+            "for": [("<string>", 1)],
+        }
+
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_if_tag(self):
@@ -384,12 +424,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "y": [("<string>", 3)],
             "b": [("<string>", 4)],
         }
+        expected_tags = {"if": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_ifchanged_tag(self):
@@ -399,12 +441,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"x": [("<string>", 1)]}
         expected_template_locals = {}
         expected_refs = {"x": [("<string>", 1)]}
+        expected_tags = {"ifchanged": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_increment_tag(self):
@@ -414,12 +458,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {}
         expected_template_locals = {"x": [("<string>", 1)]}
         expected_refs = {}
+        expected_tags = {"increment": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_liquid_tag(self):
@@ -451,7 +497,15 @@ class CountTemplateVariablesTestCase(TestCase):
             "foo": [("<string>", 3)],
             "i": [("<string>", 9)],
         }
-        expected_template_filters = {"upcase": [("<string>", 3), ("<string>", 5)]}
+        expected_template_filters = {
+            "upcase": [("<string>", 3), ("<string>", 5)],
+        }
+        expected_tags = {
+            "echo": [("<string>", 3), ("<string>", 5), ("<string>", 9)],
+            "for": [("<string>", 8)],
+            "if": [("<string>", 2)],
+            "liquid": [("<string>", 1)],
+        }
 
         self._test(
             template,
@@ -459,6 +513,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_tablerow_tag(self):
@@ -475,6 +530,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "a": [("<string>", 1)],
         }
         expected_template_filters = {"append": [("<string>", 1)]}
+        expected_tags = {"tablerow": [("<string>", 1)]}
 
         self._test(
             template,
@@ -482,6 +538,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_unless_tag(self):
@@ -511,12 +568,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "y": [("<string>", 3)],
             "b": [("<string>", 4)],
         }
+        expected_tags = {"unless": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag(self):
@@ -528,12 +587,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("some_name", 1)]}
         expected_template_locals = {}
         expected_refs = {"y": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag_with_assign(self):
@@ -546,12 +607,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("some_name", 1)]}
         expected_template_locals = {"z": [("some_name", 1)]}
         expected_refs = {"y": [("some_name", 1)], "z": [("<string>", 1)]}
+        expected_tags = {"assign": [("some_name", 1)], "include": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag_once(self):
@@ -563,12 +626,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("some_name", 1)]}
         expected_template_locals = {}
         expected_refs = {"y": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1), ("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_recursive_include_tag(self):
@@ -580,12 +645,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("some_name", 1)]}
         expected_template_locals = {}
         expected_refs = {"y": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1), ("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag_with_bound_variable(self):
@@ -610,6 +677,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "some_name": [("some_name", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
@@ -617,6 +685,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag_with_alias(self):
@@ -633,6 +702,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
@@ -640,6 +710,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_include_tag_with_arguments(self):
@@ -658,6 +729,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "y": [("some_name", 1), ("<string>", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
@@ -665,6 +737,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_include_with_variable_name(self):
@@ -679,6 +752,7 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_locals = {}
         expected_refs = {"somevar": [("<string>", 1)], "y": [("<string>", 1)]}
         expected_unloadable_partials = {"somevar": [("<string>", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
@@ -687,6 +761,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_globals,
             unloadable=expected_unloadable_partials,
             raise_for_failures=False,
+            template_tags=expected_tags,
         )
 
         with self.assertRaises(TemplateTraversalError):
@@ -708,6 +783,7 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_locals = {}
         expected_refs = {"y": [("<string>", 1)]}
         expected_unloadable_partials = {"nosuchtemplate": [("<string>", 1)]}
+        expected_tags = {"include": [("<string>", 1)]}
 
         self._test(
             template,
@@ -716,6 +792,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_globals,
             unloadable=expected_unloadable_partials,
             raise_for_failures=False,
+            template_tags=expected_tags,
         )
 
         with self.assertRaises(TemplateTraversalError):
@@ -737,12 +814,17 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"x": [("some_name", 1)], "z": [("some_name", 1)]}
         expected_template_locals = {"z": [("<string>", 1)]}
         expected_refs = {"x": [("some_name", 1)], "z": [("some_name", 1)]}
+        expected_tags = {
+            "assign": [("<string>", 1), ("some_name", 1)],
+            "render": [("<string>", 1)],
+        }
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_render_tag_once(self):
@@ -754,12 +836,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"x": [("some_name", 1)]}
         expected_template_locals = {}
         expected_refs = {"x": [("some_name", 1)]}
+        expected_tags = {"render": [("<string>", 1), ("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_recursive_render_tag(self):
@@ -771,12 +855,14 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_globals = {"y": [("some_name", 1)]}
         expected_template_locals = {}
         expected_refs = {"y": [("some_name", 1)]}
+        expected_tags = {"render": [("<string>", 1), ("some_name", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_analyze_render_tag_with_bound_variable(self):
@@ -799,6 +885,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "some_name": [("some_name", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"render": [("<string>", 1)]}
 
         self._test(
             template,
@@ -806,6 +893,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_render_tag_with_alias(self):
@@ -822,6 +910,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "x": [("some_name", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"render": [("<string>", 1)]}
 
         self._test(
             template,
@@ -829,6 +918,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_render_tag_with_arguments(self):
@@ -847,6 +937,7 @@ class CountTemplateVariablesTestCase(TestCase):
             "y": [("some_name", 1), ("<string>", 1)],
         }
         expected_template_filters = {"append": [("some_name", 1)]}
+        expected_tags = {"render": [("<string>", 1)]}
 
         self._test(
             template,
@@ -854,6 +945,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_locals,
             expected_template_globals,
             template_filters=expected_template_filters,
+            template_tags=expected_tags,
         )
 
     def test_analyze_render_tag_scope(self):
@@ -873,12 +965,17 @@ class CountTemplateVariablesTestCase(TestCase):
             "z": [("some_name", 1)],
             "y": [("<string>", 1)],
         }
+        expected_tags = {
+            "assign": [("<string>", 1), ("some_name", 1)],
+            "render": [("<string>", 1)],
+        }
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_render_template_not_found(self):
@@ -890,6 +987,7 @@ class CountTemplateVariablesTestCase(TestCase):
         expected_template_locals = {}
         expected_refs = {"y": [("<string>", 1)]}
         expected_unloadable_partials = {"nosuchtemplate": [("<string>", 1)]}
+        expected_tags = {"render": [("<string>", 1)]}
 
         self._test(
             template,
@@ -898,6 +996,7 @@ class CountTemplateVariablesTestCase(TestCase):
             expected_template_globals,
             unloadable=expected_unloadable_partials,
             raise_for_failures=False,
+            template_tags=expected_tags,
         )
 
         with self.assertRaises(TemplateTraversalError):
@@ -917,6 +1016,7 @@ class CountTemplateVariablesTestCase(TestCase):
         template = env.from_string("{% mock %}\n{% mock %}")
 
         expected_failed_visits = {"MockNode": [("<string>", 1), ("<string>", 2)]}
+        expected_tags = {"mock": [("<string>", 1), ("<string>", 2)]}
 
         self._test(
             template,
@@ -925,6 +1025,7 @@ class CountTemplateVariablesTestCase(TestCase):
             {},
             failed_visits=expected_failed_visits,
             raise_for_failures=False,
+            template_tags=expected_tags,
         )
 
         with self.assertRaises(TemplateTraversalError):
@@ -944,6 +1045,7 @@ class CountTemplateVariablesTestCase(TestCase):
         template = env.from_string("{% mock %}\n{% mock %}")
 
         expected_failed_visits = {"MockExpression": [("<string>", 1), ("<string>", 2)]}
+        expected_tags = {"mock": [("<string>", 1), ("<string>", 2)]}
 
         self._test(
             template,
@@ -952,6 +1054,7 @@ class CountTemplateVariablesTestCase(TestCase):
             {},
             failed_visits=expected_failed_visits,
             raise_for_failures=False,
+            template_tags=expected_tags,
         )
 
         with self.assertRaises(TemplateTraversalError):
@@ -1021,12 +1124,14 @@ class CountTemplateVariablesTestCase(TestCase):
             "collection.products.first.title": [("<string>", 1)],
             "p.title": [("<string>", 1), ("<string>", 1)],
         }
+        expected_tags = {"with": [("<string>", 1)]}
 
         self._test(
             template,
             expected_refs,
             expected_template_locals,
             expected_template_globals,
+            template_tags=expected_tags,
         )
 
     def test_variable_parts(self) -> None:
