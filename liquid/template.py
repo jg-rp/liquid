@@ -266,8 +266,6 @@ class BoundTemplate:
     ) -> TemplateAnalysis:
         """Statically analyze this template and any included/rendered templates.
 
-        Currently we only analyze references to template variables.
-
         :param follow_partials: If ``True``, we will try to load partial templates and
             analyze those templates too. Default's to ``True``.
         :type follow_partials: bool
@@ -479,8 +477,8 @@ class ContextualTemplateAnalysis:
     """The result of analyzing a template's variables using
     :meth:`BoundTemplate.analyze_with_context`.
 
-    Each of the following properties is a dictionary mapping variable names to the
-    number of times that variable was referenced.
+    Each of the following properties is a dictionary mapping variable or filter names
+    to the number of times that variable was referenced.
 
     :ivar all_variables: All variables references along a path through the template's
         syntax tree.
@@ -490,6 +488,7 @@ class ContextualTemplateAnalysis:
     :ivar undefined_variables: The names of variables that could not be resolved. If a
         name is referenced before it is assigned, it will appear in ``undefined`` and
         ``assigns``.
+    :ivar filters: Names of filters found during contextual analysis.
     """
 
     __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
@@ -513,11 +512,11 @@ class TemplateAnalysis:
     """The result of analyzing a template's variables using
     :meth:`BoundTemplate.analyze`.
 
-    Each of the following properties is a dictionary mapping variable names to a list of
-    two-tuples. Each tuple holds the location of a reference to the name as (<template
-    name>, <line number>). If a name is referenced multiple times, it will appear
-    multiple times in the list. If a name is referenced before it is "assigned", it will
-    appear in ``local_variables`` and ``global_variables``.
+    Each of the following properties is a dictionary mapping variable or filter names
+    to a list of two-tuples. Each tuple holds the location of a reference to the name as
+    (<template name>, <line number>). If a name is referenced multiple times, it will
+    appear multiple times in the list. If a name is referenced before it is "assigned",
+    it will appear in ``local_variables`` and ``global_variables``.
 
     :ivar variables: All referenced variables, whether they are in scope or not.
         Including references to names such as ``forloop`` from the ``for`` tag.
@@ -530,6 +529,7 @@ class TemplateAnalysis:
         be visited, probably because they do not implement a ``children`` method.
     :ivar unloadable_partials: Names or identifiers of partial templates that could not
         be loaded. This will be empty if ``follow_partials`` is ``False``.
+    :ivar filters: Names of filters found during static analysis.
     """
 
     __slots__ = (
