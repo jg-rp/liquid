@@ -2,7 +2,7 @@
 
 **_New in version 1.2.0_**
 
-Use the [`analyze()`](../api/bound-template.md#analyze) or [`analyze_async()`](../api/bound-template.md#analyze_async) methods of a Liquid [`Template`](../api/bound-template.md) to traverse its abstract syntax tree and report template variable usage.
+Use the [`analyze()`](../api/bound-template.md#analyze) or [`analyze_async()`](../api/bound-template.md#analyze_async) methods of a Liquid [`Template`](../api/bound-template.md) to traverse its abstract syntax tree and report template filter and variable usage.
 
 ## All Template Variables
 
@@ -124,6 +124,37 @@ for name, location in analysis.local_variables.items():
 ```plain title="output"
 'people' assigned in '<string>' on line 1
 'people' assigned in '<string>' on line 2
+```
+
+## Filters
+
+**_New in version 1.7.0_**
+
+The `filters` property of [`TemplateAnalysis`](../api/template-analysis.md) is a dictionary mapping Liquid [filter](../language/introduction.md#filters) names to their locations.
+
+```python
+from liquid import Template
+
+template = Template(
+    """\
+{% assign people = "Sally, John, Brian, Sue" | split: ", " %}
+{% for person in people %}
+  - {{ person | upcase | prepend: 'Hello, ' }}
+{% endfor %}
+"""
+)
+
+analysis = template.analyze()
+
+for filter_name, location in analysis.filters.items():
+    for template_name, line_number in location:
+        print(f"'{filter_name}' found in '{template_name}' on line {line_number}")
+```
+
+```plain title="output"
+'split' found in '<string>' on line 1
+'upcase' found in '<string>' on line 3
+'prepend' found in '<string>' on line 3
 ```
 
 ## Analyzing Partial Templates

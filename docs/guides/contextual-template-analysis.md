@@ -2,13 +2,13 @@
 
 **_New in version 1.3.0_**
 
-Complementing [static template analysis](./static-template-analysis.md), added in Python Liquid version 1.2.0, contextual template analysis renders a template and captures information about template variable usage as it goes.
+Complementing [static template analysis](./static-template-analysis.md), added in Python Liquid version 1.2.0, contextual template analysis renders a template and captures information about template variable and filter usage as it goes.
 
 Given some [render context](../introduction/render-context.md) data, [`BoundTemplate.analyze_with_context()`](../api/bound-template.md#analyze_with_context) will visit nodes in a template's syntax tree as if it were being rendered, excluding those nodes that are not reachable using the current render context.
 
 ## Limitations
 
-Due to limitations of the current implementation, Python Liquid does not support template introspection from within a render context or `Expression` object. Meaning line numbers and template names are not available when using contextual template analysis. Only variable names are reported along with the number of times they were referenced. This is not the case with [static template analysis](./static-template-analysis.md).
+Due to some unfortunate design decisions, Python Liquid does not support template introspection from within a render context or `Expression` object. Meaning line numbers and template names are not available when using contextual template analysis. Only variable names are reported along with the number of times they were referenced. This is not the case with [static template analysis](./static-template-analysis.md).
 
 It's also not currently possible to detect names added to a block's scope. For example, `forloop.index` will be included in the results object if referenced within a for loop block.
 
@@ -95,4 +95,34 @@ print(list(analysis.undefined_variables))
 
 ```plain title="output"
 ['nosuchthing', 'user']
+```
+
+## Filters
+
+**_New in version 1.7.0_**
+
+`ContextualTemplateAnalysis.filters` includes the names of filters used in a template, including those found in [included](../language/tags.md#include) or [rendered](../language/tags.md#render) templates.
+
+```python
+from liquid import Template
+
+template = Template(
+    """\
+{% assign fallback = 'anonymous' %}
+{{ nosuchthing }}
+
+{% if user %}
+  Hello, {{ user.name | upcase }}.
+{% else %}
+  Hello, {{ fallback | downcase }}
+{% endif %}
+"""
+)
+
+analysis = template.analyze_with_context(user="Sue")
+print(list(analysis.filters))
+```
+
+```plain title="output"
+['upcase']
 ```

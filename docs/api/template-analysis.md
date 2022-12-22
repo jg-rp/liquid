@@ -1,10 +1,10 @@
 # liquid.template.TemplateAnalysis
 
-The result of analyzing a template's variables using [`BoundTemplate.analyze()`](./bound-template.md#analyze).
+The result of analyzing a Liquid template using [`BoundTemplate.analyze()`](./bound-template.md#analyze).
 
 ## `TemplateAnalysis`
 
-`class TemplateAnalysis(*, variables, local_variables, global_variables, failed_visits, unloadable_partials,)`
+`class TemplateAnalysis(*, variables, local_variables, global_variables, failed_visits, unloadable_partials, filters)`
 
 Each of the following properties is a dictionary mapping variable names to a list of two-tuples. Each tuple holds the location of a reference to the name as `(<template name>, <line number>)`. If a name is referenced multiple times, it will appear multiple times in the list. If a name is referenced before it is "assigned", it will appear in `local_variables` and `global_variables`.
 
@@ -21,6 +21,10 @@ Template variables that are added to the template local scope, whether they are 
 ### `global_variables`
 
 Template variables that, on the given line number and "file", are out of scope or are assumed to be "global". That is, expected to be included by the application developer rather than a template author.
+
+### `filters`
+
+The name and locations of [filters](../language/introduction.md#filters) used the template.
 
 ### `failed_visits`
 
