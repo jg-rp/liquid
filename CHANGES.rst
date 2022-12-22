@@ -4,6 +4,13 @@ Python Liquid Change Log
 Version 1.7.0 (unreleased)
 --------------------------
 
+**Fixes**
+
+- Fixed counting of "local" variables (those created with ``assign``, ``capture``, etc.)
+  in templates rendered with the ``{% render %}`` tag during contextual analysis.
+  Previously these variables were silently ignored.
+  See `#92 <https://github.com/jg-rp/liquid/issues/92>`_
+
 **Features**
 
 - Report filter usage alongside variable usage with template static and contextual

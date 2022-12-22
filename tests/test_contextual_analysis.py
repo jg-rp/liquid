@@ -154,14 +154,14 @@ class ContextualAnalysisTestCase(unittest.TestCase):
 
     def test_analyze_rendered_template(self):
         """Test that we count references to variables in rendered templates."""
-        loader = DictLoader({"foo": "{{ x | append: y }}"})
+        loader = DictLoader({"foo": "{% assign bar = 42 %}{{ x | append: y }}"})
         env = Environment(loader=loader)
 
-        template = env.from_string("{{ x }}{% render 'foo' %}")
+        template = env.from_string("{{ x }}{% render 'foo' %}{{ bar }}")
         data = {"y": 1, "z": 2}
-        expect_variables = {"x": 2, "y": 1}
-        expect_locals = {}
-        expect_undefined = {"x": 2}
+        expect_variables = {"bar": 1, "x": 2, "y": 1}
+        expect_locals = {"bar": 1}
+        expect_undefined = {"x": 2, "bar": 1}
         expect_filters = {"append": 1}
 
         self._test(

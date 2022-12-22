@@ -371,7 +371,12 @@ class StrictDefaultUndefined(StrictUndefined):
 
 # pylint: disable=too-many-instance-attributes redefined-builtin too-many-public-methods
 class Context:
-    """Liquid template context."""
+    """A template render context.
+
+    A new render context is created automatically each time meth:`BoundTemplate.render`
+    is called, which includes `globals` set on the bound class:`Environment` and
+    class:`BoundTemplate`.
+    """
 
     __slots__ = (
         "env",
@@ -731,6 +736,10 @@ class Context:
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
 
+# NOTE: The name `VariableCaptureContext` is now a little misleading. We are
+# "capturing" more than variable names.
+
+
 class VariableCaptureContext(Context):
     """A render context that captures template variable names."""
 
@@ -778,7 +787,7 @@ class VariableCaptureContext(Context):
         self.root_context = root_context
 
     def assign(self, key: str, val: Any) -> None:
-        self.local_references.append(key)
+        self.root_context.local_references.append(key)
         return super().assign(key, val)
 
     def get(self, path: ContextPath, default: object = _undefined) -> object:
@@ -799,11 +808,11 @@ class VariableCaptureContext(Context):
         return result
 
     def increment(self, name: str) -> int:
-        self.local_references.append(name)
+        self.root_context.local_references.append(name)
         return super().increment(name)
 
     def decrement(self, name: str) -> int:
-        self.local_references.append(name)
+        self.root_context.local_references.append(name)
         return super().decrement(name)
 
     def filter(self, name: str) -> Callable[..., object]:
