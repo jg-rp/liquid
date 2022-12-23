@@ -13,8 +13,10 @@ Version 1.7.0 (unreleased)
 
 **Features**
 
-- Report filter usage alongside variable usage with template static and contextual
+- Report filter usage alongside variable usage with static and contextual template
   analysis. See `#91 <https://github.com/jg-rp/liquid/pull/91>`_.
+- Report tag usage when statically analyzing a template.
+  See `#97 <https://github.com/jg-rp/liquid/pull/97>`_.
 
 Version 1.6.1
 -------------
