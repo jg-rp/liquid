@@ -1,4 +1,4 @@
-"""Test cases for statically counting a template's variables."""
+"""Test cases for statically counting a template using `BoundTemplate.analyze`."""
 # pylint: disable=too-many-lines
 import asyncio
 

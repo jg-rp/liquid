@@ -373,9 +373,9 @@ class StrictDefaultUndefined(StrictUndefined):
 class Context:
     """A template render context.
 
-    A new render context is created automatically each time meth:`BoundTemplate.render`
-    is called, which includes `globals` set on the bound class:`Environment` and
-    class:`BoundTemplate`.
+    A new render context is created automatically each time :meth:`BoundTemplate.render`
+    is called, which includes `globals` set on the bound :class:`liquid.Environment` and
+    :class:`liquid.template.BoundTemplate`.
     """
 
     __slots__ = (

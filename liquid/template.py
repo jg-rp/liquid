@@ -487,7 +487,7 @@ NameRefs = Dict[str, List[Location]]
 
 # pylint: disable=too-few-public-methods
 class ContextualTemplateAnalysis:
-    """The result of analyzing a template's variables using
+    """The result of analyzing a template's filters and variables using
     :meth:`BoundTemplate.analyze_with_context`.
 
     Each of the following properties is a dictionary mapping variable or filter names
@@ -522,7 +522,7 @@ class ContextualTemplateAnalysis:
 
 # pylint: disable=too-few-public-methods
 class TemplateAnalysis:
-    """The result of analyzing a template's variables using
+    """The result of analyzing a template's tags, filters and variables using
     :meth:`BoundTemplate.analyze`.
 
     Each of the following properties is a dictionary mapping variable, tag or filter
