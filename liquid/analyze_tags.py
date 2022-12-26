@@ -1,4 +1,4 @@
-"""Audit template tags from tokenized source text."""
+"""Analyze template tags from tokenized source text."""
 from __future__ import annotations
 from collections import defaultdict
 
@@ -114,7 +114,9 @@ class TagAnalysis:  # pylint: disable=too-many-instance-attributes too-few-publi
 
         # Infer which tags are block tags. This may or may not match what the
         # environment's tag register believes are block tags.
-        block_tags = {tag[3:] for tag in end_tags}
+        block_tags = {tag[3:] for tag in end_tags} | {
+            tag.name for tag in env.tags.values() if tag.block
+        }
 
         # Registered tags. "break" and "continue" are a special case.
         registered_tags = {
@@ -122,11 +124,11 @@ class TagAnalysis:  # pylint: disable=too-many-instance-attributes too-few-publi
         }
 
         # Registered inline tags. We use this to find erroneous "end" tags.
-        inline_tags = {tag.name for tag in env.tags.values() if tag.block is False}
+        inline_tags = {tag.name for tag in env.tags.values() if not tag.block}
 
         # We use this to find unknown "end" tags.
         registered_end_blocks = {
-            tag.end for tag in env.tags.values() if tag.block is True and tag.end
+            tag.end for tag in env.tags.values() if tag.block and tag.end
         }
 
         for token in tokens:
@@ -199,3 +201,9 @@ class _BlockStackItem:
 
     def __hash__(self) -> int:  # pragma: no cover
         return hash(self.name)
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f"_BlockStackItem({self.name})"

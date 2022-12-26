@@ -92,6 +92,22 @@ class AnalyzeTagsTestCase(TestCase):
                 unclosed_tags={"if": [("<string>", 1)]},
             ),
             Case(
+                description="unbalanced block tag without inferred end tag",
+                source=(
+                    "{% for foo in bar %}\n"
+                    "{% if foo %}\n"
+                    "    {{ foo | upcase }}\n"
+                    "{% endif %}"
+                ),
+                all_tags={
+                    "for": [("<string>", 1)],
+                    "if": [("<string>", 2)],
+                    "endif": [("<string>", 4)],
+                },
+                tags={"if": [("<string>", 2)], "for": [("<string>", 1)]},
+                unclosed_tags={"for": [("<string>", 1)]},
+            ),
+            Case(
                 description="end block typo",
                 source="{% if foo %}{% if bar %}{% endif %}\n{% endi %}",
                 all_tags={
