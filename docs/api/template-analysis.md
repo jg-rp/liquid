@@ -26,6 +26,10 @@ Template variables that, on the given line number and "file", are out of scope o
 
 The name and locations of [filters](../language/introduction.md#filters) used the template.
 
+### `tags`
+
+The name and locations of [tags](../language/introduction.md#tags) used the template.
+
 ### `failed_visits`
 
 Names of AST `Node` and `Expression` objects that could not be visited, probably because they do not implement a `children` method.

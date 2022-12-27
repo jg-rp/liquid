@@ -174,3 +174,46 @@ Load and parse a template using the configured loader.
 `async get_template_async(name, globals=None) -> liquid.template.BoundTemplate`
 
 An async version of [`get_template()`](#get_template).
+
+### `analyze_tags`
+
+`analyze_tags(name, *, context = None, inner_tags = None, **kwargs) -> liquid.TagAnalysis`
+
+Audit template tags without parsing source text into an abstract syntax tree.
+
+This is useful for identifying unknown, misplaced and unbalanced tags in a template's source text. See also [`BoundTemplate.analyze()`](./bound-template.md#analyze).
+
+**Parameters:**
+
+- `name: str` - The template's name or identifier, as you would use with [`get_template()`](#get_template). Use [`analyze_tags_from_string()`](#analyze_tags_from_string) to audit tags in template text without using a template [loader](../introduction/loading-templates.md).
+
+- `context: Optional["Context"]` - An optional render context the loader might use to modify the template search space. If given, uses `get_source_with_context()` of the current loader instead of `get_source()`, and keywords arguments are passed along to `get_source_with_context()` too.
+
+- `inner_tags: Optional[InnerTagMap]` - A mapping of block tags to a list of allowed "inner" tags for the block. For example, `{% if %}` blocks are allowed to contain `{% elsif %}` and `{% else %}` tags. Defaults to mapping suitable for the built-in block tags.
+
+**Returns:** A tag audit including the location of any unknown tags and any unbalanced block tags.  
+**Return type:** [`liquid.TagAnalysis`](./tag-analysis.md)  
+**Raises:** [`liquid.exceptions.TemplateNotFound`](./exceptions.md#liquidexceptionstemplatenotfound): If a template with the given name can not be found.
+
+### `analyze_tags_async`
+
+`async analyze_tags_async(name, *, context = None, inner_tags = None, **kwargs) -> liquid.TagAnalysis`
+
+An async version of [`analyze_tags()`](#analyze_tags).
+
+### `analyze_tags_from_string`
+
+`analyze_tags_from_string(source, name = "<string>", *, inner_tags = None) -> liquid.TagAnalysis`
+
+Analyze tags in template source text against those registered with this environment.
+
+**Parameters:**
+
+- `source: str` - The source text of the template.
+
+- `name: str` - A name or identifier for the template. Defaults to `"<string>"`.
+
+- `inner_tags: Optional[InnerTagMap]` - A mapping of block tags to a list of allowed "inner" tags for the block. For example, `{% if %}` blocks are allowed to contain `{% elsif %}` and `{% else %}` tags. Defaults to mapping suitable for the built-in block tags.
+
+**Returns:** A tag audit including the location of any unknown tags and any unbalanced block tags.  
+**Return type:** [`liquid.TagAnalysis`](./tag-analysis.md)

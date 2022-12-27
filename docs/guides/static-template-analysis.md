@@ -2,9 +2,9 @@
 
 **_New in version 1.2.0_**
 
-Use the [`analyze()`](../api/bound-template.md#analyze) or [`analyze_async()`](../api/bound-template.md#analyze_async) methods of a Liquid [`Template`](../api/bound-template.md) to traverse its abstract syntax tree and report template filter and variable usage.
+Use the [`analyze()`](../api/bound-template.md#analyze) or [`analyze_async()`](../api/bound-template.md#analyze_async) methods of a Liquid [`Template`](../api/bound-template.md) to traverse its abstract syntax tree and report template tag, filter and variable usage.
 
-## All Template Variables
+## Variables
 
 The object returned from `analyze()` is an instance of [`TemplateAnalysis`](../api/template-analysis.md). Its `variables` property is a dictionary mapping template variable names to a list of two-tuples. Each tuple is the template name and line number where the variable was found.
 
@@ -55,7 +55,7 @@ for var, location in template.analyze().variables.items():
 ('thing', 'foo.bar') found in '<string>' on line 1
 ```
 
-## Global Template Variables
+### Global Variables
 
 The `global_variables` property of [`TemplateAnalysis`](../api/template-analysis.md) is similar to `variables`, but only includes those variables that are not in scope from previous `assign` or `capture` tags, or added to a block's scope by a block tag.
 
@@ -102,7 +102,7 @@ for name, location in analysis.global_variables.items():
 'people' is out of scope in '<string>' on line 1
 ```
 
-## Local Template Variables
+### Local Variables
 
 The `local_variables` property of [`TemplateAnalysis`](../api/template-analysis.md) is, again, a dictionary mapping template variable names to their locations. Each entry is the location of an `assign`, `capture`, `increment`, or `decrement` tag (or any custom tag that introduces names into the template local namespace) that initializes or updates the variable.
 
@@ -130,7 +130,7 @@ for name, location in analysis.local_variables.items():
 
 **_New in version 1.7.0_**
 
-The `filters` property of [`TemplateAnalysis`](../api/template-analysis.md) is a dictionary mapping Liquid [filter](../language/introduction.md#filters) names to their locations.
+The `filters` property of [`TemplateAnalysis`](../api/template-analysis.md) is a dictionary mapping Liquid [filter](../language/introduction.md#filters) names to their locations. Undefined filters will be included in `TemplateAnalysis.filters`, regardless of whether [`strict_filters`](../introduction/strictness.md#undefined-filters) is set or not.
 
 ```python
 from liquid import Template
@@ -155,6 +155,36 @@ for filter_name, location in analysis.filters.items():
 'split' found in '<string>' on line 1
 'upcase' found in '<string>' on line 3
 'prepend' found in '<string>' on line 3
+```
+
+## Tags
+
+**_New in version 1.7.0_**
+
+The `tags` property of [`TemplateAnalysis`](../api/template-analysis.md) is a dictionary mapping Liquid [tag](../language/introduction.md#tags) names to their locations. Note that [`{% raw %} tags`](../language/tags.md#raw) will never be included in `TemplateAnalysis.tags`. This is because the lexer converts them to template text before we get a chance to analyze them.
+
+```python
+from liquid import Template
+
+template = Template(
+    """\
+{% assign people = "Sally, John, Brian, Sue" | split: ", " %}
+{% for person in people %}
+  - {{ person | upcase | prepend: 'Hello, ' }}
+{% endfor %}
+"""
+)
+
+analysis = template.analyze()
+
+for tag_name, location in analysis.tags.items():
+    for template_name, line_number in location:
+        print(f"'{tag_name}' found in '{template_name}' on line {line_number}")
+```
+
+```plain title=output
+'assign' found in '<string>' on line 1
+'for' found in '<string>' on line 2
 ```
 
 ## Analyzing Partial Templates

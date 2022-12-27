@@ -36,7 +36,7 @@ const FeatureList: FeatureItem[] = [
         Designed for situations where template authors are untrusted, Python Liquid is non <Link
         to="https://docs.python.org/3/library/functions.html#eval">evaluating</Link>,
         it guards against mutation of <Link to="/introduction/render-context#environment-globals">shared
-        template data</Link>, and will never call functions or methods on arbitrary <Link
+        template data</Link>, and will never expose arbitrary properties or methods of <Link
         to="/introduction/render-context"> render context</Link> objects.
       </>
     ),
