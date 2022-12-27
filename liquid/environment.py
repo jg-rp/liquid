@@ -412,8 +412,8 @@ class Environment:
         *,
         inner_tags: Optional[InnerTagMap] = None,
     ) -> TagAnalysis:
-        """Analyze template tags in template source text against those registered with
-        this environment.
+        """Analyze tags in template source text against those registered with this
+        environment.
 
         Unlike template static or contextual analysis, a tag audit does not parse the
         template source text into an AST, nor does it attempt to load partial templates
@@ -458,7 +458,7 @@ class Environment:
         :param context: An optional render context the loader might use to modify the
             template search space. If given, uses
             :meth:`liquid.loaders.BaseLoader.get_source_with_context` from the current
-            loader if a render context is given.
+            loader.
         :type context: Optional[:class:`liquid.Context`]
         :param inner_tags: A mapping of block tags to a list of allowed "inner" tags for
             the block. For example, ``{% if %}`` blocks are allowed to contain
