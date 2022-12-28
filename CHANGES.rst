@@ -8,8 +8,9 @@ Version 1.7.0 (unreleased)
 
 - Fixed counting of "local" variables (those created with ``assign``, ``capture``, etc.)
   in templates rendered with the ``{% render %}`` tag during contextual analysis.
-  Previously these variables were silently ignored.
-  See `#92 <https://github.com/jg-rp/liquid/issues/92>`_
+  Previously these variables were not reported in the results of
+  ``BoundTemplate.analyze_with_context()``.
+  See `#92 <https://github.com/jg-rp/liquid/issues/92>`_.
 
 **Features**
 
@@ -21,7 +22,7 @@ Version 1.7.0 (unreleased)
 - Analyze template tags using ``Environment.analyze_tags()``. This form of tag analysis
   happens before a template is fully parsed, giving us the opportunity to find unknown,
   unexpected and unbalanced tags that might cause the parser to raise an exception or
-  skip template blocks. See `#98 <https://github.com/jg-rp/liquid/pull/98>`_
+  skip template blocks. See `#98 <https://github.com/jg-rp/liquid/pull/98>`_.
 
 Version 1.6.1
 -------------
