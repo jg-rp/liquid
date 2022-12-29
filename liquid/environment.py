@@ -4,17 +4,18 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Dict
-from typing import Any
-from typing import Type
-from typing import Tuple
-from typing import Union
-from typing import Optional
+from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
+from typing import Optional
+from typing import Type
+from typing import Tuple
 from typing import TYPE_CHECKING
+from typing import Union
 
 import warnings
 
@@ -23,8 +24,10 @@ from liquid.mode import Mode
 from liquid.tag import Tag
 from liquid.template import BoundTemplate
 from liquid.lex import get_lexer
-from liquid.stream import TokenStream
 from liquid.parse import get_parser
+from liquid.stream import TokenStream
+from liquid.analyze_tags import InnerTagMap
+from liquid.analyze_tags import TagAnalysis
 from liquid.utils import LRUCache
 
 from liquid.expressions import parse_boolean_expression
@@ -47,6 +50,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from liquid.expression import FilteredExpression
     from liquid.expression import LoopExpression
     from liquid.context import Context
+    from liquid.token import Token
 
 
 # pylint: disable=too-many-instance-attributes
@@ -242,6 +246,17 @@ class Environment:
             )
         )
 
+    def tokenizer(self) -> Callable[[str], Iterator[Token]]:
+        """Return a tokenizer for this environment."""
+        return get_lexer(
+            self.tag_start_string,
+            self.tag_end_string,
+            self.statement_start_string,
+            self.statement_end_string,
+            self.comment_start_string,
+            self.comment_end_string,
+        )
+
     def add_tag(self, tag: Type[Tag]) -> None:
         """Register a liquid tag with the environment. Built-in tags are registered for
         you automatically with every new :class:`Environment`.
@@ -270,19 +285,10 @@ class Environment:
     def parse(self, source: str) -> ast.ParseTree:
         """Parse the given string as a liquid template.
 
-        More often than not you'll want to use `Environment.from_string` instead.
+        More often than not you'll want to use :meth:`Environment.from_string` instead.
         """
-        tokenize = get_lexer(
-            self.tag_start_string,
-            self.tag_end_string,
-            self.statement_start_string,
-            self.statement_end_string,
-            self.comment_start_string,
-            self.comment_end_string,
-        )
-
         parser = get_parser(self)
-        token_iter = tokenize(source)
+        token_iter = self.tokenizer()(source)
         return parser.parse(TokenStream(token_iter))
 
     # pylint: disable=redefined-builtin
@@ -338,8 +344,8 @@ class Environment:
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
-        :param name: The template's name. The loader is responsible for interpretting
-            the name.
+        :param name: The template's name. The loader is responsible for interpreting
+            the name. It could be the name of a file or some other identifier.
         :param globals: A mapping of context variables made available every time the
             resulting template is rendered.
         :returns: A parsed template ready to be rendered.
@@ -398,6 +404,106 @@ class Environment:
     ) -> BoundTemplate:
         """An async version of ``get_template_with_context``."""
         return await self.loader.load_with_context_async(context, name, **kwargs)
+
+    def analyze_tags_from_string(
+        self,
+        source: str,
+        name: str = "<string>",
+        *,
+        inner_tags: Optional[InnerTagMap] = None,
+    ) -> TagAnalysis:
+        """Analyze tags in template source text against those registered with this
+        environment.
+
+        Unlike template static or contextual analysis, a tag audit does not parse the
+        template source text into an AST, nor does it attempt to load partial templates
+        from ``{% include %}`` or `{% render %}` tags.
+
+        :param source: The source text of the template.
+        :type source: str
+        :param name: A name or identifier for the template. Defaults to "<string>".
+        :type name: str
+        :param inner_tags: A mapping of block tags to a list of allowed "inner" tags for
+            the block. For example, ``{% if %}`` blocks are allowed to contain
+            ``{% elsif %}`` and ``{% else %}`` tags.
+        :type inner_tags: Mapping[str, Iterable[str]]
+        :returns: A tag audit including the location of any unknown tags and any
+            unbalanced block tags.
+        :rtype: :class:`liquid.analyze_tags.TagAnalysis`
+        """
+        return TagAnalysis(
+            env=self,
+            name=name,
+            tokens=list(self.tokenizer()(source)),
+            inner_tags=inner_tags,
+        )
+
+    def analyze_tags(
+        self,
+        name: str,
+        *,
+        context: Optional["Context"] = None,
+        inner_tags: Optional[InnerTagMap] = None,
+        **kwargs: str,
+    ) -> TagAnalysis:
+        """Audit template tags without parsing source text into an abstract syntax tree.
+
+        This is useful for identifying unknown, misplaced and unbalanced tags in a
+        template's source text. See also :meth:`liquid.template.BoundTemplate.analyze`.
+
+        :param name: The template's name or identifier, as you would use with
+            :meth:`Environment.get_template`. Use :meth:`Environment.analyze_tags_from_string`
+            to audit tags in template text without using a template loader.
+        :type name: str
+        :param context: An optional render context the loader might use to modify the
+            template search space. If given, uses
+            :meth:`liquid.loaders.BaseLoader.get_source_with_context` from the current
+            loader.
+        :type context: Optional[:class:`liquid.Context`]
+        :param inner_tags: A mapping of block tags to a list of allowed "inner" tags for
+            the block. For example, ``{% if %}`` blocks are allowed to contain
+            ``{% elsif %}`` and ``{% else %}`` tags.
+        :type inner_tags: Mapping[str, Iterable[str]]
+        :returns: A tag audit including the location of any unknown tags and any
+            unbalanced block tags.
+        :rtype: :class:`liquid.analyze_tags.TagAnalysis`
+        """
+        if context:
+            template_source = self.loader.get_source_with_context(
+                context=context, template_name=name, **kwargs
+            )
+        else:
+            template_source = self.loader.get_source(self, template_name=name)
+
+        return self.analyze_tags_from_string(
+            template_source.source,
+            name=template_source.filename,
+            inner_tags=inner_tags,
+        )
+
+    async def analyze_tags_async(
+        self,
+        name: str,
+        *,
+        context: Optional["Context"] = None,
+        inner_tags: Optional[InnerTagMap] = None,
+        **kwargs: str,
+    ) -> TagAnalysis:
+        """An async version of :meth:`Environment.analyze_tags`."""
+        if context:
+            template_source = await self.loader.get_source_with_context_async(
+                context=context, template_name=name, **kwargs
+            )
+        else:
+            template_source = await self.loader.get_source_async(
+                env=self, template_name=name
+            )
+
+        return self.analyze_tags_from_string(
+            template_source.source,
+            name=template_source.filename,
+            inner_tags=inner_tags,
+        )
 
     def _check_cache(
         self,
@@ -617,6 +723,7 @@ def Template(
     :param globals: An optional mapping that will be added to the context of any
         template loaded from this environment. Defaults to ``None``.
     :type globals: dict
+    :rtype: BoundTemplate
     """
     # Resorting to named arguments (repeated 3 times) as I've twice missed a bug
     # because of positional arguments.

@@ -10,7 +10,7 @@ Rendering Templates
 -------------------
 
 .. autoclass:: Environment([options])
-    :members: from_string, get_template, get_template_async, add_tag, add_filter
+    :members: from_string, get_template, get_template_async, add_tag, add_filter, analyze_tags, analyze_tags_async, analyze_tags_from_string, parse
 
     .. attribute:: context_depth_limit
 
@@ -96,15 +96,22 @@ Rendering Templates
         A dictionary of variables that will be added to the context of every template
         rendered from the environment.
 
+Template Analysis
+-----------------
+
 .. autoclass:: liquid.template.TemplateAnalysis
 
 .. autoclass:: liquid.template.ContextualTemplateAnalysis
+
+.. autoclass:: liquid.analyze_tags.TagAnalysis
 
 
 Template Loaders
 ----------------
 
 .. autoclass:: liquid.loaders.FileSystemLoader
+
+.. autoclass:: liquid.loaders.FileExtensionLoader
 
 .. autoclass:: liquid.loaders.DictLoader
 
