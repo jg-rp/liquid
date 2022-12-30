@@ -21,6 +21,7 @@ from operator import getitem
 from operator import mul
 
 from typing import Any
+from typing import Awaitable
 from typing import Callable
 from typing import Dict
 from typing import Iterator
@@ -29,6 +30,7 @@ from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import TextIO
+from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
 
@@ -98,6 +100,84 @@ class BuiltIn(Mapping[str, object]):
 builtin = BuiltIn()
 
 
+def _liquid_size(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "size")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, collections.abc.Sized):
+            return len(obj)
+        raise
+
+
+def _liquid_first(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "first")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Mapping) and obj:
+            return list(itertools.islice(obj.items(), 1))[0]
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[0]
+        raise
+
+
+def _liquid_last(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "last")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[-1]
+        raise
+
+
+async def _liquid_size_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "size")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, collections.abc.Sized):
+            return len(obj)
+        raise
+
+
+async def _liquid_first_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "first")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Mapping) and obj:
+            return list(itertools.islice(obj.items(), 1))[0]
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[0]
+        raise
+
+
+async def _liquid_last_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "last")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[-1]
+        raise
+
+
 # pylint: disable=too-many-instance-attributes redefined-builtin too-many-public-methods
 class Context:
     """A template render context.
@@ -108,19 +188,19 @@ class Context:
     """
 
     __slots__ = (
-        "env",
-        "locals",
-        "globals",
-        "counters",
-        "scope",
-        "loops",
-        "tag_namespace",
-        "disabled_tags",
-        "autoescape",
         "_copy_depth",
-        "parent_context",
-        "loop_iteration_carry",
+        "autoescape",
+        "counters",
+        "disabled_tags",
+        "env",
+        "globals",
         "local_namespace_size_carry",
+        "locals",
+        "loop_iteration_carry",
+        "loops",
+        "parent_context",
+        "scope",
+        "tag_namespace",
     )
 
     # pylint: disable=too-many-arguments
@@ -460,89 +540,42 @@ class Context:
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
     # pylint: disable=too-many-return-statements
-    @staticmethod
-    def getitem(obj: Any, key: Any) -> Any:
+    @classmethod
+    def getitem(cls, obj: Any, key: Any) -> Any:
         """Item getter with special methods for arrays/lists and hashes/dicts."""
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            try:
-                return getitem(obj, "size")
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Sized):
-                    return len(obj)
-                raise
-
-        if key == "first" and not isinstance(obj, str):
-            try:
-                return getitem(obj, "first")
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Mapping) and obj:
-                    return list(itertools.islice(obj.items(), 1))[0]
-                if isinstance(obj, collections.abc.Sequence):
-                    return obj[0]
-                raise
-
-        if key == "last" and not isinstance(obj, str):
-            try:
-                return getitem(obj, "last")
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Sequence):
-                    return obj[-1]
-                raise
+            return _liquid_size(obj)
+        if key == "first":
+            return _liquid_first(obj)
+        if key == "last":
+            return _liquid_last(obj)
 
         return getitem(obj, key)
 
     # pylint: disable=too-many-return-statements
-    @staticmethod
-    async def getitem_async(obj: Any, key: Any) -> object:
+    @classmethod
+    async def getitem_async(cls, obj: Any, key: Any) -> object:
         """Item getter with special methods for arrays/lists and hashes/dicts."""
+
+        async def _get_item(obj: Any, key: Any) -> object:
+            if hasattr(obj, "__getitem_async__"):
+                return await obj.__getitem_async__(key)
+            return getitem(obj, key)
+
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            try:
-                return (
-                    await obj.__getitem_async__(key)
-                    if hasattr(obj, "__getitem_async__")
-                    else getitem(obj, "size")
-                )
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Sized):
-                    return len(obj)
-                raise
+            return await _liquid_size_async(obj, _get_item)
+        if key == "first":
+            return await _liquid_first_async(obj, _get_item)
+        if key == "last":
+            return await _liquid_last_async(obj, _get_item)
 
-        if key == "first" and not isinstance(obj, str):
-            try:
-                return (
-                    await obj.__getitem_async__(key)
-                    if hasattr(obj, "__getitem_async__")
-                    else getitem(obj, "first")
-                )
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Mapping) and obj:
-                    return list(itertools.islice(obj.items(), 1))[0]
-                if isinstance(obj, collections.abc.Sequence):
-                    return obj[0]
-                raise
-
-        if key == "last" and not isinstance(obj, str):
-            try:
-                return (
-                    await obj.__getitem_async__(key)
-                    if hasattr(obj, "__getitem_async__")
-                    else getitem(obj, "last")
-                )
-            except (KeyError, IndexError, TypeError):
-                if isinstance(obj, collections.abc.Sequence):
-                    return obj[-1]
-                raise
-
-        if hasattr(obj, "__getitem_async__"):
-            return await obj.__getitem_async__(key)
-
-        return getitem(obj, key)
+        return await _get_item(obj, key)
 
 
 # NOTE: The name `VariableCaptureContext` is now a little misleading. We are
@@ -550,7 +583,7 @@ class Context:
 
 
 class VariableCaptureContext(Context):
-    """A render context that captures template variable names."""
+    """A render context that captures template variable and filter names."""
 
     __slots__ = (
         "local_references",
@@ -647,6 +680,36 @@ class VariableCaptureContext(Context):
         if is_undefined(result):
             self.root_context.undefined_references.append(ref)
         self.root_context.all_references.append(ref)
+
+
+class CompatContext(Context):
+    """A render context that addresses some incompatibilities between Python Liquid and
+    Ruby Liquid.
+
+    These "fixes" have not been implemented in the default `Context` for the benefit of
+    existing Python Liquid users that rely on past behavior.
+
+    TODO:
+    - https://github.com/jg-rp/liquid/issues/43
+    - https://github.com/jg-rp/liquid/issues/90
+
+    """
+
+    @classmethod
+    def getitem(cls, obj: Any, key: Any) -> Any:
+        if isinstance(obj, str) and isinstance(key, int):
+            raise IndexError("string indices are not allowed")
+        return super().getitem(obj, key)
+
+    @classmethod
+    async def getitem_async(cls, obj: Any, key: Any) -> object:
+        if isinstance(obj, str) and isinstance(key, int):
+            raise IndexError("string indices are not allowed")
+        return await super().getitem_async(obj, key)
+
+
+class CompatVariableCaptureContext(VariableCaptureContext, CompatContext):
+    """A render context that captures information about template variables and filters."""
 
 
 def get_item(

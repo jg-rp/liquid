@@ -23,6 +23,7 @@ from .loaders import DictLoader
 from .loaders import FileExtensionLoader
 from .loaders import FileSystemLoader
 
+from .context import CompatContext
 from .context import Context
 from .context import DebugUndefined
 from .context import is_undefined
@@ -38,6 +39,7 @@ from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
 __all__ = (
     "ChoiceLoader",
+    "CompatContext",
     "Context",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
