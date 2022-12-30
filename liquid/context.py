@@ -30,11 +30,12 @@ from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import TextIO
-from typing import Tuple
 from typing import Union
 from typing import TYPE_CHECKING
 
+from liquid import Mode
 from liquid.chain_map import ReadOnlyChainMap
+from liquid.output import LimitedStringIO
 
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
@@ -42,9 +43,6 @@ from liquid.exceptions import Error
 from liquid.exceptions import LocalNamespaceLimitError
 from liquid.exceptions import LoopIterationLimitError
 from liquid.exceptions import lookup_warning
-
-from liquid import Mode
-from liquid.output import LimitedStringIO
 
 from liquid.undefined import DebugUndefined
 from liquid.undefined import is_undefined
@@ -416,14 +414,13 @@ class Context:
         self.counters[name] = val
         return val
 
-    def cycle(self, group_name: str, args: Sequence[Any]) -> Iterator[Any]:
-        """Return the next item in the given cycle. Initialise the cycle first if this
-        is the first time we're seeing this combination of group name and arguments."""
+    def cycle(self, group_name: str, args: Sequence[object]) -> object:
+        """Return the next item in the cycle of the given arguments."""
         key = (group_name, tuple(args))
-        if key not in self.tag_namespace["cycles"]:
-            self.tag_namespace["cycles"][key] = cycle(args)
-        it: Iterator[Any] = self.tag_namespace["cycles"][key]
-        return it
+        namespace = self.tag_namespace["cycles"]
+        if key not in namespace:
+            namespace[key] = cycle(range(len(args)))
+        return args[next(namespace[key])]
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
@@ -689,9 +686,8 @@ class CompatContext(Context):
     These "fixes" have not been implemented in the default `Context` for the benefit of
     existing Python Liquid users that rely on past behavior.
 
-    TODO:
-    - https://github.com/jg-rp/liquid/issues/43
-    - https://github.com/jg-rp/liquid/issues/90
+    This render context currently fixes https://github.com/jg-rp/liquid/issues/43 and
+    https://github.com/jg-rp/liquid/issues/90.
 
     """
 
@@ -706,6 +702,26 @@ class CompatContext(Context):
         if isinstance(obj, str) and isinstance(key, int):
             raise IndexError("string indices are not allowed")
         return await super().getitem_async(obj, key)
+
+    def cycle(self, group_name: str, args: Sequence[object]) -> object:
+        if group_name:
+            key = group_name
+        else:
+            key = str(args)
+
+        namespace: Dict[str, int] = self.tag_namespace["cycles"]
+        index = namespace.setdefault(key, 0)
+        try:
+            rv = args[index]
+        except IndexError:
+            rv = None
+
+        index += 1
+        if index > len(args):
+            index = 0
+
+        namespace[key] = index
+        return rv
 
 
 class CompatVariableCaptureContext(VariableCaptureContext, CompatContext):

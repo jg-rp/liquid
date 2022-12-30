@@ -4,6 +4,7 @@ import asyncio
 from unittest import TestCase
 
 from liquid import Environment
+from liquid import CompatEnvironment
 from liquid import CompatContext
 from liquid import is_undefined
 
@@ -37,17 +38,44 @@ class CompatContextTestCase(TestCase):
                 is_undefined(asyncio.run(context.get_async(["some", "last"])))
             )
 
-    # def test_named_cycle_groups(self) -> None:
-    #     """Test that named cycles ignore arguments."""
-    #     source = (
-    #         "{% cycle a: 1, 2, 3 %}\n"
-    #         '{% cycle a: "x", "y", "z" %}\n'
-    #         "{% cycle a: 1, 2, 3 %}"
-    #     )
+    def test_named_cycle_groups(self) -> None:
+        """Test that named cycles ignore arguments."""
+        env = Environment()
+        context = CompatContext(env)
+        self.assertEqual(context.cycle("a", [1, 2, 3]), 1)
+        self.assertEqual(context.cycle("a", ["x", "y", "z"]), "y")
+        self.assertEqual(context.cycle("a", [1, 2, 3]), 3)
 
-    #     env = Environment()
-    #     context = CompatContext(env)
+    def test_named_cycles_with_shrinking_lengths(self) -> None:
+        """Test that we handle cycles with a shrinking number of arguments."""
+        env = Environment()
+        context = CompatContext(env)
+        self.assertEqual(context.cycle("a", [1, 2, 3]), 1)
+        self.assertEqual(context.cycle("a", ["x", "y"]), "y")
+        self.assertEqual(context.cycle("a", ["x", "y"]), None)
 
-    #     self.assertEqual(context.cycle("a", [1, 2, 3]), 1)
-    #     self.assertEqual(context.cycle("a", ["x", "y", "z"]), "y")
-    #     self.assertEqual(context.cycle("a", [1, 2, 3]), 3)
+    def test_named_cycles_with_growing_lengths(self) -> None:
+        """Test that we handle cycles with a growing number of arguments."""
+        env = Environment()
+        context = CompatContext(env)
+        self.assertEqual(context.cycle("a", [1, 2]), 1)
+        self.assertEqual(context.cycle("a", ["x", "y", "z"]), "y")
+        self.assertEqual(context.cycle("a", ["x", "y", "z"]), "z")
+
+
+class CompatTemplateTestCase(TestCase):
+    """Test cases for the "compatible" versions of BoundTemplate and Environment."""
+
+    def test_compat_capture_context(self) -> None:
+        """Test that the "capture" version of the compatible context does indeed
+        capture variables."""
+        env = CompatEnvironment()
+        template = env.from_string("{% assign x = 'hello' %}{{ x[1] }}")
+        self.assertEqual(template.render(), "")
+
+        template = env.from_string("{% assign x = 'hello' %}{{ x }}")
+        self.assertEqual(template.render(), "hello")
+        analysis = template.analyze_with_context()
+
+        self.assertEqual(analysis.all_variables, {"x": 1})
+        self.assertEqual(analysis.local_variables, {"x": 1})

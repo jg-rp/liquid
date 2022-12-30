@@ -23,6 +23,7 @@ from liquid.context import Undefined
 from liquid.mode import Mode
 from liquid.tag import Tag
 from liquid.template import BoundTemplate
+from liquid.template import CompatBoundTemplate
 from liquid.lex import get_lexer
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
@@ -748,3 +749,9 @@ def Template(
     )
 
     return env.from_string(source, globals=globals)
+
+
+class CompatEnvironment(Environment):
+    """"""
+
+    template_class = CompatBoundTemplate

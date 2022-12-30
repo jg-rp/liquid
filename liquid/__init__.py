@@ -31,6 +31,7 @@ from .context import StrictDefaultUndefined
 from .context import StrictUndefined
 from .context import Undefined
 
+from .environment import CompatEnvironment
 from .environment import Environment
 from .environment import Template
 

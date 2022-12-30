@@ -27,6 +27,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 
+from liquid.context import CompatContext
+from liquid.context import CompatVariableCaptureContext
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 from liquid.context import VariableCaptureContext
@@ -393,6 +395,13 @@ class AwareBoundTemplate(BoundTemplate):
             "template": self.drop,
             **super().make_partial_namespace(partial, render_args),
         }
+
+
+class CompatBoundTemplate(BoundTemplate):
+    """"""
+
+    context_class = CompatContext
+    capture_context_class = CompatVariableCaptureContext
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):
