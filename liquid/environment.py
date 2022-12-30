@@ -23,7 +23,7 @@ from liquid.context import Undefined
 from liquid.mode import Mode
 from liquid.tag import Tag
 from liquid.template import BoundTemplate
-from liquid.template import CompatBoundTemplate
+from liquid.template import RubyBoundTemplate
 from liquid.lex import get_lexer
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
@@ -751,7 +751,18 @@ def Template(
     return env.from_string(source, globals=globals)
 
 
-class CompatEnvironment(Environment):
-    """"""
+class RubyEnvironment(Environment):
+    """An environment that is configured for maximum compatibility with Ruby Liquid.
 
-    template_class = CompatBoundTemplate
+    This environment addresses some compatibility issues between Python Liquid's default
+    :class:`Environment` and Ruby Liquid. These issues are considered to be an
+    unacceptable breaking changes for users that rely on existing behavior of the
+    default environment.
+
+    Currently, ``RubyEnvironment`` fixes ``{% cycle %}`` tag behavior when presented
+    with `named` cycles (see https://github.com/jg-rp/liquid/issues/43) and removes the
+    ability to access characters in a string by their index (see
+    https://github.com/jg-rp/liquid/issues/90).
+    """
+
+    template_class = RubyBoundTemplate

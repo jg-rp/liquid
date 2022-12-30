@@ -679,7 +679,7 @@ class VariableCaptureContext(Context):
         self.root_context.all_references.append(ref)
 
 
-class CompatContext(Context):
+class RubyContext(Context):
     """A render context that addresses some incompatibilities between Python Liquid and
     Ruby Liquid.
 
@@ -724,7 +724,7 @@ class CompatContext(Context):
         return rv
 
 
-class CompatVariableCaptureContext(VariableCaptureContext, CompatContext):
+class RubyVariableCaptureContext(VariableCaptureContext, RubyContext):
     """A render context that captures information about template variables and filters."""
 
 

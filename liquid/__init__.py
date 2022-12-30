@@ -23,24 +23,27 @@ from .loaders import DictLoader
 from .loaders import FileExtensionLoader
 from .loaders import FileSystemLoader
 
-from .context import CompatContext
 from .context import Context
 from .context import DebugUndefined
 from .context import is_undefined
+from .context import RubyContext
 from .context import StrictDefaultUndefined
 from .context import StrictUndefined
 from .context import Undefined
 
-from .environment import CompatEnvironment
+from .environment import RubyEnvironment
 from .environment import Environment
 from .environment import Template
+
+from .template import BoundTemplate
+from .template import RubyBoundTemplate
 
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
 __all__ = (
+    "BoundTemplate",
     "ChoiceLoader",
-    "CompatContext",
     "Context",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
@@ -53,6 +56,9 @@ __all__ = (
     "is_undefined",
     "Markup",
     "Mode",
+    "RubyBoundTemplate",
+    "RubyContext",
+    "RubyEnvironment",
     "soft_str",
     "StrictDefaultUndefined",
     "StrictUndefined",

@@ -81,4 +81,10 @@ cases = [
         expect="",
         globals={},
     ),
+    Case(
+        description="size of an int",
+        template=r"{{ x.size }}",
+        expect="",
+        globals={"x": 1},
+    ),
 ]

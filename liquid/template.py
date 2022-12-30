@@ -27,8 +27,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 
-from liquid.context import CompatContext
-from liquid.context import CompatVariableCaptureContext
+from liquid.context import RubyContext
+from liquid.context import RubyVariableCaptureContext
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 from liquid.context import VariableCaptureContext
@@ -397,11 +397,14 @@ class AwareBoundTemplate(BoundTemplate):
         }
 
 
-class CompatBoundTemplate(BoundTemplate):
-    """"""
+class RubyBoundTemplate(BoundTemplate):
+    """A ``BoundTemplate`` subclass configured to use the ``RubyContext`` render context.
 
-    context_class = CompatContext
-    capture_context_class = CompatVariableCaptureContext
+    See :class:`liquid.RubyEnvironment`.
+    """
+
+    context_class = RubyContext
+    capture_context_class = RubyVariableCaptureContext
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):
