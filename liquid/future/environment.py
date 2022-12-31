@@ -11,6 +11,8 @@ class Environment(DefaultEnvironment):
     :class:`Environment` and Ruby Liquid. These issues are considered to be an
     unacceptable breaking changes for users that rely on existing behavior of the
     default environment.
+
+    See https://jg-rp.github.io/liquid/known_issues
     """
 
     template_class = FutureBoundTemplate
