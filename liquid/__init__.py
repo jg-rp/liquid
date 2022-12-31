@@ -1,5 +1,5 @@
 # flake8: noqa
-# pylint: disable=useless-import-alias,missing-module-docstring
+# pylint: disable=missing-module-docstring
 
 __version__ = "1.7.0"
 
@@ -26,6 +26,7 @@ from .loaders import FileSystemLoader
 from .context import Context
 from .context import DebugUndefined
 from .context import is_undefined
+from .context import FutureContext
 from .context import StrictDefaultUndefined
 from .context import StrictUndefined
 from .context import Undefined
@@ -33,10 +34,16 @@ from .context import Undefined
 from .environment import Environment
 from .environment import Template
 
+from .template import BoundTemplate
+from .template import FutureBoundTemplate
+
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
+from . import future
+
 __all__ = (
+    "BoundTemplate",
     "ChoiceLoader",
     "Context",
     "DebugUndefined",
@@ -47,6 +54,9 @@ __all__ = (
     "Expression",
     "FileExtensionLoader",
     "FileSystemLoader",
+    "future",
+    "FutureBoundTemplate",
+    "FutureContext",
     "is_undefined",
     "Markup",
     "Mode",

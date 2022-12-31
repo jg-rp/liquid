@@ -295,13 +295,11 @@ class AnalyzeTemplateTestCase(TestCase):
         template = Template("{% cycle x: a, b %}")
 
         expected_template_globals = {
-            "x": [("<string>", 1)],
             "a": [("<string>", 1)],
             "b": [("<string>", 1)],
         }
         expected_template_locals = {}
         expected_refs = {
-            "x": [("<string>", 1)],
             "a": [("<string>", 1)],
             "b": [("<string>", 1)],
         }

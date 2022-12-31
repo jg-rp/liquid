@@ -9,7 +9,6 @@ import re
 import sys
 import warnings
 
-from collections import deque
 from contextlib import contextmanager
 
 from functools import partial
@@ -22,9 +21,9 @@ from operator import getitem
 from operator import mul
 
 from typing import Any
+from typing import Awaitable
 from typing import Callable
 from typing import Dict
-from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Mapping
@@ -34,16 +33,23 @@ from typing import TextIO
 from typing import Union
 from typing import TYPE_CHECKING
 
+from liquid import Mode
+from liquid.chain_map import ReadOnlyChainMap
+from liquid.output import LimitedStringIO
+
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
 from liquid.exceptions import Error
 from liquid.exceptions import LocalNamespaceLimitError
 from liquid.exceptions import LoopIterationLimitError
-from liquid.exceptions import UndefinedError
 from liquid.exceptions import lookup_warning
 
-from liquid import Mode
-from liquid.output import LimitedStringIO
+from liquid.undefined import DebugUndefined
+from liquid.undefined import is_undefined
+from liquid.undefined import StrictDefaultUndefined
+from liquid.undefined import StrictUndefined
+from liquid.undefined import Undefined
+from liquid.undefined import UNDEFINED
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
@@ -51,159 +57,20 @@ if TYPE_CHECKING:  # pragma: no cover
     from liquid.builtin.tags.for_tag import ForLoop
 
 
+__all__ = (
+    "Context",
+    "DebugUndefined",
+    "get_item",
+    "is_undefined",
+    "ReadOnlyChainMap",
+    "StrictDefaultUndefined",
+    "StrictUndefined",
+    "VariableCaptureContext",
+    "Undefined",
+)
+
 ContextPath = Union[str, Sequence[Union[str, int]]]
 Namespace = Mapping[str, object]
-
-_undefined = object()
-
-
-# pylint: disable=too-many-return-statements
-def _getitem(obj: Any, key: Any) -> Any:
-    """Item getter with special methods for arrays/lists and hashes/dicts."""
-    # NOTE: A runtime checkable protocol was too slow.
-    if hasattr(key, "__liquid__"):
-        key = key.__liquid__()
-
-    if key == "size":
-        try:
-            return getitem(obj, "size")
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Sized):
-                return len(obj)
-            raise
-
-    if key == "first" and not isinstance(obj, str):
-        try:
-            return getitem(obj, "first")
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Mapping) and obj:
-                return list(itertools.islice(obj.items(), 1))[0]
-            if isinstance(obj, collections.abc.Sequence):
-                return obj[0]
-            raise
-
-    if key == "last" and not isinstance(obj, str):
-        try:
-            return getitem(obj, "last")
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Sequence):
-                return obj[-1]
-            raise
-
-    return getitem(obj, key)
-
-
-# pylint: disable=too-many-return-statements
-async def _getitem_async(obj: Any, key: Any) -> object:
-    """Item getter with special methods for arrays/lists and hashes/dicts."""
-    # NOTE: A runtime checkable protocol was too slow.
-    if hasattr(key, "__liquid__"):
-        key = key.__liquid__()
-
-    if key == "size":
-        try:
-            return (
-                await obj.__getitem_async__(key)
-                if hasattr(obj, "__getitem_async__")
-                else getitem(obj, "size")
-            )
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Sized):
-                return len(obj)
-            raise
-
-    if key == "first" and not isinstance(obj, str):
-        try:
-            return (
-                await obj.__getitem_async__(key)
-                if hasattr(obj, "__getitem_async__")
-                else getitem(obj, "first")
-            )
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Mapping) and obj:
-                return list(itertools.islice(obj.items(), 1))[0]
-            if isinstance(obj, collections.abc.Sequence):
-                return obj[0]
-            raise
-
-    if key == "last" and not isinstance(obj, str):
-        try:
-            return (
-                await obj.__getitem_async__(key)
-                if hasattr(obj, "__getitem_async__")
-                else getitem(obj, "last")
-            )
-        except (KeyError, IndexError, TypeError):
-            if isinstance(obj, collections.abc.Sequence):
-                return obj[-1]
-            raise
-
-    if hasattr(obj, "__getitem_async__"):
-        return await obj.__getitem_async__(key)
-
-    return getitem(obj, key)
-
-
-def get_item(
-    obj: Sequence[Any],
-    *items: Any,
-    default: Optional[object] = _undefined,
-) -> Any:
-    """Chained item getter."""
-    try:
-        itm: Any = reduce(_getitem, items, obj)
-    except (KeyError, IndexError, TypeError):
-        itm = default
-    return itm
-
-
-def is_undefined(obj: object) -> bool:
-    """Return `True` if `obj` is undefined. `False` otherwise."""
-    return isinstance(obj, Undefined)
-
-
-class ReadOnlyChainMap(Mapping[str, object]):
-    """Combine multiple mappings for sequential lookup.
-
-    Based on the "A greatly simplified read-only version of Chainmap" recipe linked
-    to from https://docs.python.org/3/library/collections.html under the section
-    chainmap-examples-and-recipes. The link seems to be broken.
-    """
-
-    def __init__(self, *maps: Mapping[str, object]):
-        self._maps = deque(maps)
-
-    def __getitem__(self, key: str) -> object:
-        for mapping in self._maps:
-            try:
-                return mapping[key]
-            except KeyError:
-                pass
-        raise KeyError(key)
-
-    def __iter__(self) -> Iterator[str]:
-        return itertools.chain(*self._maps)
-
-    def __len__(self) -> int:
-        return sum(len(map) for map in self._maps)
-
-    def size(self) -> int:
-        """Return the number of maps in the chain."""
-        return len(self._maps)
-
-    def get(self, key: str, default: object = None) -> object:
-        try:
-            return self[key]
-        except KeyError:
-            return default
-
-    def push(self, namespace: Mapping[Any, Any]) -> None:
-        """Add a mapping to the front of the chain map."""
-        self._maps.appendleft(namespace)
-
-    def pop(self) -> Mapping[Any, Any]:
-        """Remove a mapping from the front of the chain map."""
-        return self._maps.popleft()
 
 
 class BuiltIn(Mapping[str, object]):
@@ -231,142 +98,82 @@ class BuiltIn(Mapping[str, object]):
 builtin = BuiltIn()
 
 
-class Undefined(Mapping[Any, object]):
-    """The default undefined type. Always evaluates to an empty string. Can be iterated
-    over and indexed without error.
-    """
-
-    __slots__ = ("name", "obj", "hint")
-
-    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
-        self.name = name
-        self.obj = obj
-        self.hint = hint
-
-    def __contains__(self, item: object) -> bool:
-        return False
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, Undefined) or other is None
-
-    def __getitem__(self, key: str) -> object:
-        return self
-
-    def __len__(self) -> int:
-        return 0
-
-    def __iter__(self) -> Iterator[Any]:
-        return iter([])
-
-    def __str__(self) -> str:
-        return ""
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"Undefined({self.name})"
-
-    def __int__(self) -> int:
-        return 0
-
-    def __hash__(self) -> int:
-        return hash(self.name)
-
-    def __reversed__(self) -> Iterable[Any]:
-        return []
+def _liquid_size(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "size")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, collections.abc.Sized):
+            return len(obj)
+        raise
 
 
-class DebugUndefined(Undefined):
-    """An undefined that returns debug information when rendered."""
-
-    __slots__ = ()
-
-    def __str__(self) -> str:
-        if self.hint:
-            return f"undefined: {self.hint}"
-        if self.obj is not _undefined:
-            return f"{type(self.obj).__name__} has no attribute '{self.name}'"
-        return f"'{self.name}' is undefined"
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"Undefined({self.name})"
-
-
-class StrictUndefined(Undefined):
-    """An undefined that raises an exception for everything other than ``repr``."""
-
-    __slots__ = ("msg",)
-
-    # Properties that don't raise an UndefinedError.
-    allowed_properties = frozenset(
-        [
-            "__repr__",
-            "name",
-            "hint",
-            "obj",
-            "msg",
-        ]
-    )
-
-    def __init__(self, name: str, obj: object = _undefined, hint: Optional[str] = None):
-        super().__init__(name, obj=obj, hint=hint)
-        self.msg = self.hint if self.hint else f"'{self.name}' is undefined"
-
-    def __getattribute__(self, name: str) -> object:
-        if name in object.__getattribute__(self, "allowed_properties"):
-            return object.__getattribute__(self, name)
-        raise UndefinedError(object.__getattribute__(self, "msg"))
-
-    def __contains__(self, item: object) -> bool:
-        raise UndefinedError(self.msg)
-
-    def __eq__(self, other: object) -> bool:
-        raise UndefinedError(self.msg)
-
-    def __getitem__(self, key: str) -> object:
-        raise UndefinedError(self.msg)
-
-    def __len__(self) -> int:
-        raise UndefinedError(self.msg)
-
-    def __iter__(self) -> Iterator[Any]:
-        raise UndefinedError(self.msg)
-
-    def __str__(self) -> str:
-        raise UndefinedError(self.msg)
-
-    def __repr__(self) -> str:
-        return f"StrictUndefined({self.name})"
-
-    def __bool__(self) -> bool:
-        raise UndefinedError(self.msg)
-
-    def __int__(self) -> int:
-        raise UndefinedError(self.msg)
-
-    def __hash__(self) -> int:
-        raise UndefinedError(self.msg)
-
-    def __reversed__(self) -> Iterable[Any]:
-        raise UndefinedError(self.msg)
+def _liquid_first(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "first")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Mapping) and obj:
+            return list(itertools.islice(obj.items(), 1))[0]
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[0]
+        raise
 
 
-class StrictDefaultUndefined(StrictUndefined):
-    """An undefined that plays nicely with the `default` filter."""
+def _liquid_last(
+    obj: Any, item_getter: Callable[[Any, str], object] = getitem
+) -> object:
+    try:
+        return item_getter(obj, "last")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[-1]
+        raise
 
-    # Force the `default` filter to return its default value
-    # without inspecting this class type.
-    force_liquid_default = True
 
-    # Properties that don't raise an UndefinedError.
-    allowed_properties = frozenset(
-        [
-            "__repr__",
-            "force_liquid_default",
-            "name",
-            "hint",
-            "obj",
-            "msg",
-        ]
-    )
+async def _liquid_size_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "size")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, collections.abc.Sized):
+            return len(obj)
+        raise
+
+
+async def _liquid_first_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "first")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Mapping) and obj:
+            return list(itertools.islice(obj.items(), 1))[0]
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[0]
+        raise
+
+
+async def _liquid_last_async(
+    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
+) -> object:
+    try:
+        return await item_getter(obj, "last")
+    except (KeyError, IndexError, TypeError):
+        if isinstance(obj, str):
+            raise
+        if isinstance(obj, collections.abc.Sequence):
+            return obj[-1]
+        raise
 
 
 # pylint: disable=too-many-instance-attributes redefined-builtin too-many-public-methods
@@ -379,23 +186,20 @@ class Context:
     """
 
     __slots__ = (
-        "env",
-        "locals",
-        "globals",
-        "counters",
-        "scope",
-        "loops",
-        "tag_namespace",
-        "disabled_tags",
-        "autoescape",
         "_copy_depth",
-        "parent_context",
-        "loop_iteration_carry",
+        "autoescape",
+        "counters",
+        "disabled_tags",
+        "env",
+        "globals",
         "local_namespace_size_carry",
+        "locals",
+        "loop_iteration_carry",
+        "loops",
+        "parent_context",
+        "scope",
+        "tag_namespace",
     )
-
-    getitem = _getitem
-    getitem_async = _getitem_async
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -488,7 +292,7 @@ class Context:
             + self.local_namespace_size_carry
         )
 
-    def get(self, path: ContextPath, default: object = _undefined) -> object:
+    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
             return self._resolve(path, default)
@@ -499,7 +303,7 @@ class Context:
 
         if items:
             try:
-                return reduce(Context.getitem, items, obj)
+                return reduce(self.getitem, items, obj)
             except (KeyError, IndexError, TypeError) as err:
                 if isinstance(err, KeyError):
                     hint = (
@@ -508,7 +312,7 @@ class Context:
                 else:
                     hint = f"{err}: {name}{''.join([f'[{i}]' for i in items])}"
 
-                if default == _undefined:
+                if default == UNDEFINED:
                     return self.env.undefined(
                         name=name,
                         hint=hint,
@@ -517,9 +321,7 @@ class Context:
 
         return obj
 
-    async def get_async(
-        self, path: ContextPath, default: object = _undefined
-    ) -> object:
+    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
             return self._resolve(path, default)
@@ -529,12 +331,12 @@ class Context:
         obj = self._resolve(name, default)
 
         if items:
-            _gi = Context.getitem_async
+            _gi = self.getitem_async
             try:
                 for item in items:
                     obj = await _gi(obj, item)
             except (KeyError, IndexError, TypeError) as err:
-                if default == _undefined:
+                if default == UNDEFINED:
                     return self.env.undefined(
                         name=name,
                         hint=f"{err}: {name}{''.join([f'[{i}]' for i in items])}",
@@ -542,7 +344,7 @@ class Context:
 
         return obj
 
-    def resolve(self, name: str, default: object = _undefined) -> Any:
+    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
         """Return the object/value at `name` in the current scope.
 
         This is like `get`, but does a single, top-level lookup rather than a
@@ -550,11 +352,11 @@ class Context:
         """
         return self._resolve(name, default)
 
-    def _resolve(self, name: str, default: object = _undefined) -> Any:
+    def _resolve(self, name: str, default: object = UNDEFINED) -> Any:
         try:
             return self.scope[name]
         except KeyError:
-            if default == _undefined:
+            if default == UNDEFINED:
                 return self.env.undefined(name)
             return default
 
@@ -612,14 +414,13 @@ class Context:
         self.counters[name] = val
         return val
 
-    def cycle(self, group_name: str, args: Sequence[Any]) -> Iterator[Any]:
-        """Return the next item in the given cycle. Initialise the cycle first if this
-        is the first time we're seeing this combination of group name and arguments."""
+    def cycle(self, group_name: str, args: Sequence[object]) -> object:
+        """Return the next item in the cycle of the given arguments."""
         key = (group_name, tuple(args))
-        if key not in self.tag_namespace["cycles"]:
-            self.tag_namespace["cycles"][key] = cycle(args)
-        it: Iterator[Any] = self.tag_namespace["cycles"][key]
-        return it
+        namespace = self.tag_namespace["cycles"]
+        if key not in namespace:
+            namespace[key] = cycle(range(len(args)))
+        return args[next(namespace[key])]
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
@@ -735,13 +536,51 @@ class Context:
         carry = buf.size if isinstance(buf, LimitedStringIO) else 0
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
+    # pylint: disable=too-many-return-statements
+    @classmethod
+    def getitem(cls, obj: Any, key: Any) -> Any:
+        """Item getter with special methods for arrays/lists and hashes/dicts."""
+        if hasattr(key, "__liquid__"):
+            key = key.__liquid__()
+
+        if key == "size":
+            return _liquid_size(obj)
+        if key == "first":
+            return _liquid_first(obj)
+        if key == "last":
+            return _liquid_last(obj)
+
+        return getitem(obj, key)
+
+    # pylint: disable=too-many-return-statements
+    @classmethod
+    async def getitem_async(cls, obj: Any, key: Any) -> object:
+        """Item getter with special methods for arrays/lists and hashes/dicts."""
+
+        async def _get_item(obj: Any, key: Any) -> object:
+            if hasattr(obj, "__getitem_async__"):
+                return await obj.__getitem_async__(key)
+            return getitem(obj, key)
+
+        if hasattr(key, "__liquid__"):
+            key = key.__liquid__()
+
+        if key == "size":
+            return await _liquid_size_async(obj, _get_item)
+        if key == "first":
+            return await _liquid_first_async(obj, _get_item)
+        if key == "last":
+            return await _liquid_last_async(obj, _get_item)
+
+        return await _get_item(obj, key)
+
 
 # NOTE: The name `VariableCaptureContext` is now a little misleading. We are
 # "capturing" more than variable names.
 
 
 class VariableCaptureContext(Context):
-    """A render context that captures template variable names."""
+    """A render context that captures template variable and filter names."""
 
     __slots__ = (
         "local_references",
@@ -790,19 +629,17 @@ class VariableCaptureContext(Context):
         self.root_context.local_references.append(key)
         return super().assign(key, val)
 
-    def get(self, path: ContextPath, default: object = _undefined) -> object:
+    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
         result = super().get(path, default)
         self._count_reference(path, result)
         return result
 
-    async def get_async(
-        self, path: ContextPath, default: object = _undefined
-    ) -> object:
+    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
         result = await super().get_async(path, default)
         self._count_reference(path, result)
         return result
 
-    def resolve(self, name: str, default: object = _undefined) -> Any:
+    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
         result = super().resolve(name, default)
         self._count_reference(name, result)
         return result
@@ -840,3 +677,65 @@ class VariableCaptureContext(Context):
         if is_undefined(result):
             self.root_context.undefined_references.append(ref)
         self.root_context.all_references.append(ref)
+
+
+class FutureContext(Context):
+    """A render context that addresses some incompatibilities between Python Liquid and
+    Ruby Liquid.
+
+    These "fixes" have not been implemented in the default `Context` for the benefit of
+    existing Python Liquid users that rely on past behavior.
+
+    This render context currently fixes https://github.com/jg-rp/liquid/issues/43 and
+    https://github.com/jg-rp/liquid/issues/90.
+
+    """
+
+    @classmethod
+    def getitem(cls, obj: Any, key: Any) -> Any:
+        if isinstance(obj, str) and isinstance(key, int):
+            raise IndexError("string indices are not allowed")
+        return super().getitem(obj, key)
+
+    @classmethod
+    async def getitem_async(cls, obj: Any, key: Any) -> object:
+        if isinstance(obj, str) and isinstance(key, int):
+            raise IndexError("string indices are not allowed")
+        return await super().getitem_async(obj, key)
+
+    def cycle(self, group_name: str, args: Sequence[object]) -> object:
+        if group_name:
+            key = group_name
+        else:
+            key = str(args)
+
+        namespace: Dict[str, int] = self.tag_namespace["cycles"]
+        index = namespace.setdefault(key, 0)
+        try:
+            rv = args[index]
+        except IndexError:
+            rv = None
+
+        index += 1
+        if index > len(args):
+            index = 0
+
+        namespace[key] = index
+        return rv
+
+
+class FutureVariableCaptureContext(VariableCaptureContext, FutureContext):
+    """A render context that captures information about template variables and filters."""
+
+
+def get_item(
+    obj: Sequence[Any],
+    *items: Any,
+    default: Optional[object] = UNDEFINED,
+) -> Any:
+    """Chained item getter."""
+    try:
+        itm: Any = reduce(Context.getitem, items, obj)
+    except (KeyError, IndexError, TypeError):
+        itm = default
+    return itm

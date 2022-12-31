@@ -7,7 +7,7 @@ from typing import Type
 
 from liquid.context import builtin
 from liquid.context import get_item
-from liquid.context import _undefined
+from liquid.context import UNDEFINED
 from liquid.context import ReadOnlyChainMap
 from liquid.environment import Environment
 
@@ -144,7 +144,7 @@ class ChainedItemGetterTestCase(TestCase):
                 "description": "default to undefined",
                 "obj": {"foo": 1},
                 "key": ["no", "such", "thing"],
-                "expect": _undefined,
+                "expect": UNDEFINED,
             },
         ]
 

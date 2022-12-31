@@ -1,4 +1,5 @@
 """Liquid template definition."""
+# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import re
@@ -10,18 +11,18 @@ from collections import defaultdict
 from io import StringIO
 from pathlib import Path
 
+from typing import Any
 from typing import Awaitable
 from typing import DefaultDict
 from typing import Dict
-from typing import List
-from typing import Any
 from typing import Iterator
+from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
 from typing import Tuple
-from typing import Union
 from typing import TYPE_CHECKING
+from typing import Union
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
@@ -29,6 +30,8 @@ from liquid.ast import Node
 
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
+from liquid.context import FutureContext
+from liquid.context import FutureVariableCaptureContext
 from liquid.context import VariableCaptureContext
 
 from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
@@ -393,6 +396,16 @@ class AwareBoundTemplate(BoundTemplate):
             "template": self.drop,
             **super().make_partial_namespace(partial, render_args),
         }
+
+
+class FutureBoundTemplate(BoundTemplate):
+    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render context.
+
+    See :class:`liquid.future.Environment`.
+    """
+
+    context_class = FutureContext
+    capture_context_class = FutureVariableCaptureContext
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):

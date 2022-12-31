@@ -59,7 +59,7 @@ class CycleNode(Node):
             group_name = ""
 
         args = [arg.evaluate(context) for arg in self.args]
-        buffer.write(str(next(context.cycle(group_name, args))))
+        buffer.write(str(context.cycle(group_name, args)))
         return True
 
     async def render_to_output_async(
@@ -71,19 +71,11 @@ class CycleNode(Node):
             group_name = ""
 
         args = [await arg.evaluate_async(context) for arg in self.args]
-        buffer.write(str(next(context.cycle(group_name, args))))
+        buffer.write(str(context.cycle(group_name, args)))
         return True
 
     def children(self) -> List[ChildNode]:
         _children: List[ChildNode] = []
-        if self.group:
-            _children.append(
-                ChildNode(
-                    linenum=self.tok.linenum,
-                    node=None,
-                    expression=self.group,
-                )
-            )
         for arg in self.args:
             _children.append(ChildNode(linenum=self.tok.linenum, expression=arg))
         return _children

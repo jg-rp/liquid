@@ -11,6 +11,16 @@ Version 1.7.0 (unreleased)
   Previously these variables were not reported in the results of
   ``BoundTemplate.analyze_with_context()``.
   See `#92 <https://github.com/jg-rp/liquid/issues/92>`_.
+- Both `#43 <https://github.com/jg-rp/liquid/issues/43>`_ and 
+  `#90 <https://github.com/jg-rp/liquid/issues/90>`_ have been fixed with the
+  introduction of `liquid.future.Environment`, an environment that aims for maximum
+  compatibility with Ruby Liquid, without concern for backwards incompatible changes to
+  template rendering behavior. ``liquid.Environment`` should be considered the most
+  stable "standard" configuration, ``liquid.future.Environment`` sacrifices stability
+  for improved compatibility with Ruby Liquid.
+- Fixed a bug with AST traversal of ``cycle`` nodes. Previously, ``CycleNode.children()``
+  erroneously included a `cycle group name` expression, if available. Cycle group names
+  are always treated as strings and do not get added to a template's local namespace. 
 
 **Features**
 

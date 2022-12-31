@@ -67,4 +67,14 @@ cases = [
     #     ),
     #     expect="183",
     # ),
+    Case(
+        description="named with different number of arguments",
+        template=(
+            r"{% cycle a: '1', '2' %}"
+            r"{% cycle a: '1', '2', '3' %}"
+            r"{% cycle a: '1' %}"
+        ),
+        expect="111",
+        standard=False,
+    ),
 ]
