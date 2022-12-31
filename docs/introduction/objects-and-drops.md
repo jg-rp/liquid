@@ -207,3 +207,40 @@ print(template.render(products=ListDrop(["Shoe", "Hat", "Ball"])))
 ```
 
 If auto-escaping is not enabled, `__html__` is ignored and the return value of `__str__` is used instead. Explicitly escaping an object using the [escape](../language/filters#escape) filter will always yield an escaped version of `__str__`.
+
+## `__str__` and `__int__`
+
+Other Python [magic methods](https://docs.python.org/3/reference/datamodel.html) will work with Liquid filters and special properties too.
+
+```python
+from liquid import Environment
+
+env = Environment()
+
+class Foo:
+    def __int__(self):
+        return 7
+
+    def __str__(self):
+        return "Bar"
+
+    def __len__(self):
+        return 5
+
+
+template = env.from_string(
+    """\
+{{ foo }}
+{{ foo | plus: 2 }}
+{{ foo.size }}
+"""
+)
+
+print(template.render(foo=Foo()))
+```
+
+```plain title=output
+Bar
+9
+5
+```
