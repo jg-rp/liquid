@@ -1,6 +1,6 @@
 """A simple LRU Cache implementation.
 
-Coppied from https://github.com/pallets/jinja/blob/master/src/jinja2/utils.py
+Copied from https://github.com/pallets/jinja/blob/master/src/jinja2/utils.py
 BSD-3-Clause License
 
 Copyright 2007 Pallets

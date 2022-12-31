@@ -679,7 +679,7 @@ class VariableCaptureContext(Context):
         self.root_context.all_references.append(ref)
 
 
-class RubyContext(Context):
+class FutureContext(Context):
     """A render context that addresses some incompatibilities between Python Liquid and
     Ruby Liquid.
 
@@ -724,7 +724,7 @@ class RubyContext(Context):
         return rv
 
 
-class RubyVariableCaptureContext(VariableCaptureContext, RubyContext):
+class FutureVariableCaptureContext(VariableCaptureContext, FutureContext):
     """A render context that captures information about template variables and filters."""
 
 
