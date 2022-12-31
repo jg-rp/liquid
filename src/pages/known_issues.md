@@ -10,6 +10,12 @@ This page documents known compatibility issues between Python Liquid and the [re
 
 Issues described here are considered "won't fix" or are an unacceptable breaking change for those who already rely on past Python Liquid behavior. You are encouraged to see the [issue tracker](https://github.com/jg-rp/liquid/issues) for features and bugs that can or will be addressed.
 
+:::info
+Python Liquid version 1.7.0 introduced `liquid.future.Environment` as an alternative to the default [`Environment`](/api/Environment). This alternative environment is intended to transition Python Liquid towards greater compatibility with Ruby Liquid, without changing template rendering behavior for existing Python Liquid users.
+
+Some of the issues described below have been resolved with `liquid.future.Environment`. To use it, simply import `Environment` from `liquid.future` instead if `liquid`.
+:::
+
 ## Coercing Strings to Integers Inside Filters
 
 **_See issue [#49](https://github.com/jg-rp/liquid/issues/49)_**
@@ -50,6 +56,8 @@ Python Liquid will accept [`cycle`](/language/tags#cycle) arguments of any type,
 
 **_See issue [#43](https://github.com/jg-rp/liquid/issues/43)_**
 
+**_Fixed in version 1.7.0_** with [`liquid.future.Environment`](/api/future-environment).
+
 When the [`cycle`](/language/tags#cycle) tag is given a name, Python Liquid will use that name and all other arguments to distinguish one cycle from another. Ruby Liquid will disregard all other arguments when given a name. For example.
 
 ```liquid
@@ -87,3 +95,36 @@ Python Liquid does not have a "lax" parser, like Ruby Liquid. Upon finding an er
 ## Floats in Ranges
 
 If a range literal uses a float literal as its start or stop value, the float literal must have something after the decimal point. This is OK `(1.0..3)`. This is not `(1...3)`. Ruby Liquid will accept either, resulting in a sequence of `[1,2,3]`.
+
+## Indexable Strings
+
+**_See issue [#90](https://github.com/jg-rp/liquid/issues/90)_**
+
+**_Fixed in version 1.7.0_** with [`liquid.future.Environment`](/api/future-environment).
+
+The reference implementation does not allow us to access characters in a string by their index. Python Liquid does.
+
+**Template**
+
+```liquid
+{% assign x = 'foobar' -%}
+{{ x[0] }}
+{{ x[1] }}
+{{ x[-1] }}
+```
+
+**Python Liquid output**
+
+```plain
+f
+o
+r
+```
+
+Shopify/liquid will throw an error (in strict mode) for each attempt at accessing a character by its index.
+
+```plain
+<Liquid::UndefinedVariable: Liquid error: undefined variable 0>
+<Liquid::UndefinedVariable: Liquid error: undefined variable 1>
+<Liquid::UndefinedVariable: Liquid error: undefined variable -1>
+```

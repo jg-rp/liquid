@@ -1,5 +1,7 @@
 # liquid.TagAnalysis
 
+**_New in version 1.7.0_**
+
 The result of analyzing a template's tags with [`Environment.analyze_tags()`](./environment.md#analyze_tags), [`Environment.analyze_tags_async()`](./environment.md#analyze_tags_async) and [`Environment.analyze_tags_from_string()`](./environment.md#analyze_tags_from_string).
 
 ## `TagAnalysis`
