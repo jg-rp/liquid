@@ -1,8 +1,8 @@
 Python Liquid Change Log
 ========================
 
-Version 1.7.0 (unreleased)
---------------------------
+Version 1.7.0
+-------------
 
 **Fixes**
 
@@ -13,11 +13,12 @@ Version 1.7.0 (unreleased)
   See `#92 <https://github.com/jg-rp/liquid/issues/92>`_.
 - Both `#43 <https://github.com/jg-rp/liquid/issues/43>`_ and 
   `#90 <https://github.com/jg-rp/liquid/issues/90>`_ have been fixed with the
-  introduction of `liquid.future.Environment`, an environment that aims for maximum
+  introduction of ``liquid.future.Environment``, an environment that aims for maximum
   compatibility with Ruby Liquid, without concern for backwards incompatible changes to
   template rendering behavior. ``liquid.Environment`` should be considered the most
   stable "standard" configuration, ``liquid.future.Environment`` sacrifices stability
   for improved compatibility with Ruby Liquid.
+  See the `known issues page <https://jg-rp.github.io/liquid/known_issues>`_.
 - Fixed a bug with AST traversal of ``cycle`` nodes. Previously, ``CycleNode.children()``
   erroneously included a `cycle group name` expression, if available. Cycle group names
   are always treated as strings and do not get added to a template's local namespace. 
@@ -26,13 +27,16 @@ Version 1.7.0 (unreleased)
 
 - Report template filter usage as well as variable usage with ``BoundTemplate.analyze()``
   and ``BoundTemplate.analyze_with_context()``.
-  See `#91 <https://github.com/jg-rp/liquid/pull/91>`_.
+  See `#91 <https://github.com/jg-rp/liquid/pull/91>`_ and
+  `docs <https://jg-rp.github.io/liquid/guides/static-template-analysis#filters>`_.
 - Report template tag usage when statically analyzing a template with
-  ``BoundTemplate.analyze()``. See `#97 <https://github.com/jg-rp/liquid/pull/97>`_.
+  ``BoundTemplate.analyze()``. See `#97 <https://github.com/jg-rp/liquid/pull/97>`_ and
+  `docs <https://jg-rp.github.io/liquid/guides/static-template-analysis#tags>`_.
 - Analyze template tags using ``Environment.analyze_tags()``. This form of tag analysis
   happens before a template is fully parsed, giving us the opportunity to find unknown,
   unexpected and unbalanced tags that might cause the parser to raise an exception or
-  skip template blocks. See `#98 <https://github.com/jg-rp/liquid/pull/98>`_.
+  skip template blocks. See `#98 <https://github.com/jg-rp/liquid/pull/98>`_ and 
+  `docs <https://jg-rp.github.io/liquid/guides/tag-analysis>`_.
 
 Version 1.6.1
 -------------
