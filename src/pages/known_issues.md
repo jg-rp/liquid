@@ -6,12 +6,10 @@ hide_table_of_contents: false
 
 # Known Issues
 
-This page documents known compatibility issues between Python Liquid and the [reference implementation](https://shopify.github.io/liquid/) of Liquid, written in Ruby. We strive to be 100% compatible with the reference implementation. That is, given an equivalent render context, a template rendered with Python Liquid should produce the same output as when rendered with Ruby Liquid.
-
-Issues described here are considered "won't fix" or are an unacceptable breaking change for those who already rely on past Python Liquid behavior. You are encouraged to see the [issue tracker](https://github.com/jg-rp/liquid/issues) for features and bugs that can or will be addressed.
+This page documents known compatibility issues between Python Liquid's default [`Environment`](/api/Environment) and the [reference implementation](https://shopify.github.io/liquid/) of Liquid, written in Ruby. We strive to be 100% compatible with the reference implementation. That is, given an equivalent render context, a template rendered with Python Liquid should produce the same output as when rendered with Ruby Liquid.
 
 :::info
-Python Liquid version 1.7.0 introduced `liquid.future.Environment` as an alternative to the default [`Environment`](/api/Environment). This alternative environment is intended to transition Python Liquid towards greater compatibility with Ruby Liquid, without changing template rendering behavior for existing Python Liquid users.
+Python Liquid version 1.7.0 introduced [`liquid.future.Environment`](/api/future-environment) as an alternative to the default [`Environment`](/api/Environment). This alternative environment is intended to transition Python Liquid towards greater compatibility with Ruby Liquid, without changing template rendering behavior for existing Python Liquid users.
 
 Some of the issues described below have been resolved with `liquid.future.Environment`. To use it, simply import `Environment` from `liquid.future` instead if `liquid`.
 :::
