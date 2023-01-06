@@ -816,7 +816,7 @@ Return the remainder from the division of the input by the argument.
 
 If either the input or argument are not an integer or float, Liquid will try to convert them to an
 integer or float. If the input can't be converted, `0` will be used instead. If the argument can't
-be converted, and exception is raised.
+be converted, an exception is raised.
 
 ## newline_to_br
 
