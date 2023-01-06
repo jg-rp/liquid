@@ -1,6 +1,6 @@
 # Liquid Tags
 
-This page documents the standard tags built-in to Liquid. See [custom tags](../guides/custom-tags.md) for examples of how to write your own and the [extra tag reference](../extra/tags.md) for some non-standard tags.
+This page documents standard tags that are available with every [`Environment`](../api/environment.md) by default. See [custom tags](../guides/custom-tags.md) for examples of how to write your own and the [extra tag reference](../extra/tags.md) for some non-standard tags.
 
 :::info
 Some of the examples here are borrowed from [Shopify's Liquid documentation](https://shopify.github.io/liquid/).

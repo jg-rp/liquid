@@ -2,7 +2,7 @@
 
 **_New in version 1.5.0_**
 
-This page documents extra filters that are not included in standard Liquid. See the [filter reference](../language/filters.md) for a details of all standard filters. Each filter described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
+This page documents extra filters that are not included in standard Liquid. See the [filter reference](../language/filters.md) for details of all standard filters. Each filter described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ## index
 

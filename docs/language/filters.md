@@ -1,6 +1,6 @@
 # Liquid Filters
 
-This page documents the standard filters built-in to Liquid. See [custom filters](../guides/custom-filters.md) for examples of how to write your own and the [extra filter reference](../extra/filters.md) for some non-standard filters.
+This page documents standard filters that are available with every [`Environment`](../api/environment.md) by default. See [custom filters](../guides/custom-filters.md) for examples of how to write your own and the [extra filter reference](../extra/filters.md) for some non-standard filters.
 
 :::info
 Some of the examples here are borrowed from [Shopify's Liquid documentation](https://shopify.github.io/liquid/).
@@ -569,7 +569,7 @@ If you divide by a float, the result will be a float.
 2.857142857142857
 ```
 
-If either the input or argument are not an integer or float, Liquid will try to convert them to an integer or float. If the input can't be converted, `0` will be used instead. If the argument can't be converted, and exception is raised.
+If either the input or argument are not an integer or float, Liquid will try to convert them to an integer or float. If the input can't be converted, `0` will be used instead. If the argument can't be converted, an exception is raised.
 
 ```liquid
 {{ "20" | divided_by: "7" }}

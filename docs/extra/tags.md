@@ -2,7 +2,7 @@
 
 **_New in version 1.5.0_**
 
-This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for a details of all standard tags. Each tag described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
+This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for details of all standard tags. Each tag described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
 ## if (not)
 
