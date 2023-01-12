@@ -350,6 +350,22 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg="unexpected pipe or missing filter name, on line 1",
             ),
+            Case(
+                description="unexpected token between left value and filter",
+                template=r'{{ "hello" boo || upcase }}',
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "expected a filter or end of expression, found 'boo', on line 1"
+                ),
+            ),
+            Case(
+                description="unexpected token after left value and no filters",
+                template=r'{{ "hello" offset:2 }}',
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "expected a filter or end of expression, found 'offset', on line 1"
+                ),
+            ),
         ]
 
         self._test(test_cases, mode=Mode.STRICT)

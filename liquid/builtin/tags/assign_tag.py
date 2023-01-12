@@ -70,14 +70,12 @@ class AssignTag(Tag):
 
     def parse(self, stream: TokenStream) -> AssignNode:
         expect(stream, TOKEN_TAG, value=TAG_ASSIGN)
-        tok = stream.current
-        stream.next_token()
-
+        tok = stream.next_token()
         expect(stream, TOKEN_EXPRESSION)
 
         match = RE_ASSIGNMENT.match(stream.current.value)
         if match:
-            name, expression = match.groups()
+            name, right = match.groups()
         else:
             raise LiquidSyntaxError(
                 f'invalid assignment expression "{stream.current.value}"',
@@ -85,6 +83,5 @@ class AssignTag(Tag):
             )
 
         return AssignNode(
-            tok,
-            AssignmentExpression(name, self._parse_expression(expression)),
+            tok, AssignmentExpression(name, self._parse_expression(right))
         )

@@ -228,11 +228,18 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
 def parse_from_tokens(tokens: Iterator[Token], linenum: int = 1) -> FilteredExpression:
     """Parse an expression with zero or more filters from a token iterator."""
     parts = tuple(split_at_first_pipe(tokens))
-    if len(parts) == 1:
-        stream = TokenStream(iter(parts[0]))
-        return FilteredExpression(parse_obj(stream))
+    stream = TokenStream(iter(parts[0]))
+    left = parse_obj(stream)
 
-    left = parse_obj(TokenStream(iter(parts[0])))
+    if stream.peek[1] != TOKEN_EOF:
+        raise LiquidSyntaxError(
+            f"expected a filter or end of expression, found {stream.peek[2]!r}",
+            linenum=stream.current[0],
+        )
+
+    if len(parts) == 1:
+        return FilteredExpression(left)
+
     filters = [_parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
     return FilteredExpression(left, filters)
 

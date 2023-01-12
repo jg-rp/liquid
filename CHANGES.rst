@@ -10,6 +10,10 @@ Version 1.7.1
   misinterpreting unquoted cycle group names as strings rather than variables to be
   resolved, and not Liquid stringifying some cycled items before output. We've also
   rolled back changes to ``CycleNode.children()`` from version 1.7.0.
+- Fixed a regression bug that lead to some erroneous filtered expressions tokens to be
+  silently ignored. Specifically any tokens that appear after a valid left value and the
+  first filters, or end of expression. We now raise a ``LiquidSyntaxError`` in such
+  cases. See `#103 <https://github.com/jg-rp/liquid/issues/103>`_.
 
 Version 1.7.0
 -------------
