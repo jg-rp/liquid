@@ -29,6 +29,7 @@ except ImportError:
     from liquid.exceptions import Markup  # type: ignore
 
 from liquid.context import Context
+from liquid.context import FutureContext
 
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import Error
@@ -852,7 +853,7 @@ LoopArgument = Union[
 ]
 
 # An identifier that resolves to an iterable or a range expression.
-LoopIterable = Union[Identifier, RangeLiteral]
+LoopIterable = Union[Identifier, RangeLiteral, StringLiteral]
 
 
 class LoopExpression(Expression):
@@ -974,11 +975,13 @@ class LoopExpression(Expression):
             return reversed(list(it)), length
         return it, length
 
-    def _obj_to_iter(self, obj: object) -> Tuple[Iterator[Any], int]:
+    def _obj_to_iter(self, obj: object, context: Context) -> Tuple[Iterator[Any], int]:
         if isinstance(obj, abc.Mapping):
             return iter(obj.items()), len(obj)
         if isinstance(obj, range):
             return iter(obj), len(obj)
+        if isinstance(obj, str) and isinstance(context, FutureContext):  # Bit of a hack
+            return (iter([obj]), 1)
         if isinstance(obj, abc.Sequence):
             return iter(obj), len(obj)
 
@@ -992,7 +995,7 @@ class LoopExpression(Expression):
 
     def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
         obj = self.iterable.evaluate(context)
-        it, length = self._obj_to_iter(obj)
+        it, length = self._obj_to_iter(obj, context)
 
         limit = self.limit.evaluate(context)
         self._raise_for_invalid_argument(limit)
@@ -1016,7 +1019,7 @@ class LoopExpression(Expression):
 
     async def evaluate_async(self, context: Context) -> Tuple[Iterator[Any], int]:
         obj = await self.iterable.evaluate_async(context)
-        it, length = self._obj_to_iter(obj)
+        it, length = self._obj_to_iter(obj, context)
 
         limit = await self.limit.evaluate_async(context)
         self._raise_for_invalid_argument(limit)

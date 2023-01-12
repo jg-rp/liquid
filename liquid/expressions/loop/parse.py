@@ -6,32 +6,33 @@ from typing import Tuple
 
 from liquid.limits import to_int
 
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COLS
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IN
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_LIMIT
-from liquid.token import TOKEN_OFFSET
-from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
 from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_COMMA
 
 from liquid.expression import Continue
 from liquid.expression import CONTINUE
 from liquid.expression import IntegerLiteral
+from liquid.expression import LoopArgument
 from liquid.expression import LoopExpression
 from liquid.expression import LoopIterable
-from liquid.expression import LoopArgument
 
+from liquid.expressions.common import make_parse_range
+from liquid.expressions.common import parse_float_literal
 from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_integer_literal
-from liquid.expressions.common import parse_float_literal
-from liquid.expressions.common import make_parse_range
+from liquid.expressions.common import parse_string_literal
 
 from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
 from liquid.expressions.stream import TokenStream
@@ -122,6 +123,9 @@ def parse(expr: str, linenum: int = 1) -> LoopExpression:
 
     if stream.current[1] == TOKEN_IDENTIFIER:
         expression: LoopIterable = parse_identifier(stream)
+        next(stream)
+    elif stream.current[1] == TOKEN_STRING:
+        expression = parse_string_literal(stream)
         next(stream)
     elif stream.current[1] == TOKEN_LPAREN:
         expression = parse_range(stream)

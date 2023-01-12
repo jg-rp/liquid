@@ -625,4 +625,18 @@ cases = [
         expect="3 4 5 6 ",
         globals={},
     ),
+    Case(
+        description="loop over a string literal",
+        template=r"{% for i in 'hello' %}{{ i }} {% endfor %}",
+        expect="hello ",
+        globals={},
+        future=True,
+    ),
+    Case(
+        description="loop over a string variable",
+        template=r"{% for i in foo %}{{ i }} {% endfor %}",
+        expect="hello ",
+        globals={"foo": "hello"},
+        future=True,
+    ),
 ]

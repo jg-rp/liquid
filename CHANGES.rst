@@ -15,6 +15,15 @@ Version 1.7.1
   first filters, or end of expression. We now raise a ``LiquidSyntaxError`` in such
   cases. See `#103 <https://github.com/jg-rp/liquid/issues/103>`_.
 
+**Compatibility**
+
+- The ``{% for %}`` tag now accepts a string literal as its iterable. Unlike
+  Shopify/Liquid, whether a string literal or a variable resolving to a string, the
+  default ``Environment`` will iterate over characters in the string.
+  ``liquid.future.Environment`` is now consistent with Shopify/Liquid, in that it
+  iterates over a "array" where the first an only item is the string.
+  See `#102 <https://github.com/jg-rp/liquid/issues/102>`_.
+
 Version 1.7.0
 -------------
 
