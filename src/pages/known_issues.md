@@ -126,3 +126,32 @@ Shopify/liquid will throw an error (in strict mode) for each attempt at accessin
 <Liquid::UndefinedVariable: Liquid error: undefined variable 1>
 <Liquid::UndefinedVariable: Liquid error: undefined variable -1>
 ```
+
+## Iterating Strings
+
+**_See issue [#102](https://github.com/jg-rp/liquid/issues/102)_**
+
+**_Fixed in version 1.8.0_** with [`liquid.future.Environment`](/api/future-environment).
+
+When looping over strings with the `{% for %}` tag, the reference implementation of Liquid will iterate over a one element array, where the first and only element is the string. Python Liquid will iterate through characters in the string.
+
+**Template:**
+
+```liquid
+{% assign foo = 'hello world' %}
+{% for x in foo %}{{ x }} / {% endfor %}
+```
+
+**Ruby Liquid Output:**
+
+```plain
+hello world /
+```
+
+**Python Liquid Output:**
+
+```plain
+h / e / l / l / o /   / w / o / r / l / d /
+```
+
+It appears that this is unintended behavior for Ruby Liquid. Previously, Ruby Liquid would iterate over lines in a string, also not intended behavior. See https://github.com/Shopify/liquid/pull/1667.
