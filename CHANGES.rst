@@ -1,7 +1,7 @@
 Python Liquid Change Log
 ========================
 
-Version 1.7.1
+Version 1.8.0
 -------------
 
 **Fixes**
@@ -23,6 +23,13 @@ Version 1.7.1
   ``liquid.future.Environment`` is now consistent with Shopify/Liquid, in that it
   iterates over a "array" where the first an only item is the string.
   See `#102 <https://github.com/jg-rp/liquid/issues/102>`_.
+
+**Features**
+
+- Added a new optional ``sort_numeric`` filter, importable from ``liquid.extra``.
+  ``sort_numeric`` returns a new list with items from the input sequence sorted by any
+  integers and/or floats found in the string representation of each item.
+  See `#100 <https://github.com/jg-rp/liquid/pull/100>`_.
 
 Version 1.7.0
 -------------
