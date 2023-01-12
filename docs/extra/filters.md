@@ -107,6 +107,48 @@ print(template.render(url="https://example.com/static/app.js"))
 <script src="https://example.com/static/app.js" type="text/javascript"></script>
 ```
 
+## sort_numeric
+
+**_New in version 1.8.0_**
+
+`<sequence> | sort_numeric[: <string>]`
+
+Return a new list with items from the input sequence sorted by any integers and/or floats found in the string representation of each item. Note the difference between `sort_numeric` and `sort` in this example.
+
+```python
+from liquid import Environment
+from liquid.extra import filters
+
+env = Environment()
+env.add_filter("sort_numeric", filters.sort_numeric)
+
+template = env.from_string("""\
+{% assign foo = '1.2.1, v1.10.0, v1.1.0, v1.2.2' | split: ', ' -%}
+{{ foo | sort_numeric | join: ', ' }}
+{{ foo | sort | join: ', ' }}
+
+{% assign bar = '107, 12, 0001' | split: ', ' -%}
+{{ bar | sort_numeric | join: ', ' }}
+{{ bar | sort | join: ', ' }}
+""")
+
+print(template.render())
+```
+
+```plain title="output"
+v1.1.0, 1.2.1, v1.2.2, v1.10.0
+1.2.1, v1.1.0, v1.10.0, v1.2.2
+
+0001, 12, 107
+0001, 107, 12
+```
+
+The optional string argument is the name of a key/property to use as the sort key. In which case each item in the input sequence should be a dict (or any mapping), each with said key/property.
+
+`sort_numeric` will work as expected when given lists/tuples of integers, floats and/or Decimals, but will be slower than using standard `sort`.
+
+If an input sequence contains strings (or arbitrary objects that get stringified) that do not have numeric characters, they will be pushed to the end of the resulting list, probably in the same order as in the input sequence.
+
 ## stylesheet_tag
 
 `<string> | stylesheet_tag`
