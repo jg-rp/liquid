@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from .filters import index
 from .filters import JSON
 from .filters import script_tag
+from .filters import sort_numeric
 from .filters import stylesheet_tag
 
 from .tags import CallTag
@@ -23,26 +24,27 @@ if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
 
 __all__ = (
-    "index",
-    "JSON",
-    "script_tag",
-    "stylesheet_tag",
+    "add_extended_inline_expression_tags",
+    "add_filters",
+    "add_inline_expression_tags",
+    "add_macro_tags",
+    "add_tags_and_filters",
+    "add_tags",
     "CallTag",
     "IfNotTag",
+    "index",
     "InlineIfAssignTag",
     "InlineIfAssignTagWithParens",
     "InlineIfEchoTag",
     "InlineIfEchoTagWithParens",
     "InlineIfStatement",
     "InlineIfStatementWithParens",
+    "JSON",
     "MacroTag",
+    "script_tag",
+    "sort_numeric",
+    "stylesheet_tag",
     "WithTag",
-    "add_filters",
-    "add_inline_expression_tags",
-    "add_extended_inline_expression_tags",
-    "add_macro_tags",
-    "add_tags",
-    "add_tags_and_filters",
 )
 
 
@@ -84,6 +86,7 @@ def add_filters(env: Environment) -> None:
     env.add_filter("index", index)
     env.add_filter("json", JSON())
     env.add_filter("script_tag", script_tag)
+    env.add_filter("sort_numeric", sort_numeric)
     env.add_filter("stylesheet_tag", stylesheet_tag)
 
 
