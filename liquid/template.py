@@ -399,7 +399,19 @@ class AwareBoundTemplate(BoundTemplate):
 
 
 class FutureBoundTemplate(BoundTemplate):
-    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render context.
+    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
+    context.
+
+    See :class:`liquid.future.Environment`.
+    """
+
+    context_class = FutureContext
+    capture_context_class = FutureVariableCaptureContext
+
+
+class FutureAwareBoundTemplate(AwareBoundTemplate):
+    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
+    context, and includes a `TemplateDrop` in each render context.
 
     See :class:`liquid.future.Environment`.
     """

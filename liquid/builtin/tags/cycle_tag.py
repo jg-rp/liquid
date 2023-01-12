@@ -16,6 +16,7 @@ from liquid.expression import Expression
 
 from liquid.parse import expect
 from liquid.stream import TokenStream
+from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
 
 from liquid.token import Token
@@ -23,6 +24,8 @@ from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_COLON
+
+from liquid.undefined import is_undefined
 
 from liquid.expressions import Token as ExprToken
 from liquid.expressions import TokenStream as ExprTokenStream
@@ -54,28 +57,46 @@ class CycleNode(Node):
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.group:
-            group_name = str(self.group.evaluate(context))
+            _group = self.group.evaluate(context)
+            if is_undefined(_group):
+                group_name = "__UNDEFINED"
+            else:
+                group_name = str(_group)
         else:
             group_name = ""
 
         args = [arg.evaluate(context) for arg in self.args]
-        buffer.write(str(context.cycle(group_name, args)))
+        buffer.write(
+            to_liquid_string(
+                context.cycle(group_name, args), autoescape=context.autoescape
+            )
+        )
         return True
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
         if self.group:
-            group_name = str(await self.group.evaluate_async(context))
+            _group = await self.group.evaluate_async(context)
+            if is_undefined(_group):
+                group_name = "__UNDEFINED"
+            else:
+                group_name = str(_group)
         else:
             group_name = ""
 
         args = [await arg.evaluate_async(context) for arg in self.args]
-        buffer.write(str(context.cycle(group_name, args)))
+        buffer.write(
+            to_liquid_string(
+                context.cycle(group_name, args), autoescape=context.autoescape
+            )
+        )
         return True
 
     def children(self) -> List[ChildNode]:
         _children: List[ChildNode] = []
+        if self.group:
+            _children.append(ChildNode(linenum=self.tok.linenum, expression=self.group))
         for arg in self.args:
             _children.append(ChildNode(linenum=self.tok.linenum, expression=arg))
         return _children

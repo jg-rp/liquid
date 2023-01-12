@@ -297,11 +297,13 @@ class AnalyzeTemplateTestCase(TestCase):
         expected_template_globals = {
             "a": [("<string>", 1)],
             "b": [("<string>", 1)],
+            "x": [("<string>", 1)],
         }
         expected_template_locals = {}
         expected_refs = {
             "a": [("<string>", 1)],
             "b": [("<string>", 1)],
+            "x": [("<string>", 1)],
         }
         expected_tags = {"cycle": [("<string>", 1)]}
 

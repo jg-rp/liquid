@@ -47,6 +47,14 @@ class CompatContextTestCase(TestCase):
         self.assertEqual(context.cycle("", ["x", "y", "z"]), "x")
         self.assertEqual(context.cycle("", [1, 2, 3]), 2)
 
+    def test_cycle_wraps(self) -> None:
+        """Test that we wrap around."""
+        env = Environment()
+        context = FutureContext(env)
+        self.assertEqual(context.cycle("", ["some", "other"]), "some")
+        self.assertEqual(context.cycle("", ["some", "other"]), "other")
+        self.assertEqual(context.cycle("", ["some", "other"]), "some")
+
     def test_named_cycle_groups(self) -> None:
         """Test that named cycles ignore arguments."""
         env = Environment()
@@ -61,7 +69,7 @@ class CompatContextTestCase(TestCase):
         context = FutureContext(env)
         self.assertEqual(context.cycle("a", [1, 2, 3]), 1)
         self.assertEqual(context.cycle("a", ["x", "y"]), "y")
-        self.assertEqual(context.cycle("a", ["x", "y"]), None)
+        self.assertEqual(context.cycle("a", ["x", "y"]), "x")
 
     def test_named_cycles_with_growing_lengths(self) -> None:
         """Test that we handle cycles with a growing number of arguments."""

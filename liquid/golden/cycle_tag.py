@@ -35,17 +35,30 @@ cases = [
         template=r"{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}{% cycle 1, 2, 3 %}",
         expect="123",
     ),
-    # Case(
-    #     description="some global variables",
-    #     template=r"{% cycle a, b, c %}{% cycle a, b, c %}{% cycle a, b, c %}",
-    #     expect="123",
-    #     globals={"a": 1, "b": 2, "c": 3},
-    # ),
+    Case(
+        description="some global variables",
+        template=r"{% cycle a, b, c %}{% cycle a, b, c %}{% cycle a, b, c %}",
+        expect="123",
+        globals={"a": 1, "b": 2, "c": 3},
+        standard=False,
+    ),
     Case(
         description="variable name",
         template=r"{% cycle a: 1, 2, 3 %}{% cycle a: 1, 2, 3 %}{% cycle a: 1, 2, 3 %}",
         expect="123",
         globals={"a": "foo"},
+    ),
+    Case(
+        description="multiple undefined variable names",
+        template=r"{% cycle a: 1, 2, 3 %}{% cycle b: 1, 2, 3 %}{% cycle a: 1, 2, 3 %}",
+        expect="123",
+        globals={},
+    ),
+    Case(
+        description="undefined variable names mixed with no name",
+        template=r"{% cycle a: 1, 2, 3 %}{% cycle b: 1, 2, 3 %}{% cycle 1, 2, 3 %}",
+        expect="121",
+        globals={},
     ),
     Case(
         description="changing variable name",
@@ -58,15 +71,16 @@ cases = [
         expect="112",
         globals={"a": "foo"},
     ),
-    # Case(
-    #     description="named with different items",
-    #     template=(
-    #         r"{% cycle 'a': 1, 2, 3 %}"
-    #         r"{% cycle 'a': 7, 8, 9 %}"
-    #         r"{% cycle 'a': 1, 2, 3 %}"
-    #     ),
-    #     expect="183",
-    # ),
+    Case(
+        description="named with different items",
+        template=(
+            r"{% cycle 'a': 1, 2, 3 %}"
+            r"{% cycle 'a': 7, 8, 9 %}"
+            r"{% cycle 'a': 1, 2, 3 %}"
+        ),
+        expect="183",
+        future=True,
+    ),
     Case(
         description="named with different number of arguments",
         template=(
@@ -74,7 +88,27 @@ cases = [
             r"{% cycle a: '1', '2', '3' %}"
             r"{% cycle a: '1' %}"
         ),
-        expect="111",
-        standard=False,
+        expect="12",
+        future=True,
+    ),
+    Case(
+        description="named with shrinking number of arguments",
+        template=(
+            r"{% cycle a: '1', '2', '3' %}"
+            r"{% cycle a: '1', '2' %}"
+            r"{% cycle a: '1' %}"
+        ),
+        expect="121",
+        future=True,
+    ),
+    Case(
+        description="named with growing number of arguments",
+        template=(
+            r"{% cycle a: '1' %}"
+            r"{% cycle a: '1', '2' %}"
+            r"{% cycle a: '1', '2', '3' %}"
+        ),
+        expect="112",
+        future=True,
     ),
 ]

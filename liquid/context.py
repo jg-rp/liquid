@@ -717,7 +717,7 @@ class FutureContext(Context):
             rv = None
 
         index += 1
-        if index > len(args):
+        if index >= len(args):
             index = 0
 
         namespace[key] = index

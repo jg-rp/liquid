@@ -1,7 +1,7 @@
 # flake8: noqa
 # pylint: disable=missing-module-docstring
 
-__version__ = "1.7.0"
+__version__ = "1.7.1"
 
 try:
     from markupsafe import escape
@@ -34,7 +34,9 @@ from .context import Undefined
 from .environment import Environment
 from .environment import Template
 
+from .template import AwareBoundTemplate
 from .template import BoundTemplate
+from .template import FutureAwareBoundTemplate
 from .template import FutureBoundTemplate
 
 from .analyze_tags import TagAnalysis
@@ -43,6 +45,7 @@ from .analyze_tags import DEFAULT_INNER_TAG_MAP
 from . import future
 
 __all__ = (
+    "AwareBoundTemplate",
     "BoundTemplate",
     "ChoiceLoader",
     "Context",
@@ -56,6 +59,7 @@ __all__ = (
     "FileSystemLoader",
     "future",
     "FutureBoundTemplate",
+    "FutureAwareBoundTemplate",
     "FutureContext",
     "is_undefined",
     "Markup",

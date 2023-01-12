@@ -1,6 +1,16 @@
 Python Liquid Change Log
 ========================
 
+Version 1.7.1
+-------------
+
+**Fixes**
+
+- Fixed a bug with the ``cycle`` tag when using ``liquid.future.Environment``. We were 
+  misinterpreting unquoted cycle group names as strings rather than variables to be
+  resolved, and not Liquid stringifying some cycled items before output. We've also
+  rolled back changes to ``CycleNode.children()`` from version 1.7.0.
+
 Version 1.7.0
 -------------
 
@@ -20,8 +30,7 @@ Version 1.7.0
   for improved compatibility with Ruby Liquid.
   See the `known issues page <https://jg-rp.github.io/liquid/known_issues>`_.
 - Fixed a bug with AST traversal of ``cycle`` nodes. Previously, ``CycleNode.children()``
-  erroneously included a `cycle group name` expression, if available. Cycle group names
-  are always treated as strings and do not get added to a template's local namespace. 
+  erroneously included a `cycle group name` expression, if available. 
 
 **Features**
 

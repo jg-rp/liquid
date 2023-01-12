@@ -86,5 +86,6 @@ cases = [
         template=r"{{ x.size }}",
         expect="",
         globals={"x": 1},
+        standard=False,
     ),
 ]

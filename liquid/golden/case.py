@@ -19,6 +19,7 @@ class Case:
     standard: bool = True
     error: bool = False
     strict: bool = False
+    future: bool = False
 
 
 TEMPLATE_DROP_ATTRS = (

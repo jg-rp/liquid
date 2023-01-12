@@ -6,7 +6,10 @@ import unittest
 from typing import List
 
 from liquid.environment import Environment
+from liquid.future import Environment as FutureEnvironment
 from liquid.template import AwareBoundTemplate
+from liquid.template import BoundTemplate
+from liquid.template import FutureAwareBoundTemplate
 from liquid.mode import Mode
 from liquid.loaders import DictLoader
 
@@ -20,63 +23,98 @@ class RenderTestCase(unittest.TestCase):
         self,
         test_cases: List[Case],
         template_class=AwareBoundTemplate,
+        future_template_class=FutureAwareBoundTemplate,
         tolerance=Mode.STRICT,
     ):
-        """Run all tests in `test_cases` in sync and async modes."""
-        self._test_sync(test_cases, template_class, tolerance)
-        self._test_async(test_cases, template_class, tolerance)
+        """Run all tests in `test_cases` through sync and async paths."""
+        self._test_sync(
+            test_cases,
+            template_class=template_class,
+            future_template_class=future_template_class,
+            tolerance=tolerance,
+        )
+        self._test_async(
+            test_cases,
+            template_class=template_class,
+            future_template_class=future_template_class,
+            tolerance=tolerance,
+        )
 
     def _test_sync(
         self,
         test_cases: List[Case],
+        *,
         template_class=AwareBoundTemplate,
+        future_template_class=FutureAwareBoundTemplate,
         tolerance=Mode.STRICT,
     ):
         """Helper method for testing lists of test cases."""
-        for case in test_cases:
-            env = Environment(
-                loader=DictLoader(case.partials),
-                tolerance=tolerance,
-            )
-            env.template_class = template_class
 
-            with self.subTest(msg=case.description, mode=tolerance):
+        def sub_test(env: Environment, case: Case, future=False) -> None:
+            with self.subTest(msg=case.description, future=future, mode=tolerance):
                 if case.error:
                     with self.assertRaises(Error):
                         template = env.from_string(case.template, globals=case.globals)
-                        result = template.render()
+                        template.render()
                 else:
                     template = env.from_string(case.template, globals=case.globals)
                     result = template.render()
                     self.assertEqual(result, case.expect)
 
+        for case in test_cases:
+            loader = DictLoader(case.partials)
+
+            env = Environment(loader=loader, tolerance=tolerance)
+            env.template_class = template_class
+
+            future_env = FutureEnvironment(loader=loader, tolerance=tolerance)
+            future_env.template_class = future_template_class
+
+            if case.future:
+                sub_test(env=future_env, case=case, future=True)
+            else:
+                sub_test(env=env, case=case, future=False)
+                sub_test(env=future_env, case=case, future=True)
+
     def _test_async(
         self,
         test_cases: List[Case],
         template_class=AwareBoundTemplate,
+        future_template_class=FutureAwareBoundTemplate,
         tolerance=Mode.STRICT,
     ):
         """Helper method for table driven testing of asynchronous rendering."""
 
-        async def coro(template):
+        async def coro(template: BoundTemplate):
             return await template.render_async()
 
-        for case in test_cases:
-            env = Environment(
-                loader=DictLoader(case.partials),
-                tolerance=tolerance,
-            )
-            env.template_class = template_class
-
-            with self.subTest(msg=case.description, asynchronous=True, mode=tolerance):
+        def sub_test(env: Environment, case: Case, future=False) -> None:
+            with self.subTest(
+                msg=case.description, asynchronous=True, future=future, mode=tolerance
+            ):
                 if case.error:
                     with self.assertRaises(Error):
                         template = env.from_string(case.template, globals=case.globals)
-                        result = asyncio.run(coro(template))
+                        asyncio.run(coro(template))
                 else:
                     template = env.from_string(case.template, globals=case.globals)
                     result = asyncio.run(coro(template))
                     self.assertEqual(result, case.expect)
+
+        for case in test_cases:
+            loader = DictLoader(case.partials)
+
+            env = Environment(loader=loader, tolerance=tolerance)
+            env.template_class = template_class
+
+            future_env = FutureEnvironment(loader=loader, tolerance=tolerance)
+            future_env.template_class = future_template_class
+
+            if case.future:
+                sub_test(env=future_env, case=case, future=True)
+            else:
+                sub_test(env=env, case=case, future=False)
+                sub_test(env=future_env, case=case, future=True)
 
 
 class RenderTagsTestCase(RenderTestCase):
