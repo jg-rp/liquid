@@ -576,9 +576,7 @@ class EvalBooleanNotExpressionTestCase(unittest.TestCase):
     def test_eval_with_parens(self) -> None:
         """Test that we can evaluate boolean expressions that support logical
         `not` and grouping terms with parentheses."""
-
         env = Environment()
-
         for case in self.test_cases:
             with self.subTest(msg=case.description):
                 context = Context(env, globals=case.context)

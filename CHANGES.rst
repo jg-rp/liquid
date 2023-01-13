@@ -14,6 +14,9 @@ Version 1.8.0
   silently ignored. Specifically any tokens that appear after a valid left value and the
   first filters, or end of expression. We now raise a ``LiquidSyntaxError`` in such
   cases. See `#103 <https://github.com/jg-rp/liquid/issues/103>`_.
+- Fixed parenthesized conditional expression syntax error reporting. We now raise a 
+  ``LiquidSyntaxError`` when given unbalanced parentheses.
+  See `#101 <https://github.com/jg-rp/liquid/issues/101>`_.
 
 **Compatibility**
 

@@ -148,16 +148,13 @@ def parse_infix_expression_with_parens(
     left: Expression,
 ) -> InfixExpression:
     """Parse an infix expression from a stream of tokens."""
-    tok = stream.current
+    tok = next(stream)
     precedence = PRECEDENCES.get(tok[1], PRECEDENCE_LOWEST)
-    stream.next_token()
-
-    exp = InfixExpression(
+    return InfixExpression(
         left=left,
         operator=tok[2],
         right=parse_obj_with_parens(stream, precedence),
     )
-    return exp
 
 
 def parse_obj(
@@ -207,14 +204,14 @@ def parse_grouped_expression(stream: TokenStream) -> Expression:
     """Parse a group of logical expressions."""
     next(stream)  # Eat left paren
     expr = parse_obj_with_parens(stream)
-
     next(stream)
-    while stream.current[1] == TOKEN_RPAREN:
-        next(stream)
 
-    if stream.current[1] != TOKEN_EOF:
+    while stream.current[1] != TOKEN_RPAREN:
+        if stream.current[1] == TOKEN_EOF:
+            raise LiquidSyntaxError("unbalanced parentheses", linenum=stream.current[0])
         expr = parse_infix_expression_with_parens(stream, left=expr)
 
+    stream.expect(TOKEN_RPAREN)
     return expr
 
 
@@ -245,8 +242,12 @@ def parse_obj_with_parens(
     try:
         left = TOKEN_MAP_WITH_PARENS[stream.current[1]](stream)
     except KeyError as err:
+        if stream.current[1] == TOKEN_EOF:
+            msg = "end of expression"
+        else:
+            msg = repr(stream.current[2])
         raise LiquidSyntaxError(
-            f"unexpected {stream.current[2]!r}",
+            f"unexpected {msg}",
             linenum=stream.current[0],
         ) from err
 
@@ -271,10 +272,13 @@ def parse_with_parens(expr: str, linenum: int = 1) -> BooleanExpression:
     """Parse a string as a boolean expression, possibly containing the logical `not`
     operator and parentheses for grouping terms.
     """
-    return BooleanExpression(
-        parse_obj_with_parens(
-            TokenStream(
-                tokenize_with_parens(expr, linenum),
-            )
+    stream = TokenStream(tokenize_with_parens(expr, linenum))
+    rv = BooleanExpression(parse_obj_with_parens(stream))
+    peek_typ = stream.peek[1]
+    if peek_typ == TOKEN_RPAREN:
+        raise LiquidSyntaxError("unmatched ')'", linenum=stream.peek[0])
+    if peek_typ != TOKEN_EOF:
+        raise LiquidSyntaxError(
+            f"unexpected {stream.peek[2]!r}", linenum=stream.peek[0]
         )
-    )
+    return rv

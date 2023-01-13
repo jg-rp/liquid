@@ -19,6 +19,8 @@ from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
 from liquid.expressions.boolean.parse import PrefixExpression
 
+from liquid.exceptions import LiquidSyntaxError
+
 
 class Case(NamedTuple):
     description: str
@@ -388,3 +390,18 @@ class ParseBooleanNotExpressionTestCase(unittest.TestCase):
             with self.subTest(msg=case.description):
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(expr, case.expect)
+
+    def test_missing_close_parenthesis(self) -> None:
+        """Test that we raise a LiquidSyntaxError when missing a closing parenthesis."""
+        with self.assertRaises(LiquidSyntaxError):
+            parse_boolean_expression_with_parens("((true or false)")
+
+    def test_unmatched_close_parenthesis(self) -> None:
+        """Test that we raise a LiquidSyntaxError when too many closing parentheses."""
+        with self.assertRaises(LiquidSyntaxError):
+            parse_boolean_expression_with_parens("((true or false)))")
+
+    def test_unexpected_trailing_tokens(self) -> None:
+        """Test that we raise a LiquidSyntaxError with trailing garbage."""
+        with self.assertRaises(LiquidSyntaxError):
+            parse_boolean_expression_with_parens("((true or false)) 'foo'")
