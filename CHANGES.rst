@@ -1,8 +1,8 @@
 Python Liquid Change Log
 ========================
 
-Version 1.8.0
--------------
+Version 1.8.0 (unreleased)
+--------------------------
 
 **Fixes**
 
@@ -12,7 +12,7 @@ Version 1.8.0
   rolled back changes to ``CycleNode.children()`` from version 1.7.0.
 - Fixed a regression bug that lead to some erroneous filtered expressions tokens to be
   silently ignored. Specifically any tokens that appear after a valid left value and the
-  first filters, or end of expression. We now raise a ``LiquidSyntaxError`` in such
+  first filter or end of expression. We now raise a ``LiquidSyntaxError`` in such
   cases. See `#103 <https://github.com/jg-rp/liquid/issues/103>`_.
 - Fixed parenthesized conditional expression syntax error reporting. We now raise a 
   ``LiquidSyntaxError`` when given unbalanced parentheses.
@@ -24,7 +24,7 @@ Version 1.8.0
   Shopify/Liquid, whether a string literal or a variable resolving to a string, the
   default ``Environment`` will iterate over characters in the string.
   ``liquid.future.Environment`` is now consistent with Shopify/Liquid, in that it
-  iterates over a "array" where the first an only item is the string.
+  iterates over an "array" where the first an only item is the string.
   See `#102 <https://github.com/jg-rp/liquid/issues/102>`_.
 
 **Features**
