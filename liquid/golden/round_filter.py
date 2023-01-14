@@ -47,6 +47,41 @@ cases = [
     Case(
         description="undefined argument",
         template=r"{{ 5.666 | round: nosuchthing }}",
-        expect="6.0",
+        expect="6",
+    ),
+    Case(
+        description="argument is a string",
+        template=r"{{ 5.666 | round: 'foo' }}",
+        expect="6",
+    ),
+    Case(
+        description="argument is a string representation of an integer",
+        template=r"{{ 5.666 | round: '1' }}",
+        expect="5.7",
+    ),
+    Case(
+        description="argument is a string representation of zero",
+        template=r"{{ 5.666 | round: '1' }}",
+        expect="5.7",
+    ),
+    # Case(
+    #     description="argument is a string representation of a negative integer",
+    #     template=r"{{ 5.666 | round: '-1' }}",
+    #     expect="10",
+    # ),
+    Case(
+        description="argument is a negative",
+        template=r"{{ 5.666 | round: -2 }}",
+        expect="0",
+    ),
+    Case(
+        description="argument is a float",
+        template=r"{{ 5.666 | round: 1.2 }}",
+        expect="5.7",
+    ),
+    Case(
+        description="argument is a zero",
+        template=r"{{ 5.666 | round: 0 }}",
+        expect="6",
     ),
 ]

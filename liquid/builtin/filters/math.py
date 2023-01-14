@@ -100,10 +100,24 @@ def plus(num: NumberT, other: NumberT) -> NumberT:
 @math_filter
 def round_(num: NumberT, ndigits: Optional[int] = None) -> NumberT:
     """Round a number to a given precision in decimal digits."""
-    if ndigits or is_undefined(ndigits):
-        ndigits = int_arg(ndigits, default=0)
-        return round(num, ndigits)
-    return round(num)
+    if ndigits is None or is_undefined(ndigits):
+        return round(num)
+
+    try:
+        _ndigits = num_arg(ndigits)
+    except FilterArgumentError:
+        # Probably a string that can't be case to an int or float
+        return round(num)
+
+    if isinstance(_ndigits, float):
+        _ndigits = int(_ndigits)
+
+    if _ndigits < 0:
+        return 0
+    if _ndigits == 0:
+        return round(num)
+
+    return round(num, _ndigits)
 
 
 @math_filter

@@ -21,11 +21,14 @@ Version 1.8.0 (unreleased)
 **Compatibility**
 
 - The ``{% for %}`` tag now accepts a string literal as its iterable. Unlike
-  Shopify/Liquid, whether a string literal or a variable resolving to a string, the
+  Shopify/liquid, whether a string literal or a variable resolving to a string, the
   default ``Environment`` will iterate over characters in the string.
-  ``liquid.future.Environment`` is now consistent with Shopify/Liquid, in that it
+  ``liquid.future.Environment`` is now consistent with Shopify/liquid, in that it
   iterates over an "array" where the first an only item is the string.
   See `#102 <https://github.com/jg-rp/liquid/issues/102>`_.
+- The `round` filters is now consistent with Shopify/liquid and Ruby 3 when given
+  non-integer arguments.
+  See `Shopify/liquid#1590 <https://github.com/Shopify/liquid/issues/1590>`_.
 
 **Features**
 
