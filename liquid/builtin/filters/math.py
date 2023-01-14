@@ -11,7 +11,6 @@ from liquid.exceptions import FilterArgumentError
 
 from liquid.filter import math_filter
 from liquid.filter import num_arg
-from liquid.filter import int_arg
 
 DecimalT = decimal.Decimal
 NumberT = Union[float, int]
