@@ -44,6 +44,9 @@ class WithKeywordArg(NamedTuple):
 
 
 class WithNode(Node):
+
+    # TODO: __slots__
+
     def __init__(self, tok: Token, args: Dict[str, Expression], block: BlockNode):
         self.tok = tok
         self.args = args

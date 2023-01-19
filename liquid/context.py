@@ -199,7 +199,14 @@ class Context:
         "parent_context",
         "scope",
         "tag_namespace",
+        "template",
     )
+
+    # NOTE: `template` has been added for the benefit of tags like `{% extends %}` which
+    # need access to the current template when rendering. With hindsight, `env` and
+    # `template` should be the only positional arguments, with all others keyword only.
+    # We leave `template` optional for backwards compatibility reasons only. This might
+    # change in Python Liquid version 2.0.
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -211,8 +218,10 @@ class Context:
         parent_context: Optional[Context] = None,
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
+        template: Optional[BoundTemplate] = None,
     ):
         self.env = env
+        self.template = template
 
         # A namespace for template local variables. Those that are bound with
         # `assign` or `capture`.

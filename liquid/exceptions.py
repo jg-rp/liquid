@@ -42,6 +42,20 @@ class LiquidInterrupt(Exception):
     """Loop interrupt"""
 
 
+class StopRender(Exception):
+    """An interrupt used to signal that ``BoundTemplate.render_with_context`` should
+    stop rendering more nodes. This is used by template inheritance tags and is not
+    an error condition."""
+
+
+class LiquidEnvironmentError(Error):
+    """An exception raised due to a misconfigured environment."""
+
+
+class TemplateInheritanceError(Error):
+    """An exceptions raised when template inheritance tags are used incorrectly."""
+
+
 class LiquidSyntaxError(Error):
     """Exception raised when there is a parser error."""
 

@@ -29,21 +29,25 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.context import Context
-from liquid.context import ReadOnlyChainMap
 from liquid.context import FutureContext
 from liquid.context import FutureVariableCaptureContext
+from liquid.context import ReadOnlyChainMap
 from liquid.context import VariableCaptureContext
 
-from liquid.exceptions import TemplateTraversalError, LiquidInterrupt
-from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import Error
+from liquid.exceptions import LiquidInterrupt
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateTraversalError
 
-from liquid.expression import Expression, StringLiteral, FilteredExpression
+from liquid.expression import Expression
+from liquid.expression import FilteredExpression
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import IdentifierTuple
 from liquid.expression import Literal
+from liquid.expression import StringLiteral
 
 from liquid.output import LimitedStringIO
 from liquid.token import TOKEN_TAG
@@ -175,6 +179,8 @@ class BoundTemplate:
                         )
                     else:
                         raise
+                except StopRender:
+                    break
                 except Error as err:
                     # Raise or warn according to the current mode.
                     self.env.error(err, linenum=node.token().linenum)
@@ -210,6 +216,8 @@ class BoundTemplate:
                         )
                     else:
                         raise
+                except StopRender:
+                    break
                 except Error as err:
                     # Raise or warn according to the current mode.
                     self.env.error(err, linenum=node.token().linenum)
