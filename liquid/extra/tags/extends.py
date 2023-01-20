@@ -103,7 +103,9 @@ class _BlockStackItem(NamedTuple):
 class BlockNode(Node):
     __slots__ = ("tok", "name", "block", "expr")
 
-    def __init__(self, tok: Token, name: Expression, block: TemplateBlockNode) -> None:
+    def __init__(
+        self, tok: Token, name: StringLiteral, block: TemplateBlockNode
+    ) -> None:
         self.tok = tok
         self.expr = name
         self.name = str(name)
@@ -197,6 +199,7 @@ class ExtendsNode(Node):
 
         # The base template
         parent.render_with_context(context, buffer)
+        context.tag_namespace["extends"].clear()
         raise StopRender()
 
     async def render_to_output_async(
@@ -226,6 +229,7 @@ class ExtendsNode(Node):
 
         # The base template
         await parent.render_with_context_async(context, buffer)
+        context.tag_namespace["extends"].clear()
         raise StopRender()
 
     def children(self) -> List[ChildNode]:
@@ -320,11 +324,13 @@ class BlockTag(Tag):
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         block_name = parse_string_or_identifier(expr_stream)
-        if isinstance(block_name, Identifier) and len(block_name.path) != 1:
-            raise LiquidSyntaxError(
-                f"invalid identifier '{block_name}' for {self.name!r} tag",
-                linenum=stream.current.linenum,
-            )
+        if isinstance(block_name, Identifier):
+            if len(block_name.path) != 1:
+                raise LiquidSyntaxError(
+                    f"invalid identifier '{block_name}' for {self.name!r} tag",
+                    linenum=stream.current.linenum,
+                )
+            block_name = StringLiteral(str(block_name))
         next(expr_stream)
         expr_stream.expect(TOKEN_EOF)
         next(stream)

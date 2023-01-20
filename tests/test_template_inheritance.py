@@ -77,6 +77,155 @@ class TemplateInheritanceTestCase(TestCase):
                 globals={"you": "world!"},
                 partials={"foo": "hello, {% block bar %}{{ you }}{% endblock %}"},
             ),
+            Case(
+                description="parent variables are in scope",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block bar %}goodbye, {{ you }}{{ something }}{% endblock %}"
+                ),
+                expect="goodbye, world",
+                globals={},
+                partials={
+                    "foo": (
+                        "{% assign you = 'world' %}"
+                        "{% block bar %}hello, {{ you }}!{% endblock %}"
+                        "{% assign something = 'other' %}"
+                    )
+                },
+            ),
+            Case(
+                description="child variables are in scope",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block bar %}"
+                    "{% assign something = '/other' %}"
+                    "goodbye, {{ you }}"
+                    "{% endblock %}"
+                ),
+                expect="goodbye, world/other",
+                globals={},
+                partials={
+                    "foo": (
+                        "{% assign you = 'world' %}"
+                        "{% block bar %}{% endblock %}"
+                        "{{ something }}"
+                    )
+                },
+            ),
+            Case(
+                description="nested outer nested block",
+                template="{% extends 'foo' %}{% block bar %}Goodbye{% endblock %}",
+                expect="Goodbye!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                        "!"
+                    )
+                },
+            ),
+            Case(
+                description="override nested block",
+                template=(
+                    "{% extends 'foo' %}{% block greeting %}Goodbye{% endblock %}"
+                ),
+                expect="Goodbye, world!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    )
+                },
+            ),
+            Case(
+                description="super nested blocks",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block bar %}{{ block.super }}!!{% endblock %}"
+                ),
+                expect="Hello, world!!!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    )
+                },
+            ),
+            Case(
+                description="include an extended template",
+                template="{% include 'bar' %}",
+                expect="foo bar",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    ),
+                    "bar": "{% extends 'foo' %}{% block bar %}foo bar{% endblock %}",
+                },
+            ),
+            Case(
+                description="include in an overridden block",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block greeting %}{% include 'bar' %}{% endblock %}"
+                ),
+                expect="I am included, world!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    ),
+                    "bar": "I am included",
+                },
+            ),
+            Case(
+                description="render an extended template",
+                template="{% render 'bar' %}",
+                expect="foo bar",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    ),
+                    "bar": "{% extends 'foo' %}{% block bar %}foo bar{% endblock %}",
+                },
+            ),
+            Case(
+                description="render in an overridden block",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block greeting %}{% render 'bar' %}{% endblock %}"
+                ),
+                expect="I am rendered, world!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    ),
+                    "bar": "I am rendered",
+                },
+            ),
         ]
 
         async def coro(template: BoundTemplate) -> str:

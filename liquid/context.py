@@ -450,18 +450,26 @@ class Context:
         return idx
 
     @contextmanager
-    def extend(self, namespace: Namespace) -> Iterator[Context]:
+    def extend(
+        self, namespace: Namespace, template: Optional[BoundTemplate] = None
+    ) -> Iterator[Context]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive include"
             )
 
+        _template = self.template
+        if template:
+            self.template = template
+
         self.scope.push(namespace)
 
         try:
             yield self
         finally:
+            if template:
+                self.template = _template
             self.scope.pop()
 
     @contextmanager
