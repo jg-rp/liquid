@@ -9,6 +9,11 @@ from typing import Dict
 
 from liquid import BoundTemplate
 from liquid import Environment
+from liquid import StrictUndefined
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import RequiredBlockError
+from liquid.exceptions import UndefinedError
+from liquid.exceptions import TemplateInheritanceError
 from liquid.extra import add_inheritance_tags
 from liquid.loaders import DictLoader
 
@@ -243,3 +248,208 @@ class TemplateInheritanceTestCase(TestCase):
             with self.subTest(msg=case.description, asynchronous=True):
                 result = asyncio.run(coro(template))
                 self.assertEqual(result, case.expect)
+
+    def test_missing_required_block(self) -> None:
+        """Test that we raise an exception if a required block is missing."""
+        template = "{% extends 'foo' %}{% block baz %}{% endblock %}"
+        partials = {"foo": "{% block bar required %}{% endblock %}"}
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(RequiredBlockError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(RequiredBlockError):
+                asyncio.run(coro(template))
+
+    def test_missing_required_block_long_stack(self) -> None:
+        """Test that we raise an exception if a required block is missing in a long
+        stack."""
+        template = "{% extends 'bar' %}"
+        partials = {
+            "foo": "{% block baz required %}{% endblock %}",
+            "bar": "{% extends 'foo' %}{% block some %}hello{% endblock %}",
+        }
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(RequiredBlockError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(RequiredBlockError):
+                asyncio.run(coro(template))
+
+    def test_immediate_override_required_block(self) -> None:
+        """Test that we can override a required block in the immediate child."""
+        template = "{% extends 'foo' %}{% block bar %}hello{% endblock %}"
+        partials = {"foo": "{% block bar required %}{% endblock %}"}
+        expect = "hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
+
+    def test_override_required_block_in_leaf(self) -> None:
+        """Test that we can override a required block."""
+        template = "{% extends 'foo' %}{% block baz %}hello{% endblock %}"
+        partials = {
+            "foo": "{% block baz required %}{% endblock %}",
+            "bar": "{% extends 'foo' %}",
+        }
+        expect = "hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
+
+    def test_override_required_block_in_stack(self) -> None:
+        """Test that we can override a required block somewhere on the block stack."""
+        template = "{% extends 'bar' %}"
+        partials = {
+            "foo": "{% block baz required %}{% endblock %}",
+            "bar": "{% extends 'foo' %}{% block baz %}hello{% endblock %}",
+        }
+        expect = "hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
+
+    def test_override_required_block_directly(self) -> None:
+        """Test that we raise an exception if rendering a required block directly."""
+        template = "{% block foo required %}{% endblock %}"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment()
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(RequiredBlockError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(RequiredBlockError):
+                asyncio.run(coro(template))
+
+    def test_too_many_extends(self) -> None:
+        """Test that we raise an exception if more than one `extends` tag exists."""
+        template = "{% extends 'foo' %}{% extends 'bar' %}"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment()
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(TemplateInheritanceError):
+                asyncio.run(coro(template))
+
+    def test_invalid_block_name(self) -> None:
+        """Test that we raise an exception given an invalid block name."""
+        template = "{% extends 'foo' %}"
+        partials = {
+            "foo": "{% block 47 %}{% endblock %}",
+        }
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(LiquidSyntaxError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(LiquidSyntaxError):
+                asyncio.run(coro(template))
+
+    def test_block_drop_properties(self) -> None:
+        """Test that we handle undefined block drop properties"""
+        template = (
+            "{% extends 'foo' %}"
+            "{% block bar %}{{ block.nosuchthing }} and sue{% endblock %}"
+        )
+        partials = {"foo": "hello, {% block bar %}{{ you }}{% endblock %}"}
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials), undefined=StrictUndefined)
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(UndefinedError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(UndefinedError):
+                asyncio.run(coro(template))
+
+    def test_block_no_super_block(self) -> None:
+        """Test that we handle undefined block.super"""
+        template = "hello, {% block bar %}{{ block.super }}{{ you }}{% endblock %}"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(undefined=StrictUndefined)
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(UndefinedError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(UndefinedError):
+                asyncio.run(coro(template))

@@ -26,16 +26,14 @@ from liquid.context import Context
 
 from liquid.exceptions import LiquidEnvironmentError
 from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 
-from liquid.expression import Expression
-from liquid.expression import Identifier
 from liquid.expression import StringLiteral
 
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_literal
-from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.common import tokenize_common_expression
 
 from liquid.parse import expect
@@ -48,6 +46,8 @@ from liquid.token import Token
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_STRING
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid import Environment
@@ -72,7 +72,7 @@ class BlockDrop(Mapping[str, object]):
         self.name = name
         self.parent = parent
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         return f"Block({self.name})"
 
     def __getitem__(self, key: str) -> object:
@@ -88,28 +88,33 @@ class BlockDrop(Mapping[str, object]):
         self.parent.block.render(self.context, buf)
         return buf.getvalue()
 
-    def __len__(self) -> int:
+    def __len__(self) -> int:  # pragma: no cover
         return 1
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> Iterator[str]:  # pragma: no cover
         return iter(["super"])
 
 
 class _BlockStackItem(NamedTuple):
     block: "BlockNode"
-    stack_index: int
+    required: bool
 
 
 class BlockNode(Node):
-    __slots__ = ("tok", "name", "block", "expr")
+    __slots__ = ("tok", "name", "block", "expr", "required")
 
     def __init__(
-        self, tok: Token, name: StringLiteral, block: TemplateBlockNode
+        self,
+        tok: Token,
+        name: StringLiteral,
+        block: TemplateBlockNode,
+        required: bool,
     ) -> None:
         self.tok = tok
         self.expr = name
         self.name = str(name)
         self.block = block
+        self.required = required
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         # We should be in a base template. Render the block at the top of the "stack".
@@ -119,14 +124,22 @@ class BlockNode(Node):
 
         if not block_stack:
             # This base template is being rendered directly.
+            if self.required:
+                raise RequiredBlockError(
+                    f"block {self.name} must be overridden", linenum=self.tok.linenum
+                )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return self.block.render(context, buffer)
 
-        # TODO: required blocks
+        block, required = block_stack[0]
 
-        block, idx = block_stack[0]
-        if idx < len(block_stack) - 1:
-            parent: Optional[BlockNode] = block_stack[idx + 1].block
+        if required:
+            raise RequiredBlockError(
+                f"block {self.name} must be overridden", linenum=self.tok.linenum
+            )
+
+        if len(block_stack) > 1:
+            parent: Optional[BlockNode] = block_stack[1].block
         else:
             parent = None
 
@@ -143,12 +156,22 @@ class BlockNode(Node):
 
         if not block_stack:
             # This base template is being rendered directly.
+            if self.required:
+                raise RequiredBlockError(
+                    f"block {self.name} must be overridden", linenum=self.tok.linenum
+                )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return await self.block.render_async(context, buffer)
 
-        block, idx = block_stack[0]
-        if idx < len(block_stack) - 1:
-            parent: Optional[BlockNode] = block_stack[idx + 1].block
+        block, required = block_stack[0]
+
+        if required:
+            raise RequiredBlockError(
+                f"block {self.name!r} must be overridden", linenum=self.tok.linenum
+            )
+
+        if len(block_stack) > 1:
+            parent: Optional[BlockNode] = block_stack[1].block
         else:
             parent = None
 
@@ -304,7 +327,11 @@ class ExtendsNode(Node):
 
         for block in blocks:
             stack = block_stacks[block.name]
-            stack.append(_BlockStackItem(block=block, stack_index=len(stack)))
+            if stack and not block.required:
+                required = False
+            else:
+                required = block.required
+            stack.append(_BlockStackItem(block=block, required=required))
 
 
 class BlockTag(Tag):
@@ -323,21 +350,29 @@ class BlockTag(Tag):
         expr_stream = ExprTokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
-        block_name = parse_string_or_identifier(expr_stream)
-        if isinstance(block_name, Identifier):
-            if len(block_name.path) != 1:
-                raise LiquidSyntaxError(
-                    f"invalid identifier '{block_name}' for {self.name!r} tag",
-                    linenum=stream.current.linenum,
-                )
-            block_name = StringLiteral(str(block_name))
+        block_name = self._parse_block_name(expr_stream)
         next(expr_stream)
-        expr_stream.expect(TOKEN_EOF)
-        next(stream)
 
+        if expr_stream.current[2] == "required":
+            required = True
+            next(expr_stream)
+        else:
+            required = False
+
+        expr_stream.expect(TOKEN_EOF)
+
+        next(stream)
         block = self.parser.parse_block(stream, (self.end, TOKEN_EOF))
         expect(stream, TOKEN_TAG, value=self.end)
-        return BlockNode(tok, block_name, block)
+        return BlockNode(tok, block_name, block, required)
+
+    def _parse_block_name(self, stream: ExprTokenStream) -> StringLiteral:
+        if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
+            return StringLiteral(stream.current[2])
+        raise LiquidSyntaxError(
+            f"invalid identifier '{stream.current[2]}' for {self.name!r} tag",
+            linenum=stream.current[0],
+        )
 
 
 class ExtendsTag(Tag):

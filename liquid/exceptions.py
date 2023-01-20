@@ -56,6 +56,10 @@ class TemplateInheritanceError(Error):
     """An exceptions raised when template inheritance tags are used incorrectly."""
 
 
+class RequiredBlockError(TemplateInheritanceError):
+    """An exception raised when a required block has not been overridden."""
+
+
 class LiquidSyntaxError(Error):
     """Exception raised when there is a parser error."""
 
