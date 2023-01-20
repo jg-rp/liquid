@@ -6,14 +6,15 @@ import sys
 from collections import defaultdict
 from collections import deque
 
-from typing import Deque
 from typing import DefaultDict
+from typing import Deque
 from typing import Iterator
 from typing import List
 from typing import Mapping
 from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import TextIO
 from typing import Tuple
 from typing import TYPE_CHECKING
@@ -312,6 +313,14 @@ class ExtendsNode(Node):
                 filename=template.path or template.name,
             )
 
+        seen_block_names: Set[str] = set()
+        for block in blocks:
+            if block.name in seen_block_names:
+                raise TemplateInheritanceError(
+                    f"duplicate block {block.name}", linenum=block.tok.linenum
+                )
+            seen_block_names.add(block.name)
+
         self._store_blocks(context, blocks)
 
         if not extends:
@@ -322,8 +331,6 @@ class ExtendsNode(Node):
         block_stacks: DefaultDict[str, Deque[_BlockStackItem]] = context.tag_namespace[
             "extends"
         ]
-
-        # TODO: raise/warn on duplicate block names in the same template
 
         for block in blocks:
             stack = block_stacks[block.name]

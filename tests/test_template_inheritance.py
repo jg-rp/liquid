@@ -453,3 +453,25 @@ class TemplateInheritanceTestCase(TestCase):
         with self.subTest(asynchronous=True):
             with self.assertRaises(UndefinedError):
                 asyncio.run(coro(template))
+
+    def test_duplicate_block_names(self) -> None:
+        """Test that we raise an exception when a template has duplicate block names."""
+        template = (
+            "{% extends 'foo' %}"
+            "{% block bar %}{% endblock %}{% block bar %}{% endblock %}"
+        )
+        partials = {"foo": "{% block bar %}{% endblock %}"}
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(TemplateInheritanceError):
+                asyncio.run(coro(template))

@@ -52,14 +52,6 @@ class LiquidEnvironmentError(Error):
     """An exception raised due to a misconfigured environment."""
 
 
-class TemplateInheritanceError(Error):
-    """An exceptions raised when template inheritance tags are used incorrectly."""
-
-
-class RequiredBlockError(TemplateInheritanceError):
-    """An exception raised when a required block has not been overridden."""
-
-
 class LiquidSyntaxError(Error):
     """Exception raised when there is a parser error."""
 
@@ -81,6 +73,14 @@ class LiquidSyntaxError(Error):
         if self.filename:
             return str(self.filename)
         return ""
+
+
+class TemplateInheritanceError(LiquidSyntaxError):
+    """An exceptions raised when template inheritance tags are used incorrectly."""
+
+
+class RequiredBlockError(TemplateInheritanceError):
+    """An exception raised when a required block has not been overridden."""
 
 
 class LiquidTypeError(Error):
