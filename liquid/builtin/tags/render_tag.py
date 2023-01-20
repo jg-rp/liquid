@@ -110,6 +110,7 @@ class RenderNode(Node):
             namespace,
             disabled_tags=[TAG_INCLUDE],
             carry_loop_iterations=True,
+            template=template,
         )
 
         # Optionally bind a variable to the render namespace.
@@ -173,6 +174,7 @@ class RenderNode(Node):
             namespace,
             disabled_tags=[TAG_INCLUDE],
             carry_loop_iterations=True,
+            template=template,
         )
 
         # Optionally bind a variable to the render namespace.

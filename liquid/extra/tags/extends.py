@@ -1,4 +1,5 @@
 """Template inheritance tags."""
+# pylint: disable=missing-class-docstring
 from __future__ import annotations
 import sys
 
@@ -24,10 +25,12 @@ from liquid.ast import BlockNode as TemplateBlockNode
 from liquid.context import Context
 
 from liquid.exceptions import LiquidEnvironmentError
+from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 
 from liquid.expression import Expression
+from liquid.expression import Identifier
 from liquid.expression import StringLiteral
 
 from liquid.expressions import TokenStream as ExprTokenStream
@@ -57,7 +60,9 @@ TAG_ENDBLOCK = sys.intern("endblock")
 
 
 class BlockDrop(Mapping[str, object]):
-    __slots__ = ("buffer", "context", "name", "super")
+    """A `block` object with a `super` property."""
+
+    __slots__ = ("buffer", "context", "name", "parent")
 
     def __init__(
         self, context: Context, buffer: TextIO, name: str, parent: Optional["BlockNode"]
@@ -77,8 +82,10 @@ class BlockDrop(Mapping[str, object]):
         if not self.parent:
             return self.context.env.undefined("super")
 
+        # NOTE: We're not allowing chaining of references to `super` for now.
+        # Just the immediate parent.
         buf = self.context.get_buffer(self.buffer)
-        self.parent.render(self.context, buf)
+        self.parent.block.render(self.context, buf)
         return buf.getvalue()
 
     def __len__(self) -> int:
@@ -88,9 +95,9 @@ class BlockDrop(Mapping[str, object]):
         return iter(["super"])
 
 
-class BlockNodeDropPair(NamedTuple):
+class _BlockStackItem(NamedTuple):
     block: "BlockNode"
-    drop: BlockDrop
+    stack_index: int
 
 
 class BlockNode(Node):
@@ -103,38 +110,48 @@ class BlockNode(Node):
         self.block = block
 
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
-        # We should be in a base template. Render the block at the bottom of the stack.
-        block_stack: Sequence[BlockNodeDropPair] = context.tag_namespace["extends"].get(
-            self.name
-        )
+        # We should be in a base template. Render the block at the top of the "stack".
+        block_stack: Sequence[_BlockStackItem] = context.tag_namespace.get(
+            "extends", {}
+        ).get(self.name)
 
         if not block_stack:
             # This base template is being rendered directly.
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return self.block.render(context, buffer)
 
-        block, drop = block_stack[-1]
+        # TODO: required blocks
 
-        with context.extend({"block": drop}):
-            return block.render(context, buffer)
+        block, idx = block_stack[0]
+        if idx < len(block_stack) - 1:
+            parent: Optional[BlockNode] = block_stack[idx + 1].block
+        else:
+            parent = None
+
+        with context.extend({"block": BlockDrop(context, buffer, self.name, parent)}):
+            return block.block.render(context, buffer)
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        # We should be in a base template. Render the block at the bottom of the stack.
-        block_stack: Sequence[BlockNodeDropPair] = context.tag_namespace["extends"].get(
-            self.name
-        )
+        # We should be in a base template. Render the block at the top of the "stack".
+        block_stack: Sequence[_BlockStackItem] = context.tag_namespace.get(
+            "extends", {}
+        ).get(self.name)
 
         if not block_stack:
             # This base template is being rendered directly.
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return await self.block.render_async(context, buffer)
 
-        block, drop = block_stack[-1]
+        block, idx = block_stack[0]
+        if idx < len(block_stack) - 1:
+            parent: Optional[BlockNode] = block_stack[idx + 1].block
+        else:
+            parent = None
 
-        with context.extend({"block": drop}):
-            return await block.render_async(context, buffer)
+        with context.extend({"block": BlockDrop(context, buffer, self.name, parent)}):
+            return await block.block.render_async(context, buffer)
 
     def children(self) -> List[ChildNode]:
         return [
@@ -162,30 +179,21 @@ class ExtendsNode(Node):
         if "extends" not in context.tag_namespace:
             context.tag_namespace["extends"] = defaultdict(deque)
 
-        extends, blocks = self._find_inheritance_nodes(context.template)
+        # Build a stack for each `{% block %}` (one stack per block name) in the
+        # inheritance chain. The base template will be at the bottom of the "stack".
 
-        if extends:
-            raise TemplateInheritanceError(
-                f"too many {self.tag!r} tags", linenum=self.tok.linenum
-            )
-
-        self._store_blocks(context, buffer, blocks)
-
+        self._stack_blocks(context, context.template)
         parent = context.get_template_with_context(
             self.name.evaluate(context), tag=self.tag
         )
-        parent_template_name, blocks = self._parent_template_blocks(
-            context, buffer, parent
-        )
+        parent_template_name, blocks = self._stack_blocks(context, parent)
 
         while parent_template_name:
             parent = context.get_template_with_context(
                 parent_template_name, tag=self.tag
             )
-            parent_template_name, blocks = self._parent_template_blocks(
-                context, buffer, parent
-            )
-            self._store_blocks(context, buffer, blocks)
+            parent_template_name, blocks = self._stack_blocks(context, parent)
+            self._store_blocks(context, blocks)
 
         # The base template
         parent.render_with_context(context, buffer)
@@ -204,29 +212,17 @@ class ExtendsNode(Node):
         if "extends" not in context.tag_namespace:
             context.tag_namespace["extends"] = defaultdict(deque)
 
-        extends, blocks = self._find_inheritance_nodes(context.template)
-
-        if extends:
-            raise TemplateInheritanceError(
-                f"too many {self.tag!r} tags", linenum=self.tok.linenum
-            )
-
-        self._store_blocks(context, buffer, blocks)
-
+        self._stack_blocks(context, context.template)
         parent = await context.get_template_with_context_async(
             self.name.evaluate(context), tag=self.tag
         )
-        parent_template_name, blocks = self._parent_template_blocks(
-            context, buffer, parent
-        )
+        parent_template_name, _ = self._stack_blocks(context, parent)
 
         while parent_template_name:
             parent = await context.get_template_with_context_async(
                 parent_template_name, tag=self.tag
             )
-            parent_template_name, blocks = self._parent_template_blocks(
-                context, buffer, parent
-            )
+            parent_template_name, _ = self._stack_blocks(context, parent)
 
         # The base template
         await parent.render_with_context_async(context, buffer)
@@ -272,43 +268,39 @@ class ExtendsNode(Node):
         for child in node.children():
             if child.node:
                 self._visit_node(
-                    node,
+                    child.node,
                     extends_nodes=extends_nodes,
                     block_nodes=block_nodes,
                 )
 
-    def _parent_template_blocks(
-        self, context: Context, buffer: TextIO, parent: BoundTemplate
+    def _stack_blocks(
+        self, context: Context, template: BoundTemplate
     ) -> Tuple[Optional[str], List[BlockNode]]:
-        extends, blocks = self._find_inheritance_nodes(parent)
+        extends, blocks = self._find_inheritance_nodes(template)
 
         if len(extends) > 1:
             raise TemplateInheritanceError(
-                f"too many {self.tag!r} tags", linenum=self.tok.linenum
+                f"too many {self.tag!r} tags",
+                linenum=self.tok.linenum,
+                filename=template.path or template.name,
             )
 
-        self._store_blocks(context, buffer, blocks)
+        self._store_blocks(context, blocks)
 
         if not extends:
             return None, blocks
         return extends[0].name.evaluate(context), blocks
 
-    def _store_blocks(
-        self, context: Context, buffer: TextIO, blocks: List[BlockNode]
-    ) -> None:
-        block_stacks: DefaultDict[
-            str, Deque[BlockNodeDropPair]
-        ] = context.tag_namespace["extends"]
+    def _store_blocks(self, context: Context, blocks: List[BlockNode]) -> None:
+        block_stacks: DefaultDict[str, Deque[_BlockStackItem]] = context.tag_namespace[
+            "extends"
+        ]
 
         # TODO: raise/warn on duplicate block names in the same template
 
         for block in blocks:
             stack = block_stacks[block.name]
-            if not stack:
-                drop = BlockDrop(context, buffer, block.name, None)
-            else:
-                drop = BlockDrop(context, buffer, block.name, stack[-1].block)
-            block_stacks[block.name].append(BlockNodeDropPair(block=block, drop=drop))
+            stack.append(_BlockStackItem(block=block, stack_index=len(stack)))
 
 
 class BlockTag(Tag):
@@ -328,6 +320,11 @@ class BlockTag(Tag):
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         block_name = parse_string_or_identifier(expr_stream)
+        if isinstance(block_name, Identifier) and len(block_name.path) != 1:
+            raise LiquidSyntaxError(
+                f"invalid identifier '{block_name}' for {self.name!r} tag",
+                linenum=stream.current.linenum,
+            )
         next(expr_stream)
         expr_stream.expect(TOKEN_EOF)
         next(stream)

@@ -202,10 +202,11 @@ class Context:
         "template",
     )
 
-    # NOTE: `template` has been added for the benefit of tags like `{% extends %}` which
-    # need access to the current template when rendering. With hindsight, `env` and
-    # `template` should be the only positional arguments, with all others keyword only.
-    # We leave `template` optional for backwards compatibility reasons only. This might
+    # NOTE: The `template` argument has been added for the benefit of tags like
+    # `{% extends %}`, which need access to the current template when rendering. With
+    # hindsight, `template` should be the only positional arguments, with `env`
+    # accessible via `template`, and all others arguments should be keyword only. We
+    # leave `template` optional for backwards compatibility reasons only. This might
     # change in Python Liquid version 2.0.
 
     # pylint: disable=too-many-arguments
@@ -501,6 +502,7 @@ class Context:
         namespace: Namespace,
         disabled_tags: Optional[List[str]] = None,
         carry_loop_iterations: bool = False,
+        template: Optional[BoundTemplate] = None,
     ) -> Context:
         """Return a copy of this context without any local variables or other state
         for stateful tags."""
@@ -519,7 +521,7 @@ class Context:
             else 1
         )
 
-        return self.__class__(
+        ctx = self.__class__(
             self.env,
             globals=ReadOnlyChainMap(namespace, self.globals),
             disabled_tags=disabled_tags,
@@ -528,6 +530,8 @@ class Context:
             loop_iteration_carry=loop_iteration_carry,
             local_namespace_size_carry=self.get_size_of_locals(),
         )
+        ctx.template = template or self.template
+        return ctx
 
     def error(self, exc: Error) -> None:
         """Ignore, raise or convert the given exception to a warning."""

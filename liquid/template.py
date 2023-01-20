@@ -116,7 +116,9 @@ class BoundTemplate:
         Accepts the same arguments as the :class:`dict` constructor.
         """
         context = self.context_class(
-            self.env, globals=self.make_globals(dict(*args, **kwargs))
+            self.env,
+            globals=self.make_globals(dict(*args, **kwargs)),
+            template=self,
         )
         buf = self._get_buffer()
         self.render_with_context(context, buf)
@@ -125,7 +127,9 @@ class BoundTemplate:
     async def render_async(self, *args: Any, **kwargs: Any) -> str:
         """An async version of :meth:`liquid.template.BoundTemplate.render`."""
         context = self.context_class(
-            self.env, globals=self.make_globals(dict(*args, **kwargs))
+            self.env,
+            globals=self.make_globals(dict(*args, **kwargs)),
+            template=self,
         )
         buf = self._get_buffer()
         await self.render_with_context_async(context, buf)
