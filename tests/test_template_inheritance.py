@@ -565,3 +565,33 @@ class TemplateInheritanceTestCase(TestCase):
         with self.subTest(direct_render=True):
             with self.assertRaises(TemplateInheritanceError):
                 env.from_string(partials["foo"])
+
+    def test_override_nested_block_and_outer_block(self) -> None:
+        """Test that we can override a nested block and its outer block."""
+        template = (
+            '{% extends "foo" %}'
+            "{% block title %}Home{% endblock %}"
+            "{% block head %}{{ block.super }}Hello{% endblock %}"
+        )
+        partials = {
+            "foo": (
+                "{% block head %}"
+                "<title>{% block title %}{% endblock %} - Welcome</title>"
+                "{% endblock %}"
+            )
+        }
+        expect = "<title>Home - Welcome</title>Hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)

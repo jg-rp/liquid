@@ -4,10 +4,8 @@ from __future__ import annotations
 import sys
 
 from collections import defaultdict
-from collections import deque
 
 from typing import DefaultDict
-from typing import Deque
 from typing import Iterator
 from typing import List
 from typing import Mapping
@@ -203,7 +201,7 @@ class ExtendsNode(Node):
             )
 
         if "extends" not in context.tag_namespace:
-            context.tag_namespace["extends"] = defaultdict(deque)
+            context.tag_namespace["extends"] = defaultdict(list)
 
         # Build a stack for each `{% block %}` (one stack per block name) in the
         # inheritance chain. The base template will be at the bottom of the "stack".
@@ -237,7 +235,7 @@ class ExtendsNode(Node):
             )
 
         if "extends" not in context.tag_namespace:
-            context.tag_namespace["extends"] = defaultdict(deque)
+            context.tag_namespace["extends"] = defaultdict(list)
 
         self._stack_blocks(context, context.template)
         parent = await context.get_template_with_context_async(
@@ -328,7 +326,7 @@ class ExtendsNode(Node):
         return extends[0].name.evaluate(context), blocks
 
     def _store_blocks(self, context: Context, blocks: List[BlockNode]) -> None:
-        block_stacks: DefaultDict[str, Deque[_BlockStackItem]] = context.tag_namespace[
+        block_stacks: DefaultDict[str, List[_BlockStackItem]] = context.tag_namespace[
             "extends"
         ]
 
