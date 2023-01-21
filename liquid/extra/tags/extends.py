@@ -371,6 +371,24 @@ class BlockTag(Tag):
         next(stream)
         block = self.parser.parse_block(stream, (self.end, TOKEN_EOF))
         expect(stream, TOKEN_TAG, value=self.end)
+
+        if stream.peek.type == TOKEN_EXPRESSION:
+            next(stream)
+            expr_stream = ExprTokenStream(
+                tokenize_common_expression(
+                    stream.current.value, linenum=stream.current.linenum
+                )
+            )
+            end_block_name = self._parse_block_name(expr_stream)
+            next(expr_stream)
+            expr_stream.expect(TOKEN_EOF)
+
+            if end_block_name != block_name:
+                raise TemplateInheritanceError(
+                    f"expected endblock for {block_name}, found {end_block_name}",
+                    linenum=stream.current.linenum,
+                )
+
         return BlockNode(tok, block_name, block, required)
 
     def _parse_block_name(self, stream: ExprTokenStream) -> StringLiteral:

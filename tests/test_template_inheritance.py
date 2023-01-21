@@ -475,3 +475,47 @@ class TemplateInheritanceTestCase(TestCase):
         with self.subTest(asynchronous=True):
             with self.assertRaises(TemplateInheritanceError):
                 asyncio.run(coro(template))
+
+    def test_endblock_name(self) -> None:
+        """Test that we can name `endblock` tags."""
+        template = "{% extends 'foo' %}"
+        partials = {"foo": "{% block baz %}hello{% endblock baz %}"}
+        expect = "hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
+
+    def test_mismatched_endblock_name(self) -> None:
+        """Test that we raise an exception if an endblock label does not match."""
+        template = "{% extends 'foo' %}"
+        partials = {"foo": "{% block baz %}hello{% endblock something %}"}
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+
+        template = env.from_string(template)
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(TemplateInheritanceError):
+                asyncio.run(coro(template))
+
+        with self.subTest(direct_render=True):
+            with self.assertRaises(TemplateInheritanceError):
+                env.from_string(partials["foo"])
