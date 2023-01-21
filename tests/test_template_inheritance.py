@@ -357,6 +357,52 @@ class TemplateInheritanceTestCase(TestCase):
             result = asyncio.run(coro(template))
             self.assertEqual(result, expect)
 
+    def test_override_required_block_not_in_base(self) -> None:
+        """Test that we can override a required block from a non-base template."""
+        template = "{% extends 'bar' %}{% block content %}hello{% endblock %}"
+        partials = {
+            "foo": "{% block content %}{% endblock %}",
+            "bar": "{% extends 'foo' %}{% block content required %}{% endblock %}",
+        }
+        expect = "hello"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
+
+    def test_missing_required_block_not_in_base(self) -> None:
+        """Test that we raise an exception when missing a required block from a non-base
+        template."""
+        template = "{% extends 'bar' %}"
+        partials = {
+            "foo": "{% block content %}{% endblock %}",
+            "bar": "{% extends 'foo' %}{% block content required %}{% endblock %}",
+        }
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=DictLoader(partials))
+        add_inheritance_tags(env)
+        template = env.from_string(template)
+
+        with self.assertRaises(RequiredBlockError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(RequiredBlockError):
+                asyncio.run(coro(template))
+
     def test_override_required_block_directly(self) -> None:
         """Test that we raise an exception if rendering a required block directly."""
         template = "{% block foo required %}{% endblock %}"
