@@ -4,6 +4,16 @@ Python Liquid Change Log
 Version 1.8.0 (unreleased)
 --------------------------
 
+**Features**
+
+- Added ``{% extends %}`` and ``{% block %}`` tags for template inheritance. These are 
+  extra tags that need to be registered with a ``liquid.Environment`` explicitly. 
+  See `#104 <https://github.com/jg-rp/liquid/pull/104>`_.
+- Added a new optional ``sort_numeric`` filter, importable from ``liquid.extra``.
+  ``sort_numeric`` returns a new list with items from the input sequence sorted by any
+  integers and/or floats found in the string representation of each item.
+  See `#100 <https://github.com/jg-rp/liquid/pull/100>`_.
+
 **Fixes**
 
 - Fixed a bug with the ``cycle`` tag when using ``liquid.future.Environment``. We were 
@@ -29,13 +39,6 @@ Version 1.8.0 (unreleased)
 - The `round` filters is now consistent with Shopify/liquid and Ruby 3 when given
   non-integer arguments.
   See `Shopify/liquid#1590 <https://github.com/Shopify/liquid/issues/1590>`_.
-
-**Features**
-
-- Added a new optional ``sort_numeric`` filter, importable from ``liquid.extra``.
-  ``sort_numeric`` returns a new list with items from the input sequence sorted by any
-  integers and/or floats found in the string representation of each item.
-  See `#100 <https://github.com/jg-rp/liquid/pull/100>`_.
 
 Version 1.7.0
 -------------
