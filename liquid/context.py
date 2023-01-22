@@ -9,6 +9,7 @@ import re
 import sys
 import warnings
 
+from collections import ChainMap
 from contextlib import contextmanager
 
 from functools import partial
@@ -27,6 +28,7 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Mapping
+from typing import MutableMapping
 from typing import Optional
 from typing import Sequence
 from typing import TextIO
@@ -226,7 +228,7 @@ class Context:
 
         # A namespace for template local variables. Those that are bound with
         # `assign` or `capture`.
-        self.locals: Dict[str, Any] = {}
+        self.locals: MutableMapping[str, object] = {}
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
@@ -511,6 +513,7 @@ class Context:
         disabled_tags: Optional[List[str]] = None,
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
+        with_locals: bool = False,
     ) -> Context:
         """Return a copy of this context without any local variables or other state
         for stateful tags."""
@@ -539,6 +542,16 @@ class Context:
             local_namespace_size_carry=self.get_size_of_locals(),
         )
         ctx.template = template or self.template
+
+        if with_locals:
+            # Protect local namespace from updates in the copied render context.
+            ctx.locals = ChainMap({}, self.locals)
+            ctx.scope.pop()
+            ctx.scope.push(ctx.locals)
+            # This might need to be generalized some the caller can specify which
+            # tag namespaces need to be copied.
+            ctx.tag_namespace["extends"] = self.tag_namespace["extends"]
+
         return ctx
 
     def error(self, exc: Error) -> None:

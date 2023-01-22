@@ -18,6 +18,7 @@ from liquid.ast import Node
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 
+from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import TemplateTraversalError
 
@@ -277,6 +278,9 @@ class _TemplateVariableCounter:
                     self._analyze_include(child)
                 elif child.load_mode == "render":
                     self._analyze_render(child)
+                elif child.load_mode == "extends":
+                    self._analyze_template_inheritance_chain(self.template)
+                    raise StopRender("stop static analysis")
                 elif child.load_mode is not None:
                     raise TemplateTraversalError(
                         f"unknown load mode '{child.load_mode}'"
@@ -310,6 +314,9 @@ class _TemplateVariableCounter:
                     await self._analyze_include_async(child)
                 elif child.load_mode == "render":
                     await self._analyze_render_async(child)
+                elif child.load_mode == "extends":
+                    await self._analyze_template_inheritance_chain_async(self.template)
+                    raise StopRender("stop static analysis")
                 elif child.load_mode is not None:
                     raise TemplateTraversalError(
                         f"unknown load mode '{child.load_mode}'"
@@ -515,6 +522,16 @@ class _TemplateVariableCounter:
 
         self._partials.append((name, load_context))
         return name, load_context
+
+    def _analyze_template_inheritance_chain(self, template: BoundTemplate) -> None:
+        # TODO:
+        pass
+
+    async def _analyze_template_inheritance_chain_async(
+        self, template: BoundTemplate
+    ) -> None:
+        # TODO:
+        pass
 
     def _count_tag(self, node: Node) -> None:
         token = node.token()

@@ -142,8 +142,12 @@ class BlockNode(Node):
         else:
             parent = None
 
-        with context.extend({"block": BlockDrop(context, buffer, self.name, parent)}):
-            return block.block.render(context, buffer)
+        ctx = context.copy(
+            {"block": BlockDrop(context, buffer, self.name, parent)},
+            carry_loop_iterations=True,
+            with_locals=True,
+        )
+        return block.block.render(ctx, buffer)
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -174,8 +178,12 @@ class BlockNode(Node):
         else:
             parent = None
 
-        with context.extend({"block": BlockDrop(context, buffer, self.name, parent)}):
-            return await block.block.render_async(context, buffer)
+        ctx = context.copy(
+            {"block": BlockDrop(context, buffer, self.name, parent)},
+            carry_loop_iterations=True,
+            with_locals=True,
+        )
+        return await block.block.render_async(ctx, buffer)
 
     def children(self) -> List[ChildNode]:
         return [
