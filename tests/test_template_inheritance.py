@@ -118,7 +118,7 @@ class TemplateInheritanceTestCase(TestCase):
                 },
             ),
             Case(
-                description="nested outer nested block",
+                description="nested outer block",
                 template="{% extends 'foo' %}{% block bar %}Goodbye{% endblock %}",
                 expect="Goodbye!",
                 globals={"you": "world"},
