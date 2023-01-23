@@ -214,18 +214,17 @@ class ExtendsNode(Node):
         # Build a stack for each `{% block %}` (one stack per block name) in the
         # inheritance chain. The base template will be at the bottom of the "stack".
 
-        self._stack_blocks(context, context.template)
+        stack_blocks(context, context.template)
         parent = context.get_template_with_context(
             self.name.evaluate(context), tag=self.tag
         )
-        parent_template_name, blocks = self._stack_blocks(context, parent)
+        parent_template_name, _ = stack_blocks(context, parent)
 
         while parent_template_name:
             parent = context.get_template_with_context(
                 parent_template_name, tag=self.tag
             )
-            parent_template_name, blocks = self._stack_blocks(context, parent)
-            self._store_blocks(context, blocks)
+            parent_template_name, _ = stack_blocks(context, parent)
 
         # The base template
         parent.render_with_context(context, buffer)
@@ -245,17 +244,17 @@ class ExtendsNode(Node):
         if "extends" not in context.tag_namespace:
             context.tag_namespace["extends"] = defaultdict(list)
 
-        self._stack_blocks(context, context.template)
+        stack_blocks(context, context.template)
         parent = await context.get_template_with_context_async(
             self.name.evaluate(context), tag=self.tag
         )
-        parent_template_name, _ = self._stack_blocks(context, parent)
+        parent_template_name, _ = stack_blocks(context, parent)
 
         while parent_template_name:
             parent = await context.get_template_with_context_async(
                 parent_template_name, tag=self.tag
             )
-            parent_template_name, _ = self._stack_blocks(context, parent)
+            parent_template_name, _ = stack_blocks(context, parent)
 
         # The base template
         await parent.render_with_context_async(context, buffer)
@@ -271,80 +270,6 @@ class ExtendsNode(Node):
                 load_context={"tag": self.tag},
             )
         ]
-
-    def _find_inheritance_nodes(
-        self, template: BoundTemplate
-    ) -> Tuple[List["ExtendsNode"], List[BlockNode]]:
-        extends_nodes: List["ExtendsNode"] = []
-        block_nodes: List[BlockNode] = []
-
-        for node in template.tree.statements:
-            self._visit_node(
-                node,
-                extends_nodes=extends_nodes,
-                block_nodes=block_nodes,
-            )
-
-        return extends_nodes, block_nodes
-
-    def _visit_node(
-        self,
-        node: Node,
-        extends_nodes: List["ExtendsNode"],
-        block_nodes: List[BlockNode],
-    ) -> None:
-        if isinstance(node, BlockNode):
-            block_nodes.append(node)
-
-        if isinstance(node, ExtendsNode):
-            extends_nodes.append(node)
-
-        for child in node.children():
-            if child.node:
-                self._visit_node(
-                    child.node,
-                    extends_nodes=extends_nodes,
-                    block_nodes=block_nodes,
-                )
-
-    def _stack_blocks(
-        self, context: Context, template: BoundTemplate
-    ) -> Tuple[Optional[str], List[BlockNode]]:
-        extends, blocks = self._find_inheritance_nodes(template)
-
-        if len(extends) > 1:
-            raise TemplateInheritanceError(
-                f"too many {self.tag!r} tags",
-                linenum=self.tok.linenum,
-                filename=template.path or template.name,
-            )
-
-        seen_block_names: Set[str] = set()
-        for block in blocks:
-            if block.name in seen_block_names:
-                raise TemplateInheritanceError(
-                    f"duplicate block {block.name}", linenum=block.tok.linenum
-                )
-            seen_block_names.add(block.name)
-
-        self._store_blocks(context, blocks)
-
-        if not extends:
-            return None, blocks
-        return extends[0].name.evaluate(context), blocks
-
-    def _store_blocks(self, context: Context, blocks: List[BlockNode]) -> None:
-        block_stacks: DefaultDict[str, List[_BlockStackItem]] = context.tag_namespace[
-            "extends"
-        ]
-
-        for block in blocks:
-            stack = block_stacks[block.name]
-            if stack and not block.required:
-                required = False
-            else:
-                required = block.required
-            stack.append(_BlockStackItem(block=block, required=required))
 
 
 class BlockTag(Tag):
@@ -422,3 +347,80 @@ class ExtendsTag(Tag):
         next(expr_stream)
         expr_stream.expect(TOKEN_EOF)
         return ExtendsNode(tok, parent_template_name)
+
+
+def find_inheritance_nodes(
+    template: BoundTemplate,
+) -> Tuple[List["ExtendsNode"], List[BlockNode]]:
+    extends_nodes: List["ExtendsNode"] = []
+    block_nodes: List[BlockNode] = []
+
+    for node in template.tree.statements:
+        _visit_node(
+            node,
+            extends_nodes=extends_nodes,
+            block_nodes=block_nodes,
+        )
+
+    return extends_nodes, block_nodes
+
+
+def _visit_node(
+    node: Node,
+    extends_nodes: List["ExtendsNode"],
+    block_nodes: List[BlockNode],
+) -> None:
+    if isinstance(node, BlockNode):
+        block_nodes.append(node)
+
+    if isinstance(node, ExtendsNode):
+        extends_nodes.append(node)
+
+    for child in node.children():
+        if child.node:
+            _visit_node(
+                child.node,
+                extends_nodes=extends_nodes,
+                block_nodes=block_nodes,
+            )
+
+
+def stack_blocks(
+    context: Context, template: BoundTemplate
+) -> Tuple[Optional[str], List[BlockNode]]:
+    extends, blocks = find_inheritance_nodes(template)
+
+    if len(extends) > 1:
+        raise TemplateInheritanceError(
+            f"too many 'extends' tags",
+            linenum=extends[1].tok.linenum,
+            filename=template.path or template.name,
+        )
+
+    seen_block_names: Set[str] = set()
+    for block in blocks:
+        if block.name in seen_block_names:
+            raise TemplateInheritanceError(
+                f"duplicate block {block.name}", linenum=block.tok.linenum
+            )
+        seen_block_names.add(block.name)
+
+    _store_blocks(context, blocks)
+
+    if not extends:
+        return None, blocks
+    return extends[0].name.evaluate(context), blocks
+
+
+def _store_blocks(context: Context, blocks: List[BlockNode]) -> None:
+    block_stacks: DefaultDict[str, List[_BlockStackItem]] = context.tag_namespace[
+        "extends"
+    ]
+
+    for block in blocks:
+        stack = block_stacks[block.name]
+        if stack and not block.required:
+            required = False
+        else:
+            required = block.required
+        stack.append(_BlockStackItem(block=block, required=required))
