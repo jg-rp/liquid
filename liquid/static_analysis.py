@@ -8,6 +8,7 @@ from typing import DefaultDict
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Tuple
 from typing import TYPE_CHECKING
 
@@ -22,6 +23,7 @@ from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
 
 from liquid.exceptions import StopRender
+from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import TemplateTraversalError
 
@@ -501,14 +503,29 @@ class _TemplateCounter:
         stack_context = self._empty_context.copy({}, template=template)
         stack_context.tag_namespace["extends"] = defaultdict(list)
 
+        # Guard against recursive `extends`.
+        seen: Set[str] = set()
+
         # Add blocks from the leaf template to the stack context.
-        self._stack_blocks(stack_context, template, count_tags=False)
+        extends_name, _ = self._stack_blocks(stack_context, template, count_tags=False)
+        assert extends_name
+        seen.add(extends_name)
 
         try:
             parent = self._get_template(name, load_context, self._template_name, node)
         except TemplateNotFound:
             return
+
         parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        if parent_template_name:
+            if parent_template_name in seen:
+                raise TemplateInheritanceError(
+                    f"circular extends {parent_template_name!r}",
+                    linenum=node.linenum,
+                    filename=template.name,
+                )
+            seen.add(parent_template_name)
 
         while parent_template_name:
             try:
@@ -517,7 +534,14 @@ class _TemplateCounter:
                 )
             except TemplateNotFound:
                 return
+
             parent_template_name, _ = self._stack_blocks(stack_context, parent)
+            if parent_template_name:
+                if parent_template_name in seen:
+                    raise TemplateInheritanceError(
+                        f"circular extends {parent_template_name!r}"
+                    )
+                seen.add(parent_template_name)
 
         refs = _InheritanceChainCounter(
             parent,
@@ -736,7 +760,7 @@ class _InheritanceChainCounter(_TemplateCounter):
             and isinstance(expression, Identifier)
             and str(expression) == "block.super"
         ):
-            # need async version of analyze_expression
+            # XXX: need async version of analyze_expression
             template = self._make_template(self.parent_block_stack_item)
             scope = {str(ident.path[0]): None for ident in self.template_locals}
             refs = _InheritanceChainCounter(

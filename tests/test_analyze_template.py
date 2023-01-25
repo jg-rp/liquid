@@ -16,6 +16,7 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.context import Context
+from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
 
@@ -1217,3 +1218,18 @@ class AnalyzeTemplateTestCase(TestCase):
             template_filters=expected_template_filters,
             template_tags=expected_tags,
         )
+
+    def test_analyze_recursive_extends(self):
+        """Test that we handle recursive use of the 'extends' tag."""
+        loader = DictLoader(
+            {
+                "some": "{% extends 'other' %}",
+                "other": "{% extends 'some' %}",
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.analyze()

@@ -10,6 +10,7 @@ from typing import Dict
 from liquid import BoundTemplate
 from liquid import Environment
 from liquid import StrictUndefined
+from liquid.exceptions import ContextDepthError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import UndefinedError
@@ -618,4 +619,25 @@ class TemplateInheritanceTestCase(TestCase):
             result = asyncio.run(coro(template))
             self.assertEqual(result, expect)
 
-    # handle and test recursive `extends`
+    def test_recursive_extends(self) -> None:
+        """Test that we handle recursive extends."""
+        loader = DictLoader(
+            {
+                "some": "{% extends 'other' %}",
+                "other": "{% extends 'some' %}",
+            }
+        )
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.render()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(TemplateInheritanceError):
+                asyncio.run(coro(template))

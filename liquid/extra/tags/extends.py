@@ -350,17 +350,45 @@ def build_block_stacks(
     if "extends" not in context.tag_namespace:
         context.tag_namespace["extends"] = defaultdict(list)
 
-    stack_blocks(context, template)
+    # Guard against recursive `extends`.
+    seen: Set[str] = set()
+
+    extends_node, _ = stack_blocks(context, template)
     parent = context.get_template_with_context(parent_name, tag=tag)
+    assert extends_node
+    seen.add(extends_node.name.evaluate(context))
+
     extends_node, _ = stack_blocks(context, parent)
-    parent_template_name = extends_node.name.evaluate(context) if extends_node else None
+
+    if extends_node:
+        parent_template_name: Optional[str] = extends_node.name.evaluate(context)
+        assert parent_template_name
+        if parent_template_name in seen:
+            raise TemplateInheritanceError(
+                f"circular extends {parent_template_name!r}",
+                linenum=extends_node.tok.linenum,
+                filename=template.name,
+            )
+        seen.add(parent_template_name)
+    else:
+        parent_template_name = None
 
     while parent_template_name:
         parent = context.get_template_with_context(parent_template_name, tag=tag)
         extends_node, _ = stack_blocks(context, parent)
-        parent_template_name = (
-            extends_node.name.evaluate(context) if extends_node else None
-        )
+
+        if extends_node:
+            parent_template_name = extends_node.name.evaluate(context)
+            assert parent_template_name
+            if parent_template_name in seen:
+                raise TemplateInheritanceError(
+                    f"circular extends {parent_template_name!r}",
+                    linenum=extends_node.tok.linenum,
+                    filename=parent.name,
+                )
+            seen.add(parent_template_name)
+        else:
+            parent_template_name = None
 
     return parent
 
