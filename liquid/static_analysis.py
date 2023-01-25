@@ -7,10 +7,11 @@ from collections import defaultdict
 from typing import DefaultDict
 from typing import Dict
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import TYPE_CHECKING
+
+from typing_extensions import Literal
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
@@ -735,7 +736,7 @@ class _InheritanceChainCounter(_TemplateCounter):
             and isinstance(expression, Identifier)
             and str(expression) == "block.super"
         ):
-            # XXX: need async version of analyze_expression
+            # need async version of analyze_expression
             template = self._make_template(self.parent_block_stack_item)
             scope = {str(ident.path[0]): None for ident in self.template_locals}
             refs = _InheritanceChainCounter(

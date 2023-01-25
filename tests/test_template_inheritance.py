@@ -618,4 +618,4 @@ class TemplateInheritanceTestCase(TestCase):
             result = asyncio.run(coro(template))
             self.assertEqual(result, expect)
 
-    # TODO: handle and test recursive `extends`
+    # handle and test recursive `extends`
