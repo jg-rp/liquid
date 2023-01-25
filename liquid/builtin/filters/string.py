@@ -24,7 +24,7 @@ except ImportError:
     # pylint: disable=invalid-name
     soft_str = str  # type: ignore
 
-from liquid import is_undefined
+from liquid.undefined import is_undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 

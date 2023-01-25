@@ -167,6 +167,27 @@ class TemplateInheritanceTestCase(TestCase):
                 },
             ),
             Case(
+                description="multi-level super",
+                template=(
+                    "{% extends 'baz' %}"
+                    "{% block bar %}{{ block.super }}!!{% endblock %}"
+                ),
+                expect="Hello, world!**!!",
+                globals={"you": "world"},
+                partials={
+                    "foo": (
+                        "{% block bar %}"
+                        "{% block greeting %}Hello{% endblock %}"
+                        ", {{ you }}!"
+                        "{% endblock %}"
+                    ),
+                    "baz": (
+                        "{% extends 'foo' %}"
+                        "{% block bar %}{{ block.super }}**{% endblock %}"
+                    ),
+                },
+            ),
+            Case(
                 description="include an extended template",
                 template="{% include 'bar' %}",
                 expect="foo bar",
@@ -596,3 +617,5 @@ class TemplateInheritanceTestCase(TestCase):
         with self.subTest(asynchronous=True):
             result = asyncio.run(coro(template))
             self.assertEqual(result, expect)
+
+    # TODO: handle and test recursive `extends`

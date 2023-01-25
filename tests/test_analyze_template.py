@@ -1167,54 +1167,53 @@ class AnalyzeTemplateTestCase(TestCase):
         global_ref = list(refs.global_variables.keys())[0]
         self.assertEqual(global_ref.parts, ("some", "foo.bar"))
 
-    # def test_analyze_inheritance_chain(self):
-    #     """Test that we can count references in a chain of inherited templates."""
-    #     loader = DictLoader(
-    #         {
-    #             "base": (
-    #                 "Hello, "
-    #                 "{% assign x = 'foo' %}"
-    #                 "{% block content %}{{ 'base content' | upcase }}{% endblock %}!"
-    #                 "{% block foo %}{% endblock %}!"
-    #             ),
-    #             "other": (
-    #                 "{% extends 'base' %}"
-    #                 "{% block content %}{{ 'other' | downcase }}{% endblock %}"
-    #                 "{% block foo %}{% assign z = 7 %}{% endblock %}"
-    #             ),
-    #             "some": "{% extends 'other' %}{{ y | append: x }}{% block foo %}{% endblock %}",
-    #         }
-    #     )
-    #     env = Environment(loader=loader)
-    #     add_inheritance_tags(env)
-    #     template = env.get_template("some")
+    def test_analyze_inheritance_chain(self):
+        """Test that we can count references in a chain of inherited templates."""
+        loader = DictLoader(
+            {
+                "base": (
+                    "Hello, "
+                    "{% assign x = 'foo' %}"
+                    "{% block content %}{{ x | upcase }}{% endblock %}!"
+                    "{% block foo %}{% endblock %}!"
+                ),
+                "other": (
+                    "{% extends 'base' %}"
+                    "{% block content %}{{ x | downcase }}{% endblock %}"
+                    "{% block foo %}{% assign z = 7 %}{% endblock %}"
+                ),
+                "some": "{% extends 'other' %}{{ y | append: x }}{% block foo %}{% endblock %}",
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
 
-    #     # TODO: FIXME:
+        expected_template_globals = {}
+        expected_template_locals = {"x": [("base", 1)]}
+        expected_refs = {
+            "x": [("other", 1)],
+        }
+        expected_template_filters = {
+            "downcase": [("other", 1)],
+        }
+        expected_tags = {
+            "assign": [("base", 1)],
+            "extends": [("some", 1), ("other", 1)],
+            "block": [
+                ("some", 1),
+                ("other", 1),
+                ("other", 1),
+                ("base", 1),
+                ("base", 1),
+            ],
+        }
 
-    #     expected_template_globals = {
-    #         "y": [("some", 1)],  # XXX: this is incorrect
-    #     }
-    #     expected_template_locals = {"x": [("base", 1)]}
-    #     expected_refs = {
-    #         "x": [("some", 1)],
-    #         "y": [("some", 1)],
-    #     }
-    #     expected_template_filters = {
-    #         "append": [("some", 1)],
-    #         "upcase": [("base", 1)],
-    #         "downcase": [("other", 1)],
-    #     }
-    #     expected_tags = {
-    #         "assign": [("base", 1)],
-    #         "extends": [("some", 1), ("other", 1)],
-    #         "block": [("base", 1), ("other", 1)],
-    #     }
-
-    #     self._test(
-    #         template,
-    #         expected_refs,
-    #         expected_template_locals,
-    #         expected_template_globals,
-    #         template_filters=expected_template_filters,
-    #         template_tags=expected_tags,
-    #     )
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+            template_filters=expected_template_filters,
+            template_tags=expected_tags,
+        )

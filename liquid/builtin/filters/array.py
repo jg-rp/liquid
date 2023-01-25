@@ -29,7 +29,7 @@ from liquid.expression import NIL
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
 
-from liquid import is_undefined
+from liquid.undefined import is_undefined
 
 if TYPE_CHECKING:
     from liquid import Environment

@@ -7,6 +7,7 @@ from collections import defaultdict
 from typing import DefaultDict
 from typing import Dict
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import TYPE_CHECKING
@@ -14,6 +15,7 @@ from typing import TYPE_CHECKING
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.ast import ParseTree
 
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
@@ -27,8 +29,11 @@ from liquid.expression import FilteredExpression
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import IdentifierTuple
-from liquid.expression import Literal
 from liquid.expression import StringLiteral
+
+from liquid.extra.tags.extends import BlockNode as InheritanceBlockNode
+from liquid.extra.tags.extends import _BlockStackItem
+from liquid.extra.tags.extends import stack_blocks
 
 from liquid.token import TOKEN_TAG
 
@@ -173,7 +178,7 @@ class TemplateAnalysis:
 
 
 # pylint: disable=too-many-instance-attributes
-class _TemplateVariableCounter:
+class _TemplateCounter:
     """Count references to variable names in a Liquid template.
 
     :param template: The Liquid template to analyze.
@@ -238,21 +243,27 @@ class _TemplateVariableCounter:
         # get_template_with_context requires a `Context`.
         self._empty_context = Context(self.template.env)
 
-    def analyze(self) -> _TemplateVariableCounter:
+    def analyze(self) -> _TemplateCounter:
         """Traverse the template's syntax tree and count variables as we go.
 
         It is not safe to call this method multiple times.
         """
         for node in self.template.tree.statements:
-            self._analyze(node)
+            try:
+                self._analyze(node)
+            except StopRender:
+                break
 
         self._raise_for_failures()
         return self
 
-    async def analyze_async(self) -> _TemplateVariableCounter:
+    async def analyze_async(self) -> _TemplateCounter:
         """An async version of :meth:`_TemplateVariableCounter.analyze`"""
         for node in self.template.tree.statements:
-            await self._analyze_async(node)
+            try:
+                await self._analyze_async(node)
+            except StopRender:
+                break
 
         self._raise_for_failures()
         return self
@@ -279,7 +290,7 @@ class _TemplateVariableCounter:
                 elif child.load_mode == "render":
                     self._analyze_render(child)
                 elif child.load_mode == "extends":
-                    self._analyze_template_inheritance_chain(self.template)
+                    self._analyze_template_inheritance_chain(child, self.template)
                     raise StopRender("stop static analysis")
                 elif child.load_mode is not None:
                     raise TemplateTraversalError(
@@ -315,7 +326,9 @@ class _TemplateVariableCounter:
                 elif child.load_mode == "render":
                     await self._analyze_render_async(child)
                 elif child.load_mode == "extends":
-                    await self._analyze_template_inheritance_chain_async(self.template)
+                    await self._analyze_template_inheritance_chain_async(
+                        child, self.template
+                    )
                     raise StopRender("stop static analysis")
                 elif child.load_mode is not None:
                     raise TemplateTraversalError(
@@ -380,165 +393,264 @@ class _TemplateVariableCounter:
         return refs
 
     def _analyze_include(self, child: ChildNode) -> None:
-        name, load_context = self._include_context(child)
+        name, load_context = self._make_load_context(child, "include")
         if name is None or load_context is None:
             return
 
         try:
-            template = self._empty_context.get_template_with_context(
-                name, **load_context
+            template = self._get_template(
+                name, load_context, self._template_name, child
             )
         except TemplateNotFound:
-            self.unloadable_partials[name].append((self._template_name, child.linenum))
             return
 
         # Partial templates rendered in "include" mode share the same template local
         # namespace as their parent template. Note that block scoped variables have
         # already been pushed and will be popped by the caller.
-        refs = _TemplateVariableCounter(
+        refs = _TemplateCounter(
             template,
             follow_partials=self.follow_partials,
             scope=self._scope,
             template_locals=self.template_locals,
+            raise_for_failures=self.raise_for_failures,
             partials=self._partials,
         ).analyze()
 
         self._update_reference_counters(refs)
 
     async def _analyze_include_async(self, child: ChildNode) -> None:
-        name, load_context = self._include_context(child)
+        name, load_context = self._make_load_context(child, "include")
         if name is None or load_context is None:
             return
 
         try:
-            template = await self._empty_context.get_template_with_context_async(
-                name, **load_context
+            template = await self._get_template_async(
+                name, load_context, self._template_name, child
             )
         except TemplateNotFound:
-            self.unloadable_partials[name].append((self._template_name, child.linenum))
             return
 
-        refs = await _TemplateVariableCounter(
+        refs = await _TemplateCounter(
             template,
             follow_partials=self.follow_partials,
             scope=self._scope,
             template_locals=self.template_locals,
+            raise_for_failures=self.raise_for_failures,
             partials=self._partials,
         ).analyze_async()
 
         self._update_reference_counters(refs)
 
-    def _include_context(
-        self, child: ChildNode
-    ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
-        # Partial templates rendered in "include" mode might use a variable template
-        # name. We can't statically analyze a partial template unless it's name is a
-        # literal string (or possibly an integer, but unlikely).
-        if not isinstance(child.expression, Literal):
-            key = str(child.expression)
-            self.unloadable_partials[key].append((self._template_name, child.linenum))
-            return None, None
-
-        name = str(child.expression.value)
-        load_context = child.load_context or {}
-
-        # Keep track of partial templates that have already been analyzed. This prevents
-        # us from analyzing the same template twice and protects us against recursive
-        # includes/renders.
-        if (name, load_context) in self._partials:
-            return None, None
-
-        self._partials.append((name, load_context))
-        return (name, load_context)
-
     def _analyze_render(self, child: ChildNode) -> None:
-        name, load_context = self._render_context(child)
+        name, load_context = self._make_load_context(child, "render")
         if name is None or load_context is None:
             return
 
         try:
-            template = self._empty_context.get_template_with_context(
-                name, **load_context
+            template = self._get_template(
+                name, load_context, self._template_name, child
             )
         except TemplateNotFound:
-            self.unloadable_partials[name].append((self._template_name, child.linenum))
             return
 
         # Partial templates rendered in "render" mode do not share the parent template
         # local namespace. We do not pass the current block scope stack to "rendered"
         # templates either.
         scope = {n: None for n in child.block_scope} if child.block_scope else {}
-        refs = _TemplateVariableCounter(
+        refs = _TemplateCounter(
             template,
             follow_partials=self.follow_partials,
             scope=ReadOnlyChainMap(scope),
+            raise_for_failures=self.raise_for_failures,
             partials=self._partials,
         ).analyze()
 
         self._update_reference_counters(refs)
 
     async def _analyze_render_async(self, child: ChildNode) -> None:
-        name, load_context = self._render_context(child)
+        name, load_context = self._make_load_context(child, "render")
         if name is None or load_context is None:
             return None
 
         try:
-            template = await self._empty_context.get_template_with_context_async(
-                name, **load_context
+            template = await self._get_template_async(
+                name, load_context, self._template_name, child
             )
         except TemplateNotFound:
-            self.unloadable_partials[name].append((self._template_name, child.linenum))
             return
 
-        # Partial templates rendered in "render" mode do not share the parent template
-        # local namespace. We do not pass the current block scope stack to "rendered"
-        # templates either.
         scope = {n: None for n in child.block_scope} if child.block_scope else {}
-        refs = await _TemplateVariableCounter(
+        refs = await _TemplateCounter(
             template,
             follow_partials=self.follow_partials,
             scope=ReadOnlyChainMap(scope),
+            raise_for_failures=self.raise_for_failures,
             partials=self._partials,
         ).analyze_async()
 
         self._update_reference_counters(refs)
 
-    def _render_context(
-        self, child: ChildNode
+    def _analyze_template_inheritance_chain(
+        self, node: ChildNode, template: BoundTemplate
+    ) -> None:
+        name, load_context = self._make_load_context(node, "extends")
+        if name is None or load_context is None:
+            return
+
+        stack_context = self._empty_context.copy({}, template=template)
+        stack_context.tag_namespace["extends"] = defaultdict(list)
+
+        # Add blocks from the leaf template to the stack context.
+        self._stack_blocks(stack_context, template, count_tags=False)
+
+        try:
+            parent = self._get_template(name, load_context, self._template_name, node)
+        except TemplateNotFound:
+            return
+        parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        while parent_template_name:
+            try:
+                parent = self._get_template(
+                    parent_template_name, load_context, self._template_name, node
+                )
+            except TemplateNotFound:
+                return
+            parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        refs = _InheritanceChainCounter(
+            parent,
+            stack_context,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap({"block": None}, self._scope),
+            template_locals=self.template_locals,
+            raise_for_failures=self.raise_for_failures,
+            partials=self._partials,
+        ).analyze()
+
+        self._update_reference_counters(refs)
+
+    async def _analyze_template_inheritance_chain_async(
+        self, node: ChildNode, template: BoundTemplate
+    ) -> None:
+        name, load_context = self._make_load_context(node, "extends")
+        if name is None or load_context is None:
+            return
+
+        stack_context = self._empty_context.copy({})
+        stack_context.tag_namespace["extends"] = defaultdict(list)
+
+        # Add blocks from the leaf template to the stack context.
+        self._stack_blocks(stack_context, template, count_tags=False)
+
+        try:
+            parent = await self._get_template_async(
+                name, load_context, self._template_name, node
+            )
+        except TemplateNotFound:
+            return
+        parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        while parent_template_name:
+            try:
+                parent = await self._get_template_async(
+                    parent_template_name, load_context, self._template_name, node
+                )
+            except TemplateNotFound:
+                return
+            parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        refs = await _InheritanceChainCounter(
+            parent,
+            stack_context,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap({"block": None}, self._scope),
+            template_locals=self.template_locals,
+            raise_for_failures=self.raise_for_failures,
+            partials=self._partials,
+        ).analyze_async()
+
+        self._update_reference_counters(refs)
+
+    def _make_load_context(
+        self, node: ChildNode, load_mode: Literal["extends", "include", "render"]
     ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
-        if not isinstance(child.expression, StringLiteral):
+        # Partial templates rendered in "include" mode might use a variable template
+        # name. We can't statically analyze a partial template unless it's name is a
+        # literal string (or possibly an integer, but unlikely).
+        if load_mode == "include" and not isinstance(node.expression, StringLiteral):
+            self.unloadable_partials[str(node.expression)].append(
+                (self._template_name, node.linenum)
+            )
+            return None, None
+
+        if not isinstance(node.expression, StringLiteral):
             raise TemplateTraversalError(
-                "can't load from a variable expression when in 'render' mode"
+                f"can't load from a variable expression when in {load_mode!r} mode"
             )
 
-        name = child.expression.value
-        load_context = child.load_context or {}
+        name = node.expression.value
+        load_context = node.load_context or {}
 
-        # Keep track of partial templates that have already been analyzed. This prevents
-        # us from analyzing the same template twice and protects us against recursive
-        # includes/renders.
         if (name, load_context) in self._partials:
             return None, None
 
         self._partials.append((name, load_context))
         return name, load_context
 
-    def _analyze_template_inheritance_chain(self, template: BoundTemplate) -> None:
-        # TODO:
-        pass
+    def _get_template(
+        self,
+        name: str,
+        load_context: Dict[str, str],
+        parent_name: str,
+        parent_node: ChildNode,
+    ) -> BoundTemplate:
+        try:
+            return self._empty_context.get_template_with_context(name, **load_context)
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((parent_name, parent_node.linenum))
+            raise
 
-    async def _analyze_template_inheritance_chain_async(
-        self, template: BoundTemplate
-    ) -> None:
-        # TODO:
-        pass
+    async def _get_template_async(
+        self,
+        name: str,
+        load_context: Dict[str, str],
+        parent_name: str,
+        parent_node: ChildNode,
+    ) -> BoundTemplate:
+        try:
+            return await self._empty_context.get_template_with_context_async(
+                name, **load_context
+            )
+        except TemplateNotFound:
+            self.unloadable_partials[name].append((parent_name, parent_node.linenum))
+            raise
+
+    def _stack_blocks(
+        self, stack_context: Context, template: BoundTemplate, count_tags: bool = True
+    ) -> Tuple[Optional[str], List[InheritanceBlockNode]]:
+        template_name = template.name or "<string>"
+        ast_extends_node, ast_block_nodes = stack_blocks(stack_context, template)
+
+        # Count `extends` and `block` tags here, as we don't get the chance later.
+        if count_tags:
+            if ast_extends_node:
+                token = ast_extends_node.token()
+                self.tags[token.value].append((template_name, token.linenum))
+        for ast_node in ast_block_nodes:
+            token = ast_node.token()
+            self.tags[token.value].append((template_name, token.linenum))
+
+        if ast_extends_node:
+            return ast_extends_node.name.evaluate(stack_context), ast_block_nodes
+        return None, ast_block_nodes
 
     def _count_tag(self, node: Node) -> None:
         token = node.token()
         if not isinstance(node, BlockNode) and token.type == TOKEN_TAG:
             self.tags[token.value].append((self._template_name, token.linenum))
 
-    def _update_reference_counters(self, refs: _TemplateVariableCounter) -> None:
+    def _update_reference_counters(self, refs: _TemplateCounter) -> None:
         # Accumulate references from the partial/child template into its parent.
         for _name, _refs in refs.variables.items():
             self.variables[_name].extend(_refs)
@@ -581,6 +693,112 @@ class _TemplateVariableCounter:
             else:
                 msg = f"partial template '{msg_target}' could not be loaded"
             raise TemplateTraversalError(f"failed visit: {msg}")
+
+
+class _InheritanceChainCounter(_TemplateCounter):
+    def __init__(
+        self,
+        base_template: BoundTemplate,
+        stack_context: Context,
+        *,
+        parent_block_stack_item: Optional[_BlockStackItem] = None,
+        follow_partials: bool = True,
+        raise_for_failures: bool = True,
+        scope: Optional[ReadOnlyChainMap] = None,
+        template_locals: Optional[IdentifierMap] = None,
+        partials: Optional[List[Tuple[str, Optional[Dict[str, str]]]]] = None,
+    ) -> None:
+        self.stack_context = stack_context
+        self.parent_block_stack_item = parent_block_stack_item
+        super().__init__(
+            template=base_template,
+            follow_partials=follow_partials,
+            raise_for_failures=raise_for_failures,
+            scope=scope,
+            template_locals=template_locals,
+            partials=partials,
+        )
+
+    def _analyze(self, root: Node) -> None:
+        if isinstance(root, InheritanceBlockNode):
+            return self._analyze_block(root)
+        return super()._analyze(root)
+
+    async def _analyze_async(self, root: Node) -> None:
+        if isinstance(root, InheritanceBlockNode):
+            return await self._analyze_block_async(root)
+        return await super()._analyze_async(root)
+
+    def _analyze_expression(self, expression: Expression) -> References:
+        if (
+            self.parent_block_stack_item
+            and isinstance(expression, Identifier)
+            and str(expression) == "block.super"
+        ):
+            # XXX: need async version of analyze_expression
+            template = self._make_template(self.parent_block_stack_item)
+            scope = {str(ident.path[0]): None for ident in self.template_locals}
+            refs = _InheritanceChainCounter(
+                template,
+                self.stack_context,
+                follow_partials=self.follow_partials,
+                scope=ReadOnlyChainMap({"block": None}, self._scope, scope),
+                raise_for_failures=self.raise_for_failures,
+                partials=self._partials,
+            ).analyze()
+
+            self._update_reference_counters(refs)
+
+        return super()._analyze_expression(expression)
+
+    def _analyze_block(self, block: InheritanceBlockNode) -> None:
+        block_stacks: Dict[
+            str, List[_BlockStackItem]
+        ] = self.stack_context.tag_namespace["extends"]
+
+        block_stack_item = block_stacks[block.name][0]
+        template = self._make_template(block_stack_item)
+        scope = {str(ident.path[0]): None for ident in self.template_locals}
+
+        refs = _InheritanceChainCounter(
+            template,
+            self.stack_context,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap({"block": None}, self._scope, scope),
+            raise_for_failures=self.raise_for_failures,
+            partials=self._partials,
+            parent_block_stack_item=block_stack_item.parent,
+        ).analyze()
+
+        self._update_reference_counters(refs)
+
+    async def _analyze_block_async(self, block: InheritanceBlockNode) -> None:
+        block_stacks: Dict[
+            str, List[_BlockStackItem]
+        ] = self.stack_context.tag_namespace["extends"]
+
+        block_stack_item = block_stacks[block.name][0]
+        template = self._make_template(block_stack_item)
+        scope = {str(ident.path[0]): None for ident in self.template_locals}
+
+        refs = await _InheritanceChainCounter(
+            template,
+            self.stack_context,
+            follow_partials=self.follow_partials,
+            scope=ReadOnlyChainMap({"block": None}, self._scope, scope),
+            raise_for_failures=self.raise_for_failures,
+            partials=self._partials,
+            parent_block_stack_item=block_stack_item.parent,
+        ).analyze_async()
+
+        self._update_reference_counters(refs)
+
+    def _make_template(self, item: _BlockStackItem) -> BoundTemplate:
+        parse_tree = ParseTree()
+        parse_tree.statements = [item.block.block]
+        return self.template.env.template_class(
+            self.template.env, parse_tree=parse_tree, name=item.source_name
+        )
 
 
 class References:

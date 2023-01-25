@@ -16,13 +16,13 @@ try:
 except ImportError:
     from liquid.exceptions import Markup  # type: ignore
 
-from liquid import is_undefined
-
 from liquid.filter import liquid_filter
 from liquid.filter import with_environment
 
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
+
+from liquid.undefined import is_undefined
 
 if TYPE_CHECKING:
     from liquid import Environment

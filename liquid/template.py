@@ -30,7 +30,7 @@ from liquid.exceptions import StopRender
 
 from liquid.output import LimitedStringIO
 
-from liquid.static_analysis import _TemplateVariableCounter
+from liquid.static_analysis import _TemplateCounter
 from liquid.static_analysis import ContextualTemplateAnalysis
 from liquid.static_analysis import NameRefs
 from liquid.static_analysis import Refs
@@ -295,7 +295,7 @@ class BoundTemplate:
         :returns: A object containing analysis results.
         :rtype: :class:`liquid.template.TemplateAnalysis`
         """
-        refs = _TemplateVariableCounter(
+        refs = _TemplateCounter(
             self,
             follow_partials=follow_partials,
             raise_for_failures=raise_for_failures,
@@ -319,7 +319,7 @@ class BoundTemplate:
         self, follow_partials: bool = True, raise_for_failures: bool = True
     ) -> TemplateAnalysis:
         """An async version of :meth:`analyze`."""
-        refs = await _TemplateVariableCounter(
+        refs = await _TemplateCounter(
             self,
             follow_partials=follow_partials,
             raise_for_failures=raise_for_failures,
