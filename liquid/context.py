@@ -9,7 +9,6 @@ import re
 import sys
 import warnings
 
-from collections import ChainMap
 from contextlib import contextmanager
 
 from functools import partial
