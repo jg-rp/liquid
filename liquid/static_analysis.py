@@ -271,18 +271,20 @@ class _TemplateCounter:
         self._raise_for_failures()
         return self
 
-    def _analyze(self, root: Node) -> None:
-        self._count_tag(root)
+    def _analyze(self, node: Node) -> None:
+        self._count_tag(node)
 
         try:
-            children = root.children()
+            children = node.children()
         except NotImplementedError:
-            name = root.__class__.__name__
-            self.failed_visits[name].append((self._template_name, root.token().linenum))
+            name = node.__class__.__name__
+            self.failed_visits[name].append((self._template_name, node.token().linenum))
             return
 
         for child in children:
-            self._analyze_child(child)
+            self._analyze_expression(child)
+            self._expression_hook(child)
+            self._update_template_scope(child)
 
             if child.block_scope:
                 self._scope.push({n: None for n in child.block_scope})
@@ -307,18 +309,20 @@ class _TemplateCounter:
             if child.block_scope:
                 self._scope.pop()
 
-    async def _analyze_async(self, root: Node) -> None:
-        self._count_tag(root)
+    async def _analyze_async(self, node: Node) -> None:
+        self._count_tag(node)
 
         try:
-            children = root.children()
+            children = node.children()
         except NotImplementedError:
-            name = root.__class__.__name__
-            self.failed_visits[name].append((self._template_name, root.token().linenum))
+            name = node.__class__.__name__
+            self.failed_visits[name].append((self._template_name, node.token().linenum))
             return
 
         for child in children:
-            self._analyze_child(child)
+            self._analyze_expression(child)
+            await self._async_expression_hook(child)
+            self._update_template_scope(child)
 
             if child.block_scope:
                 self._scope.push({n: None for n in child.block_scope})
@@ -345,42 +349,45 @@ class _TemplateCounter:
             if child.block_scope:
                 self._scope.pop()
 
-    def _analyze_child(self, child: ChildNode) -> None:
-        if child.expression:
-            try:
-                refs = self._analyze_expression(child.expression)
-            except NotImplementedError:
-                name = child.expression.__class__.__name__
-                self.failed_visits[name].append((self._template_name, child.linenum))
-                return
+    def _analyze_expression(self, child: ChildNode) -> None:
+        if not child.expression:
+            return
 
-            for ref in refs.variable_references:
-                self.variables[ref].append((self._template_name, child.linenum))
+        try:
+            refs = self._update_expression_refs(child.expression)
+        except NotImplementedError:
+            name = child.expression.__class__.__name__
+            self.failed_visits[name].append((self._template_name, child.linenum))
+            return
 
-            # Check refs that are not in scope or in the local namespace before
-            # pushing the next block scope. This should highlight names that are
-            # expected to be "global".
-            for ref in refs.variable_references:
-                _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
-                if (
-                    _ref not in self._scope
-                    and Identifier(path=[IdentifierPathElement(_ref)])
-                    not in self.template_locals
-                ):
-                    self.template_globals[ref].append(
-                        (self._template_name, child.linenum)
-                    )
+        for ref in refs.variable_references:
+            self.variables[ref].append((self._template_name, child.linenum))
 
-            for f_ref in refs.filter_references:
-                self.filters[f_ref].append((self._template_name, child.linenum))
+        # Check refs that are not in scope or in the local namespace before
+        # pushing the next block scope. This should highlight names that are
+        # expected to be "global".
+        for ref in refs.variable_references:
+            _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
+            if (
+                _ref not in self._scope
+                and Identifier(path=[IdentifierPathElement(_ref)])
+                not in self.template_locals
+            ):
+                self.template_globals[ref].append((self._template_name, child.linenum))
 
-        if child.template_scope:
-            for name in child.template_scope:
-                self.template_locals[
-                    Identifier(path=[IdentifierPathElement(name)])
-                ].append((self._template_name, child.linenum))
+        for f_ref in refs.filter_references:
+            self.filters[f_ref].append((self._template_name, child.linenum))
 
-    def _analyze_expression(self, expression: Expression) -> References:
+    def _update_template_scope(self, child: ChildNode) -> None:
+        if not child.template_scope:
+            return
+
+        for name in child.template_scope:
+            self.template_locals[Identifier(path=[IdentifierPathElement(name)])].append(
+                (self._template_name, child.linenum)
+            )
+
+    def _update_expression_refs(self, expression: Expression) -> References:
         """Return a list of references used in the given expression."""
         refs: References = References()
 
@@ -391,7 +398,7 @@ class _TemplateCounter:
             refs.append_filters([f.name for f in expression.filters])
 
         for expr in expression.children():
-            refs.extend(self._analyze_expression(expr))
+            refs.extend(self._update_expression_refs(expr))
 
         return refs
 
@@ -556,9 +563,9 @@ class _TemplateCounter:
         self._update_reference_counters(refs)
 
     async def _analyze_template_inheritance_chain_async(
-        self, node: ChildNode, template: BoundTemplate
+        self, child: ChildNode, template: BoundTemplate
     ) -> None:
-        name, load_context = self._make_load_context(node, "extends")
+        name, load_context = self._make_load_context(child, "extends")
         if name is None or load_context is None:
             return
 
@@ -570,7 +577,7 @@ class _TemplateCounter:
 
         try:
             parent = await self._get_template_async(
-                name, load_context, self._template_name, node
+                name, load_context, self._template_name, child
             )
         except TemplateNotFound:
             return
@@ -579,7 +586,7 @@ class _TemplateCounter:
         while parent_template_name:
             try:
                 parent = await self._get_template_async(
-                    parent_template_name, load_context, self._template_name, node
+                    parent_template_name, load_context, self._template_name, child
                 )
             except TemplateNotFound:
                 return
@@ -598,24 +605,24 @@ class _TemplateCounter:
         self._update_reference_counters(refs)
 
     def _make_load_context(
-        self, node: ChildNode, load_mode: Literal["extends", "include", "render"]
+        self, child: ChildNode, load_mode: Literal["extends", "include", "render"]
     ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
         # Partial templates rendered in "include" mode might use a variable template
         # name. We can't statically analyze a partial template unless it's name is a
         # literal string (or possibly an integer, but unlikely).
-        if load_mode == "include" and not isinstance(node.expression, StringLiteral):
-            self.unloadable_partials[str(node.expression)].append(
-                (self._template_name, node.linenum)
+        if load_mode == "include" and not isinstance(child.expression, StringLiteral):
+            self.unloadable_partials[str(child.expression)].append(
+                (self._template_name, child.linenum)
             )
             return None, None
 
-        if not isinstance(node.expression, StringLiteral):
+        if not isinstance(child.expression, StringLiteral):
             raise TemplateTraversalError(
                 f"can't load from a variable expression when in {load_mode!r} mode"
             )
 
-        name = node.expression.value
-        load_context = node.load_context or {}
+        name = child.expression.value
+        load_context = child.load_context or {}
 
         if (name, load_context) in self._partials:
             return None, None
@@ -719,6 +726,12 @@ class _TemplateCounter:
                 msg = f"partial template '{msg_target}' could not be loaded"
             raise TemplateTraversalError(f"failed visit: {msg}")
 
+    def _expression_hook(self, child: ChildNode) -> None:
+        pass
+
+    async def _async_expression_hook(self, child: ChildNode) -> None:
+        pass
+
 
 class _InheritanceChainCounter(_TemplateCounter):
     def __init__(
@@ -744,23 +757,26 @@ class _InheritanceChainCounter(_TemplateCounter):
             partials=partials,
         )
 
-    def _analyze(self, root: Node) -> None:
-        if isinstance(root, InheritanceBlockNode):
-            return self._analyze_block(root)
-        return super()._analyze(root)
+    def _analyze(self, node: Node) -> None:
+        if isinstance(node, InheritanceBlockNode):
+            return self._analyze_block(node)
+        return super()._analyze(node)
 
-    async def _analyze_async(self, root: Node) -> None:
-        if isinstance(root, InheritanceBlockNode):
-            return await self._analyze_block_async(root)
-        return await super()._analyze_async(root)
+    async def _analyze_async(self, node: Node) -> None:
+        if isinstance(node, InheritanceBlockNode):
+            return await self._analyze_block_async(node)
+        return await super()._analyze_async(node)
 
-    def _analyze_expression(self, expression: Expression) -> References:
+    def _expression_hook(self, child: ChildNode) -> None:
+        expression = child.expression
+        if not expression:
+            return
+
         if (
             self.parent_block_stack_item
             and isinstance(expression, Identifier)
             and str(expression) == "block.super"
         ):
-            # XXX: need async version of analyze_expression
             template = self._make_template(self.parent_block_stack_item)
             scope = {str(ident.path[0]): None for ident in self.template_locals}
             refs = _InheritanceChainCounter(
@@ -774,7 +790,28 @@ class _InheritanceChainCounter(_TemplateCounter):
 
             self._update_reference_counters(refs)
 
-        return super()._analyze_expression(expression)
+    async def _async_expression_hook(self, child: ChildNode) -> None:
+        expression = child.expression
+        if not expression:
+            return
+
+        if (
+            self.parent_block_stack_item
+            and isinstance(expression, Identifier)
+            and str(expression) == "block.super"
+        ):
+            template = self._make_template(self.parent_block_stack_item)
+            scope = {str(ident.path[0]): None for ident in self.template_locals}
+            refs = await _InheritanceChainCounter(
+                template,
+                self.stack_context,
+                follow_partials=self.follow_partials,
+                scope=ReadOnlyChainMap({"block": None}, self._scope, scope),
+                raise_for_failures=self.raise_for_failures,
+                partials=self._partials,
+            ).analyze_async()
+
+            self._update_reference_counters(refs)
 
     def _analyze_block(self, block: InheritanceBlockNode) -> None:
         block_stacks: Dict[

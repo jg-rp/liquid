@@ -10,7 +10,6 @@ from typing import Dict
 from liquid import BoundTemplate
 from liquid import Environment
 from liquid import StrictUndefined
-from liquid.exceptions import ContextDepthError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import UndefinedError
