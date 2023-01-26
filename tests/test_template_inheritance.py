@@ -99,6 +99,26 @@ class TemplateInheritanceTestCase(TestCase):
                 },
             ),
             Case(
+                description="block scoped parent variables are in scope",
+                template=(
+                    "{% extends 'foo' %}"
+                    "{% block bar %}"
+                    "goodbye, {{ you }} #{{ i }}{{ something }} "
+                    "{% endblock %}"
+                ),
+                expect="goodbye, world #1 goodbye, world #2 ",
+                globals={},
+                partials={
+                    "foo": (
+                        "{% assign you = 'world' %}"
+                        "{% for i in (1..2) %}"
+                        "{% block bar %}hello, {{ you }}!{% endblock %}"
+                        "{% endfor %}"
+                        "{% assign something = 'other' %}"
+                    )
+                },
+            ),
+            Case(
                 description="child variables are out of scope",
                 template=(
                     "{% extends 'foo' %}"

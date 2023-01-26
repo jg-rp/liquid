@@ -125,7 +125,7 @@ class BlockNode(Node):
     ) -> None:
         self.tok = tok
         self.expr = name
-        self.name = str(name)
+        self.name = name.value
         self.block = block
         self.required = required
 
@@ -139,7 +139,8 @@ class BlockNode(Node):
             # This base template is being rendered directly.
             if self.required:
                 raise RequiredBlockError(
-                    f"block {self.name} must be overridden", linenum=self.tok.linenum
+                    f"block {self.name} must be overridden",
+                    linenum=self.tok.linenum,
                 )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return self.block.render(context, buffer)
@@ -148,7 +149,9 @@ class BlockNode(Node):
 
         if stack_item.required:
             raise RequiredBlockError(
-                f"block {self.name} must be overridden", linenum=self.tok.linenum
+                f"block {self.name} must be overridden",
+                linenum=self.tok.linenum,
+                filename=stack_item.source_name,
             )
 
         ctx = context.copy(

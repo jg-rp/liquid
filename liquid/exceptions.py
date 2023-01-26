@@ -75,8 +75,30 @@ class LiquidSyntaxError(Error):
         return ""
 
 
-class TemplateInheritanceError(LiquidSyntaxError):
-    """An exceptions raised when template inheritance tags are used incorrectly."""
+class TemplateInheritanceError(Error):
+    """An exceptions raised when template inheritance tags are used incorrectly.
+
+    This could occur when parsing a template or at render time.
+    """
+
+    def __init__(
+        self,
+        *args: object,
+        linenum: Optional[int] = None,
+        filename: Optional[Union[str, Path]] = None,
+    ):
+        super().__init__(*args, linenum=linenum, filename=filename)
+        self.source: Optional[str] = None
+
+    @property
+    def name(self) -> str:
+        """Return the name of the template that raised this exception. Return an empty
+        string if a name is not available."""
+        if isinstance(self.filename, Path):
+            return self.filename.as_posix()
+        if self.filename:
+            return str(self.filename)
+        return ""
 
 
 class RequiredBlockError(TemplateInheritanceError):

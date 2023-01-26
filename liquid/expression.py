@@ -1,7 +1,5 @@
-"""Tag and output statement expression objects."""
-
+"""Liquid expression objects."""
 from __future__ import annotations
-
 import sys
 
 from abc import ABC
@@ -23,13 +21,10 @@ from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
-try:
-    from markupsafe import Markup
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-
 from liquid.context import Context
 from liquid.context import FutureContext
+
+from liquid import Markup
 
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import Error

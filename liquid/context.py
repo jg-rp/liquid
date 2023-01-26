@@ -532,26 +532,31 @@ class Context:
             else 1
         )
 
-        ctx = self.__class__(
-            self.env,
-            globals=ReadOnlyChainMap(namespace, self.globals),
-            disabled_tags=disabled_tags,
-            copy_depth=self._copy_depth + 1,
-            parent_context=self,
-            loop_iteration_carry=loop_iteration_carry,
-            local_namespace_size_carry=self.get_size_of_locals(),
-        )
-        ctx.template = template or self.template
-
         if with_locals:
-            # Protect local namespace from updates in the copied render context.
-            ctx.locals = ChainMap({}, self.locals)
-            ctx.scope.pop()
-            ctx.scope.push(ctx.locals)
+            ctx = self.__class__(
+                self.env,
+                globals=ReadOnlyChainMap(namespace, self.scope),
+                disabled_tags=disabled_tags,
+                copy_depth=self._copy_depth + 1,
+                parent_context=self,
+                loop_iteration_carry=loop_iteration_carry,
+                local_namespace_size_carry=self.get_size_of_locals(),
+            )
             # This might need to be generalized some the caller can specify which
             # tag namespaces need to be copied.
             ctx.tag_namespace["extends"] = self.tag_namespace["extends"]
+        else:
+            ctx = self.__class__(
+                self.env,
+                globals=ReadOnlyChainMap(namespace, self.globals),
+                disabled_tags=disabled_tags,
+                copy_depth=self._copy_depth + 1,
+                parent_context=self,
+                loop_iteration_carry=loop_iteration_carry,
+                local_namespace_size_carry=self.get_size_of_locals(),
+            )
 
+        ctx.template = template or self.template
         return ctx
 
     def error(self, exc: Error) -> None:
