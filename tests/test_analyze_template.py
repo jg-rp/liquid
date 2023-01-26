@@ -1233,3 +1233,36 @@ class AnalyzeTemplateTestCase(TestCase):
 
         with self.assertRaises(TemplateInheritanceError):
             template.analyze()
+
+    def test_analyze_super_block(self):
+        """Test that we can count references when rendering super blocks."""
+        loader = DictLoader(
+            {
+                "base": "Hello, {% block content %}{{ foo | upcase }}{% endblock %}!",
+                "some": (
+                    "{% extends 'base' %}"
+                    "{% block content %}{{ block.super }}!{% endblock %}"
+                ),
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        expected_template_globals = {"foo": [("base", 1)]}
+        expected_template_locals = {}
+        expected_refs = {"foo": [("base", 1)], "block.super": [("some", 1)]}
+        expected_template_filters = {"upcase": [("base", 1)]}
+        expected_tags = {
+            "extends": [("some", 1)],
+            "block": [("some", 1), ("base", 1)],
+        }
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+            template_filters=expected_template_filters,
+            template_tags=expected_tags,
+        )

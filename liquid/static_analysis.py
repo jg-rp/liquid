@@ -772,11 +772,10 @@ class _InheritanceChainCounter(_TemplateCounter):
         if not expression:
             return
 
-        if (
-            self.parent_block_stack_item
-            and isinstance(expression, Identifier)
-            and str(expression) == "block.super"
-        ):
+        if not self.parent_block_stack_item:
+            return
+
+        if self._contains_super(expression):
             template = self._make_template(self.parent_block_stack_item)
             scope = {str(ident.path[0]): None for ident in self.template_locals}
             refs = _InheritanceChainCounter(
@@ -795,11 +794,10 @@ class _InheritanceChainCounter(_TemplateCounter):
         if not expression:
             return
 
-        if (
-            self.parent_block_stack_item
-            and isinstance(expression, Identifier)
-            and str(expression) == "block.super"
-        ):
+        if not self.parent_block_stack_item:
+            return
+
+        if self._contains_super(expression):
             template = self._make_template(self.parent_block_stack_item)
             scope = {str(ident.path[0]): None for ident in self.template_locals}
             refs = await _InheritanceChainCounter(
@@ -812,6 +810,22 @@ class _InheritanceChainCounter(_TemplateCounter):
             ).analyze_async()
 
             self._update_reference_counters(refs)
+
+    def _contains_super(self, expression: Expression) -> bool:
+        if isinstance(expression, Identifier) and str(expression) == "block.super":
+            return True
+
+        if isinstance(expression, FilteredExpression):
+            if (
+                isinstance(expression.expression, Identifier)
+                and str(expression.expression) == "block.super"
+            ):
+                return True
+
+        for expr in expression.children():
+            return self._contains_super(expr)
+
+        return False
 
     def _analyze_block(self, block: InheritanceBlockNode) -> None:
         block_stacks: Dict[
