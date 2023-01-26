@@ -119,6 +119,38 @@ class TemplateInheritanceTestCase(TestCase):
                 },
             ),
             Case(
+                description="nested block scoped parent variables are in scope",
+                template=(
+                    "{% extends 'some' %}"
+                    "{% block baz %}"
+                    "Hello, {{ you }} {{ other }} {{ i }}:{{ x }} "
+                    "{% endblock %}"
+                ),
+                expect=(
+                    "Hello, world banana 1:1 Hello, world banana 1:2 "
+                    "Hello, world banana 2:1 Hello, world banana 2:2 "
+                ),
+                globals={},
+                partials={
+                    "base": (
+                        "{% assign you = 'world' %}"
+                        "{% for i in (1..2) %}"
+                        "{% block bar %}hello, {{ you }}!{% endblock %}"
+                        "{% endfor %}"
+                    ),
+                    "some": (
+                        "{% extends 'base' %}"
+                        "{% block bar %}"
+                        "{% assign other = 'banana' %}"
+                        "{% for x in (1..2) %}"
+                        "{% block baz %}"
+                        "{% endblock baz %}"
+                        "{% endfor %}"
+                        "{% endblock bar %}"
+                    ),
+                },
+            ),
+            Case(
                 description="child variables are out of scope",
                 template=(
                     "{% extends 'foo' %}"
