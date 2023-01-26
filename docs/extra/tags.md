@@ -1,10 +1,184 @@
 # Extra Tags
 
-**_New in version 1.5.0_**
-
 This page documents extra tags that are not included in standard Liquid. See the [tag reference](../language/tags.md) for details of all standard tags. Each tag described here must be registered with a [`liquid.Environment`](../api/environment.md) to make it available to templates rendered from that environment.
 
+## extends / block
+
+**_New in version 1.8.0_**
+
+```plain
+{% extends "<string>" %}
+```
+
+```plain
+{% block <identifier,string> [, required] %}
+  <literal,statement,tag> ...
+{% endblock [<identifier,string>] %}
+```
+
+The `{% extends %}` and `{% block %}` tags add template inheritance features to Python Liquid. In this example `page.html` inherits from `base.html` and overrides the `content` block. As `page.html` does not define a `footer` block, the footer from `base.html` is used.
+
+```python
+from liquid import DictLoader
+from liquid import Environment
+from liquid.extra import add_inheritance_tags
+
+loader = DictLoader(
+    {
+        "base.html": (
+            "<body>\n"
+            '  <div id="content">{% block content required %}{% endblock %}</div>\n'
+            '  <div id="footer">{% block footer %}Default footer{% endblock %}</div>\n'
+            "</body>"
+        ),
+        "page.html": (
+            "{% extends 'base.html' %}\n"
+            "{% block content %}Hello, {{ you }}!{% endblock %}"
+        ),
+    }
+)
+
+env = Environment(loader=loader)
+add_inheritance_tags(env)
+
+template = env.get_template("page.html")
+print(template.render(you="World"))
+```
+
+```html title="output"
+<body>
+  <div id="content">Hello, World!</div>
+  <div id="footer">Default footer</div>
+</body>
+```
+
+A template can contain at most one `{% extends %}` tag, and that tag should normally be the first in the template. All other template text and tags (including whitespace) preceding `{% extends %}` will be output normally. Subsequent template text and tags outside any `{% block %}` tags will be ignored, unless rendering a base template directly.
+
+As soon as an `{% extends %}` tag is found, template rendering stops and Python Liquid loads the parent template (using the configured [loader](../introduction/loading-templates.md)) before searching for `{% block %}` tags. We keep loading and searching up the inheritance chain until a parent template with no `{% extends %}` tag is found, this is the _base_ template.
+
+The base template is then rendered, substituting its blocks with those defined in its children.
+
+### Block Names
+
+Every `{% block %}` must have a name and that name must be unique within a single template. Block names must be valid Liquid identifiers, optionally enclosed in quotes (quoted and unquoted block names are equivalent).
+
+`{% endblock %}` tags can include a name too. If given a name and that name does not match the one given at the start of the block, a `TemplateInheritanceError` is raised when parsing the template.
+
+```liquid
+<body>
+  <div id="content">
+    {% block content %}
+      {% block title %}
+        <h1>Some Title</h1>
+      {% endblock title %}
+    {% endblock content %}
+  </div>
+  <div id="footer">
+    {% block footer %}
+      Default footer
+    {% endblock footer %}
+  </div>
+</body>
+```
+
+### Block Scope
+
+All blocks are scoped. Variables defined in base templates and enclosing blocks will be in scope when rendering overridden blocks.
+
+```liquid title="base"
+{% assign thing = 'item' %}
+{% for i in (1..3) %}
+  {% block list-item %}{% endblock %}
+{% endfor %}
+```
+
+```liquid title="child"
+{% extends "base" %}
+{% block list-item %}
+  {{ thing }} #{{ i }}
+{% endblock %}
+```
+
+```plain title="output"
+item #1
+
+item #2
+
+item #3
+```
+
+Variables defined in an overridden block will go out of scope after that block has been rendered.
+
+```liquid title="base"
+{% assign greeting = "Hello" %}
+{% block say-hi %}{{ greeting }}, World!{% endblock %}
+{{ greeting }}, World!
+```
+
+```liquid title="child"
+{% extends "base" %}
+{% block say-hi %}
+  {% assign greeting = "Goodbye" %}
+  {{ greeting }}, World!
+  {{ block.super }}
+{% endblock %}
+```
+
+```plain title="output"
+Goodbye, World!
+Hello, World!
+
+Hello, World!
+```
+
+### Required Blocks
+
+Use the `{% block %}` tag's `required` argument to indicate that the block must be overridden by a child template. If a required block does not get implemented by a child template, a `RequiredBlockError` exception is raised at render time.
+
+In this example, if the template were to be rendered directly, we would expect a `RequiredBlockError` due to the `content` block being required.
+
+```liquid title="base"
+<head>
+  {% block head %}{% endblock %}
+<head>
+<body>
+  <div id="content">{% block content required %}{% endblock %}</div>
+  <div id="footer">{% block footer %}Default footer{% endblock %}</div>
+</body>
+```
+
+### Super Blocks
+
+A `block` object is available inside every `{% block %}` tag. It has just one property, `super`. If a `{% block %}` is overriding a parent block, `{{ block.super }}` will render the parent's implementation of that block.
+
+In this example we use `{{ block.super }}` in the `footer` block to output the base template's footer with a year appended to it.
+
+```liquid title="base"
+<head>
+  {% block head %}{% endblock %}
+<head>
+<body>
+  <div id="content">{% block content required %}{% endblock %}</div>
+  <div id="footer">{% block footer %}Default footer{% endblock %}</div>
+</body>
+```
+
+```liquid title="child"
+{% extends "base" %}
+{% block content %}Hello, World!{% endblock %}
+{% block footer %}{{ block.super }} - 2023{% endblock %}
+```
+
+```html title="output"
+<body>
+  <div id="content">Hello, World!</div>
+  <div id="footer">Default footer - 2023</div>
+</body>
+```
+
 ## if (not)
+
+**_New in version 1.5.0_**
 
 A drop-in replacement for the standard [`if`](../language/tags.md#if) tag that supports a logical `not` operator and grouping terms with parentheses. See [the tag reference](../language/tags.md#expressions) for a description of standard `if` expressions.
 
@@ -83,6 +257,8 @@ denied
 
 ## inline if / else
 
+**_New in version 1.5.0_**
+
 Drop-in replacements for the standard output statement, [`assign`](../language/tags.md#assign) tag, and [`echo`](../language/tags.md#echo) tag that support inline `if`/`else` expressions. You can find a BNF-like description of the inline conditional expression in [this gist](https://gist.github.com/jg-rp/e2dc4da9e5033e087e46016008a9d91c#file-inline_if_expression-bnf).
 
 Inline `if`/`else` expressions are designed to be backwards compatible with standard filtered expressions. As long as there are no template variables called `if` or `else` within a filtered expression, standard output statements, `assign` tags and `echo` tags will behave the same.
@@ -157,6 +333,8 @@ Use a double pipe (`||`) to start any filters you want to apply regardless of wh
 ```
 
 ## macro / call
+
+**_New in version 1.5.0_**
 
 ```plain
 {% macro <string> [[,] [ <object>, ... ] [ <identifier>: <object>, ... ]] %}
