@@ -6,7 +6,6 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 
-
 from typing import DefaultDict
 from typing import Iterator
 from typing import List
@@ -17,6 +16,8 @@ from typing import Set
 from typing import TextIO
 from typing import Tuple
 from typing import TYPE_CHECKING
+
+from liquid import Markup
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
@@ -96,6 +97,9 @@ class BlockDrop(Mapping[str, object]):
             }
         ):
             self.parent.block.block.render(self.context, buf)
+
+        if self.context.autoescape:
+            return Markup(buf.getvalue())
         return buf.getvalue()
 
     def __len__(self) -> int:  # pragma: no cover
@@ -139,7 +143,7 @@ class BlockNode(Node):
             # This base template is being rendered directly.
             if self.required:
                 raise RequiredBlockError(
-                    f"block {self.name} must be overridden",
+                    f"block {self.name!r} must be overridden",
                     linenum=self.tok.linenum,
                 )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
@@ -149,7 +153,7 @@ class BlockNode(Node):
 
         if stack_item.required:
             raise RequiredBlockError(
-                f"block {self.name} must be overridden",
+                f"block {self.name!r} must be overridden",
                 linenum=self.tok.linenum,
                 filename=stack_item.source_name,
             )
