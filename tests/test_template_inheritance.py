@@ -640,3 +640,39 @@ class TemplateInheritanceTestCase(TestCase):
         with self.subTest(asynchronous=True):
             with self.assertRaises(TemplateInheritanceError):
                 asyncio.run(coro(template))
+
+    def test_overridden_block_to_many_blocks(self) -> None:
+        """Test that we can override a block with many sub-blocks."""
+        loader = DictLoader(
+            {
+                "base": "{% block head %}Hello - Welcome{% endblock %}",
+                "other": (
+                    "{% extends 'base' %}"
+                    "{% block head %}"
+                    "{{ block.super }}:"
+                    "{% block foo %}!{% endblock %} - "
+                    "{% block bar %}{% endblock %}"
+                    "{% endblock %}"
+                ),
+                "some": (
+                    "{% extends 'other' %}"
+                    "{% block foo %}foo{{ block.super }}{% endblock %}"
+                    "{% block bar %}bar{% endblock %}"
+                ),
+            }
+        )
+        expect = "Hello - Welcome:foo! - bar"
+
+        async def coro(template: BoundTemplate) -> str:
+            return await template.render_async()
+
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        result = template.render()
+        self.assertEqual(result, expect)
+
+        with self.subTest(asynchronous=True):
+            result = asyncio.run(coro(template))
+            self.assertEqual(result, expect)
