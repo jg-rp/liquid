@@ -161,7 +161,7 @@ class BlockNode(Node):
         ctx = context.copy(
             {"block": BlockDrop(context, buffer, self.name, stack_item.parent)},
             carry_loop_iterations=True,
-            with_locals=True,
+            block_scope=True,
         )
         return stack_item.block.block.render(ctx, buffer)
 
@@ -192,7 +192,7 @@ class BlockNode(Node):
         ctx = context.copy(
             {"block": BlockDrop(context, buffer, self.name, stack_item.parent)},
             carry_loop_iterations=True,
-            with_locals=True,
+            block_scope=True,
         )
         return await stack_item.block.block.render_async(ctx, buffer)
 

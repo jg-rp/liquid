@@ -219,6 +219,18 @@ class TemplateInheritanceTestCase(TestCase):
                 },
             ),
             Case(
+                description="override a parent's parent block",
+                template=(
+                    "{% extends 'bar' %}{% block greeting %}Goodbye,{% endblock %}"
+                ),
+                expect="Goodbye, world",
+                globals={"you": "world"},
+                partials={
+                    "foo": "{% block greeting %}Hello{% endblock %} {{ you }}",
+                    "bar": "{% extends 'foo' %}",
+                },
+            ),
+            Case(
                 description="multi-level super",
                 template=(
                     "{% extends 'baz' %}"

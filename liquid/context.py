@@ -512,7 +512,7 @@ class Context:
         disabled_tags: Optional[List[str]] = None,
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
-        with_locals: bool = False,
+        block_scope: bool = False,
     ) -> Context:
         """Return a copy of this context without any local variables or other state
         for stateful tags."""
@@ -521,17 +521,16 @@ class Context:
                 "maximum context depth reached, possible recursive render"
             )
 
-        loop_iteration_carry = (
-            reduce(
+        if carry_loop_iterations:
+            loop_iteration_carry = reduce(
                 mul,
                 (loop.length for loop in self.loops),
                 self.loop_iteration_carry,
             )
-            if carry_loop_iterations
-            else 1
-        )
+        else:
+            loop_iteration_carry = 1
 
-        if with_locals:
+        if block_scope:
             ctx = self.__class__(
                 self.env,
                 globals=ReadOnlyChainMap(namespace, self.scope),
