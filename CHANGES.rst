@@ -8,11 +8,13 @@ Version 1.8.0 (unreleased)
 
 - Added ``{% extends %}`` and ``{% block %}`` tags for template inheritance. These are 
   extra tags that need to be registered with a ``liquid.Environment`` explicitly. 
-  See `#104 <https://github.com/jg-rp/liquid/pull/104>`_.
-- Added a new optional ``sort_numeric`` filter, importable from ``liquid.extra``.
-  ``sort_numeric`` returns a new list with items from the input sequence sorted by any
-  integers and/or floats found in the string representation of each item.
-  See `#100 <https://github.com/jg-rp/liquid/pull/100>`_.
+  (`docs <https://jg-rp.github.io/liquid/extra/tags#extends--block>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/extends.py>`_).
+- Added a new ``sort_numeric`` filter. ``sort_numeric`` returns a new list with items
+  from the input sequence sorted by any integers and/or floats found in the string
+  representation of each item.
+  (`docs <https://jg-rp.github.io/liquid/extra/filters#sort_numeric>`_,
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/filters/array.py#L35>`_)
 
 **Fixes**
 
@@ -36,7 +38,7 @@ Version 1.8.0 (unreleased)
   ``liquid.future.Environment`` is now consistent with Shopify/liquid, in that it
   iterates over an "array" where the first an only item is the string.
   See `#102 <https://github.com/jg-rp/liquid/issues/102>`_.
-- The `round` filters is now consistent with Shopify/liquid and Ruby 3 when given
+- The `round` filter is now consistent with Shopify/liquid and Ruby 3 when given
   non-integer arguments.
   See `Shopify/liquid#1590 <https://github.com/Shopify/liquid/issues/1590>`_.
 
