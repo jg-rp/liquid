@@ -138,6 +138,31 @@ const config = {
             ],
           },
           {
+            title: "Extra Tags",
+            items: [
+              {
+                label: "Template Inheritance",
+                to: "/extra/tags#extends--block",
+              },
+              {
+                label: "Macros",
+                to: "/extra/tags#macro--call",
+              },
+              {
+                label: "Inline Conditional Expressions",
+                to: "extra/tags#inline-if--else",
+              },
+              {
+                label: "Logical Negation",
+                to: "/extra/tags#if-not",
+              },
+              {
+                label: "Block Scoped Variables",
+                to: "/extra/tags#with",
+              },
+            ],
+          },
+          {
             title: "Links",
             items: [
               {
