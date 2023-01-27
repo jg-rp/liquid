@@ -35,6 +35,7 @@ from liquid.stream import TokenStream
 from liquid.tag import Tag
 
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
+from liquid.extra.tags.extends import TAG_BLOCK
 
 from liquid.token import Token
 from liquid.token import TOKEN_TAG
@@ -181,7 +182,7 @@ class CallNode(Node):
                 bound_args[name] = expr.evaluate(context)
 
         namespace = ReadOnlyChainMap(bound_args, excess)
-        return context.copy(namespace, disabled_tags=[TAG_INCLUDE])
+        return context.copy(namespace, disabled_tags=[TAG_INCLUDE, TAG_BLOCK])
 
     def _get_macro(self, context: Context) -> Union[Macro, Undefined]:
         macro = context.tag_namespace.get("macros", {}).get(

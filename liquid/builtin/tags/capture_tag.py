@@ -9,12 +9,8 @@ from typing import List
 from typing import Optional
 from typing import TextIO
 
-try:
-    from markupsafe import Markup
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-
 from liquid import ast
+from liquid import Markup
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
 

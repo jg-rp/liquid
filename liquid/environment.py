@@ -44,6 +44,7 @@ from liquid import loaders
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import lookup_warning
+from liquid.exceptions import TemplateInheritanceError
 
 if TYPE_CHECKING:  # pragma: no cover
     from liquid.expression import BooleanExpression
@@ -321,7 +322,7 @@ class Environment:
         """
         try:
             parse_tree = self.parse(source)
-        except LiquidSyntaxError as err:
+        except (LiquidSyntaxError, TemplateInheritanceError) as err:
             err.filename = path
             err.source = source
             raise err

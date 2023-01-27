@@ -27,6 +27,7 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Mapping
+from typing import MutableMapping
 from typing import Optional
 from typing import Sequence
 from typing import TextIO
@@ -199,7 +200,15 @@ class Context:
         "parent_context",
         "scope",
         "tag_namespace",
+        "template",
     )
+
+    # NOTE: The `template` argument has been added for the benefit of tags like
+    # `{% extends %}`, which need access to the current template when rendering. With
+    # hindsight, `template` should be the only positional arguments, with `env`
+    # accessible via `template`, and all others arguments should be keyword only. We
+    # leave `template` optional for backwards compatibility reasons only. This might
+    # change in Python Liquid version 2.0.
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -211,12 +220,14 @@ class Context:
         parent_context: Optional[Context] = None,
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
+        template: Optional[BoundTemplate] = None,
     ):
         self.env = env
+        self.template = template
 
         # A namespace for template local variables. Those that are bound with
         # `assign` or `capture`.
-        self.locals: Dict[str, Any] = {}
+        self.locals: MutableMapping[str, object] = {}
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
@@ -440,18 +451,26 @@ class Context:
         return idx
 
     @contextmanager
-    def extend(self, namespace: Namespace) -> Iterator[Context]:
+    def extend(
+        self, namespace: Namespace, template: Optional[BoundTemplate] = None
+    ) -> Iterator[Context]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive include"
             )
 
+        _template = self.template
+        if template:
+            self.template = template
+
         self.scope.push(namespace)
 
         try:
             yield self
         finally:
+            if template:
+                self.template = _template
             self.scope.pop()
 
     @contextmanager
@@ -492,6 +511,8 @@ class Context:
         namespace: Namespace,
         disabled_tags: Optional[List[str]] = None,
         carry_loop_iterations: bool = False,
+        template: Optional[BoundTemplate] = None,
+        block_scope: bool = False,
     ) -> Context:
         """Return a copy of this context without any local variables or other state
         for stateful tags."""
@@ -500,25 +521,41 @@ class Context:
                 "maximum context depth reached, possible recursive render"
             )
 
-        loop_iteration_carry = (
-            reduce(
+        if carry_loop_iterations:
+            loop_iteration_carry = reduce(
                 mul,
                 (loop.length for loop in self.loops),
                 self.loop_iteration_carry,
             )
-            if carry_loop_iterations
-            else 1
-        )
+        else:
+            loop_iteration_carry = 1
 
-        return self.__class__(
-            self.env,
-            globals=ReadOnlyChainMap(namespace, self.globals),
-            disabled_tags=disabled_tags,
-            copy_depth=self._copy_depth + 1,
-            parent_context=self,
-            loop_iteration_carry=loop_iteration_carry,
-            local_namespace_size_carry=self.get_size_of_locals(),
-        )
+        if block_scope:
+            ctx = self.__class__(
+                self.env,
+                globals=ReadOnlyChainMap(namespace, self.scope),
+                disabled_tags=disabled_tags,
+                copy_depth=self._copy_depth + 1,
+                parent_context=self,
+                loop_iteration_carry=loop_iteration_carry,
+                local_namespace_size_carry=self.get_size_of_locals(),
+            )
+            # This might need to be generalized some the caller can specify which
+            # tag namespaces need to be copied.
+            ctx.tag_namespace["extends"] = self.tag_namespace["extends"]
+        else:
+            ctx = self.__class__(
+                self.env,
+                globals=ReadOnlyChainMap(namespace, self.globals),
+                disabled_tags=disabled_tags,
+                copy_depth=self._copy_depth + 1,
+                parent_context=self,
+                loop_iteration_carry=loop_iteration_carry,
+                local_namespace_size_carry=self.get_size_of_locals(),
+            )
+
+        ctx.template = template or self.template
+        return ctx
 
     def error(self, exc: Error) -> None:
         """Ignore, raise or convert the given exception to a warning."""

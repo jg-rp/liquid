@@ -8,7 +8,9 @@ from .filters import script_tag
 from .filters import sort_numeric
 from .filters import stylesheet_tag
 
+from .tags import BlockTag
 from .tags import CallTag
+from .tags import ExtendsTag
 from .tags import IfNotTag
 from .tags import InlineIfAssignTag
 from .tags import InlineIfAssignTagWithParens
@@ -30,7 +32,9 @@ __all__ = (
     "add_macro_tags",
     "add_tags_and_filters",
     "add_tags",
+    "BlockTag",
     "CallTag",
+    "ExtendsTag",
     "IfNotTag",
     "index",
     "InlineIfAssignTag",
@@ -72,12 +76,19 @@ def add_macro_tags(env: Environment) -> None:
     env.add_tag(MacroTag)
 
 
+def add_inheritance_tags(env: Environment) -> None:
+    """Register both the `extends` and `block` tags with an environment."""
+    env.add_tag(BlockTag)
+    env.add_tag(ExtendsTag)
+
+
 def add_tags(env: Environment) -> None:  # pragma: no cover
     """Register all extra tags with an environment."""
     env.add_tag(IfNotTag)
     env.add_tag(WithTag)
-    add_macro_tags(env)
     add_extended_inline_expression_tags(env)
+    add_inheritance_tags(env)
+    add_macro_tags(env)
 
 
 def add_filters(env: Environment) -> None:

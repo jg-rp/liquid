@@ -107,7 +107,7 @@ class ChildNode(NamedTuple):
         in an isolated namespace, without access to the parent's template local scope.
         In "include" mode, the partial will have access to the parents template local
         scope and the parent's scope can be updated by the partial template too.
-    :type load_mode: Optional[Literal["render", "include"]]
+    :type load_mode: Optional[Literal["render", "include", "extends"]]
     :param load_context: Meta data a template ``Loader`` might need to find the source
         of a partial template.
     """
@@ -117,7 +117,7 @@ class ChildNode(NamedTuple):
     node: Optional[Node] = None
     template_scope: Optional[List[str]] = None
     block_scope: Optional[List[str]] = None
-    load_mode: Optional[Literal["render", "include"]] = None
+    load_mode: Optional[Literal["render", "include", "extends"]] = None
     load_context: Optional[Dict[str, str]] = None
 
 

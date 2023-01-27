@@ -1,18 +1,21 @@
 # pylint: disable=missing-module-docstring
-from .if_not import IfNotTag
+from ._with import WithTag
+from .extends import BlockTag
+from .extends import ExtendsTag
 from .if_expressions import InlineIfAssignTag
 from .if_expressions import InlineIfAssignTagWithParens
 from .if_expressions import InlineIfEchoTag
 from .if_expressions import InlineIfEchoTagWithParens
 from .if_expressions import InlineIfStatement
 from .if_expressions import InlineIfStatementWithParens
-from .macro import MacroTag
+from .if_not import IfNotTag
 from .macro import CallTag
-from ._with import WithTag
+from .macro import MacroTag
 
 __all__ = (
+    "BlockTag",
     "CallTag",
-    "MacroTag",
+    "ExtendsTag",
     "IfNotTag",
     "InlineIfAssignTag",
     "InlineIfAssignTagWithParens",
@@ -20,5 +23,6 @@ __all__ = (
     "InlineIfEchoTagWithParens",
     "InlineIfStatement",
     "InlineIfStatementWithParens",
+    "MacroTag",
     "WithTag",
 )

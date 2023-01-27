@@ -86,14 +86,13 @@ class IncludeNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.name.evaluate(context)
         template = context.get_template_with_context(str(name), tag=self.tag)
-
         namespace: Dict[str, object] = {}
 
         # Add any keyword arguments to the new template context.
         for _key, _val in self.args.items():
             namespace[_key] = _val.evaluate(context)
 
-        with context.extend(namespace):
+        with context.extend(namespace, template=template):
             # Bind a variable to the included template.
             if self.var is not None:
                 val = self.var.evaluate(context)
@@ -137,7 +136,7 @@ class IncludeNode(Node):
         for _key, _val in self.args.items():
             namespace[_key] = await _val.evaluate_async(context)
 
-        with context.extend(namespace):
+        with context.extend(namespace, template=template):
             if self.var is not None:
                 val = await self.var.evaluate_async(context)
                 key = self.alias or template.name.split(".")[0]

@@ -129,10 +129,6 @@ class Parser:
             node = self.statement.get_node(stream)
         elif stream.current.type == TOKEN_TAG:
             tag = self.tags.get(stream.current.value, self.illegal)
-
-            if tag.block:
-                stream.balancing_stack.append(tag.end)
-
             node = tag.get_node(stream)
 
             # Tag parse functions can choose to return an IllegalNode.
@@ -141,14 +137,6 @@ class Parser:
                     f"unexpected tag '{node.token().value}'",
                     linenum=node.token().linenum,
                 )
-
-            if tag.block:
-                popped = stream.balancing_stack.pop()
-                if stream.current.value != popped:
-                    raise LiquidSyntaxError(
-                        f"expected {popped}, found {stream.current.value}",
-                        linenum=stream.current.linenum,
-                    )
         else:
             node = self.literal.get_node(stream)
 

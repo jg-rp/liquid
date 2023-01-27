@@ -16,9 +16,11 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 
 from liquid.context import Context
+from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
 
+from liquid.extra import add_inheritance_tags
 from liquid.extra import add_inline_expression_tags
 from liquid.extra import WithTag
 
@@ -1165,3 +1167,102 @@ class AnalyzeTemplateTestCase(TestCase):
 
         global_ref = list(refs.global_variables.keys())[0]
         self.assertEqual(global_ref.parts, ("some", "foo.bar"))
+
+    def test_analyze_inheritance_chain(self):
+        """Test that we can count references in a chain of inherited templates."""
+        loader = DictLoader(
+            {
+                "base": (
+                    "Hello, "
+                    "{% assign x = 'foo' %}"
+                    "{% block content %}{{ x | upcase }}{% endblock %}!"
+                    "{% block foo %}{% endblock %}!"
+                ),
+                "other": (
+                    "{% extends 'base' %}"
+                    "{% block content %}{{ x | downcase }}{% endblock %}"
+                    "{% block foo %}{% assign z = 7 %}{% endblock %}"
+                ),
+                "some": "{% extends 'other' %}{{ y | append: x }}{% block foo %}{% endblock %}",
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        expected_template_globals = {}
+        expected_template_locals = {"x": [("base", 1)]}
+        expected_refs = {
+            "x": [("other", 1)],
+        }
+        expected_template_filters = {
+            "downcase": [("other", 1)],
+        }
+        expected_tags = {
+            "assign": [("base", 1)],
+            "extends": [("some", 1), ("other", 1)],
+            "block": [
+                ("some", 1),
+                ("other", 1),
+                ("other", 1),
+                ("base", 1),
+                ("base", 1),
+            ],
+        }
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+            template_filters=expected_template_filters,
+            template_tags=expected_tags,
+        )
+
+    def test_analyze_recursive_extends(self):
+        """Test that we handle recursive use of the 'extends' tag."""
+        loader = DictLoader(
+            {
+                "some": "{% extends 'other' %}",
+                "other": "{% extends 'some' %}",
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        with self.assertRaises(TemplateInheritanceError):
+            template.analyze()
+
+    def test_analyze_super_block(self):
+        """Test that we can count references when rendering super blocks."""
+        loader = DictLoader(
+            {
+                "base": "Hello, {% block content %}{{ foo | upcase }}{% endblock %}!",
+                "some": (
+                    "{% extends 'base' %}"
+                    "{% block content %}{{ block.super }}!{% endblock %}"
+                ),
+            }
+        )
+        env = Environment(loader=loader)
+        add_inheritance_tags(env)
+        template = env.get_template("some")
+
+        expected_template_globals = {"foo": [("base", 1)]}
+        expected_template_locals = {}
+        expected_refs = {"foo": [("base", 1)], "block.super": [("some", 1)]}
+        expected_template_filters = {"upcase": [("base", 1)]}
+        expected_tags = {
+            "extends": [("some", 1)],
+            "block": [("some", 1), ("base", 1)],
+        }
+
+        self._test(
+            template,
+            expected_refs,
+            expected_template_locals,
+            expected_template_globals,
+            template_filters=expected_template_filters,
+            template_tags=expected_tags,
+        )
