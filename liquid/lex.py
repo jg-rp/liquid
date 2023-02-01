@@ -246,7 +246,11 @@ def compile_liquid_rules(
     comment_s = re.escape(comment_start_string)
     comment_e = re.escape(comment_end_string)
 
-    raw_pattern = rf"{tag_s}\s*raw\s*{tag_e}(?P<raw>.*?){tag_s}\s*endraw\s*{tag_e}"
+    raw_pattern = (
+        rf"{tag_s}-?\s*raw\s*(?P<rsr>-?){tag_e}"
+        r"(?P<raw>.*?)"
+        rf"{tag_s}-?\s*endraw\s*(?P<rsr_e>-?){tag_e}"
+    )
     statement_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
 
     # The "name" group is zero or more characters so that a malformed tag (one
@@ -481,6 +485,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
         elif kind == "RAW":
             kind = TOKEN_LITERAL
             value = match.group("raw")
+            lstrip = bool(match.group("rsr_e"))
 
         elif kind == TOKEN_LITERAL:
             if lstrip:

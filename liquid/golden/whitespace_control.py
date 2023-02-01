@@ -267,4 +267,15 @@ cases = [
         expect="!\n    \n\n  !",
         globals={},
     ),
+    Case(
+        description="white space control with raw tags",
+        template="".join(
+            [
+                "! {% raw %}{{ hello }}{% endraw %} !\n",
+                "! {%- raw -%}{{ hello }}{%- endraw -%} !",
+            ]
+        ),
+        expect="! {{ hello }} !\n!{{ hello }}!",
+        globals={},
+    ),
 ]

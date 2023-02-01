@@ -7,7 +7,9 @@ Version 1.8.1 (unreleased)
 **Compatibility**
 
 - Support bracketed variables without a leading identifier.
-  See `Shopify/liquid 1680 <https://github.com/Shopify/liquid/pull/1680>`_.
+  See `Shopify/liquid #1680 <https://github.com/Shopify/liquid/pull/1680>`_.
+- Allow whitespace control from ``raw`` tags.
+  See `Shopify/liquid #1683 <https://github.com/Shopify/liquid/pull/1683>`_.
 
 Version 1.8.0
 -------------
