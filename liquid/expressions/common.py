@@ -133,7 +133,6 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
     more, possibly chained, identifiers within those brackets.
     """
     path: IdentifierPath = []
-    stream.expect(TOKEN_IDENTIFIER)
 
     while True:
         pos, typ, val = stream.current
@@ -149,7 +148,7 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
             stream.expect(TOKEN_RBRACKET)
         elif typ == TOKEN_FLOAT:
             raise LiquidSyntaxError(
-                f"expected and identifier, found {val!r}",
+                f"expected an identifier, found {val!r}",
                 linenum=pos,
             )
         elif typ == TOKEN_DOT:
@@ -170,7 +169,7 @@ def parse_string_or_identifier(
     identifier expression, raise a syntax error.
     """
     typ = stream.current[1]
-    if typ == TOKEN_IDENTIFIER:
+    if typ in (TOKEN_IDENTIFIER, TOKEN_LBRACKET):
         expr: Union[StringLiteral, Identifier] = parse_identifier(stream)
     elif typ == TOKEN_STRING:
         expr = parse_string_literal(stream)
@@ -255,7 +254,6 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
     """This is much like `parse_identifier`, but leaves the last ident
     token on the stream."""
     path: IdentifierPath = []
-    stream.expect(TOKEN_IDENTIFIER)
 
     while True:
         _, _type, value = stream.current

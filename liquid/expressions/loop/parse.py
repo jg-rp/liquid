@@ -15,6 +15,7 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_OFFSET
@@ -68,6 +69,7 @@ def parse_string_argument(stream: TokenStream) -> LoopArgument:
 
 TOKEN_MAP: Dict[str, Callable[[TokenStream], LoopArgument]] = {
     TOKEN_IDENTIFIER: parse_identifier,
+    TOKEN_LBRACKET: parse_identifier,
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
     TOKEN_CONTINUE: parse_continue,

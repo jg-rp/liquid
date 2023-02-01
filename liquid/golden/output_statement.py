@@ -189,4 +189,24 @@ cases = [
         strict=True,
         error=True,
     ),
+    Case(
+        description="bracketed variable resolves to a string",
+        template=r"{{ foo[something] }}",
+        expect="goodbye",
+        globals={"foo": {"hello": "goodbye"}, "something": "hello"},
+    ),
+    Case(
+        description=(
+            "bracketed variable resolves to a string without leading identifier"
+        ),
+        template=r"{{ [something] }}",
+        expect="goodbye",
+        globals={"something": "hello", "hello": "goodbye"},
+    ),
+    Case(
+        description="nested bracketed variable resolving to a string",
+        template=r"{{ [list[settings.zero]] }}",
+        expect="bar",
+        globals={"list": ["foo"], "settings": {"zero": 0}, "foo": "bar"},
+    ),
 ]

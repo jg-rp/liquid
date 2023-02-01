@@ -85,7 +85,7 @@ class TokenStream:
         self.current = (0, TOKEN_EOF, "")
 
     def expect(self, typ: str) -> None:
-        """Raise an excpetion if the current token in the stream does not match the
+        """Raise an exception if the current token in the stream does not match the
         given type."""
         if self.current[1] != typ:
             raise LiquidSyntaxError(
@@ -95,7 +95,7 @@ class TokenStream:
             )
 
     def expect_peek(self, typ: str) -> None:
-        """Raise an excpetion if the next token in the stream does not match the given
+        """Raise an exception if the next token in the stream does not match the given
         type."""
         if self.peek[1] != typ:
             raise LiquidSyntaxError(

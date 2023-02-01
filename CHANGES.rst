@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.8.1 (unreleased)
+--------------------------
+
+**Compatibility**
+
+- Support bracketed variables without a leading identifier.
+  See `Shopify/liquid 1680 <https://github.com/Shopify/liquid/pull/1680>`_.
+
 Version 1.8.0
 -------------
 
@@ -9,7 +17,7 @@ Version 1.8.0
 - Added ``{% extends %}`` and ``{% block %}`` tags for template inheritance. These are 
   extra tags that need to be registered with a ``liquid.Environment`` explicitly. 
   (`docs <https://jg-rp.github.io/liquid/extra/tags#extends--block>`_,
-  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/extends.py>`_).
+  `source <https://github.com/jg-rp/liquid/blob/main/liquid/extra/tags/extends.py>`_)
 - Added a new ``sort_numeric`` filter. ``sort_numeric`` returns a new list with items
   from the input sequence sorted by any integers and/or floats found in the string
   representation of each item.

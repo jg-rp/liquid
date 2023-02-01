@@ -29,22 +29,23 @@ from liquid.expressions.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
 
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_NIL
-from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_RANGE_LITERAL
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
 
 
 TOKEN_MAP = {
@@ -58,6 +59,7 @@ TOKEN_MAP = {
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
     TOKEN_IDENTIFIER: parse_identifier,
+    TOKEN_LBRACKET: parse_identifier,
 }
 
 

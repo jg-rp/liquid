@@ -9,6 +9,7 @@ from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
 from liquid.expression import PrefixExpression
 
+from liquid.expressions.common import make_parse_range
 from liquid.expressions.common import parse_blank
 from liquid.expressions.common import parse_boolean
 from liquid.expressions.common import parse_empty
@@ -17,7 +18,6 @@ from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_integer_literal
 from liquid.expressions.common import parse_nil
 from liquid.expressions.common import parse_string_literal
-from liquid.expressions.common import make_parse_range
 
 from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
 from liquid.expressions.boolean.lex import tokenize
@@ -26,32 +26,33 @@ from liquid.expressions.stream import TokenStream
 
 from liquid.exceptions import LiquidSyntaxError
 
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_NIL
-from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
 from liquid.token import TOKEN_RANGE_LITERAL
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
 
-from liquid.token import TOKEN_EQ
-from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_AND
-from liquid.token import TOKEN_NOT
-from liquid.token import TOKEN_LT
-from liquid.token import TOKEN_GT
-from liquid.token import TOKEN_NE
-from liquid.token import TOKEN_LG
-from liquid.token import TOKEN_LE
-from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_EQ
+from liquid.token import TOKEN_GE
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_LT
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_NOT
+from liquid.token import TOKEN_OR
 
 # Note that PREFIX and LOGICAL are not used in any "standard" expressions.
 PRECEDENCE_LOWEST = 1
@@ -89,6 +90,7 @@ TOKEN_MAP: Dict[str, Callable[[TokenStream], Expression]] = {
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
     TOKEN_IDENTIFIER: parse_identifier,
+    TOKEN_LBRACKET: parse_identifier,
 }
 
 BINARY_OPERATORS = frozenset(

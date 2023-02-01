@@ -249,7 +249,7 @@ class MalformedTemplateTestCase(TestCase):
                 expect_exception=LiquidSyntaxError,
                 expect_msg=[
                     "invalid identifier, found float, on line 1",
-                    "expected 'identifier', found 'float', on line 1",
+                    "expected an identifier, found '1.2', on line 1",
                 ],
             ),
             Case(
@@ -259,6 +259,7 @@ class MalformedTemplateTestCase(TestCase):
                 expect_msg=[
                     "invalid identifier, found nil, on line 1",
                     "expected 'identifier', found 'nil', on line 1",
+                    "expected ']', found 'nil', on line 1",
                 ],
             ),
             Case(
