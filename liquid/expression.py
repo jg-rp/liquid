@@ -759,8 +759,6 @@ class ConditionalExpression(FilteredExpression):
                 result = context.env.undefined("")
         else:
             result = self.expression.evaluate(context)
-            if self.filters:
-                result = self.apply_filters(result, self.filters, context)
 
         if self.filters:
             result = self.apply_filters(result, self.filters, context)
@@ -778,8 +776,6 @@ class ConditionalExpression(FilteredExpression):
                 result = context.env.undefined("")
         else:
             result = await self.expression.evaluate_async(context)
-            if self.filters:
-                result = await self.apply_filters_async(result, self.filters, context)
 
         if self.filters:
             result = await self.apply_filters_async(result, self.filters, context)
