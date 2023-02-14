@@ -1,8 +1,8 @@
 Python Liquid Change Log
 ========================
 
-Version 1.8.1 (unreleased)
---------------------------
+Version 1.8.1
+-------------
 
 **Fixes**
 
