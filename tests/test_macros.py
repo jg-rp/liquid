@@ -48,6 +48,17 @@ class MacroRenderTestCase(TestCase):
                 partials={},
             ),
             Case(
+                description="unquoted macro names are ok",
+                template=(
+                    r"{% macro func %}Hello, World!{% endmacro %}"
+                    r"{% call func %}"
+                    r"{% call 'func' %}"
+                ),
+                expect="Hello, World!Hello, World!",
+                globals={},
+                partials={},
+            ),
+            Case(
                 description="call basic macro multiple times",
                 template=(
                     r"{% macro 'func' %}Hello, World!{% endmacro %}"
@@ -261,9 +272,17 @@ class AnalyzeMacroTestCase(TestCase):
             "you": [("<string>", 1)],
             "x": [("<string>", 1)],
         }
+        expected_filters = {}
+        expected_tags = {
+            "macro": [("<string>", 1)],
+            "call": [("<string>", 1), ("<string>", 1)],
+            "assign": [("<string>", 1)],
+        }
 
         analysis = template.analyze()
 
         self.assertEqual(analysis.local_variables, expected_template_locals)
         self.assertEqual(analysis.global_variables, expected_template_globals)
         self.assertEqual(analysis.variables, expected_refs)
+        self.assertEqual(analysis.filters, expected_filters)
+        self.assertEqual(analysis.tags, expected_tags)

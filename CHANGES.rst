@@ -4,6 +4,15 @@ Python Liquid Change Log
 Version 1.8.1 (unreleased)
 --------------------------
 
+**Fixes**
+
+- Removed unnecessary wrapping of inline conditional expressions in
+  ``BooleanExpression``.
+- Fixed async evaluation of macro arguments. Previously they were always being evaluated
+  synchronously.
+- Allow `macro` names to be quoted or unquoted. Quoted and unquoted macro names are
+  now equivalent when defining and/or calling a macro.
+
 **Compatibility**
 
 - Support bracketed variables without a leading identifier.

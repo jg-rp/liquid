@@ -6,10 +6,11 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
+from liquid.exceptions import LiquidSyntaxError
+
 from liquid.expression import Expression
 from liquid.expression import NIL
 
-from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.arguments.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
@@ -19,6 +20,8 @@ from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EQUALS
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_STRING
 
 
 Argument = Tuple[Any, Expression]
@@ -117,10 +120,18 @@ _parse_macro_arguments = make_parse_arguments(parse_macro_argument, TOKEN_COLON)
 _parse_call_arguments = make_parse_arguments(parse_call_argument, TOKEN_COLON)
 
 
+def _parse_macro_name(stream: TokenStream) -> str:
+    if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
+        return stream.current[2]
+    raise LiquidSyntaxError(
+        f"invalid macro name '{stream.current[2]}'", linenum=stream.current[0]
+    )
+
+
 def parse_macro_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
     """Parse a sequence of argument names, possibly with default values."""
     stream = TokenStream(tokenize(expr, linenum))
-    name = parse_string_literal(stream).value
+    name = _parse_macro_name(stream)
     next(stream)
     return name, _parse_macro_arguments(stream)
 
@@ -128,6 +139,6 @@ def parse_macro_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argume
 def parse_call_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
     """Parse a sequence of positional and/or keyword arguments."""
     stream = TokenStream(tokenize(expr, linenum))
-    name = parse_string_literal(stream).value
+    name = _parse_macro_name(stream)
     next(stream)
     return name, _parse_call_arguments(stream)

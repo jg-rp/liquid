@@ -59,6 +59,14 @@ class Macro(NamedTuple):
     block: BlockNode
 
 
+class BoundArgs(NamedTuple):
+    """Expressions bound to `call` ready to be evaluated."""
+
+    args: Dict[str, Expression]
+    excess_args: List[Expression]
+    excess_kwargs: Dict[str, Expression]
+
+
 class MacroNode(Node):
     """Parse tree node representing a macro."""
 
@@ -135,9 +143,10 @@ class CallNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"CallNode(tok={self.tok}, name={self.name})"
 
-    def _make_context(self, context: Context, macro: Macro) -> Context:
+    def _bind_args(self, macro: Macro) -> BoundArgs:
         args = dict(macro.args)
-        macro_names = [key for key, val in macro.args]
+        macro_names = [key for key, _ in macro.args]
+        macro_set = set(macro_names)
 
         # Bind positional arguments to names. If there are more positional arguments
         # than names defined in the macro, they'll be stored in `excess_args`.
@@ -159,10 +168,15 @@ class CallNode(Node):
         excess_kwargs: Dict[str, Expression] = {}
         for name, expr in self.kwargs:
             assert isinstance(name, str)
-            if name in macro_names:
+            if name in macro_set:
                 args[name] = expr
             else:
                 excess_kwargs[name] = expr
+
+        return BoundArgs(args, excess_args, excess_kwargs)
+
+    def _make_context(self, context: Context, macro: Macro) -> Context:
+        args, excess_args, excess_kwargs = self._bind_args(macro)
 
         excess: Dict[str, object] = {
             "kwargs": {
@@ -181,8 +195,38 @@ class CallNode(Node):
                 assert isinstance(name, str)
                 bound_args[name] = expr.evaluate(context)
 
-        namespace = ReadOnlyChainMap(bound_args, excess)
-        return context.copy(namespace, disabled_tags=[TAG_INCLUDE, TAG_BLOCK])
+        return context.copy(
+            ReadOnlyChainMap(bound_args, excess),
+            disabled_tags=[TAG_INCLUDE, TAG_BLOCK],
+            carry_loop_iterations=True,
+        )
+
+    async def _make_context_async(self, context: Context, macro: Macro) -> Context:
+        args, excess_args, excess_kwargs = self._bind_args(macro)
+
+        excess: Dict[str, object] = {
+            "kwargs": {
+                name: await expr.evaluate_async(context)
+                for name, expr in excess_kwargs.items()
+            },
+            "args": [await expr.evaluate_async(context) for expr in excess_args],
+        }
+
+        # NOTE: default arguments are bound late.
+        bound_args: Dict[str, object] = {}
+        for name, expr in args.items():
+            if expr == NIL:
+                bound_args[name] = context.env.undefined(name)
+            else:
+                assert isinstance(expr, Expression)
+                assert isinstance(name, str)
+                bound_args[name] = await expr.evaluate_async(context)
+
+        return context.copy(
+            ReadOnlyChainMap(bound_args, excess),
+            disabled_tags=[TAG_INCLUDE, TAG_BLOCK],
+            carry_loop_iterations=True,
+        )
 
     def _get_macro(self, context: Context) -> Union[Macro, Undefined]:
         macro = context.tag_namespace.get("macros", {}).get(
@@ -216,7 +260,7 @@ class CallNode(Node):
 
         assert isinstance(macro, Macro)
 
-        ctx = self._make_context(context, macro)
+        ctx = await self._make_context_async(context, macro)
         await macro.block.render_async(ctx, buffer)
 
         return True
