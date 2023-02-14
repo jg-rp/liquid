@@ -8,7 +8,6 @@ from typing import Iterable
 from typing import Optional
 from typing import Tuple
 
-from liquid.expression import BooleanExpression
 from liquid.expression import Expression
 from liquid.expression import FALSE
 from liquid.expression import Filter
@@ -41,7 +40,7 @@ from liquid.token import TOKEN_ELSE
 
 
 def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
-    """Split tokens on into lists, using TOKEN_PIPE as the delimiter."""
+    """Split tokens into lists, using TOKEN_PIPE as the delimiter."""
     buf: List[Token] = []
     for token in tokens:
         if token[1] == TOKEN_PIPE:
@@ -131,12 +130,11 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     )
 
     if conditional_tokens:
-        condition = BooleanExpression(
-            parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
-        )
+        condition = parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
+
     else:
         # A missing condition (an `if` with nothing after it).
-        condition = BooleanExpression(FALSE)
+        condition = FALSE
 
     if _alternative_tokens:
         # Handle TOKEN_ELSE followed by nothing.
@@ -181,14 +179,12 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
     )
 
     if conditional_tokens:
-        condition = BooleanExpression(
-            parse_boolean_obj_with_parens(
-                TokenStream(iter(conditional_tokens)), linenum
-            )
+        condition = parse_boolean_obj_with_parens(
+            TokenStream(iter(conditional_tokens)), linenum
         )
     else:
         # A missing condition (an `if` with nothing after it).
-        condition = BooleanExpression(FALSE)
+        condition = FALSE
 
     if _alternative_tokens:
         # Handle TOKEN_ELSE followed by nothing.

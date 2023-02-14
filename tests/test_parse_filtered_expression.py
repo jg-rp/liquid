@@ -2,7 +2,6 @@
 import unittest
 from dataclasses import dataclass
 
-from liquid.expression import BooleanExpression
 from liquid.expression import ConditionalExpression
 from liquid.expression import Expression
 from liquid.expression import FilteredExpression
@@ -10,13 +9,13 @@ from liquid.expression import InfixExpression
 from liquid.expression import PrefixExpression
 from liquid.expression import IdentifierPathElement
 from liquid.expression import Identifier
-from liquid.expression import Boolean
 from liquid.expression import Filter
 from liquid.expression import StringLiteral
 from liquid.expression import IntegerLiteral
 from liquid.expression import FloatLiteral
 from liquid.expression import RangeLiteral
 from liquid.expression import TRUE
+from liquid.expression import FALSE
 
 from liquid.expressions import parse_filtered_expression
 from liquid.expressions import parse_conditional_expression
@@ -86,7 +85,7 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             "literal true",
             "true",
             FilteredExpression(
-                expression=Boolean(True),
+                expression=TRUE,
                 filters=[],
             ),
         ),
@@ -94,7 +93,7 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             "literal false",
             "false",
             FilteredExpression(
-                expression=Boolean(False),
+                expression=FALSE,
                 filters=[],
             ),
         ),
@@ -439,7 +438,7 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
                     Filter(
                         name="default",
                         args=[StringLiteral("hello")],
-                        kwargs={"allow_false": Boolean(True)},
+                        kwargs={"allow_false": TRUE},
                     )
                 ],
             ),
@@ -529,7 +528,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
             expression="'foo' if true",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
             ),
         ),
         Case(
@@ -537,7 +536,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
             expression="'foo' if true else 'bar'",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
                 alternative=FilteredExpression(StringLiteral("bar")),
             ),
         ),
@@ -553,9 +552,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
                         ]
                     )
                 ),
-                condition=BooleanExpression(
-                    expression=Identifier(path=[IdentifierPathElement("products")])
-                ),
+                condition=Identifier(path=[IdentifierPathElement("products")]),
                 alternative=FilteredExpression(StringLiteral("bar")),
             ),
         ),
@@ -567,7 +564,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
                     StringLiteral("foo"),
                     filters=[Filter(name="upcase", args=[])],
                 ),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
                 alternative=FilteredExpression(StringLiteral("bar")),
                 filters=[],
             ),
@@ -577,7 +574,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
             expression="'foo' if true else 'bar' | upcase",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
                 alternative=FilteredExpression(
                     StringLiteral("bar"),
                     filters=[Filter(name="upcase", args=[])],
@@ -590,7 +587,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
             expression="'foo' if true else 'bar' || append: 'baz' | upcase",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
                 alternative=FilteredExpression(StringLiteral("bar")),
                 filters=[
                     Filter(name="append", args=[StringLiteral("baz")]),
@@ -603,7 +600,7 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
             expression="'foo' if true else 'bar' || default: 'baz', allow_false:true",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(expression=TRUE),
+                condition=TRUE,
                 alternative=FilteredExpression(StringLiteral("bar")),
                 filters=[
                     Filter(
@@ -642,11 +639,9 @@ class ParseConditionalNotExpressionTestCase(unittest.TestCase):
             expression="'foo' if not true",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(
-                    expression=PrefixExpression(
-                        "not",
-                        right=Boolean(True),
-                    ),
+                condition=PrefixExpression(
+                    "not",
+                    right=TRUE,
                 ),
             ),
         ),
@@ -655,20 +650,18 @@ class ParseConditionalNotExpressionTestCase(unittest.TestCase):
             expression="'foo' if (true and false and false) or true else 'bar'",
             expect=ConditionalExpression(
                 expression=FilteredExpression(StringLiteral("foo")),
-                condition=BooleanExpression(
-                    expression=InfixExpression(
-                        left=InfixExpression(
-                            left=Boolean(True),
+                condition=InfixExpression(
+                    left=InfixExpression(
+                        left=TRUE,
+                        operator="and",
+                        right=InfixExpression(
+                            left=FALSE,
                             operator="and",
-                            right=InfixExpression(
-                                left=Boolean(False),
-                                operator="and",
-                                right=Boolean(False),
-                            ),
+                            right=FALSE,
                         ),
-                        operator="or",
-                        right=Boolean(True),
                     ),
+                    operator="or",
+                    right=TRUE,
                 ),
                 alternative=FilteredExpression(StringLiteral("bar")),
             ),
