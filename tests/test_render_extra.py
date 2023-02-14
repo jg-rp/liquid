@@ -150,7 +150,7 @@ class RenderInlineIfTestCase(BaseRenderTestCase):
                 partials={},
             ),
             Case(
-                description="early  filter",
+                description="early filter",
                 template=r"{{ 'hello' | upcase if true }}",
                 expect="HELLO",
                 globals={},

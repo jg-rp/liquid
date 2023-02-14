@@ -545,7 +545,9 @@ class Environment:
         if self.mode == Mode.STRICT:
             raise exc
         if self.mode == Mode.WARN:
-            warnings.warn(str(exc), category=lookup_warning(exc.__class__))
+            warnings.warn(
+                str(exc), category=lookup_warning(exc.__class__), stacklevel=2
+            )
 
     def set_expression_cache_size(self, maxsize: int = 0) -> None:
         """Create or replace cached versions of the common expression parsers. If
@@ -639,6 +641,7 @@ def get_implicit_environment(
 # ``Template`` is a factory function masquerading as a class. The desire to have an
 # intuitive API and to please the static type checker outweighs this abuse of Python
 # naming conventions. At least for now.
+
 
 # pylint: disable=redefined-builtin too-many-arguments invalid-name too-many-locals
 def Template(

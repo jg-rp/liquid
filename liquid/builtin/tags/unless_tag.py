@@ -183,7 +183,6 @@ class UnlessTag(Tag):
         return self.env.parse_boolean_expression_value(stream.current.value)
 
     def parse(self, stream: TokenStream) -> Union[UnlessNode, IllegalNode]:
-
         expect(stream, TOKEN_TAG, value=TAG_UNLESS)
         tok = stream.current
         stream.next_token()

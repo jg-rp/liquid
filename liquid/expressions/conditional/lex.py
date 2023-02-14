@@ -73,17 +73,17 @@ token_rules = (
 
 keywords = frozenset(
     [
-        TOKEN_TRUE,
-        TOKEN_FALSE,
-        TOKEN_NIL,
-        TOKEN_NULL,
-        TOKEN_EMPTY,
-        TOKEN_BLANK,
         TOKEN_AND,
-        TOKEN_OR,
+        TOKEN_BLANK,
         TOKEN_CONTAINS,
         TOKEN_ELSE,
+        TOKEN_EMPTY,
+        TOKEN_FALSE,
         TOKEN_IF,
+        TOKEN_NIL,
+        TOKEN_NULL,
+        TOKEN_OR,
+        TOKEN_TRUE,
     ]
 )
 

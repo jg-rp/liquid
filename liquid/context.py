@@ -562,7 +562,9 @@ class Context:
         if self.env.mode == Mode.STRICT:
             raise exc
         if self.env.mode == Mode.WARN:
-            warnings.warn(str(exc), category=lookup_warning(exc.__class__))
+            warnings.warn(
+                str(exc), category=lookup_warning(exc.__class__), stacklevel=2
+            )
 
     def get_buffer(self, buf: Optional[TextIO] = None) -> StringIO:
         """Return a new StringIO object, possibly limited according to the configured
