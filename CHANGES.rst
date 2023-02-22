@@ -1,6 +1,14 @@
 Python Liquid Change Log
 ========================
 
+Version 1.8.2 (unreleased)
+--------------------------
+
+**Fixes**
+
+- Changed ``FileSystemLoader`` so that loaded templates can be pickled.
+  See `#107 <https://github.com/jg-rp/liquid/issues/107>`_.
+
 Version 1.8.1
 -------------
 
