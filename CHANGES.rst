@@ -8,6 +8,8 @@ Version 1.8.2 (unreleased)
 
 - Changed ``FileSystemLoader`` so that loaded templates can be pickled.
   See `#107 <https://github.com/jg-rp/liquid/issues/107>`_.
+- Fixed the ``liquid.Environment`` template cache. Now, when given a ``cache_size`` of
+  ``0``, the cache is disabled. See `#108 <https://github.com/jg-rp/liquid/issues/108>`_.
 
 Version 1.8.1
 -------------

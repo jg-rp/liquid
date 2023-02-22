@@ -212,10 +212,10 @@ class Environment:
 
         # Template cache
         if cache_size and cache_size > 0:
-            self.cache: MutableMapping[Any, Any] = LRUCache(cache_size)
+            self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
             self.auto_reload = auto_reload
         else:
-            self.cache = {}
+            self.cache = None
             self.auto_reload = False
 
         # Common expression parsing functions that might be cached.
@@ -355,12 +355,17 @@ class Environment:
             :class:`liquid.exceptions.TemplateNotFound`: if a template with the given
             name can not be found.
         """
-        template = self._check_cache(name, globals)
+        if self.cache is not None:
+            cached = self.cache.get(name)
+            if isinstance(cached, BoundTemplate) and (
+                not self.auto_reload or cached.is_up_to_date
+            ):
+                cached.globals.update(self.make_globals(globals))
+                return cached
 
-        if not template:
-            template = self.loader.load(self, name, globals=self.make_globals(globals))
+        template = self.loader.load(self, name, globals=self.make_globals(globals))
+        if self.cache is not None:
             self.cache[name] = template
-
         return template
 
     async def get_template_async(
@@ -369,20 +374,19 @@ class Environment:
         globals: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """An async version of ``get_template``."""
-        template = self.cache.get(name)
+        if self.cache is not None:
+            cached = self.cache.get(name)
+            if isinstance(cached, BoundTemplate) and (
+                not self.auto_reload or await cached.is_up_to_date_async()
+            ):
+                cached.globals.update(self.make_globals(globals))
+                return cached
 
-        if isinstance(template, BoundTemplate) and (
-            not self.auto_reload or await template.is_up_to_date_async()
-        ):
-            template.globals.update(self.make_globals(globals))
-        else:
-            template = await self.loader.load_async(
-                self,
-                name,
-                globals=self.make_globals(globals),
-            )
+        template = await self.loader.load_async(
+            self, name, globals=self.make_globals(globals)
+        )
+        if self.cache is not None:
             self.cache[name] = template
-
         return template
 
     def get_template_with_context(
@@ -505,20 +509,6 @@ class Environment:
             name=template_source.filename,
             inner_tags=inner_tags,
         )
-
-    def _check_cache(
-        self,
-        name: str,
-        globals: Optional[Mapping[str, object]] = None,
-    ) -> Optional[BoundTemplate]:
-        _cached = self.cache.get(name)
-
-        if isinstance(_cached, BoundTemplate) and (
-            not self.auto_reload or _cached.is_up_to_date
-        ):
-            _cached.globals.update(self.make_globals(globals))
-            return _cached
-        return None
 
     # pylint: disable=redefined-builtin
     def make_globals(

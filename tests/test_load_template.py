@@ -148,13 +148,38 @@ class FileSystemLoaderTestCase(unittest.TestCase):
             same_template = env.get_template(name=str(template_path))
             self.assertTrue(template.is_up_to_date)
 
-            # Cached tempalate is the same object
-            self.assertEqual(template.tree, same_template.tree)
+            # Cached template is the same object
+            self.assertIs(template.tree, same_template.tree)
 
             # Push the first template out of the cache
             another_template = env.get_template(name=str(another_template_path))
             self.assertTrue(another_template.is_up_to_date)
             self.assertEqual(len(env.cache), 1)
+
+    def test_disable_template_cache(self):
+        """Test that we can disable the template cache."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = Path(tmpdir) / "somefile.txt"
+
+            # Initial template content
+            with template_path.open("w", encoding="UTF-8") as fd:
+                fd.write("hello there\n")
+
+            # Cache size of zero sets auto_reload to False
+            env = Environment(
+                loader=FileSystemLoader(search_path=tmpdir),
+                cache_size=0,
+            )
+            self.assertFalse(env.auto_reload)
+
+            template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            same_template = env.get_template(name=str(template_path))
+            self.assertTrue(template.is_up_to_date)
+
+            # Cached template is the same object
+            self.assertIsNot(template.tree, same_template.tree)
 
     def test_template_not_found(self):
         """Test that we get an error if the template does not exist."""
