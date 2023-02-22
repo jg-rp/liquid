@@ -1,6 +1,7 @@
 """Template loader test cases."""
 # pylint: disable=missing-class-docstring
 import asyncio
+import pickle
 import tempfile
 import time
 import unittest
@@ -190,6 +191,12 @@ class FileSystemLoaderTestCase(unittest.TestCase):
 
         with self.assertRaises(TemplateNotFound):
             _ = env.get_template(name="../dropify/index.liquid")
+
+    def test_pickle_loaded_template(self):
+        """Test that templates loaded with a file system loader are pickleable."""
+        env = Environment(loader=FileSystemLoader(search_path="tests/fixtures/"))
+        template = env.get_template(name="dropify/index.liquid")
+        pickle.dumps(template)
 
 
 class TemplateDropTestCase(unittest.TestCase):

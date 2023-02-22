@@ -238,7 +238,6 @@ class FileSystemLoader(BaseLoader):
 
         for path in self.search_path:
             source_path = path.joinpath(template_path)
-
             if not source_path.exists():
                 continue
             return source_path
@@ -252,13 +251,18 @@ class FileSystemLoader(BaseLoader):
     def get_source(self, _: Environment, template_name: str) -> TemplateSource:
         source_path = self.resolve_path(template_name)
         source, mtime = self._read(source_path)
-
         return TemplateSource(
-            source, str(source_path), lambda: mtime == source_path.stat().st_mtime
+            source,
+            str(source_path),
+            partial(self._uptodate, source_path, mtime),
         )
 
     @staticmethod
-    async def _uptodate(source_path: Path, mtime: float) -> bool:
+    def _uptodate(source_path: Path, mtime: float) -> bool:
+        return mtime == source_path.stat().st_mtime
+
+    @staticmethod
+    async def _uptodate_async(source_path: Path, mtime: float) -> bool:
         uptodate = await asyncio.get_running_loop().run_in_executor(
             None, lambda: mtime == source_path.stat().st_mtime
         )
@@ -271,7 +275,7 @@ class FileSystemLoader(BaseLoader):
         source_path = await loop.run_in_executor(None, self.resolve_path, template_name)
         source, mtime = await loop.run_in_executor(None, self._read, source_path)
         return TemplateSource(
-            source, str(source_path), partial(self._uptodate, source_path, mtime)
+            source, str(source_path), partial(self._uptodate_async, source_path, mtime)
         )
 
 
