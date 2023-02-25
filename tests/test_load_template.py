@@ -223,6 +223,12 @@ class FileSystemLoaderTestCase(unittest.TestCase):
         template = env.get_template(name="dropify/index.liquid")
         pickle.dumps(template)
 
+        async def coro():
+            template = await env.get_template_async(name="dropify/index.liquid")
+            pickle.dumps(template)
+
+        asyncio.run(coro())
+
 
 class TemplateDropTestCase(unittest.TestCase):
     def setUp(self):
