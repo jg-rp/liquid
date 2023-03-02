@@ -389,6 +389,29 @@ class Environment:
             self.cache[name] = template
         return template
 
+    def get_template_with_args(
+        self,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+        **kwargs: object,
+    ) -> BoundTemplate:
+        """Load and parse a template using the configured loader, optionally
+        passing arbitrary keyword arguments to the loader.
+
+        This method bypasses the environment's template cache. You should use a caching
+        loader instead when the loader required extra keyword arguments.
+        """
+        return self.loader.load_with_args(self, name, globals, **kwargs)
+
+    async def get_template_with_args_async(
+        self,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+        **kwargs: object,
+    ) -> BoundTemplate:
+        """An async version of :meth:`get_template_with_args`."""
+        return await self.loader.load_with_args_async(self, name, globals, **kwargs)
+
     def get_template_with_context(
         self,
         context: "Context",
@@ -407,7 +430,7 @@ class Environment:
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
-        """An async version of ``get_template_with_context``."""
+        """An async version of :meth:`get_template_with_context`."""
         return await self.loader.load_with_context_async(context, name, **kwargs)
 
     def analyze_tags_from_string(

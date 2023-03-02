@@ -68,7 +68,16 @@ class BaseLoader(ABC):
         env: Environment,
         template_name: str,
     ) -> TemplateSource:
-        """Get the template source, filename and reload helper for a template"""
+        """Get the template source, filename and reload helper for a template.
+
+        :param env: The :class:`Environment` attempting to load the template source
+            text.
+        :type env: liquid.Environment
+        :param template_name: A name or identifier for a template's source text.
+        :type template_name: str
+        :returns: Template source text and meta data.
+        :rtype: TemplateSource
+        """
         raise NotImplementedError("template loaders must implement a get_source method")
 
     async def get_source_async(
@@ -79,6 +88,30 @@ class BaseLoader(ABC):
         """An async version of `get_source`. The default implementation delegates to
         `get_source()`."""
         return self.get_source(env, template_name)
+
+    # pylint: disable=unused-argument
+    def get_source_with_args(
+        self,
+        env: Environment,
+        template_name: str,
+        **kwargs: object,
+    ) -> TemplateSource:
+        """Get template source text, optionally referencing arbitrary keyword arguments.
+
+        Keyword arguments can be useful for multi-user environments where you need to
+        modify a template loader's search space for a given user.
+
+        By default, this method delegates to :meth:`get_source`, ignoring any keyword
+        arguments.
+        """
+        return self.get_source(env, template_name)
+
+    # pylint: disable=unused-argument
+    async def get_source_with_args_async(
+        self, env: Environment, template_name: str, **kwargs: object
+    ) -> TemplateSource:
+        """An async version of :meth:`get_source_with_args`."""
+        return await self.get_source_async(env, template_name)
 
     # pylint: disable=unused-argument
     def get_source_with_context(
@@ -137,6 +170,62 @@ class BaseLoader(ABC):
         """An async version of `load`."""
         try:
             template_source = await self.get_source_async(env, name)
+            source, filename, uptodate, matter = template_source
+        except Exception as err:
+            raise TemplateNotFound(name) from err
+
+        template = env.from_string(
+            source,
+            globals=globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
+        )
+        template.uptodate = uptodate
+        return template
+
+    def load_with_args(
+        self,
+        env: Environment,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+        **kwargs: object,
+    ) -> BoundTemplate:
+        """Load and parse template source text, optionally referencing extra keyword
+        arguments.
+
+        Most custom loaders will want to override :meth:`get_source_with_args` rather
+        than this method. For example, you might want to override ``load_with_args``
+        and :meth:`get_source_with_args` when implementing a custom caching loader.
+        Where cache handling happens in ``load_*`` methods.
+        """
+        try:
+            source, filename, uptodate, matter = self.get_source_with_args(
+                env, name, **kwargs
+            )
+        except Exception as err:
+            raise TemplateNotFound(name) from err
+
+        template = env.from_string(
+            source,
+            globals=globals,
+            name=name,
+            path=Path(filename),
+            matter=matter,
+        )
+        template.uptodate = uptodate
+        return template
+
+    async def load_with_args_async(
+        self,
+        env: Environment,
+        name: str,
+        globals: Optional[Mapping[str, object]] = None,
+        **kwargs: object,
+    ) -> BoundTemplate:
+        """An async version of :meth:`load_with_args`."""
+        try:
+            template_source = await self.get_source_with_args_async(env, name, **kwargs)
             source, filename, uptodate, matter = template_source
         except Exception as err:
             raise TemplateNotFound(name) from err
