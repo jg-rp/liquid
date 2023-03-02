@@ -182,4 +182,10 @@ cases = [
         globals={"foo": "bar"},
         error=True,
     ),
+    Case(
+        description="switch on array",
+        template="{% case x %}{% when y %}foo{% endcase %}",
+        expect="foo",
+        globals={"x": ["a", "b", "c"], "y": ["a", "b", "c"]},
+    ),
 ]

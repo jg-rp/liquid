@@ -53,4 +53,22 @@ cases = [
         template=(r"{% unless 1 == true %}Hello{% else %}Goodbye{% endunless %}"),
         expect="Hello",
     ),
+    Case(
+        description="array is equal to array",
+        template=(
+            "{% assign x = 'a,b,c' | split: ',' %}"
+            "{% assign y = 'a,b,c' | split: ',' %}"
+            "{% unless x == y %}true{% else %}false{% endunless %}"
+        ),
+        expect="false",
+    ),
+    Case(
+        description="array is equal to array from context",
+        template=(
+            "{% assign y = 'a,b,c' | split: ',' %}"
+            "{% unless x == y %}true{% else %}false{% endunless %}"
+        ),
+        globals={"x": ["a", "b", "c"]},
+        expect="false",
+    ),
 ]

@@ -153,27 +153,45 @@ cases = [
     ),
     Case(
         description="logical operators are right associative",
-        template=(r"{% if true and false and false or true %}hello{% endif %}"),
+        template=r"{% if true and false and false or true %}hello{% endif %}",
         expect="",
     ),
     Case(
-        description=("zero is not equal to false"),
-        template=(r"{% if 0 == false %}Hello{% else %}Goodbye{% endif %}"),
+        description="zero is not equal to false",
+        template=r"{% if 0 == false %}Hello{% else %}Goodbye{% endif %}",
         expect="Goodbye",
     ),
     Case(
-        description=("zero is truthy"),
-        template=(r"{% if 0 %}Hello{% else %}Goodbye{% endif %}"),
+        description="zero is truthy",
+        template=r"{% if 0 %}Hello{% else %}Goodbye{% endif %}",
         expect="Hello",
     ),
     Case(
-        description=("0.0 is truthy"),
+        description="0.0 is truthy",
         template=(r"{% if 0.0 %}Hello{% else %}Goodbye{% endif %}"),
         expect="Hello",
     ),
     Case(
-        description=("one is not equal to true"),
+        description="one is not equal to true",
         template=(r"{% if 1 == true %}Hello{% else %}Goodbye{% endif %}"),
         expect="Goodbye",
+    ),
+    Case(
+        description="array is equal to array",
+        template=(
+            "{% assign x = 'a,b,c' | split: ',' %}"
+            "{% assign y = 'a,b,c' | split: ',' %}"
+            "{% if x == y %}true{% else %}false{% endif %}"
+        ),
+        expect="true",
+    ),
+    Case(
+        description="array is equal to array from context",
+        template=(
+            "{% assign y = 'a,b,c' | split: ',' %}"
+            "{% if x == y %}true{% else %}false{% endif %}"
+        ),
+        globals={"x": ["a", "b", "c"]},
+        expect="true",
     ),
 ]
