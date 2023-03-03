@@ -111,7 +111,7 @@ class BaseLoader(ABC):
         self, env: Environment, template_name: str, **kwargs: object
     ) -> TemplateSource:
         """An async version of :meth:`get_source_with_args`."""
-        return await self.get_source_async(env, template_name)
+        return self.get_source_with_args(env, template_name, **kwargs)
 
     # pylint: disable=unused-argument
     def get_source_with_context(

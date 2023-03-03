@@ -474,11 +474,11 @@ class MockContextLoader(DictLoader):
 
 
 class ContextLoaderTestCase(unittest.TestCase):
-    """Test case for a loader that used context."""
+    """Test case for a loader that references a render context."""
 
     def test_keyword_arguments(self):
         """Test that keyword arguments passed to `get_template_with_context` are
-        available to a context loader."""
+        available to a context-aware loader."""
         loader = MockContextLoader({"snippet": "hello"})
         env = Environment(loader=loader, cache_size=0)
         template = env.from_string("{% include 'snippet' %}")
@@ -518,3 +518,81 @@ class ContextLoaderTestCase(unittest.TestCase):
         asyncio.run(coro())
         self.assertIn("uid", loader.kwargs)
         self.assertEqual(loader.kwargs["uid"], 1234)
+
+
+class MockBootstrapLoader(BaseLoader):
+    def __init__(self, namespaces: Dict[str, Dict[str, str]]):
+        self.namespaces = namespaces
+
+    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+        raise TemplateNotFound(
+            f"{self.__class__.__name__} requires a namespace argument"
+        )
+
+    def get_source_with_args(
+        self, _: Environment, template_name: str, **kwargs: object
+    ) -> TemplateSource:
+        try:
+            namespace = kwargs["uid"]
+        except KeyError as err:
+            raise TemplateNotFound(
+                f"{self.__class__.__name__} requires a namespace argument"
+            ) from err
+
+        try:
+            source = self.namespaces[namespace][template_name]
+        except KeyError as err:
+            raise TemplateNotFound(f"{namespace}:{template_name}") from err
+
+        return TemplateSource(source, template_name, None)
+
+
+class BootstrapLoaderTestCase(unittest.TestCase):
+    """Test cases for a loader that expects a namespace argument."""
+
+    def setUp(self) -> None:
+        loader = MockBootstrapLoader(
+            namespaces={
+                "abc": {"foo": "hello, {{ you }}", "bar": "g'day, {{ you }}"},
+                "def": {"bar": "goodbye, {{ you }}"},
+            }
+        )
+        self.env = Environment(loader=loader)
+
+    def test_no_namespace(self) -> None:
+        """Test that we get an exception when no namespace is given."""
+        with self.assertRaises(TemplateNotFound):
+            self.env.get_template("bar")
+
+        with self.assertRaises(TemplateNotFound):
+            self.env.get_template_with_args("bar")
+
+        async def coro():
+            return await self.env.get_template_with_args_async("bar")
+
+        with self.assertRaises(TemplateNotFound):
+            asyncio.run(coro())
+
+    def test_narrow_with_namespace(self) -> None:
+        """Test that we can provide arbitrary arguments to a loader."""
+        template = self.env.get_template_with_args("foo", uid="abc")
+        self.assertEqual(template.render(you="world"), "hello, world")
+
+        with self.assertRaises(TemplateNotFound):
+            # The namespace identified by this uid does not have a "foo" template.
+            self.env.get_template_with_args("foo", uid="def")
+
+        template = self.env.get_template_with_args("bar", uid="def")
+        self.assertEqual(template.render(you="world"), "goodbye, world")
+
+        async def coro():
+            template = await self.env.get_template_with_args_async("bar", uid="abc")
+            return await template.render_async(you="world")
+
+        self.assertEqual(asyncio.run(coro()), "g'day, world")
+
+    def test_fallback_to_get_source(self) -> None:
+        """Test that we use `get_source()` by default."""
+        env = Environment()
+        with self.assertRaises(TemplateNotFound):
+            env.get_template_with_args("foo")
