@@ -11,7 +11,7 @@ This page documents known compatibility issues between Python Liquid's default [
 :::info
 Python Liquid version 1.7.0 introduced [`liquid.future.Environment`](/api/future-environment) as an alternative to the default [`Environment`](/api/Environment). This alternative environment is intended to transition Python Liquid towards greater compatibility with Ruby Liquid, without changing template rendering behavior for existing Python Liquid users.
 
-Some of the issues described below have been resolved with `liquid.future.Environment`. To use it, simply import `Environment` from `liquid.future` instead if `liquid`.
+Some of the issues described below have been resolved with `liquid.future.Environment`. To use it, simply import `Environment` from `liquid.future` instead of `liquid`.
 :::
 
 ## Coercing Strings to Integers Inside Filters

@@ -96,8 +96,8 @@ class SnippetsFileSystemLoader(FileExtensionLoader):
     ) -> TemplateSource:
         if kwargs.get("tag") == "include":
             section = Path("snippets").joinpath(template_name)
-            return super().get_source(context.env, str(section))
-        return super().get_source(context.env, template_name)
+            return self.get_source(context.env, str(section))
+        return self.get_source(context.env, template_name)
 ```
 
 `tag` being parse as a keyword argument is a convention used by the built-in [`{% include %}`](../language/tags.md#include) and [`{% render %}`](../language/tags.md#render) tags. Custom tags are free to pass whatever keyword arguments they wish to `Context.get_template_with_context()`, and they will be passed on to `get_source_with_context()` of the configured loader.
@@ -130,8 +130,8 @@ class SectionFileSystemLoader(FileExtensionLoader):
     ) -> TemplateSource:
         if kwargs.get("tag") == "section":
             section = Path("sections").joinpath(template_name)
-            return super().get_source(context.env, str(section))
-        return super().get_source(context.env, template_name)
+            return self.get_source(context.env, str(section))
+        return self.get_source(context.env, template_name)
 
 env = Environment(loader=SectionFileSystemLoader(search_path="templates/"))
 env.add_tag(SectionTag)
