@@ -21,8 +21,8 @@ from liquid.exceptions import FilterValueError
 from liquid.limits import to_int
 
 if TYPE_CHECKING:  # pragma: no cover
-    FilterT = Callable[..., Any]
-    NumberT = Union[float, int]
+    FilterT = Callable[..., Any]  # pylint: disable=invalid-name
+    NumberT = Union[float, int]  # pylint: disable=invalid-name
 
 
 def with_context(_filter: FilterT) -> FilterT:

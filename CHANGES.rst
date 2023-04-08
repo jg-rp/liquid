@@ -1,7 +1,7 @@
 Python Liquid Change Log
 ========================
 
-Version 1.8.2 (unreleased)
+Version 1.9.0 (unreleased)
 --------------------------
 
 **Fixes**
@@ -10,6 +10,11 @@ Version 1.8.2 (unreleased)
   See `#107 <https://github.com/jg-rp/liquid/issues/107>`_.
 - Fixed the ``liquid.Environment`` template cache. Now, when given a ``cache_size`` of
   ``0``, the cache is disabled. See `#108 <https://github.com/jg-rp/liquid/issues/108>`_.
+
+**Features**
+
+- Added context-aware template loader bootstrapping methods.
+  See `#109 <https://github.com/jg-rp/liquid/pull/109>`_.
 
 Version 1.8.1
 -------------

@@ -34,7 +34,7 @@ from liquid.undefined import is_undefined
 if TYPE_CHECKING:
     from liquid import Environment
 
-ArrayT = Union[List[Any], Tuple[Any, ...]]
+ArrayT = Union[List[Any], Tuple[Any, ...]]  # pylint: disable=invalid-name
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
