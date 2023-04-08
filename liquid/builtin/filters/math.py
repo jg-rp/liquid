@@ -12,8 +12,8 @@ from liquid.exceptions import FilterArgumentError
 from liquid.filter import math_filter
 from liquid.filter import num_arg
 
-DecimalT = decimal.Decimal
-NumberT = Union[float, int]
+DecimalT = decimal.Decimal  # pylint: disable=invalid-name
+NumberT = Union[float, int]  # pylint: disable=invalid-name
 
 
 @math_filter
