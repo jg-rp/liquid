@@ -5,6 +5,7 @@ from typing import List
 
 from liquid import golden
 from liquid.environment import Environment
+from liquid.exceptions import Error
 from liquid.golden.case import Case
 from liquid.loaders import DictLoader
 from liquid.template import BoundTemplate
@@ -28,9 +29,16 @@ class BaseRenderTestCase(unittest.TestCase):
             self.partials.update(case.partials)
 
             with self.subTest(msg=case.description):
-                template = self.env.from_string(case.template, globals=case.globals)
-                result = template.render()
-                self.assertEqual(result, case.expect)
+                if case.error:
+                    with self.assertRaises(Error):
+                        template = self.env.from_string(
+                            case.template, globals=case.globals
+                        )
+                        result = template.render()
+                else:
+                    template = self.env.from_string(case.template, globals=case.globals)
+                    result = template.render()
+                    self.assertEqual(result, case.expect)
 
         async def coro(template: BoundTemplate):
             return await template.render_async()
@@ -39,9 +47,16 @@ class BaseRenderTestCase(unittest.TestCase):
             self.partials.update(case.partials)
 
             with self.subTest(msg=case.description, asynchronous=True):
-                template = self.env.from_string(case.template, globals=case.globals)
-                result = asyncio.run(coro(template))
-                self.assertEqual(result, case.expect)
+                if case.error:
+                    with self.assertRaises(Error):
+                        template = self.env.from_string(
+                            case.template, globals=case.globals
+                        )
+                        result = asyncio.run(coro(template))
+                else:
+                    template = self.env.from_string(case.template, globals=case.globals)
+                    result = asyncio.run(coro(template))
+                    self.assertEqual(result, case.expect)
 
 
 class RenderIfNotTagTestCase(BaseRenderTestCase):

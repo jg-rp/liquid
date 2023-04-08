@@ -194,4 +194,29 @@ cases = [
         globals={"x": ["a", "b", "c"]},
         expect="true",
     ),
+    Case(
+        description="string does not equal int",
+        template="{% if '1' == 1 %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="int does not equal string",
+        template="{% if 1 == '1' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="int equals float",
+        template="{% if 1 == 1.0 %}true{% else %}false{% endif %}",
+        globals={},
+        expect="true",
+    ),
+    Case(
+        description="string greater than int",
+        template="{% if '2' > 1 %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+        error=True,
+    ),
 ]
