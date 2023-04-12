@@ -1,38 +1,30 @@
 """Test array filter functions."""
-# pylint: disable=too-many-public-methods,too-many-lines
 import unittest
-
 from functools import partial
 from inspect import isclass
-
 from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import NamedTuple
 
-
-from liquid.environment import Environment
-from liquid.expression import NIL
-
-
-from liquid.exceptions import Error
-from liquid.exceptions import FilterError
-from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
-
-from liquid.builtin.filters.array import join
-from liquid.builtin.filters.array import first
-from liquid.builtin.filters.array import last
+from liquid.builtin.filters.array import compact
 from liquid.builtin.filters.array import concat
+from liquid.builtin.filters.array import first
+from liquid.builtin.filters.array import join
+from liquid.builtin.filters.array import last
 from liquid.builtin.filters.array import map_
 from liquid.builtin.filters.array import reverse
 from liquid.builtin.filters.array import sort
 from liquid.builtin.filters.array import sort_natural
-from liquid.builtin.filters.array import where
 from liquid.builtin.filters.array import uniq
-from liquid.builtin.filters.array import compact
-
+from liquid.builtin.filters.array import where
+from liquid.environment import Environment
+from liquid.exceptions import Error
+from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterError
+from liquid.exceptions import FilterValueError
+from liquid.expression import NIL
 from liquid.extra.filters.array import index
 from liquid.extra.filters.array import sort_numeric
 
@@ -69,7 +61,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_join(self):
         """Test `join` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -153,7 +144,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_first(self):
         """Test `first` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -203,7 +193,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_last(self):
         """Test `last` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -253,7 +242,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_concat(self):
         """Test `concat` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -317,7 +305,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_map(self):
         """Test `map` filter function."""
-
         test_cases = [
             Case(
                 description="lists of objects",
@@ -381,7 +368,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_reverse(self):
         """Test `reverse` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -431,7 +417,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_sort(self):
         """Test `sort` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -502,7 +487,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_sort_natural(self):
         """Test `sort_natural` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -573,7 +557,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_where(self):
         """Test `where` filter function."""
-
         test_cases = [
             Case(
                 description="lists of object",
@@ -637,7 +620,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_uniq(self):
         """Test `uniq` filter function."""
-
         test_cases = [
             Case(
                 description="lists of strings",
@@ -694,7 +676,6 @@ class ArrayFilterTestCase(unittest.TestCase):
 
     def test_compact(self):
         """Test `compact` filter function."""
-
         test_cases = [
             Case(
                 description="lists with nil",

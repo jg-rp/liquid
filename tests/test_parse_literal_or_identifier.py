@@ -1,34 +1,32 @@
 """Test cases for parsing common Liquid literals and identifiers."""
 import unittest
 
-from liquid.expressions.common import parse_common_expression
-from liquid.expressions.common import tokenize_common_expression
-from liquid.expressions.stream import TokenStream
-
+from liquid.expression import BLANK
+from liquid.expression import EMPTY
+from liquid.expression import FALSE
+from liquid.expression import NIL
+from liquid.expression import TRUE
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import IntegerLiteral
 from liquid.expression import RangeLiteral
 from liquid.expression import StringLiteral
-from liquid.expression import BLANK
-from liquid.expression import EMPTY
-from liquid.expression import TRUE
-from liquid.expression import FALSE
-from liquid.expression import NIL
-
+from liquid.expressions.common import parse_common_expression
+from liquid.expressions.common import tokenize_common_expression
+from liquid.expressions.stream import TokenStream
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_RBRACKET
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_IDENTINDEX
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_TRUE
 
 
 class ParseLiteralOrIdentifierTestCase(unittest.TestCase):

@@ -2,30 +2,25 @@
 
 import re
 import sys
-
 from io import StringIO
-
 from typing import List
 from typing import Optional
 from typing import TextIO
 
-from liquid import ast
 from liquid import Markup
+from liquid import ast
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
+from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-from liquid.stream import TokenStream
-
+# ruff: noqa: D102
 
 RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
 

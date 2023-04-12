@@ -1,25 +1,21 @@
-# pylint: disable=missing-class-docstring missing-module-docstring
 import unittest
-
 from typing import NamedTuple
 from typing import Union
 
-from liquid.expression import Expression
-from liquid.expression import BooleanExpression
-from liquid.expression import IdentifierPathElement
-from liquid.expression import Identifier
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Boolean
-from liquid.expression import StringLiteral
-from liquid.expression import IntegerLiteral
+from liquid.expression import BooleanExpression
+from liquid.expression import Expression
 from liquid.expression import FloatLiteral
-from liquid.expression import RangeLiteral
+from liquid.expression import Identifier
+from liquid.expression import IdentifierPathElement
 from liquid.expression import InfixExpression
-
+from liquid.expression import IntegerLiteral
+from liquid.expression import RangeLiteral
+from liquid.expression import StringLiteral
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
 from liquid.expressions.boolean.parse import PrefixExpression
-
-from liquid.exceptions import LiquidSyntaxError
 
 
 class Case(NamedTuple):

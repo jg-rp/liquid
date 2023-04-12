@@ -2,7 +2,6 @@
 
 from abc import ABC
 from abc import abstractmethod
-
 from typing import Collection
 from typing import Dict
 from typing import List
@@ -13,12 +12,14 @@ from typing import TextIO
 from typing_extensions import Literal
 
 from liquid.context import Context
-from liquid.expression import Expression
-
-from liquid.token import Token, TOKEN_TAG, TOKEN_ILLEGAL
-
 from liquid.exceptions import DisabledTagError
 from liquid.exceptions import Error
+from liquid.expression import Expression
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
+
+# ruff: noqa: D102
 
 IllegalToken = Token(-1, TOKEN_ILLEGAL, "")
 
@@ -57,7 +58,6 @@ class Node(ABC):
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         if hasattr(self, "render_to_output_async"):
-            # pylint: disable=no-member
             return await self.render_to_output_async(context, buffer)
         return self.render_to_output(context, buffer)
 
@@ -135,7 +135,6 @@ class ParseTree(Node):
     def __repr__(self) -> str:
         return f"ParseTree({self.statements})"
 
-    # pylint: disable=useless-return
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         for stmt in self.statements:
             stmt.render(context, buffer)
@@ -209,8 +208,7 @@ class BlockNode(Node):
 
 
 class ConditionalBlockNode(Node):
-    """A parse tree node representing a sequence of statements and a conditional
-    expression."""
+    """A node containing a sequence of statements and a conditional expression."""
 
     __slots__ = ("tok", "condition", "block", "forced_output")
 

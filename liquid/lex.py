@@ -14,62 +14,59 @@ package.
 """
 
 from __future__ import annotations
-import re
 
+import re
 from functools import lru_cache
 from functools import partial
-
-from typing import Iterator
-from typing import Tuple
-from typing import Iterable
-from typing import Collection
-from typing import Pattern
 from typing import Callable
+from typing import Collection
+from typing import Iterable
+from typing import Iterator
+from typing import Pattern
+from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
-
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_STATEMENT
-from liquid.token import TOKEN_LITERAL
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_ASSIGN
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_BY
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COLS
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_NEGATIVE
 from liquid.token import TOKEN_NIL
 from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_WITH
-from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_BY
-from liquid.token import TOKEN_NEGATIVE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_CONTAINS
-from liquid.token import TOKEN_IN
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
-from liquid.token import TOKEN_REVERSED
-from liquid.token import TOKEN_CONTINUE
-from liquid.token import TOKEN_COLS
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
-from liquid.token import TOKEN_ASSIGN
-from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_OR
-from liquid.token import operators
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WITH
 from liquid.token import Token
-
+from liquid.token import operators
 
 __all__ = (
     "tokenize_assignment_expression",
@@ -229,7 +226,6 @@ include_expression_keywords = frozenset(
 )
 
 
-# pylint: disable=too-many-locals
 def compile_liquid_rules(
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",

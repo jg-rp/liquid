@@ -1,19 +1,21 @@
 """Test cases for rendering non-standard "extra" tags."""
 import asyncio
 import unittest
+from typing import TYPE_CHECKING
 from typing import List
 
 from liquid import golden
 from liquid.environment import Environment
 from liquid.exceptions import Error
-from liquid.golden.case import Case
-from liquid.loaders import DictLoader
-from liquid.template import BoundTemplate
-
 from liquid.extra import IfNotTag
 from liquid.extra import WithTag
-from liquid.extra import add_inline_expression_tags
 from liquid.extra import add_extended_inline_expression_tags
+from liquid.extra import add_inline_expression_tags
+from liquid.golden.case import Case
+from liquid.loaders import DictLoader
+
+if TYPE_CHECKING:
+    from liquid.template import BoundTemplate
 
 
 class BaseRenderTestCase(unittest.TestCase):
@@ -40,7 +42,7 @@ class BaseRenderTestCase(unittest.TestCase):
                     result = template.render()
                     self.assertEqual(result, case.expect)
 
-        async def coro(template: BoundTemplate):
+        async def coro(template: "BoundTemplate"):
             return await template.render_async()
 
         for case in test_cases:

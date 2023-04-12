@@ -1,19 +1,20 @@
-"""Functions for parsing filtered expressions. Like those found in output statements and
-assign tags.
+"""Functions for parsing filtered expressions.
+
+Like those found in output statements and assign tags.
 """
 from itertools import islice
-
 from typing import Dict
-from typing import List
-from typing import Iterator
 from typing import Iterable
+from typing import Iterator
+from typing import List
 from typing import Tuple
 
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Filter
 from liquid.expression import FilteredExpression
-
 from liquid.expressions.common import Token
+from liquid.expressions.common import make_parse_range
 from liquid.expressions.common import parse_blank
 from liquid.expressions.common import parse_boolean
 from liquid.expressions.common import parse_empty
@@ -22,13 +23,8 @@ from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_integer_literal
 from liquid.expressions.common import parse_nil
 from liquid.expressions.common import parse_string_literal
-from liquid.expressions.common import make_parse_range
-
 from liquid.expressions.filtered.lex import tokenize
 from liquid.expressions.stream import TokenStream
-
-from liquid.exceptions import LiquidSyntaxError
-
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
@@ -46,7 +42,6 @@ from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
-
 
 TOKEN_MAP = {
     TOKEN_FALSE: parse_boolean,

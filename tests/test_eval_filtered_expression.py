@@ -1,18 +1,14 @@
-# pylint: disable=missing-class-docstring missing-module-docstring
 import unittest
-
 from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
 from liquid import Context
 from liquid import Environment
-
 from liquid.context import Undefined
-
-from liquid.expressions import parse_filtered_expression
 from liquid.expressions import parse_conditional_expression
 from liquid.expressions import parse_conditional_expression_with_parens
+from liquid.expressions import parse_filtered_expression
 
 
 class Case(NamedTuple):

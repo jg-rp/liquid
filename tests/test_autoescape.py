@@ -1,11 +1,9 @@
 """HTML escape test cases."""
-# pylint: disable=missing-class-docstring
-from unittest import TestCase
-from unittest import skipIf
-
-from typing import NamedTuple
 from typing import Dict
 from typing import List
+from typing import NamedTuple
+from unittest import TestCase
+from unittest import skipIf
 
 try:
     import markupsafe

@@ -1,19 +1,16 @@
 """Bad context test cases."""
 
-from unittest import TestCase
-
 from typing import NamedTuple
 from typing import Type
+from unittest import TestCase
 
-from liquid.context import builtin
-from liquid.context import get_item
 from liquid.context import UNDEFINED
 from liquid.context import ReadOnlyChainMap
+from liquid.context import builtin
+from liquid.context import get_item
 from liquid.environment import Environment
-
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import lookup_warning
-
 from liquid.mode import Mode
 
 
@@ -31,7 +28,7 @@ class BadContextTemplateTestCase(TestCase):
     """Bad context test case."""
 
     def _test(self, test_cases, mode=Mode.STRICT):
-        """Helper method for running lists of `Case`s"""
+        """Helper method for running lists of `Case`s."""
         env = Environment()
         env.mode = mode
 

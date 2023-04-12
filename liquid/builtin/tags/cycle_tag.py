@@ -1,6 +1,5 @@
 """Tag and node definition for the built-in "cycle" tag."""
 import sys
-
 from typing import Iterable
 from typing import Iterator
 from typing import List
@@ -9,29 +8,26 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
-
-from liquid.parse import expect
-from liquid.stream import TokenStream
-from liquid.stringify import to_liquid_string
-from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_COLON
-
-from liquid.undefined import is_undefined
-
 from liquid.expressions import Token as ExprToken
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
+from liquid.parse import expect
+from liquid.stream import TokenStream
+from liquid.stringify import to_liquid_string
+from liquid.tag import Tag
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import Token
+from liquid.undefined import is_undefined
+
+# ruff: noqa: D102
 
 TAG_CYCLE = sys.intern("cycle")
 
@@ -58,10 +54,7 @@ class CycleNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         if self.group:
             _group = self.group.evaluate(context)
-            if is_undefined(_group):
-                group_name = "__UNDEFINED"
-            else:
-                group_name = str(_group)
+            group_name = "__UNDEFINED" if is_undefined(_group) else str(_group)
         else:
             group_name = ""
 
@@ -78,10 +71,7 @@ class CycleNode(Node):
     ) -> Optional[bool]:
         if self.group:
             _group = await self.group.evaluate_async(context)
-            if is_undefined(_group):
-                group_name = "__UNDEFINED"
-            else:
-                group_name = str(_group)
+            group_name = "__UNDEFINED" if is_undefined(_group) else str(_group)
         else:
             group_name = ""
 
@@ -127,7 +117,7 @@ class CycleTag(Tag):
         group_name: Optional[Expression] = None
 
         parts = list(split_at_first_colon(tokens))
-        if len(parts) == 2:
+        if len(parts) == 2:  # noqa: PLR2004
             group_name = parse_string_or_identifier(ExprTokenStream(iter(parts[0])))
 
         args: List[Expression] = []

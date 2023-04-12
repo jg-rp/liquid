@@ -1,7 +1,7 @@
 """Golden tests cases for testing liquid's `render` tag."""
 
-from liquid.golden.case import Case
 from liquid.golden.case import TEMPLATE_DROP_ATTRS
+from liquid.golden.case import Case
 
 cases = [
     Case(

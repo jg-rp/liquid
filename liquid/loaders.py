@@ -7,32 +7,30 @@ from __future__ import annotations
 
 import asyncio
 import os
-
 from abc import ABC
-
 from collections import abc
 from functools import partial
 from pathlib import Path
-
+from typing import TYPE_CHECKING
 from typing import Awaitable
-from typing import NamedTuple
 from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Mapping
+from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 from typing import Union
-from typing import TYPE_CHECKING
 
-from liquid.template import BoundTemplate
 from liquid.exceptions import TemplateNotFound
 
-
-if TYPE_CHECKING:  # pragma: no cover
-    from liquid import Environment
+if TYPE_CHECKING:
     from liquid import Context
+    from liquid import Environment
+    from liquid.template import BoundTemplate
+
+# ruff: noqa: D102 D101
 
 UpToDate = Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
 
@@ -59,8 +57,7 @@ class TemplateSource(NamedTuple):
     matter: Optional[Mapping[str, object]] = None
 
 
-# flake8: noqa
-class BaseLoader(ABC):
+class BaseLoader(ABC):  # noqa: B024
     """Base template loader from which all template loaders are derived."""
 
     def get_source(
@@ -85,16 +82,17 @@ class BaseLoader(ABC):
         env: Environment,
         template_name: str,
     ) -> TemplateSource:
-        """An async version of `get_source`. The default implementation delegates to
-        `get_source()`."""
+        """An async version of `get_source`.
+
+        The default implementation delegates to `get_source()`.
+        """
         return self.get_source(env, template_name)
 
-    # pylint: disable=unused-argument
     def get_source_with_args(
         self,
         env: Environment,
         template_name: str,
-        **kwargs: object,
+        **kwargs: object,  # noqa: ARG002
     ) -> TemplateSource:
         """Get template source text, optionally referencing arbitrary keyword arguments.
 
@@ -106,49 +104,45 @@ class BaseLoader(ABC):
         """
         return self.get_source(env, template_name)
 
-    # pylint: disable=unused-argument
     async def get_source_with_args_async(
         self, env: Environment, template_name: str, **kwargs: object
     ) -> TemplateSource:
         """An async version of :meth:`get_source_with_args`."""
         return self.get_source_with_args(env, template_name, **kwargs)
 
-    # pylint: disable=unused-argument
     def get_source_with_context(
         self,
         context: Context,
         template_name: str,
-        **kwargs: str,
+        **kwargs: str,  # noqa: ARG002
     ) -> TemplateSource:
         """Get a template's source, optionally referencing a render context."""
         return self.get_source(context.env, template_name)
 
-    # pylint: disable=unused-argument
     async def get_source_with_context_async(
         self,
         context: Context,
         template_name: str,
-        **kwargs: str,
+        **kwargs: str,  # noqa: ARG002
     ) -> TemplateSource:
         """An async version of `get_source_with_context`."""
         return await self.get_source_async(context.env, template_name)
 
-    # pylint: disable=redefined-builtin
     def load(
         self,
         env: Environment,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     ) -> BoundTemplate:
-        """Load and parse a template. Used internally by `Environment` to load a
-        template source. Delegates to `get_source`.
+        """Load and parse a template.
 
-        A custom loaders would typically implement `get_source` rather than overriding
-        `load`.
+        Used internally by `Environment` to load a template source. Delegates to
+        `get_source`. A custom loaders would typically implement `get_source` rather
+        than overriding `load`.
         """
         try:
             source, filename, uptodate, matter = self.get_source(env, name)
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
@@ -165,13 +159,13 @@ class BaseLoader(ABC):
         self,
         env: Environment,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     ) -> BoundTemplate:
         """An async version of `load`."""
         try:
             template_source = await self.get_source_async(env, name)
             source, filename, uptodate, matter = template_source
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
@@ -188,11 +182,10 @@ class BaseLoader(ABC):
         self,
         env: Environment,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
-        """Load and parse template source text, optionally referencing extra keyword
-        arguments.
+        """Load template source text, optionally referencing extra keyword arguments.
 
         Most custom loaders will want to override :meth:`get_source_with_args` rather
         than this method. For example, you might want to override ``load_with_args``
@@ -203,7 +196,7 @@ class BaseLoader(ABC):
             source, filename, uptodate, matter = self.get_source_with_args(
                 env, name, **kwargs
             )
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
@@ -220,14 +213,14 @@ class BaseLoader(ABC):
         self,
         env: Environment,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
         """An async version of :meth:`load_with_args`."""
         try:
             template_source = await self.get_source_with_args_async(env, name, **kwargs)
             source, filename, uptodate, matter = template_source
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = env.from_string(
@@ -251,7 +244,7 @@ class BaseLoader(ABC):
             source, filename, uptodate, matter = self.get_source_with_context(
                 context, name, **kwargs
             )
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = context.env.from_string(
@@ -278,7 +271,7 @@ class BaseLoader(ABC):
                 uptodate,
                 matter,
             ) = await self.get_source_with_context_async(context, name, **kwargs)
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise TemplateNotFound(name) from err
 
         template = context.env.from_string(
@@ -352,13 +345,12 @@ class FileSystemLoader(BaseLoader):
 
     @staticmethod
     async def _uptodate_async(source_path: Path, mtime: float) -> bool:
-        uptodate = await asyncio.get_running_loop().run_in_executor(
+        return await asyncio.get_running_loop().run_in_executor(
             None, lambda: mtime == source_path.stat().st_mtime
         )
-        return uptodate
 
     async def get_source_async(
-        self, env: Environment, template_name: str
+        self, _: Environment, template_name: str
     ) -> TemplateSource:
         loop = asyncio.get_running_loop()
         source_path = await loop.run_in_executor(None, self.resolve_path, template_name)
@@ -410,10 +402,7 @@ class FileExtensionLoader(FileSystemLoader):
 
 
 class DictLoader(BaseLoader):
-    """A loader that loads templates from a dictionary mapping template names to
-    template source strings. If the given dictionary is empty,
-    :meth:`liquid.Environment.get_template` will always raise a
-    :class:`liquid.exceptions.TemplateNotFound` exception.
+    """A loader that loads templates from a dictionary.
 
     :param templates: A dictionary mapping template names to template source strings.
     :type templates: Dict[str, str]
@@ -433,9 +422,7 @@ class DictLoader(BaseLoader):
 
 
 class ChoiceLoader(BaseLoader):
-    """A template loader that will try each of a list of loaders until a template is
-    found, or raise a :class:`liquid.exceptions.TemplateNotFound` exception if none of
-    the loaders could find the template.
+    """A template loader that will try each of a list of loaders in turn.
 
     :param loaders: A list of loaders implementing :class:`liquid.loaders.BaseLoader`.
     :type loaders: List[BaseLoader]

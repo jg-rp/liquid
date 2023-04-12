@@ -20,78 +20,73 @@ And make use of `liquid.expressions.common` and `liquid.expressions.TokenStream`
 
 from __future__ import annotations
 
-from enum import IntEnum, auto
+from enum import IntEnum
+from enum import auto
 from functools import lru_cache
-
-from typing import Tuple
-from typing import List
-from typing import Union
-from typing import Optional
-from typing import NamedTuple
-from typing import Container
 from typing import TYPE_CHECKING
+from typing import Container
+from typing import List
+from typing import NamedTuple
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
 from liquid import ast
-
 from liquid import expression
+from liquid.exceptions import Error
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import IdentifierPathElement
-
 from liquid.lex import tokenize_boolean_expression
-from liquid.lex import tokenize_loop_expression
 from liquid.lex import tokenize_filtered_expression
-
+from liquid.lex import tokenize_loop_expression
 from liquid.limits import to_int
 from liquid.stream import TokenStream
-
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import Error
-
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_STATEMENT
-from liquid.token import TOKEN_LITERAL
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_ASSIGN
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COLS
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EQ
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_GE
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_LT
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_NEGATIVE
 from liquid.token import TOKEN_NIL
 from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_NEGATIVE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_CONTAINS
-from liquid.token import TOKEN_IN
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
-from liquid.token import TOKEN_REVERSED
-from liquid.token import TOKEN_CONTINUE
-from liquid.token import TOKEN_COLS
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
-from liquid.token import TOKEN_ASSIGN
-from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_OR
-from liquid.token import TOKEN_EQ
-from liquid.token import TOKEN_NE
-from liquid.token import TOKEN_LG
-from liquid.token import TOKEN_LT
-from liquid.token import TOKEN_GT
-from liquid.token import TOKEN_LE
-from liquid.token import TOKEN_GE
-from liquid.token import reverse_operators
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_TRUE
 from liquid.token import Token
+from liquid.token import reverse_operators
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
 
 
@@ -143,8 +138,11 @@ class Parser:
         return node
 
     def parse_block(self, stream: TokenStream, end: Container[str]) -> ast.BlockNode:
-        """Parse multiple nodes from a stream of tokens. Stop parsing nodes when we
-        find a token in `end` or we reach the end of the stream."""
+        """Parse multiple nodes from a stream of tokens.
+
+        Stop parsing nodes when we find a token in `end` or we reach the end of the
+        stream.
+        """
         block = ast.BlockNode(stream.current)
         statements = block.statements
 
@@ -200,14 +198,18 @@ def _expect(tok: Token, typ: str, value: Optional[str] = None) -> None:
 
 
 def expect(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
-    """Raise an exception if the current token in the stream does not match the given
-    type and value."""
+    """Check the current token in the stream matches the given type and value.
+
+    Raises a `LiquidSyntaxError` if they don't.
+    """
     _expect(stream.current, typ, value)
 
 
 def expect_peek(stream: TokenStream, typ: str, value: Optional[str] = None) -> None:
-    """Raise an exception if the next token in the stream does not match the given
-    type and value."""
+    """Check the next token in the stream matches the given type and value.
+
+    Raises a `LiquidSyntaxError` if they don't.
+    """
     _expect(stream.peek, typ, value)
 
 
@@ -384,8 +386,9 @@ def parse_string_or_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
 ) -> expression.Expression:
-    """Parse an expression from a stream of tokens. If the stream is not at a string or
-    identifier expression, raise a syntax error.
+    """Parse an expression from a stream of tokens.
+
+    If the stream is not at a string or identifier expression, raise a syntax error.
     """
     if stream.current.type == TOKEN_IDENTIFIER:
         expr: expression.Expression = parse_identifier(stream)
@@ -403,8 +406,11 @@ def parse_unchained_identifier(
     stream: TokenStream,
     linenum: Optional[int] = None,
 ) -> expression.Identifier:
-    """Parse an identifier from a stream of tokens. If the stream is not at an
-    identifier or the identifier is chained, raise a syntax error."""
+    """Parse an identifier from a stream of tokens.
+
+    If the stream is not at an identifier or the identifier is chained, raise a
+    syntax error
+    """
     expect(stream, TOKEN_IDENTIFIER)
     tok = stream.current
     ident = parse_identifier(stream)
@@ -437,8 +443,11 @@ class RangeOption(NamedTuple):
 
 
 def parse_range_argument(stream: TokenStream) -> RangeArg:
-    """Parse a loop argument value from a stream of tokens. If the stream is not at a
-    valid token for a loop argument value, raise a syntax error."""
+    """Parse a loop argument value from a stream of tokens.
+
+    If the stream is not at a valid token for a loop argument value, raise a syntax
+    error.
+    """
     if stream.current.type == TOKEN_IDENTIFIER:
         arg: RangeArg = parse_identifier(stream)
     elif stream.current.type == TOKEN_INTEGER:
@@ -456,8 +465,10 @@ def parse_range_argument(stream: TokenStream) -> RangeArg:
 
 
 def parse_range_option(stream: TokenStream) -> RangeOption:
-    """Parse a loop keyword argument from a stream of tokens. If the stream is not at a
-    valid loop keyword argument, raise a syntax error."""
+    """Parse a loop keyword argument from a stream of tokens.
+
+    If the stream is not at a valid loop keyword argument, raise a syntax error.
+    """
     tok = stream.current
     if stream.current.type in (TOKEN_LIMIT, TOKEN_OFFSET, TOKEN_COLS):
         expect_peek(stream, TOKEN_COLON)
@@ -635,12 +646,10 @@ class ExpressionParser:
         tok = stream.current
         stream.next_token()
 
-        exp = expression.PrefixExpression(
+        return expression.PrefixExpression(
             tok.value,
             right=self.parse_expression(stream, precedence=Precedence.PREFIX),
         )
-
-        return exp
 
     def parse_infix_expression(
         self,
@@ -652,12 +661,11 @@ class ExpressionParser:
         precedence = self.current_precedence(stream)
         stream.next_token()
 
-        exp = expression.InfixExpression(
+        return expression.InfixExpression(
             left=left,
             operator=tok.value,
             right=self.parse_expression(stream, precedence),
         )
-        return exp
 
     def parse_expression(
         self,

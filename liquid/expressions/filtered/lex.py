@@ -6,42 +6,39 @@ Filtered expressions are those found in the output statement, the
 import re
 from typing import Iterator
 
-from liquid.expressions.common import Token
-from liquid.expressions.common import GROUP_QUOTED
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expressions.common import GROUP_IDENTINDEX
 from liquid.expressions.common import GROUP_IDENTQUOTED
+from liquid.expressions.common import GROUP_QUOTED
 from liquid.expressions.common import IDENTIFIER_PATTERN
-from liquid.expressions.common import IDENTSTRING_PATTERN
 from liquid.expressions.common import IDENTINDEX_PATTERN
+from liquid.expressions.common import IDENTSTRING_PATTERN
 from liquid.expressions.common import STRING_PATTERN
-
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_TRUE
+from liquid.expressions.common import Token
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IDENTSTRING
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_NEWLINE
 from liquid.token import TOKEN_NIL
 from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_SKIP
-from liquid.token import TOKEN_NEWLINE
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_IDENTSTRING
-from liquid.token import TOKEN_IDENTINDEX
-from liquid.token import TOKEN_DOT
-
-from liquid.exceptions import LiquidSyntaxError
-
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_SKIP
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
 
 token_rules = (
     (TOKEN_IDENTINDEX, IDENTINDEX_PATTERN),

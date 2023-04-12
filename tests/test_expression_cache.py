@@ -1,11 +1,8 @@
 """Expression caching test cases."""
-# pylint: disable=missing-class-docstring
-
 from unittest import TestCase
 
 from liquid import Environment
 from liquid import Template
-
 from liquid.builtin.tags.if_tag import IfNode
 
 

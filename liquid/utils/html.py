@@ -1,13 +1,14 @@
 """Utilities for working with strings of HTML."""
 
 from html.parser import HTMLParser
-
 from typing import List
-from typing import Tuple
 from typing import Optional
+from typing import Tuple
+
+# ruff: noqa: D102
 
 
-class StripParser(HTMLParser):  # pylint: disable=abstract-method
+class StripParser(HTMLParser):
     """An HTML parser that strips out tags."""
 
     def __init__(self) -> None:

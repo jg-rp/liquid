@@ -1,28 +1,23 @@
 """Template loader test cases."""
-# pylint: disable=missing-class-docstring
 import asyncio
 import pickle
 import tempfile
 import time
 import unittest
-
 from pathlib import Path
-
 from typing import Dict
 
-from liquid import Environment
 from liquid import Context
-from liquid.template import BoundTemplate
-from liquid.template import AwareBoundTemplate
-
+from liquid import Environment
+from liquid.exceptions import TemplateNotFound
 from liquid.loaders import BaseLoader
-from liquid.loaders import FileSystemLoader
-from liquid.loaders import FileExtensionLoader
 from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
+from liquid.loaders import FileExtensionLoader
+from liquid.loaders import FileSystemLoader
 from liquid.loaders import TemplateSource
-
-from liquid.exceptions import TemplateNotFound
+from liquid.template import AwareBoundTemplate
+from liquid.template import BoundTemplate
 
 
 class FileSystemLoaderTestCase(unittest.TestCase):
@@ -209,7 +204,7 @@ class FileSystemLoaderTestCase(unittest.TestCase):
         self.assertEqual(template.path, Path("tests/fixtures/subfolder/fallback.html"))
 
     def test_stay_in_search_path(self):
-        """Test that we can't stray above the search path"""
+        """Test that we can't stray above the search path."""
         env = Environment(
             loader=FileSystemLoader(search_path="tests/fixtures/subfolder")
         )
@@ -267,7 +262,7 @@ class TemplateDropTestCase(unittest.TestCase):
         self.assertEqual("foo" in template.drop, False)
 
     def test_drop_length(self):
-        """Test that we get the length of a template drop"""
+        """Test that we get the length of a template drop."""
         template = self.env.get_template(name="somename")
         assert isinstance(template, AwareBoundTemplate)
         self.assertEqual(len(template.drop), 3)
@@ -399,7 +394,7 @@ class FileExtensionLoaderTestCase(unittest.TestCase):
         self.assertIsInstance(template, BoundTemplate)
 
     def test_stay_in_search_path(self):
-        """Test that we can't stray above the search path"""
+        """Test that we can't stray above the search path."""
         env = Environment(
             loader=FileExtensionLoader(
                 search_path="tests/fixtures/subfolder",
@@ -524,7 +519,7 @@ class MockBootstrapLoader(BaseLoader):
     def __init__(self, namespaces: Dict[str, Dict[str, str]]):
         self.namespaces = namespaces
 
-    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+    def get_source(self, _: Environment, __: str) -> TemplateSource:
         raise TemplateNotFound(
             f"{self.__class__.__name__} requires a namespace argument"
         )

@@ -1,33 +1,29 @@
 """Liquid template and expression parsing tests."""
-# pylint: disable=missing-class-docstring missing-function-docstring
-
 import unittest
-
 from typing import Iterable
 from typing import List
 from typing import NamedTuple
 from typing import Union
 
-from liquid.environment import Environment
-from liquid.mode import Mode
-
-from liquid.builtin import literal
-from liquid.builtin import statement
-from liquid.builtin import if_tag
-from liquid.builtin import comment_tag
-from liquid.builtin import unless_tag
-from liquid.builtin import case_tag
-from liquid.builtin import for_tag
-from liquid.builtin import tablerow_tag
-from liquid.builtin import capture_tag
-from liquid.builtin import cycle_tag
 from liquid.builtin import assign_tag
-from liquid.builtin import increment_tag
+from liquid.builtin import capture_tag
+from liquid.builtin import case_tag
+from liquid.builtin import comment_tag
+from liquid.builtin import cycle_tag
 from liquid.builtin import decrement_tag
 from liquid.builtin import echo_tag
-from liquid.builtin import include_tag
-from liquid.builtin import render_tag
+from liquid.builtin import for_tag
+from liquid.builtin import if_tag
 from liquid.builtin import ifchanged_tag
+from liquid.builtin import include_tag
+from liquid.builtin import increment_tag
+from liquid.builtin import literal
+from liquid.builtin import render_tag
+from liquid.builtin import statement
+from liquid.builtin import tablerow_tag
+from liquid.builtin import unless_tag
+from liquid.environment import Environment
+from liquid.mode import Mode
 
 
 class Case(NamedTuple):
@@ -43,7 +39,6 @@ class Case(NamedTuple):
         return self.expect
 
 
-# pylint: disable=too-many-public-methods
 class ParserTestCase(unittest.TestCase):
     def _test(self, test_cases: Iterable[Case], instance, mode: Mode = Mode.STRICT):
         """Helper method for testing lists of `Case`s."""
@@ -85,7 +80,6 @@ class ParserTestCase(unittest.TestCase):
 
     def test_illegal_tag(self):
         """Test that we can handle illegal tokens in lax mode."""
-
         test_cases = [
             Case(
                 "unknown tag name",

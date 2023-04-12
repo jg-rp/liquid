@@ -1,46 +1,43 @@
 """Tokenize boolean liquid expressions."""
 import re
-
 from typing import Iterator
 
-from liquid.expressions.common import Token
-from liquid.expressions.common import GROUP_QUOTED
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expressions.common import GROUP_IDENTINDEX
 from liquid.expressions.common import GROUP_IDENTQUOTED
+from liquid.expressions.common import GROUP_QUOTED
 from liquid.expressions.common import IDENTIFIER_PATTERN
-from liquid.expressions.common import IDENTSTRING_PATTERN
 from liquid.expressions.common import IDENTINDEX_PATTERN
+from liquid.expressions.common import IDENTSTRING_PATTERN
 from liquid.expressions.common import STRING_PATTERN
-
-from liquid.token import operators
+from liquid.expressions.common import Token
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IDENTSTRING
+from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_NEWLINE
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NOT
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RANGE_LITERAL
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_NIL
-from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_SKIP
-from liquid.token import TOKEN_NEWLINE
-from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_RBRACKET
-from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_AND
-from liquid.token import TOKEN_OR
-from liquid.token import TOKEN_NOT
-from liquid.token import TOKEN_CONTAINS
-from liquid.token import TOKEN_IDENTSTRING
-from liquid.token import TOKEN_IDENTINDEX
-from liquid.token import TOKEN_DOT
-
-from liquid.exceptions import LiquidSyntaxError
+from liquid.token import TOKEN_SKIP
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
+from liquid.token import operators
 
 # Rules for the standard boolean expression.
 # Does not support grouping with parentheses.
@@ -144,8 +141,10 @@ def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
 
 
 def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
-    """Yield tokens from a boolean expression with extra tokens intended to
-    distinguish the start of a range expression from the start of a logical group.
+    """Yield tokens from a boolean expression.
+
+    Extra tokens are generated to distinguish the start of a range expression from the
+    start of a logical group.
     """
     _keywords = not_keywords
     for match in PAREN_TOKENS_RE.finditer(source):

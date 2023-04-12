@@ -1,24 +1,23 @@
 """Tag and node definition for the built-in "decrement" tag."""
 
 import sys
-
 from typing import List
-from typing import TextIO
 from typing import Optional
+from typing import TextIO
 
 from liquid import ast
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.tag import Tag
-from liquid.parse import expect
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
-
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
+from liquid.parse import expect
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
+
+# ruff: noqa: D102
 
 TAG_DECREMENT = sys.intern("decrement")
 

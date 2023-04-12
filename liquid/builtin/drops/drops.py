@@ -1,14 +1,12 @@
 """Legacy iterable drop base class."""
-from typing import Any
-from typing import Collection
 from abc import ABC
 from abc import abstractmethod
+from typing import Any
+from typing import Collection
 
 
-# pylint: disable=too-few-public-methods
 class IterableDrop(ABC, Collection[Any]):
-    """Inherit from this class if you want the drop to be iterable from
-    tags like 'include' and 'render'."""
+    """Base class for drops that can be iterated with `include` and `render` tags."""
 
     @abstractmethod
     def step(self, item: Any) -> None:

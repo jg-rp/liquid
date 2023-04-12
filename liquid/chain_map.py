@@ -5,7 +5,6 @@ https://code.activestate.com/recipes/305268/
 """
 from collections import deque
 from itertools import chain
-
 from typing import Any
 from typing import Iterator
 from typing import Mapping
@@ -29,13 +28,14 @@ class ReadOnlyChainMap(Mapping[str, object]):
         return chain(*self._maps)
 
     def __len__(self) -> int:
-        return sum(len(map) for map in self._maps)
+        return sum(len(_map) for _map in self._maps)
 
     def size(self) -> int:
         """Return the number of maps in the chain."""
         return len(self._maps)
 
     def get(self, key: str, default: object = None) -> object:
+        """Return the value for key if key is in the dictionary, else default."""
         try:
             return self[key]
         except KeyError:

@@ -1,10 +1,8 @@
 """Extra array filters."""
 import math
 import re
-
 from decimal import Decimal
 from operator import getitem
-
 from typing import Any
 from typing import List
 from typing import Sequence
@@ -13,14 +11,14 @@ from typing import Union
 
 from liquid.filter import array_filter
 from liquid.filter import sequence_filter
-
 from liquid.limits import to_int
 
 
 @array_filter
 def index(left: Sequence[object], obj: object) -> object:
-    """Return the zero-based index of an item in an array, or None if
-    the items is not in the array.
+    """Return the zero-based index of an array item.
+
+    `None` is returned if `obj` is not in `left`.
     """
     try:
         return left.index(obj)
@@ -33,8 +31,7 @@ RE_NUMERIC = re.compile(r"-?\d+")
 
 @sequence_filter
 def sort_numeric(left: Sequence[object], key: object = None) -> List[object]:
-    """Return a copy of the input sequence sorted by any numeric values found in
-    the sequence's items."""
+    """Return a copy of `left` sorted by numeric values found in `left`'s items."""
     if key:
         _key = str(key)
         return sorted(left, key=lambda item: _ints(_getitem(item, _key)))

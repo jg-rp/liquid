@@ -1,20 +1,17 @@
 """Token stream test cases."""
+from typing import List
 from unittest import TestCase
 
-from typing import List
-
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_EOF
-
 from liquid.exceptions import LiquidSyntaxError
-
 from liquid.expressions import Token
 from liquid.expressions import TokenStream
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_STRING
 
 
 class ExpresssionTokenStreamTestCase(TestCase):

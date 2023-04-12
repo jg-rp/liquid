@@ -1,32 +1,28 @@
 """Tag and node definition for the built-in "liquid" tag."""
 
 import sys
-
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
 from liquid.context import Context
 from liquid.lex import get_liquid_expression_lexer
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
+# ruff: noqa: D102
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
 
 TAG_LIQUID = sys.intern("liquid")

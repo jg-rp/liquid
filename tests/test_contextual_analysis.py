@@ -2,14 +2,13 @@
 
 import asyncio
 import unittest
-
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 
 from liquid import Context
 from liquid import DictLoader
 from liquid import Environment
 from liquid import Template
-
 from liquid.filter import with_context
 from liquid.template import BoundTemplate
 

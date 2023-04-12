@@ -1,9 +1,10 @@
 """Shared configuration from which templates can be loaded and parsed."""
 
 from __future__ import annotations
-from functools import lru_cache
-from pathlib import Path
 
+import warnings
+from functools import lru_cache
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import ClassVar
@@ -12,49 +13,44 @@ from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
-from typing import Type
 from typing import Tuple
-from typing import TYPE_CHECKING
+from typing import Type
 from typing import Union
 
-import warnings
-
-from liquid.context import Undefined
-from liquid.mode import Mode
-from liquid.tag import Tag
-from liquid.template import BoundTemplate
-from liquid.lex import get_lexer
-from liquid.parse import get_parser
-from liquid.stream import TokenStream
+from liquid import ast
+from liquid import builtin
+from liquid import loaders
 from liquid.analyze_tags import InnerTagMap
 from liquid.analyze_tags import TagAnalysis
-from liquid.utils import LRUCache
-
+from liquid.context import Undefined
+from liquid.exceptions import Error
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import TemplateInheritanceError
+from liquid.exceptions import lookup_warning
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
 from liquid.expressions import parse_conditional_expression
 from liquid.expressions import parse_conditional_expression_with_parens
 from liquid.expressions import parse_filtered_expression
 from liquid.expressions import parse_loop_expression
+from liquid.lex import get_lexer
+from liquid.mode import Mode
+from liquid.parse import get_parser
+from liquid.stream import TokenStream
+from liquid.template import BoundTemplate
+from liquid.utils import LRUCache
 
-from liquid import ast
-from liquid import builtin
-from liquid import loaders
+if TYPE_CHECKING:
+    from pathlib import Path
 
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import lookup_warning
-from liquid.exceptions import TemplateInheritanceError
-
-if TYPE_CHECKING:  # pragma: no cover
+    from liquid.context import Context
     from liquid.expression import BooleanExpression
     from liquid.expression import FilteredExpression
     from liquid.expression import LoopExpression
-    from liquid.context import Context
+    from liquid.tag import Tag
     from liquid.token import Token
 
 
-# pylint: disable=too-many-instance-attributes
 class Environment:
     """Shared configuration from which templates can be loaded and parsed.
 
@@ -145,7 +141,6 @@ class Environment:
     # class or a subclass of it.
     template_class = BoundTemplate
 
-    # pylint: disable=redefined-builtin too-many-arguments too-many-locals
     def __init__(
         self,
         tag_start_string: str = r"{%",
@@ -160,7 +155,7 @@ class Environment:
         autoescape: bool = False,
         auto_reload: bool = True,
         cache_size: int = 300,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         template_comments: bool = False,
         comment_start_string: str = "{#",
         comment_end_string: str = "#}",
@@ -259,8 +254,10 @@ class Environment:
         )
 
     def add_tag(self, tag: Type[Tag]) -> None:
-        """Register a liquid tag with the environment. Built-in tags are registered for
-        you automatically with every new :class:`Environment`.
+        """Register a liquid tag with the environment.
+
+        Built-in tags are registered for you automatically with every new
+        :class:`Environment`.
 
         :param tag: The tag to register.
         :type tag: Type[Tag]
@@ -292,13 +289,12 @@ class Environment:
         token_iter = self.tokenizer()(source)
         return parser.parse(TokenStream(token_iter))
 
-    # pylint: disable=redefined-builtin
     def from_string(
         self,
         source: str,
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
     ) -> BoundTemplate:
         """Parse the given string as a liquid template.
@@ -326,7 +322,7 @@ class Environment:
             err.filename = path
             err.source = source
             raise err
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             raise Error("unexpected liquid parsing error") from err
         return self.template_class(
             env=self,
@@ -337,11 +333,10 @@ class Environment:
             matter=matter,
         )
 
-    # pylint: disable=redefined-builtin
     def get_template(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
@@ -371,9 +366,9 @@ class Environment:
     async def get_template_async(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     ) -> BoundTemplate:
-        """An async version of ``get_template``."""
+        """An async version of `get_template`."""
         if self.cache is not None:
             cached = self.cache.get(name)
             if isinstance(cached, BoundTemplate) and (
@@ -392,11 +387,10 @@ class Environment:
     def get_template_with_args(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
-        """Load and parse a template using the configured loader, optionally
-        passing arbitrary keyword arguments to the loader.
+        """Load and parse a template with arbitrary loader arguments.
 
         This method bypasses the environment's template cache. You should use a caching
         loader instead when the loader required extra keyword arguments.
@@ -406,7 +400,7 @@ class Environment:
     async def get_template_with_args_async(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
         """An async version of :meth:`get_template_with_args`."""
@@ -418,10 +412,11 @@ class Environment:
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
-        """Load and parse a template using the configured loader, optionally referencing
-        a render context."""
-        # No template caching. How would we know what context variables a loader needs?
-        # A custom loader that uses context could implement its own cache.
+        """Load and parse a template with reference to a render context.
+
+        This method bypasses the environment's template cache. You should consider using
+        a caching loader.
+        """
         return self.loader.load_with_context(context, name, **kwargs)
 
     async def get_template_with_context_async(
@@ -440,8 +435,7 @@ class Environment:
         *,
         inner_tags: Optional[InnerTagMap] = None,
     ) -> TagAnalysis:
-        """Analyze tags in template source text against those registered with this
-        environment.
+        """Analyze tags in template source text.
 
         Unlike template static or contextual analysis, a tag audit does not parse the
         template source text into an AST, nor does it attempt to load partial templates
@@ -480,8 +474,9 @@ class Environment:
         template's source text. See also :meth:`liquid.template.BoundTemplate.analyze`.
 
         :param name: The template's name or identifier, as you would use with
-            :meth:`Environment.get_template`. Use :meth:`Environment.analyze_tags_from_string`
-            to audit tags in template text without using a template loader.
+            :meth:`Environment.get_template`.
+            Use :meth:`Environment.analyze_tags_from_string` to audit tags in template
+            text without using a template loader.
         :type name: str
         :param context: An optional render context the loader might use to modify the
             template search space. If given, uses
@@ -533,9 +528,8 @@ class Environment:
             inner_tags=inner_tags,
         )
 
-    # pylint: disable=redefined-builtin
     def make_globals(
-        self, globals: Optional[Mapping[str, object]] = None
+        self, globals: Optional[Mapping[str, object]] = None  # noqa: A002
     ) -> Dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
@@ -563,8 +557,9 @@ class Environment:
             )
 
     def set_expression_cache_size(self, maxsize: int = 0) -> None:
-        """Create or replace cached versions of the common expression parsers. If
-        `maxsize` is less than ``1``, no expression caching will happen.
+        """Create or replace cached versions of the common expression parsers.
+
+        If `maxsize` is less than ``1``, no expression caching will happen.
 
         :param maxsize: The maximum size of each expression cache.
         :type maxsize: int
@@ -608,7 +603,6 @@ class Environment:
         )
 
 
-# pylint: disable=redefined-builtin too-many-arguments too-many-locals
 @lru_cache(maxsize=10)
 def get_implicit_environment(
     tag_start_string: str,
@@ -623,7 +617,7 @@ def get_implicit_environment(
     autoescape: bool,
     auto_reload: bool,
     cache_size: int,
-    globals: Optional[Mapping[str, object]],
+    globals: Optional[Mapping[str, object]],  # noqa: A002
     template_comments: bool,
     comment_start_string: str,
     comment_end_string: str,
@@ -656,8 +650,7 @@ def get_implicit_environment(
 # naming conventions. At least for now.
 
 
-# pylint: disable=redefined-builtin too-many-arguments invalid-name too-many-locals
-def Template(
+def Template(  # noqa: N802
     source: str,
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",
@@ -670,14 +663,13 @@ def Template(
     autoescape: bool = False,
     auto_reload: bool = True,
     cache_size: int = 300,
-    globals: Optional[Mapping[str, object]] = None,
+    globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     template_comments: bool = False,
     comment_start_string: str = "{#",
     comment_end_string: str = "#}",
     expression_cache_size: int = 0,
 ) -> BoundTemplate:
-    """Returns a :class:`liquid.template.BoundTemplate`, automatically creating an
-    :class:`Environment` to bind it to.
+    """Parse a template, automatically creating an `Environment` to bind it to.
 
     Other than `source`, all arguments are passed to the implicit :class:`Environment`,
     which might have been cached from previous calls to :func:`Template`.

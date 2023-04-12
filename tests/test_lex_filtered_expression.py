@@ -5,38 +5,36 @@ and `echo` tags.
 """
 
 import unittest
-
 from typing import Any
 from typing import NamedTuple
 
-from liquid.expressions.filtered import tokenize
 from liquid.expressions.conditional import tokenize as tokenize_conditional
 from liquid.expressions.conditional import (
     tokenize_with_parens as tokenize_conditional_with_parens,
 )
-
+from liquid.expressions.filtered import tokenize
+from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_DPIPE
+from liquid.token import TOKEN_ELSE
+from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_LT
+from liquid.token import TOKEN_NOT
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RBRACKET
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_ELSE
-from liquid.token import TOKEN_NOT
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_AND
-from liquid.token import TOKEN_LT
 from liquid.token import Token
 
 

@@ -1,11 +1,27 @@
-"""Functions for parsing loop expressions. Like those found in `for` and `tablerow`
-tags."""
+"""Functions for parsing loop expressions.
+
+Like those found in `for` and `tablerow` tags.
+"""
 from typing import Callable
 from typing import Dict
 from typing import Tuple
 
+from liquid.exceptions import LiquidSyntaxError
+from liquid.expression import CONTINUE
+from liquid.expression import Continue
+from liquid.expression import IntegerLiteral
+from liquid.expression import LoopArgument
+from liquid.expression import LoopExpression
+from liquid.expression import LoopIterable
+from liquid.expressions.common import make_parse_range
+from liquid.expressions.common import parse_float_literal
+from liquid.expressions.common import parse_identifier
+from liquid.expressions.common import parse_integer_literal
+from liquid.expressions.common import parse_string_literal
+from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
+from liquid.expressions.loop.lex import tokenize
+from liquid.expressions.stream import TokenStream
 from liquid.limits import to_int
-
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_COMMA
@@ -21,25 +37,6 @@ from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
 from liquid.token import TOKEN_STRING
-
-from liquid.expression import Continue
-from liquid.expression import CONTINUE
-from liquid.expression import IntegerLiteral
-from liquid.expression import LoopArgument
-from liquid.expression import LoopExpression
-from liquid.expression import LoopIterable
-
-from liquid.expressions.common import make_parse_range
-from liquid.expressions.common import parse_float_literal
-from liquid.expressions.common import parse_identifier
-from liquid.expressions.common import parse_integer_literal
-from liquid.expressions.common import parse_string_literal
-
-from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
-from liquid.expressions.stream import TokenStream
-from liquid.expressions.loop.lex import tokenize
-
-from liquid.exceptions import LiquidSyntaxError
 
 LOOP_ARGS = frozenset(
     (
@@ -86,8 +83,7 @@ def parse_loop_argument(stream: TokenStream) -> LoopArgument:
 
 
 def parse_loop_arguments(stream: TokenStream) -> Tuple[Dict[str, LoopArgument], bool]:
-    """Parse zero or more arguments from the stream of tokens until the end of the
-    stream."""
+    """Parse loop arguments from the stream of tokens until the end of the stream."""
     arguments: Dict[str, LoopArgument] = {}
     _reversed = False
 

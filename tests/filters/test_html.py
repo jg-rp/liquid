@@ -1,9 +1,7 @@
 """Test html filter functions."""
 import unittest
-
 from functools import partial
 from inspect import isclass
-
 from typing import Any
 from typing import Dict
 from typing import Iterable
@@ -11,19 +9,17 @@ from typing import List
 from typing import NamedTuple
 
 try:
-    import markupsafe  # pylint: disable=unused-import # noqa: F401
+    import markupsafe  # noqa: F401
 
     MARKUPSAFE_AVAILABLE = True
 except ImportError:
     MARKUPSAFE_AVAILABLE = False
 
+from liquid import Markup
 from liquid.environment import Environment
 from liquid.exceptions import Error
-
 from liquid.extra.filters.html import script_tag
 from liquid.extra.filters.html import stylesheet_tag
-
-from liquid import Markup
 
 
 class Case(NamedTuple):

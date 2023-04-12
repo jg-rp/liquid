@@ -1,5 +1,8 @@
-"""An environment that is configured for maximum compatibility with Ruby Liquid, without
-concern for backwards incompatible changes to template rendering behavior."""
+"""An environment that is configured for maximum compatibility with Ruby Liquid.
+
+This environment will be updated without concern for backwards incompatible changes to
+template rendering behavior.
+"""
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
 

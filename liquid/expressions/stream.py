@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 from collections import deque
-
+from typing import TYPE_CHECKING
 from typing import Deque
 from typing import Iterator
 
-from liquid.token import TOKEN_INITIAL
+from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_INITIAL
 from liquid.token import reverse_operators
 
-from liquid.expressions.common import Token
-from liquid.exceptions import LiquidSyntaxError
+if TYPE_CHECKING:
+    from liquid.expressions.common import Token
 
 
 class TokenStream:
@@ -38,7 +39,7 @@ class TokenStream:
             tok = self.stream.current
             if tok[1] is TOKEN_EOF:
                 self.stream.close()
-                raise StopIteration()
+                raise StopIteration
             next(self.stream)
             return tok
 
@@ -85,8 +86,7 @@ class TokenStream:
         self.current = (0, TOKEN_EOF, "")
 
     def expect(self, typ: str) -> None:
-        """Raise an exception if the current token in the stream does not match the
-        given type."""
+        """Raise a `LiquidSyntaxError` if the current token type doesn't match `typ`."""
         if self.current[1] != typ:
             raise LiquidSyntaxError(
                 f"expected {reverse_operators.get(typ, typ)!r}, "
@@ -95,8 +95,7 @@ class TokenStream:
             )
 
     def expect_peek(self, typ: str) -> None:
-        """Raise an exception if the next token in the stream does not match the given
-        type."""
+        """Raise a `LiquidSyntaxError` if the next token type does not match `typ`."""
         if self.peek[1] != typ:
             raise LiquidSyntaxError(
                 f"expected {reverse_operators.get(typ, typ)!r}, "

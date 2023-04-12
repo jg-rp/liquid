@@ -1,9 +1,7 @@
 """Node and tag definitions for `with`."""
-# pylint: disable=missing-class-docstring
 from __future__ import annotations
 
 import sys
-
 from typing import TYPE_CHECKING
 from typing import Dict
 from typing import List
@@ -11,28 +9,23 @@ from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
 
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
-from liquid.context import Context
-from liquid.expression import Expression
 from liquid.expressions import parse_keyword_arguments
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.context import Context
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
 
 TAG_WITH = sys.intern("with")
 TAG_ENDWITH = sys.intern("endwith")

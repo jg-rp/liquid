@@ -10,7 +10,6 @@ from typing import Any
 from typing import NamedTuple
 
 from liquid.expressions.include import tokenize
-
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA

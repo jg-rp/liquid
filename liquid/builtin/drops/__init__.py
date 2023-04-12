@@ -1,3 +1,3 @@
-# pylint: disable=missing-module-docstring,useless-import-alias
-# flake8: noqa
-from .drops import IterableDrop as IterableDrop
+from .drops import IterableDrop  # noqa: D104
+
+__all__ = ("IterableDrop",)

@@ -1,6 +1,5 @@
 """Test cases for parsing loop-style expressions."""
 import unittest
-
 from typing import Any
 from typing import Mapping
 from typing import NamedTuple

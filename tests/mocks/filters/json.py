@@ -2,8 +2,8 @@
 
 import json
 
-from liquid.filter import liquid_filter
 from liquid.exceptions import FilterArgumentError
+from liquid.filter import liquid_filter
 
 
 @liquid_filter

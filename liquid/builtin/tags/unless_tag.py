@@ -1,36 +1,35 @@
 """Tag and node definition for the built-in "unless" tag."""
 from __future__ import annotations
-import sys
 
+import sys
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 from typing import Union
 
-from liquid.ast import ChildNode
-from liquid.ast import Node
 from liquid.ast import BlockNode
+from liquid.ast import ChildNode
 from liquid.ast import ConditionalBlockNode
 from liquid.ast import IllegalNode
-
-from liquid.context import Context
+from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
-from liquid.stream import TokenStream
-from liquid.tag import Tag
-
 from liquid.parse import eat_block
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.token import Token
+from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.context import Context
     from liquid.expression import Expression
+    from liquid.stream import TokenStream
+
+# ruff: noqa: D102
 
 TAG_UNLESS = sys.intern("unless")
 TAG_ENDUNLESS = sys.intern("endunless")

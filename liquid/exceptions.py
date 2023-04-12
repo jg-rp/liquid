@@ -1,12 +1,11 @@
 """Liquid specific Exceptions and warnings."""
 
+from pathlib import Path
 from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Type
 from typing import Union
-
-from pathlib import Path
 
 
 class Error(Exception):
@@ -37,15 +36,30 @@ class Error(Exception):
             return self.args[0]
         return None
 
+    @property
+    def name(self) -> str:
+        """Return the name of the template that raised this exception.
+
+        An empty string is return if a name is not available.
+        """
+        if isinstance(self.filename, Path):
+            return self.filename.as_posix()
+        if self.filename:
+            return str(self.filename)
+        return ""
+
 
 class LiquidInterrupt(Exception):
-    """Loop interrupt"""
+    """Loop interrupt exception."""
 
 
 class StopRender(Exception):
-    """An interrupt used to signal that ``BoundTemplate.render_with_context`` should
+    """Template inheritance interrupt.
+
+    An interrupt used to signal that ``BoundTemplate.render_with_context`` should
     stop rendering more nodes. This is used by template inheritance tags and is not
-    an error condition."""
+    an error condition.
+    """
 
 
 class LiquidEnvironmentError(Error):
@@ -64,16 +78,6 @@ class LiquidSyntaxError(Error):
         super().__init__(*args, linenum=linenum, filename=filename)
         self.source: Optional[str] = None
 
-    @property
-    def name(self) -> str:
-        """Return the name of the template that raised this exception. Return an empty
-        string if a name is not available."""
-        if isinstance(self.filename, Path):
-            return self.filename.as_posix()
-        if self.filename:
-            return str(self.filename)
-        return ""
-
 
 class TemplateInheritanceError(Error):
     """An exceptions raised when template inheritance tags are used incorrectly.
@@ -89,16 +93,6 @@ class TemplateInheritanceError(Error):
     ):
         super().__init__(*args, linenum=linenum, filename=filename)
         self.source: Optional[str] = None
-
-    @property
-    def name(self) -> str:
-        """Return the name of the template that raised this exception. Return an empty
-        string if a name is not available."""
-        if isinstance(self.filename, Path):
-            return self.filename.as_posix()
-        if self.filename:
-            return str(self.filename)
-        return ""
 
 
 class RequiredBlockError(TemplateInheritanceError):
@@ -150,9 +144,7 @@ class ContextDepthError(ResourceLimitError):
 
 
 class LoopIterationLimitError(ResourceLimitError):
-    """Exception raised when the maximum number of loop iterations has
-    been exceeded.
-    """
+    """Exception raised when the loop iteration limit has been exceeded."""
 
 
 class OutputStreamLimitError(ResourceLimitError):
@@ -160,8 +152,7 @@ class OutputStreamLimitError(ResourceLimitError):
 
 
 class LocalNamespaceLimitError(ResourceLimitError):
-    """Exception raised when the maximum size of a render context's local namespace
-    has been exceeded."""
+    """Exception raised when a local namespace limit has been exceeded."""
 
 
 # LiquidValueError inheriting from LiquidSyntaxError does not make complete sense.
@@ -219,7 +210,7 @@ def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
     return WARNINGS.get(exc, LiquidWarning)
 
 
-def escape(val: Any) -> str:
+def escape(_: Any) -> str:
     """A dummy escape function that always raises an exception."""
     raise Error("autoescape requires Markupsafe to be installed")
 
@@ -231,18 +222,17 @@ class Markup(str):
         super().__init__()
         raise Error("autoescape requires Markupsafe to be installed")
 
-    def join(self, _: object) -> str:
+    def join(self, _: object) -> str:  # noqa: D102
         raise Error(
             "autoescape requires Markupsafe to be installed"
         )  # pragma: no cover
 
-    # pylint: disable=missing-function-docstring
-    def unescape(self) -> str:
+    def unescape(self) -> str:  # noqa: D102
         raise Error(
             "autoescape requires Markupsafe to be installed"
         )  # pragma: no cover
 
-    def format(self, *args: Any, **kwargs: Any) -> str:
+    def format(self, *args: Any, **kwargs: Any) -> str:  # noqa: A003, D102, ARG002
         raise Error(
             "autoescape requires Markupsafe to be installed"
         )  # pragma: no cover

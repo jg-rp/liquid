@@ -1,28 +1,23 @@
 """Test Python Liquid's async API."""
-# pylint: disable=missing-class-docstring
 import asyncio
 import tempfile
 import time
 import unittest
-
 from collections import abc
 from pathlib import Path
-
-from typing import NamedTuple
 from typing import Dict
+from typing import NamedTuple
 
 # assert_awaited* were new in Python 3.8, so we're using the backport.
 from mock import patch
 
-from liquid import Template
 from liquid import Environment
 from liquid import FileSystemLoader
-
-from liquid.loaders import TemplateSource
+from liquid import Template
+from liquid.exceptions import TemplateNotFound
 from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
-
-from liquid.exceptions import TemplateNotFound
+from liquid.loaders import TemplateSource
 from liquid.template import BoundTemplate
 
 
@@ -165,7 +160,7 @@ class LoadAsyncTestCase(unittest.TestCase):
             self.assertEqual(result, "1-2-3-")
 
     def test_include_async(self):
-        """Test that included templates are rendered asynchronously"""
+        """Test that included templates are rendered asynchronously."""
         test_cases = [
             Case(
                 description="simple include",
@@ -251,26 +246,25 @@ class LoadAsyncTestCase(unittest.TestCase):
             return await template.render_async()
 
         for case in test_cases:
-            with self.subTest(msg=case.description):
-                with patch(
-                    "liquid.loaders.DictLoader.get_source_async", autospec=True
-                ) as source:
-                    source.side_effect = [
-                        TemplateSource(
-                            "{% for x in (1..3) %}{{x}}-{% endfor %}",
-                            "foo",
-                            None,
-                        )
-                    ]
+            with self.subTest(msg=case.description), patch(
+                "liquid.loaders.DictLoader.get_source_async", autospec=True
+            ) as source:
+                source.side_effect = [
+                    TemplateSource(
+                        "{% for x in (1..3) %}{{x}}-{% endfor %}",
+                        "foo",
+                        None,
+                    )
+                ]
 
-                    env = Environment()
-                    template = env.from_string(case.template, globals=case.context)
+                env = Environment()
+                template = env.from_string(case.template, globals=case.context)
 
-                    result = asyncio.run(coro(template))
+                result = asyncio.run(coro(template))
 
-                    source.assert_awaited_with(env.loader, env=env, template_name="foo")
-                    self.assertEqual(source.call_count, case.calls)
-                    self.assertEqual(result, case.expect)
+                source.assert_awaited_with(env.loader, env=env, template_name="foo")
+                self.assertEqual(source.call_count, case.calls)
+                self.assertEqual(result, case.expect)
 
 
 class MockAsyncDrop(abc.Mapping):

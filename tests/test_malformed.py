@@ -1,34 +1,28 @@
 """Malformed template test cases."""
-# pylint: disable=missing-class-docstring missing-function-docstring
-
-from unittest import TestCase
-
-from typing import Iterable
 from typing import Dict
+from typing import Iterable
 from typing import List
-from typing import Union
 from typing import NamedTuple
-from typing import Type
 from typing import Tuple
+from typing import Type
+from typing import Union
+from unittest import TestCase
 
 from liquid import Template
 from liquid.environment import Environment
-from liquid.mode import Mode
-
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import LiquidTypeError
-from liquid.exceptions import lookup_warning
-from liquid.exceptions import Error
-from liquid.exceptions import TemplateNotFound
-from liquid.exceptions import DisabledTagError
 from liquid.exceptions import ContextDepthError
-
-from liquid.extra import add_inline_expression_tags
-from liquid.extra import add_extended_inline_expression_tags
+from liquid.exceptions import DisabledTagError
+from liquid.exceptions import Error
+from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import lookup_warning
 from liquid.extra import IfNotTag
-
+from liquid.extra import add_extended_inline_expression_tags
+from liquid.extra import add_inline_expression_tags
 from liquid.loaders import DictLoader
+from liquid.mode import Mode
 
 
 class Case(NamedTuple):
@@ -127,12 +121,9 @@ class MalformedTemplateTestCase(TestCase):
 
         env = Environment(loader=DictLoader(templates), tolerance=Mode.WARN)
         for case in test_cases:
-            with self.subTest(msg=case.description):
-                with self.assertWarns(case.warnings):
-                    template = env.from_string(
-                        case.template, globals=self.global_context
-                    )
-                    template.render()
+            with self.subTest(msg=case.description), self.assertWarns(case.warnings):
+                template = env.from_string(case.template, globals=self.global_context)
+                template.render()
 
         env = Environment(loader=DictLoader(templates), tolerance=Mode.LAX)
         for case in test_cases:
@@ -143,7 +134,6 @@ class MalformedTemplateTestCase(TestCase):
 
     def test_liquid_syntax(self):
         """Test that we fail early and loud when parsing a malformed template."""
-
         test_cases = [
             Case(
                 description="no expression",
@@ -382,7 +372,6 @@ class MalformedTemplateTestCase(TestCase):
 
     def test_unrecoverable_syntax_errors(self):
         """Test that we fail early and loud when parsing a malformed template."""
-
         test_cases = [
             Case(
                 description="single bracket close",
@@ -402,7 +391,6 @@ class MalformedTemplateTestCase(TestCase):
 
     def test_bad_include(self):
         """Test that we gracefully handle include errors."""
-
         test_cases = [
             Case(
                 description="chained alias identifier",
@@ -473,7 +461,6 @@ class MalformedTemplateTestCase(TestCase):
 
     def test_bad_render(self):
         """Test that we gracefully handle render errors."""
-
         test_cases = [
             Case(
                 description="break from render",

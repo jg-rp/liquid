@@ -1,11 +1,10 @@
 """Template inheritance tags."""
-# pylint: disable=missing-class-docstring
 from __future__ import annotations
-import sys
 
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
-
+from typing import TYPE_CHECKING
 from typing import DefaultDict
 from typing import Iterator
 from typing import List
@@ -15,44 +14,37 @@ from typing import Sequence
 from typing import Set
 from typing import TextIO
 from typing import Tuple
-from typing import TYPE_CHECKING
 
 from liquid import Markup
-
+from liquid.ast import BlockNode as TemplateBlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode as TemplateBlockNode
-
 from liquid.exceptions import LiquidEnvironmentError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
-
 from liquid.expression import StringLiteral
-
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import tokenize_common_expression
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-if TYPE_CHECKING:  # pragma: no cover
-    from liquid import Environment
+if TYPE_CHECKING:
     from liquid import BoundTemplate
+    from liquid import Environment
     from liquid.context import Context
+    from liquid.stream import TokenStream
 
+# ruff: noqa: D102
 
 TAG_EXTENDS = sys.intern("extends")
 TAG_BLOCK = sys.intern("block")
@@ -118,6 +110,8 @@ class _BlockStackItem:
 
 
 class BlockNode(Node):
+    """The extra "Block" node."""
+
     __slots__ = ("tok", "name", "block", "expr", "required")
 
     def __init__(
@@ -204,6 +198,8 @@ class BlockNode(Node):
 
 
 class ExtendsNode(Node):
+    """The extra "Extends" node."""
+
     __slots__ = ("tok", "name")
     tag = TAG_EXTENDS
 
@@ -228,7 +224,7 @@ class ExtendsNode(Node):
 
         base_template.render_with_context(context, buffer)
         context.tag_namespace["extends"].clear()
-        raise StopRender()
+        raise StopRender
 
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
@@ -249,7 +245,7 @@ class ExtendsNode(Node):
 
         await base_template.render_with_context_async(context, buffer)
         context.tag_namespace["extends"].clear()
-        raise StopRender()
+        raise StopRender
 
     def children(self) -> List[ChildNode]:
         return [
@@ -263,6 +259,8 @@ class ExtendsNode(Node):
 
 
 class BlockTag(Tag):
+    """The extra "Block" tag."""
+
     name = TAG_BLOCK
     end = TAG_ENDBLOCK
 
@@ -322,6 +320,8 @@ class BlockTag(Tag):
 
 
 class ExtendsTag(Tag):
+    """The extra "Extends" tag."""
+
     name = TAG_EXTENDS
     block = False
 
@@ -345,9 +345,9 @@ def build_block_stacks(
     parent_name: str,
     tag: str = TAG_EXTENDS,
 ) -> BoundTemplate:
-    """Build a stack for each `{% block %}` (one stack per block name) in the
-    inheritance chain. Blocks defined in the base template will be at the top of the
-    stack.
+    """Build a stack for each `{% block %}` in the inheritance chain.
+
+    Blocks defined in the base template will be at the top of the stack.
 
     :param context: A render context to build the block stacks in.
     :param template: A leaf template with an `extends` tag.
@@ -440,8 +440,10 @@ def _visit_node(
 def stack_blocks(
     context: Context, template: BoundTemplate
 ) -> Tuple[Optional[ExtendsNode], List[BlockNode]]:
-    """Find template inheritance nodes in the given template and add them to the
-    context's block stacks."""
+    """Find template inheritance nodes in `template`.
+
+    Each node found is pushed on to the appropriate block stack.
+    """
     extends, blocks = find_inheritance_nodes(template)
     template_name = str(template.path or template.name)
 
@@ -475,11 +477,7 @@ def _store_blocks(context: Context, blocks: List[BlockNode], source_name: str) -
 
     for block in blocks:
         stack = block_stacks[block.name]
-
-        if stack and not block.required:
-            required = False
-        else:
-            required = block.required
+        required = False if stack and not block.required else block.required
 
         stack.append(
             _BlockStackItem(

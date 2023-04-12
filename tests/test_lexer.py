@@ -1,65 +1,62 @@
 """Test tokenizing of liquid templates and expressions."""
-# pylint: disable=too-many-lines,missing-class-docstring
+from typing import Any
+from typing import NamedTuple
 from unittest import TestCase
-from typing import NamedTuple, Any
 
 from liquid.environment import Environment
-from liquid.stream import TokenStream
-
 from liquid.exceptions import LiquidSyntaxError
-
-from liquid.lex import tokenize_liquid_expression
 
 # Note: These are the legacy expression lexers.
 # See test_lex_*_expression.py for current, built-in lexer test cases.
-from liquid.lex import tokenize_loop_expression
-from liquid.lex import tokenize_filtered_expression
-from liquid.lex import tokenize_boolean_expression
-from liquid.lex import tokenize_include_expression
 from liquid.lex import get_lexer
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_STATEMENT
-from liquid.token import TOKEN_LITERAL
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_NIL
-from liquid.token import TOKEN_NULL
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_include_expression
+from liquid.lex import tokenize_liquid_expression
+from liquid.lex import tokenize_loop_expression
+from liquid.stream import TokenStream
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_NEGATIVE
-from liquid.token import TOKEN_TRUE
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_CONTAINS
-from liquid.token import TOKEN_IN
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_LIMIT
-from liquid.token import TOKEN_OFFSET
-from liquid.token import TOKEN_REVERSED
-from liquid.token import TOKEN_CONTINUE
-from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
-from liquid.token import TOKEN_AND
-from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_EQ
-from liquid.token import TOKEN_NE
-from liquid.token import TOKEN_LG
-from liquid.token import TOKEN_GT
-from liquid.token import TOKEN_LE
-from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_WITH
-from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_GE
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_NEGATIVE
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_OFFSET
+from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WITH
+from liquid.token import Token
 
 
 class Case(NamedTuple):
@@ -91,7 +88,6 @@ class LiquidLexerTestCase(TestCase):
 
     def test_lex_template(self):
         """Test that the lexer can tokenize literals, objects and tags."""
-
         test_cases = [
             Case(
                 "simple template literal",
@@ -295,7 +291,6 @@ class LiquidLexerTestCase(TestCase):
     def test_lex_liquid_expression(self):
         """Test that the liquid expression lexer can tokenize line delimited
         expressions."""
-
         test_cases = [
             Case(
                 "for loop",
@@ -408,7 +403,6 @@ class LiquidLexerTestCase(TestCase):
 
     def test_lex_errors(self):
         """Test that the lexer does not fall over at common errors."""
-
         test_cases = [
             Case(
                 description="no close statement bracket",

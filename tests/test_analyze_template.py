@@ -1,48 +1,39 @@
 """Test cases for statically counting a template using `BoundTemplate.analyze`."""
-# pylint: disable=too-many-lines
 import asyncio
-
 from typing import List
 from typing import Optional
 from typing import TextIO
-
 from unittest import TestCase
 
-from liquid import Environment
 from liquid import DictLoader
+from liquid import Environment
 from liquid import Template
-
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
 from liquid.context import Context
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
-
+from liquid.extra import WithTag
 from liquid.extra import add_inheritance_tags
 from liquid.extra import add_inline_expression_tags
-from liquid.extra import WithTag
-
 from liquid.mode import Mode
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
 from liquid.template import BoundTemplate
 from liquid.template import NameRefs
 from liquid.template import Refs
 from liquid.template import TemplateAnalysis
-
 from liquid.token import Token
 
 
 class MockExpression(Expression):
-    """Mock expression"""
+    """Mock expression."""
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, _: Context) -> object:
         return "mock expression"
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, _: Context) -> object:
         return "mock expression"
 
 
@@ -52,11 +43,11 @@ class MockNode(Node):
     def __init__(self, token: Token) -> None:
         self.tok = token
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(self, _: Context, buffer: TextIO) -> Optional[bool]:
         buffer.write("mock node")
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, _: Context, buffer: TextIO
     ) -> Optional[bool]:
         buffer.write("mock node")
 
@@ -79,17 +70,15 @@ class MockChildNode(MockNode):
 
 
 class MockChildTag(MockTag):
-    """Mock tag"""
+    """Mock tag."""
 
     def parse(self, stream: TokenStream) -> Node:
         return MockChildNode(stream.current)
 
 
-# pylint: disable=too-many-public-methods
 class AnalyzeTemplateTestCase(TestCase):
     """Test that we can count a template's variables, tags and filters."""
 
-    # pylint: disable=too-many-arguments
     def _test(
         self,
         template: BoundTemplate,
@@ -1183,7 +1172,10 @@ class AnalyzeTemplateTestCase(TestCase):
                     "{% block content %}{{ x | downcase }}{% endblock %}"
                     "{% block foo %}{% assign z = 7 %}{% endblock %}"
                 ),
-                "some": "{% extends 'other' %}{{ y | append: x }}{% block foo %}{% endblock %}",
+                "some": (
+                    "{% extends 'other' %}{{ y | append: x }}"
+                    "{% block foo %}{% endblock %}"
+                ),
             }
         )
         env = Environment(loader=loader)

@@ -1,19 +1,17 @@
 """Maths related filter definitions."""
 
-import math
 import decimal
-
+import math
 from typing import Optional
 from typing import Union
 
 from liquid.context import is_undefined
 from liquid.exceptions import FilterArgumentError
-
 from liquid.filter import math_filter
 from liquid.filter import num_arg
 
-DecimalT = decimal.Decimal  # pylint: disable=invalid-name
-NumberT = Union[float, int]  # pylint: disable=invalid-name
+DecimalT = decimal.Decimal
+NumberT = Union[float, int]
 
 
 @math_filter

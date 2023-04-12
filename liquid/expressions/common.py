@@ -1,59 +1,57 @@
 """Patterns and parse functions common to multiple built-in expression types."""
 from __future__ import annotations
+
 import re
 import sys
-
+from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Iterator
 from typing import Tuple
 from typing import Union
-from typing import TYPE_CHECKING
 
-from liquid.expression import Expression
-from liquid.expression import TRUE
-from liquid.expression import FALSE
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import BLANK
-from liquid.expression import NIL
 from liquid.expression import EMPTY
-from liquid.expression import Nil
+from liquid.expression import FALSE
+from liquid.expression import NIL
+from liquid.expression import TRUE
 from liquid.expression import Blank
-from liquid.expression import Empty
 from liquid.expression import Boolean
+from liquid.expression import Empty
+from liquid.expression import Expression
+from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPath
 from liquid.expression import IdentifierPathElement
-from liquid.expression import StringLiteral
 from liquid.expression import IntegerLiteral
-from liquid.expression import FloatLiteral
+from liquid.expression import Nil
 from liquid.expression import RangeLiteral
-
-from liquid.token import reverse_operators
-from liquid.token import TOKEN_TRUE
+from liquid.expression import StringLiteral
+from liquid.limits import to_int
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_EMPTY
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_IDENTSTRING
-from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_NEWLINE
 from liquid.token import TOKEN_NIL
 from liquid.token import TOKEN_NULL
-from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_EMPTY
-from liquid.token import TOKEN_FALSE
-from liquid.token import TOKEN_NEWLINE
-from liquid.token import TOKEN_SKIP
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_OR
-
-from liquid.exceptions import LiquidSyntaxError
-from liquid.limits import to_int
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_SKIP
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
+from liquid.token import reverse_operators
 
 if TYPE_CHECKING:
     from liquid.expressions.stream import TokenStream
@@ -165,8 +163,9 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
 def parse_string_or_identifier(
     stream: "TokenStream",
 ) -> Union[StringLiteral, Identifier]:
-    """Parse an expression from a stream of tokens. If the stream is not at a string or
-    identifier expression, raise a syntax error.
+    """Parse an expression from a stream of tokens.
+
+    If the stream is not at a string or identifier expression, raise a syntax error.
     """
     typ = stream.current[1]
     if typ in (TOKEN_IDENTIFIER, TOKEN_LBRACKET):
@@ -182,8 +181,11 @@ def parse_string_or_identifier(
 
 
 def parse_unchained_identifier(stream: "TokenStream") -> Identifier:
-    """Parse an identifier from a stream of tokens. If the stream is not at an
-    identifier or the identifier is chained, raise a syntax error."""
+    """Parse an identifier from a stream of tokens.
+
+    If the stream is not at an identifier or the identifier is chained, raise a syntax
+    error.
+    """
     tok = stream.current
     ident = parse_identifier(stream)
     if len(ident.path) != 1:
@@ -194,9 +196,7 @@ def parse_unchained_identifier(stream: "TokenStream") -> Identifier:
 def make_parse_range(
     parse_obj: Callable[["TokenStream"], Expression]
 ) -> Callable[["TokenStream"], RangeLiteral]:
-    """Return a function that parse range expressions using the given parse_obj
-    callable.
-    """
+    """Return a function that parses range expressions using _parse_obj_."""
 
     def _parse_range_literal(stream: "TokenStream") -> RangeLiteral:
         """Read a range literal from the token stream.
@@ -251,8 +251,11 @@ _IDENT_TOKENS = frozenset(
 
 
 def _parse_common_identifier(stream: "TokenStream") -> Identifier:
-    """This is much like `parse_identifier`, but leaves the last ident
-    token on the stream."""
+    """Parse an identifier from a stream of tokens.
+
+    This is much like `parse_identifier`, but leaves the last ident
+    token on the stream.
+    """
     path: IdentifierPath = []
 
     while True:

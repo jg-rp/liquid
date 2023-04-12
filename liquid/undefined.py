@@ -15,8 +15,9 @@ UNDEFINED = object()
 
 
 class Undefined(Mapping[Any, object]):
-    """The default undefined type. Always evaluates to an empty string. Can be iterated
-    over and indexed without error.
+    """The default undefined type.
+
+    Always evaluates to an empty string. Can be iterated over and indexed without error.
     """
 
     __slots__ = ("name", "obj", "hint")

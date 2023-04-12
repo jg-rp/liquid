@@ -4,9 +4,8 @@ from liquid.ast import IllegalNode
 from liquid.exceptions import LiquidSyntaxError
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_ILLEGAL
 
 
 class Illegal(Tag):
@@ -15,7 +14,7 @@ class Illegal(Tag):
     name = TOKEN_ILLEGAL
     block = False
 
-    def parse(self, stream: TokenStream) -> IllegalNode:
+    def parse(self, stream: TokenStream) -> IllegalNode:  # noqa: D102
         tok = stream.current
         stream.next_token()
 

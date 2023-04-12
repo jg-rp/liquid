@@ -3,49 +3,41 @@ from __future__ import annotations
 
 import itertools
 import sys
-
-from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Dict
 from typing import List
 from typing import NamedTuple
+from typing import Optional
 from typing import TextIO
 from typing import Union
-from typing import TYPE_CHECKING
 
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
-from liquid.context import is_undefined
-from liquid.context import Undefined
+from liquid.builtin.tags.include_tag import TAG_INCLUDE
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
-
-from liquid.expression import Expression
+from liquid.context import Undefined
+from liquid.context import is_undefined
 from liquid.expression import NIL
-
+from liquid.expression import Expression
 from liquid.expressions import parse_call_arguments
 from liquid.expressions import parse_macro_arguments
-from liquid.expressions.arguments.parse import Argument
-
+from liquid.extra.tags.extends import TAG_BLOCK
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.builtin.tags.include_tag import TAG_INCLUDE
-from liquid.extra.tags.extends import TAG_BLOCK
-
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.expressions.arguments.parse import Argument
+    from liquid.stream import TokenStream
 
+# ruff: noqa: D102
 
 TAG_MACRO = sys.intern("macro")
 TAG_ENDMACRO = sys.intern("endmacro")
@@ -96,7 +88,7 @@ class MacroNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"MacroNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(self, context: Context, _: TextIO) -> Optional[bool]:
         if "macros" not in context.tag_namespace:
             context.tag_namespace["macros"] = {}
 

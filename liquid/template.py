@@ -1,12 +1,11 @@
 """Liquid template definition."""
 from __future__ import annotations
 
-from collections import abc
 from collections import Counter
-
+from collections import abc
 from io import StringIO
 from pathlib import Path
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
 from typing import Dict
@@ -14,7 +13,6 @@ from typing import Iterator
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 from typing import Union
 
 from liquid.context import Context
@@ -22,23 +20,19 @@ from liquid.context import FutureContext
 from liquid.context import FutureVariableCaptureContext
 from liquid.context import ReadOnlyChainMap
 from liquid.context import VariableCaptureContext
-
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import StopRender
-
 from liquid.output import LimitedStringIO
-
-from liquid.static_analysis import _TemplateCounter
 from liquid.static_analysis import ContextualTemplateAnalysis
 from liquid.static_analysis import NameRefs
-from liquid.static_analysis import Refs
 from liquid.static_analysis import ReferencedVariable
+from liquid.static_analysis import Refs
 from liquid.static_analysis import TemplateAnalysis
+from liquid.static_analysis import _TemplateCounter
 
-
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
     from liquid.ast import ParseTree
     from liquid.loaders import UpToDate
@@ -59,8 +53,7 @@ __all__ = (
 
 
 class BoundTemplate:
-    """A liquid template that has been parsed and is bound to a
-    :class:`liquid.Environment`.
+    """A liquid template that has been parsed and is bound to a `liquid.Environment`.
 
     You probably don't want to instantiate :class:`BoundTemplate` directly. Use
     :meth:`liquid.Environment.from_string` or :meth:`liquid.Environment.get_template`
@@ -90,14 +83,13 @@ class BoundTemplate:
     context_class = Context
     capture_context_class = VariableCaptureContext
 
-    # pylint: disable=redefined-builtin, too-many-arguments
     def __init__(
         self,
         env: Environment,
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[Dict[str, object]] = None,
+        globals: Optional[Dict[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):
@@ -227,8 +219,7 @@ class BoundTemplate:
 
     @property
     def is_up_to_date(self) -> bool:
-        """False if the template was modified since it was last parsed,
-        True otherwise."""
+        """`False` if the template has bee modified, `True` otherwise."""
         if not self.uptodate:
             return True
 
@@ -254,8 +245,7 @@ class BoundTemplate:
         return uptodate
 
     def make_globals(self, render_args: Mapping[str, object]) -> Mapping[str, object]:
-        """Return a mapping aggregated from render arguments, template globals and
-        matter variables."""
+        """Return a mapping including render arguments and template globals."""
         return ReadOnlyChainMap(
             render_args,
             self.matter,
@@ -267,8 +257,10 @@ class BoundTemplate:
         partial: bool,
         render_args: Mapping[str, object],
     ) -> Mapping[str, object]:
-        """Return a namespace dictionary. This is used by `render_with_context` to
-        extend an existing context."""
+        """Return a namespace dictionary.
+
+        This is used by `render_with_context` to extend an existing context.
+        """
         return {**render_args, "partial": partial}
 
     def __repr__(self) -> str:
@@ -391,14 +383,13 @@ class BoundTemplate:
 
 
 class AwareBoundTemplate(BoundTemplate):
-    """A `BoundTemplate` subclass that automatically includes a `TemplateDrop` in the
-    global namespace."""
+    """A `BoundTemplate` subclass with a `TemplateDrop` in the global namespace."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.drop = TemplateDrop(self.name, self.path)
 
-    def make_partial_namespace(
+    def make_partial_namespace(  # noqa: D102
         self,
         partial: bool,
         render_args: Mapping[str, object],
@@ -410,8 +401,7 @@ class AwareBoundTemplate(BoundTemplate):
 
 
 class FutureBoundTemplate(BoundTemplate):
-    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
-    context.
+    """A `BoundTemplate` configured to use the `FutureContext` render context.
 
     See :class:`liquid.future.Environment`.
     """
@@ -421,8 +411,9 @@ class FutureBoundTemplate(BoundTemplate):
 
 
 class FutureAwareBoundTemplate(AwareBoundTemplate):
-    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
-    context, and includes a `TemplateDrop` in each render context.
+    """A `BoundTemplate` configured to use the ``FutureContext`` render context.
+
+    Inserts a `TemplateDrop` into the global namespace automatically.
 
     See :class:`liquid.future.Environment`.
     """

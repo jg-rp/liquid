@@ -1,38 +1,35 @@
 """Tag and node definition for the built-in "case" tag."""
 from __future__ import annotations
-import sys
 
+import sys
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 
+from liquid import ast
 from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
-
-from liquid.expressions.common import tokenize_common_expression
 from liquid.expressions.common import parse_common_expression
+from liquid.expressions.common import tokenize_common_expression
 from liquid.expressions.stream import TokenStream as ExpressionTokenStream
-
-from liquid.token import Token
+from liquid.parse import expect
+from liquid.parse import get_parser
+from liquid.tag import Tag
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_TAG
-
-
-from liquid.parse import get_parser
-from liquid.parse import expect
-
-from liquid import ast
-from liquid.tag import Tag
-from liquid.context import Context
-from liquid.stream import TokenStream
+from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.context import Context
     from liquid.expression import Expression
+    from liquid.stream import TokenStream
+
+# ruff: noqa: D102
 
 TAG_CASE = sys.intern("case")
 TAG_ENDCASE = sys.intern("endcase")
@@ -63,10 +60,7 @@ class CaseNode(ast.Node):
         )
 
     def __str__(self) -> str:
-        if not self.whens:
-            buf = ["if (False) { }"]
-        else:
-            buf = [f"if {self.whens[0]}"]
+        buf = ["if (False) { }"] if not self.whens else [f"if {self.whens[0]}"]
 
         if len(self.whens) > 1:
             for when in self.whens[1:]:

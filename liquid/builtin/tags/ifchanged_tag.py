@@ -1,29 +1,27 @@
 """Tag and node definition for the built-in "ifchanged" tag."""
 from __future__ import annotations
-import sys
 
+import sys
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.stream import TokenStream
 from liquid.tag import Tag
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
-if TYPE_CHECKING:  # pragma: no cover
-    from liquid.context import Context
+if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.context import Context
+    from liquid.stream import TokenStream
 
+# ruff: noqa: D102
 
 TAG_IFCHANGED = sys.intern("ifchanged")
 TAG_ENDIFCHANGED = sys.intern("endifchanged")
@@ -32,7 +30,7 @@ ENDIFCHANGEDBLOCK = frozenset((TAG_ENDIFCHANGED,))
 
 
 class IfChangedNode(Node):
-    """Parse tree node for the built-in "ifchanged" tag"""
+    """Parse tree node for the built-in "ifchanged" tag."""
 
     __slots__ = ("tok", "block")
 
@@ -77,7 +75,7 @@ class IfChangedNode(Node):
 
 
 class IfChangedTag(Tag):
-    """The built-in "ifchanged" tag"""
+    """The built-in "ifchanged" tag."""
 
     name = TAG_IFCHANGED
     end = TAG_ENDIFCHANGED

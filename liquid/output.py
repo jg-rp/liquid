@@ -18,7 +18,7 @@ class LimitedStringIO(StringIO):
         self.limit = limit
         self.size = 0
 
-    def write(self, __s: str) -> int:
+    def write(self, __s: str) -> int:  # noqa: D102
         if __s:
             self.size += len(__s.encode("utf-8"))
             if self.size > self.limit:

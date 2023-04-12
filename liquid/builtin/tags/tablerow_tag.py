@@ -1,33 +1,29 @@
 """Tag and node definition for the built-in "tablerow" tag."""
 import sys
-
 from typing import Any
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
-from typing import Iterator
 
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
-
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
 from liquid.context import Context
-from liquid.expression import LoopExpression
 from liquid.expression import NIL
+from liquid.expression import LoopExpression
 from liquid.limits import to_int
-
 from liquid.parse import expect
 from liquid.parse import get_parser
-
-from liquid.tag import Tag
 from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
+# ruff: noqa: D102
 
 TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
@@ -35,7 +31,6 @@ TAG_ENDTABLEROW = sys.intern("endtablerow")
 END_TAGBLOCK = frozenset((TAG_ENDTABLEROW,))
 
 
-# pylint: disable=too-many-instance-attributes
 class TableRow(Mapping[str, object]):
     """Table row helper variables."""
 
@@ -135,7 +130,7 @@ class TableRow(Mapping[str, object]):
 
     @property
     def col_first(self) -> bool:
-        """True if this is the first column. False otherwise"""
+        """True if this is the first column. False otherwise."""
         return self._col == 1
 
     @property

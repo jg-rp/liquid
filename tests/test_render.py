@@ -1,21 +1,18 @@
 """Liquid render tests."""
-# pylint: disable=missing-function-docstring,too-many-public-methods,missing-class-docstring
 import asyncio
 import unittest
-
 from typing import List
 
+from liquid import golden
 from liquid.environment import Environment
+from liquid.exceptions import Error
 from liquid.future import Environment as FutureEnvironment
+from liquid.golden.case import Case
+from liquid.loaders import DictLoader
+from liquid.mode import Mode
 from liquid.template import AwareBoundTemplate
 from liquid.template import BoundTemplate
 from liquid.template import FutureAwareBoundTemplate
-from liquid.mode import Mode
-from liquid.loaders import DictLoader
-
-from liquid import golden
-from liquid.exceptions import Error
-from liquid.golden.case import Case
 
 
 class RenderTestCase(unittest.TestCase):

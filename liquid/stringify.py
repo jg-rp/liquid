@@ -1,8 +1,8 @@
 """Stringify a Python object ready for output in a Liquid template."""
 from typing import Any
 
-from liquid import escape
 from liquid import Markup
+from liquid import escape
 from liquid import soft_str
 
 
