@@ -1,16 +1,16 @@
 <h1 align="center">Python Liquid</h1>
 
-<p align="center">
+<p align="center" style="margin-bottom: 5px">
 A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
 </p>
 
-<p align="center">
+<p align="center" style="margin-bottom: 5px">
   <a href="https://github.com/jg-rp/liquid/blob/main/LICENSE">
     <img src="https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square" alt="License">
   </a>
 </p>
 
-<p align="center">
+<p align="center" style="margin-bottom: 5px">
   <a href="https://pypi.org/project/python-liquid/">
     <img src="https://img.shields.io/pypi/v/python-liquid.svg?style=flat-square" alt="PyPi - Version">
   </a>
@@ -19,7 +19,7 @@ A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a
   </a>
 </p>
 
-<p align="center">
+<p align="center" style="margin-bottom: 5px">
   <a href="https://pypi.org/project/python-liquid/">
     <img src="https://img.shields.io/pypi/pyversions/python-liquid.svg?style=flat-square" alt="Python versions">
   </a>
@@ -28,7 +28,7 @@ A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a
   </a>
 </p>
 
-<p align="center">
+<p align="center" style="margin-bottom: 5px">
   <a href="https://github.com/jg-rp/liquid/actions/workflows/tests.yaml">
     <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
   </a>
@@ -53,20 +53,20 @@ A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a
 
 Install Python Liquid using [Pipenv](https://pipenv.pypa.io/en/latest/):
 
-```console
-pipenv install -u python-liquid
+```shell
+$ pipenv install -u python-liquid
 ```
 
 Or [pip](https://pip.pypa.io/en/stable/getting-started/):
 
-```console
-pip install python-liquid
+```shell
+$ pip install python-liquid
 ```
 
 Or from [conda-forge](https://anaconda.org/conda-forge/python-liquid):
 
-```console
-conda install -c conda-forge python-liquid
+```shell
+$ conda install -c conda-forge python-liquid
 ```
 
 ## Links

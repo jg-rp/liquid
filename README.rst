@@ -1,0 +1,1 @@
+Python Liquid's README has moved to `README.md <https://github.com/jg-rp/liquid/blob/main/README.md>`_.
