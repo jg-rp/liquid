@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "python-liquid"
 dynamic = ["version"]
 description = "A Python engine for the Liquid template language."
-readme = "README.rst"
+readme = "README.md"
 license = "MIT"
 requires-python = ">=3.7"
 authors = [{ name = "James Prior", email = "jamesgr.prior@gmail.com" }]
@@ -29,7 +29,7 @@ dependencies = ["python-dateutil>=2.8.1", "typing-extensions>=4.2.0"]
 autoescape = ["MarkupSafe>=2.0.0"]
 
 [project.urls]
-"Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.rst"
+"Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
 Documentation = "https://jg-rp.github.io/liquid/"
 Homepage = "https://jg-rp.github.io/liquid/"
 "Issue Tracker" = "https://github.com/jg-rp/liquid/issues"
