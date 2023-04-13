@@ -782,7 +782,9 @@ class AutoescapeTestCase(TestCase):
                 self.assertEqual(result, case.expect)
 
 
-@skipIf(markupsafe is not None, "this tests exceptions raise by the lack of markupsafe")
+@skipIf(
+    markupsafe is not None, "this tests exceptions raised by the lack of markupsafe"
+)
 class DummyMarkupSafeTestCase(TestCase):
     def test_dummy_escape(self):
         """Test that the dummy definition of escape raises an exception."""

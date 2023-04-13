@@ -382,7 +382,7 @@ def parse_identifier(stream: TokenStream) -> expression.Identifier:
     return expression.Identifier(path)
 
 
-def parse_string_or_identifier(
+def parse_string_or_identifier(  # pragma: no cover
     stream: TokenStream,
     linenum: Optional[int] = None,
 ) -> expression.Expression:
@@ -717,7 +717,9 @@ class ExpressionParser:
         filters = self.parse_filters(stream)
         return expression.FilteredExpression(expr, filters)
 
-    def parse_boolean_expression_value(self, value: str) -> expression.Expression:
+    def parse_boolean_expression_value(
+        self, value: str
+    ) -> expression.Expression:  # pragma: no cover
         """Parse the given string as a boolean expression."""
         return self.parse_boolean_expression(
             TokenStream(tokenize_boolean_expression(value))

@@ -47,7 +47,6 @@ dependencies = [
     "pytest-cov",
     "black",
     "mypy",
-    "ipython",
     "pyyaml",
     "types-pyyaml",
     "twine",
@@ -58,7 +57,14 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+cov = [
+    "hatch run noescape:cov",
+    "pytest --cov-append --cov-report= --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
+]
+cov-html = [
+    "hatch run noescape:cov",
+    "pytest --cov-append --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
+]
 no-cov = "cov --no-cov {args}"
 test = "pytest {args}"
 lint = "ruff check ."
@@ -70,10 +76,20 @@ python = ["37", "38", "39", "310", "311", "pypy38", "pypy39"]
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
 
+
+[tool.hatch.envs.noescape]
+template = "noescape"
+features = []
+dependencies = ["pytest", "pytest-cov", "mock"]
+
+[tool.hatch.envs.noescape.scripts]
+cov = "pytest --cov-report= --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+test = "pytest {args}"
+
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = []
+omit = ["tests/mocks/**/*", "liquid/__about__.py"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]

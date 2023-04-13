@@ -275,24 +275,24 @@ class MockAsyncDrop(abc.Mapping):
         self.call_count = 0
         self.await_count = 0
 
-    def __len__(self):
+    def __len__(self):  # pragma: no cover
         return 1
 
-    def __iter__(self):
+    def __iter__(self):  # pragma: no cover
         return iter([self.key])
 
     def __getitem__(self, k):
         self.call_count += 1
         if k == self.key:
             return self.val
-        raise KeyError(k)
+        raise KeyError(k)  # pragma: no cover
 
     async def __getitem_async__(self, k):
         # Do IO here
         self.await_count += 1
         if k == self.key:
             return self.val
-        raise KeyError(k)
+        raise KeyError(k)  # pragma: no cover
 
 
 class AsyncDropTestCase(unittest.TestCase):
