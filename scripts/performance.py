@@ -6,6 +6,7 @@ total of 34 .liquid files, 4 of which are a theme.liquid, `Template.render`
 and/or `env.from_string` will be called 60 times per loop.
 """
 import cProfile
+import os
 import pathlib
 import sys
 import timeit
@@ -19,6 +20,8 @@ from typing import NamedTuple
 from typing import Optional
 
 import yaml
+
+sys.path.insert(0, os.getcwd())
 
 from liquid.environment import Environment
 from liquid.lex import get_lexer
@@ -54,7 +57,7 @@ from tests.mocks.filters.weight import weight_with_unit
 from tests.mocks.tags.form_tag import CommentFormTag
 from tests.mocks.tags.paginate_tag import PaginateTag
 
-# ruff: noqa: D102 D205 D103 T201
+# ruff: noqa: D102 D205 D103 T201 E402
 
 
 class ThemedTemplate(NamedTuple):

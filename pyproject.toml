@@ -69,6 +69,8 @@ no-cov = "cov --no-cov {args}"
 test = "pytest {args}"
 lint = "ruff check ."
 typing = "mypy"
+benchmark = "python -O scripts/performance.py"
+profile = "python -O scripts/performance.py --profile"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["37", "38", "39", "310", "311", "pypy38", "pypy39"]
@@ -203,3 +205,4 @@ convention = "google"
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
 "docs/conf.py" = ["D100", "E402", "A001"]
+"scripts/__init__.py" = ["D104", "I001"]

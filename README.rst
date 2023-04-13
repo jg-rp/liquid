@@ -102,7 +102,7 @@ if you notice an incompatibility.
 Benchmark
 ---------
 
-You can run the benchmark using ``make benchmark`` (or ``python -O performance.py`` if
+You can run the benchmark using ``hatch run benchmark`` (or ``python -O scripts/performance.py`` if
 you don't have ``make``) from the root of the source tree. On my ropey desktop computer
 with a Ryzen 5 1500X and Python 3.11.0, we get the following results.
 
