@@ -1,22 +1,17 @@
-name: Typing
+name: typing
 on: [push, pull_request]
 
 jobs:
-  typing:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-          cache: 'pip'
-      - name: cache mypy
-        uses: actions/cache@v3
-        with:
-          path: ./.mypy_cache
-          key: mypy|${{ matrix.python }}|${{ hashFiles('setup.cfg') }}
-        if: matrix.tox == 'typing'
-      - run: pip install tox
-      - run: python -m tox -e typing
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade hatch
+      - run: hatch run typing

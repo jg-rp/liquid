@@ -1,21 +1,17 @@
-name: Coverage
+name: coverage
 on: [push, pull_request]
 
 jobs:
-  coverage:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-          cache: 'pip'
-      - run: pip install tox coverage
-      - name: combine coverage
+          python-version: "3.10"
+      - name: Install dependencies
         run: |
-          python -m coverage erase
-          python -m tox -c tox_cov.ini
-          python -m coverage combine
-          python -m coverage report --fail-under=98
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade hatch
+      - run: hatch run cov
