@@ -10,7 +10,7 @@ Hi. Your contributions and questions are always welcome. Feel free to ask questi
 
 ## Development
 
-We use [hatch](https://hatch.pypa.io/latest/) to manage project dependencies and manage development environments.
+We use [hatch](https://hatch.pypa.io/latest/) to manage project dependencies and development environments.
 
 Run tests with the _test_ script.
 
@@ -18,7 +18,7 @@ Run tests with the _test_ script.
 $ hatch run test
 ```
 
-Or to test against the full matrix of supported Python versions.
+Or, to test against the full matrix of supported Python versions.
 
 ```shell
 $ hatch run test:test

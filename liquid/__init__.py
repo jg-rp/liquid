@@ -36,6 +36,9 @@ from .template import FutureBoundTemplate
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
+from .static_analysis import TemplateAnalysis
+from .static_analysis import ContextualTemplateAnalysis
+
 from . import future
 
 __all__ = (
@@ -43,6 +46,7 @@ __all__ = (
     "BoundTemplate",
     "ChoiceLoader",
     "Context",
+    "ContextualTemplateAnalysis",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
     "DictLoader",
@@ -52,8 +56,8 @@ __all__ = (
     "FileExtensionLoader",
     "FileSystemLoader",
     "future",
-    "FutureBoundTemplate",
     "FutureAwareBoundTemplate",
+    "FutureBoundTemplate",
     "FutureContext",
     "is_undefined",
     "Markup",
@@ -63,6 +67,7 @@ __all__ = (
     "StrictUndefined",
     "TagAnalysis",
     "Template",
+    "TemplateAnalysis",
     "Token",
     "Undefined",
 )

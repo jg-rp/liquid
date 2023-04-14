@@ -1,0 +1,44 @@
+site_name: Python Liquid
+site_description: A Python engine for the Liquid template language.
+
+theme:
+  name: readthedocs
+  features:
+    - navigation.sections
+    - content.code.copy
+
+repo_name: jg-rp/liquid
+repo_url: https://github.com/jg-rp/liquid
+edit_uri: ""
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_signature_annotations: true
+            show_root_heading: true
+            separate_signature: true
+            docstring_section_style: "spacy"
+  - autorefs
+
+nav:
+  - Introduction: "index.md"
+  - API Reference:
+      - High Level API: "api.md"
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+watch:
+  - liquid

@@ -88,6 +88,13 @@ dependencies = ["pytest", "pytest-cov", "mock"]
 cov = "pytest --cov-report= --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 test = "pytest {args}"
 
+[tool.hatch.envs.docs]
+dependencies = ["black", "mkdocs", "mkdocstrings[python]"]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+serve = "mkdocs serve --dev-addr localhost:8000"
+
 [tool.coverage.run]
 branch = true
 parallel = true
@@ -204,5 +211,4 @@ convention = "google"
 "liquid/builtin/filters/__init__.py" = ["D104", "I001"]
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
-"docs/conf.py" = ["D100", "E402", "A001"]
 "scripts/__init__.py" = ["D104", "I001"]
