@@ -60,7 +60,7 @@ Then open `htmlcov/index.html` in your browser.
 
 [Documentation](https://jg-rp.github.io/liquid/>) is built using [Docusaurus](https://docusaurus.io/). Find the source in the [docs branch](https://github.com/jg-rp/liquid/tree/docs) of this repository.
 
-The `docs` folder in the root of this repository contains older, sphinx-based docs, still hosted on [Read the Docs](https://liquid.readthedocs.io/en/latest/). The plan is to generate API Documentation for Docusaurus from Python doc comments. The older docs will be kept until such time that better Docusaurus/sphinx integration is available or a workaround is found.
+The `docs` folder in the root of this repository contains docs generated from Python docstrings, hosted on [Read the Docs](https://liquid.readthedocs.io/en/latest/). The plan is to mirror this API documentation to the Docusaurus site with the help of [Griffe](https://mkdocstrings.github.io/griffe/).
 
 ## Style Guides
 
@@ -72,4 +72,4 @@ There are no hard rules for git commit messages, although you might like to indi
 
 All Python files are formatted using [Black](https://github.com/psf/black), with its default configuration.
 
-Docstrings must use the [Sphinx docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
+Docstrings must use [Google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
