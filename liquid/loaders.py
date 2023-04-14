@@ -1,8 +1,4 @@
-"""Base class and file system implementation for loading template sources.
-
-Modelled after Jinja2 template loaders.
-See https://github.com/pallets/jinja/blob/master/src/jinja2/loaders.py
-"""
+"""Base class and file system implementation for loading template sources."""
 from __future__ import annotations
 
 import asyncio
@@ -36,19 +32,15 @@ UpToDate = Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
 
 
 class TemplateSource(NamedTuple):
-    """A Liquid template source as returned by the ``get_source`` method of a `loader`.
+    """A Liquid template source as returned by the `get_source` method of a `loader`.
 
-    :param source: The liquid template source code.
-    :type source: str
-    :param filename: The liquid template file name or other string identifying its
-        origin.
-    :type filename: str
-    :param uptodate: Optional callable that will return ``True`` if the template is up
-        to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
-    :type uptodate: Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
-    :param matter: Optional mapping containing variables associated with the template.
-        Could be "front matter" or other meta data.
-    :type matter: Optional[Mapping[str, object]]
+    Attributes:
+        source: The liquid template source code.
+        filename: The liquid template file name or other string identifying its origin.
+        uptodate: Optional callable that will return `True` if the template is up to
+            date, or `False` if it needs to be reloaded.
+        matter: Optional mapping containing variables associated with the template.
+            Could be "front matter" or other meta data.
     """
 
     source: str
@@ -67,13 +59,9 @@ class BaseLoader(ABC):  # noqa: B024
     ) -> TemplateSource:
         """Get the template source, filename and reload helper for a template.
 
-        :param env: The :class:`Environment` attempting to load the template source
-            text.
-        :type env: liquid.Environment
-        :param template_name: A name or identifier for a template's source text.
-        :type template_name: str
-        :returns: Template source text and meta data.
-        :rtype: TemplateSource
+        Args:
+            env: The `Environment` attempting to load the template source text.
+            template_name: A name or identifier for a template's source text.
         """
         raise NotImplementedError("template loaders must implement a get_source method")
 
@@ -99,7 +87,7 @@ class BaseLoader(ABC):  # noqa: B024
         Keyword arguments can be useful for multi-user environments where you need to
         modify a template loader's search space for a given user.
 
-        By default, this method delegates to :meth:`get_source`, ignoring any keyword
+        By default, this method delegates to `get_source`, ignoring any keyword
         arguments.
         """
         return self.get_source(env, template_name)
@@ -107,7 +95,7 @@ class BaseLoader(ABC):  # noqa: B024
     async def get_source_with_args_async(
         self, env: Environment, template_name: str, **kwargs: object
     ) -> TemplateSource:
-        """An async version of :meth:`get_source_with_args`."""
+        """An async version of `get_source_with_args`."""
         return self.get_source_with_args(env, template_name, **kwargs)
 
     def get_source_with_context(
@@ -187,10 +175,10 @@ class BaseLoader(ABC):  # noqa: B024
     ) -> BoundTemplate:
         """Load template source text, optionally referencing extra keyword arguments.
 
-        Most custom loaders will want to override :meth:`get_source_with_args` rather
-        than this method. For example, you might want to override ``load_with_args``
-        and :meth:`get_source_with_args` when implementing a custom caching loader.
-        Where cache handling happens in ``load_*`` methods.
+        Most custom loaders will want to override `get_source_with_args()` rather than
+        this method. For example, you might want to override `load_with_args()` and
+        `get_source_with_args()` when implementing a custom caching loader. Where cache
+        handling happens in `load_*` methods.
         """
         try:
             source, filename, uptodate, matter = self.get_source_with_args(
@@ -216,7 +204,7 @@ class BaseLoader(ABC):  # noqa: B024
         globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
-        """An async version of :meth:`load_with_args`."""
+        """An async version of `load_with_args()`."""
         try:
             template_source = await self.get_source_with_args_async(env, name, **kwargs)
             source, filename, uptodate, matter = template_source
@@ -288,11 +276,9 @@ class BaseLoader(ABC):  # noqa: B024
 class FileSystemLoader(BaseLoader):
     """A loader that loads templates from one or more directories on the file system.
 
-    :param search_path: One or more paths to search.
-    :type search_path: Union[str, Path, Iterable[Union[str, Path]]]
-    :param encoding: Open template files with the given encoding. Defaults to
-        ``"utf-8"``.
-    :type encoding: str
+    Args:
+        search_path: One or more paths to search.
+        encoding: Open template files with the given encoding.
     """
 
     def __init__(
@@ -363,14 +349,10 @@ class FileSystemLoader(BaseLoader):
 class FileExtensionLoader(FileSystemLoader):
     """A file system loader that adds a file name extension if one is missing.
 
-    :param search_path: One or more paths to search.
-    :type search_path: Union[str, Path, Iterable[Union[str, Path]]]
-    :param encoding: Open template files with the given encoding. Defaults to
-        ``"utf-8"``.
-    :type encoding: str
-    :param ext: A default file extension. Should include a leading period. Defaults to
-        ``.liquid``.
-    :type ext: str
+    : Args:
+        search_path: One or more paths to search.
+        encoding: Open template files with the given encoding.
+        ext: A default file extension. Should include a leading period.
     """
 
     def __init__(
@@ -404,8 +386,8 @@ class FileExtensionLoader(FileSystemLoader):
 class DictLoader(BaseLoader):
     """A loader that loads templates from a dictionary.
 
-    :param templates: A dictionary mapping template names to template source strings.
-    :type templates: Dict[str, str]
+    Args:
+        templates: A dictionary mapping template names to template source strings.
     """
 
     def __init__(self, templates: Dict[str, str]):
@@ -424,8 +406,8 @@ class DictLoader(BaseLoader):
 class ChoiceLoader(BaseLoader):
     """A template loader that will try each of a list of loaders in turn.
 
-    :param loaders: A list of loaders implementing :class:`liquid.loaders.BaseLoader`.
-    :type loaders: List[BaseLoader]
+    Args:
+        loaders: A list of loaders implementing `liquid.loaders.BaseLoader`.
     """
 
     def __init__(self, loaders: List[BaseLoader]):

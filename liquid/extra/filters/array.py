@@ -39,7 +39,7 @@ def sort_numeric(left: Sequence[object], key: object = None) -> List[object]:
 
 
 def _getitem(sequence: Any, key: object, default: object = None) -> Any:
-    """Item getter for the ``sort_numeric`` filter."""
+    """Item getter for the `sort_numeric` filter."""
     try:
         return getitem(sequence, key)
     except (KeyError, IndexError, TypeError):
@@ -47,7 +47,7 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
 
 
 def _ints(obj: object) -> Tuple[Union[int, float, Decimal], ...]:
-    """Key function for the ``sort_numeric`` filter."""
+    """Key function for the `sort_numeric` filter."""
     if isinstance(obj, bool):
         # isinstance(False, int) == True
         return (math.inf,)

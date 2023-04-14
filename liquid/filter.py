@@ -28,8 +28,8 @@ def with_context(_filter: FilterT) -> FilterT:
     If a function is decorated with `with_context`, that function should
     accept a `context` keyword argument, being the active render context.
 
-    :param _filter: The filter function to decorate.
-    :type _filter: Callable[..., Any]
+    Args:
+        _filter: The filter function to decorate.
     """
     _filter.with_context = True  # type: ignore
     return _filter
@@ -41,8 +41,8 @@ def with_environment(_filter: FilterT) -> FilterT:
     If a function is decorated with `with_environment`, that function should
     accept an `environment` keyword argument, being the active environment.
 
-    :param _filter: The filter function to decorate.
-    :type _filter: Callable[..., Any]
+    Args:
+        _filter: The filter function to decorate.
     """
     _filter.with_environment = True  # type: ignore
     return _filter

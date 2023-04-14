@@ -3,7 +3,7 @@
 A Python implementation of [Liquid](https://shopify.github.io/liquid/), the safe customer-facing template language for flexible web apps.
 
 !!! info
-    Python Liquid documentation has moved to [https://jg-rp.github.io/liquid/](https://jg-rp.github.io/liquid/).
+    See [https://jg-rp.github.io/liquid/](https://jg-rp.github.io/liquid/) for guides, [tag and filter references](https://jg-rp.github.io/liquid/language/tags) and extra, non-standard plugins.
 
 ## Install
 

@@ -174,9 +174,9 @@ async def _liquid_last_async(
 class Context:
     """A template render context.
 
-    A new render context is created automatically each time :meth:`BoundTemplate.render`
-    is called, which includes `globals` set on the bound :class:`liquid.Environment` and
-    :class:`liquid.template.BoundTemplate`.
+    A new render context is created automatically each time `BoundTemplate.render`
+    is called, which includes `globals` set on the bound `liquid.Environment` and
+    `liquid.template.BoundTemplate`.
     """
 
     __slots__ = (
@@ -465,7 +465,7 @@ class Context:
 
     @contextmanager
     def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[Context]:
-        """Just like ``Context.extend``, but keeps track of ForLoop objects too."""
+        """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
         with self.extend(namespace) as context:

@@ -19,7 +19,7 @@ from liquid.token import TOKEN_STATEMENT
 
 class InlineIfStatement(Statement):
     """A drop-in replacement for the standard output statement that supports
-    inline ``if`` expressions.
+    inline `if` expressions.
     """
 
     def parse(self, stream: TokenStream) -> StatementNode:
@@ -31,8 +31,8 @@ class InlineIfStatement(Statement):
 
 
 class InlineIfAssignTag(AssignTag):
-    """A drop-in replacement for the standard ``assign`` tag that supports
-    inline ``if`` expressions.
+    """A drop-in replacement for the standard `assign` tag that supports
+    inline `if` expressions.
     """
 
     def _parse_expression(self, value: str) -> Expression:
@@ -40,8 +40,8 @@ class InlineIfAssignTag(AssignTag):
 
 
 class InlineIfEchoTag(EchoTag):
-    """A drop-in replacement for the standard ``echo`` tag that supports
-    inline ``if`` expressions.
+    """A drop-in replacement for the standard `echo` tag that supports
+    inline `if` expressions.
     """
 
     def _parse_expression(self, value: str) -> Expression:
@@ -50,7 +50,7 @@ class InlineIfEchoTag(EchoTag):
 
 class InlineIfStatementWithParens(Statement):
     """A drop-in replacement for the standard output statement that supports
-    inline ``if`` expressions with the logical ``not`` operator and grouping
+    inline `if` expressions with the logical `not` operator and grouping
     terms with parentheses.
     """
 
@@ -63,8 +63,8 @@ class InlineIfStatementWithParens(Statement):
 
 
 class InlineIfAssignTagWithParens(AssignTag):
-    """A drop-in replacement for the standard ``assign`` tag that supports
-    inline ``if`` expressions with the logical ``not`` operator and grouping
+    """A drop-in replacement for the standard `assign` tag that supports
+    inline `if` expressions with the logical `not` operator and grouping
     terms with parentheses.
     """
 
@@ -73,8 +73,8 @@ class InlineIfAssignTagWithParens(AssignTag):
 
 
 class InlineIfEchoTagWithParens(EchoTag):
-    """A drop-in replacement for the standard ``echo`` tag that supports
-    inline ``if`` expressions with the logical ``not`` operator and grouping
+    """A drop-in replacement for the standard `echo` tag that supports
+    inline `if` expressions with the logical `not` operator and grouping
     terms with parentheses.
     """
 

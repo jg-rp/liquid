@@ -75,7 +75,7 @@ class DebugUndefined(Undefined):
 
 
 class StrictUndefined(Undefined):
-    """An undefined that raises an exception for everything other than ``repr``."""
+    """An undefined that raises an exception for everything other than `repr`."""
 
     __slots__ = ("msg",)
 

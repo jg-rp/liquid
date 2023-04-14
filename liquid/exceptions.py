@@ -31,14 +31,14 @@ class Error(Exception):
 
     @property
     def message(self) -> object:
-        """Return the exception's error message if one was given."""
+        """The exception's error message if one was given."""
         if self.args:
             return self.args[0]
         return None
 
     @property
     def name(self) -> str:
-        """Return the name of the template that raised this exception.
+        """The name of the template that raised this exception.
 
         An empty string is return if a name is not available.
         """
@@ -56,9 +56,9 @@ class LiquidInterrupt(Exception):
 class StopRender(Exception):
     """Template inheritance interrupt.
 
-    An interrupt used to signal that ``BoundTemplate.render_with_context`` should
-    stop rendering more nodes. This is used by template inheritance tags and is not
-    an error condition.
+    An interrupt used to signal that `BoundTemplate.render_with_context` should stop
+    rendering more nodes. This is used by template inheritance tags and is not an error
+    condition.
     """
 
 
@@ -139,7 +139,7 @@ class ResourceLimitError(Error):
 class ContextDepthError(ResourceLimitError):
     """Exception raised when the maximum context depth is reached.
 
-    Usually indicates recursive use of ``render`` or ``include`` tags.
+    Usually indicates recursive use of `render` or `include` tags.
     """
 
 

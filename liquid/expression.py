@@ -39,7 +39,7 @@ class Expression(ABC):
         """Evaluate the expression with the given context."""
 
     async def evaluate_async(self, context: Context) -> object:
-        """An async version of :meth:`liquid.expression.Expression.evaluate`."""
+        """An async version of `liquid.expression.Expression.evaluate`."""
         return self.evaluate(context)
 
     def children(self) -> List[Expression]:

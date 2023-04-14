@@ -349,10 +349,11 @@ def build_block_stacks(
 
     Blocks defined in the base template will be at the top of the stack.
 
-    :param context: A render context to build the block stacks in.
-    :param template: A leaf template with an `extends` tag.
-    :param parent_name: The name of the immediate parent template as a string.
-    :param tag: The name of the `extends` tag, if it is overridden.
+    Args:
+        context: A render context to build the block stacks in.
+        template: A leaf template with an `extends` tag.
+        parent_name: The name of the immediate parent template as a string.
+        tag: The name of the `extends` tag, if it is overridden.
     """
     if "extends" not in context.tag_namespace:
         context.tag_namespace["extends"] = defaultdict(list)

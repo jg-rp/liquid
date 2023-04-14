@@ -89,7 +89,7 @@ cov = "pytest --cov-report= --cov-config=pyproject.toml --cov=liquid --cov=tests
 test = "pytest {args}"
 
 [tool.hatch.envs.docs]
-dependencies = ["black", "mkdocs", "mkdocstrings[python]"]
+dependencies = ["black", "mkdocs", "mkdocstrings[python]", "mkdocs-material"]
 
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"

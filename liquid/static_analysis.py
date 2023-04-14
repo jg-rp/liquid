@@ -61,7 +61,7 @@ class ReferencedVariable(str):
         """A tuple representation of the variable's parts.
 
         `parts` might contain nested tuples for nested variables. For example, the
-        variable ``some[foo.bar[a.b]].other`` as a tuple would look like this:
+        variable `some[foo.bar[a.b]].other` as a tuple would look like this:
 
             ("some", ("foo", "bar", ("a", "b")), "other.thing")
         """
@@ -88,15 +88,16 @@ class ContextualTemplateAnalysis:
     Each of the following properties is a dictionary mapping variable or filter names
     to the number of times that variable was referenced.
 
-    :ivar all_variables: All variables references along a path through the template's
-        syntax tree.
-    :ivar local_variables: The names of variables assigned using the built-in ``assign``
-        ``capture``, ``increment`` or ``decrement`` tags, or any custom tag that uses
-        ``Context.assign()``.
-    :ivar undefined_variables: The names of variables that could not be resolved. If a
-        name is referenced before it is assigned, it will appear in ``undefined`` and
-        ``assigns``.
-    :ivar filters: Names of filters found during contextual analysis.
+    Attributes:
+        all_variables: All variables references along a path through the template's
+            syntax tree.
+        local_variables: The names of variables assigned using the built-in `assign`
+            `capture`, `increment` or `decrement` tags, or any custom tag that uses
+            `Context.assign()`.
+        undefined_variables: The names of variables that could not be resolved. If a
+            name is referenced before it is assigned, it will appear in `undefined` and
+            `assigns`.
+        filters: Names of filters found during contextual analysis.
     """
 
     __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
@@ -120,23 +121,24 @@ class TemplateAnalysis:
 
     Each of the following properties is a dictionary mapping variable, tag or filter
     names to a list of tuples. Each tuple holds the location of a reference to the name
-    as (<template name>, <line number>). If a name is referenced multiple times, it will
+    as (template name, line number). If a name is referenced multiple times, it will
     appear multiple times in the list. If a name is referenced before it is "assigned",
-    it will appear in ``local_variables`` and ``global_variables``.
+    it will appear in `local_variables` and `global_variables`.
 
-    :ivar variables: All referenced variables, whether they are in scope or not.
-        Including references to names such as ``forloop`` from the ``for`` tag.
-    :ivar local_variables: Template variables that are added to the template local
-        scope, whether they are subsequently used or not.
-    :ivar global_variables: Template variables that, on the given line number and
-        "file", are out of scope or are assumed to be "global". That is, expected to be
-        included by the application developer rather than a template author.
-    :ivar failed_visits: Names of AST ``Node`` and ``Expression`` objects that could not
-        be visited, probably because they do not implement a ``children`` method.
-    :ivar unloadable_partials: Names or identifiers of partial templates that could not
-        be loaded. This will be empty if ``follow_partials`` is ``False``.
-    :ivar filters: All filters found during static analysis.
-    :ivar tags: All tags found during static analysis.
+    Attributes:
+        variables: All referenced variables, whether they are in scope or not. Including
+            references to names such as `forloop` from the `for` tag.
+        local_variables: Template variables that are added to the template local scope,
+            whether they are subsequently used or not.
+        global_variables: Template variables that, on the given line number and "file",
+            are out of scope or are assumed to be "global". That is, expected to be
+            included by the application developer rather than a template author.
+        failed_visits: Names of AST `Node` and `Expression` objects that could not be
+            visited, probably because they do not implement a `children` method.
+        unloadable_partials: Names or identifiers of partial templates that could not
+            be loaded. This will be empty if `follow_partials` is `False`.
+        filters: All filters found during static analysis.
+        tags: All tags found during static analysis.
     """
 
     __slots__ = (
@@ -172,20 +174,19 @@ class TemplateAnalysis:
 class _TemplateCounter:
     """Count references to variable names in a Liquid template.
 
-    :param template: The Liquid template to analyze.
-    :type template: liquid.BoundTemplate
-    :param follow_partials: If ``True``, the reference counter will try to load partial
-        templates and count variable references in those partials too. Default's to
-        ``True``.
-    :type follow_partials: bool
-    :param raise_for_failures: If ``True``, will raise an exception if an ``ast.Node``
-        or ``expression.Expression`` does not define a ``children()`` method, or if a
-        partial template can not be loaded.
+    Args:
+        template: The Liquid template to analyze.
+        follow_partials: If `True`, the reference counter will try to load partial
+            templates and count variable references in those partials too. Default's to
+            `True`.
+        raise_for_failures: If `True`, will raise an exception if an `ast.Node` or
+            `expression.Expression` does not define a `children()` method, or if a
+            partial template can not be loaded.
 
-        When ``False``, no exception is raised and a mapping of failed nodes/expressions
-        is available as the ``failed_visits`` property. A mapping of unloadable partial
-        templates are stored in the ``unloadable_partials`` property.
-    :type: raised_for_failed_visits: bool
+            When `False`, no exception is raised and a mapping of failed
+            nodes/expressions is available as the `failed_visits` property. A mapping of
+            unloadable partial templates are stored in the `unloadable_partials`
+            property.
     """
 
     def __init__(
@@ -249,7 +250,7 @@ class _TemplateCounter:
         return self
 
     async def analyze_async(self) -> _TemplateCounter:
-        """An async version of :meth:`_TemplateVariableCounter.analyze`."""
+        """An async version of `_TemplateVariableCounter.analyze()`."""
         for node in self.template.tree.statements:
             try:
                 await self._analyze_async(node)
