@@ -352,7 +352,7 @@ class Environment:
                 resulting template is rendered.
 
         Raises:
-            TemplateNotFound`: if a template with the given name can not be found.
+            TemplateNotFound: if a template with the given name can not be found.
         """
         if self.cache is not None:
             cached = self.cache.get(name)
@@ -398,6 +398,8 @@ class Environment:
 
         This method bypasses the environment's template cache. You should use a caching
         loader instead when the loader required extra keyword arguments.
+
+        _New in version 1.9.0._
         """
         return self.loader.load_with_args(self, name, globals, **kwargs)
 
@@ -407,7 +409,10 @@ class Environment:
         globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         **kwargs: object,
     ) -> BoundTemplate:
-        """An async version of `get_template_with_args`."""
+        """An async version of `get_template_with_args`.
+
+        _New in version 1.9.0._
+        """
         return await self.loader.load_with_args_async(self, name, globals, **kwargs)
 
     def get_template_with_context(

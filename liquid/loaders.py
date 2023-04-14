@@ -89,13 +89,18 @@ class BaseLoader(ABC):  # noqa: B024
 
         By default, this method delegates to `get_source`, ignoring any keyword
         arguments.
+
+        _New in version 1.9.0._
         """
         return self.get_source(env, template_name)
 
     async def get_source_with_args_async(
         self, env: Environment, template_name: str, **kwargs: object
     ) -> TemplateSource:
-        """An async version of `get_source_with_args`."""
+        """An async version of `get_source_with_args`.
+
+        _New in version 1.9.0._
+        """
         return self.get_source_with_args(env, template_name, **kwargs)
 
     def get_source_with_context(

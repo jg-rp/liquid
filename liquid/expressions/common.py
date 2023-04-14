@@ -365,7 +365,7 @@ def tokenize_common_expression(expr: str, linenum: int = 1) -> Iterator[Token]:
 def parse_common_expression(stream: TokenStream) -> Expression:
     """Parse a string, int, float, range, nil, true, false, blank, empty or identifier.
 
-    Raises a LiquidSyntaxError if any other tokens are found.
+    Raises a `LiquidSyntaxError` if any other tokens are found.
     """
     try:
         return LITERAL_OR_IDENT_MAP[stream.current[1]](stream)

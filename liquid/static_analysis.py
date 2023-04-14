@@ -71,15 +71,14 @@ class ReferencedVariable(str):
 # (template_name, line_number).
 Location = Tuple[str, int]
 
-# A mapping of template variables to their (template_name, line_number) locations.
 Refs = Dict[ReferencedVariable, List[Location]]
+"""A mapping of template variables to their (template_name, line_number) locations."""
 
 # A mapping of Identifier expressions to their (template_name, line_number) locations.
 IdentifierMap = DefaultDict[Identifier, List[Location]]
 
-# A mapping of template, tag or filter names to their (template_name, line_number)
-# locations.
 NameRefs = Dict[str, List[Location]]
+"""A mapping of template, tag or filter names to (template_name, lineno) locations."""
 
 
 class ContextualTemplateAnalysis:
@@ -89,15 +88,15 @@ class ContextualTemplateAnalysis:
     to the number of times that variable was referenced.
 
     Attributes:
-        all_variables: All variables references along a path through the template's
-            syntax tree.
-        local_variables: The names of variables assigned using the built-in `assign`
-            `capture`, `increment` or `decrement` tags, or any custom tag that uses
-            `Context.assign()`.
-        undefined_variables: The names of variables that could not be resolved. If a
-            name is referenced before it is assigned, it will appear in `undefined` and
-            `assigns`.
-        filters: Names of filters found during contextual analysis.
+        all_variables (Dict[str, int]): All variables references along a path through
+            the template's syntax tree.
+        local_variables (Dict[str, int]): The names of variables assigned using the
+            built-in `assign` `capture`, `increment` or `decrement` tags, or any custom
+            tag that uses `Context.assign()`.
+        undefined_variables (Dict[str, int]): The names of variables that could not be
+            resolved. If a name is referenced before it is assigned, it will appear in
+            `undefined` and `assigns`.
+        filters (Dict[str, int]): Names of filters found during contextual analysis.
     """
 
     __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
@@ -126,18 +125,19 @@ class TemplateAnalysis:
     it will appear in `local_variables` and `global_variables`.
 
     Attributes:
-        variables: All referenced variables, whether they are in scope or not. Including
-            references to names such as `forloop` from the `for` tag.
-        local_variables: Template variables that are added to the template local scope,
-            whether they are subsequently used or not.
-        global_variables: Template variables that, on the given line number and "file",
-            are out of scope or are assumed to be "global". That is, expected to be
-            included by the application developer rather than a template author.
-        failed_visits: Names of AST `Node` and `Expression` objects that could not be
-            visited, probably because they do not implement a `children` method.
-        unloadable_partials: Names or identifiers of partial templates that could not
-            be loaded. This will be empty if `follow_partials` is `False`.
-        filters: All filters found during static analysis.
+        variables (Refs): All referenced variables, whether they are in scope or not.
+            Including references to names such as `forloop` from the `for` tag.
+        local_variables (Refs): Template variables that are added to the template local
+            scope, whether they are subsequently used or not.
+        global_variables (Refs): Template variables that, on the given line number and
+            "file", are out of scope or are assumed to be "global". That is, expected to
+            be included by the application developer rather than a template author.
+        failed_visits (NameRefs): Names of AST `Node` and `Expression` objects that
+            could not be visited, probably because they do not implement a `children`
+            method.
+        unloadable_partials (NameRefs): Names or identifiers of partial templates that
+            could not be loaded. This will be empty if `follow_partials` is `False`.
+        filters (NameRefs): All filters found during static analysis.
         tags: All tags found during static analysis.
     """
 
