@@ -18,6 +18,8 @@ theme:
   features:
     - navigation.sections
     - content.code.copy
+  logo: img/droplet_white_liquid.svg
+  favicon: img/favicon.ico
 
 repo_name: jg-rp/liquid
 repo_url: https://github.com/jg-rp/liquid
