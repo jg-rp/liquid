@@ -1,27 +1,24 @@
-# pylint: disable=missing-class-docstring missing-module-docstring
 import unittest
 from dataclasses import dataclass
 
+from liquid.exceptions import LiquidSyntaxError
+from liquid.expression import FALSE
+from liquid.expression import TRUE
 from liquid.expression import ConditionalExpression
 from liquid.expression import Expression
-from liquid.expression import FilteredExpression
-from liquid.expression import InfixExpression
-from liquid.expression import PrefixExpression
-from liquid.expression import IdentifierPathElement
-from liquid.expression import Identifier
 from liquid.expression import Filter
-from liquid.expression import StringLiteral
-from liquid.expression import IntegerLiteral
+from liquid.expression import FilteredExpression
 from liquid.expression import FloatLiteral
+from liquid.expression import Identifier
+from liquid.expression import IdentifierPathElement
+from liquid.expression import InfixExpression
+from liquid.expression import IntegerLiteral
+from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
-from liquid.expression import TRUE
-from liquid.expression import FALSE
-
-from liquid.expressions import parse_filtered_expression
+from liquid.expression import StringLiteral
 from liquid.expressions import parse_conditional_expression
 from liquid.expressions import parse_conditional_expression_with_parens
-
-from liquid.exceptions import LiquidSyntaxError
+from liquid.expressions import parse_filtered_expression
 
 
 @dataclass

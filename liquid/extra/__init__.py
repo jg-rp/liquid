@@ -1,13 +1,12 @@
-# pylint: disable=missing-module-docstring
-from __future__ import annotations
+from __future__ import annotations  # noqa: D104
+
 from typing import TYPE_CHECKING
 
-from .filters import index
 from .filters import JSON
+from .filters import index
 from .filters import script_tag
 from .filters import sort_numeric
 from .filters import stylesheet_tag
-
 from .tags import BlockTag
 from .tags import CallTag
 from .tags import ExtendsTag
@@ -21,8 +20,7 @@ from .tags import InlineIfStatementWithParens
 from .tags import MacroTag
 from .tags import WithTag
 
-
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
 
 __all__ = (
@@ -53,18 +51,24 @@ __all__ = (
 
 
 def add_inline_expression_tags(env: Environment) -> None:
-    """Replace standard implementations of the output statement,
+    """Add extra inline expression tags to an environment.
+
+    Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
-    expressions."""
+    expressions.
+    """
     env.add_tag(InlineIfAssignTag)
     env.add_tag(InlineIfEchoTag)
     env.add_tag(InlineIfStatement)
 
 
 def add_extended_inline_expression_tags(env: Environment) -> None:
-    """Replace standard implementations of the output statement,
+    """Add extra extended inline expressions tags to an environment.
+
+    Replace standard implementations of the output statement,
     `echo` tag and `assign` tag with ones that support inline `if`
-    expressions."""
+    expressions.
+    """
     env.add_tag(InlineIfAssignTagWithParens)
     env.add_tag(InlineIfEchoTagWithParens)
     env.add_tag(InlineIfStatementWithParens)
@@ -92,8 +96,7 @@ def add_tags(env: Environment) -> None:  # pragma: no cover
 
 
 def add_filters(env: Environment) -> None:
-    """Register all extra filters with an environment with their default
-    and options."""
+    """Register all extra filters with an environment with their default options."""
     env.add_filter("index", index)
     env.add_filter("json", JSON())
     env.add_filter("script_tag", script_tag)

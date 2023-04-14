@@ -1,19 +1,18 @@
 """Test cases for `extends` and `block` tags."""
 import asyncio
-from unittest import TestCase
-
-from typing import Mapping
-from typing import NamedTuple
 from typing import Any
 from typing import Dict
+from typing import Mapping
+from typing import NamedTuple
+from unittest import TestCase
 
 from liquid import BoundTemplate
 from liquid import Environment
 from liquid import StrictUndefined
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import RequiredBlockError
-from liquid.exceptions import UndefinedError
 from liquid.exceptions import TemplateInheritanceError
+from liquid.exceptions import UndefinedError
 from liquid.extra import add_inheritance_tags
 from liquid.loaders import DictLoader
 
@@ -24,7 +23,7 @@ class Case(NamedTuple):
     description: str
     template: str
     expect: str
-    globals: Mapping[str, Any]
+    globals: Mapping[str, Any]  # noqa: A003
     partials: Dict[str, str]
 
 
@@ -350,9 +349,8 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(RequiredBlockError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(RequiredBlockError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(RequiredBlockError):
+            asyncio.run(coro(template))
 
     def test_missing_required_block_long_stack(self) -> None:
         """Test that we raise an exception if a required block is missing in a long
@@ -373,9 +371,8 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(RequiredBlockError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(RequiredBlockError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(RequiredBlockError):
+            asyncio.run(coro(template))
 
     def test_immediate_override_required_block(self) -> None:
         """Test that we can override a required block in the immediate child."""
@@ -485,9 +482,8 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(RequiredBlockError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(RequiredBlockError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(RequiredBlockError):
+            asyncio.run(coro(template))
 
     def test_override_required_block_directly(self) -> None:
         """Test that we raise an exception if rendering a required block directly."""
@@ -503,9 +499,8 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(RequiredBlockError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(RequiredBlockError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(RequiredBlockError):
+            asyncio.run(coro(template))
 
     def test_too_many_extends(self) -> None:
         """Test that we raise an exception if more than one `extends` tag exists."""
@@ -542,12 +537,11 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(LiquidSyntaxError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(LiquidSyntaxError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(LiquidSyntaxError):
+            asyncio.run(coro(template))
 
     def test_block_drop_properties(self) -> None:
-        """Test that we handle undefined block drop properties"""
+        """Test that we handle undefined block drop properties."""
         template = (
             "{% extends 'foo' %}"
             "{% block bar %}{{ block.nosuchthing }} and sue{% endblock %}"
@@ -564,12 +558,11 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(UndefinedError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(UndefinedError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(UndefinedError):
+            asyncio.run(coro(template))
 
     def test_block_no_super_block(self) -> None:
-        """Test that we handle undefined block.super"""
+        """Test that we handle undefined block.super."""
         template = "hello, {% block bar %}{{ block.super }}{{ you }}{% endblock %}"
 
         async def coro(template: BoundTemplate) -> str:
@@ -582,9 +575,8 @@ class TemplateInheritanceTestCase(TestCase):
         with self.assertRaises(UndefinedError):
             template.render()
 
-        with self.subTest(asynchronous=True):
-            with self.assertRaises(UndefinedError):
-                asyncio.run(coro(template))
+        with self.subTest(asynchronous=True), self.assertRaises(UndefinedError):
+            asyncio.run(coro(template))
 
     def test_duplicate_block_names(self) -> None:
         """Test that we raise an exception when a template has duplicate block names."""

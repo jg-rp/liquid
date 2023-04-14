@@ -6,13 +6,11 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
 from liquid.context import Context
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
 from liquid.token import TOKEN_LITERAL
+from liquid.token import Token
 
 
 class LiteralNode(Node):
@@ -29,12 +27,13 @@ class LiteralNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"LiteralNode(tok={self.tok})"
 
-    # pylint: disable=useless-return
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(  # noqa: D102
+        self, _: Context, buffer: TextIO
+    ) -> Optional[bool]:
         buffer.write(self.tok.value)
         return None
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> List[ChildNode]:  # noqa: D102
         return []
 
 
@@ -43,5 +42,5 @@ class Literal(Tag):
 
     name = TOKEN_LITERAL
 
-    def parse(self, stream: TokenStream) -> LiteralNode:
+    def parse(self, stream: TokenStream) -> LiteralNode:  # noqa: D102
         return LiteralNode(stream.current)

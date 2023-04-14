@@ -1,41 +1,38 @@
 """Liquid expression parser test cases."""
 
 import unittest
-from typing import NamedTuple, Any
+from typing import Any
+from typing import NamedTuple
 
-from liquid.expression import FilteredExpression
-from liquid.expression import BooleanExpression
 from liquid.expression import AssignmentExpression
-from liquid.expression import LoopExpression
-from liquid.expression import IdentifierPathElement
-from liquid.expression import Identifier
 from liquid.expression import Boolean
+from liquid.expression import BooleanExpression
 from liquid.expression import Filter
-from liquid.expression import StringLiteral
-from liquid.expression import IntegerLiteral
+from liquid.expression import FilteredExpression
 from liquid.expression import FloatLiteral
-from liquid.expression import PrefixExpression
+from liquid.expression import Identifier
+from liquid.expression import IdentifierPathElement
 from liquid.expression import InfixExpression
+from liquid.expression import IntegerLiteral
+from liquid.expression import LoopExpression
+from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
-
-from liquid.token import Token
-from liquid.token import TOKEN_INITIAL
-
-from liquid.stream import TokenStream
-
-from liquid.lex import tokenize_loop_expression
-from liquid.lex import tokenize_filtered_expression
-from liquid.lex import tokenize_boolean_expression
+from liquid.expression import StringLiteral
 from liquid.lex import tokenize_assignment_expression
-
-from liquid.parse import parse_filtered_expression
-from liquid.parse import parse_boolean_expression
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_loop_expression
 from liquid.parse import parse_assignment_expression
+from liquid.parse import parse_boolean_expression
+from liquid.parse import parse_filtered_expression
 from liquid.parse import parse_loop_expression
+from liquid.stream import TokenStream
+from liquid.token import TOKEN_INITIAL
+from liquid.token import Token
 
 
 class Case(NamedTuple):
-    """Subtest helper"""
+    """Subtest helper."""
 
     description: str
     expression: str
@@ -50,7 +47,6 @@ class LiquidFilteredExpressionParserTestCase(unittest.TestCase):
 
     def _test(self, test_cases, lex_func, parse_func):
         """Helper method for testing lists of Cases."""
-
         for case in test_cases:
             with self.subTest(msg=case.description):
                 tokens = TokenStream(lex_func(case.expression))

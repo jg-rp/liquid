@@ -1,44 +1,42 @@
-# pylint: disable=missing-module-docstring
-from __future__ import annotations
+from __future__ import annotations  # noqa: D104
 
 from typing import TYPE_CHECKING
 
+from . import illegal
 from . import literal
 from . import statement
-from . import illegal
-
-from .tags import if_tag
-from .tags import comment_tag
-from .tags import unless_tag
-from .tags import case_tag
-from .tags import for_tag
-from .tags import tablerow_tag
-from .tags import capture_tag
-from .tags import cycle_tag
-from .tags import assign_tag
-from .tags import increment_tag
-from .tags import decrement_tag
-from .tags import echo_tag
-from .tags import liquid_tag
-from .tags import include_tag
-from .tags import render_tag
-from .tags import ifchanged_tag
-from .tags import inline_comment_tag
-
+from .filters.array import compact
+from .filters.array import concat
+from .filters.array import first
+from .filters.array import join
+from .filters.array import last
+from .filters.array import map_
+from .filters.array import reverse
+from .filters.array import sort
+from .filters.array import sort_natural
+from .filters.array import uniq
+from .filters.array import where
+from .filters.extra import safe
 from .filters.math import abs_
-from .filters.math import at_most
 from .filters.math import at_least
+from .filters.math import at_most
 from .filters.math import ceil
 from .filters.math import divided_by
 from .filters.math import floor
 from .filters.math import minus
+from .filters.math import modulo
 from .filters.math import plus
 from .filters.math import round_
 from .filters.math import times
-from .filters.math import modulo
-
-from .filters.string import capitalize
+from .filters.misc import date
+from .filters.misc import default
+from .filters.misc import size
 from .filters.string import append
+from .filters.string import base64_decode
+from .filters.string import base64_encode
+from .filters.string import base64_url_safe_decode
+from .filters.string import base64_url_safe_encode
+from .filters.string import capitalize
 from .filters.string import downcase
 from .filters.string import escape
 from .filters.string import escape_once
@@ -51,47 +49,40 @@ from .filters.string import remove_last
 from .filters.string import replace
 from .filters.string import replace_first
 from .filters.string import replace_last
+from .filters.string import rstrip
 from .filters.string import slice_
 from .filters.string import split
-from .filters.string import upcase
 from .filters.string import strip
-from .filters.string import rstrip
 from .filters.string import strip_html
 from .filters.string import strip_newlines
 from .filters.string import truncate
 from .filters.string import truncatewords
-from .filters.string import url_encode
+from .filters.string import upcase
 from .filters.string import url_decode
-from .filters.string import base64_encode
-from .filters.string import base64_decode
-from .filters.string import base64_url_safe_encode
-from .filters.string import base64_url_safe_decode
-
-from .filters.array import join
-from .filters.array import first
-from .filters.array import last
-from .filters.array import concat
-from .filters.array import map_
-from .filters.array import reverse
-from .filters.array import sort
-from .filters.array import sort_natural
-from .filters.array import where
-from .filters.array import uniq
-from .filters.array import compact
-
-from .filters.misc import size
-from .filters.misc import default
-from .filters.misc import date
-
-from .filters.extra import safe
-
+from .filters.string import url_encode
+from .tags import assign_tag
+from .tags import capture_tag
+from .tags import case_tag
+from .tags import comment_tag
+from .tags import cycle_tag
+from .tags import decrement_tag
+from .tags import echo_tag
+from .tags import for_tag
+from .tags import if_tag
+from .tags import ifchanged_tag
+from .tags import include_tag
+from .tags import increment_tag
+from .tags import inline_comment_tag
+from .tags import liquid_tag
+from .tags import render_tag
+from .tags import tablerow_tag
+from .tags import unless_tag
 
 if TYPE_CHECKING:
     from liquid import Environment
 
 
-# pylint: disable=too-many-statements
-def register(env: Environment) -> None:
+def register(env: Environment) -> None:  # noqa: PLR0915
     """Register all built-in tags and filters with an environment."""
     env.add_tag(literal.Literal)
     env.add_tag(statement.Statement)

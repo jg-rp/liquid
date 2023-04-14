@@ -1,36 +1,29 @@
 """Tag and node definition for the mock "paginate" tag."""
-# pylint: disable=missing-function-docstring
 import math
 import sys
-
 from collections import abc
-
 from typing import List
 from typing import Optional
 from typing import TextIO
 
-from liquid.token import Token
-from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_BY
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_EOF
-
-from liquid.tag import Tag
 from liquid import ast
-from liquid.stream import TokenStream
-from liquid.lex import tokenize_paginate_expression
-from liquid.expression import Identifier
 from liquid.context import Context
-
-from liquid.parse import get_parser
+from liquid.exceptions import LiquidTypeError
+from liquid.expression import Identifier
+from liquid.lex import tokenize_paginate_expression
 from liquid.parse import expect
+from liquid.parse import get_parser
 from liquid.parse import parse_identifier
 from liquid.parse import parse_integer_literal
-
-from liquid.exceptions import LiquidTypeError
-
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.token import TOKEN_BY
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
 TAG_PAGINATE = sys.intern("paginate")
 TAG_ENDPAGINATE = sys.intern("endpaginate")

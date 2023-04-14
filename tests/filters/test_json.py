@@ -1,11 +1,9 @@
 """Test cases for the `json` filter function."""
 import unittest
-
 from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import is_dataclass
 from inspect import isclass
-
 from typing import Any
 from typing import Dict
 from typing import Iterable

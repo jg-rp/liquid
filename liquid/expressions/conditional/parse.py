@@ -1,19 +1,18 @@
 """Functions for parsing non-standard conditional expressions."""
 from functools import partial
-
 from typing import Dict
-from typing import List
-from typing import Iterator
 from typing import Iterable
+from typing import Iterator
+from typing import List
 from typing import Optional
 from typing import Tuple
 
-from liquid.expression import Expression
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import FALSE
-from liquid.expression import Filter
 from liquid.expression import ConditionalExpression
+from liquid.expression import Expression
+from liquid.expression import Filter
 from liquid.expression import FilteredExpression
-
 from liquid.expressions.boolean.parse import parse_obj as parse_boolean_obj
 from liquid.expressions.boolean.parse import (
     parse_obj_with_parens as parse_boolean_obj_with_parens,
@@ -26,17 +25,14 @@ from liquid.expressions.filtered.parse import (
 )
 from liquid.expressions.filtered.parse import parse_obj
 from liquid.expressions.stream import TokenStream
-
-from liquid.exceptions import LiquidSyntaxError
-
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_DPIPE
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_IF
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_DPIPE
 from liquid.token import TOKEN_ELSE
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IF
+from liquid.token import TOKEN_PIPE
 
 
 def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
@@ -161,8 +157,10 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
 
 
 def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
-    """Parse a conditional expression string that supports logical `not` and
-    grouping terms with parentheses."""
+    """Parse a conditional expression string.
+
+    This parse function handles logical `not` and grouping terms with parentheses.
+    """
     tokens = tokenize_with_parens(expr, linenum)
     standard_tokens, _conditional_tokens = split_at_first_if(tokens)
 

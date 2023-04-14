@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring
-from .environment import Environment
+from .environment import Environment  # noqa: D104
 
 __all__ = ("Environment",)

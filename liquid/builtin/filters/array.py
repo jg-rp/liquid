@@ -5,36 +5,32 @@ from functools import partial
 from itertools import chain
 from itertools import islice
 from operator import getitem
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterable
 from typing import List
 from typing import Sequence
 from typing import Tuple
 from typing import Union
-from typing import TYPE_CHECKING
 
 try:
     from markupsafe import Markup
 except ImportError:
     from liquid.exceptions import Markup  # type: ignore
 
-from liquid.filter import with_environment
-from liquid.filter import array_filter
-from liquid.filter import sequence_filter
-from liquid.filter import liquid_filter
-
-from liquid.expression import NIL
-
-from liquid.exceptions import FilterError
 from liquid.exceptions import FilterArgumentError
-
+from liquid.exceptions import FilterError
+from liquid.expression import NIL
+from liquid.filter import array_filter
+from liquid.filter import liquid_filter
+from liquid.filter import sequence_filter
+from liquid.filter import with_environment
 from liquid.undefined import is_undefined
 
 if TYPE_CHECKING:
     from liquid import Environment
 
-ArrayT = Union[List[Any], Tuple[Any, ...]]  # pylint: disable=invalid-name
+ArrayT = Union[List[Any], Tuple[Any, ...]]
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
@@ -66,7 +62,7 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
 
 
 def _lower(obj: Any) -> str:
-    """Helper for the sort filter"""
+    """Helper for the sort filter."""
     try:
         return str(obj).lower()
     except AttributeError:
@@ -90,7 +86,7 @@ def join(
 
 @liquid_filter
 def first(obj: Any) -> object:
-    """Return the first item of an array"""
+    """Return the first item of an array."""
     if isinstance(obj, str):
         return None
 
@@ -105,7 +101,7 @@ def first(obj: Any) -> object:
 
 @liquid_filter
 def last(obj: Sequence[Any]) -> object:
-    """Return the last item of an array"""
+    """Return the last item of an array."""
     if isinstance(obj, str):
         return None
 
@@ -131,8 +127,7 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
 
 @liquid_filter
 def map_(sequence: ArrayT, key: object) -> List[object]:
-    """Creates an array of values by extracting the values of a named property
-    from another object."""
+    """Create an array of values from a map."""
     try:
         return [_getitem(itm, str(key), default=NIL) for itm in sequence]
     except TypeError as err:
@@ -154,10 +149,10 @@ def sort(sequence: ArrayT, key: object = None) -> List[object]:
     """
     if key:
         key_func = partial(_getitem, key=str(key), default=MAX_CH)
-        return list(sorted(sequence, key=key_func))
+        return sorted(sequence, key=key_func)
 
     try:
-        return list(sorted(sequence))
+        return sorted(sequence)
     except TypeError as err:
         raise FilterError("can't sort sequence") from err
 
@@ -167,15 +162,14 @@ def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
     """Sorts items in an array in case-insensitive order."""
     if key:
         item_getter = partial(_getitem, key=str(key), default=MAX_CH)
-        return list(sorted(sequence, key=lambda obj: _lower(item_getter(obj))))
+        return sorted(sequence, key=lambda obj: _lower(item_getter(obj)))
 
-    return list(sorted(sequence, key=_lower))
+    return sorted(sequence, key=_lower)
 
 
 @sequence_filter
 def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
-    """Creates an array including only the objects with a given property value,
-    or any truthy value by default."""
+    """Create an array from a map where _attr_ equals _value_."""
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) == value]
 

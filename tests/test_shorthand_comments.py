@@ -1,16 +1,13 @@
 """Test cases for shorthand comment syntax."""
-# pylint: disable=missing-class-docstring
-
 from dataclasses import dataclass
-from unittest import TestCase
-
 from typing import List
 from typing import Type
 from typing import Union
+from unittest import TestCase
 
 from liquid import Environment
-from liquid import Template
 from liquid import Mode
+from liquid import Template
 
 
 @dataclass

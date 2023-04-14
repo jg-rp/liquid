@@ -1,12 +1,11 @@
 """Liquid template definition."""
 from __future__ import annotations
 
-from collections import abc
 from collections import Counter
-
+from collections import abc
 from io import StringIO
 from pathlib import Path
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
 from typing import Dict
@@ -14,7 +13,6 @@ from typing import Iterator
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
-from typing import TYPE_CHECKING
 from typing import Union
 
 from liquid.context import Context
@@ -22,23 +20,19 @@ from liquid.context import FutureContext
 from liquid.context import FutureVariableCaptureContext
 from liquid.context import ReadOnlyChainMap
 from liquid.context import VariableCaptureContext
-
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import StopRender
-
 from liquid.output import LimitedStringIO
-
-from liquid.static_analysis import _TemplateCounter
 from liquid.static_analysis import ContextualTemplateAnalysis
 from liquid.static_analysis import NameRefs
-from liquid.static_analysis import Refs
 from liquid.static_analysis import ReferencedVariable
+from liquid.static_analysis import Refs
 from liquid.static_analysis import TemplateAnalysis
+from liquid.static_analysis import _TemplateCounter
 
-
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
     from liquid.ast import ParseTree
     from liquid.loaders import UpToDate
@@ -59,30 +53,22 @@ __all__ = (
 
 
 class BoundTemplate:
-    """A liquid template that has been parsed and is bound to a
-    :class:`liquid.Environment`.
+    """A liquid template that has been parsed and is bound to a `liquid.Environment`.
 
-    You probably don't want to instantiate :class:`BoundTemplate` directly. Use
-    :meth:`liquid.Environment.from_string` or :meth:`liquid.Environment.get_template`
-    instead.
+    You probably don't want to instantiate `BoundTemplate` directly. Use
+    `liquid.Environment.from_string` or `liquid.Environment.get_template` instead.
 
-    :param env: The environment this template is bound to.
-    :type env: liquid.Environment
-    :param parse_tree: The parse tree representing this template.
-    :type parse_tree: liquid.ast.ParseTree
-    :param name: Optional name of the template. Defaults to an empty string.
-    :type name: Optional[str]
-    :param path: Optional origin path or identifier for the template.
-    :type path: Optional[Union[str, Path]]
-    :param globals: An optional mapping of context variables made available every
-        time the resulting template is rendered. Defaults to ``None``.
-    :type globals: Optional[Dict[str, object]]
-    :param matter: Optional mapping containing variables associated with the template.
-        Could be "front matter" or other meta data.
-    :type matter: Optional[Mapping[str, object]]
-    :param uptodate: Optional callable that will return ``True`` if the template is up
-        to date, or ``False`` if it needs to be reloaded. Defaults to ``None``.
-    :type uptodate: Optional[Callable[[], bool]]
+    Args:
+        env: The environment this template is bound to.
+        parse_tree: The parse tree representing this template.
+        name: Optional name of the template. Defaults to an empty string.
+        path: Optional origin path or identifier for the template.
+        globals: An optional mapping of context variables made available every
+            time the resulting template is rendered. Defaults to `None`.
+        matter: Optional mapping containing variables associated with the template.
+            Could be "front matter" or other meta data.
+        uptodate: Optional callable that will return `True` if the template is up
+            to date, or `False` if it needs to be reloaded. Defaults to `None`.
     """
 
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
@@ -90,14 +76,13 @@ class BoundTemplate:
     context_class = Context
     capture_context_class = VariableCaptureContext
 
-    # pylint: disable=redefined-builtin, too-many-arguments
     def __init__(
         self,
         env: Environment,
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[Dict[str, object]] = None,
+        globals: Optional[Dict[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):
@@ -112,7 +97,7 @@ class BoundTemplate:
     def render(self, *args: Any, **kwargs: Any) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
 
-        Accepts the same arguments as the :class:`dict` constructor.
+        Accepts the same arguments as the `dict` constructor.
         """
         context = self.context_class(
             self.env,
@@ -124,7 +109,7 @@ class BoundTemplate:
         return buf.getvalue()
 
     async def render_async(self, *args: Any, **kwargs: Any) -> str:
-        """An async version of :meth:`liquid.template.BoundTemplate.render`."""
+        """An async version of `liquid.template.BoundTemplate.render`."""
         context = self.context_class(
             self.env,
             globals=self.make_globals(dict(*args, **kwargs)),
@@ -150,16 +135,18 @@ class BoundTemplate:
     ) -> None:
         """Render the template using an existing context and output buffer.
 
-        ``args`` and ``kwargs`` are passed to the :class:`dict` constructor. The
-        resulting dictionary is added to the render context.
-
-        :param context: A render context.
-        :param buffer: File-like object to which rendered text is written.
-        :param partial: If `True`, indicates that the current template has been
-            included using either a "render" or "include" tag. Defaults to ``False``.
-        :param block_scope: If `True`, indicates that assigns, breaks and continues
-            from this template will not leak into the parent context. Defaults to
-            ``False``.
+        Args:
+            context: A render context.
+            buffer: File-like object to which rendered text is written.
+            partial: If `True`, indicates that the current template has been
+                included using either a "render" or "include" tag. Defaults to `False`.
+            block_scope: If `True`, indicates that assigns, breaks and continues
+                from this template will not leak into the parent context. Defaults to
+                `False`.
+            args: Passed to the `dict` constructor. The resulting dictionary is added to
+                the render context.
+            kwargs: Passed to the `dict` constructor. The resulting dictionary is added
+                to the render context.
         """
         # "template" could get overridden from args/kwargs, "partial" will not.
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
@@ -227,8 +214,7 @@ class BoundTemplate:
 
     @property
     def is_up_to_date(self) -> bool:
-        """False if the template was modified since it was last parsed,
-        True otherwise."""
+        """`False` if the template has bee modified, `True` otherwise."""
         if not self.uptodate:
             return True
 
@@ -240,10 +226,10 @@ class BoundTemplate:
         return uptodate
 
     async def is_up_to_date_async(self) -> bool:
-        """An async version of the ``is_up_to_date`` property.
+        """An async version of the `is_up_to_date` property.
 
-        If ``template.uptodate`` is a coroutine, it wil be awaited. Otherwise it will be
-        called just like ``is_up_to_date``
+        If `template.uptodate` is a coroutine, it wil be awaited. Otherwise it will be
+        called just like `is_up_to_date`
         """
         if not self.uptodate:
             return True
@@ -254,8 +240,7 @@ class BoundTemplate:
         return uptodate
 
     def make_globals(self, render_args: Mapping[str, object]) -> Mapping[str, object]:
-        """Return a mapping aggregated from render arguments, template globals and
-        matter variables."""
+        """Return a mapping including render arguments and template globals."""
         return ReadOnlyChainMap(
             render_args,
             self.matter,
@@ -267,8 +252,10 @@ class BoundTemplate:
         partial: bool,
         render_args: Mapping[str, object],
     ) -> Mapping[str, object]:
-        """Return a namespace dictionary. This is used by `render_with_context` to
-        extend an existing context."""
+        """Return a namespace dictionary.
+
+        This is used by `render_with_context` to extend an existing context.
+        """
         return {**render_args, "partial": partial}
 
     def __repr__(self) -> str:
@@ -282,18 +269,15 @@ class BoundTemplate:
     ) -> TemplateAnalysis:
         """Statically analyze this template and any included/rendered templates.
 
-        :param follow_partials: If ``True``, we will try to load partial templates and
-            analyze those templates too. Default's to ``True``.
-        :type follow_partials: bool
-        :param raise_for_failures: If ``True``, will raise an exception if an
-            ``ast.Node`` or ``expression.Expression`` does not define a ``children()``
-            method, or if a partial template can not be loaded. When ``False``, no
-            exception is raised and a mapping of failed nodes and expressions is
-            available as the ``failed_visits`` property. A mapping of unloadable partial
-            templates is stored in the ``unloadable_partials`` property.
-        :type raised_for_failed_visits: bool
-        :returns: A object containing analysis results.
-        :rtype: :class:`liquid.template.TemplateAnalysis`
+        Args:
+            follow_partials: If `True`, we will try to load partial templates and
+                analyze those templates too.
+            raise_for_failures: If `True`, will raise an exception if an
+                `ast.Node` or `expression.Expression` does not define a `children()`
+                method, or if a partial template can not be loaded. When `False`, no
+                exception is raised and a mapping of failed nodes and expressions is
+                available as the `failed_visits` property. A mapping of unloadable
+                partial templates is stored in the `unloadable_partials` property.
         """
         refs = _TemplateCounter(
             self,
@@ -318,7 +302,7 @@ class BoundTemplate:
     async def analyze_async(
         self, follow_partials: bool = True, raise_for_failures: bool = True
     ) -> TemplateAnalysis:
-        """An async version of :meth:`analyze`."""
+        """An async version of `analyze`."""
         refs = await _TemplateCounter(
             self,
             follow_partials=follow_partials,
@@ -344,22 +328,19 @@ class BoundTemplate:
     ) -> ContextualTemplateAnalysis:
         """Analyze a path through this template's syntax tree given some context data.
 
-        Unlike :meth:`analyze`, this form of template analysis does perform a render,
+        Unlike `analyze`, this form of template analysis does perform a render,
         capturing template variables as we go.
 
         Python Liquid does not currently support template introspection from within a
-        render context or ``Expression`` object. Meaning line numbers and template names
+        render context or `Expression` object. Meaning line numbers and template names
         are not available. Only variable names are reported along with the number of
         times they were referenced.
 
         It's also, using this method, not currently possible to detect names added to a
-        block's scope. For example, ``forloop.index`` will be included in the results
-        object if referenced within a ``for`` loop block.
+        block's scope. For example, `forloop.index` will be included in the results
+        object if referenced within a `for` loop block.
 
-        Accepts the same arguments as :meth:`render`.
-
-        :returns: Contextual analysis results.
-        :rtype: :class:`liquid.template.ContextualTemplateAnalysis`
+        Accepts the same arguments as `render`.
         """
         context = self.capture_context_class(
             self.env, globals=self.make_globals(dict(*args, **kwargs))
@@ -376,7 +357,7 @@ class BoundTemplate:
     async def analyze_with_context_async(
         self, *args: Any, **kwargs: Any
     ) -> ContextualTemplateAnalysis:
-        """An async version of :meth:`analyze_with_context`."""
+        """An async version of `analyze_with_context`."""
         context = self.capture_context_class(
             self.env, globals=self.make_globals(dict(*args, **kwargs))
         )
@@ -391,14 +372,13 @@ class BoundTemplate:
 
 
 class AwareBoundTemplate(BoundTemplate):
-    """A `BoundTemplate` subclass that automatically includes a `TemplateDrop` in the
-    global namespace."""
+    """A `BoundTemplate` subclass with a `TemplateDrop` in the global namespace."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.drop = TemplateDrop(self.name, self.path)
 
-    def make_partial_namespace(
+    def make_partial_namespace(  # noqa: D102
         self,
         partial: bool,
         render_args: Mapping[str, object],
@@ -410,10 +390,9 @@ class AwareBoundTemplate(BoundTemplate):
 
 
 class FutureBoundTemplate(BoundTemplate):
-    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
-    context.
+    """A `BoundTemplate` configured to use the `FutureContext` render context.
 
-    See :class:`liquid.future.Environment`.
+    See `liquid.future.Environment`.
     """
 
     context_class = FutureContext
@@ -421,10 +400,11 @@ class FutureBoundTemplate(BoundTemplate):
 
 
 class FutureAwareBoundTemplate(AwareBoundTemplate):
-    """A ``BoundTemplate`` subclass configured to use the ``FutureContext`` render
-    context, and includes a `TemplateDrop` in each render context.
+    """A `BoundTemplate` configured to use the `FutureContext` render context.
 
-    See :class:`liquid.future.Environment`.
+    Inserts a `TemplateDrop` into the global namespace automatically.
+
+    See `liquid.future.Environment`.
     """
 
     context_class = FutureContext

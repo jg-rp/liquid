@@ -5,8 +5,8 @@ from dataclasses import field
 from typing import List
 from unittest import TestCase
 
-from liquid import Environment
 from liquid import DictLoader
+from liquid import Environment
 from liquid.analyze_tags import TagAnalysis
 from liquid.analyze_tags import TagMap
 from liquid.context import Context

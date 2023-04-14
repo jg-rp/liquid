@@ -1,18 +1,18 @@
 """Liquid tag base class."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-
+from abc import ABC
+from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from liquid.ast import Node
 from liquid.ast import IllegalNode
+from liquid.ast import Node
 from liquid.exceptions import Error
 from liquid.parse import eat_block
-from liquid.stream import TokenStream
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
+    from liquid.stream import TokenStream
 
 
 class Tag(ABC):

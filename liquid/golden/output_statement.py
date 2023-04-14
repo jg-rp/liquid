@@ -1,6 +1,7 @@
 """Golden tests cases for testing liquid output statements."""
 
 import datetime
+
 from liquid.golden.case import Case
 
 cases = [
@@ -119,7 +120,7 @@ cases = [
     ),
     Case(
         description=(
-            "render a default given a literal false " "with 'allow false' equal to true"
+            "render a default given a literal false with 'allow false' equal to true"
         ),
         template=r"{{ false | default: 'bar', allow_false: true }}",
         expect="false",

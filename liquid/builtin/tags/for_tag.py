@@ -1,34 +1,33 @@
 """Tag and node definition for the built-in "for" tag."""
 from __future__ import annotations
+
 import sys
-
-from typing import List
-from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Any
-from typing import Mapping
-from typing import TextIO
 from typing import Iterator
+from typing import List
+from typing import Mapping
+from typing import Optional
+from typing import TextIO
 
+from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.ast import BlockNode
-
-from liquid.context import Context
-from liquid.expression import LoopExpression
-
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
-
-from liquid.parse import get_parser
 from liquid.parse import expect
-
-from liquid.stream import TokenStream
+from liquid.parse import get_parser
 from liquid.tag import Tag
-
-from liquid.token import Token
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
+if TYPE_CHECKING:
+    from liquid.context import Context
+    from liquid.expression import LoopExpression
+    from liquid.stream import TokenStream
+
+# ruff: noqa: D102
 
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
@@ -41,7 +40,6 @@ ENDFORBLOCK = frozenset((TAG_ENDFOR, TAG_ELSE))
 ENDFORELSEBLOCK = frozenset((TAG_ENDFOR,))
 
 
-# pylint: disable=too-many-instance-attributes
 class ForLoop(Mapping[str, object]):
     """Loop helper variables."""
 
@@ -290,8 +288,8 @@ class BreakNode(Node):
 
     def render_to_output(
         self,
-        context: Context,
-        buffer: TextIO,
+        _: Context,
+        __: TextIO,
     ) -> Optional[bool]:
         raise BreakLoop("break")
 
@@ -312,8 +310,8 @@ class ContinueNode(Node):
 
     def render_to_output(
         self,
-        context: Context,
-        buffer: TextIO,
+        _: Context,
+        __: TextIO,
     ) -> Optional[bool]:
         raise ContinueLoop("continue")
 

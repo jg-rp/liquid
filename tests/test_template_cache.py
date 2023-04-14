@@ -1,5 +1,4 @@
 """Template cache test cases."""
-# pylint: disable=missing-class-docstring
 import unittest
 
 from liquid.utils import LRUCache

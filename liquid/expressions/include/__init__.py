@@ -1,5 +1,3 @@
-# flake8: noqa
-# pylint: disable=missing-module-docstring
-from .lex import tokenize
+from .lex import tokenize  # noqa: D104
 
 __all__ = ("tokenize",)

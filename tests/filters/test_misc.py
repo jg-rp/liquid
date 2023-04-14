@@ -1,28 +1,22 @@
 """Test miscellaneous filter functions."""
-# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import datetime
 import decimal
 import platform
 import unittest
-
 from functools import partial
 from inspect import isclass
-
-from typing import NamedTuple
 from typing import Any
-from typing import List
 from typing import Dict
+from typing import List
+from typing import NamedTuple
 
+from liquid.builtin.filters.misc import date
+from liquid.builtin.filters.misc import default
+from liquid.builtin.filters.misc import size
 from liquid.environment import Environment
-
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
-
 from liquid.expression import EMPTY
-
-from liquid.builtin.filters.misc import size
-from liquid.builtin.filters.misc import default
-from liquid.builtin.filters.misc import date
 
 
 class Case(NamedTuple):

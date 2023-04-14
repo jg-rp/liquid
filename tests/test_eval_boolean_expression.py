@@ -1,14 +1,11 @@
-# pylint: disable=missing-class-docstring missing-module-docstring
 import unittest
 from decimal import Decimal
-
 from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
 from liquid import Context
 from liquid import Environment
-
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
 

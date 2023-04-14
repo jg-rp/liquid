@@ -1,17 +1,11 @@
-# flake8: noqa
-# pylint: disable=missing-module-docstring
-
-__version__ = "1.9.0"
-
 try:
-    from markupsafe import escape
     from markupsafe import Markup
+    from markupsafe import escape
     from markupsafe import soft_str
 except ImportError:
-    from liquid.exceptions import escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import escape  # type: ignore
 
-    # pylint: disable=invalid-name
     soft_str = str  # type: ignore
 
 from .mode import Mode
@@ -42,6 +36,9 @@ from .template import FutureBoundTemplate
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
+from .static_analysis import TemplateAnalysis
+from .static_analysis import ContextualTemplateAnalysis
+
 from . import future
 
 __all__ = (
@@ -49,6 +46,7 @@ __all__ = (
     "BoundTemplate",
     "ChoiceLoader",
     "Context",
+    "ContextualTemplateAnalysis",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
     "DictLoader",
@@ -58,8 +56,8 @@ __all__ = (
     "FileExtensionLoader",
     "FileSystemLoader",
     "future",
-    "FutureBoundTemplate",
     "FutureAwareBoundTemplate",
+    "FutureBoundTemplate",
     "FutureContext",
     "is_undefined",
     "Markup",
@@ -69,6 +67,7 @@ __all__ = (
     "StrictUndefined",
     "TagAnalysis",
     "Template",
+    "TemplateAnalysis",
     "Token",
     "Undefined",
 )

@@ -1,14 +1,11 @@
-# pylint: disable=missing-class-docstring missing-module-docstring
 import os
 import unittest
 
 from mock import patch
 
-from liquid import Template
 from liquid import Mode
-
+from liquid import Template
 from liquid.exceptions import LiquidValueError
-
 from liquid.limits import MAX_STR_INT
 from liquid.limits import _init_int_max_str_digits
 
@@ -53,5 +50,5 @@ class StrToIntTestCase(unittest.TestCase):
 
     @patch.dict(os.environ, {"LIQUIDINTMAXSTRDIGITS": "0"})
     def test_zero_is_ok(self):
-        """Test that zero is OK"""
+        """Test that zero is OK."""
         self.assertEqual(_init_int_max_str_digits(), 0)

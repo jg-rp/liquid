@@ -1,23 +1,21 @@
 """Tag and node definition for the built-in "comment" tag."""
 
 import sys
-
 from typing import List
 from typing import Optional
 from typing import TextIO
 
 from liquid import ast
 from liquid.context import Context
+from liquid.parse import eat_block
+from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.parse import expect
-from liquid.parse import eat_block
-
-from liquid.token import Token
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
+# ruff: noqa: D102
 
 TAG_COMMENT = sys.intern("comment")
 TAG_ENDCOMMENT = sys.intern("endcomment")
@@ -41,8 +39,8 @@ class CommentNode(ast.Node):
 
     def render_to_output(
         self,
-        context: Context,
-        buffer: TextIO,
+        _: Context,
+        __: TextIO,
     ) -> Optional[bool]:
         return False
 
@@ -69,11 +67,10 @@ class CommentTag(Tag):
 
 
 class CommentTextTag(CommentTag):
-    """An implementation of the built-in "comment" tag that includes
-    comment text in a template's AST.
+    """An implementation of the built-in "comment" tag that retains comment text.
 
-    Some Liquid markup might be stripped out by the lexer, so comment
-    text is not guaranteed to be identical to that in the source document.
+    Some Liquid markup might be stripped out by the lexer, so comment text is not
+    guaranteed to be identical to that in the source document.
     """
 
     name = TAG_COMMENT

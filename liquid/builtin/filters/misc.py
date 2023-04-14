@@ -4,10 +4,9 @@ from __future__ import annotations
 import datetime
 import decimal
 import functools
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Union
-from typing import TYPE_CHECKING
 
 from dateutil import parser
 
@@ -16,12 +15,10 @@ try:
 except ImportError:
     from liquid.exceptions import Markup  # type: ignore
 
-from liquid.filter import liquid_filter
-from liquid.filter import with_environment
-
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
-
+from liquid.filter import liquid_filter
+from liquid.filter import with_environment
 from liquid.undefined import is_undefined
 
 if TYPE_CHECKING:
@@ -66,7 +63,7 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
 @with_environment
 @liquid_filter
 @functools.lru_cache(maxsize=10)
-def date(
+def date(  # noqa: PLR0912
     dat: Union[datetime.datetime, str, int],
     fmt: str,
     *,

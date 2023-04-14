@@ -1,11 +1,9 @@
 """HTML escape test cases."""
-# pylint: disable=missing-class-docstring
-from unittest import TestCase
-from unittest import skipIf
-
-from typing import NamedTuple
 from typing import Dict
 from typing import List
+from typing import NamedTuple
+from unittest import TestCase
+from unittest import skipIf
 
 try:
     import markupsafe
@@ -784,7 +782,9 @@ class AutoescapeTestCase(TestCase):
                 self.assertEqual(result, case.expect)
 
 
-@skipIf(markupsafe is not None, "this tests exceptions raise by the lack of markupsafe")
+@skipIf(
+    markupsafe is not None, "this tests exceptions raised by the lack of markupsafe"
+)
 class DummyMarkupSafeTestCase(TestCase):
     def test_dummy_escape(self):
         """Test that the dummy definition of escape raises an exception."""

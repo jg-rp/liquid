@@ -1,14 +1,12 @@
 """Liquid expression objects."""
 from __future__ import annotations
-import sys
 
+import sys
 from abc import ABC
 from abc import abstractmethod
-
 from collections import abc
 from decimal import Decimal
 from itertools import islice
-
 from typing import Any
 from typing import Dict
 from typing import Generic
@@ -21,19 +19,16 @@ from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
+from liquid import Markup
 from liquid.context import Context
 from liquid.context import FutureContext
-
-from liquid import Markup
-
-from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import Error
-from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import FilterValueError
-
+from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import NoSuchFilterFunc
 from liquid.limits import to_int
 
-# pylint: disable=missing-class-docstring too-few-public-methods too-many-lines
+# ruff: noqa: D102 D101
 
 
 class Expression(ABC):
@@ -44,7 +39,7 @@ class Expression(ABC):
         """Evaluate the expression with the given context."""
 
     async def evaluate_async(self, context: Context) -> object:
-        """An async version of :meth:`liquid.expression.Expression.evaluate`."""
+        """An async version of `liquid.expression.Expression.evaluate`."""
         return self.evaluate(context)
 
     def children(self) -> List[Expression]:
@@ -64,7 +59,7 @@ class Nil(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return ""
 
-    def evaluate(self, context: Context) -> None:
+    def evaluate(self, _: Context) -> None:
         return None
 
     def children(self) -> List[Expression]:
@@ -90,7 +85,7 @@ class Empty(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "empty"
 
-    def evaluate(self, context: Context) -> Empty:
+    def evaluate(self, _: Context) -> Empty:
         return self
 
     def children(self) -> List[Expression]:
@@ -118,7 +113,7 @@ class Blank(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "blank"
 
-    def evaluate(self, context: Context) -> Blank:
+    def evaluate(self, _: Context) -> Blank:
         return self
 
     def children(self) -> List[Expression]:
@@ -142,7 +137,7 @@ class Continue(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "continue"
 
-    def evaluate(self, context: Context) -> int:
+    def evaluate(self, _: Context) -> int:
         return 0
 
     def children(self) -> List[Expression]:
@@ -152,7 +147,7 @@ class Continue(Expression):
 CONTINUE = Continue()
 
 
-T = TypeVar("T")  # pylint: disable=invalid-name
+T = TypeVar("T")
 
 
 class Literal(Expression, Generic[T]):
@@ -173,7 +168,7 @@ class Literal(Expression, Generic[T]):
     def __sizeof__(self) -> int:
         return sys.getsizeof(self.value)
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, _: Context) -> object:
         return self.value
 
     def children(self) -> List[Expression]:
@@ -499,7 +494,6 @@ class Filter:
         args_str = ", ".join([str(arg) for arg in self.args])
         if args_str:
             buf.append(f": {args_str}")
-            # return f"{self.name}: {args_str})"
 
         kwargs_str = ", ".join([f"{k}: {v}" for k, v in self.kwargs.items()])
         if kwargs_str:
@@ -516,8 +510,7 @@ class Filter:
         return [await arg.evaluate_async(context) for arg in self.args]
 
     def evaluate_kwargs(self, context: Context) -> Dict[str, object]:
-        """Return a dictionary of filter keyword arguments evaluated with the given
-        context."""
+        """Return evaluated keyword arguments for this filter."""
         # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
             return {}
@@ -576,7 +569,7 @@ class FilteredExpression(Expression):
         )
 
     def __str__(self) -> str:
-        filter_str = " | ".join([str(filter) for filter in self.filters])
+        filter_str = " | ".join([str(_filter) for _filter in self.filters])
 
         if filter_str:
             return f"{self.expression} | {filter_str}"
@@ -622,7 +615,7 @@ class FilteredExpression(Expression):
                 continue
             except Error:
                 raise
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 raise Error(
                     f"filter '{_filter.name}': unexpected error: {err}"
                 ) from err
@@ -666,7 +659,7 @@ class FilteredExpression(Expression):
                 continue
             except Error:
                 raise
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 raise Error(
                     f"filter '{_filter.name}': unexpected error: {err}"
                 ) from err
@@ -736,7 +729,7 @@ class ConditionalExpression(FilteredExpression):
 
         if self.filters:
             buf.append("|")
-            buf.append(" | ".join([str(filter) for filter in self.filters]))
+            buf.append(" | ".join([str(_filter) for _filter in self.filters]))
 
         return " ".join(buf)
 
@@ -954,11 +947,7 @@ class LoopExpression(Expression):
         if limit is not None:
             length = min(length, limit)
 
-        if offset:
-            stop = offset + length
-        else:
-            stop = length
-
+        stop = offset + length if offset else length
         context.stopindex(key=offset_key, index=stop)
         it = islice(it, offset, stop)
 
@@ -1070,7 +1059,6 @@ def is_truthy(obj: Any) -> bool:
     return _is_py_falsy_number(obj) or obj not in (False, None)
 
 
-# pylint: disable=too-many-return-statements
 def compare_bool(left: Any, operator: str, right: Any) -> bool:
     """Compare an object to a boolean value."""
     if (isinstance(left, bool) and _is_py_falsy_number(right)) or (
@@ -1094,8 +1082,7 @@ def compare_bool(left: Any, operator: str, right: Any) -> bool:
     raise LiquidTypeError(f"unknown operator: {type(left)} {operator} {type(right)}")
 
 
-# pylint: disable=too-many-return-statements,too-many-branches
-def compare(left: Any, operator: str, right: Any) -> bool:
+def compare(left: Any, operator: str, right: Any) -> bool:  # noqa: PLR0911, PLR0912
     """Return the result of a comparison operation between two objects."""
     if operator == "and":
         return is_truthy(left) and is_truthy(right)
@@ -1130,7 +1117,6 @@ def compare(left: Any, operator: str, right: Any) -> bool:
     if type(left) in (int, float) and type(right) in (int, float):
         return eval_number_expression(left, operator, right)
 
-    # pylint: disable=unidiomatic-typecheck
     if type(left) != type(right):
         raise LiquidTypeError(
             f"invalid operator for types '{str(left)} {operator} {str(right)}'"

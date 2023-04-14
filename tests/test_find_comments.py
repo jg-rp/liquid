@@ -1,20 +1,20 @@
-"""Test that we can traverse a template's syntax tree to find comments"""
-# pylint: disable=missing-class-docstring missing-function-docstring
-
+"""Test that we can traverse a template's syntax tree to find comments."""
 import unittest
-
+from typing import TYPE_CHECKING
 from typing import Iterator
 from typing import Tuple
 
 from liquid import Template
-from liquid.ast import Node
 from liquid.builtin.tags.comment_tag import CommentNode
 from liquid.template import BoundTemplate
+
+if TYPE_CHECKING:
+    from liquid.ast import Node
 
 
 class FindCommentsTestCase(unittest.TestCase):
     def _find_comment_text(self, template: BoundTemplate) -> Iterator[Tuple[int, str]]:
-        def visit(node: Node) -> Iterator[Tuple[int, str]]:
+        def visit(node: "Node") -> Iterator[Tuple[int, str]]:
             if isinstance(node, CommentNode) and node.text is not None:
                 yield (node.tok.linenum, node.text)
             for child in node.children():

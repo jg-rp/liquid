@@ -1,12 +1,9 @@
 """Liquid exception test cases."""
-# pylint: disable=missing-class-docstring
-
 from pathlib import Path
 from unittest import TestCase
 
 from liquid import Environment
 from liquid import Mode
-
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
 
@@ -31,7 +28,7 @@ class LiquidErrorTestCase(TestCase):
     def test_base_error_no_message(self):
         """Test that the base error can not include a message."""
         try:
-            raise Error()
+            raise Error
         except Error as err:
             self.assertEqual(err.message, None)
 

@@ -1,44 +1,39 @@
 """Parse tree node and tag definition for the built in "include" tag."""
 import sys
-
+from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Dict
 from typing import TextIO
 from typing import Tuple
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
 from liquid.builtin.drops import IterableDrop
 from liquid.context import Context
-
-from liquid.expression import Expression, Literal
-from liquid.expression import Identifier
-
 from liquid.exceptions import LiquidSyntaxError
-from liquid.stream import TokenStream
-from liquid.tag import Tag
-
-from liquid.parse import expect
-
-from liquid.token import Token
-from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_WITH
-from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_EOF
-
+from liquid.expression import Expression
+from liquid.expression import Identifier
+from liquid.expression import Literal
 from liquid.expressions import TokenStream as ExprTokenStream
+from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.common import parse_unchained_identifier
-from liquid.expressions.common import parse_identifier
-from liquid.expressions.include.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
+from liquid.expressions.include.lex import tokenize
+from liquid.parse import expect
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.token import TOKEN_AS
+from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WITH
+from liquid.token import Token
 
+# ruff: noqa: D102
 
 TAG_INCLUDE = sys.intern("include")
 
@@ -125,8 +120,6 @@ class IncludeNode(Node):
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        """Same as ``render_to_output`` but uses async versions of get_template and
-        render_with_context."""
         name = await self.name.evaluate_async(context)
         template = await context.get_template_with_context_async(
             str(name), tag=self.tag

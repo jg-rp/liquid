@@ -1,30 +1,25 @@
 """Test math filter functions."""
-# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import unittest
-
 from functools import partial
 from inspect import isclass
-
-from typing import NamedTuple
 from typing import Any
-from typing import List
 from typing import Dict
-
-from liquid.environment import Environment
-
-from liquid.exceptions import FilterArgumentError
+from typing import List
+from typing import NamedTuple
 
 from liquid.builtin.filters.math import abs_
-from liquid.builtin.filters.math import at_most
 from liquid.builtin.filters.math import at_least
+from liquid.builtin.filters.math import at_most
 from liquid.builtin.filters.math import ceil
 from liquid.builtin.filters.math import divided_by
 from liquid.builtin.filters.math import floor
 from liquid.builtin.filters.math import minus
+from liquid.builtin.filters.math import modulo
 from liquid.builtin.filters.math import plus
 from liquid.builtin.filters.math import round_
 from liquid.builtin.filters.math import times
-from liquid.builtin.filters.math import modulo
+from liquid.environment import Environment
+from liquid.exceptions import FilterArgumentError
 
 
 class Case(NamedTuple):
@@ -61,7 +56,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_abs(self):
         """Test abs filter function."""
-
         test_cases = [
             Case(
                 description="positive integer",
@@ -160,7 +154,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_at_most(self):
         """Test at_most filter function."""
-
         test_cases = [
             Case(
                 description="positive integer < arg",
@@ -252,7 +245,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_at_least(self):
         """Test at_least filter function."""
-
         test_cases = [
             Case(
                 description="positive integer < arg",
@@ -344,7 +336,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_ceil(self):
         """Test ceil filter function."""
-
         test_cases = [
             Case(
                 description="positive integer",
@@ -429,7 +420,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_floor(self):
         """Test floor filter function."""
-
         test_cases = [
             Case(
                 description="positive integer",
@@ -514,7 +504,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_divided_by(self):
         """Test divided_by filter function."""
-
         test_cases = [
             Case(
                 description="integer value and integer arg",
@@ -599,7 +588,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_minus(self):
         """Test minus filter function."""
-
         test_cases = [
             Case(
                 description="integer value and integer arg",
@@ -677,7 +665,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_plus(self):
         """Test plus filter function."""
-
         test_cases = [
             Case(
                 description="integer value and integer arg",
@@ -755,7 +742,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_round(self):
         """Test round filter function."""
-
         test_cases = [
             Case(
                 description="float round down",
@@ -826,7 +812,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_times(self):
         """Test times filter function."""
-
         test_cases = [
             Case(
                 description="int times int",
@@ -904,7 +889,6 @@ class MathFilterTestCase(unittest.TestCase):
 
     def test_modulo(self):
         """Test modulo filter function."""
-
         test_cases = [
             Case(
                 description="integer value and integer arg",

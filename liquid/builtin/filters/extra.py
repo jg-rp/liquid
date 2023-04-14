@@ -1,5 +1,6 @@
 """Filters that don't exist in the reference implementation."""
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 try:
@@ -10,7 +11,7 @@ except ImportError:
 from liquid.filter import string_filter
 from liquid.filter import with_environment
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
 
 

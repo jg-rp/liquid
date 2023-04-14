@@ -8,18 +8,14 @@ import itertools
 import re
 import sys
 import warnings
-
 from contextlib import contextmanager
-
 from functools import partial
 from functools import reduce
-
-from itertools import cycle
 from io import StringIO
-
+from itertools import cycle
 from operator import getitem
 from operator import mul
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
 from typing import Callable
@@ -32,31 +28,29 @@ from typing import Optional
 from typing import Sequence
 from typing import TextIO
 from typing import Union
-from typing import TYPE_CHECKING
 
 from liquid import Mode
 from liquid.chain_map import ReadOnlyChainMap
-from liquid.output import LimitedStringIO
-
-from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import ContextDepthError
 from liquid.exceptions import Error
 from liquid.exceptions import LocalNamespaceLimitError
 from liquid.exceptions import LoopIterationLimitError
+from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import lookup_warning
-
+from liquid.output import LimitedStringIO
+from liquid.undefined import UNDEFINED
 from liquid.undefined import DebugUndefined
-from liquid.undefined import is_undefined
 from liquid.undefined import StrictDefaultUndefined
 from liquid.undefined import StrictUndefined
 from liquid.undefined import Undefined
-from liquid.undefined import UNDEFINED
+from liquid.undefined import is_undefined
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.template import BoundTemplate
     from liquid.builtin.tags.for_tag import ForLoop
+    from liquid.template import BoundTemplate
 
+# ruff: noqa: D102
 
 __all__ = (
     "Context",
@@ -177,13 +171,12 @@ async def _liquid_last_async(
         raise
 
 
-# pylint: disable=too-many-instance-attributes redefined-builtin too-many-public-methods
 class Context:
     """A template render context.
 
-    A new render context is created automatically each time :meth:`BoundTemplate.render`
-    is called, which includes `globals` set on the bound :class:`liquid.Environment` and
-    :class:`liquid.template.BoundTemplate`.
+    A new render context is created automatically each time `BoundTemplate.render`
+    is called, which includes `globals` set on the bound `liquid.Environment` and
+    `liquid.template.BoundTemplate`.
     """
 
     __slots__ = (
@@ -210,11 +203,10 @@ class Context:
     # leave `template` optional for backwards compatibility reasons only. This might
     # change in Python Liquid version 2.0.
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         env: Environment,
-        globals: Optional[Namespace] = None,
+        globals: Optional[Namespace] = None,  # noqa: A002
         disabled_tags: Optional[List[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[Context] = None,
@@ -371,7 +363,7 @@ class Context:
                 return self.env.undefined(name)
             return default
 
-    def filter(self, name: str) -> Callable[..., object]:
+    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
         """Return the filter function with given name."""
         try:
             filter_func = self.env.filters[name]
@@ -400,8 +392,7 @@ class Context:
         return await self.env.get_template_async(name)
 
     def get_template_with_context(self, name: str, **kwargs: str) -> BoundTemplate:
-        """Load a template from the environment, optionally referencing the current
-        render context."""
+        """Load a template referencing the current render context."""
         return self.env.get_template_with_context(self, name, **kwargs)
 
     async def get_template_with_context_async(
@@ -409,8 +400,7 @@ class Context:
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
-        """Load a template from the environment asynchronously, optionally referencing
-        the current render context."""
+        """An async version of `get_template_with_context`."""
         return await self.env.get_template_with_context_async(self, name, **kwargs)
 
     def increment(self, name: str) -> int:
@@ -475,7 +465,7 @@ class Context:
 
     @contextmanager
     def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[Context]:
-        """Just like ``Context.extend``, but keeps track of ForLoop objects too."""
+        """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
         with self.extend(namespace) as context:
@@ -492,9 +482,7 @@ class Context:
             return self.env.undefined("parentloop")
 
     def raise_for_loop_limit(self, length: int = 1) -> None:
-        """Raise a ``LoopIterationLimitError`` if the product of the loop stack is
-        greater than the configured loop iteration limit.
-        """
+        """Raise a `LoopIterationLimitError` if loop stack is bigger than the limit."""
         if (
             self.env.loop_iteration_limit
             and reduce(
@@ -514,8 +502,10 @@ class Context:
         template: Optional[BoundTemplate] = None,
         block_scope: bool = False,
     ) -> Context:
-        """Return a copy of this context without any local variables or other state
-        for stateful tags."""
+        """Return a copy of this render context.
+
+        Local variables and other state for stateful tags are not copied.
+        """
         if self._copy_depth > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive render"
@@ -567,15 +557,13 @@ class Context:
             )
 
     def get_buffer(self, buf: Optional[TextIO] = None) -> StringIO:
-        """Return a new StringIO object, possibly limited according to the configured
-        output stream limit."""
+        """Return a new StringIO object that respects the configured stream limit."""
         if self.env.output_stream_limit is None:
             return StringIO()
 
         carry = buf.size if isinstance(buf, LimitedStringIO) else 0
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
-    # pylint: disable=too-many-return-statements
     @classmethod
     def getitem(cls, obj: Any, key: Any) -> Any:
         """Item getter with special methods for arrays/lists and hashes/dicts."""
@@ -591,7 +579,6 @@ class Context:
 
         return getitem(obj, key)
 
-    # pylint: disable=too-many-return-statements
     @classmethod
     async def getitem_async(cls, obj: Any, key: Any) -> object:
         """Item getter with special methods for arrays/lists and hashes/dicts."""
@@ -632,11 +619,10 @@ class VariableCaptureContext(Context):
     # Used for formatting context path strings.
     re_ident = re.compile(r"^[\w_][\w_\-]*$")
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         env: Environment,
-        globals: Optional[Namespace] = None,
+        globals: Optional[Namespace] = None,  # noqa: A002
         disabled_tags: Optional[List[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[VariableCaptureContext] = None,
@@ -691,7 +677,7 @@ class VariableCaptureContext(Context):
         self.root_context.local_references.append(name)
         return super().decrement(name)
 
-    def filter(self, name: str) -> Callable[..., object]:
+    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
         self.root_context.filters.append(name)
         return super().filter(name)
 
@@ -704,7 +690,7 @@ class VariableCaptureContext(Context):
                 if isinstance(elem, int):
                     _path.append(f"[{elem}]")
                 else:
-                    if self.re_ident.match(elem):
+                    if self.re_ident.match(elem):  # noqa: PLR5501
                         if _path:
                             _path.append(f".{elem}")
                         else:
@@ -719,8 +705,7 @@ class VariableCaptureContext(Context):
 
 
 class FutureContext(Context):
-    """A render context that addresses some incompatibilities between Python Liquid and
-    Ruby Liquid.
+    """A render context configured for maximum compatibility with the Ruby liquid.
 
     These "fixes" have not been implemented in the default `Context` for the benefit of
     existing Python Liquid users that rely on past behavior.
@@ -743,11 +728,7 @@ class FutureContext(Context):
         return await super().getitem_async(obj, key)
 
     def cycle(self, group_name: str, args: Sequence[object]) -> object:
-        if group_name:
-            key = group_name
-        else:
-            key = str(args)
-
+        key = group_name if group_name else str(args)
         namespace: Dict[str, int] = self.tag_namespace["cycles"]
         index = namespace.setdefault(key, 0)
         try:
@@ -764,7 +745,7 @@ class FutureContext(Context):
 
 
 class FutureVariableCaptureContext(VariableCaptureContext, FutureContext):
-    """A render context that captures information about template variables and filters."""
+    """A context that captures information about template variables and filters."""
 
 
 def get_item(

@@ -1,14 +1,12 @@
 """Resource limit test cases."""
-# pylint: disable=missing-class-docstring
 import platform
 import unittest
 
 from liquid import DictLoader
 from liquid import Environment
-
 from liquid.exceptions import ContextDepthError
-from liquid.exceptions import LoopIterationLimitError
 from liquid.exceptions import LocalNamespaceLimitError
+from liquid.exceptions import LoopIterationLimitError
 from liquid.exceptions import OutputStreamLimitError
 
 
@@ -161,10 +159,8 @@ class LoopIterationLimitTestCase(unittest.TestCase):
         env = MockEnv(
             loader=DictLoader(
                 {
-                    "foo": (
-                        "{% for i in (1..50) %}" "{% render 'bar' %}" "{% endfor %}"
-                    ),
-                    "bar": ("{% for j in (1..50) %}" "{{ j }}" "{% endfor %}"),
+                    "foo": ("{% for i in (1..50) %}{% render 'bar' %}{% endfor %}"),
+                    "bar": ("{% for j in (1..50) %}{{ j }}{% endfor %}"),
                 }
             )
         )

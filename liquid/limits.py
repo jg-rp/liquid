@@ -8,11 +8,9 @@ resulting in too many breaking changes.
 
 import os
 import sys
-
 from typing import Any
 
 from liquid.exceptions import LiquidValueError
-
 
 _MIN_STR_INT = 640
 _DEFAULT_MAX_STR_INT = 4300
@@ -34,7 +32,7 @@ def _init_int_max_str_digits() -> int:
 
     if not env.isdigit():
         raise TypeError(
-            f"{var}: invalid limit; must be >= " f"{_MIN_STR_INT} or 0 for unlimited"
+            f"{var}: invalid limit; must be >= {_MIN_STR_INT} or 0 for unlimited"
         )
 
     max_digits = int(env)

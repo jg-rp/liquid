@@ -1,57 +1,49 @@
 """Analyze template variables, tags and filters by traversing a template's AST."""
 from __future__ import annotations
+
 import re
-
 from collections import defaultdict
-
+from typing import TYPE_CHECKING
 from typing import DefaultDict
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
-from typing import TYPE_CHECKING
-
-from typing_extensions import Literal
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import ParseTree
-
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
-
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import TemplateTraversalError
-
 from liquid.expression import Expression
 from liquid.expression import FilteredExpression
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import IdentifierTuple
 from liquid.expression import StringLiteral
-
 from liquid.extra.tags.extends import BlockNode as InheritanceBlockNode
 from liquid.extra.tags.extends import _BlockStackItem
 from liquid.extra.tags.extends import stack_blocks
-
 from liquid.token import TOKEN_TAG
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from liquid import BoundTemplate
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
 
 
 class ReferencedVariable(str):
-    """A str subclass for variables found during static analysis that retains
-    information about a variable's parts.
-    """
+    """A str subclass for variables found during static analysis."""
 
-    def __new__(cls, obj: object) -> ReferencedVariable:
+    def __new__(cls, obj: object) -> ReferencedVariable:  # noqa: D102
         _str = super().__new__(cls, obj)
         _str.obj = obj
         return _str
@@ -66,9 +58,10 @@ class ReferencedVariable(str):
 
     @property
     def parts(self) -> IdentifierTuple:
-        """A tuple representation of the variable's parts, which might contain
-        nested tuples for nested variables. For example, the variable
-        ``some[foo.bar[a.b]].other`` as a tuple would look like this:
+        """A tuple representation of the variable's parts.
+
+        `parts` might contain nested tuples for nested variables. For example, the
+        variable `some[foo.bar[a.b]].other` as a tuple would look like this:
 
             ("some", ("foo", "bar", ("a", "b")), "other.thing")
         """
@@ -89,23 +82,22 @@ IdentifierMap = DefaultDict[Identifier, List[Location]]
 NameRefs = Dict[str, List[Location]]
 
 
-# pylint: disable=too-few-public-methods
 class ContextualTemplateAnalysis:
-    """The result of analyzing a template's filters and variables using
-    :meth:`BoundTemplate.analyze_with_context`.
+    """The result of analyzing a template using `BoundTemplate.analyze_with_context`.
 
     Each of the following properties is a dictionary mapping variable or filter names
     to the number of times that variable was referenced.
 
-    :ivar all_variables: All variables references along a path through the template's
-        syntax tree.
-    :ivar local_variables: The names of variables assigned using the built-in ``assign``
-        ``capture``, ``increment`` or ``decrement`` tags, or any custom tag that uses
-        ``Context.assign()``.
-    :ivar undefined_variables: The names of variables that could not be resolved. If a
-        name is referenced before it is assigned, it will appear in ``undefined`` and
-        ``assigns``.
-    :ivar filters: Names of filters found during contextual analysis.
+    Attributes:
+        all_variables: All variables references along a path through the template's
+            syntax tree.
+        local_variables: The names of variables assigned using the built-in `assign`
+            `capture`, `increment` or `decrement` tags, or any custom tag that uses
+            `Context.assign()`.
+        undefined_variables: The names of variables that could not be resolved. If a
+            name is referenced before it is assigned, it will appear in `undefined` and
+            `assigns`.
+        filters: Names of filters found during contextual analysis.
     """
 
     __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
@@ -124,30 +116,29 @@ class ContextualTemplateAnalysis:
         self.filters = filters
 
 
-# pylint: disable=too-few-public-methods
 class TemplateAnalysis:
-    """The result of analyzing a template's tags, filters and variables using
-    :meth:`BoundTemplate.analyze`.
+    """The result of analyzing a template using `BoundTemplate.analyze`.
 
     Each of the following properties is a dictionary mapping variable, tag or filter
     names to a list of tuples. Each tuple holds the location of a reference to the name
-    as (<template name>, <line number>). If a name is referenced multiple times, it will
+    as (template name, line number). If a name is referenced multiple times, it will
     appear multiple times in the list. If a name is referenced before it is "assigned",
-    it will appear in ``local_variables`` and ``global_variables``.
+    it will appear in `local_variables` and `global_variables`.
 
-    :ivar variables: All referenced variables, whether they are in scope or not.
-        Including references to names such as ``forloop`` from the ``for`` tag.
-    :ivar local_variables: Template variables that are added to the template local
-        scope, whether they are subsequently used or not.
-    :ivar global_variables: Template variables that, on the given line number and
-        "file", are out of scope or are assumed to be "global". That is, expected to be
-        included by the application developer rather than a template author.
-    :ivar failed_visits: Names of AST ``Node`` and ``Expression`` objects that could not
-        be visited, probably because they do not implement a ``children`` method.
-    :ivar unloadable_partials: Names or identifiers of partial templates that could not
-        be loaded. This will be empty if ``follow_partials`` is ``False``.
-    :ivar filters: All filters found during static analysis.
-    :ivar tags: All tags found during static analysis.
+    Attributes:
+        variables: All referenced variables, whether they are in scope or not. Including
+            references to names such as `forloop` from the `for` tag.
+        local_variables: Template variables that are added to the template local scope,
+            whether they are subsequently used or not.
+        global_variables: Template variables that, on the given line number and "file",
+            are out of scope or are assumed to be "global". That is, expected to be
+            included by the application developer rather than a template author.
+        failed_visits: Names of AST `Node` and `Expression` objects that could not be
+            visited, probably because they do not implement a `children` method.
+        unloadable_partials: Names or identifiers of partial templates that could not
+            be loaded. This will be empty if `follow_partials` is `False`.
+        filters: All filters found during static analysis.
+        tags: All tags found during static analysis.
     """
 
     __slots__ = (
@@ -180,24 +171,22 @@ class TemplateAnalysis:
         self.tags = tags
 
 
-# pylint: disable=too-many-instance-attributes
 class _TemplateCounter:
     """Count references to variable names in a Liquid template.
 
-    :param template: The Liquid template to analyze.
-    :type template: liquid.BoundTemplate
-    :param follow_partials: If ``True``, the reference counter will try to load partial
-        templates and count variable references in those partials too. Default's to
-        ``True``.
-    :type follow_partials: bool
-    :param raise_for_failures: If ``True``, will raise an exception if an ``ast.Node``
-        or ``expression.Expression`` does not define a ``children()`` method, or if a
-        partial template can not be loaded.
+    Args:
+        template: The Liquid template to analyze.
+        follow_partials: If `True`, the reference counter will try to load partial
+            templates and count variable references in those partials too. Default's to
+            `True`.
+        raise_for_failures: If `True`, will raise an exception if an `ast.Node` or
+            `expression.Expression` does not define a `children()` method, or if a
+            partial template can not be loaded.
 
-        When ``False``, no exception is raised and a mapping of failed nodes/expressions
-        is available as the ``failed_visits`` property. A mapping of unloadable partial
-        templates are stored in the ``unloadable_partials`` property.
-    :type: raised_for_failed_visits: bool
+            When `False`, no exception is raised and a mapping of failed
+            nodes/expressions is available as the `failed_visits` property. A mapping of
+            unloadable partial templates are stored in the `unloadable_partials`
+            property.
     """
 
     def __init__(
@@ -261,7 +250,7 @@ class _TemplateCounter:
         return self
 
     async def analyze_async(self) -> _TemplateCounter:
-        """An async version of :meth:`_TemplateVariableCounter.analyze`"""
+        """An async version of `_TemplateVariableCounter.analyze()`."""
         for node in self.template.tree.statements:
             try:
                 await self._analyze_async(node)
@@ -480,7 +469,7 @@ class _TemplateCounter:
     async def _analyze_render_async(self, child: ChildNode) -> None:
         name, load_context = self._make_load_context(child, "render")
         if name is None or load_context is None:
-            return None
+            return
 
         try:
             template = await self._get_template_async(
@@ -665,10 +654,9 @@ class _TemplateCounter:
         ast_extends_node, ast_block_nodes = stack_blocks(stack_context, template)
 
         # Count `extends` and `block` tags here, as we don't get the chance later.
-        if count_tags:
-            if ast_extends_node:
-                token = ast_extends_node.token()
-                self.tags[token.value].append((template_name, token.linenum))
+        if count_tags and ast_extends_node:
+            token = ast_extends_node.token()
+            self.tags[token.value].append((template_name, token.linenum))
         for ast_node in ast_block_nodes:
             token = ast_node.token()
             self.tags[token.value].append((template_name, token.linenum))
@@ -815,12 +803,11 @@ class _InheritanceChainCounter(_TemplateCounter):
         if isinstance(expression, Identifier) and str(expression) == "block.super":
             return True
 
-        if isinstance(expression, FilteredExpression):
-            if (
-                isinstance(expression.expression, Identifier)
-                and str(expression.expression) == "block.super"
-            ):
-                return True
+        if isinstance(expression, FilteredExpression) and (
+            isinstance(expression.expression, Identifier)
+            and str(expression.expression) == "block.super"
+        ):
+            return True
 
         for expr in expression.children():
             return self._contains_super(expr)
@@ -878,21 +865,21 @@ class _InheritanceChainCounter(_TemplateCounter):
 
 
 class References:
-    "Collects references for Template.analyze and friends"
+    """Collect references for Template.analyze and friends."""
 
     def __init__(self) -> None:
         self.variable_references: List[Identifier] = []
         self.filter_references: List[str] = []
 
     def append_variable(self, var: Identifier) -> None:
-        "Add a variable reference"
+        """Add a variable reference."""
         self.variable_references.append(var)
 
     def append_filters(self, filters: List[str]) -> None:
-        "Add references to filters"
+        """Add references to filters."""
         self.filter_references.extend(filters)
 
     def extend(self, refs: References) -> None:
-        "Incorporate references from another References"
+        """Incorporate references from another References."""
         self.variable_references.extend(refs.variable_references)
         self.filter_references.extend(refs.filter_references)

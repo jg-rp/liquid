@@ -1,32 +1,28 @@
 """Test cases for parsing list of positional and keyword arguments."""
 import unittest
-
 from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 from typing import Union
 
+from liquid.exceptions import Error
+from liquid.exceptions import LiquidSyntaxError
+from liquid.expression import FALSE
+from liquid.expression import NIL
+from liquid.expression import TRUE
 from liquid.expression import Expression
 from liquid.expression import FloatLiteral
-from liquid.expression import IdentifierPathElement
 from liquid.expression import Identifier
+from liquid.expression import IdentifierPathElement
 from liquid.expression import IntegerLiteral
 from liquid.expression import StringLiteral
-from liquid.expression import FALSE
-from liquid.expression import TRUE
-from liquid.expression import NIL
-
 from liquid.expressions import parse_call_arguments
 from liquid.expressions import parse_keyword_arguments
 from liquid.expressions import parse_macro_arguments
-
 from liquid.expressions.arguments.lex import tokenize
 from liquid.expressions.arguments.parse import parse_equals_separated_arguments
 from liquid.expressions.stream import TokenStream
-
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidSyntaxError
 
 Arguments = List[Tuple[Optional[str], Optional[Expression]]]
 

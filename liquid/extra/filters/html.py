@@ -1,14 +1,14 @@
 """Extra HTML filters."""
 from __future__ import annotations
-import html
 
+import html
 from typing import TYPE_CHECKING
 
 from liquid import Markup
 from liquid.filter import string_filter
 from liquid.filter import with_environment
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
 
 

@@ -1,10 +1,7 @@
 """Mick shop related filters."""
-# pylint: disable=missing-function-docstring
+from liquid.exceptions import FilterArgumentError
 from liquid.filter import liquid_filter
 from liquid.filter import string_filter
-
-from liquid.exceptions import FilterArgumentError
-
 
 TRANSLATION_TABLE = {"'": None, '"': None, "(": None, ")": None, "[": None, "]": None}
 

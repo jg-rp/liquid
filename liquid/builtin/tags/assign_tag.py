@@ -1,26 +1,25 @@
 """Tag and node definition for the built-in "assign" tag."""
 import re
 import sys
-
 from typing import List
 from typing import Optional
 from typing import TextIO
 
-from liquid.token import Token
-from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_EXPRESSION
-
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.expression import Expression
-from liquid.tag import Tag
 from liquid.context import Context
-from liquid.stream import TokenStream
-from liquid.expression import AssignmentExpression
 from liquid.exceptions import LiquidSyntaxError
-
-from liquid.parse import expect
+from liquid.expression import AssignmentExpression
+from liquid.expression import Expression
 from liquid.expressions.common import ASSIGN_IDENTIFIER_PATTERN
+from liquid.parse import expect
+from liquid.stream import TokenStream
+from liquid.tag import Tag
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_TAG
+from liquid.token import Token
+
+# ruff: noqa: D102
 
 RE_ASSIGNMENT = re.compile(rf"^({ASSIGN_IDENTIFIER_PATTERN})\s*=\s*(.+)$")
 
@@ -39,7 +38,7 @@ class AssignNode(Node):
     def __str__(self) -> str:
         return f"var ({self.expression})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(self, context: Context, _: TextIO) -> Optional[bool]:
         self.expression.evaluate(context)
         return False
 

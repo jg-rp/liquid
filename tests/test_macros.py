@@ -1,11 +1,10 @@
 """Test cases for `macro` and `call` tags."""
 import asyncio
-from unittest import TestCase
-
-from typing import Mapping
-from typing import NamedTuple
 from typing import Any
 from typing import Dict
+from typing import Mapping
+from typing import NamedTuple
+from unittest import TestCase
 
 from liquid.context import StrictUndefined
 from liquid.environment import Environment
@@ -20,7 +19,7 @@ class Case(NamedTuple):
     description: str
     template: str
     expect: str
-    globals: Mapping[str, Any]
+    globals: Mapping[str, Any]  # noqa: A003
     partials: Dict[str, str]
 
 

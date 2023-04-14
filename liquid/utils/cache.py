@@ -31,11 +31,12 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from collections import abc, deque
+import contextlib
+from collections import abc
+from collections import deque
 from threading import Lock
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name,protected-access,consider-using-with
 class LRUCache(abc.MutableMapping):
     """A simple LRU Cache implementation."""
 
@@ -74,12 +75,12 @@ class LRUCache(abc.MutableMapping):
     def copy(self):
         """Return a shallow copy of the instance."""
         rv = self.__class__(self.capacity)
-        rv._mapping.update(self._mapping)
-        rv._queue.extend(self._queue)
+        rv._mapping.update(self._mapping)  # noqa: SLF001
+        rv._queue.extend(self._queue)  # noqa: SLF001
         return rv
 
     def get(self, key: str, default: object = None):
-        """Return an item from the cache dict or `default`"""
+        """Return an item from the cache dict or `default`."""
         try:
             return self[key]
         except KeyError:
@@ -88,7 +89,7 @@ class LRUCache(abc.MutableMapping):
     def setdefault(self, key, default=None):
         """Set `default` if the key is not in the cache otherwise
         leave unchanged. Return the value of this key.
-        """
+        """  # noqa: D205
         try:
             return self[key]
         except KeyError:
@@ -116,29 +117,29 @@ class LRUCache(abc.MutableMapping):
         return f"<{self.__class__.__name__} {self._mapping!r}>"
 
     def __getitem__(self, key):
-        """Get an item from the cache. Moves the item up so that it has the
-        highest priority then.
+        """Get an item from the cache.
+
+        Moves the item up so that it has the highest priority then.
         Raise a `KeyError` if it does not exist.
         """
         self._wlock.acquire()
         try:
             rv = self._mapping[key]
             if self._queue[-1] != key:
-                try:
+                # if something removed the key from the container
+                # when we read, ignore the ValueError that we would
+                # get otherwise.
+                with contextlib.suppress(ValueError):
                     self._remove(key)
-                except ValueError:  # pragma: no cover
-                    # if something removed the key from the container
-                    # when we read, ignore the ValueError that we would
-                    # get otherwise.
-                    pass
                 self._append(key)
             return rv
         finally:
             self._wlock.release()
 
     def __setitem__(self, key, value):
-        """Sets the value for an item. Moves the item up so that it
-        has the highest priority then.
+        """Sets the value for an item.
+
+        Moves the item up so that it has the highest priority then.
         """
         self._wlock.acquire()
         try:
@@ -153,15 +154,14 @@ class LRUCache(abc.MutableMapping):
 
     def __delitem__(self, key):
         """Remove an item from the cache dict.
+
         Raise a `KeyError` if it does not exist.
         """
         self._wlock.acquire()
         try:
             del self._mapping[key]
-            try:
+            with contextlib.suppress(ValueError):
                 self._remove(key)
-            except ValueError:  # pragma: no cover
-                pass
         finally:
             self._wlock.release()
 
@@ -183,9 +183,7 @@ class LRUCache(abc.MutableMapping):
         return reversed(tuple(self._queue))
 
     def __reversed__(self):
-        """Iterate over the keys in the cache dict, oldest items
-        coming first.
-        """
+        """Iterate over the keys in the cache dict, oldest items coming first."""
         return iter(tuple(self._queue))
 
     __copy__ = copy

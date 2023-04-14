@@ -7,22 +7,18 @@ from typing import Optional
 from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
-
-from liquid.expression import Expression
 from liquid.expression import NIL
-
-from liquid.expressions.common import parse_unchained_identifier
+from liquid.expression import Expression
 from liquid.expressions.arguments.lex import tokenize
+from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.parse import parse_obj
 from liquid.expressions.stream import TokenStream
-
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EQUALS
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_STRING
-
 
 Argument = Tuple[Any, Expression]
 
@@ -31,8 +27,7 @@ def make_parse_arguments(
     func: Callable[[TokenStream, str], Argument],
     separator_token: str = TOKEN_COLON,
 ) -> Callable[[TokenStream], List[Argument]]:
-    """Return an argument list parser using the given function to parse
-    each argument."""
+    """Return an argument list parser that uses _func_."""
 
     def _parse_arguments(stream: TokenStream) -> List[Argument]:
         """Parse arguments from a stream of tokens until EOF."""
@@ -80,7 +75,8 @@ def parse_keyword_arguments(expr: str, linenum: int = 1) -> Dict[str, Expression
 
     Values can be string, integer, float, true, false or nil literals, an
     identifier or a range expression. An identifier value could be chained
-    using a mixture of dot and bracket notation."""
+    using a mixture of dot and bracket notation.
+    """
     return dict(parse_colon_separated_arguments(TokenStream(tokenize(expr, linenum))))
 
 

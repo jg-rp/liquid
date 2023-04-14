@@ -3,53 +3,53 @@
 from __future__ import annotations
 
 from functools import wraps
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Iterable
 from typing import Iterator
 from typing import List
-from typing import Union
 from typing import Optional
-from typing import TYPE_CHECKING
+from typing import Union
 
 from liquid.context import Undefined
-
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
-
 from liquid.limits import to_int
 
-if TYPE_CHECKING:  # pragma: no cover
-    FilterT = Callable[..., Any]  # pylint: disable=invalid-name
-    NumberT = Union[float, int]  # pylint: disable=invalid-name
+if TYPE_CHECKING:
+    FilterT = Callable[..., Any]
+    NumberT = Union[float, int]
 
 
 def with_context(_filter: FilterT) -> FilterT:
-    """Pass the active :class:`liquid.context.Context` as the named argument
-    ``context`` to the decorated filter function.
+    """Pass the active render context to decorated filter functions.
 
-    :param _filter: The filter function to decorate.
-    :type _filter: Callable[..., Any]
+    If a function is decorated with `with_context`, that function should
+    accept a `context` keyword argument, being the active render context.
+
+    Args:
+        _filter: The filter function to decorate.
     """
     _filter.with_context = True  # type: ignore
     return _filter
 
 
 def with_environment(_filter: FilterT) -> FilterT:
-    """Pass the active :class:`liquid.Environment` as the named argument
-    ``environment`` to the decorated filter function.
+    """Pass the active environment to decorated filter functions.
 
-    :param _filter: The filter function to decorate.
-    :type _filter: Callable[..., Any]
+    If a function is decorated with `with_environment`, that function should
+    accept an `environment` keyword argument, being the active environment.
+
+    Args:
+        _filter: The filter function to decorate.
     """
     _filter.with_environment = True  # type: ignore
     return _filter
 
 
 def string_filter(_filter: FilterT) -> FilterT:
-    """A filter function decorator that converts the first positional argument to a
-    string."""
+    """A filter function decorator that converts the first argument to a string."""
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
@@ -64,8 +64,7 @@ def string_filter(_filter: FilterT) -> FilterT:
 
 
 def array_filter(_filter: FilterT) -> FilterT:
-    """A filter function decorator that raises a FilterValueError if the filter value
-    is not array-like."""
+    """Raise a `FilterValueError` if the left value is not array-like."""
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
@@ -81,11 +80,10 @@ def array_filter(_filter: FilterT) -> FilterT:
 
 
 def sequence_filter(_filter: FilterT) -> FilterT:
-    """A filter function decorator that raises a FilterValueError if the filter value
-    can not be coerced into an array-like object.
+    """Coerce the left value to sequence.
 
     This is intended to mimic the semantics of the reference implementation's
-    ``InputIterator`` class.
+    `InputIterator` class.
     """
 
     @wraps(_filter)
@@ -117,8 +115,7 @@ def liquid_filter(_filter: FilterT) -> FilterT:
 
 
 def int_arg(val: Any, default: Optional[int] = None) -> int:
-    """Return the ``val`` as an int or ``default`` if ``val`` can't be cast to an
-    int."""
+    """Return `val` as an int or `default` if `val` can't be cast to an int."""
     try:
         return to_int(val)
     except ValueError as err:
@@ -130,8 +127,10 @@ def int_arg(val: Any, default: Optional[int] = None) -> int:
 
 
 def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
-    """Return the ``val`` as an int or float. If ``val`` can't be cast to an
-    int or float, return ``default`."""
+    """Return `val` as an int or float.
+
+    If `val` can't be cast to an int or float, return `default`.
+    """
     if isinstance(val, (int, float)):
         return val
 
@@ -159,8 +158,7 @@ def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
 
 
 def math_filter(_filter: FilterT) -> FilterT:
-    """A filter function decorator that raises a FilterArgumentError if the filter value
-    is not a number."""
+    """Raise a `FilterArgumentError` if the filter value can not be a number."""
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:

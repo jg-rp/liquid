@@ -1,32 +1,29 @@
 """Liquid expression evaluator test cases."""
 import unittest
 from decimal import Decimal
-
 from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
-from liquid.environment import Environment
 from liquid.context import Context
-from liquid.stream import TokenStream
+from liquid.environment import Environment
 
 # Note: These are test cases for the legacy expression implementation.
 # See `test_eval_*_expression.py` for expression evaluation test cases
 # as used by all built-in tags.
-
-from liquid.lex import tokenize_filtered_expression
-from liquid.lex import tokenize_boolean_expression
-from liquid.lex import tokenize_loop_expression
 from liquid.lex import tokenize_assignment_expression
-
-from liquid.parse import parse_filtered_expression
-from liquid.parse import parse_boolean_expression
+from liquid.lex import tokenize_boolean_expression
+from liquid.lex import tokenize_filtered_expression
+from liquid.lex import tokenize_loop_expression
 from liquid.parse import parse_assignment_expression
+from liquid.parse import parse_boolean_expression
+from liquid.parse import parse_filtered_expression
 from liquid.parse import parse_loop_expression
+from liquid.stream import TokenStream
 
 
 class Case(NamedTuple):
-    """Subtest helper"""
+    """Subtest helper."""
 
     description: str
     context: Mapping
@@ -632,7 +629,6 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
 
     def test_eval_assignment_expression(self):
         """Test that we can evaluate assignment expressions."""
-
         test_cases = [
             Case(
                 description="assign a string literal",
@@ -680,7 +676,6 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
 
     def test_eval_loop_expression(self):
         """Test that we can evaluate loop expressions."""
-
         test_cases = [
             Case(
                 description="simple range loop",
@@ -745,7 +740,6 @@ class LiquidStatementEvalTestCase(unittest.TestCase):
 
     def test_eval_continue_loop_expression(self):
         """Test that we can evaluate loop expressions that use a continue offset."""
-
         env = Environment()
         context = Context(env, {"array": [1, 2, 3, 4, 5, 6]})
 

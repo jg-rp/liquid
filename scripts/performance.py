@@ -5,39 +5,34 @@ theme template. So, given the four fixtures at the time of writing, with a
 total of 34 .liquid files, 4 of which are a theme.liquid, `Template.render`
 and/or `env.from_string` will be called 60 times per loop.
 """
-# pylint: disable=missing-function-docstring
 import cProfile
+import os
 import pathlib
-import timeit
 import sys
-
-from typing import NamedTuple
-from typing import List
-from typing import Dict
+import timeit
 from typing import Any
-from typing import Mapping
-from typing import Optional
 from typing import Callable
+from typing import Dict
 from typing import Iterator
+from typing import List
+from typing import Mapping
+from typing import NamedTuple
+from typing import Optional
 
 import yaml
 
+sys.path.insert(0, os.getcwd())
+
 from liquid.environment import Environment
-from liquid.template import BoundTemplate
-from liquid.template import AwareBoundTemplate
-from liquid.mode import Mode
-from liquid.loaders import FileSystemLoader
-from liquid.token import Token
 from liquid.lex import get_lexer
-
-from tests.mocks.tags.form_tag import CommentFormTag
-from tests.mocks.tags.paginate_tag import PaginateTag
-
+from liquid.loaders import FileSystemLoader
+from liquid.mode import Mode
+from liquid.template import AwareBoundTemplate
+from liquid.template import BoundTemplate
+from liquid.token import Token
 from tests.mocks.filters.json import json_
-
 from tests.mocks.filters.money import money_
 from tests.mocks.filters.money import money_with_currency
-
 from tests.mocks.filters.shop import asset_url
 from tests.mocks.filters.shop import default_pagination
 from tests.mocks.filters.shop import global_asset_url
@@ -45,22 +40,24 @@ from tests.mocks.filters.shop import img_tag
 from tests.mocks.filters.shop import link_to
 from tests.mocks.filters.shop import link_to_type
 from tests.mocks.filters.shop import link_to_vendor
+from tests.mocks.filters.shop import pluralize
+from tests.mocks.filters.shop import product_img_url
+from tests.mocks.filters.shop import script_tag
 from tests.mocks.filters.shop import shopify_asset_url
 from tests.mocks.filters.shop import stylesheet_tag
-from tests.mocks.filters.shop import script_tag
 from tests.mocks.filters.shop import url_for_type
 from tests.mocks.filters.shop import url_for_vendor
-from tests.mocks.filters.shop import product_img_url
-from tests.mocks.filters.shop import pluralize
 from tests.mocks.filters.shop import within
-
 from tests.mocks.filters.tag import highlight_active_tag
 from tests.mocks.filters.tag import link_to_add_tag
 from tests.mocks.filters.tag import link_to_remove_tag
 from tests.mocks.filters.tag import link_to_tag
-
 from tests.mocks.filters.weight import weight
 from tests.mocks.filters.weight import weight_with_unit
+from tests.mocks.tags.form_tag import CommentFormTag
+from tests.mocks.tags.paginate_tag import PaginateTag
+
+# ruff: noqa: D102 D205 D103 T201 E402
 
 
 class ThemedTemplate(NamedTuple):
@@ -139,7 +136,7 @@ def load_data() -> Dict[str, Any]:
     See https://github.com/Shopify/liquid/blob/master/performance/shopify/database.rb
     """
     with open("tests/fixtures/vision.database.yml", "r") as fd:
-        data = yaml.load(fd, Loader=yaml.Loader)
+        data = yaml.safe_load(fd)
 
     # Collections contain products, but shove a list of collections that a product
     # belongs to into each product object too.
@@ -218,11 +215,10 @@ def lex(
         list(tokenizer(bundle.template.source))
 
 
-# pylint: disable=redefined-builtin
 def parse(
     env: Environment,
     templates: List[ThemedTemplateSource],
-    globals: Optional[Mapping[str, object]] = None,
+    globals: Optional[Mapping[str, object]] = None,  # noqa: A002
 ) -> List[ThemedTemplate]:
     """Parse a list of templates using the given environment."""
     parsed_templates = []
@@ -246,11 +242,10 @@ def render(templates: List[ThemedTemplate]):
         template.render()
 
 
-# pylint: disable=redefined-builtin
 def parse_and_render(
     env: Environment,
     templates: List[ThemedTemplateSource],
-    globals: Optional[Mapping[str, object]] = None,
+    globals: Optional[Mapping[str, object]] = None,  # noqa: A002
 ):
     parsed_templates = parse(env, templates, globals=globals)
     render(parsed_templates)
@@ -306,8 +301,7 @@ def profile_parse_and_render(search_path: str):
 
 def setup_render(search_path: str) -> List[ThemedTemplate]:
     env, template_sources = setup_parse(search_path)
-    parsed_templates = parse(env, template_sources)
-    return parsed_templates
+    return parse(env, template_sources)
 
 
 def setup_parse(search_path: str):

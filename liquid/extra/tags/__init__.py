@@ -1,5 +1,4 @@
-# pylint: disable=missing-module-docstring
-from ._with import WithTag
+from ._with import WithTag  # noqa: D104
 from .extends import BlockTag
 from .extends import ExtendsTag
 from .if_expressions import InlineIfAssignTag

@@ -1,16 +1,13 @@
 """Test filter decorators and helpers."""
-# pylint: disable=missing-class-docstring
 from unittest import TestCase
 
-from liquid import Environment
 from liquid import Context
-
-from liquid.filter import liquid_filter
-from liquid.filter import with_context
-from liquid.filter import num_arg
-from liquid.filter import int_arg
-
+from liquid import Environment
 from liquid.exceptions import FilterArgumentError
+from liquid.filter import int_arg
+from liquid.filter import liquid_filter
+from liquid.filter import num_arg
+from liquid.filter import with_context
 
 
 @liquid_filter

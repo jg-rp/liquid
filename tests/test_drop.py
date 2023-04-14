@@ -1,7 +1,5 @@
 """Test the "drop" API."""
-# pylint: disable=missing-class-docstring
 import unittest
-
 from typing import Generic
 from typing import NamedTuple
 from typing import TypeVar

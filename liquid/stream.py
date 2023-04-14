@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from collections import deque
-
 from typing import Deque
 from typing import Iterator
 from typing import List
 
-from liquid.token import Token
-from liquid.token import TOKEN_INITIAL
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_INITIAL
+from liquid.token import Token
 
 
 class TokenStream:
@@ -41,7 +40,7 @@ class TokenStream:
             tok = self.stream.current
             if tok.type is TOKEN_EOF:
                 self.stream.close()
-                raise StopIteration()
+                raise StopIteration
             next(self.stream)
             return tok
 

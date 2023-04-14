@@ -10,45 +10,48 @@ Hi. Your contributions and questions are always welcome. Feel free to ask questi
 
 ## Development
 
-Install development dependencies with [Pipenv](https://pipenv.pypa.io/en/latest/).
+We use [hatch](https://hatch.pypa.io/latest/) to manage project dependencies and development environments.
+
+Run tests with the _test_ script.
 
 ```shell
-$ pipenv install --dev
-$ pipenv shell
+$ hatch run test
 ```
 
-Run tests with Python's [unittest](https://docs.python.org/3/library/unittest.html#command-line-interface) module.
+Or, to test against the full matrix of supported Python versions.
 
 ```shell
-$ python -m unittest
+$ hatch run test:test
 ```
 
-Or [pytest](https://docs.pytest.org/en/7.1.x/).
+And to test without the _autoescape_ extra.
 
 ```shell
-$ pytest
+$ hatch run noescape:test
 ```
 
-Check formatting and style with [Pylint](https://github.com/PyCQA/pylint), [Flake8](https://flake8.pycqa.org/en/latest/) and [Black](https://github.com/psf/black).
+Lint with [ruff](https://beta.ruff.rs/docs/).
 
 ```shell
-$ tox -e lint
+$ hatch run lint
 ```
 
 Typecheck with [Mypy](https://mypy.readthedocs.io/en/stable/).
 
-```
-$ tox -e typing
+```shell
+$ hatch run typing
 ```
 
-Always write tests using `unittest.TestCase`. We want our tests to be type-checked and linted too. Check test coverage with [Coverage.py](https://coverage.readthedocs.io/en/6.4.3/).
+Check coverage with pytest-cov.
 
+```shell
+$ hatch run cov
 ```
-$ python -m coverage erase
-$ python -m coverage run -p -m unittest
-$ python -m coverage combine
-$ python -m coverage report --fail-under=98
-$ python -m coverage html
+
+Or generate an HTML coverage report.
+
+```shell
+$ hatch run cov-html
 ```
 
 Then open `htmlcov/index.html` in your browser.
@@ -57,16 +60,16 @@ Then open `htmlcov/index.html` in your browser.
 
 [Documentation](https://jg-rp.github.io/liquid/>) is built using [Docusaurus](https://docusaurus.io/). Find the source in the [docs branch](https://github.com/jg-rp/liquid/tree/docs) of this repository.
 
-The `docs` folder in the root of this repository contains older, sphinx-based docs, still hosted on [Read the Docs](https://liquid.readthedocs.io/en/latest/). The plan is to generate API Documentation for Docusaurus from Python doc comments. The older docs will be kept until such time that better Docusaurus/sphinx integration is available or a workaround is found.
+The `docs` folder in the root of this repository contains docs generated from Python docstrings, hosted on [Read the Docs](https://liquid.readthedocs.io/en/latest/). The plan is to mirror this API documentation to the Docusaurus site with the help of [Griffe](https://mkdocstrings.github.io/griffe/).
 
 ## Style Guides
 
 ### Git Commit Messages
 
-There are no hard rules for git commit messages, although you might like to indicate the type of commit by starting the message with `docs:`, `feat:`, `fix:` or `refactor:`, for example.
+There are no hard rules for git commit messages, although you might like to indicate the type of commit by starting the message with `docs:`, `chore:`, `feat:`, `fix:` or `refactor:`, for example.
 
 ### Python Style
 
 All Python files are formatted using [Black](https://github.com/psf/black), with its default configuration.
 
-Docstrings must use the [Sphinx docstring format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html).
+Docstrings must use [Google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).

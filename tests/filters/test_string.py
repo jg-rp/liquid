@@ -1,22 +1,18 @@
 """Test cases for string filters."""
-# pylint: disable=too-many-public-methods,too-many-lines,missing-class-docstring
 import unittest
-
 from functools import partial
 from inspect import isclass
-
-from typing import NamedTuple
 from typing import Any
-from typing import List
 from typing import Dict
+from typing import List
+from typing import NamedTuple
 
-from liquid.environment import Environment
-from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
-from liquid.exceptions import FilterError
-
-from liquid.builtin.filters.string import capitalize
 from liquid.builtin.filters.string import append
+from liquid.builtin.filters.string import base64_decode
+from liquid.builtin.filters.string import base64_encode
+from liquid.builtin.filters.string import base64_url_safe_decode
+from liquid.builtin.filters.string import base64_url_safe_encode
+from liquid.builtin.filters.string import capitalize
 from liquid.builtin.filters.string import downcase
 from liquid.builtin.filters.string import escape
 from liquid.builtin.filters.string import escape_once
@@ -28,21 +24,21 @@ from liquid.builtin.filters.string import remove_first
 from liquid.builtin.filters.string import replace
 from liquid.builtin.filters.string import replace_first
 from liquid.builtin.filters.string import replace_last
+from liquid.builtin.filters.string import rstrip
 from liquid.builtin.filters.string import slice_
 from liquid.builtin.filters.string import split
-from liquid.builtin.filters.string import upcase
 from liquid.builtin.filters.string import strip
-from liquid.builtin.filters.string import rstrip
 from liquid.builtin.filters.string import strip_html
 from liquid.builtin.filters.string import strip_newlines
 from liquid.builtin.filters.string import truncate
 from liquid.builtin.filters.string import truncatewords
-from liquid.builtin.filters.string import url_encode
+from liquid.builtin.filters.string import upcase
 from liquid.builtin.filters.string import url_decode
-from liquid.builtin.filters.string import base64_encode
-from liquid.builtin.filters.string import base64_decode
-from liquid.builtin.filters.string import base64_url_safe_encode
-from liquid.builtin.filters.string import base64_url_safe_decode
+from liquid.builtin.filters.string import url_encode
+from liquid.environment import Environment
+from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterError
+from liquid.exceptions import FilterValueError
 
 
 class Case(NamedTuple):
@@ -77,7 +73,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_capitalize(self):
         """Test capitalize filter function."""
-
         test_cases = [
             Case(
                 description="lower case string",
@@ -113,7 +108,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_append(self):
         """Test append filter function."""
-
         test_cases = [
             Case(
                 description="concat",
@@ -170,7 +164,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_downcase(self):
         """Test downcase filter function."""
-
         test_cases = [
             Case(
                 description="make lower case",
@@ -206,7 +199,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_escape(self):
         """Test escape filter function."""
-
         test_cases = [
             Case(
                 description="make HTML-safe",
@@ -242,7 +234,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_escape_once(self):
         """Test escape_once filter function."""
-
         test_cases = [
             Case(
                 description="make HTML-safe",
@@ -285,7 +276,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_lstrip(self):
         """Test lstrip filter function."""
-
         test_cases = [
             Case(
                 description="left padded",
@@ -335,7 +325,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_newline_to_br(self):
         """Test newline_to_br filter function."""
-
         test_cases = [
             Case(
                 description="string with newlines",
@@ -385,7 +374,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_prepend(self):
         """Test prepend filter function."""
-
         test_cases = [
             Case(
                 description="concat",
@@ -442,7 +430,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_remove(self):
         """Test remove filter function."""
-
         test_cases = [
             Case(
                 description="remove substrings",
@@ -499,7 +486,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_remove_first(self):
         """Test remove_first filter function."""
-
         test_cases = [
             Case(
                 description="remove substrings",
@@ -556,7 +542,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_replace(self):
         """Test replace filter function."""
-
         test_cases = [
             Case(
                 description="replace substrings",
@@ -767,7 +752,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_slice(self):
         """Test slice filter function."""
-
         test_cases = [
             Case(
                 description="zero",
@@ -901,7 +885,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_split(self):
         """Test split filter function."""
-
         test_cases = [
             Case(
                 description="split string",
@@ -983,7 +966,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_upcase(self):
         """Test upcase filter function."""
-
         test_cases = [
             Case(
                 description="make lower case",
@@ -1019,7 +1001,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_strip(self):
         """Test strip filter function."""
-
         test_cases = [
             Case(
                 description="left padded",
@@ -1069,7 +1050,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_rstrip(self):
         """Test rstrip filter function."""
-
         test_cases = [
             Case(
                 description="left padded",
@@ -1119,7 +1099,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_strip_html(self):
         """Test strip_html filter function."""
-
         test_cases = [
             Case(
                 description="some HTML markup",
@@ -1165,7 +1144,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_strip_newlines(self):
         """Test strip_newlines filter function."""
-
         test_cases = [
             Case(
                 description="newline and other whitespace",
@@ -1215,7 +1193,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_truncate(self):
         """Test truncate filter function."""
-
         test_cases = [
             Case(
                 description="default end",
@@ -1307,7 +1284,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_truncatewords(self):
         """Test truncatewords filter function."""
-
         test_cases = [
             Case(
                 description="default end",
@@ -1441,7 +1417,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_url_encode_html(self):
         """Test url_encode filter function."""
-
         test_cases = [
             Case(
                 description="some special URL characters",
@@ -1477,7 +1452,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_url_decode_html(self):
         """Test url_decode filter function."""
-
         test_cases = [
             Case(
                 description="some special URL characters",
@@ -1513,7 +1487,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_base64_encode(self):
         """Test base64_encode filter function."""
-
         test_cases = [
             Case(
                 description="from string",
@@ -1563,7 +1536,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_base64_decode(self):
         """Test base64_decode filter function."""
-
         test_cases = [
             Case(
                 description="from string",
@@ -1613,7 +1585,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_base64_url_safe_encode(self):
         """Test base64_url_safe_encode filter function."""
-
         test_cases = [
             Case(
                 description="from string",
@@ -1663,7 +1634,6 @@ class StringFilterTestCase(unittest.TestCase):
 
     def test_base64_url_safe_decode(self):
         """Test base64_url_safe_decode filter function."""
-
         test_cases = [
             Case(
                 description="from string",

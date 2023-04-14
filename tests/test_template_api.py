@@ -2,9 +2,9 @@
 
 import unittest
 
-from liquid import Template
 from liquid import Environment
 from liquid import Mode
+from liquid import Template
 
 
 class TemplateAPITestCase(unittest.TestCase):

@@ -1,49 +1,43 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 import sys
-
+from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Dict
 from typing import TextIO
 from typing import Tuple
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-
 from liquid.builtin.drops import IterableDrop
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
-
 from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
-
 from liquid.exceptions import LiquidSyntaxError
-
-from liquid.expression import Expression, Literal
+from liquid.expression import Expression
 from liquid.expression import Identifier
-
+from liquid.expression import Literal
+from liquid.expressions import TokenStream as ExprTokenStream
+from liquid.expressions.common import parse_identifier
+from liquid.expressions.common import parse_string_literal
+from liquid.expressions.common import parse_unchained_identifier
+from liquid.expressions.filtered.parse import parse_obj
+from liquid.expressions.include.lex import tokenize
 from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-
-from liquid.token import Token
-from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_WITH
-from liquid.token import TOKEN_FOR
 from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_COLON
+from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_FOR
+from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_WITH
+from liquid.token import Token
 
-from liquid.expressions import TokenStream as ExprTokenStream
-from liquid.expressions.common import parse_string_literal
-from liquid.expressions.common import parse_unchained_identifier
-from liquid.expressions.common import parse_identifier
-from liquid.expressions.include.lex import tokenize
-from liquid.expressions.filtered.parse import parse_obj
-
+# ruff: noqa: D102
 
 TAG_RENDER = sys.intern("render")
 
@@ -153,8 +147,6 @@ class RenderNode(Node):
     async def render_to_output_async(
         self, context: Context, buffer: TextIO
     ) -> Optional[bool]:
-        """An awaitable version of `render_to_output` that loads templates
-        asynchronously."""
         path = await self.name.evaluate_async(context)
         assert isinstance(path, str)
         template = await context.get_template_with_context_async(path, tag=self.tag)
@@ -316,8 +308,7 @@ class RenderTag(Tag):
 
 
 def parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:
-    """Return the next key/value pair from the stream where key and value
-    are separated by a colon."""
+    """Return the next key/value pair from the stream."""
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
     stream.expect(TOKEN_COLON)

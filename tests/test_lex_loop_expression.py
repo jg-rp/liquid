@@ -9,21 +9,20 @@ from typing import Any
 from typing import NamedTuple
 
 from liquid.expressions.loop import tokenize
-
-from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_DOT
-from liquid.token import TOKEN_REVERSED
-from liquid.token import TOKEN_IDENTIFIER
-from liquid.token import TOKEN_LIMIT
-from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_LPAREN
-from liquid.token import TOKEN_RANGE
-from liquid.token import TOKEN_RPAREN
-from liquid.token import TOKEN_OFFSET
-from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTINUE
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_IN
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LIMIT
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_OFFSET
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_REVERSED
+from liquid.token import TOKEN_RPAREN
 from liquid.token import Token
 
 

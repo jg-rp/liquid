@@ -6,34 +6,29 @@ import binascii
 import html
 import re
 import urllib.parse
-
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import List
 from typing import Optional
 from typing import Union
-from typing import TYPE_CHECKING
 
 try:
-    from markupsafe import escape as markupsafe_escape
     from markupsafe import Markup
+    from markupsafe import escape as markupsafe_escape
     from markupsafe import soft_str
 except ImportError:
-    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
     from liquid.exceptions import Markup  # type: ignore
+    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
 
-    # pylint: disable=invalid-name
     soft_str = str  # type: ignore
 
-from liquid.undefined import is_undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
-
-from liquid.filter import with_environment
-from liquid.filter import string_filter
 from liquid.filter import liquid_filter
-
+from liquid.filter import string_filter
+from liquid.filter import with_environment
 from liquid.limits import to_int
-
+from liquid.undefined import is_undefined
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
 
@@ -51,8 +46,7 @@ def append(val: str, arg: object) -> str:
 
 @string_filter
 def capitalize(val: str) -> str:
-    """Make sure the first character of a string is upper case and the rest
-    lowercase."""
+    """Make sure the first character of _val_ is upper case and the rest lowercase."""
     return val.capitalize()
 
 
@@ -92,7 +86,7 @@ RE_LINETERM = re.compile(r"\r?\n")
 @with_environment
 @string_filter
 def newline_to_br(val: str, *, environment: Environment) -> str:
-    """Convert '\\r\\n' or '\\n' to '<br />\\n'."""
+    """Convert LF or CRLF to `<br />`, plus a newline."""
     # The reference implementation was changed to replace "\r\n" as well as "\n",
     # but they don't seem to care about "\r" (Mac OS).
     if environment.autoescape:
@@ -134,22 +128,19 @@ def remove_last(val: str, arg: str) -> str:
 
 @string_filter
 def replace(val: str, seq: str, sub: str = "") -> str:
-    """Replaces every occurrence of the first argument in a string with the second
-    argument."""
+    """Replace occurrences of _seq_ in _val_ with _sub_."""
     return val.replace(soft_str(seq), soft_str(sub))
 
 
 @string_filter
 def replace_first(val: str, seq: str, sub: str = "") -> str:
-    """Replaces the first occurrence of the first argument in a string with the second
-    argument."""
+    """Replace the first occurrence of _seq_ in _val_ with _sub_."""
     return val.replace(soft_str(seq), soft_str(sub), 1)
 
 
 @string_filter
 def replace_last(val: str, seq: str, sub: str) -> str:
-    """Replace the last occurrence of the first argument in a string with the second
-    argument."""
+    """Replace the last occurrence of _seq_ in _val_ with _sub_."""
     try:
         before, _, after = val.rpartition(soft_str(seq))
     except ValueError:
@@ -191,8 +182,7 @@ def _slice_arg(val: Any) -> int:
 
 @liquid_filter
 def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
-    """Return a substring or subsequence, starting at `start`, containing up to
-    `length` characters or items.
+    """Return the subsequence of _val_ starting at _start_ with up to _length_ chars.
 
     Array-like objects return a list, strings return a substring, all other objects are
     cast to a string before returning a substring.

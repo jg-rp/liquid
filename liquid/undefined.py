@@ -15,8 +15,9 @@ UNDEFINED = object()
 
 
 class Undefined(Mapping[Any, object]):
-    """The default undefined type. Always evaluates to an empty string. Can be iterated
-    over and indexed without error.
+    """The default undefined type.
+
+    Always evaluates to an empty string. Can be iterated over and indexed without error.
     """
 
     __slots__ = ("name", "obj", "hint")
@@ -74,7 +75,7 @@ class DebugUndefined(Undefined):
 
 
 class StrictUndefined(Undefined):
-    """An undefined that raises an exception for everything other than ``repr``."""
+    """An undefined that raises an exception for everything other than `repr`."""
 
     __slots__ = ("msg",)
 

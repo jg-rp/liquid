@@ -1,6 +1,7 @@
 """Golden tests cases for testing liquid's `echo` tag."""
 
 import datetime
+
 from liquid.golden.case import Case
 
 cases = [

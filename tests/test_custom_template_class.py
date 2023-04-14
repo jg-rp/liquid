@@ -1,17 +1,14 @@
 """Test Template and Context subclassing."""
 import io
 import unittest
-
 from typing import Any
-from typing import Optional
 from typing import List
+from typing import Optional
 
 from liquid import Context
 from liquid import Environment
-
 from liquid.context import ContextPath
 from liquid.context import Namespace
-
 from liquid.template import BoundTemplate
 
 
@@ -22,7 +19,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
         """Test that we can use a subclass of BoundTemplate with an Environment."""
 
         class CustomTemplate(BoundTemplate):
-            """Mock template subclass"""
+            """Mock template subclass."""
 
         env = Environment()
         env.template_class = CustomTemplate
@@ -33,14 +30,13 @@ class CustomTemplateClassTestCase(unittest.TestCase):
     def test_context_subclass(self):
         """Test that we can use a subclass of Context with an Environment."""
 
-        # pylint: disable=redefined-builtin
         class CustomContext(Context):
-            """Mock context subclass"""
+            """Mock context subclass."""
 
             def __init__(
                 self,
                 env: Environment,
-                globals: Optional[Namespace] = None,
+                globals: Optional[Namespace] = None,  # noqa: A002
                 disabled_tags: Optional[List[str]] = None,
                 copy_depth: int = 0,
             ):
@@ -52,7 +48,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
                 return super().assign(key, val)
 
         class CustomTemplate(BoundTemplate):
-            """Mock template subclass"""
+            """Mock template subclass."""
 
             context_class = CustomContext
 
@@ -70,18 +66,16 @@ class CustomTemplateClassTestCase(unittest.TestCase):
         self.assertEqual(ctx.assign_counter, 1)
 
     def test_capture_variables_from_context_subclass(self):
-        """Test that we can capture a template's used variables from a Context subclass."""
-
+        """Test that we can capture a template's variables from a Context subclass."""
         _missing = object()
 
-        # pylint: disable=redefined-builtin
         class CustomContext(Context):
-            """Mock context subclass"""
+            """Mock context subclass."""
 
             def __init__(
                 self,
                 env: Environment,
-                globals: Optional[Namespace] = None,
+                globals: Optional[Namespace] = None,  # noqa: A002
                 disabled_tags: Optional[List[str]] = None,
                 copy_depth: int = 0,
             ):
@@ -109,7 +103,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
                     self.references.append(".".join(str(p) for p in path))
 
         class CustomTemplate(BoundTemplate):
-            """Mock template subclass"""
+            """Mock template subclass."""
 
             context_class = CustomContext
 

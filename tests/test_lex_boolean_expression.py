@@ -1,15 +1,12 @@
 """Test Liquid boolean expression tokenization."""
 
 import unittest
-
 from typing import Any
 from typing import NamedTuple
 
 from liquid.exceptions import LiquidSyntaxError
-
 from liquid.expressions.boolean import tokenize
 from liquid.expressions.boolean import tokenize_with_parens
-
 from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_CONTAINS
@@ -330,14 +327,12 @@ class LexBooleanExpressionErrorsTestCase(unittest.TestCase):
     def test_lex_illegal_expression(self) -> None:
         """Test that we raise a syntax error upon illegal characters."""
         for case in self.test_cases:
-            with self.subTest(msg=case.description):
-                with self.assertRaises(case.expect):
-                    list(tokenize(case.source))
+            with self.subTest(msg=case.description), self.assertRaises(case.expect):
+                list(tokenize(case.source))
 
     def test_lex_illegal_expression_with_parens(self) -> None:
         """Test that we raise a syntax error upon illegal characters when using the
         non-standard lexer."""
         for case in self.test_cases:
-            with self.subTest(msg=case.description):
-                with self.assertRaises(case.expect):
-                    list(tokenize_with_parens(case.source))
+            with self.subTest(msg=case.description), self.assertRaises(case.expect):
+                list(tokenize_with_parens(case.source))

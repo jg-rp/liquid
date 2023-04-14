@@ -1,16 +1,15 @@
 """Token stream test cases."""
 from unittest import TestCase
 
-from liquid.token import Token
-from liquid.token import TOKEN_STRING
-from liquid.token import TOKEN_PIPE
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_EOF
-
-from liquid.stream import TokenStream
+from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_PIPE
+from liquid.token import TOKEN_STRING
+from liquid.token import Token
 
 
 class TokenStreamTestCase(TestCase):

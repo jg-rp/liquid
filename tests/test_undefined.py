@@ -1,22 +1,21 @@
 """Test built-in "undefined" types."""
 import asyncio
-
 from dataclasses import dataclass
 from dataclasses import field
-
-from unittest import TestCase
+from typing import TYPE_CHECKING
 from typing import Dict
+from unittest import TestCase
 
-from liquid import Environment
-from liquid import Undefined
 from liquid import DebugUndefined
-from liquid import StrictUndefined
+from liquid import Environment
 from liquid import StrictDefaultUndefined
-
-from liquid.template import BoundTemplate
-
-from liquid.exceptions import UndefinedError
+from liquid import StrictUndefined
+from liquid import Undefined
 from liquid.exceptions import NoSuchFilterFunc
+from liquid.exceptions import UndefinedError
+
+if TYPE_CHECKING:
+    from liquid.template import BoundTemplate
 
 
 @dataclass
@@ -272,7 +271,7 @@ class TestUndefined(TestCase):
         __class__."""
         undef = StrictDefaultUndefined("nosuchthing")
         with self.assertRaises(UndefinedError):
-            undef.__class__  # pylint: disable=pointless-statement
+            undef.__class__  # noqa: B018
 
     def test_strict_default_undefined(self):
         """Test that the strict default undefined type raises an exception for
@@ -427,7 +426,7 @@ class TestUndefined(TestCase):
                 self.assertEqual(case.expect, str(raised.exception))
 
                 # And render async
-                async def coro(template: BoundTemplate):
+                async def coro(template: "BoundTemplate"):
                     return await template.render_async()
 
                 with self.assertRaises(NoSuchFilterFunc) as raised:

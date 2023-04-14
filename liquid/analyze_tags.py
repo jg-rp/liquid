@@ -1,18 +1,18 @@
 """Analyze template tags from tokenized source text."""
 from __future__ import annotations
-from collections import defaultdict
 
+from collections import defaultdict
+from typing import TYPE_CHECKING
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import Tuple
-from typing import TYPE_CHECKING
 
 from liquid.token import TOKEN_TAG
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from liquid import Environment
     from liquid.token import Token
 
@@ -28,29 +28,29 @@ InnerTagMap = Mapping[str, Iterable[str]]
 TagMap = Dict[str, List[Tuple[str, int]]]
 
 
-class TagAnalysis:  # pylint: disable=too-many-instance-attributes too-few-public-methods
-    """The result of analyzing a template's tags with :meth:`Environment.analyze_tags`
-    or :meth:`Environment.analyze_tags_async`.
+class TagAnalysis:
+    """The result of analyzing a template's tags with `Environment.analyze_tags()`.
 
     Each of the following properties maps tag names to a list of their locations.
     Locations are (template_name, line_number) tuples.
 
-    Note that ``raw`` tags are not included at all. The lexer converts them to text
+    Note that `raw` tags are not included at all. The lexer converts them to text
     tokens before we get a chance to analyze them.
 
     Also be aware that reported `unexpected_tags` don't handle the possibility of an
-    "inner" tag appearing in a partial template (using ``{% include %}``), where
+    "inner" tag appearing in a partial template (using `{% include %}`), where
     appropriate enclosing block tags are in the parent template.
 
-    :ivar all_tags: A mapping of all tags to their locations. Includes "end", "inner"
-        and unknown tags.
-    :ivar tags: A mapping of tag names to their locations. Excludes "end" and "inner"
-        tags.
-    :ivar unclosed_tags: Block tags that don't have a matching "end" tag.
-    :ivar unexpected_tags: Inner tags that are not properly enclosed by appropriate
-        block tags. For example, an ``{% else %}`` that is not enclosed by a
-        ``{% for %}`` or ``{% unless %}`` block.
-    :ivar unknown_tags: Tags that are unknown to the environment.
+    Attributes:
+        all_tags: A mapping of all tags to their locations. Includes "end", "inner"
+            and unknown tags.
+        tags: A mapping of tag names to their locations. Excludes "end" and "inner"
+            tags.
+        unclosed_tags: Block tags that don't have a matching "end" tag.
+        unexpected_tags: Inner tags that are not properly enclosed by appropriate
+            block tags. For example, an `{% else %}` that is not enclosed by a
+            `{% for %}` or `{% unless %}` block.
+        unknown_tags: Tags that are unknown to the environment.
     """
 
     def __init__(
@@ -94,12 +94,11 @@ class TagAnalysis:  # pylint: disable=too-many-instance-attributes too-few-publi
                 tags[token.value].append((self.template_name, token.linenum))
         return dict(tags)
 
-    def _audit_tags(
+    def _audit_tags(  # noqa: PLR0912
         self,
         env: Environment,
         tokens: List[Token],
     ) -> Tuple[TagMap, TagMap, TagMap]:
-        # pylint: disable=too-many-locals too-many-branches
         block_stack: List[_BlockStackItem] = []
         unclosed_tags: TagMap = defaultdict(list)
         unexpected_tags: TagMap = defaultdict(list)
@@ -170,23 +169,24 @@ class TagAnalysis:  # pylint: disable=too-many-instance-attributes too-few-publi
         for tag_name, locations in self.all_tags.items():
             if tag_name.startswith("end"):
                 start_tag_name = tag_name[3:]
-                if start_tag_name in inline_tags and start_tag_name not in unknown_tags:
-                    unknown_tags[tag_name].extend(locations)
-                elif (
-                    tag_name not in registered_end_blocks
+                if (
+                    start_tag_name in inline_tags
                     and start_tag_name not in unknown_tags
+                    or (
+                        tag_name not in registered_end_blocks
+                        and start_tag_name not in unknown_tags
+                    )
                 ):
                     unknown_tags[tag_name].extend(locations)
 
         return dict(unclosed_tags), dict(unexpected_tags), dict(unknown_tags)
 
     def _valid_inner_tag(
-        self, tag_names: Iterable[str], block_stack: List[_BlockStackItem]
+        self,
+        tag_names: Iterable[str],
+        block_stack: List[_BlockStackItem],
     ) -> bool:
-        for tag_name in tag_names:
-            if tag_name in block_stack:  # type: ignore
-                return True
-        return False
+        return any(tag_name in block_stack for tag_name in tag_names)
 
 
 class _BlockStackItem:

@@ -3,7 +3,8 @@
 
 def truncate_chars(val: str, num: int, end: str = "...") -> str:
     """Truncates a string if it is longer than the specified number of characters.
-    Truncated strings will end with `end`, an ellipsis by default."""
+    Truncated strings will end with `end`, an ellipsis by default.
+    """  # noqa: D205
     val_length = len(val)
     end_length = len(end)
 
