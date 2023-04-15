@@ -10,6 +10,7 @@
 **Features**
 
 - Added context-aware template loader bootstrapping methods. See [#109](https://github.com/jg-rp/liquid/pull/109).
+- Added support for async class-based filters. See [#115](https://github.com/jg-rp/liquid/pull/115).
 
 ## Version 1.8.1
 
