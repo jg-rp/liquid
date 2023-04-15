@@ -1,34 +1,28 @@
 <h1 align="center">Python Liquid</h1>
 
-<p align="center" style="margin-bottom: 5px">
+<p align="center">
 A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
 </p>
 
-<p align="center" style="margin-bottom: 5px">
+<p align="center">
   <a href="https://github.com/jg-rp/liquid/blob/main/LICENSE">
     <img src="https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square" alt="License">
   </a>
-</p>
-
-<p align="center" style="margin-bottom: 5px">
+  <br>
   <a href="https://pypi.org/project/python-liquid/">
     <img src="https://img.shields.io/pypi/v/python-liquid.svg?style=flat-square" alt="PyPi - Version">
   </a>
   <a href="https://anaconda.org/conda-forge/python-liquid">
     <img src="https://img.shields.io/conda/vn/conda-forge/python-liquid?style=flat-square" alt="conda-forge">
   </a>
-</p>
-
-<p align="center" style="margin-bottom: 5px">
+  <br>
   <a href="https://pypi.org/project/python-liquid/">
     <img src="https://img.shields.io/pypi/pyversions/python-liquid.svg?style=flat-square" alt="Python versions">
   </a>
   <a href="https://github.com/jg-rp/liquid/actions/workflows/coverage.yaml">
     <img src="https://img.shields.io/badge/pypy-3.7%20%7C%203.8%20%7C%203.9-blue?style=flat-square" alt="PyPy versions">
   </a>
-</p>
-
-<p align="center" style="margin-bottom: 5px">
+  <br>
   <a href="https://github.com/jg-rp/liquid/actions/workflows/tests.yaml">
     <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
   </a>
