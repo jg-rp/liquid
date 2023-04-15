@@ -313,9 +313,7 @@ class Environment:
         Args:
             source: The liquid template source code.
             name: Optional name of the template. Available as `Template.name`.
-                 empty string.
-            path: Optional path or identifier to the origin of the template. Defaults
-                to `None`.
+            path: Optional path or identifier to the origin of the template.
             globals: An optional mapping of context variables made available every
                 time the resulting template is rendered.
             matter: Optional mapping containing variables associated with the
@@ -397,7 +395,7 @@ class Environment:
         """Load and parse a template with arbitrary loader arguments.
 
         This method bypasses the environment's template cache. You should use a caching
-        loader instead when the loader required extra keyword arguments.
+        loader instead when the loader requires extra keyword arguments.
 
         _New in version 1.9.0._
         """
