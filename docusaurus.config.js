@@ -171,7 +171,7 @@ const config = {
               },
               {
                 label: "Change Log",
-                href: "https://github.com/jg-rp/liquid/blob/main/CHANGES.rst",
+                href: "https://github.com/jg-rp/liquid/blob/main/CHANGES.md",
               },
               {
                 label: "PyPi",
