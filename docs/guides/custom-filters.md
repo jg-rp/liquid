@@ -1,6 +1,6 @@
 # Custom Filters
 
-In Python Liquid, a [filter](../language/introduction.md#filters) can be implemented as a Python function, or any callable that accepts at least one argument, the left hand side of a filtered expression. The function's return value will be output, assigned or piped to more filters.
+In Python Liquid, a [filters](../language/introduction.md#filters) are implemented as a Python functions or callable classes that accept at least one argument, the left hand side of a filtered expression. The callable's return value will be output, assigned or piped to more filters.
 
 :::info
 All built-in filters are implemented in this way, so have a look in [liquid/builtin/filters/](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/filters) for examples.
@@ -130,6 +130,39 @@ from liquid import Environment, FileSystemLoader
 env = Environment(loader=FileSystemLoader("templates/"))
 del env.filters["base64_decode"]
 ```
+
+## Class-Based Filters
+
+If your custom filter takes initialization arguments or needs to retain state between calls (probably not a good idea), a class-based implementation might be appropriate. Simply implement a [`__call__`](https://docs.python.org/3/reference/datamodel.html#object.__call__) method, and Python Liquid will use it when applying the filter.
+
+For example, here's the implementation of a `json` filter, that dumps the input object to a JSON formatted string.
+
+```python
+import json
+from typing import Any
+from typing import Callable
+from typing import Optional
+
+from liquid.filter import int_arg
+from liquid.filter import liquid_filter
+
+class JSON:
+    def __init__(self, default: Optional[Callable[[Any], Any]] = None):
+        self.default = default
+
+    @liquid_filter
+    def __call__(
+        self,
+        obj: object,
+        indent: Optional[object] = None,
+    ) -> str:
+        indent = int_arg(indent) if indent else None
+        return json.dumps(obj, default=self.default, indent=indent)
+```
+
+### Async Filters
+
+Class-based filters can also implement a `filter_async` method, which should be a coroutine. When applied in an async context, if a filter implements `filter_async`, it will be awaited instead of calling `__call__`.
 
 ## Filter Function Decorators
 
