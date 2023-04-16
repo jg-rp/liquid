@@ -1,4 +1,5 @@
 """Test filter decorators and helpers."""
+import asyncio
 from unittest import TestCase
 
 from liquid import Context
@@ -54,3 +55,72 @@ class NumArgTestCase(TestCase):
         """Test that an exception is raised if a default is not given."""
         with self.assertRaises(FilterArgumentError):
             num_arg(object())
+
+
+class SomeFilter:
+    """A mock class-based filter implementing the async filter interface."""
+
+    def __call__(self, val: object) -> str:
+        return "Hello, " + str(val)
+
+    async def filter_async(self, val: object) -> str:
+        return "Goodbye, " + str(val)
+
+
+class OtherFilter:
+    """A mock class-based filter implementing the async filter interface.
+
+    Includes arguments.
+    """
+
+    def __call__(self, val: object, post: str) -> str:
+        return "Hello, " + str(val) + post
+
+    async def filter_async(self, val: object, post: str) -> str:
+        return "Goodbye, " + str(val) + post
+
+
+class AsyncFilterTestCase(TestCase):
+    def test_call_an_async_filter(self):
+        """Test that we can await an async filter."""
+        env = Environment(strict_filters=True)
+        env.add_filter("greeting", SomeFilter())
+        template = env.from_string(r"{{ you | greeting }}")
+        result = template.render(you="World")
+        self.assertEqual(result, "Hello, World")
+
+    def test_await_an_async_filter(self):
+        """Test that we can await an async filter."""
+        env = Environment(strict_filters=True)
+        env.add_filter("greeting", SomeFilter())
+        template = env.from_string(r"{{ you | greeting }}")
+
+        async def coro() -> str:
+            return await template.render_async(you="World")
+
+        result = asyncio.run(coro())
+        self.assertEqual(result, "Goodbye, World")
+
+    def test_await_an_async_filter_with_args(self):
+        """Test that we can await an async filter with arguments."""
+        env = Environment(strict_filters=True)
+        env.add_filter("greeting", OtherFilter())
+        template = env.from_string(r"{{ you | greeting: '!' }}")
+
+        async def coro() -> str:
+            return await template.render_async(you="World")
+
+        result = asyncio.run(coro())
+        self.assertEqual(result, "Goodbye, World!")
+
+    def test_await_an_async_filter_with_keyword_args(self):
+        """Test that we can await an async filter with keyword arguments."""
+        env = Environment(strict_filters=True)
+        env.add_filter("greeting", OtherFilter())
+        template = env.from_string(r"{{ you | greeting: post:'!' }}")
+
+        async def coro() -> str:
+            return await template.render_async(you="World")
+
+        result = asyncio.run(coro())
+        self.assertEqual(result, "Goodbye, World!")

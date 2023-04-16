@@ -8,6 +8,8 @@ from collections import abc
 from decimal import Decimal
 from itertools import islice
 from typing import Any
+from typing import Awaitable
+from typing import Callable
 from typing import Dict
 from typing import Generic
 from typing import Iterable
@@ -641,19 +643,12 @@ class FilteredExpression(Expression):
             # Any exception causes us to abort the filter chain and discard the result.
             # Nothing will be rendered.
             try:
-                if not _filter.args and not _filter.kwargs:
-                    rv = func(rv)
-                elif _filter.args and not _filter.kwargs:
-                    rv = func(
-                        rv,
-                        *(await _filter.evaluate_args_async(context)),
+                if hasattr(func, "filter_async"):
+                    rv = await self._await_filter_async(
+                        rv, _filter, func.filter_async, context
                     )
                 else:
-                    rv = func(
-                        rv,
-                        *(await _filter.evaluate_args_async(context)),
-                        **(await _filter.evaluate_kwargs_async(context)),
-                    )
+                    rv = await self._call_filter_async(rv, _filter, func, context)
             except FilterValueError:
                 # Pass over filtered expressions who's left value is not allowed.
                 continue
@@ -665,6 +660,42 @@ class FilteredExpression(Expression):
                 ) from err
 
         return rv
+
+    async def _call_filter_async(
+        self,
+        left: object,
+        _filter: Filter,
+        func: Callable[..., object],
+        context: Context,
+    ) -> object:
+        """Call a filter with async evaluated arguments."""
+        if not _filter.args and not _filter.kwargs:
+            return func(left)
+        if _filter.args and not _filter.kwargs:
+            return func(left, *(await _filter.evaluate_args_async(context)))
+        return func(
+            left,
+            *(await _filter.evaluate_args_async(context)),
+            **(await _filter.evaluate_kwargs_async(context)),
+        )
+
+    async def _await_filter_async(
+        self,
+        left: object,
+        _filter: Filter,
+        func: Callable[[object], Awaitable[object]],
+        context: Context,
+    ) -> object:
+        """Await an async filter."""
+        if not _filter.args and not _filter.kwargs:
+            return await func(left)
+        if _filter.args and not _filter.kwargs:
+            return await func(left, *(await _filter.evaluate_args_async(context)))
+        return await func(
+            left,
+            *(await _filter.evaluate_args_async(context)),
+            **(await _filter.evaluate_kwargs_async(context)),
+        )
 
     def evaluate(self, context: Context) -> object:
         return self.apply_filters(
