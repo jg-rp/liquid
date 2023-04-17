@@ -1,5 +1,4 @@
 """Shared configuration from which templates can be loaded and parsed."""
-
 from __future__ import annotations
 
 import warnings
@@ -219,7 +218,7 @@ class Environment:
         self.mode = tolerance
 
         # Template cache
-        if cache_size and cache_size > 0:
+        if cache_size and cache_size > 0 and not self.loader.caching_loader:
             self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
             self.auto_reload = auto_reload
         else:

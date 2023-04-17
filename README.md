@@ -1,7 +1,7 @@
 <h1 align="center">Python Liquid</h1>
 
 <p align="center">
-A Python implementation of <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
+A Python engine for <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
 </p>
 
 <p align="center">
