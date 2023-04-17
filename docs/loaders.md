@@ -1,5 +1,8 @@
 # Template Loaders
 
+::: liquid.loaders.CachingFileSystemLoader
+    handler: python
+
 ::: liquid.loaders.FileSystemLoader
     handler: python
 
