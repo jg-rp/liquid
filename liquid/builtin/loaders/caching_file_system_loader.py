@@ -1,4 +1,4 @@
-"""A template loader that delegates to other template loaders."""
+"""A file system loader that caches parsed templates in memory."""
 from __future__ import annotations
 
 from functools import partial
