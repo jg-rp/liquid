@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 1.9.0 (unreleased)
+## Version 1.9.0
 
 **Fixes**
 
