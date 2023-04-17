@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 class CachingFileSystemLoader(FileExtensionLoader):
     """A file system loader that caches parsed templates in memory."""
 
+    caching_loader = True
+
     def __init__(
         self,
         search_path: Union[str, Path, Iterable[Union[str, Path]]],

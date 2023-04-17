@@ -44,7 +44,15 @@ class TemplateSource(NamedTuple):
 
 
 class BaseLoader(ABC):  # noqa: B024
-    """Base template loader from which all template loaders are derived."""
+    """Base template loader from which all template loaders are derived.
+
+    Attributes:
+        caching_loader (bool): Indicates if this loader implements its own cache.
+            Setting this sto `True` will cause the `Environment` to disable its cache
+            when initialized with a caching loader.
+    """
+
+    caching_loader = False
 
     def get_source(
         self,
