@@ -162,7 +162,7 @@ class JSON:
 
 ### Async Filters
 
-Class-based filters can also implement a `filter_async` method, which should be a coroutine. When applied in an async context, if a filter implements `filter_async`, it will be awaited instead of calling `__call__`.
+Since version 1.9.0, class-based filters can also implement a `filter_async` method, which should be a coroutine. When applied in an async context, if a filter implements `filter_async`, it will be awaited instead of calling `__call__`.
 
 ## Filter Function Decorators
 

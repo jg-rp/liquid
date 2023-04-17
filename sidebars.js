@@ -84,6 +84,7 @@ const sidebars = {
         "api/Template",
         "api/Environment",
         "api/BoundTemplate",
+        "api/cachingfilesystemloader",
         "api/future-environment",
         "api/filesystemloader",
         "api/fileextensionloader",

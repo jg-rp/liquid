@@ -29,3 +29,15 @@ env = Environment(expression_cache_size=80)
 An [`Environment`](../api/environment.md) will manage one cache for each of the common, built-in expression types, _filtered_, _boolean_ and _loop_ expressions. Each uses an [lru_cache](https://docs.python.org/3/library/functools.html#functools.lru_cache) from Python's [functools](https://docs.python.org/3/library/functools.html#module-functools) module. You can inspect cache _hits_, _misses_ and _currsize_ for each using the `cache_info()` function of `Environment.parse_filtered_expression_value`, `Environment.parse_boolean_expression_value` and `Environment.parse_loop_expression_value`.
 
 Tests with the [benchmark fixtures](https://github.com/jg-rp/liquid/tree/main/tests/fixtures) show that extra memory used from caching expressions is offset by the reduced size of the resulting syntax trees.
+
+## Caching Template Loaders
+
+**_New in version 1.9.0_**
+
+An [`Environment`](../api/environment.md) template cache does not work well with [context aware loaders](../guides/custom-loaders.md#loading-with-context), because the environment has no way of knowing what context variables might be used to build a cache key. For this reason it is recommended to use [`CachingFileSystemLoader`](../api/cachingfilesystemloader.md) which, by default, replaces the environment cache.
+
+:::info
+With hindsight, considering how typical Liquid use cases differ from "traditional" template engine usage, we should never have provided an environment-wide template cache. Come Liquid version 2.0 (unreleased), all template caching will be handled by template loaders.
+:::
+
+See [Caching File System Loader](../introduction/loading-templates.md#caching-file-system-loader) for example usage.

@@ -4,7 +4,7 @@ You can load templates from a file system or database, for example, by creating 
 
 [`Environment.get_template()`](../api/environment.md#get_template) and [`Environment.get_template_async()`](../api/environment.md#get_template_async) accept a template name and return a [`BoundTemplate`](../api/bound-template.md). That is a template bound to the environment, ready to be rendered. It is up to the loader to interpret a template name. In the case of [`FileSystemLoader`](../api/filesystemloader.md), the name would be a file name, possibly preceded by a path relative to the configured search path.
 
-Available, built-in loaders are [`FileSystemLoader`](../api/filesystemloader.md), [`FileExtensionLoader`](../api/fileextensionloader.md), [`DictLoader`](../api/dictloader.md) and [`ChoiceLoader`](../api/choiceloader.md). See also [custom loaders](../guides/custom-loaders.md), and examples of a [`FrontMatterFileSystemLoader`](../guides/custom-loaders.md#front-matter-loader) and an [`AsyncDatabaseLoader`](../guides/custom-loaders.md#async-database-loader).
+Available, built-in loaders are [`CachingFileSystemLoader`](../api/cachingfilesystemloader.md), [`FileSystemLoader`](../api/filesystemloader.md), [`FileExtensionLoader`](../api/fileextensionloader.md), [`DictLoader`](../api/dictloader.md) and [`ChoiceLoader`](../api/choiceloader.md). See also [custom loaders](../guides/custom-loaders.md), and examples of a [`FrontMatterFileSystemLoader`](../guides/custom-loaders.md#front-matter-loader) and an [`AsyncDatabaseLoader`](../guides/custom-loaders.md#async-database-loader).
 
 This example assumes a folder called `templates` exists in the current working directory, and that template files `index.html` and `some-list.html` exist within it.
 
@@ -60,12 +60,10 @@ print(template.render(
   <body>
     <h1>Some List</h1>
     <ul>
+      <li>John</li>
 
-  <li>John</li>
-
-  <li>Sally</li>
-
-</ul>
+      <li>Sally</li>
+    </ul>
   </body>
 </html>
 ```
@@ -73,3 +71,19 @@ print(template.render(
 :::info
 Notice how whitespace is output unchanged. See [`whitespace control`](../language/introduction.md#whitespace-control) for more information.
 :::
+
+## Caching File System Loader
+
+**_New in version 1.9.0_**
+
+When rendering partial templates with [`{% include %}`](../language/tags.md#include) or [`{% render %}`](../language/tags.md#render), or making use of Python Liquid's [template inheritance features](../extra/tags.md#extends--block), it is recommended to use a [`CachingFileSystemLoader`](../api/cachingfilesystemloader.md) or a custom loader that handles its own cache.
+
+```python
+from liquid import CachingFileSystemLoader
+from liquid import Environment
+
+loader = CachingFileSystemLoader("templates/", cache_size=500)
+env = Environment(loader=loader)
+
+# ...
+```
