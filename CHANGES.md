@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 1.9.1
+
+**Fixes**
+
+- Force the "wheel" build target to include `py.typed`.
+- Restore `liquid.__version__`.
+
 ## Version 1.9.0
 
 **Fixes**

@@ -36,9 +36,12 @@ Homepage = "https://jg-rp.github.io/liquid/"
 "Source Code" = "https://github.com/jg-rp/liquid"
 
 [tool.hatch.version]
-path = "liquid/__about__.py"
+path = "liquid/__init__.py"
 
 [tool.hatch.build.targets.sdist]
+include = ["/liquid"]
+
+[tool.hatch.build.targets.wheel]
 include = ["/liquid"]
 
 [tool.hatch.envs.default]
