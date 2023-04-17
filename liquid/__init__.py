@@ -12,6 +12,7 @@ from .mode import Mode
 from .token import Token
 from .expression import Expression
 
+from .loaders import CachingFileSystemLoader
 from .loaders import ChoiceLoader
 from .loaders import DictLoader
 from .loaders import FileExtensionLoader
@@ -44,6 +45,7 @@ from . import future
 __all__ = (
     "AwareBoundTemplate",
     "BoundTemplate",
+    "CachingFileSystemLoader",
     "ChoiceLoader",
     "Context",
     "ContextualTemplateAnalysis",

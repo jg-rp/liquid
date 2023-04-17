@@ -1,5 +1,4 @@
 """Shared configuration from which templates can be loaded and parsed."""
-
 from __future__ import annotations
 
 import warnings
@@ -22,6 +21,7 @@ from liquid import builtin
 from liquid import loaders
 from liquid.analyze_tags import InnerTagMap
 from liquid.analyze_tags import TagAnalysis
+from liquid.builtin.loaders import CachingFileSystemLoader
 from liquid.context import Undefined
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
@@ -219,7 +219,11 @@ class Environment:
         self.mode = tolerance
 
         # Template cache
-        if cache_size and cache_size > 0:
+        if (
+            cache_size
+            and cache_size > 0
+            and not isinstance(self.loader, CachingFileSystemLoader)
+        ):
             self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
             self.auto_reload = auto_reload
         else:
