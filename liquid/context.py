@@ -379,6 +379,13 @@ class Context:
             kwargs["environment"] = self.env
 
         if kwargs:
+            if hasattr(filter_func, "filter_async"):
+                _filter_func = partial(filter_func, **kwargs)
+                _filter_func.filter_async = partial(  # type: ignore
+                    filter_func.filter_async,
+                    **kwargs,
+                )
+                return _filter_func
             return partial(filter_func, **kwargs)
 
         return filter_func

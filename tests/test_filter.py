@@ -73,10 +73,16 @@ class OtherFilter:
     Includes arguments.
     """
 
-    def __call__(self, val: object, post: str) -> str:
+    with_environment = True
+
+    def __call__(self, val: object, post: str, environment: Environment) -> str:
+        assert isinstance(environment, Environment)
         return "Hello, " + str(val) + post
 
-    async def filter_async(self, val: object, post: str) -> str:
+    async def filter_async(
+        self, val: object, post: str, environment: Environment
+    ) -> str:
+        assert isinstance(environment, Environment)
         return "Goodbye, " + str(val) + post
 
 
