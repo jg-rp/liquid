@@ -867,8 +867,8 @@ LoopArgument = Union[
     Nil,
 ]
 
-# An identifier that resolves to an iterable or a range expression.
-LoopIterable = Union[Identifier, RangeLiteral, StringLiteral]
+# This alias is kept for historic reasons.
+LoopIterable = Expression
 
 
 class LoopExpression(Expression):
