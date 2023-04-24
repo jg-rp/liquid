@@ -39,10 +39,12 @@ Homepage = "https://jg-rp.github.io/liquid/"
 path = "liquid/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-include = ["/liquid"]
+packages = ["liquid"]
+exclude = ["/**/.mypy_cache/"]
 
 [tool.hatch.build.targets.wheel]
-include = ["/liquid"]
+packages = ["liquid"]
+exclude = ["/**/.mypy_cache/"]
 
 [tool.hatch.envs.default]
 dependencies = [

@@ -1,10 +1,14 @@
 # Python Liquid Change Log
 
-## Version 1.9.2 (unreleased)
+## Version 1.9.2
 
 **Fixes**
 
 - Fixed a bug where a class-based filter defining `filter_async` and setting `with_context` or `with_environment` to `True` would not be awaited. See # [#117](https://github.com/jg-rp/liquid/issues/117).
+
+**Build**
+
+- Fixed some package build issues since moving to [hatch](https://hatch.pypa.io/latest/). Both version 1.9.0 and 1.9.1 inadvertently included `.mypy_cache` folders, making the distribution files significantly larger.
 
 ## Version 1.9.1
 
