@@ -73,6 +73,12 @@ const sidebars = {
       collapsed: false,
       items: ["babel/introduction", "babel/filters", "babel/tags"],
     },
+    {
+      type: "category",
+      label: "JSONPath",
+      collapsed: false,
+      items: ["jsonpath/introduction", "jsonpath/filters", "jsonpath/tags"],
+    },
   ],
 
   apiSidebar: [
