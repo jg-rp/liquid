@@ -259,10 +259,7 @@ class BoundTemplate:
         return {**render_args, "partial": partial}
 
     def __repr__(self) -> str:
-        return (
-            f"Template(name='{self.name}', "
-            f"path='{self.path}', uptodate={self.is_up_to_date})"
-        )  # pragma: no cover
+        return f"Template(name='{self.name}', path='{self.path}')"  # pragma: no cover
 
     def analyze(
         self, follow_partials: bool = True, raise_for_failures: bool = True

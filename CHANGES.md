@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 1.9.3 (unreleased)
+
+**Fixes**
+
+- Removed `is_up_to_date` from `liquid.BoundTemplate.__repr__`. It was causing `RuntimeWarning`s with Python 3.11 when using an async template loader. Specifically warnings about coroutines that were never awaited.
+
 ## Version 1.9.2
 
 **Fixes**
