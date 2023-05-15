@@ -56,9 +56,9 @@ dependencies = [
     "types-pyyaml",
     "twine",
     "ruff",
-    "sphinx",
     "mock",
     "types-python-dateutil",
+    "MarkupSafe",
 ]
 
 [tool.hatch.envs.default.scripts]
