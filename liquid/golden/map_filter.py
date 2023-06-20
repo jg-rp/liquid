@@ -35,4 +35,16 @@ cases = [
         expect="#",
         globals={"a": [{"title": "foo"}, {"title": "bar"}]},
     ),
+    Case(
+        description="nested arrays get flattened",
+        template=r"{{ a | map: 'title' | join: '#' }}",
+        expect="foo#bar#baz",
+        globals={"a": [{"title": "foo"}, [{"title": "bar"}, {"title": "baz"}]]},
+    ),
+    Case(
+        description="input is a hash",
+        template=r"{{ a | map: 'title' | join: '#' }}",
+        expect="foo",
+        globals={"a": {"title": "foo", "some": "thing"}},
+    ),
 ]

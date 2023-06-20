@@ -125,7 +125,7 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
     return list(chain(sequence, second_array))
 
 
-@liquid_filter
+@sequence_filter
 def map_(sequence: ArrayT, key: object) -> List[object]:
     """Create an array of values from a map."""
     try:
