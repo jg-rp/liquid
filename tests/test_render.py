@@ -421,6 +421,10 @@ class RenderFiltersTestCase(RenderTestCase):
         """Test that we can render the `base64_url_safe_decode` filter correctly."""
         self._test(golden.base64_url_safe_decode_filter.cases)
 
+    def test_render_sum_filter(self):
+        """Test that we can render the `sum` filter correctly."""
+        self._test(golden.sum_filter.cases)
+
 
 class RenderMiscTestCase(RenderTestCase):
     def test_render_range_objects(self):

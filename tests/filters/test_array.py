@@ -17,6 +17,7 @@ from liquid.builtin.filters.array import map_
 from liquid.builtin.filters.array import reverse
 from liquid.builtin.filters.array import sort
 from liquid.builtin.filters.array import sort_natural
+from liquid.builtin.filters.array import sum_
 from liquid.builtin.filters.array import uniq
 from liquid.builtin.filters.array import where
 from liquid.environment import Environment
@@ -876,3 +877,51 @@ class ArrayFilterTestCase(unittest.TestCase):
         ]
 
         self._test(sort_numeric, test_cases)
+
+    def test_sum(self):
+        """Test `sum` filter function."""
+        test_case = [
+            Case(
+                description="empty sequence",
+                val=[],
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="only zeros",
+                val=[0, 0, 0],
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="ints",
+                val=[1, 2, 3],
+                args=[],
+                kwargs={},
+                expect=6,
+            ),
+            Case(
+                description="negative ints",
+                val=[-1, -2, -3],
+                args=[],
+                kwargs={},
+                expect=-6,
+            ),
+            Case(
+                description="floats",
+                val=[0.1, 0.2, 0.3],
+                args=[],
+                kwargs={},
+                expect=0.6,
+            ),
+            Case(
+                description="floats and ints",
+                val=[0.1, 0.2, 0.3, 1, 2, 3],
+                args=[],
+                kwargs={},
+                expect=6.6,
+            ),
+        ]
+        self._test(sum_, test_case)
