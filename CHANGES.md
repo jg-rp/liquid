@@ -5,6 +5,11 @@
 **Fixes**
 
 - Removed `is_up_to_date` from `liquid.BoundTemplate.__repr__`. It was causing `RuntimeWarning`s with Python 3.11 when using an async template loader. Specifically warnings about coroutines that were never awaited.
+- Fixed the `map` filter. If given a nested array-like input, it now flattens it automatically.
+
+**Features**
+
+- Added the `sum` filter, which will return the sum of all numeric values in its input sequence.
 
 ## Version 1.9.2
 

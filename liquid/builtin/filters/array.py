@@ -23,6 +23,7 @@ from liquid.exceptions import FilterError
 from liquid.expression import NIL
 from liquid.filter import array_filter
 from liquid.filter import liquid_filter
+from liquid.filter import num_arg
 from liquid.filter import sequence_filter
 from liquid.filter import with_environment
 from liquid.undefined import is_undefined
@@ -214,3 +215,15 @@ def compact(sequence: ArrayT, key: object = None) -> List[object]:
         except TypeError as err:
             raise FilterArgumentError(f"can't read property '{key}'") from err
     return [itm for itm in sequence if itm is not None]
+
+
+@sequence_filter
+def sum_(sequence: ArrayT, key: object = None) -> Union[float, int]:
+    """Return the sum of all numeric elements in an array.
+
+    If _key_ is given, it is assumed that sequence items are mapping-like,
+    and the values at _item[key]_ will be summed instead.
+    """
+    if key is not None and not is_undefined(key):
+        return sum(num_arg(_getitem(elem, key, 0), 0) for elem in sequence)
+    return sum(num_arg(elem, 0) for elem in sequence)
