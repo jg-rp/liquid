@@ -227,7 +227,8 @@ def sum_(sequence: ArrayT, key: object = None) -> Union[float, int, Decimal]:
     """
     if key is not None and not is_undefined(key):
         rv = sum(decimal_arg(_getitem(elem, key, 0), 0) for elem in sequence)
-    rv = sum(decimal_arg(elem, 0) for elem in sequence)
+    else:
+        rv = sum(decimal_arg(elem, 0) for elem in sequence)
     if isinstance(rv, Decimal):
         return float(rv)
     return rv

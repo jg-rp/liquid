@@ -903,6 +903,13 @@ class ArrayFilterTestCase(unittest.TestCase):
                 expect=6,
             ),
             Case(
+                description="nested ints",
+                val=[1, [2, [3]]],
+                args=[],
+                kwargs={},
+                expect=6,
+            ),
+            Case(
                 description="negative ints",
                 val=[-1, -2, -3],
                 args=[],
@@ -922,6 +929,41 @@ class ArrayFilterTestCase(unittest.TestCase):
                 args=[],
                 kwargs={},
                 expect=6.6,
+            ),
+            Case(
+                description="with key argument",
+                val=[{"k": 1}, {"k": 2}, {"k": 3}],
+                args=["k"],
+                kwargs={},
+                expect=6,
+            ),
+            Case(
+                description="with key argument and numeric strings",
+                val=[{"k": "1"}, {"k": "2"}, {"k": "3"}],
+                args=["k"],
+                kwargs={},
+                expect=6,
+            ),
+            Case(
+                description="list of dicts and no key",
+                val=[{"k": 1}, {"k": 2}, {"k": 3}],
+                args=[],
+                kwargs={},
+                expect=0,
+            ),
+            Case(
+                description="some missing keys",
+                val=[{"k": 1}, {"k": 2}, {"x": 3}],
+                args=["k"],
+                kwargs={},
+                expect=3,
+            ),
+            Case(
+                description="key argument and non-mapping items",
+                val=[1, 2, 3],
+                args=["k"],
+                kwargs={},
+                expect=FilterArgumentError,
             ),
         ]
         self._test(sum_, test_case)
