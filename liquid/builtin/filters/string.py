@@ -176,8 +176,7 @@ def _slice_arg(val: Any) -> int:
         ) from err
 
     rv = min(rv, MAX_SLICE_ARG)
-    rv = max(rv, MIN_SLICE_ARG)
-    return rv
+    return max(rv, MIN_SLICE_ARG)
 
 
 @liquid_filter

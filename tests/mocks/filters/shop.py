@@ -9,13 +9,11 @@ TRANSLATION_TABLE = {"'": None, '"': None, "(": None, ")": None, "[": None, "]":
 def to_handle(val):
     val = val.lower().translate(TRANSLATION_TABLE)
     # val = re.sub(r"\W+", "-", val)
-    val = "-".join(val.split())
+    return "-".join(val.split())
     # if val.endswith("-"):
     #     val = val[:-1]
     # if val.startswith("-"):
     #     val = s[1:]
-
-    return val
 
 
 def _link_to(link, url, title=""):
