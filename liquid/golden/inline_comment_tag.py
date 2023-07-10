@@ -94,4 +94,24 @@ cases = [
         template="{%- # {% echo 'hello world' %} -%}",
         expect=" -%}",
     ),
+    Case(
+        description="comment with single quote",
+        template=r"{%# some 'comment %}",
+        expect="",
+    ),
+    Case(
+        description="comment with single quoted string",
+        template=r"{%# some 'comment' %}",
+        expect="",
+    ),
+    Case(
+        description="comment with double quote",
+        template='{%# some "comment %}',
+        expect="",
+    ),
+    Case(
+        description="comment with double quoted string",
+        template='{%# some "comment" %}',
+        expect="",
+    ),
 ]
