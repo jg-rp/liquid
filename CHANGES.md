@@ -1,11 +1,11 @@
 # Python Liquid Change Log
 
-## Version 1.9.3 (unreleased)
+## Version 1.9.3
 
 **Fixes**
 
 - Removed `is_up_to_date` from `liquid.BoundTemplate.__repr__`. It was causing `RuntimeWarning`s with Python 3.11 when using an async template loader. Specifically warnings about coroutines that were never awaited.
-- Fixed the `map` filter. If given a nested array-like input, it now flattens it automatically.
+- Fixed the `map` filter. If given a nested array-like input, it now flattens it automatically. See [#119](https://github.com/jg-rp/liquid/issues/119).
 - Fixed the behavior of the `liquid` tag when other liquid tags appear within it. See [#123](https://github.com/jg-rp/liquid/issues/123).
 
 **Features**
