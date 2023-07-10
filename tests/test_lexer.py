@@ -392,6 +392,15 @@ class LiquidLexerTestCase(TestCase):
                     Token(8, TOKEN_TAG, "endfor"),
                 ],
             ),
+            Case(
+                "liquid in liquid",
+                "liquid\necho 'foo'",
+                [
+                    Token(1, TOKEN_TAG, "liquid"),
+                    Token(2, TOKEN_TAG, "echo"),
+                    Token(2, TOKEN_EXPRESSION, "'foo'"),
+                ],
+            ),
         ]
 
         for case in test_cases:

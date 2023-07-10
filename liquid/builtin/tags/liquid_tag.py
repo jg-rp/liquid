@@ -75,6 +75,9 @@ class LiquidTag(Tag):
         if stream.current.type == TOKEN_EOF:
             # Empty liquid tag. Empty block.
             block = BlockNode(tok, [])
+        elif stream.current.type == TOKEN_TAG:
+            parser = get_parser(self.env)
+            block = parser.parse_block(stream, end=())
         else:
             expect(stream, TOKEN_EXPRESSION)
             expr_stream = TokenStream(

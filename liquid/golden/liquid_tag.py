@@ -183,4 +183,33 @@ cases = [
         expect="",
         error=True,
     ),
+    Case(
+        description="bare liquid tag in liquid tag",
+        template="\n".join(
+            [
+                r"{%- liquid",
+                r"  liquid",
+                r'  echo "foo"',
+                r"-%}",
+            ]
+        ),
+        expect="foo",
+    ),
+    Case(
+        description="liquid tag in liquid tag",
+        template="\n".join(
+            [
+                r"{%- liquid",
+                r"  liquid echo 'bar'",
+                r'  echo "foo"',
+                r"-%}",
+            ]
+        ),
+        expect="barfoo",
+    ),
+    Case(
+        description="nested liquid in liquid tag",
+        template='{%- liquid liquid liquid echo "foo" -%}',
+        expect="foo",
+    ),
 ]
