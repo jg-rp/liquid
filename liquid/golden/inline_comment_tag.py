@@ -114,4 +114,14 @@ cases = [
         template='{%# some "comment" %}',
         expect="",
     ),
+    Case(
+        description="comment with u2018",
+        template="{%# some ‘comment %}",
+        expect="",
+    ),
+    Case(
+        description="comment with u201C",
+        template="{%# some “comment %}",
+        expect="",
+    ),
 ]
