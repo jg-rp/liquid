@@ -14,6 +14,7 @@ from .filters.array import map_
 from .filters.array import reverse
 from .filters.array import sort
 from .filters.array import sort_natural
+from .filters.array import sum_
 from .filters.array import uniq
 from .filters.array import where
 from .filters.extra import safe
@@ -157,6 +158,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_filter("reverse", reverse)
     env.add_filter("sort", sort)
     env.add_filter("sort_natural", sort_natural)
+    env.add_filter("sum", sum_)
     env.add_filter("where", where)
     env.add_filter("uniq", uniq)
     env.add_filter("compact", compact)

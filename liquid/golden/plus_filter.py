@@ -55,4 +55,9 @@ cases = [
         template=r"{{ 10 | plus: nosuchthing }}",
         expect="10",
     ),
+    Case(
+        description="integer value and negative integer arg",
+        template=r"{{ 10 | plus: -2 }}",
+        expect="8",
+    ),
 ]

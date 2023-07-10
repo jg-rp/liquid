@@ -1,6 +1,7 @@
 """Filter functions that operate on arrays."""
 from __future__ import annotations
 
+from decimal import Decimal
 from functools import partial
 from itertools import chain
 from itertools import islice
@@ -22,6 +23,7 @@ from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 from liquid.expression import NIL
 from liquid.filter import array_filter
+from liquid.filter import decimal_arg
 from liquid.filter import liquid_filter
 from liquid.filter import sequence_filter
 from liquid.filter import with_environment
@@ -214,3 +216,19 @@ def compact(sequence: ArrayT, key: object = None) -> List[object]:
         except TypeError as err:
             raise FilterArgumentError(f"can't read property '{key}'") from err
     return [itm for itm in sequence if itm is not None]
+
+
+@sequence_filter
+def sum_(sequence: ArrayT, key: object = None) -> Union[float, int, Decimal]:
+    """Return the sum of all numeric elements in an array.
+
+    If _key_ is given, it is assumed that sequence items are mapping-like,
+    and the values at _item[key]_ will be summed instead.
+    """
+    if key is not None and not is_undefined(key):
+        rv = sum(decimal_arg(_getitem(elem, key, 0), 0) for elem in sequence)
+    else:
+        rv = sum(decimal_arg(elem, 0) for elem in sequence)
+    if isinstance(rv, Decimal):
+        return float(rv)
+    return rv

@@ -128,8 +128,7 @@ class TemplateNotFound(Error):
 
     def __str__(self) -> str:
         msg = super().__str__()
-        msg = f"template not found {msg}"
-        return msg
+        return f"template not found {msg}"
 
 
 class ResourceLimitError(Error):

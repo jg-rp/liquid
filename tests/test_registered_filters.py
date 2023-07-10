@@ -411,6 +411,12 @@ class ExtraFilterRegistrationTestCase(unittest.TestCase):
                 context={"data": {"foo": [1, 2, 3]}},
                 expect='{"foo": [1, 2, 3]}',
             ),
+            Case(
+                description="sum",
+                template=r"{{ foo | sum }}",
+                context={"foo": [1, 2, 3]},
+                expect="6",
+            ),
         ]
 
         env = Environment()

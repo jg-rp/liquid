@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from functools import wraps
 from typing import TYPE_CHECKING
 from typing import Any
@@ -142,6 +143,41 @@ def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
 
         try:
             return float(val)
+        except ValueError as err:
+            if default is not None:
+                return default
+            raise FilterArgumentError(
+                f"could not cast string '{val}' to a number"
+            ) from err
+
+    elif default is not None:
+        return default
+
+    raise FilterArgumentError(
+        f"expected an int, float or string, found {type(val).__name__}"
+    )
+
+
+def decimal_arg(
+    val: Any, default: Union[int, Decimal, None] = None
+) -> Union[int, Decimal]:
+    """Return `val` as an int or decimal.
+
+    If `val` can't be cast to an int or decimal, return `default`.
+    """
+    if isinstance(val, int):
+        return val
+    if isinstance(val, float):
+        return Decimal(str(val))
+
+    if isinstance(val, str):
+        try:
+            return to_int(val)
+        except ValueError:
+            pass
+
+        try:
+            return Decimal(val)
         except ValueError as err:
             if default is not None:
                 return default
