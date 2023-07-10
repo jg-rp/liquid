@@ -1295,6 +1295,23 @@ there
 Hellothere
 ```
 
+## sum
+
+`<array> | sum[: <string>]`
+
+Return the sum of all numeric elements in an array.
+
+```liquid
+{% assign array = '1,2,3' | split: ',' -%}
+{{ array | sum }}
+```
+
+```plain title="output"
+6
+```
+
+If the optional string argument is given, it is assumed that array items are hash/mapping-like, and the argument should be the name of a property/key. The values at `array[property]` will be summed.
+
 ## times
 
 `<number> | times: <number>`
