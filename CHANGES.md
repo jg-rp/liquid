@@ -10,12 +10,13 @@
 **Features**
 
 - Added the `sum` filter, which will return the sum of all numeric values in its input sequence.
+- Added `Environment.setup_tags_and_filters()` for easier tag and filter registration when subclassing `Environment`. See [#122](https://github.com/jg-rp/liquid/issues/122).
 
 ## Version 1.9.2
 
 **Fixes**
 
-- Fixed a bug where a class-based filter defining `filter_async` and setting `with_context` or `with_environment` to `True` would not be awaited. See # [#117](https://github.com/jg-rp/liquid/issues/117).
+- Fixed a bug where a class-based filter defining `filter_async` and setting `with_context` or `with_environment` to `True` would not be awaited. See [#117](https://github.com/jg-rp/liquid/issues/117).
 
 **Build**
 

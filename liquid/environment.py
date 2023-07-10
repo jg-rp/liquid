@@ -236,7 +236,7 @@ class Environment:
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
 
-        builtin.register(self)
+        self.setup_tags_and_filters()
 
     def __hash__(self) -> int:
         return hash(
@@ -289,6 +289,10 @@ class Environment:
                 `__call__` method. All builtin filters are implemented in this way.
         """
         self.filters[name] = func
+
+    def setup_tags_and_filters(self) -> None:
+        """Add default tags and filters to this environment."""
+        builtin.register(self)
 
     def parse(self, source: str) -> ast.ParseTree:
         """Parse `source` as a liquid template.
