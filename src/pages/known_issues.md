@@ -155,3 +155,28 @@ h / e / l / l / o /   / w / o / r / l / d /
 ```
 
 It appears that this is unintended behavior for Ruby Liquid. Previously, Ruby Liquid would iterate over lines in a string, also not intended behavior. See https://github.com/Shopify/liquid/pull/1667.
+
+## Summing Floats
+
+**_See [Shopify/Liquid#1725](https://github.com/Shopify/liquid/issues/1725)_**
+
+When given one or more floats as input, the reference implementation's standard `sum` filter will return a `BigDecimal`, which is rendered in scientific notation (or similar). Python Liquid will coerce the result to a float, and render that, without an exponent.
+
+**Template:**
+
+```liquid
+{% assign a = "0.1,0.2,0.3" | split: "," %}
+{{ a | sum }}
+```
+
+**Ruby Liquid Output:**
+
+```plain
+0.6e0
+```
+
+**Python Liquid Output:**
+
+```plain
+0.6
+```
