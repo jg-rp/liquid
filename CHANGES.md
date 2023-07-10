@@ -9,7 +9,7 @@
 
 **Features**
 
-- Added the `sum` filter, which will return the sum of all numeric values in its input sequence.
+- Added the `sum` filter, which will return the sum of all numeric values in its input sequence. ([docs](https://jg-rp.github.io/liquid/language/filters#sum), [source](https://github.com/jg-rp/liquid/blob/14ab1117705db04597d81b613ed6c4a92db10f37/liquid/builtin/filters/array.py#L222)).
 - Added `Environment.setup_tags_and_filters()` for easier tag and filter registration when subclassing `Environment`. See [#122](https://github.com/jg-rp/liquid/issues/122).
 
 ## Version 1.9.2
