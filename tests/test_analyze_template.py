@@ -1226,6 +1226,13 @@ class AnalyzeTemplateTestCase(TestCase):
         with self.assertRaises(TemplateInheritanceError):
             template.analyze()
 
+        async def coro(template: BoundTemplate) -> str:
+            return await template.analyze_async()
+
+        with self.subTest(asynchronous=True):
+            with self.assertRaises(TemplateInheritanceError):
+                asyncio.run(coro(template))
+
     def test_analyze_super_block(self):
         """Test that we can count references when rendering super blocks."""
         loader = DictLoader(

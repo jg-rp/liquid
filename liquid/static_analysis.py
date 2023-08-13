@@ -552,34 +552,56 @@ class _TemplateCounter:
         self._update_reference_counters(refs)
 
     async def _analyze_template_inheritance_chain_async(
-        self, child: ChildNode, template: BoundTemplate
+        self, node: ChildNode, template: BoundTemplate
     ) -> None:
-        name, load_context = self._make_load_context(child, "extends")
+        name, load_context = self._make_load_context(node, "extends")
         if name is None or load_context is None:
             return
 
         stack_context = self._empty_context.copy({})
         stack_context.tag_namespace["extends"] = defaultdict(list)
 
+        # Guard against recursive `extends`.
+        seen: Set[str] = set()
+
         # Add blocks from the leaf template to the stack context.
-        self._stack_blocks(stack_context, template, count_tags=False)
+        extends_name, _ = self._stack_blocks(stack_context, template, count_tags=False)
+        assert extends_name
+        seen.add(extends_name)
 
         try:
             parent = await self._get_template_async(
-                name, load_context, self._template_name, child
+                name, load_context, self._template_name, node
             )
         except TemplateNotFound:
             return
+
         parent_template_name, _ = self._stack_blocks(stack_context, parent)
+
+        if parent_template_name:
+            if parent_template_name in seen:
+                raise TemplateInheritanceError(
+                    f"circular extends {parent_template_name!r}",
+                    linenum=node.linenum,
+                    filename=template.name,
+                )
+            seen.add(parent_template_name)
 
         while parent_template_name:
             try:
                 parent = await self._get_template_async(
-                    parent_template_name, load_context, self._template_name, child
+                    parent_template_name, load_context, self._template_name, node
                 )
             except TemplateNotFound:
                 return
+
             parent_template_name, _ = self._stack_blocks(stack_context, parent)
+            if parent_template_name:
+                if parent_template_name in seen:
+                    raise TemplateInheritanceError(
+                        f"circular extends {parent_template_name!r}"
+                    )
+                seen.add(parent_template_name)
 
         refs = await _InheritanceChainCounter(
             parent,
