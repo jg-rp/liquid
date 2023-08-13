@@ -284,9 +284,8 @@ class Environment:
                 template.
             func: Any callable that accepts at least one argument, the result of the
                 expression the filter is applied to. If the filter needs access to the
-                environment or render context, you probably want to make `func` a class
-                that inherits from `liquid.filter.Filter`, and override the
-                `__call__` method. All builtin filters are implemented in this way.
+                active environment or render context, use `liquid.filer.with_context`
+                and/or `liquid.filter.with_environment` decorators.
         """
         self.filters[name] = func
 
