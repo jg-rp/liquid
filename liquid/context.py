@@ -537,7 +537,7 @@ class Context:
                 loop_iteration_carry=loop_iteration_carry,
                 local_namespace_size_carry=self.get_size_of_locals(),
             )
-            # This might need to be generalized some the caller can specify which
+            # This might need to be generalized so the caller can specify which
             # tag namespaces need to be copied.
             ctx.tag_namespace["extends"] = self.tag_namespace["extends"]
         else:
@@ -696,14 +696,13 @@ class VariableCaptureContext(Context):
             for elem in path:
                 if isinstance(elem, int):
                     _path.append(f"[{elem}]")
-                else:
-                    if self.re_ident.match(elem):  # noqa: PLR5501
-                        if _path:
-                            _path.append(f".{elem}")
-                        else:
-                            _path.append(f"{elem}")
+                elif self.re_ident.match(elem):  # noqa: PLR5501
+                    if _path:
+                        _path.append(f".{elem}")
                     else:
-                        _path.append(f'["{elem}"]')
+                        _path.append(f"{elem}")
+                else:
+                    _path.append(f'["{elem}"]')
             ref = "".join(_path)
 
         if is_undefined(result):
