@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 1.9.4
+
+**Fixes**
+
+- Fixed async loading of templates with the `{% extends %}` tag. Previously templates were being loaded synchronously, even when using `render_async()`. See [#124](https://github.com/jg-rp/liquid/issues/124).
+- Fixed handling of recursive `{% extends %}` tags during async static analysis. See [#125](https://github.com/jg-rp/liquid/issues/125).
+
 ## Version 1.9.3
 
 **Fixes**
