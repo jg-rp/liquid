@@ -809,10 +809,7 @@ class _InheritanceChainCounter(_TemplateCounter):
         ):
             return True
 
-        for expr in expression.children():
-            return self._contains_super(expr)
-
-        return False
+        return any(self._contains_super(expr) for expr in expression.children())
 
     def _analyze_block(self, block: InheritanceBlockNode) -> None:
         block_stacks: Dict[

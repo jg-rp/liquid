@@ -236,7 +236,7 @@ class ExtendsNode(Node):
                 linenum=self.tok.linenum,
             )
 
-        base_template = build_block_stacks(
+        base_template = await build_block_stacks_async(
             context,
             context.template,
             self.name.evaluate(context),
@@ -383,6 +383,70 @@ def build_block_stacks(
 
     while parent_template_name:
         parent = context.get_template_with_context(parent_template_name, tag=tag)
+        extends_node, _ = stack_blocks(context, parent)
+
+        if extends_node:
+            parent_template_name = extends_node.name.evaluate(context)
+            assert parent_template_name
+            if parent_template_name in seen:
+                raise TemplateInheritanceError(
+                    f"circular extends {parent_template_name!r}",
+                    linenum=extends_node.tok.linenum,
+                    filename=parent.name,
+                )
+            seen.add(parent_template_name)
+        else:
+            parent_template_name = None
+
+    return parent
+
+
+async def build_block_stacks_async(
+    context: Context,
+    template: BoundTemplate,
+    parent_name: str,
+    tag: str = TAG_EXTENDS,
+) -> BoundTemplate:
+    """Build a stack for each `{% block %}` in the inheritance chain.
+
+    Blocks defined in the base template will be at the top of the stack.
+
+    Args:
+        context: A render context to build the block stacks in.
+        template: A leaf template with an `extends` tag.
+        parent_name: The name of the immediate parent template as a string.
+        tag: The name of the `extends` tag, if it is overridden.
+    """
+    if "extends" not in context.tag_namespace:
+        context.tag_namespace["extends"] = defaultdict(list)
+
+    # Guard against recursive `extends`.
+    seen: Set[str] = set()
+
+    extends_node, _ = stack_blocks(context, template)
+    parent = await context.get_template_with_context_async(parent_name, tag=tag)
+    assert extends_node
+    seen.add(extends_node.name.evaluate(context))
+
+    extends_node, _ = stack_blocks(context, parent)
+
+    if extends_node:
+        parent_template_name: Optional[str] = extends_node.name.evaluate(context)
+        assert parent_template_name
+        if parent_template_name in seen:
+            raise TemplateInheritanceError(
+                f"circular extends {parent_template_name!r}",
+                linenum=extends_node.tok.linenum,
+                filename=template.name,
+            )
+        seen.add(parent_template_name)
+    else:
+        parent_template_name = None
+
+    while parent_template_name:
+        parent = await context.get_template_with_context_async(
+            parent_template_name, tag=tag
+        )
         extends_node, _ = stack_blocks(context, parent)
 
         if extends_node:
