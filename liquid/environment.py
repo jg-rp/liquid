@@ -65,40 +65,36 @@ class Environment:
             an output statement.
         statement_end_string: The sequence of characters indicating the end of an
             output statement.
-        template_comments: If `True`, enable template comments. Where, by default,
+        template_comments: If `True`, enable template comments, where, by default,
             anything between `{#` and `#}` is considered a comment.
-            `False`.
         comment_start_string: The sequence of characters indicating the start of a
-            comment.
-            `comment_start_string` to have any effect.
+            comment. `template_comments` must be `True` for `comment_start_string`
+            to have any effect.
         comment_end_string: The sequence of characters indicating the end of a
-            comment.
-            `comment_end_string` to have any effect.
+            comment.  `template_comments` must be `True` for `comment_end_string`
+            to have any effect.
         tolerance: Indicates how tolerant to be of errors. Must be one of
             `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
         loader: A template loader. If you want to use the builtin "render" or
             "include" tags, a loader must be configured.
-            `liquid.loaders.DictLoader`.
         undefined: A subclass of `Undefined` that represents undefined values. Could be
             one of the built-in undefined types, `Undefined`, `DebugUndefined` or
-            `StrictUndefined`. undefined type that silently ignores undefined values.
+            `StrictUndefined`.
         strict_filters: If `True`, will raise an exception upon finding an
-            undefined filter. Otherwise undefined filters are silently ignored. Defaults
-            to `True`.
-        autoescape: If `True`, all context values will be HTML-escaped before output
-            unless they've been explicitly marked as "safe". Requires the package
+            undefined filter. Otherwise undefined filters are silently ignored.
+        autoescape: If `True`, all render context values will be HTML-escaped before
+            output unless they've been explicitly marked as "safe". Requires the package
             Markupsafe.
         auto_reload: If `True`, loaders that have an `uptodate` callable will
             reload template source data automatically. For deployments where template
             sources don't change between service reloads, setting auto_reload to `False`
             can yield an increase in performance by avoiding calls to `uptodate`.
-            `.
         cache_size: The capacity of the template cache in number of templates.
-            . If `cache_size` is `None` or less than `1`, it has the
-            effect of setting `auto_reload` to `False`.
+            If `cache_size` is `None` or less than `1`, it has the effect of setting
+            `auto_reload` to `False`.
         expression_cache_size: The capacity of each of the common expression caches.
-            `, disabling expression caching.
-        globals: An optional mapping that will be added to the context of any
+            A `cache_size` of `0` will disabling expression caching.
+        globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
 
     Attributes:
@@ -125,8 +121,7 @@ class Environment:
         cache: The template cache.
         auto_reload: Indicates if automatic reloading of templates is enabled.
         template_class: `Environment.get_template` and `Environment.from_string`
-            return an instance of :attr:`Environment.template_class`.
-            `liquid.template.BoundTemplate`.
+            return an instance of `Environment.template_class`.
         globals: A dictionary of variables that will be added to the context of every
             template rendered from the environment.
     """
@@ -151,7 +146,7 @@ class Environment:
     # Instances of `template_class` are returned from `from_string`,
     # `get_template` and `get_template_async`. It should be the `BoundTemplate`
     # class or a subclass of it.
-    template_class = BoundTemplate
+    template_class: Type[BoundTemplate] = BoundTemplate
 
     def __init__(
         self,
@@ -200,13 +195,13 @@ class Environment:
 
         # The undefined type. When an identifier can not be resolved, the returned value
         # is `Undefined` or a subclass of `Undefined`.
-        self.undefined = undefined
+        self.undefined: Type[Undefined] = undefined
 
         # Indicates if an undefined filter should raise an exception or be ignored.
-        self.strict_filters = strict_filters
+        self.strict_filters: bool = strict_filters
 
         # Indicates if autoescape is enabled.
-        self.autoescape = autoescape
+        self.autoescape: bool = autoescape
 
         # Tag register.
         self.tags: Dict[str, Tag] = {}
@@ -215,12 +210,12 @@ class Environment:
         self.filters: Dict[str, Callable[..., Any]] = {}
 
         # tolerance mode
-        self.mode = tolerance
+        self.mode: Mode = tolerance
 
         # Template cache
         if cache_size and cache_size > 0 and not self.loader.caching_loader:
             self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
-            self.auto_reload = auto_reload
+            self.auto_reload: bool = auto_reload
         else:
             self.cache = None
             self.auto_reload = False
@@ -294,7 +289,7 @@ class Environment:
         builtin.register(self)
 
     def parse(self, source: str) -> ast.ParseTree:
-        """Parse `source` as a liquid template.
+        """Parse _source_ as a Liquid template.
 
         More often than not you'll want to use `Environment.from_string` instead.
         """
@@ -316,10 +311,10 @@ class Environment:
             source: The liquid template source code.
             name: Optional name of the template. Available as `Template.name`.
             path: Optional path or identifier to the origin of the template.
-            globals: An optional mapping of context variables made available every
-                time the resulting template is rendered.
-            matter: Optional mapping containing variables associated with the
-                template. Could be "front matter" or other meta data.
+            globals: An optional mapping of render context variables attached
+                to the resulting template.
+            matter: Optional mapping of render context variables associated
+                with the template. Could be "front matter" or other meta data.
         """
         try:
             parse_tree = self.parse(source)
@@ -348,11 +343,11 @@ class Environment:
         Args:
             name: The template's name. The loader is responsible for interpreting
                 the name. It could be the name of a file or some other identifier.
-            globals: A mapping of context variables made available every time the
-                resulting template is rendered.
+            globals: A mapping of render context variables attached to the
+                resulting template.
 
         Raises:
-            TemplateNotFound: if a template with the given name can not be found.
+            TemplateNotFound: If a template with the given name can not be found.
         """
         if self.cache is not None:
             cached = self.cache.get(name)
@@ -674,47 +669,44 @@ def Template(  # noqa: N802, D417
     which might have been cached from previous calls to `Template`.
 
     Args:
-        source: A Liquid template source string.
-        tag_start_string: The sequence of characters indicating the start of a liquid
+        tag_start_string: The sequence of characters indicating the start of a
+            liquid tag.
+        tag_end_string: The sequence of characters indicating the end of a liquid
             tag.
-        tag_end_string: The sequence of characters indicating the end of a liquid tag.
-
-        statement_start_string: The sequence of characters indicating the start of an
+        statement_start_string: The sequence of characters indicating the start of
+            an output statement.
+        statement_end_string: The sequence of characters indicating the end of an
             output statement.
-        statement_end_string: The sequence of characters indicating the end of an output
-            statement.
-        template_comments: If `True`, enable template comments. Where, by default,
+        strip_tags: Has no effect. We don't support automatic whitespace stripping.
+        template_comments: If `True`, enable template comments, where, by default,
             anything between `{#` and `#}` is considered a comment.
         comment_start_string: The sequence of characters indicating the start of a
-            comment.
-            `comment_start_string` to have any effect.
-        comment_end_string: The sequence of characters indicating the end of a comment.
-            `template_comments` must be `True` for
-            `comment_end_string` to have any effect.
+            comment. `template_comments` must be `True` for `comment_start_string`
+            to have any effect.
+        comment_end_string: The sequence of characters indicating the end of a
+            comment.  `template_comments` must be `True` for `comment_end_string`
+            to have any effect.
         tolerance: Indicates how tolerant to be of errors. Must be one of
             `Mode.LAX`, `Mode.WARN` or `Mode.STRICT`.
         undefined: A subclass of `Undefined` that represents undefined values. Could be
             one of the built-in undefined types, `Undefined`, `DebugUndefined` or
             `StrictUndefined`.
-            ignores undefined values.
-        strict_filters: If `True`, will raise an exception upon finding an undefined
-            filter. Otherwise undefined filters are silently ignored.
-            `True`.
-        autoescape: If `True`, all context values will be HTML-escaped before output
-            unless they've been explicitly marked as "safe". Requires the package
+        strict_filters: If `True`, will raise an exception upon finding an
+            undefined filter. Otherwise undefined filters are silently ignored.
+        autoescape: If `True`, all render context values will be HTML-escaped before
+            output unless they've been explicitly marked as "safe". Requires the package
             Markupsafe.
-        auto_reload: If `True`, loaders that have an `uptodate` callable will reload
-            template source data automatically. For deployments where template sources
-            don't change between service reloads, setting auto_reload to `False` can
-            yield an increase in performance by avoiding calls to `uptodate`. Defaults
-            to `True`.
-        cache_size: The capacity of the template cache in number of templates. Defaults
-            to 300. If `cache_size` is `None` or less than `1`, it has the effect of
-            setting `auto_reload` to `False`.
+        auto_reload: If `True`, loaders that have an `uptodate` callable will
+            reload template source data automatically. For deployments where template
+            sources don't change between service reloads, setting auto_reload to `False`
+            can yield an increase in performance by avoiding calls to `uptodate`.
+        cache_size: The capacity of the template cache in number of templates.
+            If `cache_size` is `None` or less than `1`, it has the effect of setting
+            `auto_reload` to `False`.
         expression_cache_size: The capacity of each of the common expression caches.
-            `, disabling expression caching.
-        globals: An optional mapping that will be added to the context of any template
-            loaded from this environment.
+            A `cache_size` of `0` will disabling expression caching.
+        globals: An optional mapping that will be added to the render context of any
+            template loaded from this environment.
     """
     # Resorting to named arguments (repeated 3 times) as I've twice missed a bug
     # because of positional arguments.
