@@ -154,7 +154,11 @@ class Parser:
             # Detect output nodes in any of this block's children. This is used by
             # some tags to automatically suppress whitespace when no other output is
             # present.
-            if stmt.force_output or getattr(stmt, "forced_output", False):
+            if (
+                self.env.render_whitespace_only_blocks
+                or stmt.force_output
+                or getattr(stmt, "forced_output", False)
+            ):
                 block.forced_output = True
             stream.next_token()
 
