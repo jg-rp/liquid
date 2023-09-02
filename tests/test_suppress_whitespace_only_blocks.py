@@ -4,31 +4,32 @@ import unittest
 from liquid import Environment
 
 
-class DefaultWhiteSpaceSuppressionTestCase(unittest.TestCase):
+class DefaultWhitespaceSuppressionTestCase(unittest.TestCase):
     """Test cases for controlling automatic suppression of empty blocks."""
+
+    def setUp(self) -> None:
+        self.env = Environment()
 
     def test_suppress_empty_if_block(self) -> None:
         """Test that we suppress empty if blocks by default."""
-        env = Environment()
-        template = env.from_string("!{% if true %}\n \t\r{% endif %}!")
+        template = self.env.from_string("!{% if true %}\n \t\r{% endif %}!")
         self.assertEqual(template.render(), "!!")
 
     def test_suppress_empty_else_block(self) -> None:
         """Test that we suppress empty else blocks by default."""
-        env = Environment()
-        template = env.from_string("!{% if false %}foo{% else %}\n \r\t{% endif %}!")
+        template = self.env.from_string(
+            "!{% if false %}foo{% else %}\n \r\t{% endif %}!"
+        )
         self.assertEqual(template.render(), "!!")
 
     def test_suppress_empty_unless_block(self) -> None:
         """Test that we suppress empty unless blocks by default."""
-        env = Environment()
-        template = env.from_string("!{% unless false %}\n \t\r{% endunless %}!")
+        template = self.env.from_string("!{% unless false %}\n \t\r{% endunless %}!")
         self.assertEqual(template.render(), "!!")
 
     def test_suppress_empty_case_block(self) -> None:
         """Test that we suppress empty case blocks by default."""
-        env = Environment()
-        template = env.from_string(
+        template = self.env.from_string(
             "!{% assign x = 1 %}{% case x %}{% when 1 %}\n \t\r{% endcase %}!"
         )
         self.assertEqual(template.render(), "!!")
@@ -38,7 +39,7 @@ class MyEnvironment(Environment):
     render_whitespace_only_blocks = True
 
 
-class ControlWhiteSpaceSuppressionTestCase(unittest.TestCase):
+class ControlWhitespaceSuppressionTestCase(unittest.TestCase):
     """Test cases for controlling automatic suppression of empty blocks."""
 
     def setUp(self) -> None:
