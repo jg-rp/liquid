@@ -1299,6 +1299,8 @@ Hellothere
 
 `<array> | sum[: <string>]`
 
+**_New in version 1.9.3_**
+
 Return the sum of all numeric elements in an array.
 
 ```liquid
