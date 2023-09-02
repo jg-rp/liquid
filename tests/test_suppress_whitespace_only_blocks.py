@@ -9,7 +9,7 @@ from liquid.builtin.tags.unless_tag import UnlessTag
 
 
 class DefaultWhitespaceSuppressionTestCase(unittest.TestCase):
-    """Test cases for controlling automatic suppression of empty blocks."""
+    """Test cases covering default suppression of whitespace only blocks."""
 
     def setUp(self) -> None:
         self.env = Environment()
@@ -49,7 +49,7 @@ class MyEnvironment(Environment):
 
 
 class ControlWhitespaceSuppressionTestCase(unittest.TestCase):
-    """Test cases for controlling automatic suppression of empty blocks."""
+    """Test disabling of automatic suppression of whitespace only blocks."""
 
     def setUp(self) -> None:
         self.env = MyEnvironment()
@@ -109,7 +109,7 @@ class MyUnlessTag(UnlessTag):
 
 
 class IfTagWhiteSpaceSuppressionTestCase(unittest.TestCase):
-    """Test cases for disabling _if_ tag whitespace suppression only."""
+    """Test cases for disabling _if_ and _unless_ tag whitespace suppression only."""
 
     def setUp(self) -> None:
         self.env = Environment()
