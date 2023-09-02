@@ -324,6 +324,7 @@ class ForTag(Tag):
 
     name = TAG_FOR
     end = TAG_ENDFOR
+    node_class = ForNode
 
     def parse(self, stream: TokenStream) -> Node:
         parser = get_parser(self.env)
@@ -344,7 +345,7 @@ class ForTag(Tag):
             default = parser.parse_block(stream, ENDFORELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDFOR)
-        return ForNode(tok, expression=expr, block=block, default=default)
+        return self.node_class(tok, expression=expr, block=block, default=default)
 
 
 class BreakTag(Tag):

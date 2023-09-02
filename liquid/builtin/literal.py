@@ -41,6 +41,7 @@ class Literal(Tag):
     """Pseudo "tag" for template literals."""
 
     name = TOKEN_LITERAL
+    node_class = LiteralNode
 
     def parse(self, stream: TokenStream) -> LiteralNode:  # noqa: D102
-        return LiteralNode(stream.current)
+        return self.node_class(stream.current)

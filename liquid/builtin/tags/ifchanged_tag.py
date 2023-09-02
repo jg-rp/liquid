@@ -79,6 +79,7 @@ class IfChangedTag(Tag):
 
     name = TAG_IFCHANGED
     end = TAG_ENDIFCHANGED
+    node_class = IfChangedNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -88,8 +89,6 @@ class IfChangedTag(Tag):
         expect(stream, TOKEN_TAG, value=TAG_IFCHANGED)
         tok = stream.current
         stream.next_token()
-
         block = self.parser.parse_block(stream, ENDIFCHANGEDBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDIFCHANGED)
-
-        return IfChangedNode(tok=tok, block=block)
+        return self.node_class(tok=tok, block=block)

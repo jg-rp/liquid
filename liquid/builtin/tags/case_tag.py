@@ -132,6 +132,7 @@ class CaseTag(Tag):
 
     name = TAG_CASE
     end = TAG_ENDCASE
+    node_class = CaseNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -188,7 +189,7 @@ class CaseTag(Tag):
             default = self.parser.parse_block(stream, ENDCASEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDCASE)
-        return CaseNode(tok, whens=whens, default=default)
+        return self.node_class(tok, whens=whens, default=default)
 
     def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
         stream = ExpressionTokenStream(

@@ -48,13 +48,14 @@ class IncrementTag(Tag):
 
     name = TAG_INCREMENT
     block = False
+    node_class = IncrementNode
 
     def parse(self, stream: TokenStream) -> IncrementNode:
         expect(stream, TOKEN_TAG, value=TAG_INCREMENT)
         tok = stream.current
         stream.next_token()
         expect(stream, TOKEN_EXPRESSION)
-        return IncrementNode(
+        return self.node_class(
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(

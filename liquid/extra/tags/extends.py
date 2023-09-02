@@ -263,6 +263,7 @@ class BlockTag(Tag):
 
     name = TAG_BLOCK
     end = TAG_ENDBLOCK
+    node_class = BlockNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -308,7 +309,7 @@ class BlockTag(Tag):
                     linenum=stream.current.linenum,
                 )
 
-        return BlockNode(tok, block_name, block, required)
+        return self.node_class(tok, block_name, block, required)
 
     def _parse_block_name(self, stream: ExprTokenStream) -> StringLiteral:
         if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
@@ -324,6 +325,7 @@ class ExtendsTag(Tag):
 
     name = TAG_EXTENDS
     block = False
+    node_class = ExtendsNode
 
     def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=self.name)
@@ -336,7 +338,7 @@ class ExtendsTag(Tag):
         parent_template_name = parse_string_literal(expr_stream)
         next(expr_stream)
         expr_stream.expect(TOKEN_EOF)
-        return ExtendsNode(tok, parent_template_name)
+        return self.node_class(tok, parent_template_name)
 
 
 def build_block_stacks(

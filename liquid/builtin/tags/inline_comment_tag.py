@@ -18,6 +18,7 @@ class InlineCommentTag(Tag):
 
     block = False
     name = sys.intern("#")
+    node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:  # noqa: D102
         expect(stream, TOKEN_TAG, value=self.name)
@@ -30,4 +31,4 @@ class InlineCommentTag(Tag):
                     "every line of an inline comment must start with a '#' character",
                     linenum=stream.current.linenum,
                 )
-        return CommentNode(tok, text=stream.current.value)
+        return self.node_class(tok, text=stream.current.value)

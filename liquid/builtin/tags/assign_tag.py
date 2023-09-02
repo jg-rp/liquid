@@ -63,6 +63,7 @@ class AssignTag(Tag):
 
     name = TAG_ASSIGN
     block = False
+    node_class = AssignNode
 
     def _parse_expression(self, value: str) -> Expression:
         return self.env.parse_filtered_expression_value(value)
@@ -81,6 +82,6 @@ class AssignTag(Tag):
                 linenum=stream.current.linenum,
             )
 
-        return AssignNode(
+        return self.node_class(
             tok, AssignmentExpression(name, self._parse_expression(right))
         )

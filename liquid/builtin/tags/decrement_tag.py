@@ -52,13 +52,14 @@ class DecrementTag(Tag):
 
     name = TAG_DECREMENT
     block = False
+    node_class = DecrementNode
 
     def parse(self, stream: TokenStream) -> DecrementNode:
         expect(stream, TOKEN_TAG, value=TAG_DECREMENT)
         tok = stream.current
         stream.next_token()
         expect(stream, TOKEN_EXPRESSION)
-        return DecrementNode(
+        return self.node_class(
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(

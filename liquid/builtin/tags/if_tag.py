@@ -172,6 +172,7 @@ class IfTag(Tag):
 
     name = TAG_IF
     end = TAG_ENDIF
+    node_class = IfNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -223,7 +224,7 @@ class IfTag(Tag):
             alternative = parse_block(stream, ENDIFELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDIF)
-        return IfNode(
+        return self.node_class(
             tok=tok,
             condition=condition,
             consequence=consequence,

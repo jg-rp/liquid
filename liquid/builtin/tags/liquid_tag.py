@@ -60,6 +60,7 @@ class LiquidTag(Tag):
 
     name = TAG_LIQUID
     block = False
+    node_class = LiquidNode
 
     def __init__(self, env: "Environment"):
         super().__init__(env)
@@ -88,4 +89,4 @@ class LiquidTag(Tag):
             parser = get_parser(self.env)
             block = parser.parse_block(expr_stream, end=())
 
-        return LiquidNode(tok, block=block)
+        return self.node_class(tok, block=block)

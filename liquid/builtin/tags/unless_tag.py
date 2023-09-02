@@ -171,6 +171,7 @@ class UnlessTag(Tag):
 
     name = TAG_UNLESS
     end = TAG_ENDUNLESS
+    node_class = UnlessNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -218,7 +219,7 @@ class UnlessTag(Tag):
             alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDUNLESS)
-        return UnlessNode(
+        return self.node_class(
             tok,
             condition=condition,
             consequence=consequence,
