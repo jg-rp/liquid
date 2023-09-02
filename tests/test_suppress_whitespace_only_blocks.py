@@ -1,17 +1,11 @@
 """Test cases for controlling automatic suppression of empty blocks."""
 import unittest
-from typing import List
-from typing import Optional
 
 from liquid import Environment
-from liquid.ast import BlockNode
-from liquid.ast import ConditionalBlockNode
 from liquid.builtin.tags.if_tag import IfNode
 from liquid.builtin.tags.if_tag import IfTag
 from liquid.builtin.tags.unless_tag import UnlessNode
 from liquid.builtin.tags.unless_tag import UnlessTag
-from liquid.expression import Expression
-from liquid.token import Token
 
 
 class DefaultWhitespaceSuppressionTestCase(unittest.TestCase):
@@ -99,22 +93,7 @@ class ControlWhitespaceSuppressionTestCase(unittest.TestCase):
 
 
 class MyIfNode(IfNode):
-    def __init__(
-        self,
-        tok: Token,
-        condition: Expression,
-        consequence: BlockNode,
-        conditional_alternatives: List[ConditionalBlockNode],
-        alternative: Optional[BlockNode],
-    ):
-        super().__init__(
-            tok,
-            condition,
-            consequence,
-            conditional_alternatives,
-            alternative,
-        )
-        self.forced_output = True
+    force_output = True
 
 
 class MyIfTag(IfTag):
@@ -122,22 +101,7 @@ class MyIfTag(IfTag):
 
 
 class MyUnlessNode(UnlessNode):
-    def __init__(
-        self,
-        tok: Token,
-        condition: Expression,
-        consequence: BlockNode,
-        conditional_alternatives: Optional[List[ConditionalBlockNode]] = None,
-        alternative: Optional[BlockNode] = None,
-    ):
-        super().__init__(
-            tok,
-            condition,
-            consequence,
-            conditional_alternatives,
-            alternative,
-        )
-        self.forced_output = True
+    force_output = True
 
 
 class MyUnlessTag(UnlessTag):

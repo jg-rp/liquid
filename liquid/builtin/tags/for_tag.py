@@ -154,7 +154,7 @@ class ForNode(Node):
         self.block = block
         self.default = default
 
-        self.forced_output = any(
+        self.forced_output = self.force_output or any(
             b.forced_output for b in (self.block, self.default) if b
         )
 

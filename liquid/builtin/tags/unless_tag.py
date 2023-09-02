@@ -67,7 +67,7 @@ class UnlessNode(Node):
         self.conditional_alternatives = conditional_alternatives or []
         self.alternative = alternative
 
-        self.forced_output = any(
+        self.forced_output = self.force_output or any(
             getattr(n, "forced_output", False)
             for n in (
                 self.consequence,

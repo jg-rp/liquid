@@ -55,7 +55,7 @@ class CaseNode(ast.Node):
         self.whens = whens
         self.default = default
 
-        self.forced_output = any(
+        self.forced_output = self.force_output or any(
             n.forced_output for n in (*self.whens, self.default) if n
         )
 
