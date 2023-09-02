@@ -8,6 +8,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ConditionalBlockNode
 from liquid.builtin.tags.if_tag import IfNode
 from liquid.builtin.tags.if_tag import IfTag
+from liquid.builtin.tags.unless_tag import UnlessNode
+from liquid.builtin.tags.unless_tag import UnlessTag
 from liquid.expression import Expression
 from liquid.token import Token
 
@@ -87,6 +89,14 @@ class ControlWhitespaceSuppressionTestCase(unittest.TestCase):
         template = self.env.from_string("!{% for x in (1..3) %}\n{% endfor %}!")
         self.assertEqual(template.render(), "!\n\n\n!")
 
+    def test_issue127_example(self) -> None:
+        """Test example from issue #127."""
+        template = self.env.from_string(
+            "{% for x in (1..3) %}{{ x }}"
+            "{% unless forloop.last %}\n{% endunless %}{% endfor %}"
+        )
+        self.assertEqual(template.render(), "1\n2\n3")
+
 
 class MyIfNode(IfNode):
     def __init__(
@@ -111,12 +121,36 @@ class MyIfTag(IfTag):
     node_class = MyIfNode
 
 
+class MyUnlessNode(UnlessNode):
+    def __init__(
+        self,
+        tok: Token,
+        condition: Expression,
+        consequence: BlockNode,
+        conditional_alternatives: Optional[List[ConditionalBlockNode]] = None,
+        alternative: Optional[BlockNode] = None,
+    ):
+        super().__init__(
+            tok,
+            condition,
+            consequence,
+            conditional_alternatives,
+            alternative,
+        )
+        self.forced_output = True
+
+
+class MyUnlessTag(UnlessTag):
+    node_class = MyUnlessNode
+
+
 class IfTagWhiteSpaceSuppressionTestCase(unittest.TestCase):
     """Test cases for disabling _if_ tag whitespace suppression only."""
 
     def setUp(self) -> None:
         self.env = Environment()
         self.env.add_tag(MyIfTag)
+        self.env.add_tag(MyUnlessTag)
 
     def test_output_empty_if_block(self) -> None:
         """Test that we can output empty if blocks."""
@@ -134,3 +168,11 @@ class IfTagWhiteSpaceSuppressionTestCase(unittest.TestCase):
             "!{% for x in (1..3) %}{% if true %}\n{% endif %}{% endfor %}!"
         )
         self.assertEqual(template.render(), "!\n\n\n!")
+
+    def test_issue127_example(self) -> None:
+        """Test example from issue #127."""
+        template = self.env.from_string(
+            "{% for x in (1..3) %}{{ x }}"
+            "{% unless forloop.last %}\n{% endunless %}{% endfor %}"
+        )
+        self.assertEqual(template.render(), "1\n2\n3")
