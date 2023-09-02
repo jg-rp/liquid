@@ -1,7 +1,15 @@
 """Test cases for controlling automatic suppression of empty blocks."""
 import unittest
+from typing import List
+from typing import Optional
 
 from liquid import Environment
+from liquid.ast import BlockNode
+from liquid.ast import ConditionalBlockNode
+from liquid.builtin.tags.if_tag import IfNode
+from liquid.builtin.tags.if_tag import IfTag
+from liquid.expression import Expression
+from liquid.token import Token
 
 
 class DefaultWhitespaceSuppressionTestCase(unittest.TestCase):
@@ -77,4 +85,52 @@ class ControlWhitespaceSuppressionTestCase(unittest.TestCase):
     def test_output_empty_for_block(self) -> None:
         """Test that we can output empty for blocks."""
         template = self.env.from_string("!{% for x in (1..3) %}\n{% endfor %}!")
+        self.assertEqual(template.render(), "!\n\n\n!")
+
+
+class MyIfNode(IfNode):
+    def __init__(
+        self,
+        tok: Token,
+        condition: Expression,
+        consequence: BlockNode,
+        conditional_alternatives: List[ConditionalBlockNode],
+        alternative: Optional[BlockNode],
+    ):
+        super().__init__(
+            tok,
+            condition,
+            consequence,
+            conditional_alternatives,
+            alternative,
+        )
+        self.forced_output = True
+
+
+class MyIfTag(IfTag):
+    node_class = MyIfNode
+
+
+class IfTagWhiteSpaceSuppressionTestCase(unittest.TestCase):
+    """Test cases for disabling _if_ tag whitespace suppression only."""
+
+    def setUp(self) -> None:
+        self.env = Environment()
+        self.env.add_tag(MyIfTag)
+
+    def test_output_empty_if_block(self) -> None:
+        """Test that we can output empty if blocks."""
+        template = self.env.from_string("!{% if true %}\n \t\r{% endif %}!")
+        self.assertEqual(template.render(), "!\n \t\r!")
+
+    def test_suppress_empty_for_block(self) -> None:
+        """Test that we suppress empty for blocks by default."""
+        template = self.env.from_string("!{% for x in (1..3) %}\n \t\r{% endfor %}!")
+        self.assertEqual(template.render(), "!!")
+
+    def test_output_empty_for_block_with_nested_if_block(self) -> None:
+        """Test that we can output empty for blocks with a nested if block."""
+        template = self.env.from_string(
+            "!{% for x in (1..3) %}{% if true %}\n{% endif %}{% endfor %}!"
+        )
         self.assertEqual(template.render(), "!\n\n\n!")
