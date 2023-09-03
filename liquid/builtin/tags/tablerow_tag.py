@@ -257,6 +257,7 @@ class TablerowTag(Tag):
 
     name = TAG_TABLEROW
     end = TAG_ENDTABLEROW
+    node_class = TablerowNode
 
     def parse(self, stream: TokenStream) -> TablerowNode:
         parser = get_parser(self.env)
@@ -272,4 +273,4 @@ class TablerowTag(Tag):
         block = parser.parse_block(stream, END_TAGBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDTABLEROW)
 
-        return TablerowNode(tok, expression=loop_expression, block=block)
+        return self.node_class(tok, expression=loop_expression, block=block)

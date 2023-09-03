@@ -57,11 +57,12 @@ class CommentTag(Tag):
 
     name = TAG_COMMENT
     end = TAG_ENDCOMMENT
+    node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:
         expect(stream, TOKEN_TAG, value=TAG_COMMENT)
         stream.next_token()
-        node = CommentNode(stream.current)
+        node = self.node_class(stream.current)
         eat_block(stream, end=END_COMMENTBLOCK)
         return node
 
@@ -91,4 +92,4 @@ class CommentTextTag(CommentTag):
             text.append(stream.current.value)
             stream.next_token()
 
-        return CommentNode(tok, text="".join(text))
+        return self.node_class(tok, text="".join(text))

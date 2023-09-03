@@ -109,6 +109,7 @@ class CycleTag(Tag):
 
     name = TAG_CYCLE
     block = False
+    node_class = CycleNode
 
     def parse(self, stream: TokenStream) -> CycleNode:
         tok = next(stream)
@@ -137,4 +138,4 @@ class CycleTag(Tag):
                     linenum=expr_stream.current[0],
                 )
 
-        return CycleNode(tok, group_name, args)
+        return self.node_class(tok, group_name, args)

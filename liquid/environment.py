@@ -98,7 +98,7 @@ class Environment:
             template loaded from this environment.
 
     Attributes:
-        context_depth_limit: Class attribute.The maximum number of times a render
+        context_depth_limit: Class attribute. The maximum number of times a render
             context can be extended or wrapped before a `ContextDepthError` is raised.
         local_namespace_limit: Class attribute. The maximum number of bytes (according
             to sys.getsizeof) allowed in a template's local namespace, per render,
@@ -109,6 +109,9 @@ class Environment:
         output_stream_limit: Class attribute. The maximum number of bytes that can be
             written to a template's output stream, per render, before an
             `OutputStreamLimitError` exception is raised.
+        render_whitespace_only_blocks: Class attribute. Indicates if block tags that,
+            when rendered, contain whitespace only should be output. Defaults to
+            `False`, meaning empty blocks are suppressed.
         undefined: The undefined type. When an identifier can not be resolved, an
             instance of `undefined` is returned.
         strict_filters: Indicates if an undefined filter should raise an exception or be
@@ -147,6 +150,9 @@ class Environment:
     # `get_template` and `get_template_async`. It should be the `BoundTemplate`
     # class or a subclass of it.
     template_class: Type[BoundTemplate] = BoundTemplate
+
+    # Whether to output blocks that only contain only whitespace when rendered.
+    render_whitespace_only_blocks: bool = False
 
     def __init__(
         self,

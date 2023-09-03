@@ -81,6 +81,7 @@ class CaptureTag(Tag):
 
     name = TAG_CAPTURE
     end = TAG_ENDCAPTURE
+    node_class = CaptureNode
 
     def parse(self, stream: TokenStream) -> CaptureNode:
         parser = get_parser(self.env)
@@ -104,4 +105,4 @@ class CaptureTag(Tag):
         block = parser.parse_block(stream, ENDCAPTUREBLOCK)
         expect(stream, TOKEN_TAG, value=TAG_ENDCAPTURE)
 
-        return CaptureNode(tok, name, block=block)
+        return self.node_class(tok, name, block=block)

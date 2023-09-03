@@ -275,6 +275,7 @@ class MacroTag(Tag):
 
     name = TAG_MACRO
     end = TAG_ENDMACRO
+    node_class = MacroNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -294,7 +295,7 @@ class MacroTag(Tag):
         block = self.parser.parse_block(stream, (TAG_ENDMACRO, TOKEN_EOF))
         expect(stream, TOKEN_TAG, value=TAG_ENDMACRO)
 
-        return MacroNode(tok=tok, name=name, args=args, block=block)
+        return self.node_class(tok=tok, name=name, args=args, block=block)
 
 
 class CallTag(Tag):
@@ -302,6 +303,7 @@ class CallTag(Tag):
 
     name = TAG_CALL
     block = False
+    node_class = CallNode
 
     def parse(self, stream: TokenStream) -> CallNode:
         expect(stream, TOKEN_TAG, value=TAG_CALL)
@@ -321,4 +323,4 @@ class CallTag(Tag):
             else:
                 kwargs.append((key, val))
 
-        return CallNode(tok=tok, name=name, args=args, kwargs=kwargs)
+        return self.node_class(tok=tok, name=name, args=args, kwargs=kwargs)

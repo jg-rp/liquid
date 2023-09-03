@@ -66,7 +66,7 @@ class IfNode(Node):
         self.conditional_alternatives = conditional_alternatives
         self.alternative = alternative
 
-        self.forced_output = any(
+        self.forced_output = self.force_output or any(
             getattr(n, "forced_output", False)
             for n in (
                 self.consequence,
@@ -172,6 +172,7 @@ class IfTag(Tag):
 
     name = TAG_IF
     end = TAG_ENDIF
+    node_class = IfNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -223,7 +224,7 @@ class IfTag(Tag):
             alternative = parse_block(stream, ENDIFELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDIF)
-        return IfNode(
+        return self.node_class(
             tok=tok,
             condition=condition,
             consequence=consequence,

@@ -67,7 +67,7 @@ class UnlessNode(Node):
         self.conditional_alternatives = conditional_alternatives or []
         self.alternative = alternative
 
-        self.forced_output = any(
+        self.forced_output = self.force_output or any(
             getattr(n, "forced_output", False)
             for n in (
                 self.consequence,
@@ -171,6 +171,7 @@ class UnlessTag(Tag):
 
     name = TAG_UNLESS
     end = TAG_ENDUNLESS
+    node_class = UnlessNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -218,7 +219,7 @@ class UnlessTag(Tag):
             alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
 
         expect(stream, TOKEN_TAG, value=TAG_ENDUNLESS)
-        return UnlessNode(
+        return self.node_class(
             tok,
             condition=condition,
             consequence=consequence,

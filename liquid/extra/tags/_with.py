@@ -72,6 +72,7 @@ class WithNode(Node):
 class WithTag(Tag):
     name = TAG_WITH
     end = TAG_ENDWITH
+    node_class = WithNode
 
     def __init__(self, env: Environment):
         super().__init__(env)
@@ -90,4 +91,4 @@ class WithTag(Tag):
         block = self.parser.parse_block(stream, (TAG_ENDWITH, TOKEN_EOF))
         expect(stream, TOKEN_TAG, value=TAG_ENDWITH)
 
-        return WithNode(tok=tok, args=args, block=block)
+        return self.node_class(tok=tok, args=args, block=block)
