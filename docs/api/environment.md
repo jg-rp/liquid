@@ -44,6 +44,44 @@ Shared configuration from which templates can be loaded and parsed. An environme
 
 - `globals: Optional[Mapping[str, object]]` - An optional mapping that will be added to the context of any template loaded from this environment. Defaults to `None`.
 
+## Class Attributes
+
+### `context_depth_limit`
+
+**Type**: `ClassVar[int]`
+
+The maximum number of times a render context can be extended or wrapped before a `ContextDepthError` is raised. Defaults to `30`.
+
+### `loop_iteration_limit`
+
+**Type**: `ClassVar[Optional[int]]`
+
+The maximum number of bytes (according to sys.getsizeof) allowed in a template's local namespace, per render, before a `LocalNamespaceLimitError` exception is raised. Note that we only count the size of the local namespace values, not its keys. Defaults to `None`.
+
+### `local_namespace_limit`
+
+**Type**: `ClassVar[int]`
+
+The maximum number of loop iterations allowed before a `liquid.exceptions.LoopIterationLimitError` is raised. Defaults to `None`.
+
+### `output_stream_limit`
+
+**Type**: `ClassVar[int]`
+
+The maximum number of bytes that can be written to a template's output stream, per render, before an `OutputStreamLimitError` exception is raised. Defaults to `None`.
+
+### `template_class`
+
+**Type**: `Type[liquid.template.BoundTemplate]`
+
+[`Environment.get_template()`](#get_template) and [`Environment.from_string()`](#from_string) return an instance of [`Environment.template_class`](#template_class). Defaults to [`liquid.template.BoundTemplate`](./bound-template.md).
+
+### `render_whitespace_only_blocks`
+
+**Type**: `bool`
+
+Indicates if block tags that, when rendered, contain whitespace only should be output. Defaults to `False`, meaning empty blocks are suppressed.
+
 ## Properties
 
 ### `undefined`
@@ -91,12 +129,6 @@ The template cache.
 ### `auto_reload`
 
 Indicates if automatic reloading of templates is enabled.
-
-### `template_class`
-
-**Type**: `Type[liquid.template.BoundTemplate]`
-
-[`Environment.get_template()`](#get_template) and [`Environment.from_string()`](#from_string) return an instance of [`Environment.template_class`](#template_class). Defaults to [`liquid.template.BoundTemplate`](./bound-template.md).
 
 ### `globals`
 

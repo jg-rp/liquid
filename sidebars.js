@@ -46,6 +46,7 @@ const sidebars = {
         "guides/contextual-template-analysis",
         "guides/tag-analysis",
         "guides/undefined-variables",
+        "guides/whitespace-suppression",
         "guides/resource-limits",
         "guides/django-liquid",
         "guides/flask-liquid",
