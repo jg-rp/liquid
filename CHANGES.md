@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 1.10.0 (unreleased)
+
+**Features**
+
+- Optionally disable automatic suppression of whitespace only blocks with the `Environment` class attribute `render_whitespace_only_blocks`. ([docs](https://jg-rp.github.io/liquid/guides/whitespace-suppression)).
+- All built-in and included "extra" tags now have a `node_class` class attribute specifying the `Node` type the tag contributes to a templates AST. This is done for easier customization through `Tag` and `Node` subclassing.
+
 ## Version 1.9.4
 
 **Fixes**
