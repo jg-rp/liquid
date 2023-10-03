@@ -55,4 +55,9 @@ cases = [
         template=r"{{ '-1152098955' | date: '%m/%d/%Y' }}",
         expect="-1152098955",
     ),
+    Case(
+        description="seconds since epoch format directive",
+        template=r"{{ 'March 14, 2016' | date: '%s' }}",
+        expect="1457913600",
+    ),
 ]

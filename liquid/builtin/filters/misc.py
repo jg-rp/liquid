@@ -63,13 +63,13 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
 @with_environment
 @liquid_filter
 @functools.lru_cache(maxsize=10)
-def date(  # noqa: PLR0912
+def date(  # noqa: PLR0912 PLR0911
     dat: Union[datetime.datetime, str, int],
     fmt: str,
     *,
     environment: Environment,
 ) -> str:
-    """Formats a datetime according the the given format string."""
+    """Format a datetime according the the given format string."""
     if is_undefined(dat):
         return ""
 
@@ -103,7 +103,16 @@ def date(  # noqa: PLR0912
             f"date expected datetime.datetime, found {type(dat).__name__}"
         )
 
-    rv = dat.strftime(fmt)
+    try:
+        rv = dat.strftime(fmt)
+    except ValueError as err:
+        # This is not uncommon on Windows when a format string contains
+        # directives that are not officially supported by Python.
+
+        # Handle "%s" as a special case.
+        if fmt == r"%s":
+            return str(dat.timestamp()).split(".")[0]
+        raise FilterArgumentError(str(err)) from err
 
     if environment.autoescape and isinstance(fmt, Markup):
         return Markup(rv)
