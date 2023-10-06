@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 1.10.1
+
+**Fixes**
+
+- Fixed unexpected errors from the `date` filter when it's given an invalid format string. Previously we were raising a `liquid.exceptions.Error` in response to a `ValueError` from [strftime](https://docs.python.org/3/library/datetime.html#datetime.date.strftime). We now raise a `FilterArgumentError` with its `__cause__` set to the `ValueError`.
+- Fixed handling of `"%s"` date filter format strings. We now fall back to a string representation of `datetime.timestamp()` for platforms that don't support `%s`. Note that this is for `"%s"` exactly. We don't handle the more general case of `%s` appearing in a longer format string.
+
 ## Version 1.10.0
 
 **Features**
