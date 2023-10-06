@@ -210,4 +210,31 @@ cases = [
         expect="bar",
         globals={"list": ["foo"], "settings": {"zero": 0}, "foo": "bar"},
     ),
+    Case(
+        description="quoted, bracketed variable name",
+        template=r"{{ foo['bar'] }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="quoted, bracketed variable name with whitespace",
+        template=r"{{ foo['bar baz'] }}",
+        expect="42",
+        globals={"foo": {"bar baz": 42}},
+    ),
+    Case(
+        description="top-level quoted, bracketed variable name with whitespace",
+        template=r"{{ ['bar baz'] }}",
+        expect="42",
+        globals={"bar baz": 42},
+    ),
+    Case(
+        description=(
+            "top-level quoted, bracketed variable name with whitespace "
+            "followed by dot notation"
+        ),
+        template=r"{{ ['bar baz'].qux }}",
+        expect="42",
+        globals={"bar baz": {"qux": 42}},
+    ),
 ]
