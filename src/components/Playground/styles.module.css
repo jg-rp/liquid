@@ -1,0 +1,31 @@
+.heading {
+  font-size: 18px;
+  font-weight: lighter;
+  margin: 5px;
+}
+
+.version {
+  font-weight: bold;
+}
+
+.headingRule {
+  margin-top: 1em;
+}
+
+.editorCol {
+  height: 70vh;
+}
+
+.infoCol {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 3px;
+}
+
+.splitView {
+  border: 1px solid var(--ifm-hr-background-color);
+}
+
+.container {
+  --ifm-container-width-xl: 1536px;
+}

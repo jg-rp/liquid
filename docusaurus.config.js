@@ -45,6 +45,21 @@ const config = {
     ],
   ],
 
+  plugins: [
+    async function disableUsedExports() {
+      return {
+        name: "disable-used-exports",
+        configureWebpack() {
+          return {
+            optimization: {
+              usedExports: false,
+            },
+          };
+        },
+      };
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -79,6 +94,11 @@ const config = {
             docId: "api/Environment",
             position: "left",
             label: "API",
+          },
+          {
+            to: "/playground/",
+            label: "Try It",
+            position: "left",
           },
           // {to: '/blog', label: 'Blog', position: 'right'},
           {
