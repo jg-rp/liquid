@@ -9,9 +9,7 @@ import Link from "@docusaurus/Link";
 
 import { Tab } from "@headlessui/react";
 import { DocumentIcon } from "@heroicons/react/24/solid";
-
 import Loader from "../Loader";
-import styles from "./styles.module.css";
 
 const mainCode = `\
 import json
@@ -218,20 +216,29 @@ export default function Playground() {
     },
   ];
 
+  // TODO: restore cursor position / set focus (get rid of tabs! use a multi-model editor!)
+  // TODO: default HTML template
+  // TODO: set default result
+  // TODO: add note about extra tags and filters
+  // TODO: add links to footer, homepage github README
+
   return (
-    <div className={clsx("container", styles.container)}>
+    <div className={clsx("container", "--ifm-container-width-xl: 1536px;")}>
       <div className="row">
         <div className="col">
           <h1 className="mt-5 text-xl font-light">
             Playground <sup className="text-sm">BETA</sup>
           </h1>
-          <hr className={styles.headingRule} />
+          <hr className="mt-1" />
         </div>
       </div>
       <div className="row row--no-gutters">
-        <div className={clsx("col relative", styles.editorCol)}>
+        <div className="col relative h-[75vh]">
           {isLoading && <Loader />}
-          <Allotment className={styles.splitView} minSize={200}>
+          <Allotment
+            className="border border-solid border-[var(--ifm-hr-background-color)]"
+            minSize={200}
+          >
             <Allotment.Pane className="relative flex flex-col bg-[#F8F8FF] dark:bg-[#1E1E1E]">
               <RenderButton
                 onClick={render}
@@ -320,7 +327,7 @@ export default function Playground() {
         </div>
       </div>
       <div className="row">
-        <div className={clsx("col", styles.infoCol)}>
+        <div className="col mt-1 text-center">
           <p>
             Templates are rendered in-browser thanks to{" "}
             <Link to="https://pyodide.org/en/stable/index.html">Pyodide</Link>,
