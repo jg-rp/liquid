@@ -7,7 +7,6 @@ import Editor from "@monaco-editor/react";
 import { useColorMode } from "@docusaurus/theme-common";
 import Link from "@docusaurus/Link";
 
-import { Tab } from "@headlessui/react";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import Loader from "../Loader";
 
@@ -49,73 +48,19 @@ Python Liquid version {{ __version__ }}
 
 const snippetLiquid = "Hello, {{ name }}!";
 
-function LiquidEditor({ defaultValue, theme, beforeMount, onMount, onChange }) {
+function EditorTab({ fileName, file, setFileName }) {
   return (
-    <Editor
-      height="100%"
-      language="liquid"
-      theme={theme}
-      defaultValue={defaultValue}
-      beforeMount={beforeMount}
-      onMount={onMount}
-      onChange={onChange}
-      loading=""
-      options={{
-        codeLens: false,
-        minimap: { enabled: false },
-        tabSize: 2,
-        renderLineHighlight: "none",
-        scrollBeyondLastLine: false,
-        scrollbar: { alwaysConsumeMouseWheel: false },
-        padding: { bottom: 10, top: 10 },
-      }}
-    />
-  );
-}
-
-function DataEditor({ defaultValue, theme, onChange }) {
-  return (
-    <Editor
-      height="100%"
-      language="json"
-      theme={theme}
-      defaultValue={defaultValue}
-      onChange={onChange}
-      loading=""
-      options={{
-        codeLens: false,
-        minimap: { enabled: false },
-        tabSize: 2,
-        renderLineHighlight: "none",
-        scrollBeyondLastLine: false,
-        scrollbar: { alwaysConsumeMouseWheel: false },
-        padding: { bottom: 10, top: 10 },
-      }}
-    />
-  );
-}
-
-function ResultEditor({ result, theme, onMount }) {
-  return (
-    <Editor
-      height="100%"
-      language="html"
-      theme={theme}
-      value={result}
-      onMount={onMount}
-      loading=""
-      options={{
-        codeLens: false,
-        minimap: { enabled: false },
-        tabSize: 2,
-        renderLineHighlight: "none",
-        scrollBeyondLastLine: false,
-        scrollbar: { alwaysConsumeMouseWheel: false },
-        padding: { bottom: 10, top: 10 },
-        wordWrap: "off",
-        readOnly: true,
-      }}
-    />
+    <button
+      className={clsx(
+        "flex cursor-pointer items-center border-none px-4 py-1 text-sm font-medium",
+        fileName === file.name
+          ? "bg-[#F8F8FF] text-slate-700 dark:bg-[#1E1E1E] dark:text-neutral-300"
+          : "bg-slate-200 text-slate-500 hover:bg-[#F8F8FF] hover:text-slate-700 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+      )}
+      onClick={() => setFileName(fileName)}
+    >
+      {fileName}
+    </button>
   );
 }
 
@@ -157,6 +102,19 @@ export default function Playground() {
   const { colorMode } = useColorMode();
   const initTheme = colorMode === "light" ? "GitHub" : "vs-dark";
 
+  const editorRef = useRef(null);
+
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor;
+    import("monaco-themes/themes/GitHub.json")
+      .then((themeData) => {
+        monaco.editor.defineTheme("GitHub", themeData);
+      })
+      .then((_) => {
+        if (colorMode === "light") monaco.editor.setTheme("GitHub");
+      });
+  }
+
   const {
     runPython,
     stdout,
@@ -188,35 +146,34 @@ export default function Playground() {
     }
   }
 
-  function handleEditorDidMount(_, monaco) {
-    import("monaco-themes/themes/GitHub.json")
-      .then((themeData) => {
-        monaco.editor.defineTheme("GitHub", themeData);
-      })
-      .then((_) => {
-        if (colorMode === "light") monaco.editor.setTheme("GitHub");
-      });
-  }
-
-  const tabs = [
-    {
+  const files = {
+    "index.liquid": {
       name: "index.liquid",
-      code: index,
+      language: "liquid",
+      value: indexLiquid,
       setter: setIndex,
     },
-    {
+    "snippet.liquid": {
       name: "snippet.liquid",
-      code: snippet,
+      language: "liquid",
+      value: snippetLiquid,
       setter: setSnippet,
     },
-    {
+    "data.json": {
       name: "data.json",
-      code: data,
+      language: "json",
+      value: initData,
       setter: setData,
     },
-  ];
+  };
 
-  // TODO: restore cursor position / set focus (get rid of tabs! use a multi-model editor!)
+  const [fileName, setFileName] = useState("index.liquid");
+  const file = files[fileName];
+
+  useEffect(() => {
+    editorRef.current?.focus();
+  }, [file.name]);
+
   // TODO: default HTML template
   // TODO: set default result
   // TODO: add note about extra tags and filters
@@ -244,59 +201,46 @@ export default function Playground() {
                 onClick={render}
                 disabled={isLoading || isRunning}
               />
-              <Tab.Group>
-                <Tab.List className="min-h-10 flex h-10 space-x-0.5 bg-slate-300 dark:bg-neutral-800">
-                  {tabs.map(({ name }) => (
-                    <Tab
-                      key={name}
-                      className={({ selected }) =>
-                        clsx(
-                          "flex cursor-pointer items-center border-none px-4 py-1 text-sm font-medium",
-                          selected
-                            ? "bg-[#F8F8FF] text-slate-700 dark:bg-[#1E1E1E] dark:text-neutral-300"
-                            : "bg-slate-200 text-slate-500 hover:bg-[#F8F8FF] hover:text-slate-700 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
-                        )
-                      }
-                    >
-                      {name.endsWith(".json") ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          fill="currentColor"
-                          className="bi bi-braces mr-1 h-5 w-5"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M2.114 8.063V7.9c1.005-.102 1.497-.615 1.497-1.6V4.503c0-1.094.39-1.538 1.354-1.538h.273V2h-.376C3.25 2 2.49 2.759 2.49 4.352v1.524c0 1.094-.376 1.456-1.49 1.456v1.299c1.114 0 1.49.362 1.49 1.456v1.524c0 1.593.759 2.352 2.372 2.352h.376v-.964h-.273c-.964 0-1.354-.444-1.354-1.538V9.663c0-.984-.492-1.497-1.497-1.6zM13.886 7.9v.163c-1.005.103-1.497.616-1.497 1.6v1.798c0 1.094-.39 1.538-1.354 1.538h-.273v.964h.376c1.613 0 2.372-.759 2.372-2.352v-1.524c0-1.094.376-1.456 1.49-1.456V7.332c-1.114 0-1.49-.362-1.49-1.456V4.352C13.51 2.759 12.75 2 11.138 2h-.376v.964h.273c.964 0 1.354.444 1.354 1.538V6.3c0 .984.492 1.497 1.497 1.6z" />
-                        </svg>
-                      ) : (
-                        <DocumentIcon className="mr-1 h-4 w-4" />
-                      )}
-                      {name}
-                    </Tab>
-                  ))}
-                </Tab.List>
 
-                <Tab.Panels className="flex-1">
-                  {tabs.map(({ name, code, setter }) => (
-                    <Tab.Panel className="h-full" key={name}>
-                      {name.endsWith(".json") ? (
-                        <DataEditor
-                          defaultValue={code}
-                          theme={initTheme}
-                          onChange={(value) => setter(value)}
-                        />
-                      ) : (
-                        <LiquidEditor
-                          defaultValue={code}
-                          theme={initTheme}
-                          onChange={(value) => setter(value)}
-                        />
-                      )}
-                    </Tab.Panel>
-                  ))}
-                </Tab.Panels>
-              </Tab.Group>
+              <div className="flex h-10 space-x-0.5 border-0 bg-slate-300 dark:bg-neutral-800">
+                <EditorTab
+                  fileName="index.liquid"
+                  file={file}
+                  setFileName={setFileName}
+                />
+                <EditorTab
+                  fileName="snippet.liquid"
+                  file={file}
+                  setFileName={setFileName}
+                />
+                <EditorTab
+                  fileName="data.json"
+                  file={file}
+                  setFileName={setFileName}
+                />
+              </div>
+
+              <div className="flex-1">
+                <Editor
+                  height="100%"
+                  defaultLanguage={file.language}
+                  theme={initTheme}
+                  path={file.name}
+                  defaultValue={file.value}
+                  onMount={handleEditorDidMount}
+                  onChange={(value) => file.setter(value)}
+                  loading=""
+                  options={{
+                    codeLens: false,
+                    minimap: { enabled: false },
+                    tabSize: 2,
+                    renderLineHighlight: "none",
+                    scrollBeyondLastLine: false,
+                    scrollbar: { alwaysConsumeMouseWheel: false },
+                    padding: { bottom: 10, top: 10 },
+                  }}
+                />
+              </div>
             </Allotment.Pane>
             <Allotment.Pane className="bg-[#F8F8FF] dark:bg-[#1E1E1E]">
               <div className="flex h-10 justify-between space-x-0 border-0 bg-slate-300 dark:bg-neutral-800">
@@ -309,18 +253,28 @@ export default function Playground() {
                     className="bi bi-chevron-expand mr-1 h-5 w-5 rotate-90"
                     viewBox="0 0 16 16"
                   >
-                    <path
-                      fill-rule="evenodd"
-                      d="M3.646 9.146a.5.5 0 0 1 .708 0L8 12.793l3.646-3.647a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 0-.708zm0-2.292a.5.5 0 0 0 .708 0L8 3.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708z"
-                    />
+                    <path d="M3.646 9.146a.5.5 0 0 1 .708 0L8 12.793l3.646-3.647a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 0-.708zm0-2.292a.5.5 0 0 0 .708 0L8 3.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708z" />
                   </svg>
                   result.html
                 </div>
               </div>
-              <ResultEditor
-                result={stderr || stdout}
+              <Editor
+                height="100%"
+                language="html"
                 theme={initTheme}
-                onMount={handleEditorDidMount}
+                value={stderr || stdout}
+                loading=""
+                options={{
+                  codeLens: false,
+                  minimap: { enabled: false },
+                  tabSize: 2,
+                  renderLineHighlight: "none",
+                  scrollBeyondLastLine: false,
+                  scrollbar: { alwaysConsumeMouseWheel: false },
+                  padding: { bottom: 10, top: 10 },
+                  wordWrap: "off",
+                  readOnly: true,
+                }}
               />
             </Allotment.Pane>
           </Allotment>
