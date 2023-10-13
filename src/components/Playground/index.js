@@ -218,7 +218,6 @@ export default function Playground() {
       interruptExecution();
     }
     if (isReady) {
-      console.log(editorRef.current?.getModel());
       writeFile("index.liquid", index);
       writeFile("snippet.liquid", snippet);
       writeFile("data.json", data);
