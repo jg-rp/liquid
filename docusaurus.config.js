@@ -208,6 +208,10 @@ const config = {
                 label: "PyPi",
                 href: "https://pypi.org/project/python-liquid/",
               },
+              {
+                label: "Playground",
+                to: "/playground",
+              },
             ],
           },
           {
