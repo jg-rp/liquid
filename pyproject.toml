@@ -78,7 +78,7 @@ benchmark = "python -O scripts/performance.py"
 profile = "python -O scripts/performance.py --profile"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311", "pypy38", "pypy39"]
+python = ["37", "38", "39", "310", "311", "312", "pypy38", "pypy39"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
