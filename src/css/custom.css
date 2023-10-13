@@ -38,7 +38,7 @@
   --ifm-code-font-size: 90%;
 }
 
-[data-theme='dark'] {
+[data-theme="dark"] {
   --ifm-color-primary: #ffdf76;
   --ifm-color-primary-dark: #ffd651;
   --ifm-color-primary-darker: #ffd23e;
@@ -66,3 +66,7 @@ html[data-theme="dark"] .docusaurus-highlight-code-line {
 .markdown > h3 {
   --ifm-h2-font-size: 1.3rem !important;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

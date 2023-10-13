@@ -45,6 +45,32 @@ const config = {
     ],
   ],
 
+  plugins: [
+    async function tailwind() {
+      return {
+        name: "tailwindcss",
+        configurePostCss(postcssOptions) {
+          // Appends TailwindCSS and AutoPrefixer.
+          postcssOptions.plugins.push(require("tailwindcss"));
+          postcssOptions.plugins.push(require("autoprefixer"));
+          return postcssOptions;
+        },
+      };
+    },
+    async function disableUsedExports() {
+      return {
+        name: "disable-used-exports",
+        configureWebpack() {
+          return {
+            optimization: {
+              usedExports: false,
+            },
+          };
+        },
+      };
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -79,6 +105,11 @@ const config = {
             docId: "api/Environment",
             position: "left",
             label: "API",
+          },
+          {
+            to: "/playground/",
+            label: "Try It",
+            position: "left",
           },
           // {to: '/blog', label: 'Blog', position: 'right'},
           {
@@ -176,6 +207,10 @@ const config = {
               {
                 label: "PyPi",
                 href: "https://pypi.org/project/python-liquid/",
+              },
+              {
+                label: "Playground",
+                to: "/playground",
               },
             ],
           },
