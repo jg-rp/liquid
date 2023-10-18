@@ -5,7 +5,7 @@ import Playground from "../components/Playground";
 
 export default function PlaygroundPage() {
   return (
-    <Layout title="Playground" description="JSONPath playground">
+    <Layout title="Playground" description="Liquid playground">
       <ErrorBoundary
         fallback={({ error, tryAgain }) => (
           <div>

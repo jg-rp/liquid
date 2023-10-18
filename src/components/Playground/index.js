@@ -276,7 +276,7 @@ export default function Playground() {
                 disabled={isLoading || isRunning}
               />
 
-              <div className="flex h-10 space-x-0.5 border-0 bg-slate-300 dark:bg-neutral-800">
+              <div className="flex h-10 flex-none space-x-0.5 border-0 bg-slate-300 dark:bg-neutral-800">
                 <EditorTab
                   fileName="index.liquid"
                   file={file}
