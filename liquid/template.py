@@ -56,7 +56,8 @@ class BoundTemplate:
     """A liquid template that has been parsed and is bound to a `liquid.Environment`.
 
     You probably don't want to instantiate `BoundTemplate` directly. Use
-    `liquid.Environment.from_string` or `liquid.Environment.get_template` instead.
+    `liquid.Environment.from_string()` or `liquid.Environment.get_template()`
+    instead.
 
     Args:
         env: The environment this template is bound to.
