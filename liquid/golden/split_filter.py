@@ -85,4 +85,13 @@ cases = [
         expect="",
         future=True,
     ),
+    Case(
+        description="left matches string repr of argument",
+        template=(
+            r'{% assign a = "1" | split: 1 %}'
+            r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="",
+        future=True,
+    ),
 ]

@@ -15,7 +15,8 @@ def split(val: str, sep: str) -> List[str]:
     if not val:
         return []
 
+    sep = soft_str(sep)
     if val == sep:
         return []
 
-    return val.split(soft_str(sep))
+    return val.split(sep)
