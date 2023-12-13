@@ -47,6 +47,7 @@ cases = [
             r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
         ),
         expect="#0a#1b#2c",
+        future=True,
     ),
     Case(
         description="argument does not appear in string",
@@ -55,6 +56,7 @@ cases = [
             r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
         ),
         expect="#0abc",
+        future=True,
     ),
     Case(
         description="empty string and empty argument",
@@ -63,6 +65,7 @@ cases = [
             r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
         ),
         expect="",
+        future=True,
     ),
     Case(
         description="empty string and single char argument",
@@ -71,6 +74,7 @@ cases = [
             r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
         ),
         expect="",
+        future=True,
     ),
     Case(
         description="left matches argument",
@@ -79,5 +83,6 @@ cases = [
             r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
         ),
         expect="",
+        future=True,
     ),
 ]
