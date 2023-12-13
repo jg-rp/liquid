@@ -40,4 +40,44 @@ cases = [
         template=r'{{ "Hello there" | split: nosuchthing | join: "#" }}',
         expect="H#e#l#l#o# #t#h#e#r#e",
     ),
+    Case(
+        description="empty string argument",
+        template=(
+            r'{% assign a = "abc" | split: "" %}'
+            r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="#0a#1b#2c",
+    ),
+    Case(
+        description="argument does not appear in string",
+        template=(
+            r'{% assign a = "abc" | split: "," %}'
+            r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="#0abc",
+    ),
+    Case(
+        description="empty string and empty argument",
+        template=(
+            r'{% assign a = "" | split: "" %}'
+            r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="",
+    ),
+    Case(
+        description="empty string and single char argument",
+        template=(
+            r'{% assign a = "" | split: "," %}'
+            r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="",
+    ),
+    Case(
+        description="left matches argument",
+        template=(
+            r'{% assign a = "," | split: "," %}'
+            r"{% for i in a %}{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="",
+    ),
 ]
