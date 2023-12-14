@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 1.10.2 (unreleased)
+## Version 1.10.2
 
 **Fixes**
 
