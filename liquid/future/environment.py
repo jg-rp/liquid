@@ -5,6 +5,7 @@ template rendering behavior.
 """
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
+from .filters import split
 
 
 class Environment(DefaultEnvironment):
@@ -19,3 +20,8 @@ class Environment(DefaultEnvironment):
     """
 
     template_class = FutureBoundTemplate
+
+    def setup_tags_and_filters(self) -> None:
+        """Add future tags and filters to this environment."""
+        super().setup_tags_and_filters()
+        self.add_filter("split", split)
