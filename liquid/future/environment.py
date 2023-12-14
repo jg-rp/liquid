@@ -3,6 +3,7 @@
 This environment will be updated without concern for backwards incompatible changes to
 template rendering behavior.
 """
+from ..builtin.tags.comment_tag import NestedCommentTextTag
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
 from .filters import split
@@ -24,4 +25,5 @@ class Environment(DefaultEnvironment):
     def setup_tags_and_filters(self) -> None:
         """Add future tags and filters to this environment."""
         super().setup_tags_and_filters()
-        self.add_filter("split", split)
+        self.add_filter("split", split)  # issue #134
+        self.add_tag(NestedCommentTextTag)  # issue #133

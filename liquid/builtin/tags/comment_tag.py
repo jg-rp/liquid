@@ -7,6 +7,7 @@ from typing import TextIO
 
 from liquid import ast
 from liquid.context import Context
+from liquid.exceptions import LiquidSyntaxError
 from liquid.parse import eat_block
 from liquid.parse import expect
 from liquid.stream import TokenStream
@@ -92,4 +93,47 @@ class CommentTextTag(CommentTag):
             text.append(stream.current.value)
             stream.next_token()
 
+        return self.node_class(tok, text="".join(text))
+
+
+class NestedCommentTextTag(CommentTag):
+    """An implementation of the "comment" tag that allows nested comment blocks.
+
+    Some Liquid markup might be stripped out by the lexer, so comment text is not
+    guaranteed to be identical to that in the source document.
+    """
+
+    name = TAG_COMMENT
+    end = TAG_ENDCOMMENT
+
+    def parse(self, stream: TokenStream) -> CommentNode:
+        expect(stream, TOKEN_TAG, value=TAG_COMMENT)
+        stream.next_token()
+        tok = stream.current
+
+        text = []
+        level = 1
+        inner_comment_token = tok
+        while stream.current.type != TOKEN_EOF:
+            if (
+                stream.current.type == TOKEN_TAG
+                and stream.current.value == TAG_ENDCOMMENT
+            ):
+                level -= 1
+                if not level:
+                    break
+            elif (
+                stream.current.type == TOKEN_TAG and stream.current.value == TAG_COMMENT
+            ):
+                level += 1
+                inner_comment_token = stream.current
+
+            text.append(stream.current.value)
+            stream.next_token()
+
+        if level:
+            raise LiquidSyntaxError(
+                "unclosed nested comment block",
+                linenum=inner_comment_token[0],
+            )
         return self.node_class(tok, text="".join(text))

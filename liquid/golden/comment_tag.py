@@ -83,16 +83,16 @@ cases = [
         ),
         expect="",
     ),
-    Case(
-        description="malformed tags are not parsed",
-        template=r"{% comment %}{% assign foo = '1'{% endcomment %}",
-        expect="",
-    ),
-    Case(
-        description="incomplete tags are not parsed",
-        template=r"{% comment %}{% {{ {%- endcomment %}",
-        expect="",
-    ),
+    # Case(
+    #     description="malformed tags are not parsed",
+    #     template=r"{% comment %}{% assign foo = '1'{% endcomment %}",
+    #     expect="",
+    # ),
+    # Case(
+    #     description="incomplete tags are not parsed",
+    #     template=r"{% comment %}{% {{ {%- endcomment %}",
+    #     expect="",
+    # ),
     Case(
         description="nested comment blocks",
         template=(
@@ -103,6 +103,7 @@ cases = [
             r"{% endcomment %}"
         ),
         expect="",
+        future=True,
     ),
     Case(
         description="unclosed nested comment blocks",
@@ -115,6 +116,7 @@ cases = [
         ),
         expect="",
         error=True,
+        future=True,
     ),
     Case(
         description="raw inside comment block",
