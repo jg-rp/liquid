@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 1.11.0 (unreleased)
+
+**Fixes**
+
+- Added an additional implementation of the `split` filter, which resolves some compatibility issues between Python Liquid's and the reference implementation. Previously, when given an empty string to split or when the string and the delimiter were equal, we used Python's `str.split()` behavior of producing one or two element lists containing empty strings. We now match Shopify/Liquid in returning an empty list for such cases. The new `split` filter will be enabled by default when using [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment), and can optionally be registered with `liquid.Environment` for those that don't mind the behavioral change. See [#135](https://github.com/jg-rp/liquid/pull/135).
+
 ## Version 1.10.1
 
 **Fixes**
