@@ -16,6 +16,7 @@ from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Mapping
+from typing import NoReturn
 from typing import Optional
 from typing import Tuple
 from typing import TypeVar
@@ -29,6 +30,7 @@ from liquid.exceptions import FilterValueError
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.limits import to_int
+from liquid.undefined import Undefined
 
 # ruff: noqa: D102 D101
 
@@ -1079,7 +1081,7 @@ def eval_number_expression(left: Number, operator: str, right: Number) -> bool:
 
 
 def _is_py_falsy_number(obj: object) -> bool:
-    # Liquid 0, 0.0, 0b0, 0X0, 0o0 and Decimal("0") are not falsy.
+    # Liquid 0, 0.0, and Decimal("0") are not falsy.
     return not isinstance(obj, bool) and isinstance(obj, (int, float, Decimal))
 
 
@@ -1090,67 +1092,86 @@ def is_truthy(obj: Any) -> bool:
     return _is_py_falsy_number(obj) or obj not in (False, None)
 
 
-def compare_bool(left: Any, operator: str, right: Any) -> bool:
-    """Compare an object to a boolean value."""
-    if (isinstance(left, bool) and _is_py_falsy_number(right)) or (
-        isinstance(right, bool) and _is_py_falsy_number(left)
-    ):
-        if operator in ("==", "<", ">", "<=", ">="):
-            return False
-        if operator in ("!=", "<>"):
-            return True
-        raise LiquidTypeError(
-            f"unknown operator: {type(left)} {operator} {type(right)}"
-        )
-
-    if operator == "==":
-        return bool(left == right)
-    if operator in ("!=", "<>"):
-        return bool(left != right)
-    if operator in ("<", ">", "<=", ">="):
-        return False
-
-    raise LiquidTypeError(f"unknown operator: {type(left)} {operator} {type(right)}")
-
-
-def compare(left: Any, operator: str, right: Any) -> bool:  # noqa: PLR0911, PLR0912
-    """Return the result of a comparison operation between two objects."""
-    if operator == "and":
+def compare(left: object, op: str, right: object) -> bool:  # noqa: PLR0911, PLR0912
+    """Compare _left_ with _right_ according to Liquid semantics."""
+    if op == "and":
         return is_truthy(left) and is_truthy(right)
-    if operator == "or":
+    if op == "or":
         return is_truthy(left) or is_truthy(right)
 
     if hasattr(left, "__liquid__"):
         left = left.__liquid__()
+
     if hasattr(right, "__liquid__"):
         right = right.__liquid__()
 
-    if isinstance(right, (Empty, Blank)):
-        left, right = right, left
+    def _type_error(_left: object, _right: object) -> NoReturn:
+        if type(_left) != type(_right):
+            raise LiquidTypeError(f"invalid operator for types '{_left} {op} {_right}'")
 
-    if isinstance(left, bool) or isinstance(right, bool):
-        return compare_bool(left, operator, right)
+        raise LiquidTypeError(f"unknown operator: {type(_left)} {op} {type(_right)}")
 
-    if operator == "==":
-        return bool(left == right)
-    if operator in ("!=", "<>"):
-        return bool(left != right)
-
-    if operator == "contains":
+    if op == "==":
+        return _eq(left, right)
+    if op == "!=":
+        return not _eq(left, right)
+    if op == "<>":
+        return not _eq(left, right)
+    if op == "<":
+        try:
+            return _lt(left, right)
+        except TypeError:
+            _type_error(left, right)
+    if op == ">":
+        try:
+            return _lt(right, left)
+        except TypeError:
+            _type_error(right, left)
+    if op == ">=":
+        try:
+            return _lt(right, left) or _eq(left, right)
+        except TypeError:
+            _type_error(right, left)
+    if op == "<=":
+        try:
+            return _lt(left, right) or _eq(left, right)
+        except TypeError:
+            _type_error(left, right)
+    if op == "contains":
         if isinstance(left, str):
             return str(right) in left
         if isinstance(left, (list, dict)):
             return right in left
+        if isinstance(left, Undefined):
+            return False
 
-    if None in (left, right):
+    return _type_error(left, right)
+
+
+def _eq(left: object, right: object) -> bool:
+    if isinstance(right, (Empty, Blank)):
+        left, right = right, left
+
+    # Remember 1 == True and 0 == False in Python
+    if isinstance(right, bool):
+        left, right = right, left
+
+    if isinstance(left, bool):
+        return isinstance(right, bool) and left == right
+
+    return left == right
+
+
+def _lt(left: object, right: object) -> bool:
+    if isinstance(left, str) and isinstance(right, str):
+        return left < right
+
+    if isinstance(left, bool) or isinstance(right, bool):
         return False
 
-    if type(left) in (int, float) and type(right) in (int, float):
-        return eval_number_expression(left, operator, right)
+    if isinstance(left, (int, float, Decimal)) and isinstance(
+        right, (int, float, Decimal)
+    ):
+        return left < right
 
-    if type(left) != type(right):
-        raise LiquidTypeError(
-            f"invalid operator for types '{str(left)} {operator} {str(right)}'"
-        )
-
-    raise LiquidTypeError(f"unknown operator: {type(left)} {operator} {type(right)}")
+    raise TypeError

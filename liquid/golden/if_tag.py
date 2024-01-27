@@ -219,4 +219,52 @@ cases = [
         expect="false",
         error=True,
     ),
+    Case(
+        description="string is less than string",
+        template="{% if 'abc' < 'acb' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="true",
+    ),
+    Case(
+        description="string is not less than string",
+        template="{% if 'bbb' < 'aaa' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="string is less than or equal to string",
+        template="{% if 'abc' <= 'acb' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="true",
+    ),
+    Case(
+        description="string is not less than or equal to string",
+        template="{% if 'bbb' <= 'aaa' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="string is greater than string",
+        template="{% if 'abc' > 'acb' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="string is not greater than string",
+        template="{% if 'bbb' > 'aaa' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="true",
+    ),
+    Case(
+        description="string is greater than or equal to string",
+        template="{% if 'abc' >= 'acb' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="false",
+    ),
+    Case(
+        description="string is not greater than or equal to string",
+        template="{% if 'bbb' >= 'aaa' %}true{% else %}false{% endif %}",
+        globals={},
+        expect="true",
+    ),
 ]
