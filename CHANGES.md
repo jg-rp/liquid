@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 1.10.3 (unreleased)
+
+**Fixes**
+
+- Fixed comparing strings with `<`, `<=`, `>` and `>=` in boolean expressions (`{% if %}` and `{% unless %}`). Previously we were raising a `LiquidTypeError`, now we return the result of comparing two string by their lexicographical order.
+
 ## Version 1.10.2
 
 **Fixes**
@@ -10,7 +16,7 @@
 
 ## Version 1.10.1
 
-Version 1.10.1 was accidentally skipped and not officially released.
+Version 1.10.1 was accidentally skipped and not released.
 
 ## Version 1.10.0
 
