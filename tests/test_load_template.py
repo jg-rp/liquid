@@ -349,35 +349,6 @@ class MatterLoaderTestCase(unittest.TestCase):
         self.assertEqual(template.render(you="John"), "Hello, John!")
 
 
-class ChoiceLoaderTestCase(unittest.TestCase):
-    """Test loading templates from a list of loaders."""
-
-    def test_choose_between_loaders(self):
-        """Test that we can load templates from a list of loaders."""
-        loader = ChoiceLoader(
-            loaders=[
-                DictLoader({"a": "Hello, {{ you }}!"}),
-                DictLoader(
-                    {
-                        "a": "unreachable",
-                        "b": "the quick brown {{ animal | default: 'fox' }}",
-                    }
-                ),
-            ]
-        )
-
-        env = Environment(loader=loader)
-
-        template = env.get_template("a")
-        self.assertEqual(template.render(you="World"), "Hello, World!")
-
-        template = env.get_template("b")
-        self.assertEqual(template.render(), "the quick brown fox")
-
-        with self.assertRaises(TemplateNotFound):
-            env.get_template("c")
-
-
 class FileExtensionLoaderTestCase(unittest.TestCase):
     """Test loading templates from the file system with automatic extensions."""
 
@@ -591,3 +562,159 @@ class BootstrapLoaderTestCase(unittest.TestCase):
         env = Environment()
         with self.assertRaises(TemplateNotFound):
             env.get_template_with_args("foo")
+
+
+class ChoiceLoaderTestCase(unittest.TestCase):
+    """Test loading templates from a list of loaders."""
+
+    def test_choose_between_loaders(self):
+        """Test that we can load templates from a list of loaders."""
+        loader = ChoiceLoader(
+            loaders=[
+                DictLoader({"a": "Hello, {{ you }}!"}),
+                DictLoader(
+                    {
+                        "a": "unreachable",
+                        "b": "the quick brown {{ animal | default: 'fox' }}",
+                    }
+                ),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        template = env.get_template("a")
+        self.assertEqual(template.render(you="World"), "Hello, World!")
+
+        template = env.get_template("b")
+        self.assertEqual(template.render(), "the quick brown fox")
+
+        with self.assertRaises(TemplateNotFound):
+            env.get_template("c")
+
+    def test_choose_between_loaders_with_arguments(self):
+        """Test that we can choose between loaders that require arguments."""
+        loader = ChoiceLoader(
+            loaders=[
+                MockBootstrapLoader(
+                    namespaces={
+                        "foo": {
+                            "a": "Hello, {{ you }}!",
+                            "b": "the quick brown {{ animal | default: 'fox' }}",
+                        }
+                    }
+                ),
+                DictLoader({"a": "Goodbye, {{ you }}!"}),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        # Template not found with arguments
+        with self.assertRaises(TemplateNotFound):
+            env.get_template_with_args("c", uid="foo")
+
+        # Get template 'a' without arguments.
+        template = env.get_template("a")
+        self.assertEqual(template.render(you="World"), "Goodbye, World!")
+
+        # Get template 'a' with uid argument.
+        template = env.get_template_with_args("a", uid="foo")
+        self.assertEqual(template.render(you="World"), "Hello, World!")
+
+    def test_choose_between_loaders_with_arguments_async(self):
+        """Test that we can choose between async loaders that require arguments."""
+        loader = ChoiceLoader(
+            loaders=[
+                MockBootstrapLoader(
+                    namespaces={
+                        "foo": {
+                            "a": "Hello, {{ you }}!",
+                            "b": "the quick brown {{ animal | default: 'fox' }}",
+                        }
+                    }
+                ),
+                DictLoader({"a": "Goodbye, {{ you }}!"}),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        # Template not found with arguments
+        async def coro():
+            await env.get_template_with_args_async("c", uid="foo")
+
+        with self.assertRaises(TemplateNotFound):
+            asyncio.run(coro())
+
+        # Get template 'a' without arguments.
+        async def coro():
+            template = env.get_template("a")
+            return template.render(you="World")
+
+        self.assertEqual(asyncio.run(coro()), "Goodbye, World!")
+
+        # Get template 'a' with uid argument.
+        async def coro():
+            template = env.get_template_with_args("a", uid="foo")
+            return template.render(you="World")
+
+        self.assertEqual(asyncio.run(coro()), "Hello, World!")
+
+    def test_choose_between_loaders_with_context(self):
+        """Test that we can choose between loaders that make use of a render context."""
+        context_loader = MockContextLoader({"a": "Hello, {{ you }}!"})
+
+        loader = ChoiceLoader(
+            loaders=[
+                DictLoader({"b": "Greetings, {{ you }}!"}),
+                context_loader,
+                DictLoader({"a": "Goodbye, {{ you }}!"}),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        # No matches.
+        with self.assertRaises(TemplateNotFound):
+            env.from_string("{% include 'c' %}").render()
+
+        # The mock context loader gets access to the active render context when
+        # it's used from an `include` or `render` tag.
+        template = env.from_string("{% include 'a' %}", globals={"uid": 1234})
+        self.assertEqual(template.render(you="World"), "Hello, World!")
+        self.assertIn("tag", context_loader.kwargs)
+        self.assertEqual(context_loader.kwargs["tag"], "include")
+        self.assertIn("uid", context_loader.kwargs)
+        self.assertEqual(context_loader.kwargs["uid"], 1234)
+
+    def test_choose_between_loaders_with_context_async(self):
+        """Test that we can choose between async loaders that use render context."""
+        context_loader = MockContextLoader({"a": "Hello, {{ you }}!"})
+
+        loader = ChoiceLoader(
+            loaders=[
+                DictLoader({"b": "Greetings, {{ you }}!"}),
+                context_loader,
+                DictLoader({"a": "Goodbye, {{ you }}!"}),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        # No matches.
+        with self.assertRaises(TemplateNotFound):
+            env.from_string("{% include 'c' %}").render()
+
+        # The mock context loader gets access to the active render context when
+        # it's used from an `include` or `render` tag.
+        template = env.from_string("{% include 'a' %}", globals={"uid": 1234})
+
+        async def coro():
+            return template.render(you="World")
+
+        self.assertEqual(asyncio.run(coro()), "Hello, World!")
+        self.assertIn("tag", context_loader.kwargs)
+        self.assertEqual(context_loader.kwargs["tag"], "include")
+        self.assertIn("uid", context_loader.kwargs)
+        self.assertEqual(context_loader.kwargs["uid"], 1234)
