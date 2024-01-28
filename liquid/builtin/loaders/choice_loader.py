@@ -7,11 +7,13 @@ from typing import List
 from liquid.exceptions import TemplateNotFound
 
 from .base_loader import BaseLoader
-from .base_loader import TemplateSource
+from .mixins import CachingLoaderMixin
 
 if TYPE_CHECKING:
     from liquid import Context
     from liquid import Environment
+
+    from .base_loader import TemplateSource
 
 
 class ChoiceLoader(BaseLoader):
@@ -107,3 +109,23 @@ class ChoiceLoader(BaseLoader):
                 pass
 
         raise TemplateNotFound(template_name)
+
+
+class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):
+    """A `ChoiceLoader` that caches parsed templates in memory."""
+
+    def __init__(
+        self,
+        loaders: List[BaseLoader],
+        *,
+        auto_reload: bool = True,
+        namespace_key: str = "",
+        cache_size: int = 300,
+    ):
+        super().__init__(
+            auto_reload=auto_reload,
+            namespace_key=namespace_key,
+            cache_size=cache_size,
+        )
+
+        ChoiceLoader.__init__(self, loaders)

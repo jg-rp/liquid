@@ -129,11 +129,12 @@ class BaseLoader(ABC):  # noqa: B024
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
     ) -> BoundTemplate:
-        """Load and parse a template.
+        """Find and parse template source code.
 
-        Used internally by `Environment` to load a template source. Delegates to
-        `get_source`. A custom loaders would typically implement `get_source` rather
-        than overriding `load`.
+        This is used internally by `liquid.Environment` to load template
+        source text. `load()` delegates to `BaseLoader.get_source()`. Custom
+        loaders would typically implement `get_source()` rather than overriding
+        `load()`.
         """
         try:
             source, filename, uptodate, matter = self.get_source(env, name)
@@ -156,7 +157,7 @@ class BaseLoader(ABC):  # noqa: B024
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
     ) -> BoundTemplate:
-        """An async version of `load`."""
+        """An async version of `load()`."""
         try:
             template_source = await self.get_source_async(env, name)
             source, filename, uptodate, matter = template_source
