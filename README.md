@@ -2,8 +2,8 @@
 
 <p align="center">
 A Python engine for <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
+<br>We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely and is test against the <a href="https://github.com/jg-rp/golden-liquid">Golden Liquid</a> test suite.
 </p>
-
 <p align="center">
   <a href="https://github.com/jg-rp/liquid/blob/main/LICENSE">
     <img src="https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square" alt="License">
@@ -28,6 +28,10 @@ A Python engine for <a href="https://shopify.github.io/liquid/">Liquid</a>, the 
   </a>
   <a href="https://github.com/jg-rp/liquid/actions/workflows/coverage.yaml">
     <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/coverage.yaml?branch=main&label=coverage&style=flat-square" alt="Coverage">
+  </a>
+  <br>
+  <a href="https://pypi.org/project/python-liquid/">
+    <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/python-liquid?style=flat-square">
   </a>
 </p>
 
