@@ -6,6 +6,10 @@
 
 - Fixed comparing strings with `<`, `<=`, `>` and `>=` in boolean expressions (`{% if %}` and `{% unless %}`). Previously we were raising a `LiquidTypeError`, now we return the result of comparing two string by their lexicographical order.
 
+**Features**
+
+- Added `CachingChoiceLoader`, a template loader that chooses between a list of template loaders and caches parsed templates in memory.
+
 ## Version 1.10.2
 
 **Fixes**
