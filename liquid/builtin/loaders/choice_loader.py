@@ -112,7 +112,17 @@ class ChoiceLoader(BaseLoader):
 
 
 class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):
-    """A `ChoiceLoader` that caches parsed templates in memory."""
+    """A `ChoiceLoader` that caches parsed templates in memory.
+
+    Args:
+        loaders: A list of loaders implementing `liquid.loaders.BaseLoader`.
+        auto_reload: If `True`, automatically reload a cached template if it has been
+            updated.
+        namespace_key: The name of a global render context variable or loader keyword
+            argument that resolves to the current loader "namespace" or "scope".
+        cache_size: The maximum number of templates to hold in the cache before removing
+            the least recently used template.
+    """
 
     def __init__(
         self,

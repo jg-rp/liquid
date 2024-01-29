@@ -15,6 +15,9 @@
 ::: liquid.loaders.ChoiceLoader
     handler: python
 
+::: liquid.loaders.CachingChoiceLoader
+    handler: python
+
 ::: liquid.loaders.BaseLoader
     handler: python
 
