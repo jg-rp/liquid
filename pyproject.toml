@@ -1,29 +1,30 @@
 [build-system]
-requires = ["hatchling"]
 build-backend = "hatchling.build"
+requires = ["hatchling"]
 
 [project]
-name = "python-liquid"
-dynamic = ["version"]
-description = "A Python engine for the Liquid template language."
-readme = "README.md"
-license = "MIT"
-requires-python = ">=3.7"
-authors = [{ name = "James Prior", email = "jamesgr.prior@gmail.com" }]
+authors = [{name = "James Prior", email = "jamesgr.prior@gmail.com"}]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = ["python-dateutil>=2.8.1", "typing-extensions>=4.2.0"]
+description = "A Python engine for the Liquid template language."
+dynamic = ["version"]
+license = "MIT"
+name = "python-liquid"
+readme = "README.md"
+requires-python = ">=3.7"
 
 [project.optional-dependencies]
 autoescape = ["MarkupSafe>=2.0.0"]
@@ -39,43 +40,43 @@ Homepage = "https://jg-rp.github.io/liquid/"
 path = "liquid/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-packages = ["liquid"]
 exclude = ["/**/.mypy_cache/"]
+packages = ["liquid"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["liquid"]
 exclude = ["/**/.mypy_cache/"]
+packages = ["liquid"]
 
 [tool.hatch.envs.default]
 dependencies = [
-    "pytest",
-    "pytest-cov",
-    "black",
-    "mypy",
-    "pyyaml",
-    "types-pyyaml",
-    "twine",
-    "ruff",
-    "mock",
-    "types-python-dateutil",
-    "MarkupSafe",
+  "pytest",
+  "pytest-cov",
+  "black",
+  "mypy",
+  "pyyaml",
+  "types-pyyaml",
+  "twine",
+  "ruff",
+  "mock",
+  "types-python-dateutil",
+  "MarkupSafe",
 ]
 
 [tool.hatch.envs.default.scripts]
+benchmark = "python -O scripts/performance.py"
 cov = [
-    "hatch run noescape:cov",
-    "pytest --cov-append --cov-report= --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
+  "hatch run noescape:cov",
+  "pytest --cov-append --cov-report= --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
 ]
 cov-html = [
-    "hatch run noescape:cov",
-    "pytest --cov-append --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
+  "hatch run noescape:cov",
+  "pytest --cov-append --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
 ]
-no-cov = "cov --no-cov {args}"
-test = "pytest {args}"
 lint = "ruff check ."
-typing = "mypy"
-benchmark = "python -O scripts/performance.py"
+no-cov = "cov --no-cov {args}"
 profile = "python -O scripts/performance.py --profile"
+test = "pytest {args}"
+typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["37", "38", "39", "310", "311", "312", "pypy38", "pypy39"]
@@ -83,11 +84,10 @@ python = ["37", "38", "39", "310", "311", "312", "pypy38", "pypy39"]
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
 
-
 [tool.hatch.envs.noescape]
-template = "noescape"
-features = []
 dependencies = ["pytest", "pytest-cov", "mock"]
+features = []
+template = "noescape"
 
 [tool.hatch.envs.noescape.scripts]
 cov = "pytest --cov-report= --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
@@ -102,70 +102,69 @@ serve = "mkdocs serve --dev-addr localhost:8000"
 
 [tool.coverage.run]
 branch = true
-parallel = true
 omit = ["tests/mocks/**/*", "liquid/__about__.py"]
+parallel = true
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
-
 [tool.mypy]
-files = "liquid"
-python_version = "3.10"
+disallow_incomplete_defs = true
 disallow_subclassing_any = true
 disallow_untyped_calls = true
 disallow_untyped_defs = true
-disallow_incomplete_defs = true
-no_implicit_optional = true
+files = "liquid"
 local_partial_types = true
+no_implicit_optional = true
 no_implicit_reexport = true
+python_version = "3.10"
 strict = true
 warn_redundant_casts = true
-warn_unused_configs = true
-warn_unused_ignores = false
 warn_return_any = true
 warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = false
 
 [tool.ruff]
 select = [
-    "A",
-    "ARG",
-    "B",
-    "BLE",
-    "C4",
-    "D",
-    "E",
-    "F",
-    "I",
-    "ICN",
-    "ISC",
-    "N",
-    "PIE",
-    "PL",
-    "PT",
-    "Q",
-    "RET",
-    "RSE",
-    "S",
-    "SIM",
-    "SLF",
-    "T10",
-    "T20",
-    "TCH",
-    "YTT",
+  "A",
+  "ARG",
+  "B",
+  "BLE",
+  "C4",
+  "D",
+  "E",
+  "F",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PIE",
+  "PL",
+  "PT",
+  "Q",
+  "RET",
+  "RSE",
+  "S",
+  "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TCH",
+  "YTT",
 ]
 # TODO: review ignores
 ignore = [
-    "S105",
-    "S101",
-    "D107",
-    "D105",
-    "PLR0913",
-    "D401",
-    "N818",
-    "PT009",
-    "B905",
-    "PT027",
+  "S105",
+  "S101",
+  "D107",
+  "D105",
+  "PLR0913",
+  "D401",
+  "N818",
+  "PT009",
+  "B905",
+  "PT027",
 ]
 
 fixable = ["I", "SIM", "D202"]
@@ -173,26 +172,26 @@ unfixable = []
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
 ]
 
 # Same as Black.
@@ -210,12 +209,11 @@ force-single-line = true
 [tool.ruff.pydocstyle]
 convention = "google"
 
-
 [tool.ruff.per-file-ignores]
 "liquid/__about__.py" = ["D100"]
 "liquid/__init__.py" = ["D104", "I001"]
 "liquid/builtin/filters/__init__.py" = ["D104", "I001"]
 "liquid/builtin/loaders/__init__.py" = ["D104", "I001"]
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
-"tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
 "scripts/__init__.py" = ["D104", "I001"]
+"tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
