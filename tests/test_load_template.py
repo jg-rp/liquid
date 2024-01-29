@@ -703,15 +703,19 @@ class ChoiceLoaderTestCase(unittest.TestCase):
         env = Environment(loader=loader)
 
         # No matches.
+        async def coro():
+            template_ = env.from_string("{% include 'c' %}")
+            await template_.render_async()
+
         with self.assertRaises(TemplateNotFound):
-            env.from_string("{% include 'c' %}").render()
+            asyncio.run(coro())
 
         # The mock context loader gets access to the active render context when
         # it's used from an `include` or `render` tag.
         template = env.from_string("{% include 'a' %}", globals={"uid": 1234})
 
         async def coro():
-            return template.render(you="World")
+            return await template.render_async(you="World")
 
         self.assertEqual(asyncio.run(coro()), "Hello, World!")
         self.assertIn("tag", context_loader.kwargs)
