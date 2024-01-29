@@ -94,6 +94,14 @@ Python Liquid does not have a "lax" parser, like Ruby Liquid. Upon finding an er
 
 If a range literal uses a float literal as its start or stop value, the float literal must have something after the decimal point. This is OK `(1.0..3)`. This is not `(1...3)`. Ruby Liquid will accept either, resulting in a sequence of `[1,2,3]`.
 
+## The Split Filter
+
+**_See issue [#134](https://github.com/jg-rp/liquid/issues/134)_**
+
+**_Fixed in version 1.10.2_** with [`liquid.future.Environment`](/api/future-environment).
+
+When given an empty string to split or when the string and the delimiter are equal, we used Python's `str.split()` behavior of producing one or two element lists containing empty strings. Shopify/Liquid returns an empty list/array in such cases.
+
 ## Indexable Strings
 
 **_See issue [#90](https://github.com/jg-rp/liquid/issues/90)_**
