@@ -96,6 +96,7 @@ const sidebars = {
         "api/filesystemloader",
         "api/fileextensionloader",
         "api/choiceloader",
+        "api/cachingchoiceloader",
         "api/dictloader",
         "api/exceptions",
         "api/context",

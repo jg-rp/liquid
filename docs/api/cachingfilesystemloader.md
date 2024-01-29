@@ -1,4 +1,4 @@
-# liquid.CachingFileSystemLoader
+# liquid.loaders.CachingFileSystemLoader
 
 A loader that inherits from [`FileExtensionLoader`](./fileextensionloader.md) and caches parsed templates in an LRU cache.
 

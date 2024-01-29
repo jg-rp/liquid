@@ -34,10 +34,14 @@ Tests with the [benchmark fixtures](https://github.com/jg-rp/liquid/tree/main/te
 
 **_New in version 1.9.0_**
 
-An [`Environment`](../api/environment.md) template cache does not work well with [context aware loaders](../guides/custom-loaders.md#loading-with-context), because the environment has no way of knowing what context variables might be used to build a cache key. For this reason it is recommended to use [`CachingFileSystemLoader`](../api/cachingfilesystemloader.md) which, by default, replaces the environment cache.
+An [`Environment`](../api/environment.md)-wide template cache does not work well with [context aware loaders](../guides/custom-loaders.md#loading-with-context). This is because the environment has no way of knowing what context variables might be used to build a cache key. For this reason it is recommended to use [`CachingFileSystemLoader`](../api/cachingfilesystemloader.md) or [`CachingChoiceLoader`](../api/cachingchoiceloader.md) which, by default, replace the environment cache.
 
-:::info
-With hindsight, considering how typical Liquid use cases differ from "traditional" template engine usage, we should never have provided an environment-wide template cache. Come Liquid version 2.0 (unreleased), all template caching will be handled by template loaders.
-:::
+```python
+from liquid import CachingFileSystemLoader
+from liquid import Environment
 
-See [Caching File System Loader](../introduction/loading-templates.md#caching-file-system-loader) for example usage.
+loader = CachingFileSystemLoader("templates/", cache_size=500)
+env = Environment(loader=loader)
+
+# ...
+```
