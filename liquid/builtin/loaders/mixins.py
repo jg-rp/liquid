@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 # ruff: noqa: D102
 
+# ignoring "safe-super" type errors due to https://github.com/python/mypy/issues/14757
+
 
 class _CachingLoaderProtocol(Protocol):
     def load(

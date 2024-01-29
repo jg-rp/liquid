@@ -5,8 +5,10 @@ import unittest
 from pathlib import Path
 
 from liquid import BoundTemplate
+from liquid import CachingChoiceLoader
 from liquid import CachingFileSystemLoader
 from liquid import Context
+from liquid import DictLoader
 from liquid import Environment
 
 
@@ -236,3 +238,44 @@ class CachingFileSystemLoaderTestCase(unittest.TestCase):
         context = Context(env=env)
         template = env.get_template_with_context(context, "dropify/index.liquid")
         self.assertNotEqual(template.render(), "namespaced template")
+
+
+class CachingChoiceLoaderTestCase(unittest.TestCase):
+    """Test loading templates with caching from a list of loaders."""
+
+    def test_load_template(self) -> None:
+        """Simple choice loader from two dictionaries."""
+        loader = CachingChoiceLoader(
+            [
+                DictLoader({"a": "Hello, {{ you }}!"}),
+                DictLoader(
+                    {
+                        "a": "Goodbye, {{ you }}!",
+                        "b": "g'day, {{ you }}!",
+                    }
+                ),
+            ]
+        )
+
+        env = Environment(loader=loader)
+
+        # The environment-wide cache should be disabled.
+        self.assertIsNone(env.cache)
+
+        # The template cache should start empty
+        self.assertEqual(len(loader.cache), 0)
+
+        self.assertEqual(env.get_template("a").render(you="World"), "Hello, World!")
+        self.assertEqual(len(loader.cache), 1)
+        self.assertEqual(env.get_template("b").render(you="World"), "g'day, World!")
+        self.assertEqual(len(loader.cache), 2)
+
+        # Clear the cache
+        loader.cache.clear()
+
+        self.assertEqual(len(loader.cache), 0)
+        template = env.get_template("a")
+        self.assertEqual(len(loader.cache), 1)
+        same_template = env.get_template("a")
+        self.assertEqual(len(loader.cache), 1)
+        self.assertIs(template, same_template)
