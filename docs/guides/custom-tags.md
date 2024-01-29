@@ -164,7 +164,7 @@ class WithTag(Tag):
 
 ### Example Node
 
-Every [`Node`](../api/node.md) must implement a [`render_to_output()`](../api/node.md#rendertooutput) method and, optionally, a [`render_to_output_async()`](../api/node.md#rendertooutputasync) method. By referencing its `Expression`'s and the active render context, `render_to_output()` is responsible for writing text to the output buffer.
+Every [`Node`](../api/node.md) must implement a [`render_to_output()`](../api/node.md#render_to_output) method and, optionally, a [`render_to_output_async()`](../api/node.md#render_to_output_async) method. By referencing its `Expression`'s and the active render context, `render_to_output()` is responsible for writing text to the output buffer.
 
 Our `WithNode` simply evaluates each of its arguments and uses the results to extend the scope of the active render context before rendering its block.
 
@@ -185,7 +185,7 @@ class WithNode(Node):
 
 ### Example Tag Usage
 
-We can add `WithTag` tag to an [`Environment`](../api/environment.md) like this. Notice that [`Environment.add_tag()`](../api/environment.md#addtag) takes a class, not a class instance.
+We can add `WithTag` tag to an [`Environment`](../api/environment.md) like this. Notice that [`Environment.add_tag()`](../api/environment.md#add_tag) takes a class, not a class instance.
 
 ```python
 from liquid import Environment

@@ -271,7 +271,7 @@ class FrontMatterFileSystemLoader(FileSystemLoader):
 
 ## Async Database Loader
 
-Template loaders can implement `get_source_async()`. When a template is rendered by awaiting [`BoundTemplate.render_async()`](../api/bound-template.md#renderasync) instead of calling [`BoundTemplate.render()`](../api/bound-template.md#render), `{% render %}` and `{% include %}` tags will use `get_template_async` of the bound [`Environment`](../api/environment.md), which delegates to `get_source_async` of the configured loader.
+Template loaders can implement `get_source_async()`. When a template is rendered by awaiting [`BoundTemplate.render_async()`](../api/bound-template.md#render_async) instead of calling [`BoundTemplate.render()`](../api/bound-template.md#render), `{% render %}` and `{% include %}` tags will use `get_template_async` of the bound [`Environment`](../api/environment.md), which delegates to `get_source_async` of the configured loader.
 
 For example, `AsyncDatabaseLoader` will load templates from a PostgreSQL database using [asyncpg](https://github.com/MagicStack/asyncpg).
 

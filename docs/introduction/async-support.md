@@ -1,7 +1,7 @@
 # Async Support
 
 Python Liquid supports loading and rendering templates asynchronously. When [`BoundTemplate.render_async()`](../api/bound-template.md)
-is awaited, [`{% render %}`](../language/tags.md#render) and [`{% include %}`](../language/tags.md#include) tags will use [`Environment.get_template_async()`](../api/environment.md#get-template-async), which delegates to [`get_source_async()`](../api/filesystemloader.md#get_source_async) of the configured template loader.
+is awaited, [`{% render %}`](../language/tags.md#render) and [`{% include %}`](../language/tags.md#include) tags will use [`Environment.get_template_async()`](../api/environment.md#get_template_async), which delegates to [`get_source_async()`](../api/filesystemloader.md#get_source_async) of the configured template loader.
 
 ```python
 import asyncio

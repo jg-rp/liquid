@@ -112,7 +112,7 @@ print(tag_analysis.unexpected_tags)
 
 ## Unknown Tags
 
-`TagAnalysis.unknown_tags` contains the names and locations of tags that are not registered with the environment. If there's an unregistered block tag, only the tag starting the block will be reported. In the case of an "end" tag typo, the "end" tag will be reported as "unknown" and the start tag will be in [`unclosed_tags`](#unclosed_tags).
+`TagAnalysis.unknown_tags` contains the names and locations of tags that are not registered with the environment. If there's an unregistered block tag, only the tag starting the block will be reported. In the case of an "end" tag typo, the "end" tag will be reported as "unknown" and the start tag will be in [`unclosed_tags`](#unclosed-tags).
 
 ```python
 from liquid import Environment

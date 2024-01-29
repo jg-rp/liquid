@@ -55,7 +55,7 @@ See the [filter reference](./filters.md) for details of all filters built-in to 
 Being a Ruby project, the reference implementation of Liquid borrows terms and types found in Ruby. Like "array" and "hash". Python equivalents would be "list" and "dictionary", or anything that implements the [Sequence](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) or [Mapping](https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping) interfaces, respectively.
 :::
 
-Liquid is dynamically typed. New variables are declared, initialized and reassigned with the [{% assign %}](./tags.md#assign) and [{% capture %}](./tags.md#capture) tags. Assignment expressions can reference existing variables and include literal strings, integers, floats and Booleans.
+Liquid is dynamically typed. New variables are declared, initialized and reassigned with the [\{% assign %}](./tags.md#assign) and [\{% capture %}](./tags.md#capture) tags. Assignment expressions can reference existing variables and include literal strings, integers, floats and Booleans.
 
 ```liquid
 {% assign title = collection.products.first.title %}

@@ -140,7 +140,7 @@ Render the template using an existing [`liquid.Context`](./context.md) and outpu
 
 `async render_with_context_async(context, buffer, *args, **kwargs) -> None`
 
-An async version of [`liquid.BoundTemplate.render_with_context_async()`](#async-render_with_context_async)
+An async version of [`liquid.BoundTemplate.render_with_context()`](#render_with_context)
 
 **Return Type**: `None`
 

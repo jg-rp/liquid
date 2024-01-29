@@ -40,7 +40,7 @@ print(template.render())
 
 ## Tags
 
-Liquid Babel tags can be registered with an [`Environment`](../api/environment.md) using its [`add_tag()`](../api/environment.md#addtag) method. [Tags](../api/tag.md) are configured by setting attributes on a subclass. This example changes the name of the default [`translate`](./tags.md#translate) tag to `trans` and disables whitespace normalization in translation messages.
+Liquid Babel tags can be registered with an [`Environment`](../api/environment.md) using its [`add_tag()`](../api/environment.md#add_tag) method. [Tags](../api/tag.md) are configured by setting attributes on a subclass. This example changes the name of the default [`translate`](./tags.md#translate) tag to `trans` and disables whitespace normalization in translation messages.
 
 ```python
 from liquid import Environment

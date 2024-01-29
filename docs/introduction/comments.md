@@ -19,7 +19,7 @@ Using the standard [`{% comment %}`](../language/tags.md#comment) tag you can ma
 Python Liquid will raise a `LiquidSyntaxError` if it finds the string `{% endcomment %}` inside a comment block. Ruby Liquid, on the other hand, will successfully parse fully-formed nested comment blocks, but will fail to parse a comment block containing either a `{% comment %}` or `{% endcomment %}` on its own.
 :::
 
-Similarly, with the [inline comment tag](../language/tags.md#inline-comment) added in Python Liquid version 1.2.0, one or more lines can be commented out in a single inline tag.
+Similarly, with the [inline comment tag](../language/tags.md#-inline-comment) added in Python Liquid version 1.2.0, one or more lines can be commented out in a single inline tag.
 
 Both the traditional comment block and the newer inline comment tag suffer from problems when commenting out other liquid tags.
 
@@ -27,7 +27,7 @@ Both the traditional comment block and the newer inline comment tag suffer from 
 
 **_New in version 1.1.0_**
 
-Python Liquid offers an alternative, non-standard template comment syntax. When enabled, anything between `{#` and `#}` will be treated as a comment. It is disabled by default. Enable it using the [`template_comments`](../api/environment.md#template_comments) argument to [`liquid.Environment`](../api/environment.md) or [`liquid.Template`](../api/template.md).
+Python Liquid offers an alternative, non-standard template comment syntax. When enabled, anything between `{#` and `#}` will be treated as a comment. It is disabled by default. Enable it using the [`template_comments`](../api/environment.md#environment) argument to [`liquid.Environment`](../api/environment.md) or [`liquid.Template`](../api/template.md).
 
 :::caution
 This alternative comment syntax is non-standard. If you choose to use it in your templates, those

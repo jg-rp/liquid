@@ -218,7 +218,7 @@ pprint(analysis.variables)
  'website': [('layout', 2)]}
 ```
 
-When the `raise_for_failures` argument is `True` (the default), we should expect a [`TemplateTraversalError`](../api/exceptions.md#templatetraversalerror) to be raised if a partial template can not be loaded. If `raise_for_failures` is `False`, a dictionary of unloadable `include`/`render` tags is available as `TemplateAnalysis.unloadable_partials`.
+When the `raise_for_failures` argument is `True` (the default), we should expect a [`TemplateTraversalError`](../api/exceptions.md#liquidexceptionstemplatetraversalerror) to be raised if a partial template can not be loaded. If `raise_for_failures` is `False`, a dictionary of unloadable `include`/`render` tags is available as `TemplateAnalysis.unloadable_partials`.
 
 ```python
 from liquid import Environment, DictLoader
@@ -243,7 +243,7 @@ print(analysis.unloadable_partials)
 
 ## Analyzing Custom Tags
 
-All built-in tags (the tag's `Node` and `Expression` classes) implement a `children()` method. When analyzing a custom tag that does not implement `children()`, and with the `raise_for_failures` argument set to `True` (the default), Python Liquid will raise a [`TemplateTraversalError`](../api/exceptions.md#templatetraversalerror). When `raise_for_failures` is `False`, a dictionary of unvisitable AST nodes and expressions is available as `TemplateAnalysis.failed_visits`.
+All built-in tags (the tag's `Node` and `Expression` classes) implement a `children()` method. When analyzing a custom tag that does not implement `children()`, and with the `raise_for_failures` argument set to `True` (the default), Python Liquid will raise a [`TemplateTraversalError`](../api/exceptions.md#liquidexceptionstemplatetraversalerror). When `raise_for_failures` is `False`, a dictionary of unvisitable AST nodes and expressions is available as `TemplateAnalysis.failed_visits`.
 
 ```python
 from liquid import Environment, DictLoader

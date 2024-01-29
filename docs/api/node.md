@@ -26,7 +26,7 @@ Return the token that started this node. Looks for [`self.tok`](#tok).
 
 `render(context: Context, buffer: TextIO) -> Optional[bool]`
 
-Check disabled tags before delegating to [`render_to_output()`](#render-to-output).
+Check disabled tags before delegating to [`render_to_output()`](#render_to_output).
 
 ### `render_async`
 
@@ -46,4 +46,4 @@ Abstract method. Render this node to the output buffer with the given context.
 
 `async render_to_output_async(context: Context, buffer: TextIO) -> Optional[bool]`
 
-An async version of [`render_to_output()`](#render-to-output). Delegates to `render_to_output` by default.
+An async version of [`render_to_output()`](#render_to_output). Delegates to `render_to_output` by default.
