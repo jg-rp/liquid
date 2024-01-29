@@ -12,6 +12,7 @@ from .mode import Mode
 from .token import Token
 from .expression import Expression
 
+from .loaders import CachingChoiceLoader
 from .loaders import CachingFileSystemLoader
 from .loaders import ChoiceLoader
 from .loaders import DictLoader
@@ -47,6 +48,7 @@ __version__ = "1.10.3"
 __all__ = (
     "AwareBoundTemplate",
     "BoundTemplate",
+    "CachingChoiceLoader",
     "CachingFileSystemLoader",
     "ChoiceLoader",
     "Context",

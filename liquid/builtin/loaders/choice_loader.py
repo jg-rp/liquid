@@ -7,10 +7,13 @@ from typing import List
 from liquid.exceptions import TemplateNotFound
 
 from .base_loader import BaseLoader
-from .base_loader import TemplateSource
+from .mixins import CachingLoaderMixin
 
 if TYPE_CHECKING:
+    from liquid import Context
     from liquid import Environment
+
+    from .base_loader import TemplateSource
 
 
 class ChoiceLoader(BaseLoader):
@@ -24,9 +27,8 @@ class ChoiceLoader(BaseLoader):
         super().__init__()
         self.loaders = loaders
 
-    def get_source(  # noqa: D102
-        self, env: Environment, template_name: str
-    ) -> TemplateSource:
+    def get_source(self, env: Environment, template_name: str) -> TemplateSource:
+        """Get source code for a template from one of the configured loaders."""
         for loader in self.loaders:
             try:
                 return loader.get_source(env, template_name)
@@ -35,11 +37,12 @@ class ChoiceLoader(BaseLoader):
 
         raise TemplateNotFound(template_name)
 
-    async def get_source_async(  # noqa: D102
+    async def get_source_async(
         self,
         env: Environment,
         template_name: str,
     ) -> TemplateSource:
+        """An async version of `get_source`."""
         for loader in self.loaders:
             try:
                 return await loader.get_source_async(env, template_name)
@@ -47,3 +50,82 @@ class ChoiceLoader(BaseLoader):
                 pass
 
         raise TemplateNotFound(template_name)
+
+    def get_source_with_args(
+        self,
+        env: Environment,
+        template_name: str,
+        **kwargs: object,
+    ) -> TemplateSource:
+        """Get source code for a template from one of the configured loaders."""
+        for loader in self.loaders:
+            try:
+                return loader.get_source_with_args(env, template_name, **kwargs)
+            except TemplateNotFound:
+                pass
+
+        # TODO: include arguments in TemplateNotFound exception.
+        raise TemplateNotFound(template_name)
+
+    async def get_source_with_args_async(
+        self,
+        env: Environment,
+        template_name: str,
+        **kwargs: object,
+    ) -> TemplateSource:
+        """An async version of `get_source_with_args`."""
+        for loader in self.loaders:
+            try:
+                return await loader.get_source_with_args_async(
+                    env, template_name, **kwargs
+                )
+            except TemplateNotFound:
+                pass
+
+        raise TemplateNotFound(template_name)
+
+    def get_source_with_context(
+        self, context: Context, template_name: str, **kwargs: str
+    ) -> TemplateSource:
+        """Get source code for a template from one of the configured loaders."""
+        for loader in self.loaders:
+            try:
+                return loader.get_source_with_context(context, template_name, **kwargs)
+            except TemplateNotFound:
+                pass
+
+        raise TemplateNotFound(template_name)
+
+    async def get_source_with_context_async(
+        self, context: Context, template_name: str, **kwargs: str
+    ) -> TemplateSource:
+        """Get source code for a template from one of the configured loaders."""
+        for loader in self.loaders:
+            try:
+                return await loader.get_source_with_context_async(
+                    context, template_name, **kwargs
+                )
+            except TemplateNotFound:
+                pass
+
+        raise TemplateNotFound(template_name)
+
+
+class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):
+    """A `ChoiceLoader` that caches parsed templates in memory."""
+
+    def __init__(
+        self,
+        loaders: List[BaseLoader],
+        *,
+        auto_reload: bool = True,
+        namespace_key: str = "",
+        cache_size: int = 300,
+    ):
+        super().__init__(
+            auto_reload=auto_reload,
+            namespace_key=namespace_key,
+            cache_size=cache_size,
+        )
+
+        ChoiceLoader.__init__(self, loaders)
