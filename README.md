@@ -2,7 +2,7 @@
 
 <p align="center">
 A Python engine for <a href="https://shopify.github.io/liquid/">Liquid</a>, the safe customer-facing template language for flexible web apps.
-<br>We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely and is test against the <a href="https://github.com/jg-rp/golden-liquid">Golden Liquid</a> test suite.
+<br>We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely and test against the <a href="https://github.com/jg-rp/golden-liquid">Golden Liquid</a> test suite.
 </p>
 <p align="center">
   <a href="https://github.com/jg-rp/liquid/blob/main/LICENSE">
