@@ -1,11 +1,14 @@
 """Template loader test cases."""
 import asyncio
 import pickle
+import sys
 import tempfile
 import time
 import unittest
 from pathlib import Path
 from typing import Dict
+
+from mock import patch
 
 from liquid import Context
 from liquid import Environment
@@ -15,6 +18,7 @@ from liquid.loaders import ChoiceLoader
 from liquid.loaders import DictLoader
 from liquid.loaders import FileExtensionLoader
 from liquid.loaders import FileSystemLoader
+from liquid.loaders import PackageLoader
 from liquid.loaders import TemplateSource
 from liquid.template import AwareBoundTemplate
 from liquid.template import BoundTemplate
@@ -722,3 +726,75 @@ class ChoiceLoaderTestCase(unittest.TestCase):
         self.assertEqual(context_loader.kwargs["tag"], "include")
         self.assertIn("uid", context_loader.kwargs)
         self.assertEqual(context_loader.kwargs["uid"], 1234)
+
+
+class PackageLoaderTestCase(unittest.TestCase):
+    """Test loading templates from Python packages."""
+
+    def test_no_such_package(self) -> None:
+        """Test that we get an exception at construction time if the
+        package doesn't exist."""
+        with self.assertRaises(ModuleNotFoundError):
+            Environment(loader=PackageLoader("nosuchthing"))
+
+    def test_package_root(self) -> None:
+        """Test that we can load templates from a package's root."""
+        with patch.object(sys, "path", [str(Path(__file__).parent)] + sys.path):
+            loader = PackageLoader("mock_package", package_path="")
+
+        env = Environment(loader=loader)
+
+        with self.assertRaises(TemplateNotFound):
+            env.get_template("some")
+
+        template = env.get_template("other")
+        self.assertEqual(template.render(you="World"), "g'day, World!\n")
+
+    def test_package_directory(self) -> None:
+        """Test that we can load templates from a package directory."""
+        with patch.object(sys, "path", [str(Path(__file__).parent)] + sys.path):
+            loader = PackageLoader("mock_package", package_path="templates")
+
+        env = Environment(loader=loader)
+        template = env.get_template("some")
+        self.assertEqual(template.render(you="World"), "Hello, World!\n")
+
+    def test_package_with_list_of_paths(self) -> None:
+        """Test that we can load templates from multiple paths in a package."""
+        with patch.object(sys, "path", [str(Path(__file__).parent)] + sys.path):
+            loader = PackageLoader(
+                "mock_package", package_path=["templates", "templates/more_templates"]
+            )
+
+        env = Environment(loader=loader)
+        template = env.get_template("some.liquid")
+        self.assertEqual(template.render(you="World"), "Hello, World!\n")
+
+        template = env.get_template("more_templates/thing.liquid")
+        self.assertEqual(template.render(you="World"), "Goodbye, World!\n")
+
+        template = env.get_template("thing.liquid")
+        self.assertEqual(template.render(you="World"), "Goodbye, World!\n")
+
+    def test_package_root_async(self) -> None:
+        """Test that we can load templates from a package's root asynchronously."""
+        with patch.object(sys, "path", [str(Path(__file__).parent)] + sys.path):
+            loader = PackageLoader("mock_package", package_path="")
+
+        env = Environment(loader=loader)
+
+        async def coro():
+            return await env.get_template_async("other")
+
+        template = asyncio.run(coro())
+        self.assertEqual(template.render(you="World"), "g'day, World!\n")
+
+    def test_escape_package_root(self) -> None:
+        """Test that we can't escape the package's package's root."""
+        with patch.object(sys, "path", [str(Path(__file__).parent)] + sys.path):
+            loader = PackageLoader("mock_package", package_path="")
+
+        env = Environment(loader=loader)
+
+        with self.assertRaises(TemplateNotFound):
+            env.get_template("../secret.liquid")

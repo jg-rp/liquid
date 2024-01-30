@@ -12,6 +12,8 @@ from .file_system_loader import FileSystemLoader
 
 from .caching_file_system_loader import CachingFileSystemLoader
 
+from .package_loader import PackageLoader
+
 __all__ = (
     "BaseLoader",
     "CachingChoiceLoader",
@@ -20,6 +22,7 @@ __all__ = (
     "DictLoader",
     "FileExtensionLoader",
     "FileSystemLoader",
+    "PackageLoader",
     "TemplateNamespace",
     "TemplateSource",
     "UpToDate",

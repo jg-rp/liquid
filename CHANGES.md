@@ -9,6 +9,7 @@
 **Features**
 
 - Added `CachingChoiceLoader`, a template loader that chooses between a list of template loaders and caches parsed templates in memory.
+- Added `PackageLoader`, a template loader that reads templates from Python packages.
 
 ## Version 1.10.2
 

@@ -18,6 +18,7 @@ from .loaders import ChoiceLoader
 from .loaders import DictLoader
 from .loaders import FileExtensionLoader
 from .loaders import FileSystemLoader
+from .loaders import PackageLoader
 
 from .context import Context
 from .context import DebugUndefined
@@ -68,6 +69,7 @@ __all__ = (
     "is_undefined",
     "Markup",
     "Mode",
+    "PackageLoader",
     "soft_str",
     "StrictDefaultUndefined",
     "StrictUndefined",
