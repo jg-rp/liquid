@@ -18,7 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = ["python-dateutil>=2.8.1", "typing-extensions>=4.2.0", "importlib-resources>=6.1.0"]
+dependencies = ["python-dateutil>=2.8.1", "typing-extensions>=4.2.0", "importlib-resources>=5.10.0"]
 description = "A Python engine for the Liquid template language."
 dynamic = ["version"]
 license = "MIT"
