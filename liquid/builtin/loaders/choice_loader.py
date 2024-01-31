@@ -123,7 +123,7 @@ class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):
         cache_size: The maximum number of templates to hold in the cache before removing
             the least recently used template.
 
-    _New in version 1.10.3._
+    _New in version 1.11.0._
     """
 
     def __init__(

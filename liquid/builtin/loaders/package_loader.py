@@ -34,7 +34,7 @@ class PackageLoader(BaseLoader):
         ext: A default file extension to use if one is not provided. Should
             include a leading period.
 
-    _New in version 1.10.3._
+    _New in version 1.11.0._
     """
 
     def __init__(
