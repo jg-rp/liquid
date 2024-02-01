@@ -1,15 +1,19 @@
 # Python Liquid Change Log
 
-## Version 1.11.0 (unreleased)
+## Version 1.11.0
 
 **Fixes**
 
-- Fixed comparing strings with `<`, `<=`, `>` and `>=` in boolean expressions (`{% if %}` and `{% unless %}`). Previously we were raising a `LiquidTypeError`, now we return the result of comparing two string by their lexicographical order.
+- Fixed comparing strings with `<`, `<=`, `>` and `>=` in boolean expressions (`{% if %}` and `{% unless %}`). Previously we were raising a `LiquidTypeError`, now we return the result of comparing two string by their lexicographical order. See [#141](https://github.com/jg-rp/liquid/issues/141).
 
 **Features**
 
-- Added `CachingChoiceLoader`, a template loader that chooses between a list of template loaders and caches parsed templates in memory.
-- Added `PackageLoader`, a template loader that reads templates from Python packages.
+- Added `CachingChoiceLoader`, a template loader that chooses between a list of template loaders and caches parsed templates in memory. ([docs](https://jg-rp.github.io/liquid/api/cachingchoiceloader), [source](https://github.com/jg-rp/liquid/blob/main/liquid/builtin/loaders/choice_loader.py#L114))
+- Added `PackageLoader`, a template loader that reads templates from Python packages. ([docs](https://jg-rp.github.io/liquid/api/packageloader), [source](https://github.com/jg-rp/liquid/blob/main/liquid/builtin/loaders/package_loader.py))
+
+**Dependencies**
+
+- Python Liquid now depends on [importlib-resources](https://pypi.org/project/importlib-resources/) >= 5.10. This is that backport of [importlib.resources](https://docs.python.org/3/library/importlib.resources.html#importlib.resources.Anchor) from Python's standard library. We use it in `PackageLoader`.
 
 ## Version 1.10.2
 
