@@ -36,6 +36,8 @@ from collections import abc
 from collections import deque
 from threading import Lock
 
+from liquid.exceptions import CacheCapacityValueError
+
 
 class LRUCache(abc.MutableMapping):
     """A simple LRU Cache implementation."""
@@ -45,6 +47,9 @@ class LRUCache(abc.MutableMapping):
     # won't do any harm.
 
     def __init__(self, capacity: int):
+        if capacity < 1:
+            raise CacheCapacityValueError("cache size must be greater than 1")
+
         self.capacity = capacity
         self._mapping = {}
         self._queue = deque()
