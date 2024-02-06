@@ -239,6 +239,16 @@ class CachingFileSystemLoaderTestCase(unittest.TestCase):
         template = env.get_template_with_context(context, "dropify/index.liquid")
         self.assertNotEqual(template.render(), "namespaced template")
 
+    def test_zero_capacity_cache(self):
+        """Test that we get an exception when cache size is zero."""
+        with self.assertRaises(ValueError):
+            CachingFileSystemLoader("tests/fixtures/", cache_size=0)
+
+    def test_negative_capacity_cache(self):
+        """Test that we get an exception when cache size is negative."""
+        with self.assertRaises(ValueError):
+            CachingFileSystemLoader("tests/fixtures/", cache_size=-1)
+
 
 class CachingChoiceLoaderTestCase(unittest.TestCase):
     """Test loading templates with caching from a list of loaders."""
