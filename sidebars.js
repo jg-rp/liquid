@@ -98,6 +98,8 @@ const sidebars = {
         "api/choiceloader",
         "api/cachingchoiceloader",
         "api/dictloader",
+        "api/make-choice-loader",
+        "api/make-file-system-loader",
         "api/exceptions",
         "api/context",
         "api/Tag",
