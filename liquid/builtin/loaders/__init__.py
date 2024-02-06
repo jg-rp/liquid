@@ -52,7 +52,7 @@ def make_file_system_loader(
 
     A `CachingFileSystemLoader` is returned if _cache_size_ is greater than 0.
     Otherwise a `FileExtensionLoader` is returned if _ext_ is not empty.
-    Otherwise a `FileSystemLoader` is returned.
+    If _ext_ is empty, a `FileSystemLoader` is returned.
 
     _auto_reload_ and _namespace_key_ are ignored if _cache_key_ is less than 1.
 

@@ -27,3 +27,8 @@
 ::: liquid.loaders.TemplateSource
     handler: python
 
+::: liquid.loaders.make_choice_loader
+    handler: python
+
+::: liquid.loaders.make_file_system_loader
+    handler: python
