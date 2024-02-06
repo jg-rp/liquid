@@ -27,6 +27,8 @@ __all__ = (
     "DictLoader",
     "FileExtensionLoader",
     "FileSystemLoader",
+    "make_choice_loader",
+    "make_file_system_loader",
     "PackageLoader",
     "TemplateNamespace",
     "TemplateSource",
