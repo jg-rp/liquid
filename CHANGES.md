@@ -1,5 +1,16 @@
 # Python Liquid Change Log
 
+## Version 1.12.0 (unreleased)
+
+**Fixes**
+
+- Fixed a bug with the LRU cache. We now raise a `ValueError` at construction time if a caching template loader is given a cache size less than 1. Previously, in such cases, an `IndexError` would have been raised when attempting to write to the cache.
+
+**Features**
+
+- Added `make_choice_loader()`, a factory function that returns a `ChoiceLoader` or `CachingChoiceLoader` depending on its arguments.
+- Added `make_file_system_loader()`, a factory function that returns a `FileSystemLoader`, `FileExtensionLoader` or `CachingFileSystemLoader` depending on its arguments.
+
 ## Version 1.11.0
 
 **Fixes**
