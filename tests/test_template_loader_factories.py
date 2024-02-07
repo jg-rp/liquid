@@ -1,14 +1,14 @@
 """Template loader factory test cases."""
 import unittest
 
-from liquid.loaders import CachingChoiceLoader
-from liquid.loaders import CachingFileSystemLoader
-from liquid.loaders import ChoiceLoader
-from liquid.loaders import DictLoader
-from liquid.loaders import FileExtensionLoader
-from liquid.loaders import FileSystemLoader
-from liquid.loaders import make_choice_loader
-from liquid.loaders import make_file_system_loader
+from liquid import CachingChoiceLoader
+from liquid import CachingFileSystemLoader
+from liquid import ChoiceLoader
+from liquid import DictLoader
+from liquid import FileExtensionLoader
+from liquid import FileSystemLoader
+from liquid import make_choice_loader
+from liquid import make_file_system_loader
 
 
 class TemplateLoaderFactoryTestCase(unittest.TestCase):
