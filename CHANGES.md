@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 1.12.0 (unreleased)
+## Version 1.12.0
 
 **Fixes**
 
@@ -8,8 +8,8 @@
 
 **Features**
 
-- Added `make_choice_loader()`, a factory function that returns a `ChoiceLoader` or `CachingChoiceLoader` depending on its arguments. ([docs](https://jg-rp.github.io/liquid/api/make-choice-loader))
-- Added `make_file_system_loader()`, a factory function that returns a `FileSystemLoader`, `FileExtensionLoader` or `CachingFileSystemLoader` depending on its arguments. ([docs](https://jg-rp.github.io/liquid/api/make-file-system-loader))
+- Added `make_choice_loader()`, a factory function that returns a `ChoiceLoader` or `CachingChoiceLoader` depending on its arguments. ([docs](https://jg-rp.github.io/liquid/api/make-choice-loader), [source](https://github.com/jg-rp/liquid/blob/c61fcd29e6f3f1b769165874d128478c76001203/liquid/builtin/loaders/__init__.py#L96))
+- Added `make_file_system_loader()`, a factory function that returns a `FileSystemLoader`, `FileExtensionLoader` or `CachingFileSystemLoader` depending on its arguments. ([docs](https://jg-rp.github.io/liquid/api/make-file-system-loader), [source](https://github.com/jg-rp/liquid/blob/c61fcd29e6f3f1b769165874d128478c76001203/liquid/builtin/loaders/__init__.py#L39))
 
 ## Version 1.11.0
 
