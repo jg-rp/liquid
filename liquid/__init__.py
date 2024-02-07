@@ -19,6 +19,8 @@ from .loaders import DictLoader
 from .loaders import FileExtensionLoader
 from .loaders import FileSystemLoader
 from .loaders import PackageLoader
+from .loaders import make_choice_loader
+from .loaders import make_file_system_loader
 
 from .context import Context
 from .context import DebugUndefined
@@ -44,7 +46,7 @@ from .static_analysis import ContextualTemplateAnalysis
 
 from . import future
 
-__version__ = "1.11.0"
+__version__ = "1.12.0"
 
 __all__ = (
     "AwareBoundTemplate",
@@ -67,6 +69,8 @@ __all__ = (
     "FutureBoundTemplate",
     "FutureContext",
     "is_undefined",
+    "make_choice_loader",
+    "make_file_system_loader",
     "Markup",
     "Mode",
     "PackageLoader",

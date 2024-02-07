@@ -235,3 +235,7 @@ class Markup(str):
         raise Error(
             "autoescape requires Markupsafe to be installed"
         )  # pragma: no cover
+
+
+class CacheCapacityValueError(ValueError):
+    """An exception raised when the LRU cache is given a zero or negative capacity."""
