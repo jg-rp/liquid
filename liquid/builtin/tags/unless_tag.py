@@ -38,7 +38,7 @@ TAG_ELSE = sys.intern("else")
 
 ENDUNLESSBLOCK = frozenset((TAG_ENDUNLESS, TAG_ELSIF, TAG_ELSE, TOKEN_EOF))
 ENDELSIFBLOCK = frozenset((TAG_ENDUNLESS, TAG_ELSIF, TAG_ELSE))
-ENDUNLESSELSEBLOCK = frozenset((TAG_ENDUNLESS,))
+ENDUNLESSELSEBLOCK = frozenset((TAG_ENDUNLESS, TAG_ELSIF, TAG_ELSE))
 
 
 class UnlessNode(Node):
@@ -216,9 +216,23 @@ class UnlessTag(Tag):
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
+            if stream.current.type == TOKEN_EXPRESSION:
+                # Superfluous expressions inside an `else` tag are ignored.
+                stream.next_token()
             alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
 
+        # Extraneous `else` and `elsif` blocks are ignored.
+        if not stream.current.istag(TAG_ENDUNLESS):
+            while stream.current.type != TOKEN_EOF:
+                if (
+                    stream.current.type == TOKEN_TAG
+                    and stream.current.value == TAG_ENDUNLESS
+                ):
+                    break
+                stream.next_token()
+
         expect(stream, TOKEN_TAG, value=TAG_ENDUNLESS)
+
         return self.node_class(
             tok,
             condition=condition,

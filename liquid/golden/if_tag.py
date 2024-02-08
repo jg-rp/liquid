@@ -267,4 +267,28 @@ cases = [
         globals={},
         expect="true",
     ),
+    Case(
+        description="else tag expressions are ignored",
+        template="{% if false %}1{% else nonsense %}2{% endif %}",
+        globals={},
+        expect="2",
+        error=False,
+        strict=True,
+    ),
+    Case(
+        description="extra else blocks are ignored",
+        template="{% if false %}1{% else %}2{% else %}3{% endif %}",
+        globals={},
+        expect="2",
+        error=False,
+        strict=True,
+    ),
+    Case(
+        description="extra elsif blocks are ignored",
+        template="{% if false %}1{% else %}2{% elsif true %}3{% endif %}",
+        globals={},
+        expect="2",
+        error=False,
+        strict=True,
+    ),
 ]
