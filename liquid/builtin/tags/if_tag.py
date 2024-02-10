@@ -37,7 +37,7 @@ TAG_ELSE = sys.intern("else")
 
 ENDIFBLOCK = frozenset((TAG_ENDIF, TAG_ELSIF, TAG_ELSE, TOKEN_EOF))
 ENDELSIFBLOCK = frozenset((TAG_ENDIF, TAG_ELSIF, TAG_ELSE))
-ENDIFELSEBLOCK = frozenset((TAG_ENDIF,))
+ENDIFELSEBLOCK = frozenset((TAG_ENDIF, TAG_ELSE, TAG_ELSIF))
 
 
 class IfNode(Node):
@@ -221,9 +221,23 @@ class IfTag(Tag):
 
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
+            if stream.current.type == TOKEN_EXPRESSION:
+                # Superfluous expressions inside an `else` tag are ignored.
+                stream.next_token()
             alternative = parse_block(stream, ENDIFELSEBLOCK)
 
+        # Extraneous `else` and `elsif` blocks are ignored.
+        if not stream.current.istag(TAG_ENDIF):
+            while stream.current.type != TOKEN_EOF:
+                if (
+                    stream.current.type == TOKEN_TAG
+                    and stream.current.value == TAG_ENDIF
+                ):
+                    break
+                stream.next_token()
+
         expect(stream, TOKEN_TAG, value=TAG_ENDIF)
+
         return self.node_class(
             tok=tok,
             condition=condition,

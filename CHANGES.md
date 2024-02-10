@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 1.12.1 (unreleased)
+
+**Fixes**
+
+- Fixed handling of `{% else %}` tags that include text between `else` and the closing tag delimiter (`%}`). Previously we were treating such text as part of the `else` block, we now follow Shopify/Liquid behavior by ignoring it, even in strict mode. See [#150](https://github.com/jg-rp/liquid/issues/150).
+- Fixed handling of superfluous `{% else %}` and `{% elsif %}` blocks. Previously we would raise a `LiquidSyntaxError`, now we ignore them, as Shopify/Liquid does. See [#151](https://github.com/jg-rp/liquid/issues/151).
+
 ## Version 1.12.0
 
 **Fixes**
