@@ -5,7 +5,7 @@ from enum import auto
 
 
 class Mode(IntEnum):
-    """Template correctness tolerance."""
+    """Template error tolerance mode."""
 
     LAX = auto()
     WARN = auto()

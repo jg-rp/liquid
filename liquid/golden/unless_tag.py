@@ -78,6 +78,7 @@ cases = [
         expect="2",
         error=False,
         strict=True,
+        future=True,
     ),
     Case(
         description="extra else blocks are ignored",
@@ -86,6 +87,7 @@ cases = [
         expect="2",
         error=False,
         strict=True,
+        future=True,
     ),
     Case(
         description="extra elsif blocks are ignored",
@@ -94,5 +96,6 @@ cases = [
         expect="2",
         error=False,
         strict=True,
+        future=True,
     ),
 ]
