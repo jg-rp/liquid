@@ -90,6 +90,14 @@ Python Liquid might not handle syntax or type errors in the same way as the refe
 
 Python Liquid does not have a "lax" parser, like Ruby Liquid. Upon finding an error, Python Liquid's [lax mode](/introduction/strictness) simply discards the current block and continues to parse/render the next block, if one is available. Also, Python Liquid will never inject error messages into an output document. Although this can be achieved by extending [`BoundTemplate`](/api/BoundTemplate) and overriding [`render_with_context()`](/api/BoundTemplate#render_with_context).
 
+## Extra Else Blocks
+
+**_Fixed in version 1.12.1_** with [`liquid.future.Environment`](/api/future-environment).
+
+Shopify/Liquid will silently ignore superfluous `{% else %}` tag expressions (anything between `else` and the closing tag delimiter `%}`) and superfluous `{% elsif %}` and `{% else %}` blocks after the first `{% else %}` block.
+
+Python Liquid's default behavior is to raise a `LiquidSyntaxError` in such cases.
+
 ## Floats in Ranges
 
 If a range literal uses a float literal as its start or stop value, the float literal must have something after the decimal point. This is OK `(1.0..3)`. This is not `(1...3)`. Ruby Liquid will accept either, resulting in a sequence of `[1,2,3]`.
