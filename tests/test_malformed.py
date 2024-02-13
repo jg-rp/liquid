@@ -357,6 +357,32 @@ class MalformedTemplateTestCase(TestCase):
                     "expected a filter or end of expression, found 'offset', on line 1"
                 ),
             ),
+            Case(
+                description="unexpected expression in 'else' tag",
+                template=r"{% if true %}a{% else foo %}b{% endif %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "found an 'else' tag expression, did you mean 'elsif'?, on line 1"
+                ),
+            ),
+            Case(
+                description="extra 'else' block",
+                template=r"{% if true %}a{% else %}b{% else %}c{% endif %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "expected tag with value 'endif', found tag with value 'else', "
+                    "on line 1"
+                ),
+            ),
+            Case(
+                description="extra 'elsif' block",
+                template=r"{% if true %}a{% else %}b{% elsif %}c{% endif %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg=(
+                    "expected tag with value 'endif', found tag with value 'elsif', "
+                    "on line 1"
+                ),
+            ),
         ]
 
         self._test(test_cases, mode=Mode.STRICT)

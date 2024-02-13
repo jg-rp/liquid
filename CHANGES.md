@@ -4,8 +4,8 @@
 
 **Fixes**
 
-- Fixed handling of `{% else %}` tags that include text between `else` and the closing tag delimiter (`%}`). Previously we were treating such text as part of the `else` block, we now follow Shopify/Liquid behavior by ignoring it, even in strict mode. See [#150](https://github.com/jg-rp/liquid/issues/150).
-- Fixed handling of superfluous `{% else %}` and `{% elsif %}` blocks. Previously we would raise a `LiquidSyntaxError`, now we ignore them, as Shopify/Liquid does. See [#151](https://github.com/jg-rp/liquid/issues/151).
+- Fixed handling of `{% else %}` tags that include text between `else` and the closing tag delimiter (`%}`). Previously we were treating such text as part of the `{% else %}` block. Now the default behavior is to raise a `LiquidSyntaxError`. When using [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment), we follow Shopify/Liquid behavior of silently ignoring `{% else %}` tag expressions, even in strict mode. See [#150](https://github.com/jg-rp/liquid/issues/150).
+- [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment) now silently ignores superfluous `{% else %}` and `{% elsif %}` blocks. The default environment continues to raise a `LiquidSyntaxError` if `{% else %}` or `{% elsif %}` appear after the first `{% else %}` tag. See [#151](https://github.com/jg-rp/liquid/issues/151).
 
 ## Version 1.12.0
 

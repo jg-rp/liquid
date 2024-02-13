@@ -70,7 +70,7 @@ class RenderIfNotTagTestCase(BaseRenderTestCase):
 
     def test_render_standard_if_tag(self) -> None:
         """Test that the `if (not)` tag renders standard `if` tags."""
-        self._test(golden.if_tag.cases)
+        self._test([case for case in golden.if_tag.cases if not case.future])
 
     def test_render_non_standard_if_tag(self) -> None:
         """Test that we can render `if` tags with logical `not` and grouping

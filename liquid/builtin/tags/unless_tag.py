@@ -14,6 +14,7 @@ from liquid.ast import ConditionalBlockNode
 from liquid.ast import IllegalNode
 from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
+from liquid.mode import Mode
 from liquid.parse import eat_block
 from liquid.parse import expect
 from liquid.parse import get_parser
@@ -173,6 +174,9 @@ class UnlessTag(Tag):
     end = TAG_ENDUNLESS
     node_class = UnlessNode
 
+    mode = Mode.STRICT
+    """Tag specific parsing mode, independent from environment tolerance mode."""
+
     def __init__(self, env: Environment):
         super().__init__(env)
         self.parser = get_parser(self.env)
@@ -217,12 +221,18 @@ class UnlessTag(Tag):
         if stream.current.istag(TAG_ELSE):
             stream.next_token()
             if stream.current.type == TOKEN_EXPRESSION:
-                # Superfluous expressions inside an `else` tag are ignored.
-                stream.next_token()
+                if self.mode == Mode.LAX:
+                    # Superfluous expressions inside an `else` tag are ignored.
+                    stream.next_token()
+                else:
+                    raise LiquidSyntaxError(
+                        "found an 'else' tag expression, did you mean 'elsif'?",
+                        stream.current.linenum,
+                    )
             alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
 
-        # Extraneous `else` and `elsif` blocks are ignored.
-        if not stream.current.istag(TAG_ENDUNLESS):
+        if not stream.current.istag(TAG_ENDUNLESS) and self.mode == Mode.LAX:
+            # Extraneous `else` and `elsif` blocks are ignored.
             while stream.current.type != TOKEN_EOF:
                 if (
                     stream.current.type == TOKEN_TAG
