@@ -1,17 +1,16 @@
 (function liquidPrism(Prism) {
   Prism.languages.liquid = {
     "comment-tag": {
-      pattern:
-        /(^\{%-?\s*comment\s*-?%\})[\s\S]+(?=\{%-?\s*endcomment\s*-?%\}$)/,
+      pattern: /(\{%-?\s*comment\s*-?%\})[\s\S]+(?=\{%-?\s*endcomment\s*-?%\})/,
       lookbehind: true,
       alias: "comment",
     },
     "alt-comment": {
-      pattern: /^\{#[\s\S]*?#\}$/,
+      pattern: /\{#[\s\S]*?#\}/,
       alias: "comment",
     },
     "inline-comment-tag": {
-      pattern: /(^\{%-?\s*)#.*?(?=-?%\})/s,
+      pattern: /(\{%-?\s*)#.*?(?=-?%\})/s,
       lookbehind: true,
       inside: {
         comment: {
@@ -37,7 +36,7 @@
       },
     },
     tag: {
-      pattern: /(^\{%-?\s*)\w+/,
+      pattern: /(\{%-?\s*)\w+/,
       lookbehind: true,
       alias: "class",
     },
@@ -46,7 +45,7 @@
       greedy: true,
     },
     delimiter: {
-      pattern: /^\{[{%]-?|-?[}%]\}$/,
+      pattern: /\{[{%]-?|-?[}%]\}/,
       alias: "punctuation",
     },
     filter: {
@@ -56,7 +55,7 @@
     },
     operator: /!?=|<=?|>=?|<>|\.\./,
     keyword:
-      /\b(?:and|contains|in|limit|offset|or|reversed|with|empty|blank|if|else)\b/,
+      /\b(?:and|as|contains|in|limit|offset|or|reversed|with|empty|blank|if|else)\b/,
     builtin: {
       pattern: /(\b\.)(?:first|last|size)\b/,
       lookbehind: true,
@@ -81,17 +80,21 @@
   liquid_tag.inside.punctuation = Prism.languages.liquid.punctuation;
 
   const pattern =
-    /\{%?-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|\{\{.*?\}\}|\{%.*?%\}|\{#.*?#\}/gs;
+    /\{%?-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|\{\{.*?\}\}|\{%.*?%\}|\{#.*?#\}/;
   const markupTemplating = Prism.languages["markup-templating"];
   let insideRaw = false;
 
   Prism.hooks.add("before-tokenize", function (env) {
+    if (env.language !== "twig") {
+      return;
+    }
+
     markupTemplating.buildPlaceholders(
       env,
       "liquid",
       pattern,
       function (match) {
-        let tagMatch = /^\{%-?\s*(\w+)/.exec(match);
+        let tagMatch = /\{%-?\s*(\w+)/.exec(match);
         if (tagMatch) {
           let tag = tagMatch[1];
           if (tag === "raw" && !insideRaw) {
@@ -104,7 +107,7 @@
         }
 
         return !insideRaw;
-      }
+      },
     );
   });
   Prism.hooks.add("after-tokenize", function (env) {
