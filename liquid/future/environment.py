@@ -6,6 +6,7 @@ template rendering behavior.
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
 from .filters import split
+from .tags import LaxCaseTag
 from .tags import LaxIfTag
 from .tags import LaxUnlessTag
 
@@ -27,5 +28,6 @@ class Environment(DefaultEnvironment):
         """Add future tags and filters to this environment."""
         super().setup_tags_and_filters()
         self.add_filter("split", split)
+        self.add_tag(LaxCaseTag)
         self.add_tag(LaxIfTag)
         self.add_tag(LaxUnlessTag)
