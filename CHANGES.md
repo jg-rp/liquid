@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 1.12.2
+
+**Fixes**
+
+- Fixed `{% case %}` / `{% when %}` behavior. When using [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment), we now render any number of `{% else %}` blocks and allow `{% when %}` tags to appear after `{% else %}` tags. The default `Environment` continues to raise a `LiquidSyntaxError` in such cases.
+
 ## Version 1.12.1
 
 **Fixes**
