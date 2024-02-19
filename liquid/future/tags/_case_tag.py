@@ -63,8 +63,11 @@ class LaxCaseNode(ast.Node):
         rendered: Optional[bool] = False
 
         for block in self.blocks:
+            # Always render truthy `when` blocks, no matter the order.
             if isinstance(block, ast.ConditionalBlockNode):
                 rendered = block.render(context, buf) or rendered
+            # Only render `else` blocks if all preceding `when` blocks are falsy.
+            # Multiple `else` blocks are OK.
             elif isinstance(block, ast.BlockNode) and not rendered:
                 block.render(context, buf)
 
@@ -136,6 +139,7 @@ class LaxCaseTag(CaseTag):
         ):
             stream.next_token()
 
+        # Collect all `when` and `else` tags regardless of te order n which they appear.
         blocks: List[Union[ast.BlockNode, ast.ConditionalBlockNode]] = []
 
         while not stream.current.istag(TAG_ENDCASE):
@@ -146,6 +150,8 @@ class LaxCaseTag(CaseTag):
                 when_tok = stream.next_token()
                 expect(stream, TOKEN_EXPRESSION)
 
+                # Transform each comma or "or" separated when expression into a block
+                # node of its own, just as if each expression had its own `when` tag.
                 when_exprs = [
                     BooleanExpression(InfixExpression(case, "==", expr))
                     for expr in self._parse_when_expression(
@@ -156,6 +162,7 @@ class LaxCaseTag(CaseTag):
                 stream.next_token()
                 when_block = self.parser.parse_block(stream, ENDWHENBLOCK)
 
+                # Reuse the same block.
                 blocks.extend(
                     ast.ConditionalBlockNode(
                         tok=when_tok,
