@@ -216,4 +216,11 @@ cases = [
         globals={},
         future=True,
     ),
+    Case(
+        description="truthy and empty when block before else",
+        template=(r"{% case 'x' %}{% when 'x' %}{% else %}bar{% endcase %}"),
+        expect="",
+        globals={},
+        future=True,
+    ),
 ]
