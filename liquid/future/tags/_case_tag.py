@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
@@ -27,12 +26,6 @@ if TYPE_CHECKING:
     from liquid.stream import TokenStream
 
 
-@dataclass
-class _Block:
-    tag: str
-    node: Union[ast.BlockNode, ast.ConditionalBlockNode]
-
-
 class LaxCaseNode(ast.Node):
     """Parse tree node for the lax "case" tag."""
 
@@ -41,27 +34,27 @@ class LaxCaseNode(ast.Node):
     def __init__(
         self,
         tok: Token,
-        blocks: List[_Block],
+        blocks: List[Union[ast.BlockNode, ast.ConditionalBlockNode]],
     ):
         self.tok = tok
         self.blocks = blocks
 
         self.forced_output = self.force_output or any(
-            b.node.forced_output for b in self.blocks
+            b.forced_output for b in self.blocks
         )
 
     def __str__(self) -> str:
         buf = (
             ["if (False) { }"]
-            if not self.blocks or self.blocks[0].tag == TAG_ELSE
-            else [f"if {self.blocks[0].node}"]
+            if not self.blocks or isinstance(self.blocks[0], ast.BlockNode)
+            else [f"if {self.blocks[0]}"]
         )
 
         for block in self.blocks:
-            if block.tag == TAG_ELSE:
-                buf.append(f"else {block.node}")
-            elif block.tag == TAG_WHEN:
-                buf.append(f"elsif {block.node}")
+            if isinstance(block, ast.BlockNode):
+                buf.append(f"else {block}")
+            if isinstance(block, ast.ConditionalBlockNode):
+                buf.append(f"elsif {block}")
 
         return " ".join(buf)
 
@@ -70,10 +63,10 @@ class LaxCaseNode(ast.Node):
         rendered: Optional[bool] = False
 
         for block in self.blocks:
-            if block.tag == TAG_WHEN:
-                rendered = block.node.render(context, buf) or rendered
-            elif block.tag == TAG_ELSE and not rendered:
-                block.node.render(context, buf)
+            if isinstance(block, ast.ConditionalBlockNode):
+                rendered = block.render(context, buf) or rendered
+            elif isinstance(block, ast.BlockNode) and not rendered:
+                block.render(context, buf)
 
         val = buf.getvalue()
         if self.forced_output or not val.isspace():
@@ -88,10 +81,10 @@ class LaxCaseNode(ast.Node):
         rendered: Optional[bool] = False
 
         for block in self.blocks:
-            if block.tag == TAG_WHEN:
-                rendered = await block.node.render_async(context, buf) or rendered
-            elif block.tag == TAG_ELSE and not rendered:
-                await block.node.render_async(context, buf)
+            if isinstance(block, ast.ConditionalBlockNode):
+                rendered = await block.render_async(context, buf) or rendered
+            elif isinstance(block, ast.BlockNode) and not rendered:
+                await block.render_async(context, buf)
 
         val = buf.getvalue()
         if self.forced_output or not val.isspace():
@@ -103,20 +96,20 @@ class LaxCaseNode(ast.Node):
         _children = []
 
         for block in self.blocks:
-            if isinstance(block.node, ast.BlockNode):
+            if isinstance(block, ast.BlockNode):
                 _children.append(
                     ast.ChildNode(
-                        linenum=block.node.tok.linenum,
-                        node=block.node,
+                        linenum=block.tok.linenum,
+                        node=block,
                         expression=None,
                     )
                 )
-            elif isinstance(block.node, ast.ConditionalBlockNode):
+            elif isinstance(block, ast.ConditionalBlockNode):
                 _children.append(
                     ast.ChildNode(
-                        linenum=block.node.tok.linenum,
-                        node=block.node,
-                        expression=block.node.condition,
+                        linenum=block.tok.linenum,
+                        node=block,
+                        expression=block.condition,
                     )
                 )
 
@@ -143,17 +136,12 @@ class LaxCaseTag(CaseTag):
         ):
             stream.next_token()
 
-        blocks: List[_Block] = []
+        blocks: List[Union[ast.BlockNode, ast.ConditionalBlockNode]] = []
 
         while not stream.current.istag(TAG_ENDCASE):
             if stream.current.istag(TAG_ELSE):
                 stream.next_token()
-                blocks.append(
-                    _Block(
-                        tag=TAG_ELSE,
-                        node=self.parser.parse_block(stream, ENDWHENBLOCK),
-                    )
-                )
+                blocks.append(self.parser.parse_block(stream, ENDWHENBLOCK))
             elif stream.current.istag(TAG_WHEN):
                 when_tok = stream.next_token()
                 expect(stream, TOKEN_EXPRESSION)  # XXX: empty when expressions?
@@ -169,13 +157,10 @@ class LaxCaseTag(CaseTag):
                 when_block = self.parser.parse_block(stream, ENDWHENBLOCK)
 
                 blocks.extend(
-                    _Block(
-                        tag=TAG_WHEN,
-                        node=ast.ConditionalBlockNode(
-                            tok=when_tok,
-                            condition=expr,
-                            block=when_block,
-                        ),
+                    ast.ConditionalBlockNode(
+                        tok=when_tok,
+                        condition=expr,
+                        block=when_block,
                     )
                     for expr in when_exprs
                 )
