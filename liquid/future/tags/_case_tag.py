@@ -144,7 +144,7 @@ class LaxCaseTag(CaseTag):
                 blocks.append(self.parser.parse_block(stream, ENDWHENBLOCK))
             elif stream.current.istag(TAG_WHEN):
                 when_tok = stream.next_token()
-                expect(stream, TOKEN_EXPRESSION)  # XXX: empty when expressions?
+                expect(stream, TOKEN_EXPRESSION)
 
                 when_exprs = [
                     BooleanExpression(InfixExpression(case, "==", expr))
