@@ -143,17 +143,6 @@ cases = [
         globals={"title": "Hello"},
     ),
     Case(
-        description="mix or and comma separated when expression",
-        template=(
-            r"{% case title %}"
-            r"{% when 'foo' %}foo"
-            r"{% when 'bar' or 'Hello', 'Hello' %}bar"
-            r"{% endcase %}"
-        ),
-        expect="barbar",
-        globals={"title": "Hello"},
-    ),
-    Case(
         description="unexpected when token",
         template=(
             r"{% case title %}"
@@ -187,5 +176,51 @@ cases = [
         template="{% case x %}{% when y %}foo{% endcase %}",
         expect="foo",
         globals={"x": ["a", "b", "c"], "y": ["a", "b", "c"]},
+    ),
+    Case(
+        description="multiple else blocks",
+        template=(
+            r"{% case 'x' %}{% when 'y' %}foo{% else %}bar{% else %}baz{% endcase %}"
+        ),
+        expect="barbaz",
+        globals={},
+        future=True,
+    ),
+    Case(
+        description="falsy when before and truthy when after else",
+        template=(
+            r"{% case 'x' %}{% when 'y' %}foo{% else %}bar"
+            r"{% when 'x' %}baz{% endcase %}"
+        ),
+        expect="barbaz",
+        globals={},
+        future=True,
+    ),
+    Case(
+        description="falsy when before and truthy when after multiple else blocks",
+        template=(
+            r"{% case 'x' %}{% when 'y' %}foo{% else %}bar"
+            r"{% else %}baz{% when 'x' %}qux{% endcase %}"
+        ),
+        expect="barbazqux",
+        globals={},
+        future=True,
+    ),
+    Case(
+        description="truthy when before and after else",
+        template=(
+            r"{% case 'x' %}{% when 'x' %}foo"
+            r"{% else %}bar{% when 'x' %}baz{% endcase %}"
+        ),
+        expect="foobaz",
+        globals={},
+        future=True,
+    ),
+    Case(
+        description="truthy and empty when block before else",
+        template=(r"{% case 'x' %}{% when 'x' %}{% else %}bar{% endcase %}"),
+        expect="",
+        globals={},
+        future=True,
     ),
 ]
