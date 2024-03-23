@@ -76,6 +76,9 @@ ENV/
 # IDE
 .vscode/
 
+# System
+.DS_Store
+
 # Dev utils
 dev.py
 dump_golden.py
