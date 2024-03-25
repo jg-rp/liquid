@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from liquid import Environment
 
 ArrayT = Union[List[Any], Tuple[Any, ...]]
+"""Array-like objects."""
 
 # Send objects with missing keys to the end when sorting a list.
 MAX_CH = chr(0x10FFFF)
@@ -74,9 +75,12 @@ def _lower(obj: Any) -> str:
 @with_environment
 @sequence_filter
 def join(
-    sequence: Iterable[object], separator: object = " ", *, environment: Environment
+    sequence: Iterable[object],
+    separator: object = " ",
+    *,
+    environment: Environment,
 ) -> str:
-    """Concatenate an array of strings."""
+    """Return a string of items in _sequence_ separated by _separator_."""
     if not isinstance(separator, str):
         separator = str(separator)
 
@@ -88,7 +92,7 @@ def join(
 
 @liquid_filter
 def first(obj: Any) -> object:
-    """Return the first item of an array."""
+    """Return the first item of collection _obj_."""
     if isinstance(obj, str):
         return None
 
@@ -103,7 +107,7 @@ def first(obj: Any) -> object:
 
 @liquid_filter
 def last(obj: Sequence[Any]) -> object:
-    """Return the last item of an array."""
+    """Return the last item of collection _obj_."""
     if isinstance(obj, str):
         return None
 
@@ -115,7 +119,7 @@ def last(obj: Sequence[Any]) -> object:
 
 @sequence_filter
 def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
-    """Return two arrays joined together."""
+    """Return the concatenation of _sequence_ and _second_array_."""
     if not isinstance(second_array, (list, tuple)):
         raise FilterArgumentError(
             f"concat expected an array, found {type(second_array).__name__}"
@@ -129,7 +133,7 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
 
 @sequence_filter
 def map_(sequence: ArrayT, key: object) -> List[object]:
-    """Create an array of values from a map."""
+    """Return an array/list of items in _sequence_ selected by _key_."""
     try:
         return [_getitem(itm, str(key), default=NIL) for itm in sequence]
     except TypeError as err:
@@ -144,9 +148,9 @@ def reverse(array: ArrayT) -> List[object]:
 
 @array_filter
 def sort(sequence: ArrayT, key: object = None) -> List[object]:
-    """Sorts items in an array in case-sensitive order.
+    """Return a copy of _sequence_ in ascending order.
 
-    When a key string is provided, objects without the key property should
+    When a key string is provided, objects without the key property will
     be at the end of the output list/array.
     """
     if key:
@@ -161,7 +165,11 @@ def sort(sequence: ArrayT, key: object = None) -> List[object]:
 
 @array_filter
 def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
-    """Sorts items in an array in case-insensitive order."""
+    """Return a copy of _sequence_ in ascending order, with case-insensitive comparison.
+
+    When a key string is provided, objects without the key property will
+    be at the end of the output list/array.
+    """
     if key:
         item_getter = partial(_getitem, key=str(key), default=MAX_CH)
         return sorted(sequence, key=lambda obj: _lower(item_getter(obj)))
@@ -171,7 +179,7 @@ def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
 
 @sequence_filter
 def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
-    """Create an array from a map where _attr_ equals _value_."""
+    """Return a list of items from _sequence_ where _attr_ equals _value_."""
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) == value]
 
@@ -180,7 +188,7 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
 
 @sequence_filter
 def uniq(sequence: ArrayT, key: object = None) -> List[object]:
-    """Removes any duplicate elements in an array."""
+    """Return a copy of _sequence_ with duplicate elements removed."""
     # Note that we're not using a dict or set for deduplication because we need
     # to handle sequences containing unhashable objects, like dictionaries.
 
@@ -209,7 +217,7 @@ def uniq(sequence: ArrayT, key: object = None) -> List[object]:
 
 @sequence_filter
 def compact(sequence: ArrayT, key: object = None) -> List[object]:
-    """Removes any nil values from an array."""
+    """Return a copy of _sequence_ with any nil values removed."""
     if key is not None:
         try:
             return [itm for itm in sequence if itm[key] is not None]
@@ -220,7 +228,7 @@ def compact(sequence: ArrayT, key: object = None) -> List[object]:
 
 @sequence_filter
 def sum_(sequence: ArrayT, key: object = None) -> Union[float, int, Decimal]:
-    """Return the sum of all numeric elements in an array.
+    """Return the sum of all numeric elements in _sequence_.
 
     If _key_ is given, it is assumed that sequence items are mapping-like,
     and the values at _item[key]_ will be summed instead.
