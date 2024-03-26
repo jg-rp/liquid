@@ -80,7 +80,7 @@ def join(
     *,
     environment: Environment,
 ) -> str:
-    """Return a string of items in _sequence_ separated by _separator_."""
+    """Return a string by joining items in _sequence_, separated by _separator_."""
     if not isinstance(separator, str):
         separator = str(separator)
 
@@ -107,7 +107,7 @@ def first(obj: Any) -> object:
 
 @liquid_filter
 def last(obj: Sequence[Any]) -> object:
-    """Return the last item of collection _obj_."""
+    """Return the last item of array-like object _obj_."""
     if isinstance(obj, str):
         return None
 
