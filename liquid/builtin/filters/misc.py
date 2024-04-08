@@ -1,4 +1,4 @@
-"""Miscellaneous filters."""
+"""Miscellaneous filter functions."""
 from __future__ import annotations
 
 import datetime
@@ -27,7 +27,10 @@ if TYPE_CHECKING:
 
 @liquid_filter
 def size(obj: Any) -> int:
-    """Return the length of an array or string."""
+    """Return the length of _obj_.
+
+    _obj_ could be a dict, list, string or any class implementing _len_.
+    """
     try:
         return len(obj)
     except TypeError:
@@ -36,7 +39,7 @@ def size(obj: Any) -> int:
 
 @liquid_filter
 def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> Any:
-    """Return a default value if the input is nil, false, or empty."""
+    """Return _obj_, or _default_ if _obj_ is nil, false, or empty."""
     _obj = obj
 
     # Return the default value immediately if the object defines a
@@ -69,7 +72,7 @@ def date(  # noqa: PLR0912 PLR0911
     *,
     environment: Environment,
 ) -> str:
-    """Format a datetime according the the given format string."""
+    """Return a string representation of _dat_ using format string _fmt_."""
     if is_undefined(dat):
         return ""
 

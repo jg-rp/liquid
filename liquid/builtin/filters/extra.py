@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 @with_environment
 @string_filter
 def safe(val: str, *, environment: Environment) -> str:
-    """Stringify and mark as safe."""
+    """Return a copy of _val_ that will not be automatically HTML escaped on output."""
     if environment.autoescape:
         return Markup(val)
     return val
