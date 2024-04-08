@@ -1,4 +1,4 @@
-"""Maths related filter definitions."""
+"""Maths related filter functions."""
 
 import decimal
 import math
@@ -10,10 +10,10 @@ from liquid.exceptions import FilterArgumentError
 from liquid.filter import math_filter
 from liquid.filter import num_arg
 
-# TODO: [VERSION_2] Either handle all filter function argument type conversions
-# in a decorator or all in the function itself. Having these type conversions
-# split between decorators and calls to helper functions does not help with
-# readability, or make it easy to write good doc strings.
+# TODO: Version 2 - Either handle all filter function argument type
+# conversions in a decorator or all in the function itself. Having these type
+# conversions split between decorators and calls to helper functions does not
+# help with readability, or make it easy to write good doc strings.
 
 
 @math_filter
