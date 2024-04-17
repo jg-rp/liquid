@@ -60,27 +60,45 @@ Hello user
 
 ## Falsy StrictUndefined
 
-It's usually [not possible](https://github.com/Shopify/liquid/issues/1034) to detect undefined variables in a template using an [`if`](../language/tags#if) tag. In Python Liquid we can implement an `Undefined` type that allows us to write `{% if nosuchthing %}`, but still get some strictness when undefined variables are used elsewhere.
+It's [usually not possible](https://github.com/Shopify/liquid/issues/1034) to detect undefined variables in a template using an [`if`](../language/tags#if) tag. In Python Liquid we can implement an `Undefined` type that allows us to write `{% if nosuchthing %}` or `{% if nosuchthing == 'foo' %}`, but still get some strictness when undefined variables are used elsewhere.
 
 ```python
 from liquid import Environment
 from liquid import StrictUndefined
 
+
 class FalsyStrictUndefined(StrictUndefined):
+    # Properties that don't raise an UndefinedError.
+    allowed_properties = frozenset(
+        [
+            "__repr__",
+            "__bool__",
+            "__eq__",
+            "__liquid__",
+            "__class__",
+            "name",
+            "hint",
+            "obj",
+            "msg",
+        ]
+    )
+
     def __bool__(self) -> bool:
         return False
 
     def __eq__(self, other: object) -> bool:
-        if other is False:
-            return True
-        raise UndefinedError(self.msg)
+        return other is False
+
 
 env = Environment(undefined=FalsyStrictUndefined)
 
 template = env.from_string("{% if nosuchthing %}foo{% else %}bar{% endif %}")
-template.render() # "bar"
+print(template.render())  # "bar"
 
-template = env.from_string("{{ nosuchthing }}")
+template = env.from_string("{% if nosuchthing == 'hi' %}foo{% else %}bar{% endif %}")
+print(template.render())  # "bar"
+
+template = env.from_string("{{ nosuchthing | upcase }}")
 template.render()
 # UndefinedError: 'nosuchthing' is undefined, on line 1
 ```
