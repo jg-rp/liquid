@@ -615,7 +615,6 @@ class ExpressionParser:
         filter_name = stream.current.value
         stream.next_token()
 
-        #
         args = []
         kwargs = {}
 

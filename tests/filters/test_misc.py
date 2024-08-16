@@ -1,4 +1,5 @@
 """Test miscellaneous filter functions."""
+
 import datetime
 import decimal
 import platform
@@ -32,9 +33,7 @@ class MockDrop:  # pragma: no cover
         self.val = val
 
     def __eq__(self, other):
-        if isinstance(other, MockDrop) and self.val == other.val:
-            return True
-        return False
+        return bool(isinstance(other, MockDrop) and self.val == other.val)
 
     def __str__(self):
         return "hello mock drop"
@@ -48,9 +47,7 @@ class NoLiquidDrop:  # pragma: no cover
         self.val = val
 
     def __eq__(self, other):
-        if isinstance(other, NoLiquidDrop) and self.val == other.val:
-            return True
-        return False
+        return bool(isinstance(other, NoLiquidDrop) and self.val == other.val)
 
     def __str__(self):
         return "hello no liquid drop"
@@ -63,9 +60,7 @@ class FalsyDrop:  # pragma: no cover
     def __eq__(self, other):
         if isinstance(other, bool) and self.val == other:
             return True
-        if isinstance(other, FalsyDrop) and self.val == other.val:
-            return True
-        return False
+        return bool(isinstance(other, FalsyDrop) and self.val == other.val)
 
     def __str__(self):
         return "falsy drop"
