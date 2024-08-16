@@ -6,6 +6,7 @@ template rendering behavior.
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
 from .filters import split
+from .tags import InterruptingTablerowTag
 from .tags import LaxCaseTag
 from .tags import LaxIfTag
 from .tags import LaxUnlessTag
@@ -31,3 +32,4 @@ class Environment(DefaultEnvironment):
         self.add_tag(LaxCaseTag)
         self.add_tag(LaxIfTag)
         self.add_tag(LaxUnlessTag)
+        self.add_tag(InterruptingTablerowTag)
