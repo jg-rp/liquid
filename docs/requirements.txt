@@ -1,6 +1,6 @@
-black==23.11.0
-mkdocs-material==9.4.8
-mkdocstrings-python==1.7.4
-mkdocstrings==0.24.0
-python-dateutil==2.8.2
-typing_extensions==4.8.0
+black==24.8.0
+mkdocs-material==9.5.32
+mkdocstrings-python==1.10.8
+mkdocstrings==0.25.2
+python-dateutil==2.9.0.post0
+typing_extensions==4.12.2
