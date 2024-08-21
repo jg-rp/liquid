@@ -6,6 +6,10 @@
 
 - Fixed `{% case %}` / `{% when %}` behavior. When using [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment), we now render any number of `{% else %}` blocks and allow `{% when %}` tags to appear after `{% else %}` tags. The default `Environment` continues to raise a `LiquidSyntaxError` in such cases.
 
+**Changed**
+
+- Changed `{% break %}` and `{% continue %}` tag handling when they appear inside a `{% tablerow %}` tag. Now, when using `liquid.future.Environment`, interrupts follow Shopify/Liquid behavior introduced in [#1818](https://github.com/Shopify/liquid/pull/1818). Python Liquid's default environment is unchanged.
+
 ## Version 1.12.1
 
 **Fixes**

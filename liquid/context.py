@@ -72,9 +72,7 @@ class BuiltIn(Mapping[str, object]):
     """Mapping-like object for resolving built-in, dynamic objects."""
 
     def __contains__(self, item: object) -> bool:
-        if item in ("now", "today"):
-            return True
-        return False
+        return item in ("now", "today")
 
     def __getitem__(self, key: str) -> object:
         if key == "now":

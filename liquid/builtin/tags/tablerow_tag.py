@@ -12,6 +12,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import Context
+from liquid.exceptions import BreakLoop
+from liquid.exceptions import ContinueLoop
 from liquid.expression import NIL
 from liquid.expression import LoopExpression
 from liquid.limits import to_int
@@ -156,6 +158,9 @@ class TableRow(Mapping[str, object]):
 class TablerowNode(Node):
     """Parse tree node for the built-in "tablerow" tag."""
 
+    interrupts = False
+    """If _true_, handle `break` and `continue` interrupts inside a tablerow loop."""
+
     __slots__ = ("tok", "expression", "block")
 
     def __init__(
@@ -194,18 +199,33 @@ class TablerowNode(Node):
         }
 
         buffer.write('<tr class="row1">\n')
+        _break = False
 
         with context.extend(namespace):
             for item in tablerow:
                 namespace[name] = item
                 buffer.write(f'<td class="col{tablerow.col}">')
-                self.block.render(context=context, buffer=buffer)
+
+                try:
+                    self.block.render(context=context, buffer=buffer)
+                except BreakLoop:
+                    if self.interrupts:
+                        _break = True
+                    else:
+                        raise
+                except ContinueLoop:
+                    if not self.interrupts:
+                        raise
+
                 buffer.write("</td>")
 
                 if tablerow.col_last and not tablerow.last:
                     buffer.write(f'</tr>\n<tr class="row{tablerow.row + 1}">')
 
-            buffer.write("</tr>\n")
+                if _break:
+                    break
+
+        buffer.write("</tr>\n")
         return True
 
     async def render_to_output_async(
@@ -227,18 +247,33 @@ class TablerowNode(Node):
         }
 
         buffer.write('<tr class="row1">\n')
+        _break = False
 
         with context.extend(namespace):
             for item in tablerow:
                 namespace[name] = item
                 buffer.write(f'<td class="col{tablerow.col}">')
-                await self.block.render_async(context=context, buffer=buffer)
+
+                try:
+                    await self.block.render_async(context=context, buffer=buffer)
+                except BreakLoop:
+                    if self.interrupts:
+                        _break = True
+                    else:
+                        raise
+                except ContinueLoop:
+                    if not self.interrupts:
+                        raise
+
                 buffer.write("</td>")
 
                 if tablerow.col_last and not tablerow.last:
                     buffer.write(f'</tr>\n<tr class="row{tablerow.row + 1}">')
 
-            buffer.write("</tr>\n")
+                if _break:
+                    break
+
+        buffer.write("</tr>\n")
         return True
 
     def children(self) -> List[ChildNode]:

@@ -1,4 +1,5 @@
 """Liquid expression objects."""
+
 from __future__ import annotations
 
 import sys
@@ -79,9 +80,7 @@ class Empty(Expression):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Empty):
             return True
-        if isinstance(other, (list, dict, str)) and not other:
-            return True
-        return False
+        return isinstance(other, (list, dict, str)) and not other
 
     def __repr__(self) -> str:  # pragma: no cover
         return "Empty()"
@@ -107,9 +106,7 @@ class Blank(Expression):
             return True
         if isinstance(other, (list, dict)) and not other:
             return True
-        if isinstance(other, Blank):
-            return True
-        return False
+        return isinstance(other, Blank)
 
     def __repr__(self) -> str:  # pragma: no cover
         return "Blank()"
@@ -131,9 +128,7 @@ class Continue(Expression):
     __slots__ = ()
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, Continue):
-            return True
-        return False
+        return isinstance(other, Continue)
 
     def __repr__(self) -> str:  # pragma: no cover
         return "Continue()"
@@ -1106,7 +1101,7 @@ def compare(left: object, op: str, right: object) -> bool:  # noqa: PLR0911, PLR
         right = right.__liquid__()
 
     def _type_error(_left: object, _right: object) -> NoReturn:
-        if type(_left) != type(_right):
+        if type(_left) != type(_right):  # noqa: E721
             raise LiquidTypeError(f"invalid operator for types '{_left} {op} {_right}'")
 
         raise LiquidTypeError(f"unknown operator: {type(_left)} {op} {type(_right)}")
