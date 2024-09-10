@@ -1,4 +1,5 @@
 """Liquid render tests."""
+
 import asyncio
 import unittest
 from typing import List
@@ -13,6 +14,8 @@ from liquid.mode import Mode
 from liquid.template import AwareBoundTemplate
 from liquid.template import BoundTemplate
 from liquid.template import FutureAwareBoundTemplate
+
+# mypy: disable-error-code="no-untyped-def"
 
 
 class RenderTestCase(unittest.TestCase):
@@ -438,3 +441,7 @@ class RenderMiscTestCase(RenderTestCase):
     def test_identifiers(self):
         """Test permitted identifiers."""
         self._test(golden.identifiers.cases)
+
+    def test_universal_end_tags(self) -> None:
+        """Test universal aka anonymous end tags."""
+        self._test(golden.universal_end_tags.cases)

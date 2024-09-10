@@ -72,6 +72,7 @@ from . import times_filter
 from . import truncate_filter
 from . import truncatewords_filter
 from . import uniq_filter
+from . import universal_end_tags
 from . import unless_tag
 from . import upcase_filter
 from . import url_decode_filter
@@ -154,6 +155,7 @@ test_cases = [
     truncate_filter,
     truncatewords_filter,
     uniq_filter,
+    universal_end_tags,
     unless_tag,
     upcase_filter,
     url_decode_filter,
