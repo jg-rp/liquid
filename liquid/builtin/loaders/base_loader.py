@@ -1,4 +1,5 @@
 """Base template loader."""
+
 from __future__ import annotations
 
 from abc import ABC
@@ -48,7 +49,7 @@ class BaseLoader(ABC):  # noqa: B024
 
     Attributes:
         caching_loader (bool): Indicates if this loader implements its own cache.
-            Setting this sto `True` will cause the `Environment` to disable its cache
+            Setting this to `True` will cause the `Environment` to disable its cache
             when initialized with a caching loader.
     """
 
