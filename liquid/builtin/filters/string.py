@@ -1,4 +1,5 @@
 """Filter functions that operate on strings."""
+
 from __future__ import annotations
 
 import base64

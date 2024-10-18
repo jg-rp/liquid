@@ -17,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "python-dateutil>=2.8.1",
@@ -31,7 +32,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-autoescape = ["MarkupSafe>=2.0.0"]
+autoescape = ["MarkupSafe>=2,<3"]
 
 [project.urls]
 "Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
@@ -63,7 +64,7 @@ dependencies = [
   "ruff",
   "mock",
   "types-python-dateutil",
-  "MarkupSafe",
+  "MarkupSafe>=2, < 3",
 ]
 
 [tool.hatch.envs.default.scripts]
