@@ -282,6 +282,61 @@ cases = [
             "</tr>\n"
         ),
     ),
+    Case(
+        description="break from a tablerow loop",
+        template=(
+            r"{% tablerow n in (1..3) cols:2 %}"
+            r"{{n}}{% break %}{{n}}"
+            r"{% endtablerow %}"
+        ),
+        expect='<tr class="row1">\n<td class="col1">1</td></tr>\n',
+        future=True,
+    ),
+    Case(
+        description="continue from a tablerow loop",
+        template=(
+            r"{% tablerow n in (1..3) cols:2 %}"
+            r"{{n}}{% continue %}{{n}}"
+            r"{% endtablerow %}"
+        ),
+        expect=(
+            '<tr class="row1">\n'
+            '<td class="col1">1</td>'
+            '<td class="col2">2</td>'
+            "</tr>\n"
+            '<tr class="row2">'
+            '<td class="col1">3</td>'
+            "</tr>\n"
+        ),
+        future=True,
+    ),
+    Case(
+        description="break from a tablerow loop inside a for loop",
+        template=(
+            r"{% for i in (1..2) -%}\n"
+            r"{% for j in (1..2) -%}\n"
+            r"{% tablerow k in (1..3) %}{% break %}{% endtablerow -%}\n"
+            r"loop j={{ j }}\n"
+            r"{% endfor -%}\n"
+            r"loop i={{ i }}\n"
+            r"{% endfor -%}\n"
+            r"after loop\n"
+        ),
+        expect="\n".join(
+            [
+                r'\n\n<tr class="row1">',
+                r'<td class="col1"></td></tr>',
+                r'\nloop j=1\n\n<tr class="row1">',
+                r'<td class="col1"></td></tr>',
+                r'\nloop j=2\n\nloop i=1\n\n\n<tr class="row1">',
+                r'<td class="col1"></td></tr>',
+                r'\nloop j=1\n\n<tr class="row1">',
+                r'<td class="col1"></td></tr>',
+                r"\nloop j=2\n\nloop i=2\n\nafter loop\n",
+            ]
+        ),
+        future=True,
+    ),
     # Case(
     #     description="cols is non number string",
     #     template=(

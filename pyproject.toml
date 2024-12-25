@@ -17,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "python-dateutil>=2.8.1",
@@ -31,7 +32,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-autoescape = ["MarkupSafe>=2.0.0"]
+autoescape = ["MarkupSafe>=2,<3"]
 
 [project.urls]
 "Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
@@ -63,7 +64,7 @@ dependencies = [
   "ruff",
   "mock",
   "types-python-dateutil",
-  "MarkupSafe",
+  "MarkupSafe>=2, < 3",
 ]
 
 [tool.hatch.envs.default.scripts]
@@ -130,48 +131,6 @@ warn_unused_configs = true
 warn_unused_ignores = false
 
 [tool.ruff]
-select = [
-  "A",
-  "ARG",
-  "B",
-  "BLE",
-  "C4",
-  "D",
-  "E",
-  "F",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PIE",
-  "PL",
-  "PT",
-  "Q",
-  "RET",
-  "RSE",
-  "S",
-  "SIM",
-  "SLF",
-  "T10",
-  "T20",
-  "YTT",
-]
-# TODO: review ignores
-ignore = [
-  "S105",
-  "S101",
-  "D107",
-  "D105",
-  "PLR0913",
-  "D401",
-  "N818",
-  "PT009",
-  "B905",
-  "PT027",
-]
-
-fixable = ["I", "SIM", "D202"]
-unfixable = []
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -200,19 +159,16 @@ exclude = [
 # Same as Black.
 line-length = 88
 
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 # Assume Python 3.10.
 target-version = "py310"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 force-single-line = true
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "liquid/__about__.py" = ["D100"]
 "liquid/__init__.py" = ["D104", "I001"]
 "liquid/builtin/filters/__init__.py" = ["D104", "I001"]
@@ -220,3 +176,52 @@ convention = "google"
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "scripts/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
+
+[tool.ruff.lint]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+select = [
+  "A",
+  "ARG",
+  "B",
+  "BLE",
+  "C4",
+  "D",
+  "E",
+  "F",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PIE",
+  "PL",
+  "PT",
+  "Q",
+  "RET",
+  "RSE",
+  "S",
+  "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TCH",
+  "YTT",
+]
+
+# TODO: review ignores
+ignore = [
+  "S105",
+  "S101",
+  "D107",
+  "D105",
+  "PLR0913",
+  "D401",
+  "N818",
+  "PT009",
+  "B905",
+  "PT027",
+]
+
+fixable = ["I", "SIM", "D202"]
+unfixable = []

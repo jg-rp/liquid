@@ -1,4 +1,5 @@
 """Malformed template test cases."""
+
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -410,6 +411,18 @@ class MalformedTemplateTestCase(TestCase):
                 template=r"text {%method} oh nos!",
                 expect_exception=LiquidSyntaxError,
                 expect_msg="expected '%}', found 'eof', on line 1",
+            ),
+            Case(
+                description="issue #162",
+                template="Hello, \nMy name is {{{ name }}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="issue #162",
+                template="Hello, \nMy name is {% echo { name %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
             ),
         ]
 
