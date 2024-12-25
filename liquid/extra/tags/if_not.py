@@ -20,4 +20,6 @@ class IfNotTag(IfTag):
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Pare a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
-        return parse_boolean_expression_with_parens(stream.current.value)
+        return parse_boolean_expression_with_parens(
+            stream.current.value, stream.current.linenum
+        )

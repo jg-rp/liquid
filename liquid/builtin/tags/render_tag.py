@@ -1,4 +1,5 @@
 """Parse tree node and tag definition for the built in "render" tag."""
+
 import sys
 from typing import Dict
 from typing import List
@@ -249,7 +250,9 @@ class RenderTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         tok = next(stream)
         expect(stream, TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(tokenize(stream.current.value))
+        expr_stream = ExprTokenStream(
+            tokenize(stream.current.value, stream.current.linenum)
+        )
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
         # This is the name of the template to be included.
