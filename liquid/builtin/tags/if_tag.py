@@ -185,7 +185,10 @@ class IfTag(Tag):
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Pare a boolean expression from a stream of tokens."""
         expect(stream, TOKEN_EXPRESSION)
-        return self.env.parse_boolean_expression_value(stream.current.value)
+        return self.env.parse_boolean_expression_value(
+            stream.current.value,
+            stream.current.linenum,
+        )
 
     def parse(self, stream: TokenStream) -> Node:
         expect(stream, TOKEN_TAG, value=TAG_IF)

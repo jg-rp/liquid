@@ -3,7 +3,7 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [project]
-authors = [{name = "James Prior", email = "jamesgr.prior@gmail.com"}]
+authors = [{ name = "James Prior", email = "jamesgr.prior@gmail.com" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -18,7 +18,11 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = ["python-dateutil>=2.8.1", "typing-extensions>=4.2.0", "importlib-resources>=5.10.0"]
+dependencies = [
+  "python-dateutil>=2.8.1",
+  "typing-extensions>=4.2.0",
+  "importlib-resources>=5.10.0",
+]
 description = "A Python engine for the Liquid template language."
 dynamic = ["version"]
 license = "MIT"
@@ -150,7 +154,6 @@ select = [
   "SLF",
   "T10",
   "T20",
-  "TCH",
   "YTT",
 ]
 # TODO: review ignores
