@@ -60,4 +60,6 @@ class Statement(Tag):
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
-        return self.node_class(tok, self.env.parse_filtered_expression_value(tok.value))
+        return self.node_class(
+            tok, self.env.parse_filtered_expression_value(tok.value, tok.linenum)
+        )

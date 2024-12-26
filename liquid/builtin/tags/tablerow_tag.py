@@ -302,7 +302,9 @@ class TablerowTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        loop_expression = self.env.parse_loop_expression_value(stream.current.value)
+        loop_expression = self.env.parse_loop_expression_value(
+            stream.current.value, stream.current.linenum
+        )
         stream.next_token()
 
         block = parser.parse_block(stream, END_TAGBLOCK)

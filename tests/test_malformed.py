@@ -1,4 +1,5 @@
 """Malformed template test cases."""
+
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -16,6 +17,7 @@ from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import LiquidWarning
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import lookup_warning
 from liquid.extra import IfNotTag
@@ -33,20 +35,20 @@ class Case(NamedTuple):
     expect_render: str = ""
 
     @property
-    def exceptions(self):
+    def exceptions(self) -> Tuple[Type[Error], ...]:
         if isinstance(self.expect_exception, tuple):
             return self.expect_exception
         return (self.expect_exception,)
 
     @property
-    def warnings(self):
+    def warnings(self) -> Tuple[Type[LiquidWarning], ...]:
         return tuple(lookup_warning(e) for e in self.exceptions)
 
 
 class MalformedTemplateTestCase(TestCase):
     """Malformed template test case."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.global_context = {
             "product": {
                 "some-tags": ["hello", "there"],
@@ -55,7 +57,7 @@ class MalformedTemplateTestCase(TestCase):
             "tag": "goodbye",
         }
 
-    def _test(self, test_cases: Iterable[Case], mode: Mode = Mode.STRICT):
+    def _test(self, test_cases: Iterable[Case], mode: Mode = Mode.STRICT) -> None:
         """Helper method for running lists of `Case`s in each render mode."""
         self._test_with_env(Environment(tolerance=mode), test_cases)
 
@@ -75,7 +77,7 @@ class MalformedTemplateTestCase(TestCase):
             env, [case for case in test_cases if "||" not in case.template]
         )
 
-    def _test_with_env(self, env: Environment, test_cases: Iterable[Case]):
+    def _test_with_env(self, env: Environment, test_cases: Iterable[Case]) -> None:
         for case in test_cases:
             with self.subTest(msg=case.description, mode=env.mode):
                 if env.mode == Mode.STRICT:
@@ -103,7 +105,9 @@ class MalformedTemplateTestCase(TestCase):
                     result = template.render()
                     self.assertEqual(result, case.expect_render)
 
-    def _test_partial(self, test_cases: Iterable[Case], templates: Dict[str, str]):
+    def _test_partial(
+        self, test_cases: Iterable[Case], templates: Dict[str, str]
+    ) -> None:
         """Helper method for testing lists of 'include' or 'render' cases."""
         env = Environment(loader=DictLoader(templates))
         for case in test_cases:
@@ -132,7 +136,7 @@ class MalformedTemplateTestCase(TestCase):
                 result = template.render()
                 self.assertEqual(result, case.expect_render)
 
-    def test_liquid_syntax(self):
+    def test_liquid_syntax(self) -> None:
         """Test that we fail early and loud when parsing a malformed template."""
         test_cases = [
             Case(
@@ -389,14 +393,14 @@ class MalformedTemplateTestCase(TestCase):
         self._test(test_cases, mode=Mode.WARN)
         self._test(test_cases, mode=Mode.LAX)
 
-    def test_liquid_syntax_from_template_api(self):
+    def test_liquid_syntax_from_template_api(self) -> None:
         """Test that syntax errors are raised by default when using the `Template`
         API."""
         with self.assertRaises(LiquidSyntaxError):
             # Missing colon before filter argument
             Template(r"{{ a | sort foo }}")
 
-    def test_unrecoverable_syntax_errors(self):
+    def test_unrecoverable_syntax_errors(self) -> None:
         """Test that we fail early and loud when parsing a malformed template."""
         test_cases = [
             Case(
@@ -415,7 +419,88 @@ class MalformedTemplateTestCase(TestCase):
 
         self._test(test_cases, mode=Mode.STRICT)
 
-    def test_bad_include(self):
+    def test_error_line_numbers(self) -> None:
+        """Test that we get the correct line number in error messages."""
+        test_cases = [
+            Case(
+                description="issue #162",
+                template="Hello, \nMy name is {{{ name }}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="echo",
+                template="Hello, \nMy name is {% echo { name %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="assign",
+                template="Hello, \n\n {% assign x = { name %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+            Case(
+                description="decrement",
+                template="Hello, \n\n {% decrement { x %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+            Case(
+                description="increment",
+                template="Hello, \n\n {% increment { x %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+            Case(
+                description="for",
+                template="Hello, \n {% for x \nin { y %}{% endfor %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+            Case(
+                description="if",
+                template="Hello, \n {% if x == { y %}{% endif %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="elsif",
+                template="Hello, \n {% if x == y %}\n{% elsif z < { %}{% endif %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+            Case(
+                description="render",
+                template="Hello, \n {% render 'foo' x: { %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="tablerow",
+                template="Hello, \n {% tablerow x in { y %}{% endtablerow %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="unless",
+                template="Hello, \n {% unless x == { y %}{% endunless %}",
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 2",
+            ),
+            Case(
+                description="unless elsif",
+                template=(
+                    "Hello, \n {% unless x == y %}\n{% elsif z < { %}{% endunless %}"
+                ),
+                expect_exception=LiquidSyntaxError,
+                expect_msg="unexpected '{', on line 3",
+            ),
+        ]
+
+        self._test(test_cases, mode=Mode.STRICT)
+
+    def test_bad_include(self) -> None:
         """Test that we gracefully handle include errors."""
         test_cases = [
             Case(
@@ -485,7 +570,7 @@ class MalformedTemplateTestCase(TestCase):
 
         self._test_partial(test_cases, templates)
 
-    def test_bad_render(self):
+    def test_bad_render(self) -> None:
         """Test that we gracefully handle render errors."""
         test_cases = [
             Case(
@@ -546,7 +631,7 @@ class MalformedTemplateTestCase(TestCase):
 
         self._test_partial(test_cases, templates)
 
-    def test_resume_block(self):
+    def test_resume_block(self) -> None:
         """Test that we continue to execute a block after a single statement error."""
         source = (
             r"{% if true %}"
@@ -581,7 +666,7 @@ class MalformedTemplateTestCase(TestCase):
 
         self.assertEqual(result, "before error after error")
 
-    def test_invalid_identifiers(self):
+    def test_invalid_identifiers(self) -> None:
         """Test that we gracefully handle invalid identifiers."""
         test_cases = [
             Case(

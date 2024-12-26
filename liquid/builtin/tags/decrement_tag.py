@@ -63,7 +63,9 @@ class DecrementTag(Tag):
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(
-                    ExprTokenStream(tokenize(stream.current.value))
+                    ExprTokenStream(
+                        tokenize(stream.current.value, stream.current.linenum)
+                    )
                 )
             ),
         )

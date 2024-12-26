@@ -26,7 +26,7 @@ class InlineIfStatement(Statement):
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
         return StatementNode(
-            tok, self.env.parse_conditional_expression_value(tok.value)
+            tok, self.env.parse_conditional_expression_value(tok.value, tok.linenum)
         )
 
 
@@ -35,8 +35,8 @@ class InlineIfAssignTag(AssignTag):
     inline `if` expressions.
     """
 
-    def _parse_expression(self, value: str) -> Expression:
-        return self.env.parse_conditional_expression_value(value)
+    def _parse_expression(self, value: str, linenum: int) -> Expression:
+        return self.env.parse_conditional_expression_value(value, linenum)
 
 
 class InlineIfEchoTag(EchoTag):
@@ -44,8 +44,8 @@ class InlineIfEchoTag(EchoTag):
     inline `if` expressions.
     """
 
-    def _parse_expression(self, value: str) -> Expression:
-        return self.env.parse_conditional_expression_value(value)
+    def _parse_expression(self, value: str, linenum: int) -> Expression:
+        return self.env.parse_conditional_expression_value(value, linenum)
 
 
 class InlineIfStatementWithParens(Statement):
@@ -58,7 +58,10 @@ class InlineIfStatementWithParens(Statement):
         tok = stream.current
         expect(stream, TOKEN_STATEMENT)
         return StatementNode(
-            tok, self.env.parse_conditional_expression_value_with_parens(tok.value)
+            tok,
+            self.env.parse_conditional_expression_value_with_parens(
+                tok.value, tok.linenum
+            ),
         )
 
 
@@ -68,8 +71,8 @@ class InlineIfAssignTagWithParens(AssignTag):
     terms with parentheses.
     """
 
-    def _parse_expression(self, value: str) -> Expression:
-        return self.env.parse_conditional_expression_value_with_parens(value)
+    def _parse_expression(self, value: str, linenum: int) -> Expression:
+        return self.env.parse_conditional_expression_value_with_parens(value, linenum)
 
 
 class InlineIfEchoTagWithParens(EchoTag):
@@ -78,5 +81,5 @@ class InlineIfEchoTagWithParens(EchoTag):
     terms with parentheses.
     """
 
-    def _parse_expression(self, value: str) -> Expression:
-        return self.env.parse_conditional_expression_value_with_parens(value)
+    def _parse_expression(self, value: str, linenum: int) -> Expression:
+        return self.env.parse_conditional_expression_value_with_parens(value, linenum)

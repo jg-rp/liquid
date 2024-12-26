@@ -334,7 +334,10 @@ class ForTag(Tag):
         stream.next_token()
 
         expect(stream, TOKEN_EXPRESSION)
-        expr = self.env.parse_loop_expression_value(stream.current.value)
+        expr = self.env.parse_loop_expression_value(
+            stream.current.value,
+            stream.current.linenum,
+        )
         stream.next_token()
 
         block = parser.parse_block(stream, ENDFORBLOCK)

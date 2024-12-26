@@ -529,7 +529,8 @@ class Environment:
         )
 
     def make_globals(
-        self, globals: Optional[Mapping[str, object]] = None  # noqa: A002
+        self,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     ) -> Dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
@@ -577,12 +578,12 @@ class Environment:
     def _get_expression_parsers(
         self, cache_size: int = 0
     ) -> Tuple[
-        Callable[[str], "BooleanExpression"],
-        Callable[[str], "BooleanExpression"],
-        Callable[[str], "FilteredExpression"],
-        Callable[[str], "FilteredExpression"],
-        Callable[[str], "FilteredExpression"],
-        Callable[[str], "LoopExpression"],
+        Callable[[str, int], "BooleanExpression"],
+        Callable[[str, int], "BooleanExpression"],
+        Callable[[str, int], "FilteredExpression"],
+        Callable[[str, int], "FilteredExpression"],
+        Callable[[str, int], "FilteredExpression"],
+        Callable[[str, int], "LoopExpression"],
     ]:
         if cache_size >= 1:
             return (
