@@ -5,6 +5,7 @@
 **Fixes**
 
 - Fixed `{% case %}` / `{% when %}` behavior. When using [`liquid.future.Environment`](https://jg-rp.github.io/liquid/api/future-environment), we now render any number of `{% else %}` blocks and allow `{% when %}` tags to appear after `{% else %}` tags. The default `Environment` continues to raise a `LiquidSyntaxError` in such cases.
+- Fixed line numbers in some error messages. When parsing some Liquid expressions, we were always getting a line number of `1` in the event of a syntax error. See [issue #162](https://github.com/jg-rp/liquid/issues/162).
 
 **Changed**
 
