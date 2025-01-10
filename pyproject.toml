@@ -211,6 +211,7 @@ select = [
 
 # TODO: review ignores
 ignore = [
+  "A005",
   "S105",
   "S101",
   "D107",

@@ -1,6 +1,8 @@
 > [!IMPORTANT]  
 > 🎉 Announcing the release of [Python Liquid2](https://github.com/jg-rp/python-liquid2). See the [migration guide](https://jg-rp.github.io/python-liquid2/migration/) and the list of [new features](https://jg-rp.github.io/python-liquid2/migration/#new-features). 🎉
 
+---
+
 <h1 align="center">Python Liquid</h1>
 
 <p align="center">
