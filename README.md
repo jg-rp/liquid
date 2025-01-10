@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> 🎉 Announcing the release of [Python Liquid2](https://github.com/jg-rp/python-liquid2). See the [migration guide](https://jg-rp.github.io/python-liquid2/migration/) and the list of [new features](https://jg-rp.github.io/python-liquid2/migration/#new-features). 🎉
+
 <h1 align="center">Python Liquid</h1>
 
 <p align="center">
@@ -87,7 +90,8 @@ print(template.render(you="Liquid"))  # "Hello, Liquid!"
 
 ## Related Projects
 
-- [liquid-babel](https://github.com/jg-rp/liquid-babel) Internationalization and localization for Liquid templates.
+- [Python Liquid2](https://github.com/jg-rp/python-liquid2): A new Python pakage for Liquid, with extra features.
+- [liquid-babel](https://github.com/jg-rp/liquid-babel): Internationalization and localization for Liquid templates.
 - [LiquidScript](https://github.com/jg-rp/liquidscript): A JavaScript and TypeScript engine for Liquid with a similar high-level API to Python Liquid.
 - [django-liquid](https://github.com/jg-rp/django-liquid): A Django template backend for Liquid. Render Liquid templates in your Django apps.
 - [Flask-Liquid](https://github.com/jg-rp/Flask-Liquid): A Flask extension for Liquid. Render Liquid templates in your Flask applications.
