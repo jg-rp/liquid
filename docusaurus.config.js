@@ -82,12 +82,6 @@ const config = {
         items: [
           {
             type: "doc",
-            docId: "introduction/getting-started",
-            position: "left",
-            label: "Docs",
-          },
-          {
-            type: "doc",
             docId: "language/filters",
             position: "left",
             label: "Filters",
@@ -129,12 +123,8 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "Introduction",
-                to: "/introduction/getting-started",
-              },
-              {
                 label: "Installation",
-                to: "/introduction/getting-started#install",
+                to: "/#install",
               },
               {
                 label: "Filter Reference",
