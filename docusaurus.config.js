@@ -119,7 +119,7 @@ const config = {
       },
       announcementBar: {
         content:
-          '&#x1F389; <a href="https://github.com/jg-rp/python-liquid2"><strong>Python Liquid2</strong></a> is out! &#x1F389;',
+          '&#x1F389; <a href="https://jg-rp.github.io/python-liquid2/"><strong>Python Liquid2</strong></a> is out! &#x1F389;',
         isCloseable: false,
       },
       footer: {
