@@ -1,9 +1,3 @@
----
-title: Compatibility
-description: Known incompatibilities between Python Liquid and Ruby Liquid
-hide_table_of_contents: false
----
-
 # Known Issues
 
 This page documents known compatibility issues between Python Liquid's default [`Environment`](/api/Environment) and the [reference implementation](https://shopify.github.io/liquid/) of Liquid, written in Ruby. We strive to be 100% compatible with the reference implementation. That is, given an equivalent render context, a template rendered with Python Liquid should produce the same output as when rendered with Ruby Liquid.

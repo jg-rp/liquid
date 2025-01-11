@@ -31,6 +31,7 @@ const sidebars = {
         "introduction/auto-escape",
         "introduction/async-support",
         "introduction/caching",
+        "introduction/known-issues",
       ],
     },
     {

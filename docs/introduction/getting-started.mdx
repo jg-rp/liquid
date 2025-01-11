@@ -1,13 +1,18 @@
+---
+slug: /
+---
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Getting Started
+# Python Liquid
 
 Python Liquid is a [Python](https://www.python.org/) engine for [Liquid](https://shopify.github.io/liquid/), the safe, customer-facing template language for flexible web apps.
 
 This page gets you started using Liquid with Python. See [Introduction to Liquid](../language/introduction.md), the [filter reference](../language/filters.md) and the [tag reference](../language/tags.md) to learn about writing Liquid templates.
 
-## Install
+## Quick start
+
+### Install
 
 Install Python Liquid from [PyPi](https://pypi.org/project/python-liquid/):
 
@@ -68,7 +73,7 @@ mamba install python-liquid
 </TabItem>
 </Tabs>
 
-## Render
+### Render
 
 Render a template string by creating a [`Template`](../api/template.md) and calling its [`render()`](../api/bound-template.md#render) method.
 
@@ -103,7 +108,7 @@ print(template.render(**data))
 # Hello, Sally!
 ```
 
-## Configure
+### Configure
 
 Configure template parsing and rendering behavior with extra arguments to [`Template`](../api/template.md). The following example renders a template in [strict mode](strictness.md) and will raise an exception whenever an undefined variable is used. See [`liquid.Template`](../api/template.md) for all available options.
 
@@ -125,7 +130,7 @@ result = template.render(you="World")
 Keep reading to see how to configure an environment once, then load and render templates from it.
 :::
 
-## Environment
+### Environment
 
 While [`Template`](../api/template.md) can be convenient, more often than not an application will want to configure a single [`Environment`](../api/environment.md), then load and render templates from it. This is usually more efficient than using [`Template`](../api/template.md) directly.
 
