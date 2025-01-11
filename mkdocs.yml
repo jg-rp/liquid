@@ -20,6 +20,7 @@ theme:
     - content.code.copy
   logo: img/droplet_white_liquid.svg
   favicon: img/favicon.ico
+  custom_dir: docs/.overrides
 
 repo_name: jg-rp/liquid
 repo_url: https://github.com/jg-rp/liquid

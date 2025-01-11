@@ -25,3 +25,15 @@ div.doc-contents:not(.first) {
     background-color: var(--md-accent-fg-color);
   }
   
+  .md-banner {
+    text-align: center;
+  }
+
+  .md-banner a {
+    color: white;
+  }
+
+  .md-banner a:hover {
+    color: white;
+    text-decoration: underline;
+  }
