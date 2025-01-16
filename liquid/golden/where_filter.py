@@ -119,4 +119,38 @@ cases = [
         expect="(b,bar)",
         globals={"a": [{"b": False}, {"b": "bar"}, {"b": None}]},
     ),
+    Case(
+        description="array of hashes with dotted property, string match",
+        template=(
+            r"{% assign x = a | where: 'user.title', 'bar' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(user.title,bar)",
+        globals={
+            "a": [{"user.title": "foo"}, {"user.title": "bar"}, {"user.title": None}]
+        },
+    ),
+    Case(
+        description="array of hashes with dotted property, path match",
+        template=(
+            r"{% assign x = a | where: 'user.title', 'bar' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1].title }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(user,bar)",
+        globals={
+            "a": [
+                {"user": {"title": "foo"}},
+                {"user": {"title": "bar"}},
+                {"user": {"title": None}},
+            ]
+        },
+    ),
 ]

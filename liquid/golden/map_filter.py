@@ -47,4 +47,72 @@ cases = [
         expect="foo",
         globals={"a": {"title": "foo", "some": "thing"}},
     ),
+    Case(
+        description="dotted property, string match",
+        template=r"{{ a | map: 'user.title' | join: '#' }}",
+        expect="foo#bar#baz",
+        globals={
+            "a": [{"user.title": "foo"}, {"user.title": "bar"}, {"user.title": "baz"}]
+        },
+    ),
+    Case(
+        description="dotted property, string match, missing property",
+        template=r"{{ a | map: 'user.title' | join: '#' }}",
+        expect="foo##baz",
+        globals={
+            "a": [
+                {"user.title": "foo"},
+                {"user.firstname": "bar"},
+                {"user.title": "baz"},
+            ]
+        },
+    ),
+    Case(
+        description="dotted property, path match",
+        template=r"{{ a | map: 'user.title' | join: '#' }}",
+        expect="foo#bar#baz",
+        globals={
+            "a": [
+                {"user": {"title": "foo"}},
+                {"user": {"title": "bar"}},
+                {"user": {"title": "baz"}},
+            ]
+        },
+    ),
+    Case(
+        description="dotted property, path and string match",
+        template=r"{{ a | map: 'user.title' | join: '#' }}",
+        expect="foo#bar#baz",
+        globals={
+            "a": [
+                {"user.title": "foo"},
+                {"user": {"title": "bar"}},
+                {"user": {"title": "baz"}},
+            ]
+        },
+    ),
+    Case(
+        description="dotted property, path match, missing property",
+        template=r"{{ a | map: 'user.title' | join: '#' }}",
+        expect="foo##baz",
+        globals={
+            "a": [
+                {"user": {"title": "foo"}},
+                {"user": {"firstname": "bar"}},
+                {"user": {"title": "baz"}},
+            ]
+        },
+    ),
+    Case(
+        description="property with bracketed index",
+        template=r"{{ a | map: 'user[1]' | join: '#' }}",
+        expect="##",
+        globals={
+            "a": [
+                {"user": [1, 2, 3]},
+                {"user": [4, 5, 6]},
+                {"user": [7, 8, 9]},
+            ]
+        },
+    ),
 ]

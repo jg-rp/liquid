@@ -33,7 +33,7 @@ cases = [
         expect="",
     ),
     Case(
-        description="array of objects with key property",
+        description="property, array of objects",
         template=(
             r"{% assign x = a | compact: 'title' %}"
             r"{% for obj in x %}"
@@ -48,6 +48,44 @@ cases = [
                 {"title": "foo", "name": "a"},
                 {"title": None, "name": "b"},
                 {"title": "bar", "name": "c"},
+            ]
+        },
+    ),
+    Case(
+        description="dotted property, string match",
+        template=(
+            r"{% assign x = a | compact: 'user.title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(user.title,foo)(name,a)(user.title,bar)(name,c)",
+        globals={
+            "a": [
+                {"user.title": "foo", "name": "a"},
+                {"user.title": None, "name": "b"},
+                {"user.title": "bar", "name": "c"},
+            ]
+        },
+    ),
+    Case(
+        description="dotted property, path match",
+        template=(
+            r"{% assign x = a | compact: 'user.title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1].title }},{{ i[1].name }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(user,foo,a)(user,bar,c)",
+        globals={
+            "a": [
+                {"user": {"title": "foo", "name": "a"}},
+                {"user": {"title": None, "name": "b"}},
+                {"user": {"title": "bar", "name": "c"}},
             ]
         },
     ),

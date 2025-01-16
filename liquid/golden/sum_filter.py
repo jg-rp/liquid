@@ -94,4 +94,16 @@ cases = [
         globals={"a": [1, 2, 3]},
         error=True,
     ),
+    Case(
+        description="hashes with dotted property argument, string match",
+        template=r"{{ a | sum: 'k.foo' }}",
+        expect="6",
+        globals={"a": [{"k.foo": 1}, {"k.foo": 2}, {"k.foo": 3}]},
+    ),
+    Case(
+        description="hashes with dotted property argument, path match",
+        template=r"{{ a | sum: 'k.foo' }}",
+        expect="6",
+        globals={"a": [{"k": {"foo": 1}}, {"k": {"foo": 2}}, {"k": {"foo": 3}}]},
+    ),
 ]

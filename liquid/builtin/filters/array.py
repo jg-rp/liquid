@@ -1,4 +1,5 @@
 """Filter functions that operate on arrays."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -62,6 +63,9 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
         if not hasattr(sequence, "__getitem__"):
             raise
         return default
+
+
+# def _fetch_item(obj: Any, )
 
 
 def _lower(obj: Any) -> str:

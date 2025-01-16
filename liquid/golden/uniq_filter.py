@@ -84,4 +84,113 @@ cases = [
             ]
         },
     ),
+    Case(
+        description="property, array contains a primitive",
+        template=(
+            r"{% assign x = a | uniq: 'title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="",
+        globals={
+            "a": [
+                {"title": "foo", "name": "a"},
+                {"title": "foo", "name": "b"},
+                {"title": "bar", "name": "c"},
+                False,
+            ]
+        },
+    ),
+    Case(
+        description="property, array contains an array",
+        template=(
+            r"{% assign x = a | uniq: 'title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(title,foo)(name,a)(title,bar)(name,c)(,)",
+        globals={
+            "a": [
+                {"title": "foo", "name": "a"},
+                {"title": "foo", "name": "b"},
+                {"title": "bar", "name": "c"},
+                ["foo", "bar"],
+            ]
+        },
+    ),
+    Case(
+        description="property with a dot, string match",
+        template=(
+            r"{% assign x = a | uniq: 'user.title' %}"
+            r"{% for obj in x %}"
+            r"{% for i in obj %}"
+            r"({{ i[0] }},{{ i[1] }})"
+            r"{% endfor %}"
+            r"{% endfor %}"
+        ),
+        expect="(user.title,foo)(name,a)(user.title,bar)(name,c)",
+        globals={
+            "a": [
+                {"user.title": "foo", "name": "a"},
+                {"user.title": "foo", "name": "b"},
+                {"user.title": "bar", "name": "c"},
+            ]
+        },
+    ),
+    Case(
+        description="property, arrays",
+        template="\n".join(
+            [
+                "{% assign x = a | uniq: 'foo' -%}",
+                "{% for item in x -%}",
+                "{% for pair in item -%}",
+                "({{ pair[0] }}, {{ pair[1] | join: '#' }})",
+                "{% endfor -%}",
+                "{% endfor %}",
+            ]
+        ),
+        expect="".join(
+            [
+                "(foo, 3#4#5)\n",
+                "(foo, 3#2#5)\n",
+                "(foo, 3#-1#5)\n",
+            ]
+        ),
+        globals={
+            "a": [
+                {"foo": [3, 4, 5]},
+                {"foo": [3, 2, 5]},
+                {"foo": [3, 4, 5]},
+                {"foo": [3, -1, 5]},
+            ]
+        },
+    ),
+    Case(
+        description="property with bracketed index",
+        template="\n".join(
+            [
+                "{% assign x = a | uniq: 'foo[1]' -%}",
+                "{% for item in x -%}",
+                "{% for pair in item -%}",
+                "({{ pair[0] }}, {{ pair[1] | join: '#' }})",
+                "{% endfor -%}",
+                "{% endfor %}",
+            ]
+        ),
+        expect="(foo, 3#4#5)\n",
+        globals={
+            "a": [
+                {"foo": [3, 4, 5]},
+                {"foo": [3, 2, 5]},
+                {"foo": [3, 4, 5]},
+                {"foo": [3, -1, 5]},
+            ]
+        },
+    ),
 ]
