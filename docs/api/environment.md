@@ -82,6 +82,12 @@ The maximum number of bytes that can be written to a template's output stream, p
 
 Indicates if block tags that, when rendered, contain whitespace only should be output. Defaults to `False`, meaning empty blocks are suppressed.
 
+### `shorthand_indexes`
+
+**Type**: `bool`
+
+Indicates if array indexes without surrounding square brackets should be allowed in paths to variables. When `True`, `{{ foo.0.bar }}` is equivalent to `{{ foo[0].bar }}`. Defaults to `False`.
+
 ## Properties
 
 ### `undefined`
