@@ -46,7 +46,7 @@ from .static_analysis import ContextualTemplateAnalysis
 
 from . import future
 
-__version__ = "1.12.2"
+__version__ = "1.13.0"
 
 __all__ = (
     "AwareBoundTemplate",

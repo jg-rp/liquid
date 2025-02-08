@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 1.13.0
+
+**Features**
+
+- Added a `shorthand_indexes` class variable to `liquid.Environment`. When `shorthand_indexes` is set to `True` (default is `False`), array indexes in variable paths need not be surrounded by square brackets. See [#165](https://github.com/jg-rp/liquid/pull/165).
+
 ## Version 1.12.2
 
 **Fixes**
