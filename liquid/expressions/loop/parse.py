@@ -2,6 +2,7 @@
 
 Like those found in `for` and `tablerow` tags.
 """
+
 from typing import Callable
 from typing import Dict
 from typing import Tuple
@@ -109,9 +110,11 @@ def parse_loop_arguments(stream: TokenStream) -> Tuple[Dict[str, LoopArgument], 
     return arguments, _reversed
 
 
-def parse(expr: str, linenum: int = 1) -> LoopExpression:
+def parse(
+    expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+) -> LoopExpression:
     """Parse a loop expression string."""
-    stream = TokenStream(tokenize(expr, linenum))
+    stream = TokenStream(tokenize(expr, linenum), shorthand_indexes=shorthand_indexes)
     stream.expect(TOKEN_IDENTIFIER)
     name = next(stream)[2]
 

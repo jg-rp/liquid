@@ -1,4 +1,5 @@
 """Functions for parsing non-standard conditional expressions."""
+
 from functools import partial
 from typing import Dict
 from typing import Iterable
@@ -65,13 +66,15 @@ split_at_first_if = partial(_split_at_first, _type=TOKEN_IF)
 split_at_first_else = partial(_split_at_first, _type=TOKEN_ELSE)
 
 
-def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
+def _parse_filter(
+    tokens: List[Token], linenum: int, *, shorthand_indexes: bool = False
+) -> Filter:
     if not tokens:
         raise LiquidSyntaxError(
             "unexpected pipe or missing filter name", linenum=linenum
         )
 
-    stream = TokenStream(iter(tokens))
+    stream = TokenStream(iter(tokens), shorthand_indexes=shorthand_indexes)
     stream.expect(TOKEN_IDENTIFIER)
     name = stream.current[2]
 
@@ -108,13 +111,17 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
     return Filter(name, args, kwargs)
 
 
-def parse(expr: str, linenum: int = 1) -> FilteredExpression:
+def parse(
+    expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+) -> FilteredExpression:
     """Parse a conditional expression string."""
     tokens = tokenize(expr, linenum)
     standard_tokens, _conditional_tokens = split_at_first_if(tokens)
 
     # This expression includes filters.
-    _expr = parse_standard_filtered(iter(standard_tokens), linenum)
+    _expr = parse_standard_filtered(
+        iter(standard_tokens), linenum, shorthand_indexes=shorthand_indexes
+    )
 
     if not _conditional_tokens:
         # A standard filtered expression
@@ -126,7 +133,10 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     )
 
     if conditional_tokens:
-        condition = parse_boolean_obj(TokenStream(iter(conditional_tokens)), linenum)
+        condition = parse_boolean_obj(
+            TokenStream(iter(conditional_tokens), shorthand_indexes=shorthand_indexes),
+            linenum,
+        )
 
     else:
         # A missing condition (an `if` with nothing after it).
@@ -138,7 +148,7 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
 
         if alternative_tokens:
             alternative: Optional[Expression] = parse_standard_filtered(
-                iter(alternative_tokens), linenum
+                iter(alternative_tokens), linenum, shorthand_indexes=shorthand_indexes
             )
         else:
             alternative = None
@@ -156,7 +166,9 @@ def parse(expr: str, linenum: int = 1) -> FilteredExpression:
     return ConditionalExpression(_expr, tail_filters, condition, alternative)
 
 
-def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
+def parse_with_parens(
+    expr: str, linenum: int = 1, shorthand_indexes: bool = False
+) -> FilteredExpression:
     """Parse a conditional expression string.
 
     This parse function handles logical `not` and grouping terms with parentheses.
@@ -165,7 +177,9 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
     standard_tokens, _conditional_tokens = split_at_first_if(tokens)
 
     # This expression includes filters.
-    _expr = parse_standard_filtered(iter(standard_tokens), linenum)
+    _expr = parse_standard_filtered(
+        iter(standard_tokens), linenum, shorthand_indexes=shorthand_indexes
+    )
 
     if not _conditional_tokens:
         # A standard filtered expression
@@ -178,7 +192,8 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
 
     if conditional_tokens:
         condition = parse_boolean_obj_with_parens(
-            TokenStream(iter(conditional_tokens)), linenum
+            TokenStream(iter(conditional_tokens), shorthand_indexes=shorthand_indexes),
+            linenum,
         )
     else:
         # A missing condition (an `if` with nothing after it).
@@ -190,7 +205,7 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
 
         if alternative_tokens:
             alternative: Optional[Expression] = parse_standard_filtered(
-                iter(alternative_tokens), linenum
+                iter(alternative_tokens), linenum, shorthand_indexes=shorthand_indexes
             )
         else:
             alternative = None
@@ -199,7 +214,7 @@ def parse_with_parens(expr: str, linenum: int = 1) -> FilteredExpression:
 
     if _filter_tokens:
         tail_filters = [
-            _parse_filter(_tokens, linenum)
+            _parse_filter(_tokens, linenum, shorthand_indexes=shorthand_indexes)
             for _tokens in split_at_pipe(iter(_filter_tokens))
         ]
     else:

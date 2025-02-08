@@ -1,4 +1,5 @@
 """Patterns and parse functions common to multiple built-in expression types."""
+
 from __future__ import annotations
 
 import re
@@ -145,10 +146,17 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
             stream.next_token()
             stream.expect(TOKEN_RBRACKET)
         elif typ == TOKEN_FLOAT:
-            raise LiquidSyntaxError(
-                f"expected an identifier, found {val!r}",
-                linenum=pos,
-            )
+            if stream.shorthand_indexes:
+                path.extend(
+                    IdentifierPathElement(to_int(i)) for i in val.rstrip(".").split(".")
+                )
+            else:
+                raise LiquidSyntaxError(
+                    f"expected an identifier, found {val!r}",
+                    linenum=pos,
+                )
+        elif typ == TOKEN_INTEGER and stream.shorthand_indexes:
+            path.append(IdentifierPathElement(to_int(val)))
         elif typ == TOKEN_DOT:
             pass
         else:
@@ -194,7 +202,7 @@ def parse_unchained_identifier(stream: "TokenStream") -> Identifier:
 
 
 def make_parse_range(
-    parse_obj: Callable[["TokenStream"], Expression]
+    parse_obj: Callable[["TokenStream"], Expression],
 ) -> Callable[["TokenStream"], RangeLiteral]:
     """Return a function that parses range expressions using _parse_obj_."""
 

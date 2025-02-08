@@ -2,7 +2,9 @@
 
 Like those found in output statements and assign tags.
 """
+
 from itertools import islice
+from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import Iterator
@@ -43,7 +45,7 @@ from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
 
-TOKEN_MAP = {
+TOKEN_MAP: Dict[str, Callable[[TokenStream], Expression]] = {
     TOKEN_FALSE: parse_boolean,
     TOKEN_TRUE: parse_boolean,
     TOKEN_NIL: parse_nil,
@@ -126,7 +128,7 @@ def split_at_comma(
 
 
 def bucket_args(
-    arguments: Iterable[Tuple[str, Expression]]
+    arguments: Iterable[Tuple[str, Expression]],
 ) -> Tuple[List[Expression], Dict[str, Expression]]:  # pragma: no cover
     """Split filter arguments into positional and keyword arguments."""
     args = []
@@ -166,12 +168,16 @@ def parse_args(
         yield parse_arg(arg_tokens)
 
 
-def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:  # pragma: no cover
+def parse_arg(
+    tokens: List[Token], *, shorthand_indexes: bool = False
+) -> Tuple[str, Expression]:  # pragma: no cover
     """Parse a single argument from a list of tokens."""
     if len(tokens) > 1 and tokens[1][1] == TOKEN_COLON:
         # A named/keyword parameter/argument
-        return tokens[0][2], parse_obj(TokenStream(islice(tokens, 2, None)))
-    return "", parse_obj(TokenStream(iter(tokens)))
+        return tokens[0][2], parse_obj(
+            TokenStream(islice(tokens, 2, None), shorthand_indexes=shorthand_indexes)
+        )
+    return "", parse_obj(TokenStream(iter(tokens), shorthand_indexes=shorthand_indexes))
 
 
 # _parse_filter has replaced the parse_* functions above in the name of better syntax
@@ -179,13 +185,15 @@ def parse_arg(tokens: List[Token]) -> Tuple[str, Expression]:  # pragma: no cove
 # be depreciated as we approach Python Liquid version 2 and then removed.
 
 
-def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
+def _parse_filter(
+    tokens: List[Token], linenum: int, *, shorthand_indexes: bool = False
+) -> Filter:
     if not tokens:
         raise LiquidSyntaxError(
             "unexpected pipe or missing filter name", linenum=linenum
         )
 
-    stream = TokenStream(iter(tokens))
+    stream = TokenStream(iter(tokens), shorthand_indexes=shorthand_indexes)
     stream.expect(TOKEN_IDENTIFIER)
     name = stream.current[2]
 
@@ -222,10 +230,12 @@ def _parse_filter(tokens: List[Token], linenum: int) -> Filter:
     return Filter(name, args, kwargs)
 
 
-def parse_from_tokens(tokens: Iterator[Token], linenum: int = 1) -> FilteredExpression:
+def parse_from_tokens(
+    tokens: Iterator[Token], linenum: int = 1, *, shorthand_indexes: bool = False
+) -> FilteredExpression:
     """Parse an expression with zero or more filters from a token iterator."""
     parts = tuple(split_at_first_pipe(tokens))
-    stream = TokenStream(iter(parts[0]))
+    stream = TokenStream(iter(parts[0]), shorthand_indexes=shorthand_indexes)
     left = parse_obj(stream)
 
     if stream.peek[1] != TOKEN_EOF:
@@ -237,10 +247,17 @@ def parse_from_tokens(tokens: Iterator[Token], linenum: int = 1) -> FilteredExpr
     if len(parts) == 1:
         return FilteredExpression(left)
 
-    filters = [_parse_filter(_tokens, linenum) for _tokens in split_at_pipe(parts[1])]
+    filters = [
+        _parse_filter(_tokens, linenum, shorthand_indexes=shorthand_indexes)
+        for _tokens in split_at_pipe(parts[1])
+    ]
     return FilteredExpression(left, filters)
 
 
-def parse(expr: str, linenum: int = 1) -> FilteredExpression:
+def parse(
+    expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+) -> FilteredExpression:
     """Parse an expression string with zero or more filters."""
-    return parse_from_tokens(tokenize(expr, linenum))
+    return parse_from_tokens(
+        tokenize(expr, linenum), shorthand_indexes=shorthand_indexes
+    )

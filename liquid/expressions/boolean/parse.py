@@ -1,4 +1,5 @@
 """Functions for parsing boolean expressions."""
+
 from typing import Callable
 from typing import Dict
 
@@ -188,9 +189,15 @@ parse_range = make_parse_range(parse_simple_obj)
 TOKEN_MAP[TOKEN_LPAREN] = parse_range
 
 
-def parse(expr: str, linenum: int = 1) -> BooleanExpression:
+def parse(
+    expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+) -> BooleanExpression:
     """Parse a string as a "standard" boolean expression."""
-    return BooleanExpression(parse_obj(TokenStream(tokenize(expr, linenum))))
+    return BooleanExpression(
+        parse_obj(
+            TokenStream(tokenize(expr, linenum), shorthand_indexes=shorthand_indexes)
+        )
+    )
 
 
 def parse_grouped_expression(stream: TokenStream) -> Expression:
@@ -261,13 +268,17 @@ def parse_obj_with_parens(
     return left
 
 
-def parse_with_parens(expr: str, linenum: int = 1) -> BooleanExpression:
+def parse_with_parens(
+    expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+) -> BooleanExpression:
     """Parse a string as a boolean expression.
 
     This function handles expressions containing the logical `not` operator and
     parentheses for grouping terms.
     """
-    stream = TokenStream(tokenize_with_parens(expr, linenum))
+    stream = TokenStream(
+        tokenize_with_parens(expr, linenum), shorthand_indexes=shorthand_indexes
+    )
     rv = BooleanExpression(parse_obj_with_parens(stream))
     peek_typ = stream.peek[1]
     if peek_typ == TOKEN_RPAREN:

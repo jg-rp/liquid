@@ -1,8 +1,10 @@
 """Shared configuration from which templates can be loaded and parsed."""
+
 from __future__ import annotations
 
 import warnings
 from functools import lru_cache
+from functools import partial
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -12,6 +14,7 @@ from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
+from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import Union
@@ -153,6 +156,10 @@ class Environment:
 
     # Whether to output blocks that only contain only whitespace when rendered.
     render_whitespace_only_blocks: bool = False
+
+    # When `True`, accept indexes without enclosing square brackets in paths to
+    # variables. Defaults to `False`.
+    shorthand_indexes: bool = False
 
     def __init__(
         self,
@@ -578,29 +585,77 @@ class Environment:
     def _get_expression_parsers(
         self, cache_size: int = 0
     ) -> Tuple[
-        Callable[[str, int], "BooleanExpression"],
-        Callable[[str, int], "BooleanExpression"],
-        Callable[[str, int], "FilteredExpression"],
-        Callable[[str, int], "FilteredExpression"],
-        Callable[[str, int], "FilteredExpression"],
-        Callable[[str, int], "LoopExpression"],
+        BooleanExprParserCallable,
+        BooleanExprParserCallable,
+        FilteredExprParserCallable,
+        FilteredExprParserCallable,
+        FilteredExprParserCallable,
+        LoopExprParserCallable,
     ]:
         if cache_size >= 1:
             return (
-                lru_cache(maxsize=cache_size)(parse_boolean_expression),
-                lru_cache(maxsize=cache_size)(parse_boolean_expression_with_parens),
-                lru_cache(maxsize=cache_size)(parse_conditional_expression),
-                lru_cache(maxsize=cache_size)(parse_conditional_expression_with_parens),
-                lru_cache(maxsize=cache_size)(parse_filtered_expression),
-                lru_cache(maxsize=cache_size)(parse_loop_expression),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_boolean_expression,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_boolean_expression_with_parens,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_conditional_expression,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_conditional_expression_with_parens,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_filtered_expression,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
+                lru_cache(maxsize=cache_size)(
+                    partial(
+                        parse_loop_expression,
+                        shorthand_indexes=self.shorthand_indexes,
+                    )
+                ),
             )
         return (
-            parse_boolean_expression,
-            parse_boolean_expression_with_parens,
-            parse_conditional_expression,
-            parse_conditional_expression_with_parens,
-            parse_filtered_expression,
-            parse_loop_expression,
+            partial(
+                parse_boolean_expression,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
+            partial(
+                parse_boolean_expression_with_parens,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
+            partial(
+                parse_conditional_expression,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
+            partial(
+                parse_conditional_expression_with_parens,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
+            partial(
+                parse_filtered_expression,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
+            partial(
+                parse_loop_expression,
+                shorthand_indexes=self.shorthand_indexes,
+            ),
         )
 
 
@@ -738,3 +793,33 @@ def Template(  # noqa: N802, D417
     )
 
     return env.from_string(source, globals=globals)
+
+
+class FilteredExprParserCallable(Protocol):
+    """The signature for filter expression parser callables."""
+
+    def __call__(
+        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+    ) -> FilteredExpression:
+        """Parse _expr_."""
+        ...
+
+
+class LoopExprParserCallable(Protocol):
+    """The signature for loop expression parser callables."""
+
+    def __call__(
+        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+    ) -> LoopExpression:
+        """Parse _expr_."""
+        ...
+
+
+class BooleanExprParserCallable(Protocol):
+    """The signature for Boolean expression parser callables."""
+
+    def __call__(
+        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
+    ) -> BooleanExpression:
+        """Parse _expr_."""
+        ...
