@@ -57,6 +57,14 @@ def test_shorthand_index_in_conditional_expression() -> None:
     assert template.render(**data) == ""
 
 
+def test_shorthand_indexes_in_case_tag() -> None:
+    data = {"foo": ["World", "Liquid"]}
+    template = ENV.from_string(
+        "{% case foo.0 %}{% when 'World' %}Hello, World!{% endcase %}"
+    )
+    assert template.render(**data) == "Hello, World!"
+
+
 def test_shorthand_indexes_in_ternary_expressions() -> None:
     env = MockEnv()
     add_inline_expression_tags(env)

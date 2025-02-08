@@ -254,6 +254,8 @@ _IDENT_TOKENS = frozenset(
         TOKEN_IDENTINDEX,
         TOKEN_DOT,
         TOKEN_LBRACKET,
+        TOKEN_INTEGER,
+        TOKEN_FLOAT,
     )
 )
 
@@ -267,7 +269,7 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
     path: IdentifierPath = []
 
     while True:
-        _, _type, value = stream.current
+        pos, _type, value = stream.current
         if _type == TOKEN_IDENTIFIER:
             path.append(IdentifierPathElement(value))
         elif _type == TOKEN_IDENTINDEX:
@@ -277,6 +279,19 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
             path.append(_parse_common_identifier(stream))
             stream.next_token()
             stream.expect(TOKEN_RBRACKET)
+        elif _type == TOKEN_FLOAT:
+            if stream.shorthand_indexes:
+                path.extend(
+                    IdentifierPathElement(to_int(i))
+                    for i in value.rstrip(".").split(".")
+                )
+            else:
+                raise LiquidSyntaxError(
+                    f"expected an identifier, found {value!r}",
+                    linenum=pos,
+                )
+        elif _type == TOKEN_INTEGER and stream.shorthand_indexes:
+            path.append(IdentifierPathElement(to_int(value)))
         elif _type == TOKEN_DOT:
             pass
 
