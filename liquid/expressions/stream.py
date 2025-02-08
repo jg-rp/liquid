@@ -19,12 +19,14 @@ if TYPE_CHECKING:
 class TokenStream:
     """Step through or iterate a stream of tokens."""
 
-    def __init__(self, tokeniter: Iterator[Token]):
+    def __init__(self, tokeniter: Iterator[Token], *, shorthand_indexes: bool = False):
         self.iter = tokeniter
         self._pushed: Deque[Token] = deque()
 
         self.current: Token = (0, TOKEN_INITIAL, "")
         next(self)
+
+        self.shorthand_indexes = shorthand_indexes
 
     class TokenStreamIterator:
         """An iterable token stream."""

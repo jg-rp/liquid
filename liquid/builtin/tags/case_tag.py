@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "case" tag."""
+
 from __future__ import annotations
 
 import sys
@@ -193,14 +194,16 @@ class CaseTag(Tag):
 
     def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
         stream = ExpressionTokenStream(
-            tokenize_common_expression(expr, linenum=linenum)
+            tokenize_common_expression(expr, linenum=linenum),
+            shorthand_indexes=self.env.shorthand_indexes,
         )
         return parse_common_expression(stream)
 
     def _parse_when_expression(self, expr: str, linenum: int) -> List[Expression]:
         expressions = []
         stream = ExpressionTokenStream(
-            tokenize_common_expression(expr, linenum=linenum)
+            tokenize_common_expression(expr, linenum=linenum),
+            shorthand_indexes=self.env.shorthand_indexes,
         )
 
         while True:
