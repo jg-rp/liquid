@@ -14,7 +14,6 @@ from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
-from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import Union
@@ -585,12 +584,12 @@ class Environment:
     def _get_expression_parsers(
         self, cache_size: int = 0
     ) -> Tuple[
-        BooleanExprParserCallable,
-        BooleanExprParserCallable,
-        FilteredExprParserCallable,
-        FilteredExprParserCallable,
-        FilteredExprParserCallable,
-        LoopExprParserCallable,
+        Callable[[str, int], BooleanExpression],
+        Callable[[str, int], BooleanExpression],
+        Callable[[str, int], FilteredExpression],
+        Callable[[str, int], FilteredExpression],
+        Callable[[str, int], FilteredExpression],
+        Callable[[str, int], LoopExpression],
     ]:
         if cache_size >= 1:
             return (
@@ -793,33 +792,3 @@ def Template(  # noqa: N802, D417
     )
 
     return env.from_string(source, globals=globals)
-
-
-class FilteredExprParserCallable(Protocol):
-    """The signature for filter expression parser callables."""
-
-    def __call__(
-        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
-    ) -> FilteredExpression:
-        """Parse _expr_."""
-        ...
-
-
-class LoopExprParserCallable(Protocol):
-    """The signature for loop expression parser callables."""
-
-    def __call__(
-        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
-    ) -> LoopExpression:
-        """Parse _expr_."""
-        ...
-
-
-class BooleanExprParserCallable(Protocol):
-    """The signature for Boolean expression parser callables."""
-
-    def __call__(
-        self, expr: str, linenum: int = 1, *, shorthand_indexes: bool = False
-    ) -> BooleanExpression:
-        """Parse _expr_."""
-        ...
