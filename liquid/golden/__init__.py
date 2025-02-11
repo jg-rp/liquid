@@ -47,6 +47,7 @@ from . import plus_filter
 from . import prepend_filter
 from . import range_objects
 from . import raw_tag
+from . import reject_filter
 from . import remove_filter
 from . import remove_first_filter
 from . import remove_last_filter
@@ -129,6 +130,7 @@ test_cases = [
     prepend_filter,
     range_objects,
     raw_tag,
+    reject_filter,
     remove_filter,
     remove_first_filter,
     remove_last_filter,
