@@ -23,6 +23,8 @@ from . import downcase_filter
 from . import echo_tag
 from . import escape_filter
 from . import escape_once_filter
+from . import find_filter
+from . import find_index_filter
 from . import first_filter
 from . import floor_filter
 from . import for_tag
@@ -107,6 +109,8 @@ test_cases = [
     echo_tag,
     escape_filter,
     escape_once_filter,
+    find_filter,
+    find_index_filter,
     first_filter,
     floor_filter,
     for_tag,

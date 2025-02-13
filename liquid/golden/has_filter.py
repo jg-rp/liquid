@@ -112,4 +112,28 @@ cases = [
         expect="false",
         globals={"a": [{"x": 99}, {"z": 42}]},
     ),
+    Case(
+        description="array of hashes, with a nil",
+        template=r"{{ a | has: 'z', 42 }}",
+        expect="",
+        globals={"a": [{"x": 99}, None, {"z": 42}]},
+    ),
+    Case(
+        description="array of hashes, nil property",
+        template=r"{{ a | has: nil }}",
+        expect="false",
+        globals={"a": [{"x": 99}, {"z": 42}]},
+    ),
+    Case(
+        description="array of hashes, int property",
+        template=r"{{ a | has: 42 }}",
+        expect="false",
+        globals={"a": [{"x": 99}, {"z": 42}]},
+    ),
+    Case(
+        description="array of hashes, false property",
+        template=r"{{ a | has: false }}",
+        expect="false",
+        globals={"a": [{"x": 99}, {"z": 42}]},
+    ),
 ]
