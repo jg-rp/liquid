@@ -41,6 +41,18 @@ cases = [
         globals={"a": ["x", None, "z", False, True]},
     ),
     Case(
+        description="string input, default value, match",
+        template=r"{{ a | has: 'z' }}",
+        expect="true",
+        globals={"a": "zoo"},
+    ),
+    Case(
+        description="string input, default value, no match",
+        template=r"{{ a | has: 'z' }}",
+        expect="false",
+        globals={"a": "foo"},
+    ),
+    Case(
         description="hash input, default value, match",
         template=r"{{ a | has: 'z' }}",
         expect="true",
