@@ -107,17 +107,21 @@ AUTO_ESCAPE_TEST_CASES = [
             'type="text/css" media="all" />'
         ),
     ),
-    Case(
-        description="safe url from context",
-        val=Markup("<b>assets/style.css</b>"),
-        args=[],
-        kwargs={},
-        expect=(
-            '<link href="&lt;b&gt;assets/style.css&lt;/b&gt;" rel="stylesheet" '
-            'type="text/css" media="all" />'
-        ),
-    ),
 ]
+
+if MARKUPSAFE_AVAILABLE:
+    AUTO_ESCAPE_TEST_CASES.append(
+        Case(
+            description="safe url from context",
+            val=Markup("<b>assets/style.css</b>"),
+            args=[],
+            kwargs={},
+            expect=(
+                '<link href="&lt;b&gt;assets/style.css&lt;/b&gt;" rel="stylesheet" '
+                'type="text/css" media="all" />'
+            ),
+        ),
+    )
 
 
 @pytest.mark.parametrize(

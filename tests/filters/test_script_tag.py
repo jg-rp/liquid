@@ -94,17 +94,21 @@ AUTO_ESCAPE_TEST_CASES = [
             'type="text/javascript"></script>'
         ),
     ),
-    Case(
-        description="safe url from context",
-        val=Markup("<b>assets/assets/app.js</b>"),
-        args=[],
-        kwargs={},
-        expect=(
-            '<script src="&lt;b&gt;assets/assets/app.js&lt;/b&gt;" '
-            'type="text/javascript"></script>'
-        ),
-    ),
 ]
+
+if MARKUPSAFE_AVAILABLE:
+    AUTO_ESCAPE_TEST_CASES.append(
+        Case(
+            description="safe url from context",
+            val=Markup("<b>assets/assets/app.js</b>"),
+            args=[],
+            kwargs={},
+            expect=(
+                '<script src="&lt;b&gt;assets/assets/app.js&lt;/b&gt;" '
+                'type="text/javascript"></script>'
+            ),
+        ),
+    )
 
 
 @pytest.mark.parametrize(
