@@ -13,7 +13,7 @@ from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterValueError
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 

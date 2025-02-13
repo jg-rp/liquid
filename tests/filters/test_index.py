@@ -11,7 +11,7 @@ from liquid.exceptions import Error
 from liquid.extra.filters.array import index
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 

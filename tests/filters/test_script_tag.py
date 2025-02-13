@@ -21,7 +21,7 @@ from liquid.exceptions import Error
 from liquid.extra.filters.html import script_tag
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 

@@ -12,7 +12,7 @@ from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 

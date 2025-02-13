@@ -14,7 +14,7 @@ from liquid.exceptions import FilterArgumentError
 from liquid.extra.filters._json import JSON
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 

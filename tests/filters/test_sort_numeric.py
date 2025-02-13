@@ -12,7 +12,7 @@ from liquid.exceptions import FilterArgumentError
 from liquid.extra.filters.array import sort_numeric
 
 
-@dataclass(kw_only=True)
+@dataclass
 class Case:
     """Test helper class."""
 
