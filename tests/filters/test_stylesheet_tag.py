@@ -4,6 +4,7 @@ from dataclasses import field
 from functools import partial
 from inspect import isclass
 from typing import Any
+from typing import Dict
 from typing import List
 
 try:
@@ -29,7 +30,7 @@ class Case:
     val: Any
     expect: Any
     args: List[Any] = field(default_factory=list)
-    kwargs: dict[str, Any] = field(default_factory=dict)
+    kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 ENV = Environment()
