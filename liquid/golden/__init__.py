@@ -26,6 +26,7 @@ from . import escape_once_filter
 from . import first_filter
 from . import floor_filter
 from . import for_tag
+from . import has_filter
 from . import identifiers
 from . import if_tag
 from . import ifchanged_tag
@@ -109,6 +110,7 @@ test_cases = [
     first_filter,
     floor_filter,
     for_tag,
+    has_filter,
     identifiers,
     if_tag,
     ifchanged_tag,
