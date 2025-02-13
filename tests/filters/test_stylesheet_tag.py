@@ -4,6 +4,7 @@ from dataclasses import field
 from functools import partial
 from inspect import isclass
 from typing import Any
+from typing import List
 
 try:
     import markupsafe  # noqa: F401
@@ -27,7 +28,7 @@ class Case:
     description: str
     val: Any
     expect: Any
-    args: list[Any] = field(default_factory=list)
+    args: List[Any] = field(default_factory=list)
     kwargs: dict[str, Any] = field(default_factory=dict)
 
 
