@@ -3,6 +3,12 @@
 This environment will be updated without concern for backwards incompatible changes to
 template rendering behavior.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from typing import Type
+
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
 from .filters import split
@@ -10,6 +16,9 @@ from .tags import InterruptingTablerowTag
 from .tags import LaxCaseTag
 from .tags import LaxIfTag
 from .tags import LaxUnlessTag
+
+if TYPE_CHECKING:
+    from ..template import BoundTemplate
 
 
 class Environment(DefaultEnvironment):
@@ -23,7 +32,7 @@ class Environment(DefaultEnvironment):
     See https://jg-rp.github.io/liquid/known_issues
     """
 
-    template_class = FutureBoundTemplate
+    template_class: Type[BoundTemplate] = FutureBoundTemplate
 
     def setup_tags_and_filters(self) -> None:
         """Add future tags and filters to this environment."""
