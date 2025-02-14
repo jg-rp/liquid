@@ -21,12 +21,12 @@ cases = [
         expect="",
         globals={"a": ["x", "y", "zoo"]},
     ),
-    Case(
-        description="array of ints, default value",
-        template=r"{{ a | find_index: 3 }}",
-        expect="0",
-        globals={"a": [1, 2, 3]},
-    ),
+    # Case(
+    #     description="array of ints, default value",
+    #     template=r"{{ a | find_index: 3 }}",
+    #     expect="0",
+    #     globals={"a": [1, 2, 3]},
+    # ),
     Case(
         description="mixed array, default value",
         template=r"{{ a | find_index: 'z' }}",

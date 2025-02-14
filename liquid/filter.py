@@ -15,6 +15,7 @@ from typing import Union
 
 from liquid.context import Undefined
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import FilterItemTypeError
 from liquid.exceptions import FilterValueError
 from liquid.limits import to_int
 
@@ -96,6 +97,8 @@ def sequence_filter(_filter: FilterT) -> FilterT:
 
         try:
             return _filter(val, *args, **kwargs)
+        except FilterItemTypeError:
+            return None
         except TypeError as err:
             raise FilterArgumentError(err) from err
 

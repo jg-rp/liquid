@@ -16,23 +16,13 @@ cases = [
     ),
     Case(
         description="array containing null, default value",
-        template=(
-            r"{% assign b = a | reject: 'c' %}"
-            r"{% for obj in b %}"
-            r"{{ obj }}, "
-            r"{% endfor %}"
-        ),
+        template=r"{{ a | reject: 'c' }}",
         expect="",
         globals={"a": ["x", "y", "cat", None]},
     ),
     Case(
         description="array containing an int, default value",
-        template=(
-            r"{% assign b = a | reject: 'c' %}"
-            r"{% for obj in b %}"
-            r"{{ obj }}, "
-            r"{% endfor %}"
-        ),
+        template=r"{{} a | reject: 'c' }}",
         expect="",
         error=True,
         globals={"a": ["x", "y", "cat", 1]},

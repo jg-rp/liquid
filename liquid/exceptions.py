@@ -123,6 +123,10 @@ class FilterValueError(Error):
     """Exception raised when a filters value is invalid."""
 
 
+class FilterItemTypeError(Error):
+    """Exception raised when an array item causes a type error when filtered."""
+
+
 class TemplateNotFound(Error):
     """Exception raised when a template could not be found."""
 

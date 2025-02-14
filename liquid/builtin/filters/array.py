@@ -1,4 +1,5 @@
 """Filter functions that operate on arrays."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -21,6 +22,7 @@ except ImportError:
 
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
+from liquid.exceptions import FilterItemTypeError
 from liquid.expression import NIL
 from liquid.filter import array_filter
 from liquid.filter import decimal_arg
@@ -58,7 +60,13 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
         return getitem(sequence, key)
     except (KeyError, IndexError):
         return default
-    except TypeError:
+    except TypeError as err:
+        if sequence is None:
+            raise FilterItemTypeError(str(err)) from err
+        if isinstance(sequence, str) and isinstance(key, str) and key in sequence:
+            return key
+        if isinstance(sequence, int) and isinstance(key, int):
+            return sequence == key
         if not hasattr(sequence, "__getitem__"):
             raise
         return default
@@ -184,6 +192,60 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
         return [itm for itm in sequence if _getitem(itm, attr) == value]
 
     return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
+
+
+@sequence_filter
+def reject(
+    sequence: ArrayT, attr: object, value: object = None
+) -> Union[List[object], None]:
+    """Return a list of items from _sequence_ where _attr_ is not equal to _value_."""
+    if attr is None or is_undefined(attr):
+        return None
+
+    if value is not None and not is_undefined(value):
+        return [itm for itm in sequence if _getitem(itm, attr) != value]
+
+    return [itm for itm in sequence if _getitem(itm, attr) in (False, None)]
+
+
+@sequence_filter
+def find(sequence: ArrayT, attr: object, value: object = None) -> object:
+    """Return the first item from _sequence_ where _attr_ is equal to _value_."""
+    if value is not None and not is_undefined(value):
+        return next((itm for itm in sequence if _getitem(itm, attr) == value), None)
+
+    return next(
+        (itm for itm in sequence if _getitem(itm, attr) not in (False, None)), None
+    )
+
+
+@sequence_filter
+def find_index(
+    sequence: ArrayT, attr: object, value: object = None
+) -> Union[int, None]:
+    """Return the index of first item from _sequence_ where _attr_ equals _value_."""
+    if value is not None and not is_undefined(value):
+        return next(
+            (i for i, itm in enumerate(sequence) if _getitem(itm, attr) == value), None
+        )
+
+    return next(
+        (
+            i
+            for i, itm in enumerate(sequence)
+            if _getitem(itm, attr) not in (False, None)
+        ),
+        None,
+    )
+
+
+@sequence_filter
+def has(sequence: ArrayT, attr: object, value: object = None) -> bool:
+    """Return true if any items in _sequence_ have _attr_ equal to _value_."""
+    if value is not None and not is_undefined(value):
+        return any((itm for itm in sequence if _getitem(itm, attr) == value))
+
+    return any((itm for itm in sequence if _getitem(itm, attr) not in (False, None)))
 
 
 @sequence_filter
