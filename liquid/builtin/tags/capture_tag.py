@@ -11,7 +11,6 @@ from liquid import Markup
 from liquid import ast
 from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -86,11 +85,11 @@ class CaptureTag(Tag):
     def parse(self, stream: TokenStream) -> CaptureNode:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG, value=TAG_CAPTURE)
+        stream.expect(TOKEN_TAG, value=TAG_CAPTURE)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
 
         match = RE_CAPTURE.match(stream.current.value)
         if match:
@@ -103,6 +102,6 @@ class CaptureTag(Tag):
 
         stream.next_token()
         block = parser.parse_block(stream, ENDCAPTUREBLOCK)
-        expect(stream, TOKEN_TAG, value=TAG_ENDCAPTURE)
+        stream.expect(TOKEN_TAG, value=TAG_ENDCAPTURE)
 
         return self.node_class(tok, name, block=block)

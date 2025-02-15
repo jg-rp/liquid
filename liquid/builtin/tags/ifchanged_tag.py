@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "ifchanged" tag."""
+
 from __future__ import annotations
 
 import sys
@@ -10,7 +11,6 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
@@ -86,9 +86,9 @@ class IfChangedTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_IFCHANGED)
+        stream.expect(TOKEN_TAG, value=TAG_IFCHANGED)
         tok = stream.current
         stream.next_token()
         block = self.parser.parse_block(stream, ENDIFCHANGEDBLOCK)
-        expect(stream, TOKEN_TAG, value=TAG_ENDIFCHANGED)
+        stream.expect(TOKEN_TAG, value=TAG_ENDIFCHANGED)
         return self.node_class(tok=tok, block=block)

@@ -3,14 +3,6 @@
 The template lexer generates a stream of template literals, tags, output statements and
 expressions, where each expression token is an unscanned string. Lexing of expression
 tokens is delegated to the "parse" method of each registered Tag.
-
-As of Python Liquid 1.2.0 we are in the process of refactoring and optimizing expression
-tokenization. All `tokenize_*` functions and expression rules are being migrated to
-`liquid.expressions`. Those defined here will be depreciated as we approach version 2.0.
-At which point this module will be reserved for tokenizing templates, not expressions.
-
-All built-in tags now use lexers (and parsers) found in the `liquid.expressions`
-package.
 """
 
 from __future__ import annotations
@@ -19,7 +11,6 @@ import re
 from functools import lru_cache
 from functools import partial
 from typing import Callable
-from typing import Collection
 from typing import Iterable
 from typing import Iterator
 from typing import Pattern
@@ -30,7 +21,6 @@ from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_ASSIGN
 from liquid.token import TOKEN_BLANK
-from liquid.token import TOKEN_BY
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_COMMA
@@ -66,17 +56,8 @@ from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_WITH
 from liquid.token import Token
-from liquid.token import operators
 
 __all__ = (
-    "tokenize_assignment_expression",
-    "tokenize_boolean_expression",
-    "tokenize_filtered_expression",
-    "tokenize_loop_expression",
-    "tokenize_identifier",
-    "tokenize_include_expression",
-    "tokenize_paginate_expression",
-    "tokenize_liquid_expression",
     "get_lexer",
     "get_liquid_expression_lexer",
 )
@@ -358,91 +339,8 @@ def get_liquid_expression_lexer(
     )
 
 
-# For backwards compatibility. No line comments.
+# TODO: move me
 tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string="")
-
-
-def _tokenize(
-    source: str, rules: Pattern[str], keywords: Collection[str]
-) -> Iterator[Token]:
-    """Generate tokens from the given source string according to the compiled rules."""
-    line_num = 1
-
-    for match in rules.finditer(source):
-        kind = match.lastgroup
-        assert kind is not None
-
-        value = match.group()
-
-        if kind == TOKEN_IDENTIFIER and value in keywords:
-            kind = value
-
-        elif kind == TOKEN_STRING:
-            value = match.group("quoted")
-
-        elif kind == "OP":
-            try:
-                kind = operators[value]
-            except KeyError as err:
-                raise LiquidSyntaxError(
-                    f"unknown operator {value!r}",
-                    linenum=line_num,
-                ) from err
-
-        elif kind == "NEWLINE":
-            line_num += 1
-            continue
-
-        elif kind == "SKIP":
-            continue
-
-        elif kind == TOKEN_ILLEGAL:
-            raise LiquidSyntaxError(f"unexpected {value!r}", linenum=line_num)
-
-        yield Token(line_num, kind, value)
-
-
-tokenize_identifier = partial(
-    _tokenize,
-    rules=_compile_rules(identifier_rules),
-    keywords=(),
-)
-
-tokenize_loop_expression = partial(
-    _tokenize,
-    rules=_compile_rules(loop_expression_rules),
-    keywords=loop_expression_keywords,
-)
-
-tokenize_filtered_expression = partial(
-    _tokenize,
-    rules=_compile_rules(filtered_expression_rules),
-    keywords=filtered_expression_keywords,
-)
-
-tokenize_assignment_expression = partial(
-    _tokenize,
-    rules=_compile_rules(assignment_expression_rules),
-    keywords=filtered_expression_keywords,
-)
-
-tokenize_boolean_expression = partial(
-    _tokenize,
-    rules=_compile_rules(boolean_expression_rules),
-    keywords=boolean_expression_keywords,
-)
-
-tokenize_include_expression = partial(
-    _tokenize,
-    rules=_compile_rules(include_expression_rules),
-    keywords=include_expression_keywords,
-)
-
-tokenize_paginate_expression = partial(
-    _tokenize,
-    rules=_compile_rules(identifier_rules),
-    keywords={TOKEN_BY},
-)
 
 
 def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:

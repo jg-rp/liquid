@@ -1,10 +1,10 @@
 """Tag an node definition for the built-in "inline comment" tag."""
+
 import re
 import sys
 
 from liquid.builtin.tags.comment_tag import CommentNode
 from liquid.exceptions import LiquidSyntaxError
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
@@ -21,7 +21,7 @@ class InlineCommentTag(Tag):
     node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:  # noqa: D102
-        expect(stream, TOKEN_TAG, value=self.name)
+        stream.expect(TOKEN_TAG, value=self.name)
         tok = stream.current
         # Empty comment tag?
         if stream.peek.type == TOKEN_EXPRESSION:

@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "assign" tag."""
+
 import re
 import sys
 from typing import List
@@ -12,7 +13,6 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import AssignmentExpression
 from liquid.expression import Expression
 from liquid.expressions.common import ASSIGN_IDENTIFIER_PATTERN
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
@@ -69,9 +69,9 @@ class AssignTag(Tag):
         return self.env.parse_filtered_expression_value(value, linenum)
 
     def parse(self, stream: TokenStream) -> AssignNode:
-        expect(stream, TOKEN_TAG, value=TAG_ASSIGN)
+        stream.expect(TOKEN_TAG, value=TAG_ASSIGN)
         tok = stream.next_token()
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
 
         match = RE_ASSIGNMENT.match(stream.current.value)
         if match:

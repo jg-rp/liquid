@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "unless" tag."""
+
 from __future__ import annotations
 
 import sys
@@ -16,7 +17,6 @@ from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
 from liquid.mode import Mode
 from liquid.parse import eat_block
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -183,13 +183,13 @@ class UnlessTag(Tag):
 
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Parse a boolean expression from a stream of tokens."""
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         return self.env.parse_boolean_expression_value(
             stream.current.value, stream.current.linenum
         )
 
     def parse(self, stream: TokenStream) -> Union[UnlessNode, IllegalNode]:
-        expect(stream, TOKEN_TAG, value=TAG_UNLESS)
+        stream.expect(TOKEN_TAG, value=TAG_UNLESS)
         tok = stream.current
         stream.next_token()
 
@@ -243,7 +243,7 @@ class UnlessTag(Tag):
                     break
                 stream.next_token()
 
-        expect(stream, TOKEN_TAG, value=TAG_ENDUNLESS)
+        stream.expect(TOKEN_TAG, value=TAG_ENDUNLESS)
 
         return self.node_class(
             tok,

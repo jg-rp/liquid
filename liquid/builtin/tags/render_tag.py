@@ -24,7 +24,6 @@ from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.parse import parse_obj
 from liquid.expressions.include.lex import tokenize
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
@@ -249,7 +248,7 @@ class RenderTag(Tag):
 
     def parse(self, stream: TokenStream) -> Node:
         tok = next(stream)
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr_stream = ExprTokenStream(
             tokenize(stream.current.value, stream.current.linenum)
         )

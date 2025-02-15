@@ -16,7 +16,6 @@ from liquid.builtin.tags.case_tag import CaseTag
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
-from liquid.parse import expect
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
@@ -123,12 +122,12 @@ class LaxCaseTag(CaseTag):
     """A `case` tag that is lax in its handling of extra `else` and `when` blocks."""
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        expect(stream, TOKEN_TAG, value=TAG_CASE)
+        stream.expect(TOKEN_TAG, value=TAG_CASE)
         tok = stream.current
         stream.next_token()
 
         # Parse the case expression.
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         case = self._parse_case_expression(stream.current.value, stream.current.linenum)
         stream.next_token()
 
@@ -148,7 +147,7 @@ class LaxCaseTag(CaseTag):
                 blocks.append(self.parser.parse_block(stream, ENDWHENBLOCK))
             elif stream.current.istag(TAG_WHEN):
                 when_tok = stream.next_token()
-                expect(stream, TOKEN_EXPRESSION)
+                stream.expect(TOKEN_EXPRESSION)
 
                 # Transform each comma or "or" separated when expression into a block
                 # node of its own, just as if each expression had its own `when` tag.
@@ -178,5 +177,5 @@ class LaxCaseTag(CaseTag):
                     linenum=stream.current.linenum,
                 )
 
-        expect(stream, TOKEN_TAG, value=TAG_ENDCASE)
+        stream.expect(TOKEN_TAG, value=TAG_ENDCASE)
         return LaxCaseNode(tok, blocks=blocks)

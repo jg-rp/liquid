@@ -10,7 +10,6 @@ from liquid.builtin.statement import StatementNode
 from liquid.builtin.tags.assign_tag import AssignTag
 from liquid.builtin.tags.echo_tag import EchoTag
 from liquid.expression import Expression
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.token import TOKEN_STATEMENT
 
@@ -24,7 +23,7 @@ class InlineIfStatement(Statement):
 
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current
-        expect(stream, TOKEN_STATEMENT)
+        stream.expect(TOKEN_STATEMENT)
         return StatementNode(
             tok, self.env.parse_conditional_expression_value(tok.value, tok.linenum)
         )
@@ -56,7 +55,7 @@ class InlineIfStatementWithParens(Statement):
 
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current
-        expect(stream, TOKEN_STATEMENT)
+        stream.expect(TOKEN_STATEMENT)
         return StatementNode(
             tok,
             self.env.parse_conditional_expression_value_with_parens(

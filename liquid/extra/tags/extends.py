@@ -1,4 +1,5 @@
 """Template inheritance tags."""
+
 from __future__ import annotations
 
 import sys
@@ -28,7 +29,6 @@ from liquid.expression import StringLiteral
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import tokenize_common_expression
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -270,10 +270,10 @@ class BlockTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=self.name)
+        stream.expect(TOKEN_TAG, value=self.name)
         tok = next(stream)
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr_stream = ExprTokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
@@ -290,7 +290,7 @@ class BlockTag(Tag):
 
         next(stream)
         block = self.parser.parse_block(stream, (self.end, TOKEN_EOF))
-        expect(stream, TOKEN_TAG, value=self.end)
+        stream.expect(TOKEN_TAG, value=self.end)
 
         if stream.peek.type == TOKEN_EXPRESSION:
             next(stream)
@@ -328,10 +328,10 @@ class ExtendsTag(Tag):
     node_class = ExtendsNode
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=self.name)
+        stream.expect(TOKEN_TAG, value=self.name)
         tok = next(stream)
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr_stream = ExprTokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )

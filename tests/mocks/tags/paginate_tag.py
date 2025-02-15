@@ -1,4 +1,5 @@
 """Tag and node definition for the mock "paginate" tag."""
+
 import math
 import sys
 from collections import abc
@@ -121,11 +122,11 @@ class PaginateTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG, value=TAG_PAGINATE)
+        stream.expect(TOKEN_TAG, value=TAG_PAGINATE)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr_stream = TokenStream(tokenize_paginate_expression(stream.current.value))
 
         # Read the identifier (the object to be paginated).
@@ -148,7 +149,7 @@ class PaginateTag(Tag):
         # Advance the stream passed the expression and read the block.
         stream.next_token()
         block = parser.parse_block(stream, end=END_PAGINATEBLOCK)
-        expect(stream, TOKEN_TAG, value=TAG_ENDPAGINATE)
+        stream.expect(TOKEN_TAG, value=TAG_ENDPAGINATE)
 
         return PaginateNode(
             tok, identifier=identifier, page_size=page_size.value, block=block

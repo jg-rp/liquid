@@ -2,6 +2,11 @@
 
 ## Version 2.0.0 (unreleased)
 
+**Breaking changes**
+
+- Removed legacy expression parsing functions.
+- Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
+
 **Features**
 
 - Added new filters `reject`, `has`, `find` and `find_index`.

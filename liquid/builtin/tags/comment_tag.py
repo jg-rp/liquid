@@ -8,7 +8,6 @@ from typing import TextIO
 from liquid import ast
 from liquid.context import Context
 from liquid.parse import eat_block
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -60,7 +59,7 @@ class CommentTag(Tag):
     node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:
-        expect(stream, TOKEN_TAG, value=TAG_COMMENT)
+        stream.expect(TOKEN_TAG, value=TAG_COMMENT)
         stream.next_token()
         node = self.node_class(stream.current)
         eat_block(stream, end=END_COMMENTBLOCK)
@@ -78,7 +77,7 @@ class CommentTextTag(CommentTag):
     end = TAG_ENDCOMMENT
 
     def parse(self, stream: TokenStream) -> CommentNode:
-        expect(stream, TOKEN_TAG, value=TAG_COMMENT)
+        stream.expect(TOKEN_TAG, value=TAG_COMMENT)
         stream.next_token()
         tok = stream.current
 

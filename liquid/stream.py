@@ -6,10 +6,13 @@ from collections import deque
 from typing import Deque
 from typing import Iterator
 from typing import List
+from typing import Optional
 
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_INITIAL
-from liquid.token import Token
+from .exceptions import LiquidSyntaxError
+from .token import TOKEN_EOF
+from .token import TOKEN_INITIAL
+from .token import Token
+from .token import reverse_operators
 
 
 class TokenStream:
@@ -85,3 +88,30 @@ class TokenStream:
     def close(self) -> None:
         """Close the stream."""
         self.current = Token(0, TOKEN_EOF, "")
+
+    def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> None:
+        if tok.type != typ or (value is not None and tok.value != value):
+            _typ = reverse_operators.get(tok.type, tok.type)
+            _expected_typ = reverse_operators.get(typ, typ)
+            if value is not None:
+                msg = (
+                    f"expected {_expected_typ} with value '{value}', "
+                    f"found {_typ} with value '{tok.value}'"
+                )
+            else:
+                msg = f"expected '{_expected_typ}', found '{_typ}'"
+            raise LiquidSyntaxError(msg, linenum=tok.linenum)
+
+    def expect(self, typ: str, value: Optional[str] = None) -> None:
+        """Check the current token in the stream matches the given type and value.
+
+        Raises a `LiquidSyntaxError` if they don't.
+        """
+        self._expect(self.current, typ, value)
+
+    def expect_peek(self, typ: str, value: Optional[str] = None) -> None:
+        """Check the next token in the stream matches the given type and value.
+
+        Raises a `LiquidSyntaxError` if they don't.
+        """
+        self._expect(self.peek, typ, value)

@@ -68,11 +68,11 @@ class CommentFormTag(Tag):
     def parse(self, stream: TokenStream) -> ast.Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG, value=TAG_FORM)
+        stream.expect(TOKEN_TAG, value=TAG_FORM)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr_stream = TokenStream(tokenize_identifier(stream.current.value))
 
         expect(expr_stream, TOKEN_IDENTIFIER)
@@ -85,6 +85,6 @@ class CommentFormTag(Tag):
         # Advance the stream passed the expression and read the block.
         stream.next_token()
         block = parser.parse_block(stream, end=END_FORMBLOCK)
-        expect(stream, TOKEN_TAG, value=TAG_ENDFORM)
+        stream.expect(TOKEN_TAG, value=TAG_ENDFORM)
 
         return CommentFormNode(tok, article=article, block=block)

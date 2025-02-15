@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "cycle" tag."""
+
 import sys
 from typing import Iterable
 from typing import Iterator
@@ -16,7 +17,6 @@ from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
@@ -113,7 +113,7 @@ class CycleTag(Tag):
 
     def parse(self, stream: TokenStream) -> CycleNode:
         tok = next(stream)
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         tokens = tokenize(stream.current.value, linenum=tok.linenum)
         group_name: Optional[Expression] = None
 

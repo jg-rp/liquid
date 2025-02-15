@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "tablerow" tag."""
+
 import sys
 from typing import Any
 from typing import Dict
@@ -17,7 +18,6 @@ from liquid.exceptions import ContinueLoop
 from liquid.expression import NIL
 from liquid.expression import LoopExpression
 from liquid.limits import to_int
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -297,17 +297,17 @@ class TablerowTag(Tag):
     def parse(self, stream: TokenStream) -> TablerowNode:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG, value=TAG_TABLEROW)
+        stream.expect(TOKEN_TAG, value=TAG_TABLEROW)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         loop_expression = self.env.parse_loop_expression_value(
             stream.current.value, stream.current.linenum
         )
         stream.next_token()
 
         block = parser.parse_block(stream, END_TAGBLOCK)
-        expect(stream, TOKEN_TAG, value=TAG_ENDTABLEROW)
+        stream.expect(TOKEN_TAG, value=TAG_ENDTABLEROW)
 
         return self.node_class(tok, expression=loop_expression, block=block)

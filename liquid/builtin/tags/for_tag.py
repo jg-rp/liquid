@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "for" tag."""
+
 from __future__ import annotations
 
 import sys
@@ -15,7 +16,6 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
@@ -329,11 +329,11 @@ class ForTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         parser = get_parser(self.env)
 
-        expect(stream, TOKEN_TAG, value=TAG_FOR)
+        stream.expect(TOKEN_TAG, value=TAG_FOR)
         tok = stream.current
         stream.next_token()
 
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         expr = self.env.parse_loop_expression_value(
             stream.current.value,
             stream.current.linenum,
@@ -347,7 +347,7 @@ class ForTag(Tag):
             stream.next_token()
             default = parser.parse_block(stream, ENDFORELSEBLOCK)
 
-        expect(stream, TOKEN_TAG, value=TAG_ENDFOR)
+        stream.expect(TOKEN_TAG, value=TAG_ENDFOR)
         return self.node_class(tok, expression=expr, block=block, default=default)
 
 
@@ -358,7 +358,7 @@ class BreakTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> BreakNode:
-        expect(stream, TOKEN_TAG, value=TAG_BREAK)
+        stream.expect(TOKEN_TAG, value=TAG_BREAK)
         return BreakNode(stream.current)
 
 
@@ -369,5 +369,5 @@ class ContinueTag(Tag):
     block = False
 
     def parse(self, stream: TokenStream) -> ContinueNode:
-        expect(stream, TOKEN_TAG, value=TAG_CONTINUE)
+        stream.expect(TOKEN_TAG, value=TAG_CONTINUE)
         return ContinueNode(stream.current)

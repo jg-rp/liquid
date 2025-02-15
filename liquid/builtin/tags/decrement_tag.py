@@ -10,7 +10,6 @@ from liquid.context import Context
 from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
@@ -55,10 +54,10 @@ class DecrementTag(Tag):
     node_class = DecrementNode
 
     def parse(self, stream: TokenStream) -> DecrementNode:
-        expect(stream, TOKEN_TAG, value=TAG_DECREMENT)
+        stream.expect(TOKEN_TAG, value=TAG_DECREMENT)
         tok = stream.current
         stream.next_token()
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         return self.node_class(
             tok=tok,
             identifier=str(
