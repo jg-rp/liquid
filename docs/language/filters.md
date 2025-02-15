@@ -636,6 +636,94 @@ preserving existing HTML escape sequences.
 Have you read &#39;James &amp; the Giant Peach&#39;?
 ```
 
+## find
+
+`<array> | find: <string>[, <object>]`
+
+**_New in version 2.0.0_**
+
+Return the first item in the input array that contains a property, given as the first argument, equal to the value given as the second argument. If no such item exists, `null` is returned.
+
+In this example we select the first page in the "Programming" category.
+
+```json title="data"
+{
+  "pages": [
+    {
+      "id": 1,
+      "title": "Introduction to Cooking",
+      "category": "Cooking",
+      "tags": ["recipes", "beginner", "cooking techniques"]
+    },
+    {
+      "id": 2,
+      "title": "Top 10 Travel Destinations in Europe",
+      "category": "Travel",
+      "tags": ["Europe", "destinations", "travel tips"]
+    },
+    {
+      "id": 3,
+      "title": "Mastering JavaScript",
+      "category": "Programming",
+      "tags": ["JavaScript", "web development", "coding"]
+    }
+  ]
+}
+```
+
+```liquid
+{% assign page = pages | find: 'category', 'Programming' %}
+{{ page.title }}
+```
+
+```plain title="output"
+Mastering JavaScript
+```
+
+## find_index
+
+`<array> | find_index: <string>[, <object>]`
+
+**_New in version 2.0.0_**
+
+Return the index of the first item in the input array that contains a property, given as the first argument, equal to the value given as the second argument. If no such item exists, `null` is returned.
+
+In this example we find the index for the first page in the "Programming" category.
+
+```json title="data"
+{
+  "pages": [
+    {
+      "id": 1,
+      "title": "Introduction to Cooking",
+      "category": "Cooking",
+      "tags": ["recipes", "beginner", "cooking techniques"]
+    },
+    {
+      "id": 2,
+      "title": "Top 10 Travel Destinations in Europe",
+      "category": "Travel",
+      "tags": ["Europe", "destinations", "travel tips"]
+    },
+    {
+      "id": 3,
+      "title": "Mastering JavaScript",
+      "category": "Programming",
+      "tags": ["JavaScript", "web development", "coding"]
+    }
+  ]
+}
+```
+
+```liquid
+{% assign index = pages | find_index: 'category', 'Programming' %}
+{{ pages[index].title }}
+```
+
+```plain title="output"
+Mastering JavaScript
+```
+
 ## first
 
 `<sequence> | first`
@@ -677,6 +765,50 @@ before the filter is applied.
 ```
 
 If the input can't be converted to a number, `0` is returned.
+
+## has
+
+`<array> | has: <string>[, <object>]`
+
+**_New in version 2.0.0_**
+
+Return `true` if the input array contains an object with a property identified by the first argument that is equal to the object given as the second argument. `false` is returned if none of the items in the input array contain such a property/value.
+
+In this example we test to see if any pages are in the "Programming" category.
+
+```json title="data"
+{
+  "pages": [
+    {
+      "id": 1,
+      "title": "Introduction to Cooking",
+      "category": "Cooking",
+      "tags": ["recipes", "beginner", "cooking techniques"]
+    },
+    {
+      "id": 2,
+      "title": "Top 10 Travel Destinations in Europe",
+      "category": "Travel",
+      "tags": ["Europe", "destinations", "travel tips"]
+    },
+    {
+      "id": 3,
+      "title": "Mastering JavaScript",
+      "category": "Programming",
+      "tags": ["JavaScript", "web development", "coding"]
+    }
+  ]
+}
+```
+
+```liquid
+{% assign has_programming_page = pages | has: 'category', 'Programming' %}
+{{ has_programming_page }}
+```
+
+```plain title="output"
+true
+```
 
 ## join
 
@@ -887,6 +1019,59 @@ concatenation.
 ```plain title="output"
 7.542
 World!
+```
+
+## reject
+
+`<array> | reject: <string>[, <object>]`
+
+**_New in version 2.0.0_**
+
+Return a copy of the input array including only those objects that have a property, named with the first argument, **that is not equal to** a value, given as the second argument. If a second argument is not given, only elements with the named property that are falsy will be included.
+
+```json title="data"
+{
+  "products": [
+    { "title": "Vacuum", "type": "house", "available": true },
+    { "title": "Spatula", "type": "kitchen", "available": false },
+    { "title": "Television", "type": "lounge", "available": true },
+    { "title": "Garlic press", "type": "kitchen", "available": true }
+  ]
+}
+```
+
+```liquid
+All products:
+{% for product in products -%}
+- {{ product.title }}
+{% endfor %}
+
+{%- assign kitchen_products = products | reject: "type", "kitchen" -%}
+
+Non kitchen products:
+{% for product in kitchen_products -%}
+- {{ product.title }}
+{% endfor %}
+
+{%- assign unavailable_products = products | reject: "available" -%}
+
+Unavailable products:
+{% for product in unavailable_products -%}
+- {{ product.title }}
+{% endfor %}
+```
+
+```plain title="output"
+All products:
+- Vacuum
+- Spatula
+- Television
+- Garlic press
+Non kitchen products:
+- Vacuum
+- Television
+Unavailable products:
+- Spatula
 ```
 
 ## remove

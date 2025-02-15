@@ -234,6 +234,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ["json"],
       },
       algolia: {
         appId: "SY0LPESLUP",
