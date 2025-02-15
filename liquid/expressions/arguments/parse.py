@@ -1,4 +1,5 @@
 """Generic argument list parsers."""
+
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -12,7 +13,7 @@ from liquid.expression import Expression
 from liquid.expressions.arguments.lex import tokenize
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.parse import parse_obj
-from liquid.expressions.stream import TokenStream
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF

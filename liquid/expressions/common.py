@@ -7,7 +7,6 @@ import sys
 from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Iterator
-from typing import Tuple
 from typing import Union
 
 from liquid.exceptions import LiquidSyntaxError
@@ -52,10 +51,11 @@ from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_SKIP
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
+from liquid.token import Token as Token  # noqa: PLC0414
 from liquid.token import reverse_operators
 
 if TYPE_CHECKING:
-    from liquid.expressions.stream import TokenStream
+    from liquid.stream import TokenStream
 
 GROUP_QUOTE = sys.intern("quote")
 GROUP_QUOTED = sys.intern("quoted")
@@ -83,9 +83,6 @@ IDENTINDEX_PATTERN = rf"\[\s*(?P<{GROUP_IDENTINDEX}>\-?\d+)\s*]"
 
 # 'something' or "something"
 STRING_PATTERN = rf"(?P<{GROUP_QUOTE}>[\"'])(?P<{GROUP_QUOTED}>.*?)(?P={GROUP_QUOTE})"
-
-# (position, type, value)
-Token = Tuple[int, str, str]
 
 
 def parse_boolean(stream: "TokenStream") -> Boolean:
@@ -382,7 +379,7 @@ def tokenize_common_expression(expr: str, linenum: int = 1) -> Iterator[Token]:
             raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
 
         linenum += newlines
-        yield (linenum, kind, value)
+        yield Token(linenum, kind, value)
 
 
 def parse_common_expression(stream: TokenStream) -> Expression:

@@ -1,4 +1,5 @@
 """Template inheritance tags."""
+
 from __future__ import annotations
 
 import sys
@@ -25,11 +26,10 @@ from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.expression import StringLiteral
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import tokenize_common_expression
-from liquid.parse import expect
 from liquid.parse import get_parser
+from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from liquid import BoundTemplate
     from liquid import Environment
     from liquid.context import Context
-    from liquid.stream import TokenStream
+
 
 # ruff: noqa: D102
 
@@ -270,11 +270,11 @@ class BlockTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=self.name)
+        stream.expect(TOKEN_TAG, value=self.name)
         tok = next(stream)
 
-        expect(stream, TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        stream.expect(TOKEN_EXPRESSION)
+        expr_stream = TokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         block_name = self._parse_block_name(expr_stream)
@@ -290,11 +290,11 @@ class BlockTag(Tag):
 
         next(stream)
         block = self.parser.parse_block(stream, (self.end, TOKEN_EOF))
-        expect(stream, TOKEN_TAG, value=self.end)
+        stream.expect(TOKEN_TAG, value=self.end)
 
         if stream.peek.type == TOKEN_EXPRESSION:
             next(stream)
-            expr_stream = ExprTokenStream(
+            expr_stream = TokenStream(
                 tokenize_common_expression(
                     stream.current.value, linenum=stream.current.linenum
                 )
@@ -311,7 +311,7 @@ class BlockTag(Tag):
 
         return self.node_class(tok, block_name, block, required)
 
-    def _parse_block_name(self, stream: ExprTokenStream) -> StringLiteral:
+    def _parse_block_name(self, stream: TokenStream) -> StringLiteral:
         if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
             return StringLiteral(stream.current[2])
         raise LiquidSyntaxError(
@@ -328,11 +328,11 @@ class ExtendsTag(Tag):
     node_class = ExtendsNode
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=self.name)
+        stream.expect(TOKEN_TAG, value=self.name)
         tok = next(stream)
 
-        expect(stream, TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        stream.expect(TOKEN_EXPRESSION)
+        expr_stream = TokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         parent_template_name = parse_string_literal(expr_stream)

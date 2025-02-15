@@ -1,4 +1,5 @@
 """Tokenize boolean liquid expressions."""
+
 import re
 from typing import Iterator
 
@@ -137,7 +138,7 @@ def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
             raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
 
         linenum += newlines
-        yield (linenum, kind, value)
+        yield Token(linenum, kind, value)
 
 
 def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
@@ -159,7 +160,7 @@ def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
         elif kind == TOKEN_RANGE_LITERAL:
             # Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
             # via the `yield` at the end of this loop.
-            yield (linenum + newlines, kind, kind)
+            yield Token(linenum + newlines, kind, kind)
             kind = TOKEN_LPAREN
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
@@ -185,4 +186,4 @@ def tokenize_with_parens(source: str, linenum: int = 1) -> Iterator[Token]:
             raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
 
         linenum += newlines
-        yield (linenum, kind, value)
+        yield Token(linenum, kind, value)

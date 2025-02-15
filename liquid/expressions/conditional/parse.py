@@ -25,7 +25,7 @@ from liquid.expressions.filtered.parse import (
     parse_from_tokens as parse_standard_filtered,
 )
 from liquid.expressions.filtered.parse import parse_obj
-from liquid.expressions.stream import TokenStream
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DPIPE

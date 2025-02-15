@@ -1,4 +1,5 @@
 """Node and tag definitions for `macro` and `call`."""
+
 from __future__ import annotations
 
 import itertools
@@ -24,7 +25,6 @@ from liquid.expression import Expression
 from liquid.expressions import parse_call_arguments
 from liquid.expressions import parse_macro_arguments
 from liquid.extra.tags.extends import TAG_BLOCK
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -282,18 +282,18 @@ class MacroTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_MACRO)
+        stream.expect(TOKEN_TAG, value=TAG_MACRO)
         tok = stream.current
         stream.next_token()
 
         # Parse the expression
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         name, args = parse_macro_arguments(stream.current.value, linenum=tok.linenum)
         stream.next_token()
 
         # Parse the block
         block = self.parser.parse_block(stream, (TAG_ENDMACRO, TOKEN_EOF))
-        expect(stream, TOKEN_TAG, value=TAG_ENDMACRO)
+        stream.expect(TOKEN_TAG, value=TAG_ENDMACRO)
 
         return self.node_class(tok=tok, name=name, args=args, block=block)
 
@@ -306,11 +306,11 @@ class CallTag(Tag):
     node_class = CallNode
 
     def parse(self, stream: TokenStream) -> CallNode:
-        expect(stream, TOKEN_TAG, value=TAG_CALL)
+        stream.expect(TOKEN_TAG, value=TAG_CALL)
         tok = stream.current
 
         stream.next_token()
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         name, _args = parse_call_arguments(stream.current.value, linenum=tok.linenum)
 
         # Args can be positional (no default), or keyword (with default).

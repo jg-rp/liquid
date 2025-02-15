@@ -1,4 +1,5 @@
 """Parse tree node and tag definition for the built in "include" tag."""
+
 import sys
 from typing import Dict
 from typing import List
@@ -14,13 +15,11 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Identifier
 from liquid.expression import Literal
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.parse import parse_obj
 from liquid.expressions.include.lex import tokenize
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
@@ -192,8 +191,8 @@ class IncludeTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Read an IncludeNode from the given stream of tokens."""
         tok = next(stream)
-        expect(stream, TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        stream.expect(TOKEN_EXPRESSION)
+        expr_stream = TokenStream(
             tokenize(
                 stream.current.value,
                 linenum=tok.linenum,
@@ -246,7 +245,7 @@ class IncludeTag(Tag):
         return self.node_class(tok, name=name, var=identifier, alias=alias, args=args)
 
 
-def _parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:
+def _parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
     stream.expect(TOKEN_COLON)

@@ -18,13 +18,11 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Identifier
 from liquid.expression import Literal
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_identifier
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.parse import parse_obj
 from liquid.expressions.include.lex import tokenize
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
@@ -249,8 +247,8 @@ class RenderTag(Tag):
 
     def parse(self, stream: TokenStream) -> Node:
         tok = next(stream)
-        expect(stream, TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        stream.expect(TOKEN_EXPRESSION)
+        expr_stream = TokenStream(
             tokenize(stream.current.value, stream.current.linenum)
         )
 
@@ -310,7 +308,7 @@ class RenderTag(Tag):
         )
 
 
-def parse_argument(stream: ExprTokenStream) -> Tuple[str, Expression]:
+def parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
     """Return the next key/value pair from the stream."""
     key = str(parse_unchained_identifier(stream))
     stream.next_token()

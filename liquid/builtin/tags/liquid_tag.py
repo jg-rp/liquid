@@ -11,7 +11,6 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import Context
 from liquid.lex import get_liquid_expression_lexer
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -69,7 +68,7 @@ class LiquidTag(Tag):
         )
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_LIQUID)
+        stream.expect(TOKEN_TAG, value=TAG_LIQUID)
         tok = stream.current
         stream.next_token()
 
@@ -80,7 +79,7 @@ class LiquidTag(Tag):
             parser = get_parser(self.env)
             block = parser.parse_block(stream, end=())
         else:
-            expect(stream, TOKEN_EXPRESSION)
+            stream.expect(TOKEN_EXPRESSION)
             expr_stream = TokenStream(
                 self.tokenize_liquid_expression(
                     stream.current.value, line_count=stream.current.linenum

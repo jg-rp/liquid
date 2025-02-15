@@ -1,4 +1,5 @@
 """Parse tree node and pseudo "tag" for output statements."""
+
 from typing import List
 from typing import Optional
 from typing import TextIO
@@ -7,7 +8,6 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import Context
 from liquid.expression import Expression
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
@@ -59,7 +59,7 @@ class Statement(Tag):
 
     def parse(self, stream: TokenStream) -> StatementNode:
         tok = stream.current
-        expect(stream, TOKEN_STATEMENT)
+        stream.expect(TOKEN_STATEMENT)
         return self.node_class(
             tok, self.env.parse_filtered_expression_value(tok.value, tok.linenum)
         )

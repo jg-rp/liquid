@@ -3,6 +3,7 @@
 Filtered expressions are those found in the output statement, the
 `assign` tag and the `echo` tag.
 """
+
 import re
 from typing import Iterator
 
@@ -106,4 +107,4 @@ def tokenize(source: str, linenum: int = 1) -> Iterator[Token]:
             raise LiquidSyntaxError(f"unexpected {value!r}", linenum=linenum)
 
         linenum += newlines
-        yield (linenum, kind, value)
+        yield Token(linenum, kind, value)

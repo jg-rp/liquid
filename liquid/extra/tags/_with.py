@@ -1,4 +1,5 @@
 """Node and tag definitions for `with`."""
+
 from __future__ import annotations
 
 import sys
@@ -13,7 +14,6 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.expressions import parse_keyword_arguments
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -79,16 +79,16 @@ class WithTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_WITH)
+        stream.expect(TOKEN_TAG, value=TAG_WITH)
         tok = next(stream)
 
         # Parse keyword arguments
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         args = parse_keyword_arguments(stream.current.value)
         stream.next_token()
 
         # Parse the block
         block = self.parser.parse_block(stream, (TAG_ENDWITH, TOKEN_EOF))
-        expect(stream, TOKEN_TAG, value=TAG_ENDWITH)
+        stream.expect(TOKEN_TAG, value=TAG_ENDWITH)
 
         return self.node_class(tok=tok, args=args, block=block)

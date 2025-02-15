@@ -12,7 +12,6 @@ from liquid.expressions.conditional.parse import (
 )
 from liquid.expressions.filtered.parse import parse as parse_filtered_expression
 from liquid.expressions.loop.parse import parse as parse_loop_expression
-from liquid.expressions.stream import TokenStream
 
 __all__ = (
     "parse_call_arguments",
@@ -24,6 +23,5 @@ __all__ = (
     "parse_conditional_expression_with_parens",
     "parse_filtered_expression",
     "parse_loop_expression",
-    "TokenStream",
     "Token",
 )

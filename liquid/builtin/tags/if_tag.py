@@ -1,4 +1,5 @@
 """Tag and node definition for the built-in "if" tag."""
+
 from __future__ import annotations
 
 import sys
@@ -15,7 +16,6 @@ from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
 from liquid.mode import Mode
 from liquid.parse import eat_block
-from liquid.parse import expect
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -184,14 +184,14 @@ class IfTag(Tag):
 
     def parse_expression(self, stream: TokenStream) -> Expression:
         """Pare a boolean expression from a stream of tokens."""
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         return self.env.parse_boolean_expression_value(
             stream.current.value,
             stream.current.linenum,
         )
 
     def parse(self, stream: TokenStream) -> Node:
-        expect(stream, TOKEN_TAG, value=TAG_IF)
+        stream.expect(TOKEN_TAG, value=TAG_IF)
         tok = stream.current
         stream.next_token()
 
@@ -249,7 +249,7 @@ class IfTag(Tag):
                     break
                 stream.next_token()
 
-        expect(stream, TOKEN_TAG, value=TAG_ENDIF)
+        stream.expect(TOKEN_TAG, value=TAG_ENDIF)
 
         return self.node_class(
             tok=tok,

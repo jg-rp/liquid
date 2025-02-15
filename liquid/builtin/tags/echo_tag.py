@@ -6,7 +6,6 @@ from liquid.ast import Node
 from liquid.builtin.statement import StatementNode
 from liquid.expression import NIL
 from liquid.expression import Expression
-from liquid.parse import expect
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -34,13 +33,13 @@ class EchoTag(Tag):
         return self.env.parse_filtered_expression_value(value, linenum)
 
     def parse(self, stream: TokenStream) -> Node:  # noqa: D102
-        expect(stream, TOKEN_TAG, value=TAG_ECHO)
+        stream.expect(TOKEN_TAG, value=TAG_ECHO)
         tok = stream.current
         stream.next_token()
 
         if stream.current.type == TOKEN_EOF:
             expr: Expression = NIL
         else:
-            expect(stream, TOKEN_EXPRESSION)
+            stream.expect(TOKEN_EXPRESSION)
             expr = self._parse_expression(stream.current.value, tok.linenum)
         return self.node_class(tok, expression=expr)

@@ -13,9 +13,8 @@ from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
 from liquid.expressions.common import parse_common_expression
 from liquid.expressions.common import tokenize_common_expression
-from liquid.expressions.stream import TokenStream as ExpressionTokenStream
-from liquid.parse import expect
 from liquid.parse import get_parser
+from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
@@ -28,7 +27,6 @@ if TYPE_CHECKING:
     from liquid import Environment
     from liquid.context import Context
     from liquid.expression import Expression
-    from liquid.stream import TokenStream
 
 # ruff: noqa: D102
 
@@ -140,12 +138,12 @@ class CaseTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> ast.Node:
-        expect(stream, TOKEN_TAG, value=TAG_CASE)
+        stream.expect(TOKEN_TAG, value=TAG_CASE)
         tok = stream.current
         stream.next_token()
 
         # Parse the case expression.
-        expect(stream, TOKEN_EXPRESSION)
+        stream.expect(TOKEN_EXPRESSION)
         case = self._parse_case_expression(stream.current.value, stream.current.linenum)
         stream.next_token()
 
@@ -161,7 +159,7 @@ class CaseTag(Tag):
         while stream.current.istag(TAG_WHEN):
             when_tok = stream.current
             stream.next_token()  # Eat WHEN
-            expect(stream, TOKEN_EXPRESSION)
+            stream.expect(TOKEN_EXPRESSION)
 
             # One conditional block for every object in a comma or `or` separated list.
             when_exprs = [
@@ -189,11 +187,11 @@ class CaseTag(Tag):
             stream.next_token()
             default = self.parser.parse_block(stream, ENDCASEBLOCK)
 
-        expect(stream, TOKEN_TAG, value=TAG_ENDCASE)
+        stream.expect(TOKEN_TAG, value=TAG_ENDCASE)
         return self.node_class(tok, whens=whens, default=default)
 
     def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
-        stream = ExpressionTokenStream(
+        stream = TokenStream(
             tokenize_common_expression(expr, linenum=linenum),
             shorthand_indexes=self.env.shorthand_indexes,
         )
@@ -201,7 +199,7 @@ class CaseTag(Tag):
 
     def _parse_when_expression(self, expr: str, linenum: int) -> List[Expression]:
         expressions = []
-        stream = ExpressionTokenStream(
+        stream = TokenStream(
             tokenize_common_expression(expr, linenum=linenum),
             shorthand_indexes=self.env.shorthand_indexes,
         )
