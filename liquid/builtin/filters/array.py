@@ -44,78 +44,52 @@ MAX_CH = chr(0x10FFFF)
 MISSING = object()
 
 
-def _str_if_not(val: object) -> str:
-    if not isinstance(val, str):
-        return str(val)
-    return val
-
-
-def _getitem(sequence: Any, key: object, default: object = None) -> Any:
-    """Helper for the map filter.
-
-    Same as sequence[key], but returns a default value if key does not exist
-    in sequence.
-    """
-    try:
-        return getitem(sequence, key)
-    except (KeyError, IndexError):
-        return default
-    except TypeError as err:
-        if sequence is None:
-            raise FilterItemTypeError(str(err)) from err
-        if isinstance(sequence, str) and isinstance(key, str) and key in sequence:
-            return key
-        if isinstance(sequence, int) and isinstance(key, int):
-            return sequence == key
-        if not hasattr(sequence, "__getitem__"):
-            raise
-        return default
-
-
-def _lower(obj: Any) -> str:
-    """Helper for the sort filter."""
-    try:
-        return str(obj).lower()
-    except AttributeError:
-        return ""
-
-
 @with_environment
 @sequence_filter
 def join(
-    sequence: Iterable[object],
+    left: Iterable[object],
     separator: object = " ",
     *,
     environment: Environment,
 ) -> str:
-    """Return a string by joining items in _sequence_, separated by _separator_."""
+    """Return concatenated items in _left_ separated by _separator_.
+
+    Items in _left_ will be coerced to a string if they are not already
+    strings, as will _separator_.
+    """
     if not isinstance(separator, str):
         separator = str(separator)
 
     if environment.autoescape and separator == " ":
         separator = Markup(" ")
 
-    return separator.join(_str_if_not(item) for item in sequence)
+    return separator.join(_str_if_not(item) for item in left)
 
 
 @liquid_filter
-def first(obj: Any) -> object:
-    """Return the first item of collection _obj_."""
-    if isinstance(obj, str):
+def first(left: Any) -> object:
+    """Return the first item in collection _left_.
+
+    If _left_ is not a collection or it is empty, `None` is returned.
+    """
+    if isinstance(left, str):
         return None
 
-    if isinstance(obj, dict):
-        obj = list(islice(obj.items(), 1))
+    if isinstance(left, dict):
+        left = list(islice(left.items(), 1))
 
     try:
-        return getitem(obj, 0)
+        return getitem(left, 0)
     except (TypeError, KeyError, IndexError):
         return None
 
 
 @liquid_filter
 def last(obj: Sequence[Any]) -> object:
-    """Return the last item of array-like object _obj_."""
+    """Return the last item in collection _left_.
+
+    If _left_ is not a collection or it is empty, `None` is returned.
+    """
     if isinstance(obj, str):
         return None
 
@@ -302,3 +276,40 @@ def sum_(sequence: ArrayT, key: object = None) -> Union[float, int, Decimal]:
     if isinstance(rv, Decimal):
         return float(rv)
     return rv
+
+
+def _str_if_not(val: object) -> str:
+    if not isinstance(val, str):
+        return str(val)
+    return val
+
+
+def _getitem(sequence: Any, key: object, default: object = None) -> Any:
+    """Helper for the map filter.
+
+    Same as sequence[key], but returns a default value if key does not exist
+    in sequence, and handles some corner cases so as to mimic Shopify/Liquid
+    behavior.
+    """
+    try:
+        return getitem(sequence, key)
+    except (KeyError, IndexError):
+        return default
+    except TypeError as err:
+        if sequence is None:
+            raise FilterItemTypeError(str(err)) from err
+        if isinstance(sequence, str) and isinstance(key, str) and key in sequence:
+            return key
+        if isinstance(sequence, int) and isinstance(key, int):
+            return sequence == key
+        if not hasattr(sequence, "__getitem__"):
+            raise
+        return default
+
+
+def _lower(obj: Any) -> str:
+    """Helper for the sort filter."""
+    try:
+        return str(obj).lower()
+    except AttributeError:
+        return ""

@@ -82,7 +82,7 @@ def array_filter(_filter: FilterT) -> FilterT:
 
 
 def sequence_filter(_filter: FilterT) -> FilterT:
-    """Coerce the left value to sequence.
+    """A filter function decorator that coerces the left value to sequence.
 
     This is intended to mimic the semantics of the reference implementation's
     `InputIterator` class.
@@ -98,6 +98,8 @@ def sequence_filter(_filter: FilterT) -> FilterT:
         try:
             return _filter(val, *args, **kwargs)
         except FilterItemTypeError:
+            # This type error came from an internal `_getitem` call, not a
+            # call to the filter callable.
             return None
         except TypeError as err:
             raise FilterArgumentError(err) from err
