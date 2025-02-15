@@ -8,7 +8,6 @@ from typing import TextIO
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import Context
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.stream import TokenStream
@@ -58,9 +57,7 @@ class IncrementTag(Tag):
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(
-                    ExprTokenStream(
-                        tokenize(stream.current.value, stream.current.linenum)
-                    )
+                    TokenStream(tokenize(stream.current.value, stream.current.linenum))
                 )
             ),
         )

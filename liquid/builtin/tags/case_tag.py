@@ -13,8 +13,8 @@ from liquid.expression import BooleanExpression
 from liquid.expression import InfixExpression
 from liquid.expressions.common import parse_common_expression
 from liquid.expressions.common import tokenize_common_expression
-from liquid.expressions.stream import TokenStream as ExpressionTokenStream
 from liquid.parse import get_parser
+from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from liquid import Environment
     from liquid.context import Context
     from liquid.expression import Expression
-    from liquid.stream import TokenStream
 
 # ruff: noqa: D102
 
@@ -192,7 +191,7 @@ class CaseTag(Tag):
         return self.node_class(tok, whens=whens, default=default)
 
     def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
-        stream = ExpressionTokenStream(
+        stream = TokenStream(
             tokenize_common_expression(expr, linenum=linenum),
             shorthand_indexes=self.env.shorthand_indexes,
         )
@@ -200,7 +199,7 @@ class CaseTag(Tag):
 
     def _parse_when_expression(self, expr: str, linenum: int) -> List[Expression]:
         expressions = []
-        stream = ExpressionTokenStream(
+        stream = TokenStream(
             tokenize_common_expression(expr, linenum=linenum),
             shorthand_indexes=self.env.shorthand_indexes,
         )

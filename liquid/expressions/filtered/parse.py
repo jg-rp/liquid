@@ -26,7 +26,7 @@ from liquid.expressions.common import parse_integer_literal
 from liquid.expressions.common import parse_nil
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.filtered.lex import tokenize
-from liquid.expressions.stream import TokenStream
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA

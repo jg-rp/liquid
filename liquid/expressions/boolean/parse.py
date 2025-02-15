@@ -20,7 +20,7 @@ from liquid.expressions.common import parse_integer_literal
 from liquid.expressions.common import parse_nil
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.filtered.parse import parse_obj as parse_simple_obj
-from liquid.expressions.stream import TokenStream
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_CONTAINS

@@ -26,10 +26,10 @@ from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.expression import StringLiteral
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_literal
 from liquid.expressions.common import tokenize_common_expression
 from liquid.parse import get_parser
+from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from liquid import BoundTemplate
     from liquid import Environment
     from liquid.context import Context
-    from liquid.stream import TokenStream
+
 
 # ruff: noqa: D102
 
@@ -274,7 +274,7 @@ class BlockTag(Tag):
         tok = next(stream)
 
         stream.expect(TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        expr_stream = TokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         block_name = self._parse_block_name(expr_stream)
@@ -294,7 +294,7 @@ class BlockTag(Tag):
 
         if stream.peek.type == TOKEN_EXPRESSION:
             next(stream)
-            expr_stream = ExprTokenStream(
+            expr_stream = TokenStream(
                 tokenize_common_expression(
                     stream.current.value, linenum=stream.current.linenum
                 )
@@ -311,7 +311,7 @@ class BlockTag(Tag):
 
         return self.node_class(tok, block_name, block, required)
 
-    def _parse_block_name(self, stream: ExprTokenStream) -> StringLiteral:
+    def _parse_block_name(self, stream: TokenStream) -> StringLiteral:
         if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
             return StringLiteral(stream.current[2])
         raise LiquidSyntaxError(
@@ -332,7 +332,7 @@ class ExtendsTag(Tag):
         tok = next(stream)
 
         stream.expect(TOKEN_EXPRESSION)
-        expr_stream = ExprTokenStream(
+        expr_stream = TokenStream(
             tokenize_common_expression(stream.current.value, linenum=tok.linenum)
         )
         parent_template_name = parse_string_literal(expr_stream)

@@ -44,6 +44,8 @@ from .analyze_tags import DEFAULT_INNER_TAG_MAP
 from .static_analysis import TemplateAnalysis
 from .static_analysis import ContextualTemplateAnalysis
 
+from .stream import TokenStream
+
 from . import future
 
 __version__ = "1.13.0"
@@ -82,4 +84,5 @@ __all__ = (
     "TemplateAnalysis",
     "Token",
     "Undefined",
+    "TokenStream",
 )

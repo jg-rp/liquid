@@ -1,4 +1,5 @@
 """Test cases for parsing common Liquid literals and identifiers."""
+
 import unittest
 
 from liquid.expression import BLANK
@@ -14,7 +15,7 @@ from liquid.expression import RangeLiteral
 from liquid.expression import StringLiteral
 from liquid.expressions.common import parse_common_expression
 from liquid.expressions.common import tokenize_common_expression
-from liquid.expressions.stream import TokenStream
+from liquid.stream import TokenStream
 from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE

@@ -6,6 +6,8 @@
 
 - Removed legacy expression parsing functions.
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
+- Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.
+- All tokens are now named tuples. Previously functions in `liquid.expressions` would generate and use plain tuples internally.
 
 **Features**
 

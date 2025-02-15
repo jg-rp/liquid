@@ -13,7 +13,6 @@ from liquid.context import Context
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expressions import Token as ExprToken
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_string_or_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.expressions.filtered.parse import parse_obj
@@ -119,10 +118,10 @@ class CycleTag(Tag):
 
         parts = list(split_at_first_colon(tokens))
         if len(parts) == 2:  # noqa: PLR2004
-            group_name = parse_string_or_identifier(ExprTokenStream(iter(parts[0])))
+            group_name = parse_string_or_identifier(TokenStream(iter(parts[0])))
 
         args: List[Expression] = []
-        expr_stream = ExprTokenStream(iter(parts[-1]))
+        expr_stream = TokenStream(iter(parts[-1]))
         while True:
             args.append(parse_obj(expr_stream))
             next(expr_stream)

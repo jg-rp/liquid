@@ -7,7 +7,6 @@ from typing import TextIO
 
 from liquid import ast
 from liquid.context import Context
-from liquid.expressions import TokenStream as ExprTokenStream
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.stream import TokenStream
@@ -62,9 +61,7 @@ class DecrementTag(Tag):
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(
-                    ExprTokenStream(
-                        tokenize(stream.current.value, stream.current.linenum)
-                    )
+                    TokenStream(tokenize(stream.current.value, stream.current.linenum))
                 )
             ),
         )

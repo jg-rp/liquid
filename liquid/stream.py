@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import deque
 from typing import Deque
 from typing import Iterator
-from typing import List
 from typing import Optional
 
 from .exceptions import LiquidSyntaxError
@@ -18,17 +17,21 @@ from .token import reverse_operators
 class TokenStream:
     """Step through or iterate a stream of tokens."""
 
-    def __init__(self, tokeniter: Iterator[Token]):
+    def __init__(
+        self,
+        tokeniter: Iterator[Token],
+        *,
+        shorthand_indexes: bool = False,
+    ):
         self.iter = tokeniter
 
         # Queue of peeked tokens
         self._pushed: Deque[Token] = deque()
 
-        # Stack of tags
-        self.balancing_stack: List[str] = []
-
         self.current: Token = Token(0, TOKEN_INITIAL, "")
         next(self)
+
+        self.shorthand_indexes = shorthand_indexes
 
     class TokenStreamIterator:
         """An iterable token stream."""
