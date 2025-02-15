@@ -1,4 +1,5 @@
 """Filter functions that operate on arrays."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -21,6 +22,7 @@ except ImportError:
 
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
+from liquid.exceptions import FilterItemTypeError
 from liquid.expression import NIL
 from liquid.filter import array_filter
 from liquid.filter import decimal_arg
@@ -42,72 +44,52 @@ MAX_CH = chr(0x10FFFF)
 MISSING = object()
 
 
-def _str_if_not(val: object) -> str:
-    if not isinstance(val, str):
-        return str(val)
-    return val
-
-
-def _getitem(sequence: Any, key: object, default: object = None) -> Any:
-    """Helper for the map filter.
-
-    Same as sequence[key], but returns a default value if key does not exist
-    in sequence.
-    """
-    try:
-        return getitem(sequence, key)
-    except (KeyError, IndexError):
-        return default
-    except TypeError:
-        if not hasattr(sequence, "__getitem__"):
-            raise
-        return default
-
-
-def _lower(obj: Any) -> str:
-    """Helper for the sort filter."""
-    try:
-        return str(obj).lower()
-    except AttributeError:
-        return ""
-
-
 @with_environment
 @sequence_filter
 def join(
-    sequence: Iterable[object],
+    left: Iterable[object],
     separator: object = " ",
     *,
     environment: Environment,
 ) -> str:
-    """Return a string by joining items in _sequence_, separated by _separator_."""
+    """Return concatenated items in _left_ separated by _separator_.
+
+    Items in _left_ will be coerced to a string if they are not already
+    strings, as will _separator_.
+    """
     if not isinstance(separator, str):
         separator = str(separator)
 
     if environment.autoescape and separator == " ":
         separator = Markup(" ")
 
-    return separator.join(_str_if_not(item) for item in sequence)
+    return separator.join(_str_if_not(item) for item in left)
 
 
 @liquid_filter
-def first(obj: Any) -> object:
-    """Return the first item of collection _obj_."""
-    if isinstance(obj, str):
+def first(left: Any) -> object:
+    """Return the first item in collection _left_.
+
+    If _left_ is not a collection or it is empty, `None` is returned.
+    """
+    if isinstance(left, str):
         return None
 
-    if isinstance(obj, dict):
-        obj = list(islice(obj.items(), 1))
+    if isinstance(left, dict):
+        left = list(islice(left.items(), 1))
 
     try:
-        return getitem(obj, 0)
+        return getitem(left, 0)
     except (TypeError, KeyError, IndexError):
         return None
 
 
 @liquid_filter
 def last(obj: Sequence[Any]) -> object:
-    """Return the last item of array-like object _obj_."""
+    """Return the last item in collection _left_.
+
+    If _left_ is not a collection or it is empty, `None` is returned.
+    """
     if isinstance(obj, str):
         return None
 
@@ -187,6 +169,60 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
 
 
 @sequence_filter
+def reject(
+    sequence: ArrayT, attr: object, value: object = None
+) -> Union[List[object], None]:
+    """Return a list of items from _sequence_ where _attr_ is not equal to _value_."""
+    if attr is None or is_undefined(attr):
+        return None
+
+    if value is not None and not is_undefined(value):
+        return [itm for itm in sequence if _getitem(itm, attr) != value]
+
+    return [itm for itm in sequence if _getitem(itm, attr) in (False, None)]
+
+
+@sequence_filter
+def find(sequence: ArrayT, attr: object, value: object = None) -> object:
+    """Return the first item from _sequence_ where _attr_ is equal to _value_."""
+    if value is not None and not is_undefined(value):
+        return next((itm for itm in sequence if _getitem(itm, attr) == value), None)
+
+    return next(
+        (itm for itm in sequence if _getitem(itm, attr) not in (False, None)), None
+    )
+
+
+@sequence_filter
+def find_index(
+    sequence: ArrayT, attr: object, value: object = None
+) -> Union[int, None]:
+    """Return the index of first item from _sequence_ where _attr_ equals _value_."""
+    if value is not None and not is_undefined(value):
+        return next(
+            (i for i, itm in enumerate(sequence) if _getitem(itm, attr) == value), None
+        )
+
+    return next(
+        (
+            i
+            for i, itm in enumerate(sequence)
+            if _getitem(itm, attr) not in (False, None)
+        ),
+        None,
+    )
+
+
+@sequence_filter
+def has(sequence: ArrayT, attr: object, value: object = None) -> bool:
+    """Return true if any items in _sequence_ have _attr_ equal to _value_."""
+    if value is not None and not is_undefined(value):
+        return any((itm for itm in sequence if _getitem(itm, attr) == value))
+
+    return any((itm for itm in sequence if _getitem(itm, attr) not in (False, None)))
+
+
+@sequence_filter
 def uniq(sequence: ArrayT, key: object = None) -> List[object]:
     """Return a copy of _sequence_ with duplicate elements removed."""
     # Note that we're not using a dict or set for deduplication because we need
@@ -240,3 +276,40 @@ def sum_(sequence: ArrayT, key: object = None) -> Union[float, int, Decimal]:
     if isinstance(rv, Decimal):
         return float(rv)
     return rv
+
+
+def _str_if_not(val: object) -> str:
+    if not isinstance(val, str):
+        return str(val)
+    return val
+
+
+def _getitem(sequence: Any, key: object, default: object = None) -> Any:
+    """Helper for the map filter.
+
+    Same as sequence[key], but returns a default value if key does not exist
+    in sequence, and handles some corner cases so as to mimic Shopify/Liquid
+    behavior.
+    """
+    try:
+        return getitem(sequence, key)
+    except (KeyError, IndexError):
+        return default
+    except TypeError as err:
+        if sequence is None:
+            raise FilterItemTypeError(str(err)) from err
+        if isinstance(sequence, str) and isinstance(key, str) and key in sequence:
+            return key
+        if isinstance(sequence, int) and isinstance(key, int):
+            return sequence == key
+        if not hasattr(sequence, "__getitem__"):
+            raise
+        return default
+
+
+def _lower(obj: Any) -> str:
+    """Helper for the sort filter."""
+    try:
+        return str(obj).lower()
+    except AttributeError:
+        return ""

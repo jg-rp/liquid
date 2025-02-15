@@ -992,6 +992,8 @@ class LoopExpression(Expression):
             return (iter([obj]), 1)
         if isinstance(obj, abc.Sequence):
             return iter(obj), len(obj)
+        if obj is None:
+            return iter([]), 0
 
         raise LiquidTypeError(
             f"expected array or hash at '{self.iterable}', found '{str(obj)}'"

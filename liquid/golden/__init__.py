@@ -23,9 +23,12 @@ from . import downcase_filter
 from . import echo_tag
 from . import escape_filter
 from . import escape_once_filter
+from . import find_filter
+from . import find_index_filter
 from . import first_filter
 from . import floor_filter
 from . import for_tag
+from . import has_filter
 from . import identifiers
 from . import if_tag
 from . import ifchanged_tag
@@ -47,6 +50,7 @@ from . import plus_filter
 from . import prepend_filter
 from . import range_objects
 from . import raw_tag
+from . import reject_filter
 from . import remove_filter
 from . import remove_first_filter
 from . import remove_last_filter
@@ -105,9 +109,12 @@ test_cases = [
     echo_tag,
     escape_filter,
     escape_once_filter,
+    find_filter,
+    find_index_filter,
     first_filter,
     floor_filter,
     for_tag,
+    has_filter,
     identifiers,
     if_tag,
     ifchanged_tag,
@@ -129,6 +136,7 @@ test_cases = [
     prepend_filter,
     range_objects,
     raw_tag,
+    reject_filter,
     remove_filter,
     remove_first_filter,
     remove_last_filter,

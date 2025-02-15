@@ -1,4 +1,6 @@
 """HTML escape test cases."""
+
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import NamedTuple
@@ -8,7 +10,7 @@ from unittest import skipIf
 try:
     import markupsafe
 except ImportError:
-    markupsafe = None
+    markupsafe = None  # type: ignore
 
 try:
     from markupsafe import Markup
@@ -26,7 +28,7 @@ class Case(NamedTuple):
 
     description: str
     template: str
-    context: Dict
+    context: Dict[str, Any]
     expect: str
 
 
@@ -34,17 +36,17 @@ class SafeHTMLDrop:
     def __init__(self, somelist: List[object]):
         self.items = somelist
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "SafeHTMLDrop"
 
-    def __html__(self):
+    def __html__(self) -> str:
         lis = "\n".join(f"<li>{item}</li>" for item in self.items)
         return f"<ul>\n{lis}\n</ul>"
 
 
 @skipIf(markupsafe is None, "this test requires markupsafe")
 class AutoescapeTestCase(TestCase):
-    def test_do_not_escape_output(self):
+    def test_do_not_escape_output(self) -> None:
         """Test that we can turn off auto-escaping."""
         tests = [
             Case(
@@ -69,7 +71,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_escape_output(self):
+    def test_escape_output(self) -> None:
         """Test that we can automatically escape output statements."""
         tests = [
             Case(
@@ -123,7 +125,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_escape_string_filters(self):
+    def test_escape_string_filters(self) -> None:
         """Test that string filters are autoescaped."""
         tests = [
             Case(
@@ -508,7 +510,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_autoescape_array_filters(self):
+    def test_autoescape_array_filters(self) -> None:
         """Test that array filters are autoescaped."""
         tests = [
             Case(
@@ -566,7 +568,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_autoescape_misc_filters(self):
+    def test_autoescape_misc_filters(self) -> None:
         """Test that misc filters are autoescaped."""
         tests = [
             Case(
@@ -597,7 +599,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_safe_filter(self):
+    def test_safe_filter(self) -> None:
         """Test the safe filter."""
         tests = [
             Case(
@@ -622,14 +624,14 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_safe_filter_with_no_autoescape(self):
+    def test_safe_filter_with_no_autoescape(self) -> None:
         """Test that the safe filter is a no-op if autoescape is disabled."""
         env = Environment(autoescape=False)
         template = env.from_string(r"{{ '<p>Hello</p>' | safe }}")
         result = template.render()
         self.assertEqual(result, "<p>Hello</p>")
 
-    def test_tablerow_tag(self):
+    def test_tablerow_tag(self) -> None:
         """Test that the tablerow tag behaves well with autoescape."""
         tests = [
             Case(
@@ -732,7 +734,7 @@ class AutoescapeTestCase(TestCase):
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
 
-    def test_liquid_tag(self):
+    def test_liquid_tag(self) -> None:
         """Test that the liquid tag behaves well with autoescape."""
         tests = [
             Case(
@@ -786,12 +788,12 @@ class AutoescapeTestCase(TestCase):
     markupsafe is not None, "this tests exceptions raised by the lack of markupsafe"
 )
 class DummyMarkupSafeTestCase(TestCase):
-    def test_dummy_escape(self):
+    def test_dummy_escape(self) -> None:
         """Test that the dummy definition of escape raises an exception."""
         with self.assertRaises(Error):
             escape("foo")
 
-    def test_dummy_markup(self):
+    def test_dummy_markup(self) -> None:
         """Test that the dummy definition of Markup raises an exception."""
         with self.assertRaises(Error):
             Markup("foo")

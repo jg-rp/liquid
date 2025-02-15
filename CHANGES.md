@@ -1,5 +1,15 @@
 # Python Liquid Change Log
 
+## Version 2.0.0 (unreleased)
+
+**Features**
+
+- Added new filters `reject`, `has`, `find` and `find_index`.
+
+**Chores**
+
+- Started to refactor tests to use pytest instead of `unittest.TestCase`. pytest is now required to run test suites. Previously `pytest` or `python -m unittest` could have been used.
+
 ## Version 1.13.0
 
 **Features**
