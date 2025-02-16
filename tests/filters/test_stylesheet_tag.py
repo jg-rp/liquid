@@ -7,13 +7,6 @@ from typing import Any
 from typing import Dict
 from typing import List
 
-try:
-    import markupsafe  # noqa: F401
-
-    MARKUPSAFE_AVAILABLE = True
-except ImportError:
-    MARKUPSAFE_AVAILABLE = False
-
 import pytest
 
 from liquid import Environment
@@ -109,30 +102,23 @@ AUTO_ESCAPE_TEST_CASES = [
             'type="text/css" media="all" />'
         ),
     ),
-]
-
-if MARKUPSAFE_AVAILABLE:
-    AUTO_ESCAPE_TEST_CASES.append(
-        Case(
-            description="safe url from context",
-            val=Markup("<b>assets/style.css</b>"),
-            args=[],
-            kwargs={},
-            expect=(
-                '<link href="&lt;b&gt;assets/style.css&lt;/b&gt;" rel="stylesheet" '
-                'type="text/css" media="all" />'
-            ),
+    Case(
+        description="safe url from context",
+        val=Markup("<b>assets/style.css</b>"),
+        args=[],
+        kwargs={},
+        expect=(
+            '<link href="&lt;b&gt;assets/style.css&lt;/b&gt;" rel="stylesheet" '
+            'type="text/css" media="all" />'
         ),
-    )
+    ),
+]
 
 
 @pytest.mark.parametrize(
     "case", AUTO_ESCAPE_TEST_CASES, ids=operator.attrgetter("description")
 )
 def test_stylesheet_tag_filter_auto_escape(case: Case) -> None:
-    if not MARKUPSAFE_AVAILABLE:
-        pytest.skip(reason="this test requires markupsafe")
-
     stylesheet_tag_ = partial(stylesheet_tag, environment=AUTO_ESCAPE_ENV)
     if isclass(case.expect) and issubclass(case.expect, Error):
         with pytest.raises(case.expect):

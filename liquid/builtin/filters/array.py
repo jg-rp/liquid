@@ -15,11 +15,7 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-try:
-    from markupsafe import Markup
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-
+from liquid import Markup
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterItemTypeError

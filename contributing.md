@@ -24,12 +24,6 @@ Or, to test against the full matrix of supported Python versions.
 $ hatch run test:test
 ```
 
-And to test without the _autoescape_ extra.
-
-```shell
-$ hatch run noescape:test
-```
-
 Lint with [ruff](https://beta.ruff.rs/docs/).
 
 ```shell

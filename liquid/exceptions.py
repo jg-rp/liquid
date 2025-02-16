@@ -1,7 +1,6 @@
 """Liquid specific Exceptions and warnings."""
 
 from pathlib import Path
-from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Type
@@ -211,34 +210,6 @@ WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {
 def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
     """Return a warning equivalent of the given exception."""
     return WARNINGS.get(exc, LiquidWarning)
-
-
-def escape(_: Any) -> str:
-    """A dummy escape function that always raises an exception."""
-    raise Error("autoescape requires Markupsafe to be installed")
-
-
-class Markup(str):
-    """A dummy markup class that always raises an exception."""
-
-    def __init__(self, _: object):
-        super().__init__()
-        raise Error("autoescape requires Markupsafe to be installed")
-
-    def join(self, _: object) -> str:  # noqa: D102
-        raise Error(
-            "autoescape requires Markupsafe to be installed"
-        )  # pragma: no cover
-
-    def unescape(self) -> str:  # noqa: D102
-        raise Error(
-            "autoescape requires Markupsafe to be installed"
-        )  # pragma: no cover
-
-    def format(self, *args: Any, **kwargs: Any) -> str:  # noqa: A003, D102, ARG002
-        raise Error(
-            "autoescape requires Markupsafe to be installed"
-        )  # pragma: no cover
 
 
 class CacheCapacityValueError(ValueError):

@@ -85,8 +85,7 @@ class Environment:
         strict_filters: If `True`, will raise an exception upon finding an
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
-            output unless they've been explicitly marked as "safe". Requires the package
-            Markupsafe.
+            output unless they've been explicitly marked as "safe".
         auto_reload: If `True`, loaders that have an `uptodate` callable will
             reload template source data automatically. For deployments where template
             sources don't change between service reloads, setting auto_reload to `False`
@@ -755,8 +754,7 @@ def Template(  # noqa: N802, D417
         strict_filters: If `True`, will raise an exception upon finding an
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
-            output unless they've been explicitly marked as "safe". Requires the package
-            Markupsafe.
+            output unless they've been explicitly marked as "safe".
         auto_reload: If `True`, loaders that have an `uptodate` callable will
             reload template source data automatically. For deployments where template
             sources don't change between service reloads, setting auto_reload to `False`

@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+  "MarkupSafe>=2,<3",
   "python-dateutil>=2.8.1",
   "typing-extensions>=4.2.0",
   "importlib-resources>=5.10.0",
@@ -30,9 +31,6 @@ license = "MIT"
 name = "python-liquid"
 readme = "README.md"
 requires-python = ">=3.7"
-
-[project.optional-dependencies]
-autoescape = ["MarkupSafe>=2,<3"]
 
 [project.urls]
 "Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
@@ -68,15 +66,9 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=missing --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 benchmark = "python -O scripts/performance.py"
-cov = [
-  "hatch run noescape:cov",
-  "pytest --cov-append --cov-report= --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
-]
-cov-html = [
-  "hatch run noescape:cov",
-  "pytest --cov-append --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}",
-]
+cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 lint = "ruff check ."
 no-cov = "cov --no-cov {args}"
 profile = "python -O scripts/performance.py --profile"
@@ -87,15 +79,6 @@ typing = "mypy"
 python = ["37", "38", "39", "310", "311", "312", "pypy38", "pypy39"]
 
 [tool.hatch.envs.test.scripts]
-test = "pytest {args}"
-
-[tool.hatch.envs.noescape]
-dependencies = ["pytest", "pytest-cov", "mock"]
-features = []
-template = "noescape"
-
-[tool.hatch.envs.noescape.scripts]
-cov = "pytest --cov-report= --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 test = "pytest {args}"
 
 [tool.hatch.envs.docs]

@@ -13,16 +13,9 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-try:
-    from markupsafe import Markup
-    from markupsafe import escape as markupsafe_escape
-    from markupsafe import soft_str
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-    from liquid.exceptions import escape as markupsafe_escape  # type: ignore
-
-    soft_str = str  # type: ignore
-
+from liquid import Markup
+from liquid import escape as markupsafe_escape
+from liquid import soft_str
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 from liquid.filter import liquid_filter
