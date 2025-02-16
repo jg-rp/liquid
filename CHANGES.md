@@ -8,15 +8,11 @@
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
 - Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.
 - All tokens are now named tuples. Previously functions in `liquid.expressions` would generate and use plain tuples internally.
+- We now depend on markupsafe>=3. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
 
 **Features**
 
 - Added new filters `reject`, `has`, `find` and `find_index`.
-
-**Chores**
-
-- The markupsafe package is now a required dependency. It used to be optional.
-- Started to refactor tests to use pytest instead of `unittest.TestCase`. pytest is now required to run test suites. Previously `pytest` or `python -m unittest` could have been used.
 
 ## Version 1.13.0
 
