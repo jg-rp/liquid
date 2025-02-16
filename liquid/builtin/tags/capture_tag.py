@@ -3,7 +3,6 @@
 import re
 import sys
 from io import StringIO
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -65,7 +64,7 @@ class CaptureNode(ast.Node):
         self._assign(context, buf)
         return False
 
-    def children(self) -> List[ast.ChildNode]:
+    def children(self) -> list[ast.ChildNode]:
         return [
             ast.ChildNode(
                 linenum=self.tok.linenum,

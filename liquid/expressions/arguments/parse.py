@@ -2,10 +2,7 @@
 
 from typing import Any
 from typing import Callable
-from typing import Dict
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import NIL
@@ -21,18 +18,18 @@ from liquid.token import TOKEN_EQUALS
 from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_STRING
 
-Argument = Tuple[Any, Expression]
+Argument = tuple[Any, Expression]
 
 
 def make_parse_arguments(
     func: Callable[[TokenStream, str], Argument],
     separator_token: str = TOKEN_COLON,
-) -> Callable[[TokenStream], List[Argument]]:
+) -> Callable[[TokenStream], list[Argument]]:
     """Return an argument list parser that uses _func_."""
 
-    def _parse_arguments(stream: TokenStream) -> List[Argument]:
+    def _parse_arguments(stream: TokenStream) -> list[Argument]:
         """Parse arguments from a stream of tokens until EOF."""
-        args: List[Argument] = []
+        args: list[Argument] = []
         # Leading commas are OK
         if stream.current[1] == TOKEN_COMMA:
             next(stream)
@@ -65,7 +62,7 @@ parse_colon_separated_arguments = make_parse_arguments(parse_argument, TOKEN_COL
 parse_equals_separated_arguments = make_parse_arguments(parse_argument, TOKEN_EQUALS)
 
 
-def parse_keyword_arguments(expr: str, linenum: int = 1) -> Dict[str, Expression]:
+def parse_keyword_arguments(expr: str, linenum: int = 1) -> dict[str, Expression]:
     """Parse keyword or named arguments from a Liquid expression string.
 
     Each key/value pair is assumed to be separated by a comma. Leading and
@@ -125,7 +122,7 @@ def _parse_macro_name(stream: TokenStream) -> str:
     )
 
 
-def parse_macro_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
+def parse_macro_arguments(expr: str, linenum: int = 1) -> tuple[str, list[Argument]]:
     """Parse a sequence of argument names, possibly with default values."""
     stream = TokenStream(tokenize(expr, linenum))
     name = _parse_macro_name(stream)
@@ -133,7 +130,7 @@ def parse_macro_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argume
     return name, _parse_macro_arguments(stream)
 
 
-def parse_call_arguments(expr: str, linenum: int = 1) -> Tuple[str, List[Argument]]:
+def parse_call_arguments(expr: str, linenum: int = 1) -> tuple[str, list[Argument]]:
     """Parse a sequence of positional and/or keyword arguments."""
     stream = TokenStream(tokenize(expr, linenum))
     name = _parse_macro_name(stream)

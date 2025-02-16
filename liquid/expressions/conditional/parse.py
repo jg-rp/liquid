@@ -1,12 +1,9 @@
 """Functions for parsing non-standard conditional expressions."""
 
 from functools import partial
-from typing import Dict
 from typing import Iterable
 from typing import Iterator
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import FALSE
@@ -36,9 +33,9 @@ from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_PIPE
 
 
-def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
+def split_at_pipe(tokens: Iterable[Token]) -> Iterator[list[Token]]:
     """Split tokens into lists, using TOKEN_PIPE as the delimiter."""
-    buf: List[Token] = []
+    buf: list[Token] = []
     for token in tokens:
         if token[1] == TOKEN_PIPE:
             yield buf
@@ -51,8 +48,8 @@ def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
 def _split_at_first(
     tokens: Iterator[Token],
     _type: str,
-) -> Tuple[List[Token], Optional[Iterator[Token]]]:
-    buf: List[Token] = []
+) -> tuple[list[Token], Optional[Iterator[Token]]]:
+    buf: list[Token] = []
     for token in tokens:
         if token[1] == _type:
             return (buf, tokens)
@@ -67,7 +64,7 @@ split_at_first_else = partial(_split_at_first, _type=TOKEN_ELSE)
 
 
 def _parse_filter(
-    tokens: List[Token], linenum: int, *, shorthand_indexes: bool = False
+    tokens: list[Token], linenum: int, *, shorthand_indexes: bool = False
 ) -> Filter:
     if not tokens:
         raise LiquidSyntaxError(
@@ -87,8 +84,8 @@ def _parse_filter(
     stream.expect(TOKEN_COLON)
     next(stream)
 
-    args: List[Expression] = []
-    kwargs: Dict[str, Expression] = {}
+    args: list[Expression] = []
+    kwargs: dict[str, Expression] = {}
 
     while stream.current[1] != TOKEN_EOF:
         if stream.peek[1] == TOKEN_COLON:
@@ -144,7 +141,7 @@ def parse(
 
     if _alternative_tokens:
         # Handle TOKEN_ELSE followed by nothing.
-        alternative_tokens: List[Token] = list(_alternative_tokens)
+        alternative_tokens: list[Token] = list(_alternative_tokens)
 
         if alternative_tokens:
             alternative: Optional[Expression] = parse_standard_filtered(
@@ -201,7 +198,7 @@ def parse_with_parens(
 
     if _alternative_tokens:
         # Handle TOKEN_ELSE followed by nothing.
-        alternative_tokens: List[Token] = list(_alternative_tokens)
+        alternative_tokens: list[Token] = list(_alternative_tokens)
 
         if alternative_tokens:
             alternative: Optional[Expression] = parse_standard_filtered(

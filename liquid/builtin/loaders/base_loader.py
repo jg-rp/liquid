@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Awaitable
 from typing import Callable
-from typing import Dict
 from typing import Mapping
 from typing import NamedTuple
 from typing import Optional
@@ -289,7 +288,7 @@ class DictLoader(BaseLoader):
         templates: A dictionary mapping template names to template source strings.
     """
 
-    def __init__(self, templates: Dict[str, str]):
+    def __init__(self, templates: dict[str, str]):
         super().__init__()
         self.templates = templates
 

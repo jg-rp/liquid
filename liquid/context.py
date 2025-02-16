@@ -19,9 +19,7 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
 from typing import Callable
-from typing import Dict
 from typing import Iterator
-from typing import List
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
@@ -205,7 +203,7 @@ class Context:
         self,
         env: Environment,
         globals: Optional[Namespace] = None,  # noqa: A002
-        disabled_tags: Optional[List[str]] = None,
+        disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[Context] = None,
         loop_iteration_carry: int = 1,
@@ -224,7 +222,7 @@ class Context:
         self.globals = globals or {}
 
         # A namespace for `increment` and `decrement` counters.
-        self.counters: Dict[str, int] = {}
+        self.counters: dict[str, int] = {}
 
         # Namespaces are searched in this order. When a context is extended, the
         # temporary namespace is pushed to the front of this chain.
@@ -232,14 +230,14 @@ class Context:
 
         # A namespace supporting stateful tags. Such as `cycle`, `increment`,
         # `decrement` and `ifchanged`.
-        self.tag_namespace: Dict[str, Any] = {
+        self.tag_namespace: dict[str, Any] = {
             "cycles": {},
             "ifchanged": "",
             "stopindex": {},
         }
 
         # As stack of forloop objects. Used for populating forloop.parentloop.
-        self.loops: List[ForLoop] = []
+        self.loops: list[ForLoop] = []
 
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
@@ -368,7 +366,7 @@ class Context:
         except KeyError as err:
             raise NoSuchFilterFunc(f"unknown filter '{name}'") from err
 
-        kwargs: Dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
 
         if getattr(filter_func, "with_context", False):
             kwargs["context"] = self
@@ -502,7 +500,7 @@ class Context:
     def copy(
         self,
         namespace: Namespace,
-        disabled_tags: Optional[List[str]] = None,
+        disabled_tags: Optional[list[str]] = None,
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
         block_scope: bool = False,
@@ -628,7 +626,7 @@ class VariableCaptureContext(Context):
         self,
         env: Environment,
         globals: Optional[Namespace] = None,  # noqa: A002
-        disabled_tags: Optional[List[str]] = None,
+        disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[VariableCaptureContext] = None,
         loop_iteration_carry: int = 1,
@@ -643,10 +641,10 @@ class VariableCaptureContext(Context):
             loop_iteration_carry=loop_iteration_carry,
             local_namespace_size_carry=local_namespace_size_carry,
         )
-        self.local_references: List[str] = []
-        self.all_references: List[str] = []
-        self.undefined_references: List[str] = []
-        self.filters: List[str] = []
+        self.local_references: list[str] = []
+        self.all_references: list[str] = []
+        self.undefined_references: list[str] = []
+        self.filters: list[str] = []
 
         root_context: VariableCaptureContext = self
         while root_context.parent_context and isinstance(
@@ -733,7 +731,7 @@ class FutureContext(Context):
 
     def cycle(self, group_name: str, args: Sequence[object]) -> object:
         key = group_name if group_name else str(args)
-        namespace: Dict[str, int] = self.tag_namespace["cycles"]
+        namespace: dict[str, int] = self.tag_namespace["cycles"]
         index = namespace.setdefault(key, 0)
         try:
             rv = args[index]

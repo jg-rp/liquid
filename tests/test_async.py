@@ -1,11 +1,11 @@
 """Test Python Liquid's async API."""
+
 import asyncio
 import tempfile
 import time
 import unittest
 from collections import abc
 from pathlib import Path
-from typing import Dict
 from typing import NamedTuple
 
 # assert_awaited* were new in Python 3.8, so we're using the backport.
@@ -246,9 +246,12 @@ class LoadAsyncTestCase(unittest.TestCase):
             return await template.render_async()
 
         for case in test_cases:
-            with self.subTest(msg=case.description), patch(
-                "liquid.loaders.DictLoader.get_source_async", autospec=True
-            ) as source:
+            with (
+                self.subTest(msg=case.description),
+                patch(
+                    "liquid.loaders.DictLoader.get_source_async", autospec=True
+                ) as source,
+            ):
                 source.side_effect = [
                     TemplateSource(
                         "{% for x in (1..3) %}{{x}}-{% endfor %}",
@@ -329,8 +332,8 @@ class AsyncDropTestCase(unittest.TestCase):
 class AsyncMatterDictLoader(DictLoader):
     def __init__(
         self,
-        templates: Dict[str, str],
-        matter: Dict[str, Dict[str, object]],
+        templates: dict[str, str],
+        matter: dict[str, dict[str, object]],
     ):
         super().__init__(templates)
         self.matter = matter

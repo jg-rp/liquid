@@ -1,7 +1,7 @@
 """Test cases for `extends` and `block` tags."""
+
 import asyncio
 from typing import Any
-from typing import Dict
 from typing import Mapping
 from typing import NamedTuple
 from unittest import TestCase
@@ -24,7 +24,7 @@ class Case(NamedTuple):
     template: str
     expect: str
     globals: Mapping[str, Any]  # noqa: A003
-    partials: Dict[str, str]
+    partials: dict[str, str]
 
 
 class TemplateInheritanceTestCase(TestCase):

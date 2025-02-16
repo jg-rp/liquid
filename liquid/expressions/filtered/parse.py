@@ -5,11 +5,8 @@ Like those found in output statements and assign tags.
 
 from itertools import islice
 from typing import Callable
-from typing import Dict
 from typing import Iterable
 from typing import Iterator
-from typing import List
-from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
@@ -45,7 +42,7 @@ from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
 
-TOKEN_MAP: Dict[str, Callable[[TokenStream], Expression]] = {
+TOKEN_MAP: dict[str, Callable[[TokenStream], Expression]] = {
     TOKEN_FALSE: parse_boolean,
     TOKEN_TRUE: parse_boolean,
     TOKEN_NIL: parse_nil,
@@ -89,9 +86,9 @@ TOKEN_MAP[TOKEN_LPAREN] = parse_range
 TOKEN_MAP[TOKEN_RANGE_LITERAL] = parse_range_with_parens
 
 
-def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
+def split_at_pipe(tokens: Iterable[Token]) -> Iterator[list[Token]]:
     """Split tokens on into lists, using TOKEN_PIPE as the delimiter."""
-    buf: List[Token] = []
+    buf: list[Token] = []
     for token in tokens:
         if token[1] == TOKEN_PIPE:
             yield buf
@@ -101,9 +98,9 @@ def split_at_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
     yield buf
 
 
-def split_at_first_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
+def split_at_first_pipe(tokens: Iterable[Token]) -> Iterator[list[Token]]:
     """Like split_at_pipe, but stops splitting after the first TOKEN_PIPE is found."""
-    buf: List[Token] = []
+    buf: list[Token] = []
     for token in tokens:
         if token[1] == TOKEN_PIPE:
             yield buf
@@ -115,9 +112,9 @@ def split_at_first_pipe(tokens: Iterable[Token]) -> Iterator[List[Token]]:
 
 def split_at_comma(
     tokens: Iterable[Token],
-) -> Iterator[List[Token]]:  # pragma: no cover
+) -> Iterator[list[Token]]:  # pragma: no cover
     """Split tokens into lists, using TOKEN_COMMA as the delimiter."""
-    buf: List[Token] = []
+    buf: list[Token] = []
     for token in tokens:
         if token[1] == TOKEN_COMMA:
             yield buf
@@ -128,8 +125,8 @@ def split_at_comma(
 
 
 def bucket_args(
-    arguments: Iterable[Tuple[str, Expression]],
-) -> Tuple[List[Expression], Dict[str, Expression]]:  # pragma: no cover
+    arguments: Iterable[tuple[str, Expression]],
+) -> tuple[list[Expression], dict[str, Expression]]:  # pragma: no cover
     """Split filter arguments into positional and keyword arguments."""
     args = []
     kwargs = {}
@@ -141,7 +138,7 @@ def bucket_args(
     return args, kwargs
 
 
-def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:  # pragma: no cover
+def parse_filter(tokens: list[Token], linenum: int = 1) -> Filter:  # pragma: no cover
     """Parse a Liquid filter from a list of tokens."""
     if not tokens:
         raise LiquidSyntaxError(
@@ -162,15 +159,15 @@ def parse_filter(tokens: List[Token], linenum: int = 1) -> Filter:  # pragma: no
 
 def parse_args(
     tokens: Iterator[Token],
-) -> Iterator[Tuple[str, Expression]]:  # pragma: no cover
+) -> Iterator[tuple[str, Expression]]:  # pragma: no cover
     """Parse a filter's arguments from the given token iterator."""
     for arg_tokens in split_at_comma(tokens):
         yield parse_arg(arg_tokens)
 
 
 def parse_arg(
-    tokens: List[Token], *, shorthand_indexes: bool = False
-) -> Tuple[str, Expression]:  # pragma: no cover
+    tokens: list[Token], *, shorthand_indexes: bool = False
+) -> tuple[str, Expression]:  # pragma: no cover
     """Parse a single argument from a list of tokens."""
     if len(tokens) > 1 and tokens[1][1] == TOKEN_COLON:
         # A named/keyword parameter/argument
@@ -186,7 +183,7 @@ def parse_arg(
 
 
 def _parse_filter(
-    tokens: List[Token], linenum: int, *, shorthand_indexes: bool = False
+    tokens: list[Token], linenum: int, *, shorthand_indexes: bool = False
 ) -> Filter:
     if not tokens:
         raise LiquidSyntaxError(
@@ -206,8 +203,8 @@ def _parse_filter(
     stream.expect(TOKEN_COLON)
     next(stream)
 
-    args: List[Expression] = []
-    kwargs: Dict[str, Expression] = {}
+    args: list[Expression] = []
+    kwargs: dict[str, Expression] = {}
 
     while stream.current[1] != TOKEN_EOF:
         if stream.peek[1] == TOKEN_COLON:

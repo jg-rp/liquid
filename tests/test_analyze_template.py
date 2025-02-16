@@ -1,6 +1,6 @@
 """Test cases for statically counting a template using `BoundTemplate.analyze`."""
+
 import asyncio
-from typing import List
 from typing import Optional
 from typing import TextIO
 from unittest import TestCase
@@ -65,7 +65,7 @@ class MockTag(Tag):
 class MockChildNode(MockNode):
     """Mock AST node."""
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [ChildNode(self.tok.linenum, expression=MockExpression())]
 
 

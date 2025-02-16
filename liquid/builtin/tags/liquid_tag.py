@@ -2,7 +2,6 @@
 
 import sys
 from typing import TYPE_CHECKING
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -50,7 +49,7 @@ class LiquidNode(Node):
     ) -> Optional[bool]:
         return await self.block.render_async(context, buffer)
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return self.block.children()
 
 

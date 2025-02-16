@@ -6,7 +6,6 @@ import sys
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterator
-from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
@@ -256,7 +255,7 @@ class ForNode(Node):
 
         return rendered
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
                 linenum=self.block.tok.linenum,
@@ -293,7 +292,7 @@ class BreakNode(Node):
     ) -> Optional[bool]:
         raise BreakLoop("break")
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return []
 
 
@@ -315,7 +314,7 @@ class ContinueNode(Node):
     ) -> Optional[bool]:
         raise ContinueLoop("continue")
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return []
 
 

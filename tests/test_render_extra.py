@@ -1,8 +1,8 @@
 """Test cases for rendering non-standard "extra" tags."""
+
 import asyncio
 import unittest
 from typing import TYPE_CHECKING
-from typing import List
 
 from liquid import golden
 from liquid.environment import Environment
@@ -26,7 +26,7 @@ class BaseRenderTestCase(unittest.TestCase):
         self.loader = DictLoader(self.partials)
         self.env = Environment(loader=self.loader)
 
-    def _test(self, test_cases: List[Case]) -> None:
+    def _test(self, test_cases: list[Case]) -> None:
         for case in test_cases:
             self.partials.update(case.partials)
 

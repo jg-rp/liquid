@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -58,7 +57,7 @@ class IfNode(Node):
         tok: Token,
         condition: Expression,
         consequence: BlockNode,
-        conditional_alternatives: List[ConditionalBlockNode],
+        conditional_alternatives: list[ConditionalBlockNode],
         alternative: Optional[BlockNode],
     ):
         self.tok = tok
@@ -138,7 +137,7 @@ class IfNode(Node):
 
         return rendered
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
                 linenum=self.tok.linenum,

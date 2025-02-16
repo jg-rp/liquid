@@ -2,7 +2,6 @@
 
 import asyncio
 import unittest
-from typing import Dict
 from typing import Optional
 
 from liquid import Context
@@ -19,11 +18,11 @@ class ContextualAnalysisTestCase(unittest.TestCase):
     def _test(
         self,
         template: BoundTemplate,
-        data: Dict[str, object],
-        variables: Dict[str, int],
-        assigns: Dict[str, int],
-        undefined: Dict[str, int],
-        filters: Optional[Dict[str, int]] = None,
+        data: dict[str, object],
+        variables: dict[str, int],
+        assigns: dict[str, int],
+        undefined: dict[str, int],
+        filters: Optional[dict[str, int]] = None,
     ) -> None:
         refs = template.analyze_with_context(**data)
         self.assertEqual(refs.all_variables, variables)

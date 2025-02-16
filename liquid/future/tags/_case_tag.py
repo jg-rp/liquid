@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import List
 from typing import Optional
 from typing import TextIO
 from typing import Union
@@ -33,7 +32,7 @@ class LaxCaseNode(ast.Node):
     def __init__(
         self,
         tok: Token,
-        blocks: List[Union[ast.BlockNode, ast.ConditionalBlockNode]],
+        blocks: list[Union[ast.BlockNode, ast.ConditionalBlockNode]],
     ):
         self.tok = tok
         self.blocks = blocks
@@ -94,7 +93,7 @@ class LaxCaseNode(ast.Node):
 
         return rendered
 
-    def children(self) -> List[ast.ChildNode]:
+    def children(self) -> list[ast.ChildNode]:
         _children = []
 
         for block in self.blocks:
@@ -139,7 +138,7 @@ class LaxCaseTag(CaseTag):
             stream.next_token()
 
         # Collect all `when` and `else` tags regardless of te order n which they appear.
-        blocks: List[Union[ast.BlockNode, ast.ConditionalBlockNode]] = []
+        blocks: list[Union[ast.BlockNode, ast.ConditionalBlockNode]] = []
 
         while not stream.current.istag(TAG_ENDCASE):
             if stream.current.istag(TAG_ELSE):

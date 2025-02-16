@@ -1,11 +1,8 @@
 """Parse tree node and tag definition for the built in "render" tag."""
 
 import sys
-from typing import Dict
-from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import Tuple
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
@@ -54,7 +51,7 @@ class RenderNode(Node):
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[str] = None,
-        args: Optional[Dict[str, Expression]] = None,
+        args: Optional[dict[str, Expression]] = None,
     ):
         self.tok = tok
         self.name = name
@@ -207,8 +204,8 @@ class RenderNode(Node):
 
         return True
 
-    def children(self) -> List[ChildNode]:
-        block_scope: List[str] = list(self.args.keys())
+    def children(self) -> list[ChildNode]:
+        block_scope: list[str] = list(self.args.keys())
         _children = [
             ChildNode(
                 linenum=self.tok.linenum,
@@ -308,7 +305,7 @@ class RenderTag(Tag):
         )
 
 
-def parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
+def parse_argument(stream: TokenStream) -> tuple[str, Expression]:
     """Return the next key/value pair from the stream."""
     key = str(parse_unchained_identifier(stream))
     stream.next_token()

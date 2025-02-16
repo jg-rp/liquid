@@ -1,9 +1,7 @@
 """Utilities for working with strings of HTML."""
 
 from html.parser import HTMLParser
-from typing import List
 from typing import Optional
-from typing import Tuple
 
 # ruff: noqa: D102
 
@@ -16,9 +14,9 @@ class StripParser(HTMLParser):
         self.reset()
         self.script_depth = 0
         self.style_depth = 0
-        self.dat: List[str] = []
+        self.dat: list[str] = []
 
-    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
         if tag == "script":
             self.script_depth += 1
         elif tag == "style":

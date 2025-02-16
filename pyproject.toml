@@ -9,8 +9,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
@@ -76,7 +74,7 @@ test = "pytest {args}"
 typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311", "312", "pypy38", "pypy39"]
+python = ["39", "310", "311", "312", "pypy39"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
@@ -105,7 +103,7 @@ files = "liquid"
 local_partial_types = true
 no_implicit_optional = true
 no_implicit_reexport = true
-python_version = "3.10"
+python_version = "3.12"
 strict = true
 warn_redundant_casts = true
 warn_return_any = true
@@ -142,8 +140,8 @@ exclude = [
 # Same as Black.
 line-length = 88
 
-# Assume Python 3.10.
-target-version = "py310"
+# Assume Python 3.12.
+target-version = "py312"
 
 [tool.ruff.lint.isort]
 force-single-line = true

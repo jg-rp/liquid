@@ -1,8 +1,8 @@
 """Test cases for analyzing a template's tags using `Environment.analyze_tags`."""
+
 import asyncio
 from dataclasses import dataclass
 from dataclasses import field
-from typing import List
 from unittest import TestCase
 
 from liquid import DictLoader
@@ -32,7 +32,7 @@ class AnalyzeTagsTestCase(TestCase):
     def setUp(self) -> None:
         self.standard_env = Environment()
 
-    def _test(self, env: Environment, test_cases: List[Case]) -> None:
+    def _test(self, env: Environment, test_cases: list[Case]) -> None:
         """Test helper function."""
         for case in test_cases:
             with self.subTest(msg=case.description):

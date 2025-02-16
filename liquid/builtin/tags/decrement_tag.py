@@ -1,7 +1,6 @@
 """Tag and node definition for the built-in "decrement" tag."""
 
 import sys
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -36,7 +35,7 @@ class DecrementNode(ast.Node):
         buffer.write(str(context.decrement(self.identifier)))
         return True
 
-    def children(self) -> List[ast.ChildNode]:
+    def children(self) -> list[ast.ChildNode]:
         return [
             ast.ChildNode(
                 linenum=self.tok.linenum,

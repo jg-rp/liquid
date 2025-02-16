@@ -1,6 +1,5 @@
 """Parse tree node and pseudo "tag" for output statements."""
 
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -46,7 +45,7 @@ class StatementNode(Node):
         buffer.write(to_liquid_string(val, context.autoescape))
         return None
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [ChildNode(linenum=self.tok.linenum, expression=self.expression)]
 
 

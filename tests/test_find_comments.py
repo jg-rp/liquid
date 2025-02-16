@@ -1,8 +1,8 @@
 """Test that we can traverse a template's syntax tree to find comments."""
+
 import unittest
 from typing import TYPE_CHECKING
 from typing import Iterator
-from typing import Tuple
 
 from liquid import Template
 from liquid.builtin.tags.comment_tag import CommentNode
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class FindCommentsTestCase(unittest.TestCase):
-    def _find_comment_text(self, template: BoundTemplate) -> Iterator[Tuple[int, str]]:
-        def visit(node: "Node") -> Iterator[Tuple[int, str]]:
+    def _find_comment_text(self, template: BoundTemplate) -> Iterator[tuple[int, str]]:
+        def visit(node: "Node") -> Iterator[tuple[int, str]]:
             if isinstance(node, CommentNode) and node.text is not None:
                 yield (node.tok.linenum, node.text)
             for child in node.children():

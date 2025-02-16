@@ -9,7 +9,6 @@ from typing import Any
 from typing import Callable
 from typing import Iterable
 from typing import Iterator
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -213,7 +212,7 @@ def math_filter(_filter: FilterT) -> FilterT:
     return wrapper
 
 
-def flatten(it: Iterable[Any], level: int = 5) -> List[object]:
+def flatten(it: Iterable[Any], level: int = 5) -> list[object]:
     """Flatten nested "liquid arrays" into a list."""
 
     def _flatten(it: Iterable[Any], level: int = 5) -> Iterator[object]:

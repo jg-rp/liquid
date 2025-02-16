@@ -1,10 +1,7 @@
 """Malformed template test cases."""
 
-from typing import Dict
 from typing import Iterable
-from typing import List
 from typing import NamedTuple
-from typing import Tuple
 from typing import Type
 from typing import Union
 from unittest import TestCase
@@ -30,18 +27,18 @@ from liquid.mode import Mode
 class Case(NamedTuple):
     description: str
     template: str
-    expect_exception: Union[Type[Error], Tuple[Type[Error], ...]]
-    expect_msg: Union[str, List[str]]
+    expect_exception: Union[Type[Error], tuple[Type[Error], ...]]
+    expect_msg: Union[str, list[str]]
     expect_render: str = ""
 
     @property
-    def exceptions(self) -> Tuple[Type[Error], ...]:
+    def exceptions(self) -> tuple[Type[Error], ...]:
         if isinstance(self.expect_exception, tuple):
             return self.expect_exception
         return (self.expect_exception,)
 
     @property
-    def warnings(self) -> Tuple[Type[LiquidWarning], ...]:
+    def warnings(self) -> tuple[Type[LiquidWarning], ...]:
         return tuple(lookup_warning(e) for e in self.exceptions)
 
 
@@ -106,7 +103,7 @@ class MalformedTemplateTestCase(TestCase):
                     self.assertEqual(result, case.expect_render)
 
     def _test_partial(
-        self, test_cases: Iterable[Case], templates: Dict[str, str]
+        self, test_cases: Iterable[Case], templates: dict[str, str]
     ) -> None:
         """Helper method for testing lists of 'include' or 'render' cases."""
         env = Environment(loader=DictLoader(templates))

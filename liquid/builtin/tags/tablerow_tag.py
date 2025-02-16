@@ -2,9 +2,7 @@
 
 import sys
 from typing import Any
-from typing import Dict
 from typing import Iterator
-from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
@@ -174,7 +172,7 @@ class TablerowNode(Node):
         self.block = block
 
     def __str__(self) -> str:
-        return f"tablerow({ self.expression }) {{ {self.block} }}"
+        return f"tablerow({self.expression}) {{ {self.block} }}"
 
     def _int_or_zero(self, arg: object) -> int:
         try:
@@ -194,7 +192,7 @@ class TablerowNode(Node):
         context.raise_for_loop_limit(length)
         tablerow = TableRow(name, loop_iter, length, cols)
 
-        namespace: Dict[str, object] = {
+        namespace: dict[str, object] = {
             "tablerowloop": tablerow,
         }
 
@@ -242,7 +240,7 @@ class TablerowNode(Node):
         context.raise_for_loop_limit(length)
         tablerow = TableRow(name, loop_iter, length, cols)
 
-        namespace: Dict[str, object] = {
+        namespace: dict[str, object] = {
             "tablerowloop": tablerow,
         }
 
@@ -276,7 +274,7 @@ class TablerowNode(Node):
         buffer.write("</tr>\n")
         return True
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             ChildNode(
                 linenum=self.block.tok.linenum,

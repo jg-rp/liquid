@@ -1,13 +1,11 @@
 """An implementation of the `split` filter."""
 
-from typing import List
-
 from liquid import soft_str
 from liquid.filter import string_filter
 
 
 @string_filter
-def split(val: str, sep: str) -> List[str]:
+def split(val: str, sep: str) -> list[str]:
     """Split string _val_ on delimiter _sep_.
 
     If _sep_ is empty or _undefined_, _val_ is split into a list of single

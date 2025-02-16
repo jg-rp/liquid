@@ -1,6 +1,6 @@
 """Test cases for shorthand comment syntax."""
+
 from dataclasses import dataclass
-from typing import List
 from typing import Type
 from typing import Union
 from unittest import TestCase
@@ -20,7 +20,7 @@ class Case:
 class ShorthandCommentTestCase(TestCase):
     def _test(
         self,
-        test_cases: List[Case],
+        test_cases: list[Case],
         template_comments=False,
         comment_start_string="{#",
         comment_end_string="#}",

@@ -1,8 +1,8 @@
 """A template loader that delegates to other template loaders."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import List
 
 from liquid.exceptions import TemplateNotFound
 
@@ -23,7 +23,7 @@ class ChoiceLoader(BaseLoader):
         loaders: A list of loaders implementing `liquid.loaders.BaseLoader`.
     """
 
-    def __init__(self, loaders: List[BaseLoader]):
+    def __init__(self, loaders: list[BaseLoader]):
         super().__init__()
         self.loaders = loaders
 
@@ -128,7 +128,7 @@ class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):
 
     def __init__(
         self,
-        loaders: List[BaseLoader],
+        loaders: list[BaseLoader],
         *,
         auto_reload: bool = True,
         namespace_key: str = "",

@@ -8,13 +8,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import DefaultDict
 from typing import Iterator
-from typing import List
 from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Set
 from typing import TextIO
-from typing import Tuple
 
 from liquid import Markup
 from liquid.ast import BlockNode as TemplateBlockNode
@@ -190,7 +188,7 @@ class BlockNode(Node):
         )
         return await stack_item.block.block.render_async(ctx, buffer)
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             ChildNode(linenum=self.tok.linenum, expression=self.expr),
             ChildNode(linenum=self.tok.linenum, node=self.block, block_scope=["block"]),
@@ -247,7 +245,7 @@ class ExtendsNode(Node):
         context.tag_namespace["extends"].clear()
         raise StopRender
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             ChildNode(
                 linenum=self.tok.linenum,
@@ -469,10 +467,10 @@ async def build_block_stacks_async(
 
 def find_inheritance_nodes(
     template: BoundTemplate,
-) -> Tuple[List["ExtendsNode"], List[BlockNode]]:
+) -> tuple[list["ExtendsNode"], list[BlockNode]]:
     """Return lists of `extends` and `block` nodes from the given template."""
-    extends_nodes: List["ExtendsNode"] = []
-    block_nodes: List[BlockNode] = []
+    extends_nodes: list["ExtendsNode"] = []
+    block_nodes: list[BlockNode] = []
 
     for node in template.tree.statements:
         _visit_node(
@@ -486,8 +484,8 @@ def find_inheritance_nodes(
 
 def _visit_node(
     node: Node,
-    extends_nodes: List["ExtendsNode"],
-    block_nodes: List[BlockNode],
+    extends_nodes: list["ExtendsNode"],
+    block_nodes: list[BlockNode],
 ) -> None:
     if isinstance(node, BlockNode):
         block_nodes.append(node)
@@ -506,7 +504,7 @@ def _visit_node(
 
 def stack_blocks(
     context: Context, template: BoundTemplate
-) -> Tuple[Optional[ExtendsNode], List[BlockNode]]:
+) -> tuple[Optional[ExtendsNode], list[BlockNode]]:
     """Find template inheritance nodes in `template`.
 
     Each node found is pushed on to the appropriate block stack.
@@ -537,8 +535,8 @@ def stack_blocks(
     return extends[0], blocks
 
 
-def _store_blocks(context: Context, blocks: List[BlockNode], source_name: str) -> None:
-    block_stacks: DefaultDict[str, List[_BlockStackItem]] = context.tag_namespace[
+def _store_blocks(context: Context, blocks: list[BlockNode], source_name: str) -> None:
+    block_stacks: DefaultDict[str, list[_BlockStackItem]] = context.tag_namespace[
         "extends"
     ]
 

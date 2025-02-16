@@ -1,11 +1,8 @@
 """Parse tree node and tag definition for the built in "include" tag."""
 
 import sys
-from typing import Dict
-from typing import List
 from typing import Optional
 from typing import TextIO
-from typing import Tuple
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
@@ -49,7 +46,7 @@ class IncludeNode(Node):
         name: Expression,
         var: Optional[Identifier] = None,
         alias: Optional[str] = None,
-        args: Optional[Dict[str, Expression]] = None,
+        args: Optional[dict[str, Expression]] = None,
     ):
         self.tok = tok
         self.name = name
@@ -80,7 +77,7 @@ class IncludeNode(Node):
     def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
         name = self.name.evaluate(context)
         template = context.get_template_with_context(str(name), tag=self.tag)
-        namespace: Dict[str, object] = {}
+        namespace: dict[str, object] = {}
 
         # Add any keyword arguments to the new template context.
         for _key, _val in self.args.items():
@@ -123,7 +120,7 @@ class IncludeNode(Node):
         template = await context.get_template_with_context_async(
             str(name), tag=self.tag
         )
-        namespace: Dict[str, object] = {}
+        namespace: dict[str, object] = {}
 
         for _key, _val in self.args.items():
             namespace[_key] = await _val.evaluate_async(context)
@@ -150,8 +147,8 @@ class IncludeNode(Node):
 
         return True
 
-    def children(self) -> List[ChildNode]:
-        block_scope: List[str] = list(self.args.keys())
+    def children(self) -> list[ChildNode]:
+        block_scope: list[str] = list(self.args.keys())
         _children = [
             ChildNode(
                 linenum=self.tok.linenum,
@@ -223,7 +220,7 @@ class IncludeTag(Tag):
                 next(expr_stream)
 
         # Zero or more keyword arguments
-        args: Dict[str, Expression] = {}
+        args: dict[str, Expression] = {}
 
         # The first keyword argument might follow immediately or after a comma.
         if expr_stream.current[1] == TOKEN_IDENTIFIER:
@@ -245,7 +242,7 @@ class IncludeTag(Tag):
         return self.node_class(tok, name=name, var=identifier, alias=alias, args=args)
 
 
-def _parse_argument(stream: TokenStream) -> Tuple[str, Expression]:
+def _parse_argument(stream: TokenStream) -> tuple[str, Expression]:
     key = str(parse_unchained_identifier(stream))
     stream.next_token()
     stream.expect(TOKEN_COLON)

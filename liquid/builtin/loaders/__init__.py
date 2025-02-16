@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Iterable
-from typing import List
+
 from typing import Union
 
 from .base_loader import BaseLoader
@@ -94,7 +94,7 @@ def make_file_system_loader(
 
 
 def make_choice_loader(
-    loaders: List[BaseLoader],
+    loaders: list[BaseLoader],
     *,
     auto_reload: bool = True,
     namespace_key: str = "",

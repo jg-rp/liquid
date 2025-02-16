@@ -1,7 +1,6 @@
 """Liquid specific Exceptions and warnings."""
 
 from pathlib import Path
-from typing import Dict
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -199,7 +198,7 @@ class FilterWarning(LiquidWarning):
     """Replaces filter exceptions when in WARN mode."""
 
 
-WARNINGS: Dict[Type[Error], Type[LiquidWarning]] = {
+WARNINGS: dict[Type[Error], Type[LiquidWarning]] = {
     LiquidSyntaxError: LiquidSyntaxWarning,
     LiquidTypeError: LiquidTypeWarning,
     FilterArgumentError: FilterWarning,

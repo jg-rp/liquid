@@ -14,7 +14,6 @@ from typing import Callable
 from typing import Iterable
 from typing import Iterator
 from typing import Pattern
-from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_AND
@@ -263,7 +262,7 @@ def compile_liquid_rules(
     return _compile_rules(liquid_rules)
 
 
-def _compile_rules(rules: Iterable[Tuple[str, str]]) -> Pattern[str]:
+def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
     """Compile the given rules into a single regular expression."""
     pattern = "|".join(f"(?P<{name}>{pattern})" for name, pattern in rules)
     return re.compile(pattern, re.DOTALL)

@@ -4,8 +4,6 @@ Like those found in `for` and `tablerow` tags.
 """
 
 from typing import Callable
-from typing import Dict
-from typing import Tuple
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import CONTINUE
@@ -65,7 +63,7 @@ def parse_string_argument(stream: TokenStream) -> LoopArgument:
         ) from err
 
 
-TOKEN_MAP: Dict[str, Callable[[TokenStream], LoopArgument]] = {
+TOKEN_MAP: dict[str, Callable[[TokenStream], LoopArgument]] = {
     TOKEN_IDENTIFIER: parse_identifier,
     TOKEN_LBRACKET: parse_identifier,
     TOKEN_INTEGER: parse_integer_literal,
@@ -83,9 +81,9 @@ def parse_loop_argument(stream: TokenStream) -> LoopArgument:
         raise LiquidSyntaxError(f"unexpected {stream.current[2]!r}") from err
 
 
-def parse_loop_arguments(stream: TokenStream) -> Tuple[Dict[str, LoopArgument], bool]:
+def parse_loop_arguments(stream: TokenStream) -> tuple[dict[str, LoopArgument], bool]:
     """Parse loop arguments from the stream of tokens until the end of the stream."""
-    arguments: Dict[str, LoopArgument] = {}
+    arguments: dict[str, LoopArgument] = {}
     _reversed = False
 
     while True:
