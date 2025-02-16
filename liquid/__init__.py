@@ -79,4 +79,18 @@ __all__ = (
     "Token",
     "Undefined",
     "TokenStream",
+    "parse",
+    "render",
 )
+
+DEFAULT_ENVIRONMENT = Environment()
+
+
+def parse(source: str) -> BoundTemplate:
+    """Parse template source text using the default environment."""
+    return DEFAULT_ENVIRONMENT.from_string(source)
+
+
+def render(source: str, **data: object) -> str:
+    """Parse and render source text using the default environment."""
+    return DEFAULT_ENVIRONMENT.from_string(source).render(**data)

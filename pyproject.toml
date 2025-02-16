@@ -17,11 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
-dependencies = [
-  "MarkupSafe>=2,<3",
-  "python-dateutil>=2.8.1",
-  "importlib-resources>=5.10.0",
-]
+dependencies = ["MarkupSafe>=3", "python-dateutil>=2.8.1"]
 description = "A Python engine for the Liquid template language."
 dynamic = ["version"]
 license = "MIT"
@@ -51,7 +47,6 @@ packages = ["liquid"]
 dependencies = [
   "pytest",
   "pytest-cov",
-  "black",
   "mypy",
   "pyyaml",
   "types-pyyaml",
@@ -59,7 +54,6 @@ dependencies = [
   "ruff",
   "mock",
   "types-python-dateutil",
-  "MarkupSafe>=2, < 3",
 ]
 
 [tool.hatch.envs.default.scripts]
