@@ -20,7 +20,6 @@ classifiers = [
 dependencies = [
   "MarkupSafe>=2,<3",
   "python-dateutil>=2.8.1",
-  "typing-extensions>=4.2.0",
   "importlib-resources>=5.10.0",
 ]
 description = "A Python engine for the Liquid template language."

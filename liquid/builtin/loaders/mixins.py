@@ -1,4 +1,5 @@
 """Mixin classes that can be used to add common functions to a template loader."""
+
 from __future__ import annotations
 
 from abc import ABC
@@ -7,8 +8,7 @@ from typing import TYPE_CHECKING
 from typing import Awaitable
 from typing import Callable
 from typing import Mapping
-
-from typing_extensions import Protocol
+from typing import Protocol
 
 from liquid.utils import LRUCache
 
@@ -30,16 +30,14 @@ class _CachingLoaderProtocol(Protocol):
         env: Environment,
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
     async def load_async(
         self,
         env: Environment,
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
     def load_with_args(
         self,
@@ -47,8 +45,7 @@ class _CachingLoaderProtocol(Protocol):
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
         **kwargs: object,
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
     async def load_with_args_async(
         self,
@@ -56,24 +53,21 @@ class _CachingLoaderProtocol(Protocol):
         name: str,
         globals: TemplateNamespace = None,  # noqa: A002
         **kwargs: object,
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
     def load_with_context(
         self,
         context: Context,
         name: str,
         **kwargs: str,
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
     async def load_with_context_async(
         self,
         context: Context,
         name: str,
         **kwargs: str,
-    ) -> BoundTemplate:
-        ...
+    ) -> BoundTemplate: ...
 
 
 class CachingLoaderMixin(ABC, _CachingLoaderProtocol):

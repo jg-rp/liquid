@@ -3,11 +3,10 @@
 from abc import ABC
 from abc import abstractmethod
 from typing import Collection
+from typing import Literal
 from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
-
-from typing_extensions import Literal
 
 from liquid.context import Context
 from liquid.exceptions import DisabledTagError

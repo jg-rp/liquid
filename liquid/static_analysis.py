@@ -6,6 +6,7 @@ import re
 from collections import defaultdict
 from typing import TYPE_CHECKING
 from typing import DefaultDict
+from typing import Literal
 from typing import Optional
 from typing import Set
 
@@ -31,8 +32,6 @@ from liquid.extra.tags.extends import stack_blocks
 from liquid.token import TOKEN_TAG
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
-
     from liquid import BoundTemplate
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")

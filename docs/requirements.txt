@@ -3,4 +3,3 @@ mkdocs-material==9.5.32
 mkdocstrings-python==1.10.8
 mkdocstrings==0.25.2
 python-dateutil==2.9.0.post0
-typing_extensions==4.12.2
