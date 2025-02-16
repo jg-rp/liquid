@@ -4,7 +4,7 @@
 
 **Breaking changes**
 
-- Removed legacy expression parsing functions.
+- Removed legacy expression parsing functions. If you're importing anything from `liquid.parse` for your custom tags, you'll need to use functions from `liquid.expressions` instead.
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
 - Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.
 - All tokens are now named tuples. Previously functions in `liquid.expressions` would generate and use plain tuples internally.
@@ -15,6 +15,7 @@
 
 **Chores**
 
+- The markupsafe package is now a required dependency. It used to be optional.
 - Started to refactor tests to use pytest instead of `unittest.TestCase`. pytest is now required to run test suites. Previously `pytest` or `python -m unittest` could have been used.
 
 ## Version 1.13.0

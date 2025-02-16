@@ -1,4 +1,5 @@
 """Miscellaneous filter functions."""
+
 from __future__ import annotations
 
 import datetime
@@ -10,11 +11,7 @@ from typing import Union
 
 from dateutil import parser
 
-try:
-    from markupsafe import Markup
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-
+from liquid import Markup
 from liquid.exceptions import FilterArgumentError
 from liquid.expression import EMPTY
 from liquid.filter import liquid_filter

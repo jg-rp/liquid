@@ -1,12 +1,6 @@
-try:
-    from markupsafe import Markup
-    from markupsafe import escape
-    from markupsafe import soft_str
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-    from liquid.exceptions import escape  # type: ignore
-
-    soft_str = str  # type: ignore
+from markupsafe import Markup
+from markupsafe import escape
+from markupsafe import soft_str
 
 from .mode import Mode
 from .token import Token

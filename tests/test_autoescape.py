@@ -5,22 +5,9 @@ from typing import Dict
 from typing import List
 from typing import NamedTuple
 from unittest import TestCase
-from unittest import skipIf
-
-try:
-    import markupsafe
-except ImportError:
-    markupsafe = None  # type: ignore
-
-try:
-    from markupsafe import Markup
-    from markupsafe import escape
-except ImportError:
-    from liquid.exceptions import Markup  # type: ignore
-    from liquid.exceptions import escape  # type: ignore
 
 from liquid import Environment
-from liquid.exceptions import Error
+from liquid import Markup
 
 
 class Case(NamedTuple):
@@ -33,8 +20,8 @@ class Case(NamedTuple):
 
 
 class SafeHTMLDrop:
-    def __init__(self, somelist: List[object]):
-        self.items = somelist
+    def __init__(self, some_list: List[object]):
+        self.items = some_list
 
     def __str__(self) -> str:
         return "SafeHTMLDrop"
@@ -44,7 +31,6 @@ class SafeHTMLDrop:
         return f"<ul>\n{lis}\n</ul>"
 
 
-@skipIf(markupsafe is None, "this test requires markupsafe")
 class AutoescapeTestCase(TestCase):
     def test_do_not_escape_output(self) -> None:
         """Test that we can turn off auto-escaping."""
@@ -782,18 +768,3 @@ class AutoescapeTestCase(TestCase):
                 template = env.from_string(case.template)
                 result = template.render(**case.context)
                 self.assertEqual(result, case.expect)
-
-
-@skipIf(
-    markupsafe is not None, "this tests exceptions raised by the lack of markupsafe"
-)
-class DummyMarkupSafeTestCase(TestCase):
-    def test_dummy_escape(self) -> None:
-        """Test that the dummy definition of escape raises an exception."""
-        with self.assertRaises(Error):
-            escape("foo")
-
-    def test_dummy_markup(self) -> None:
-        """Test that the dummy definition of Markup raises an exception."""
-        with self.assertRaises(Error):
-            Markup("foo")
