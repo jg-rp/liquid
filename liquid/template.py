@@ -1,4 +1,5 @@
 """Liquid template definition."""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -8,7 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
-from typing import Dict
 from typing import Iterator
 from typing import Mapping
 from typing import Optional
@@ -83,7 +83,7 @@ class BoundTemplate:
         parse_tree: ParseTree,
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[Dict[str, object]] = None,  # noqa: A002
+        globals: Optional[dict[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):

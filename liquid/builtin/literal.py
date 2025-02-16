@@ -1,6 +1,5 @@
 """Pseudo tag and node definition for template literals."""
 
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -33,7 +32,7 @@ class LiteralNode(Node):
         buffer.write(self.tok.value)
         return None
 
-    def children(self) -> List[ChildNode]:  # noqa: D102
+    def children(self) -> list[ChildNode]:  # noqa: D102
         return []
 
 

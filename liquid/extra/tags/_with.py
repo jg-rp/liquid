@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from typing import Dict
-from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
@@ -39,7 +37,7 @@ class WithKeywordArg(NamedTuple):
 class WithNode(Node):
     __slots__ = ("tok", "args", "block")
 
-    def __init__(self, tok: Token, args: Dict[str, Expression], block: BlockNode):
+    def __init__(self, tok: Token, args: dict[str, Expression], block: BlockNode):
         self.tok = tok
         self.args = args
         self.block = block
@@ -57,7 +55,7 @@ class WithNode(Node):
         with context.extend(namespace):
             return await self.block.render_async(context, buffer)
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             ChildNode(
                 linenum=self.tok.linenum, node=self.block, block_scope=list(self.args)

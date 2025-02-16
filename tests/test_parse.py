@@ -1,7 +1,7 @@
 """Liquid template and expression parsing tests."""
+
 import unittest
 from typing import Iterable
-from typing import List
 from typing import NamedTuple
 from typing import Union
 
@@ -29,7 +29,7 @@ from liquid.mode import Mode
 class Case(NamedTuple):
     description: str
     template: str
-    expect: Union[str, List[str]]
+    expect: Union[str, list[str]]
     expect_statements: int = 1
 
     @property

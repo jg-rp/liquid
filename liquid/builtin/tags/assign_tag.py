@@ -2,7 +2,6 @@
 
 import re
 import sys
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -48,7 +47,7 @@ class AssignNode(Node):
         await self.expression.evaluate_async(context)
         return False
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             ChildNode(
                 linenum=self.tok.linenum,

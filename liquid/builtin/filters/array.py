@@ -10,9 +10,7 @@ from operator import getitem
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterable
-from typing import List
 from typing import Sequence
-from typing import Tuple
 from typing import Union
 
 from liquid import Markup
@@ -30,7 +28,7 @@ from liquid.undefined import is_undefined
 if TYPE_CHECKING:
     from liquid import Environment
 
-ArrayT = Union[List[Any], Tuple[Any, ...]]
+ArrayT = Union[list[Any], tuple[Any, ...]]
 """Array-like objects."""
 
 # Send objects with missing keys to the end when sorting a list.
@@ -110,7 +108,7 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
 
 
 @sequence_filter
-def map_(sequence: ArrayT, key: object) -> List[object]:
+def map_(sequence: ArrayT, key: object) -> list[object]:
     """Return an array/list of items in _sequence_ selected by _key_."""
     try:
         return [_getitem(itm, str(key), default=NIL) for itm in sequence]
@@ -119,13 +117,13 @@ def map_(sequence: ArrayT, key: object) -> List[object]:
 
 
 @array_filter
-def reverse(array: ArrayT) -> List[object]:
+def reverse(array: ArrayT) -> list[object]:
     """Reverses the order of the items in an array."""
     return list(reversed(array))
 
 
 @array_filter
-def sort(sequence: ArrayT, key: object = None) -> List[object]:
+def sort(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ in ascending order.
 
     When a key string is provided, objects without the key property will
@@ -142,7 +140,7 @@ def sort(sequence: ArrayT, key: object = None) -> List[object]:
 
 
 @array_filter
-def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
+def sort_natural(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ in ascending order, with case-insensitive comparison.
 
     When a key string is provided, objects without the key property will
@@ -156,7 +154,7 @@ def sort_natural(sequence: ArrayT, key: object = None) -> List[object]:
 
 
 @sequence_filter
-def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
+def where(sequence: ArrayT, attr: object, value: object = None) -> list[object]:
     """Return a list of items from _sequence_ where _attr_ equals _value_."""
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) == value]
@@ -167,7 +165,7 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> List[object]:
 @sequence_filter
 def reject(
     sequence: ArrayT, attr: object, value: object = None
-) -> Union[List[object], None]:
+) -> Union[list[object], None]:
     """Return a list of items from _sequence_ where _attr_ is not equal to _value_."""
     if attr is None or is_undefined(attr):
         return None
@@ -219,7 +217,7 @@ def has(sequence: ArrayT, attr: object, value: object = None) -> bool:
 
 
 @sequence_filter
-def uniq(sequence: ArrayT, key: object = None) -> List[object]:
+def uniq(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ with duplicate elements removed."""
     # Note that we're not using a dict or set for deduplication because we need
     # to handle sequences containing unhashable objects, like dictionaries.
@@ -248,7 +246,7 @@ def uniq(sequence: ArrayT, key: object = None) -> List[object]:
 
 
 @sequence_filter
-def compact(sequence: ArrayT, key: object = None) -> List[object]:
+def compact(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ with any nil values removed."""
     if key is not None:
         try:

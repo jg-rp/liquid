@@ -1,9 +1,9 @@
 """Test built-in "undefined" types."""
+
 import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 from typing import TYPE_CHECKING
-from typing import Dict
 from unittest import TestCase
 
 from liquid import DebugUndefined
@@ -25,7 +25,7 @@ class Case:
     description: str
     template: str
     expect: str
-    context: Dict[str, object] = field(default_factory=dict)
+    context: dict[str, object] = field(default_factory=dict)
 
 
 class TestUndefined(TestCase):

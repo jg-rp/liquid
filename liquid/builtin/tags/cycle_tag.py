@@ -3,7 +3,6 @@
 import sys
 from typing import Iterable
 from typing import Iterator
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -36,7 +35,7 @@ class CycleNode(Node):
 
     __slots__ = ("tok", "group", "args", "key")
 
-    def __init__(self, tok: Token, group: Optional[Expression], args: List[Expression]):
+    def __init__(self, tok: Token, group: Optional[Expression], args: list[Expression]):
         self.tok = tok
         self.group = group
         self.args = args
@@ -82,8 +81,8 @@ class CycleNode(Node):
         )
         return True
 
-    def children(self) -> List[ChildNode]:
-        _children: List[ChildNode] = []
+    def children(self) -> list[ChildNode]:
+        _children: list[ChildNode] = []
         if self.group:
             _children.append(ChildNode(linenum=self.tok.linenum, expression=self.group))
         for arg in self.args:
@@ -91,9 +90,9 @@ class CycleNode(Node):
         return _children
 
 
-def split_at_first_colon(tokens: Iterable[ExprToken]) -> Iterator[List[ExprToken]]:
+def split_at_first_colon(tokens: Iterable[ExprToken]) -> Iterator[list[ExprToken]]:
     """Split tokens on into lists, using TOKEN_COLON as the delimiter."""
-    buf: List[ExprToken] = []
+    buf: list[ExprToken] = []
     for token in tokens:
         if token[1] == TOKEN_COLON:
             yield buf
@@ -120,7 +119,7 @@ class CycleTag(Tag):
         if len(parts) == 2:  # noqa: PLR2004
             group_name = parse_string_or_identifier(TokenStream(iter(parts[0])))
 
-        args: List[Expression] = []
+        args: list[Expression] = []
         expr_stream = TokenStream(iter(parts[-1]))
         while True:
             args.append(parse_obj(expr_stream))

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -47,7 +46,7 @@ class CaseNode(ast.Node):
     def __init__(
         self,
         tok: Token,
-        whens: List[ast.ConditionalBlockNode],
+        whens: list[ast.ConditionalBlockNode],
         default: Optional[ast.BlockNode] = None,
     ):
         self.tok = tok
@@ -106,7 +105,7 @@ class CaseNode(ast.Node):
 
         return rendered
 
-    def children(self) -> List[ast.ChildNode]:
+    def children(self) -> list[ast.ChildNode]:
         _children = [
             ast.ChildNode(
                 linenum=alt.tok.linenum,
@@ -154,7 +153,7 @@ class CaseTag(Tag):
         ):
             stream.next_token()
 
-        whens: List[ast.ConditionalBlockNode] = []
+        whens: list[ast.ConditionalBlockNode] = []
 
         while stream.current.istag(TAG_WHEN):
             when_tok = stream.current
@@ -197,7 +196,7 @@ class CaseTag(Tag):
         )
         return parse_common_expression(stream)
 
-    def _parse_when_expression(self, expr: str, linenum: int) -> List[Expression]:
+    def _parse_when_expression(self, expr: str, linenum: int) -> list[Expression]:
         expressions = []
         stream = TokenStream(
             tokenize_common_expression(expr, linenum=linenum),

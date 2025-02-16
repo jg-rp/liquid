@@ -11,15 +11,12 @@ from itertools import islice
 from typing import Any
 from typing import Awaitable
 from typing import Callable
-from typing import Dict
 from typing import Generic
 from typing import Iterable
 from typing import Iterator
-from typing import List
 from typing import Mapping
 from typing import NoReturn
 from typing import Optional
-from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
@@ -47,7 +44,7 @@ class Expression(ABC):
         """An async version of `liquid.expression.Expression.evaluate`."""
         return self.evaluate(context)
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         """Return a list of child expressions."""
         raise NotImplementedError(f"{self.__class__.__name__}.children")
 
@@ -67,7 +64,7 @@ class Nil(Expression):
     def evaluate(self, _: Context) -> None:
         return None
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return []
 
 
@@ -91,7 +88,7 @@ class Empty(Expression):
     def evaluate(self, _: Context) -> Empty:
         return self
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return []
 
 
@@ -117,7 +114,7 @@ class Blank(Expression):
     def evaluate(self, _: Context) -> Blank:
         return self
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return []
 
 
@@ -139,7 +136,7 @@ class Continue(Expression):
     def evaluate(self, _: Context) -> int:
         return 0
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return []
 
 
@@ -170,7 +167,7 @@ class Literal(Expression, Generic[T]):
     def evaluate(self, _: Context) -> object:
         return self.value
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return []
 
 
@@ -300,7 +297,7 @@ class RangeLiteral(Expression):
             await self.stop.evaluate_async(context),
         )
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [self.start, self.stop]
 
 
@@ -320,8 +317,8 @@ class IdentifierPathElement(Literal[Union[int, str]]):
         return str(self.value)
 
 
-IdentifierPath = List[Union[IdentifierPathElement, "Identifier"]]
-IdentifierTuple = Tuple[Union[str, "IdentifierTuple"], ...]
+IdentifierPath = list[Union[IdentifierPathElement, "Identifier"]]
+IdentifierTuple = tuple[Union[str, "IdentifierTuple"], ...]
 
 
 class Identifier(Expression):
@@ -351,7 +348,7 @@ class Identifier(Expression):
 
     def as_tuple(self) -> IdentifierTuple:
         """Return this identifier's path as a tuple."""
-        parts: List[Union[str, IdentifierTuple]] = []
+        parts: list[Union[str, IdentifierTuple]] = []
         for elem in self.path:
             if isinstance(elem, Identifier):
                 parts.append(elem.as_tuple())
@@ -366,14 +363,14 @@ class Identifier(Expression):
         return super().__sizeof__() + sys.getsizeof(self.path)
 
     def evaluate(self, context: Context) -> object:
-        path: List[Any] = [elem.evaluate(context) for elem in self.path]
+        path: list[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
 
     async def evaluate_async(self, context: Context) -> object:
-        path: List[Any] = [await elem.evaluate_async(context) for elem in self.path]
+        path: list[Any] = [await elem.evaluate_async(context) for elem in self.path]
         return await context.get_async(path)
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [el for el in self.path if isinstance(el, Expression)]
 
 
@@ -413,7 +410,7 @@ class PrefixExpression(Expression):
     async def evaluate_async(self, context: Context) -> object:
         return self._evaluate(await self.right.evaluate_async(context))
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [self.right]
 
 
@@ -459,7 +456,7 @@ class InfixExpression(Expression):
             await self.right.evaluate_async(context),
         )
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [self.left, self.right]
 
 
@@ -469,7 +466,7 @@ class Filter:
     def __init__(
         self,
         name: str,
-        args: List[Expression],
+        args: list[Expression],
         kwargs: Optional[Mapping[str, Expression]] = None,
     ):
         self.name = name
@@ -500,22 +497,22 @@ class Filter:
 
         return "".join(buf)
 
-    def evaluate_args(self, context: Context) -> List[object]:
+    def evaluate_args(self, context: Context) -> list[object]:
         """Return a list of filter arguments evaluated with the given context."""
         return [arg.evaluate(context) for arg in self.args]
 
-    async def evaluate_args_async(self, context: Context) -> List[object]:
+    async def evaluate_args_async(self, context: Context) -> list[object]:
         """An async version of `evaluate_args`."""
         return [await arg.evaluate_async(context) for arg in self.args]
 
-    def evaluate_kwargs(self, context: Context) -> Dict[str, object]:
+    def evaluate_kwargs(self, context: Context) -> dict[str, object]:
         """Return evaluated keyword arguments for this filter."""
         # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
             return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
-    async def evaluate_kwargs_async(self, context: Context) -> Dict[str, object]:
+    async def evaluate_kwargs_async(self, context: Context) -> dict[str, object]:
         """An async version of `evaluate_kwargs`."""
         # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
@@ -549,14 +546,14 @@ class BooleanExpression(Expression):
     async def evaluate_async(self, context: Context) -> bool:
         return is_truthy(await self.expression.evaluate_async(context))
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [self.expression]
 
 
 class FilteredExpression(Expression):
     __slots__ = ("expression", "filters")
 
-    def __init__(self, expression: Expression, filters: Optional[List[Filter]] = None):
+    def __init__(self, expression: Expression, filters: Optional[list[Filter]] = None):
         self.expression = expression
         self.filters = filters or []
 
@@ -708,7 +705,7 @@ class FilteredExpression(Expression):
             context,
         )
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         _children = [self.expression]
         for _filter in self.filters:
             _children.extend(_filter.args)
@@ -725,7 +722,7 @@ class ConditionalExpression(FilteredExpression):
     def __init__(
         self,
         expression: Expression,
-        filters: Optional[List[Filter]] = None,
+        filters: Optional[list[Filter]] = None,
         condition: Optional[Expression] = None,
         alternative: Optional[Expression] = None,
     ):
@@ -803,7 +800,7 @@ class ConditionalExpression(FilteredExpression):
 
         return result
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         _children = [self.expression]
 
         if self.condition is not None:
@@ -852,7 +849,7 @@ class AssignmentExpression(Expression):
         )
         return ""
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [self.expression]
 
 
@@ -945,7 +942,7 @@ class LoopExpression(Expression):
         limit: Optional[int],
         offset: Optional[int | Continue],
         context: Context,
-    ) -> Tuple[Iterator[Any], int]:
+    ) -> tuple[Iterator[Any], int]:
         """Slice iterable `it` according to `limit` and `offset`."""
         length = size
 
@@ -983,7 +980,7 @@ class LoopExpression(Expression):
             return reversed(list(it)), length
         return it, length
 
-    def _obj_to_iter(self, obj: object, context: Context) -> Tuple[Iterator[Any], int]:
+    def _obj_to_iter(self, obj: object, context: Context) -> tuple[Iterator[Any], int]:
         if isinstance(obj, abc.Mapping):
             return iter(obj.items()), len(obj)
         if isinstance(obj, range):
@@ -1003,7 +1000,7 @@ class LoopExpression(Expression):
         if arg is not None and not isinstance(arg, int):
             raise LiquidTypeError(f"expected an integer argument, found {arg!r}")
 
-    def evaluate(self, context: Context) -> Tuple[Iterator[Any], int]:
+    def evaluate(self, context: Context) -> tuple[Iterator[Any], int]:
         obj = self.iterable.evaluate(context)
         it, length = self._obj_to_iter(obj, context)
 
@@ -1027,7 +1024,7 @@ class LoopExpression(Expression):
             context=context,
         )
 
-    async def evaluate_async(self, context: Context) -> Tuple[Iterator[Any], int]:
+    async def evaluate_async(self, context: Context) -> tuple[Iterator[Any], int]:
         obj = await self.iterable.evaluate_async(context)
         it, length = self._obj_to_iter(obj, context)
 
@@ -1051,7 +1048,7 @@ class LoopExpression(Expression):
             context=context,
         )
 
-    def children(self) -> List[Expression]:
+    def children(self) -> list[Expression]:
         return [
             self.iterable,
             self.limit,

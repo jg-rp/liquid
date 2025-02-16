@@ -1,4 +1,5 @@
 """Built-in file system loader."""
+
 from __future__ import annotations
 
 import asyncio
@@ -7,7 +8,6 @@ from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Iterable
-from typing import Tuple
 from typing import Union
 
 from liquid.exceptions import TemplateNotFound
@@ -58,7 +58,7 @@ class FileSystemLoader(BaseLoader):
             return source_path
         raise TemplateNotFound(template_name)
 
-    def _read(self, source_path: Path) -> Tuple[str, float]:
+    def _read(self, source_path: Path) -> tuple[str, float]:
         with source_path.open(encoding=self.encoding) as fd:
             source = fd.read()
         return source, source_path.stat().st_mtime

@@ -1,7 +1,6 @@
 """Tag and node definition for the built-in "comment" tag."""
 
 import sys
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -43,7 +42,7 @@ class CommentNode(ast.Node):
     ) -> Optional[bool]:
         return False
 
-    def children(self) -> List[ast.ChildNode]:
+    def children(self) -> list[ast.ChildNode]:
         return []
 
 

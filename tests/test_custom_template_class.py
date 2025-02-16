@@ -1,8 +1,8 @@
 """Test Template and Context subclassing."""
+
 import io
 import unittest
 from typing import Any
-from typing import List
 from typing import Optional
 
 from liquid import Context
@@ -37,7 +37,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
                 self,
                 env: Environment,
                 globals: Optional[Namespace] = None,  # noqa: A002
-                disabled_tags: Optional[List[str]] = None,
+                disabled_tags: Optional[list[str]] = None,
                 copy_depth: int = 0,
             ):
                 super().__init__(env, globals, disabled_tags, copy_depth)
@@ -76,11 +76,11 @@ class CustomTemplateClassTestCase(unittest.TestCase):
                 self,
                 env: Environment,
                 globals: Optional[Namespace] = None,  # noqa: A002
-                disabled_tags: Optional[List[str]] = None,
+                disabled_tags: Optional[list[str]] = None,
                 copy_depth: int = 0,
             ):
                 super().__init__(env, globals, disabled_tags, copy_depth)
-                self.references: List[str] = []
+                self.references: list[str] = []
 
             def get(self, path: ContextPath, default: object = ...) -> object:
                 self._count_reference(path)

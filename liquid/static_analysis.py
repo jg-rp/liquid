@@ -1,15 +1,14 @@
 """Analyze template variables, tags and filters by traversing a template's AST."""
+
 from __future__ import annotations
 
 import re
 from collections import defaultdict
 from typing import TYPE_CHECKING
 from typing import DefaultDict
-from typing import Dict
-from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Set
-from typing import Tuple
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
@@ -33,8 +32,6 @@ from liquid.extra.tags.extends import stack_blocks
 from liquid.token import TOKEN_TAG
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
-
     from liquid import BoundTemplate
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
@@ -69,15 +66,15 @@ class ReferencedVariable(str):
 
 
 # (template_name, line_number).
-Location = Tuple[str, int]
+Location = tuple[str, int]
 
-Refs = Dict[ReferencedVariable, List[Location]]
+Refs = dict[ReferencedVariable, list[Location]]
 """A mapping of template variables to their (template_name, line_number) locations."""
 
 # A mapping of Identifier expressions to their (template_name, line_number) locations.
-IdentifierMap = DefaultDict[Identifier, List[Location]]
+IdentifierMap = DefaultDict[Identifier, list[Location]]
 
-NameRefs = Dict[str, List[Location]]
+NameRefs = dict[str, list[Location]]
 """A mapping of template, tag or filter names to (template_name, lineno) locations."""
 
 
@@ -88,15 +85,15 @@ class ContextualTemplateAnalysis:
     to the number of times that variable was referenced.
 
     Attributes:
-        all_variables (Dict[str, int]): All variables references along a path through
+        all_variables (dict[str, int]): All variables references along a path through
             the template's syntax tree.
-        local_variables (Dict[str, int]): The names of variables assigned using the
+        local_variables (dict[str, int]): The names of variables assigned using the
             built-in `assign` `capture`, `increment` or `decrement` tags, or any custom
             tag that uses `Context.assign()`.
-        undefined_variables (Dict[str, int]): The names of variables that could not be
+        undefined_variables (dict[str, int]): The names of variables that could not be
             resolved. If a name is referenced before it is assigned, it will appear in
             `undefined` and `assigns`.
-        filters (Dict[str, int]): Names of filters found during contextual analysis.
+        filters (dict[str, int]): Names of filters found during contextual analysis.
     """
 
     __slots__ = ("all_variables", "local_variables", "undefined_variables", "filters")
@@ -104,10 +101,10 @@ class ContextualTemplateAnalysis:
     def __init__(
         self,
         *,
-        all_variables: Dict[str, int],
-        local_variables: Dict[str, int],
-        undefined_variables: Dict[str, int],
-        filters: Dict[str, int],
+        all_variables: dict[str, int],
+        local_variables: dict[str, int],
+        undefined_variables: dict[str, int],
+        filters: dict[str, int],
     ) -> None:
         self.all_variables = all_variables
         self.local_variables = local_variables
@@ -197,7 +194,7 @@ class _TemplateCounter:
         raise_for_failures: bool = True,
         scope: Optional[ReadOnlyChainMap] = None,
         template_locals: Optional[IdentifierMap] = None,
-        partials: Optional[List[Tuple[str, Optional[Dict[str, str]]]]] = None,
+        partials: Optional[list[tuple[str, Optional[dict[str, str]]]]] = None,
     ) -> None:
         self.template = template
         self._template_name = self.template.name or "<string>"
@@ -617,7 +614,7 @@ class _TemplateCounter:
 
     def _make_load_context(
         self, child: ChildNode, load_mode: Literal["extends", "include", "render"]
-    ) -> Tuple[Optional[str], Optional[Dict[str, str]]]:
+    ) -> tuple[Optional[str], Optional[dict[str, str]]]:
         # Partial templates rendered in "include" mode might use a variable template
         # name. We can't statically analyze a partial template unless it's name is a
         # literal string (or possibly an integer, but unlikely).
@@ -644,7 +641,7 @@ class _TemplateCounter:
     def _get_template(
         self,
         name: str,
-        load_context: Dict[str, str],
+        load_context: dict[str, str],
         parent_name: str,
         parent_node: ChildNode,
     ) -> BoundTemplate:
@@ -657,7 +654,7 @@ class _TemplateCounter:
     async def _get_template_async(
         self,
         name: str,
-        load_context: Dict[str, str],
+        load_context: dict[str, str],
         parent_name: str,
         parent_node: ChildNode,
     ) -> BoundTemplate:
@@ -671,7 +668,7 @@ class _TemplateCounter:
 
     def _stack_blocks(
         self, stack_context: Context, template: BoundTemplate, count_tags: bool = True
-    ) -> Tuple[Optional[str], List[InheritanceBlockNode]]:
+    ) -> tuple[Optional[str], list[InheritanceBlockNode]]:
         template_name = template.name or "<string>"
         ast_extends_node, ast_block_nodes = stack_blocks(stack_context, template)
 
@@ -717,7 +714,7 @@ class _TemplateCounter:
             msg_target = next(iter(self.failed_visits.keys()))
             if len(self.failed_visits) > 1:
                 msg = (
-                    f"{msg_target} (+{len(self.failed_visits) -1} more) "
+                    f"{msg_target} (+{len(self.failed_visits) - 1} more) "
                     "does not implement a 'children' method"
                 )
             else:
@@ -729,7 +726,7 @@ class _TemplateCounter:
             if len(self.unloadable_partials) > 1:
                 msg = (
                     f"partial template '{msg_target}' "
-                    f"(+{len(self.unloadable_partials) -1} more) "
+                    f"(+{len(self.unloadable_partials) - 1} more) "
                     "could not be loaded"
                 )
             else:
@@ -754,7 +751,7 @@ class _InheritanceChainCounter(_TemplateCounter):
         raise_for_failures: bool = True,
         scope: Optional[ReadOnlyChainMap] = None,
         template_locals: Optional[IdentifierMap] = None,
-        partials: Optional[List[Tuple[str, Optional[Dict[str, str]]]]] = None,
+        partials: Optional[list[tuple[str, Optional[dict[str, str]]]]] = None,
     ) -> None:
         self.stack_context = stack_context
         self.parent_block_stack_item = parent_block_stack_item
@@ -834,9 +831,9 @@ class _InheritanceChainCounter(_TemplateCounter):
         return any(self._contains_super(expr) for expr in expression.children())
 
     def _analyze_block(self, block: InheritanceBlockNode) -> None:
-        block_stacks: Dict[
-            str, List[_BlockStackItem]
-        ] = self.stack_context.tag_namespace["extends"]
+        block_stacks: dict[str, list[_BlockStackItem]] = (
+            self.stack_context.tag_namespace["extends"]
+        )
 
         block_stack_item = block_stacks[block.name][0]
         template = self._make_template(block_stack_item)
@@ -855,9 +852,9 @@ class _InheritanceChainCounter(_TemplateCounter):
         self._update_reference_counters(refs)
 
     async def _analyze_block_async(self, block: InheritanceBlockNode) -> None:
-        block_stacks: Dict[
-            str, List[_BlockStackItem]
-        ] = self.stack_context.tag_namespace["extends"]
+        block_stacks: dict[str, list[_BlockStackItem]] = (
+            self.stack_context.tag_namespace["extends"]
+        )
 
         block_stack_item = block_stacks[block.name][0]
         template = self._make_template(block_stack_item)
@@ -887,14 +884,14 @@ class References:
     """Collect references for Template.analyze and friends."""
 
     def __init__(self) -> None:
-        self.variable_references: List[Identifier] = []
-        self.filter_references: List[str] = []
+        self.variable_references: list[Identifier] = []
+        self.filter_references: list[str] = []
 
     def append_variable(self, var: Identifier) -> None:
         """Add a variable reference."""
         self.variable_references.append(var)
 
-    def append_filters(self, filters: List[str]) -> None:
+    def append_filters(self, filters: list[str]) -> None:
         """Add references to filters."""
         self.filter_references.extend(filters)
 

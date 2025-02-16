@@ -3,13 +3,10 @@
 from abc import ABC
 from abc import abstractmethod
 from typing import Collection
-from typing import Dict
-from typing import List
+from typing import Literal
 from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
-
-from typing_extensions import Literal
 
 from liquid.context import Context
 from liquid.exceptions import DisabledTagError
@@ -77,7 +74,7 @@ class Node(ABC):
         """An async version of `liquid.ast.Node.render_to_output`."""
         return self.render_to_output(context, buffer)
 
-    def children(self) -> List["ChildNode"]:
+    def children(self) -> list["ChildNode"]:
         """Return a list of child nodes and/or expressions associated with this node."""
         raise NotImplementedError(f"{self.__class__.__name__}.children")
 
@@ -109,10 +106,10 @@ class ChildNode(NamedTuple):
     linenum: int
     expression: Optional[Expression] = None
     node: Optional[Node] = None
-    template_scope: Optional[List[str]] = None
-    block_scope: Optional[List[str]] = None
+    template_scope: Optional[list[str]] = None
+    block_scope: Optional[list[str]] = None
     load_mode: Optional[Literal["render", "include", "extends"]] = None
-    load_context: Optional[Dict[str, str]] = None
+    load_context: Optional[dict[str, str]] = None
 
 
 class ParseTree(Node):
@@ -121,7 +118,7 @@ class ParseTree(Node):
     __slots__ = ("statements", "version")
 
     def __init__(self) -> None:
-        self.statements: List[Node] = []
+        self.statements: list[Node] = []
 
     def __str__(self) -> str:  # pragma: no cover
         return "".join(str(s) for s in self.statements)
@@ -163,7 +160,7 @@ class BlockNode(Node):
 
     __slots__ = ("tok", "statements", "forced_output")
 
-    def __init__(self, tok: Token, statements: Optional[List[Node]] = None):
+    def __init__(self, tok: Token, statements: Optional[list[Node]] = None):
         self.tok = tok
         self.statements = statements or []
         self.forced_output = False
@@ -191,7 +188,7 @@ class BlockNode(Node):
                 context.error(err)
         return True
 
-    def children(self) -> List["ChildNode"]:
+    def children(self) -> list["ChildNode"]:
         return [
             ChildNode(
                 linenum=self.tok.linenum,
@@ -229,7 +226,7 @@ class ConditionalBlockNode(Node):
             return True
         return False
 
-    def children(self) -> List["ChildNode"]:
+    def children(self) -> list["ChildNode"]:
         return [
             ChildNode(
                 linenum=self.tok.linenum,

@@ -1,4 +1,5 @@
 """Template loader test cases."""
+
 import asyncio
 import pickle
 import sys
@@ -6,7 +7,6 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import Dict
 
 from mock import patch
 
@@ -282,8 +282,8 @@ class TemplateDropTestCase(unittest.TestCase):
 class MatterDictLoader(DictLoader):
     def __init__(
         self,
-        templates: Dict[str, str],
-        matter: Dict[str, Dict[str, object]],
+        templates: dict[str, str],
+        matter: dict[str, dict[str, object]],
     ):
         super().__init__(templates)
         self.matter = matter
@@ -424,7 +424,7 @@ class BaseLoaderTestCase(unittest.TestCase):
 
 
 class MockContextLoader(DictLoader):
-    def __init__(self, templates: Dict[str, str]):
+    def __init__(self, templates: dict[str, str]):
         self.kwargs = {}
         super().__init__(templates)
 
@@ -491,7 +491,7 @@ class ContextLoaderTestCase(unittest.TestCase):
 
 
 class MockBootstrapLoader(BaseLoader):
-    def __init__(self, namespaces: Dict[str, Dict[str, str]]):
+    def __init__(self, namespaces: dict[str, dict[str, str]]):
         self.namespaces = namespaces
 
     def get_source(self, _: Environment, __: str) -> TemplateSource:

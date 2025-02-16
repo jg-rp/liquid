@@ -1,6 +1,4 @@
 import asyncio
-from typing import List
-from typing import Tuple
 
 import pytest
 
@@ -14,7 +12,7 @@ from liquid.golden.case import Case
 from liquid.template import AwareBoundTemplate
 from liquid.template import FutureAwareBoundTemplate
 
-TEST_CASES: List[Tuple[str, Case]] = [
+TEST_CASES: list[tuple[str, Case]] = [
     (suite.__name__.split(".")[-1], case)
     for suite in golden.test_cases
     for case in suite.cases
@@ -26,7 +24,7 @@ DEFAULT_TEST_CASES = [case for case in TEST_CASES if not case[1].future]
 @pytest.mark.parametrize(
     "case", DEFAULT_TEST_CASES, ids=lambda c: f"{c[0]}: {c[1].description}"
 )
-def test_golden_liquid(case: Tuple[str, Case]) -> None:
+def test_golden_liquid(case: tuple[str, Case]) -> None:
     case_ = case[1]
 
     loader = DictLoader(case_.partials)
@@ -43,7 +41,7 @@ def test_golden_liquid(case: Tuple[str, Case]) -> None:
 @pytest.mark.parametrize(
     "case", DEFAULT_TEST_CASES, ids=lambda c: f"{c[0]}: {c[1].description}"
 )
-def test_golden_liquid_async(case: Tuple[str, Case]) -> None:
+def test_golden_liquid_async(case: tuple[str, Case]) -> None:
     case_ = case[1]
 
     loader = DictLoader(case_.partials)
@@ -64,7 +62,7 @@ def test_golden_liquid_async(case: Tuple[str, Case]) -> None:
 @pytest.mark.parametrize(
     "case", TEST_CASES, ids=lambda c: f"{c[0]}: {c[1].description}"
 )
-def test_golden_future(case: Tuple[str, Case]) -> None:
+def test_golden_future(case: tuple[str, Case]) -> None:
     case_ = case[1]
 
     loader = DictLoader(case_.partials)
@@ -81,7 +79,7 @@ def test_golden_future(case: Tuple[str, Case]) -> None:
 @pytest.mark.parametrize(
     "case", TEST_CASES, ids=lambda c: f"{c[0]}: {c[1].description}"
 )
-def test_golden_future_async(case: Tuple[str, Case]) -> None:
+def test_golden_future_async(case: tuple[str, Case]) -> None:
     case_ = case[1]
 
     loader = DictLoader(case_.partials)

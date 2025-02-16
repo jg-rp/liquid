@@ -9,12 +9,10 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import ClassVar
-from typing import Dict
 from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
-from typing import Tuple
 from typing import Type
 from typing import Union
 
@@ -215,10 +213,10 @@ class Environment:
         self.autoescape: bool = autoescape
 
         # Tag register.
-        self.tags: Dict[str, Tag] = {}
+        self.tags: dict[str, Tag] = {}
 
         # Filter register.
-        self.filters: Dict[str, Callable[..., Any]] = {}
+        self.filters: dict[str, Callable[..., Any]] = {}
 
         # tolerance mode
         self.mode: Mode = tolerance
@@ -536,7 +534,7 @@ class Environment:
     def make_globals(
         self,
         globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Combine environment globals with template globals."""
         if globals:
             # Template globals take priority over environment globals.
@@ -582,7 +580,7 @@ class Environment:
 
     def _get_expression_parsers(
         self, cache_size: int = 0
-    ) -> Tuple[
+    ) -> tuple[
         Callable[[str, int], BooleanExpression],
         Callable[[str, int], BooleanExpression],
         Callable[[str, int], FilteredExpression],

@@ -1,8 +1,8 @@
 """Golden test case definition."""
+
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
-from typing import Dict
 
 
 @dataclass
@@ -12,8 +12,8 @@ class Case:
     description: str
     template: str
     expect: str
-    globals: Dict[str, Any] = field(default_factory=dict)  # noqa: A003
-    partials: Dict[str, Any] = field(default_factory=dict)
+    globals: dict[str, Any] = field(default_factory=dict)  # noqa: A003
+    partials: dict[str, Any] = field(default_factory=dict)
     standard: bool = True
     error: bool = False
     strict: bool = False

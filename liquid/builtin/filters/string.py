@@ -9,7 +9,6 @@ import re
 import urllib.parse
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -181,7 +180,7 @@ def _slice_arg(val: Any) -> int:
 
 
 @liquid_filter
-def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
+def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
     """Return the subsequence of _val_ starting at _start_ with up to _length_ chars.
 
     Array-like objects return a list, strings return a substring, all other objects are
@@ -211,7 +210,7 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, List[object]]:
 
 
 @string_filter
-def split(val: str, seq: str) -> List[str]:
+def split(val: str, seq: str) -> list[str]:
     """Return a list of strings from splitting _value_ on _seq_."""
     if not seq:
         return list(val)

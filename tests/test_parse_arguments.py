@@ -1,10 +1,8 @@
 """Test cases for parsing list of positional and keyword arguments."""
 
 import unittest
-from typing import List
 from typing import NamedTuple
 from typing import Optional
-from typing import Tuple
 from typing import Union
 
 from liquid.exceptions import Error
@@ -25,7 +23,7 @@ from liquid.expressions.arguments.lex import tokenize
 from liquid.expressions.arguments.parse import parse_equals_separated_arguments
 from liquid.stream import TokenStream
 
-Arguments = List[Tuple[Optional[str], Optional[Expression]]]
+Arguments = list[tuple[Optional[str], Optional[Expression]]]
 
 
 class Case(NamedTuple):

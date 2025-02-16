@@ -1,8 +1,6 @@
 """HTML escape test cases."""
 
 from typing import Any
-from typing import Dict
-from typing import List
 from typing import NamedTuple
 from unittest import TestCase
 
@@ -15,12 +13,12 @@ class Case(NamedTuple):
 
     description: str
     template: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     expect: str
 
 
 class SafeHTMLDrop:
-    def __init__(self, some_list: List[object]):
+    def __init__(self, some_list: list[object]):
         self.items = some_list
 
     def __str__(self) -> str:

@@ -5,8 +5,6 @@ from __future__ import annotations
 import itertools
 import sys
 from typing import TYPE_CHECKING
-from typing import Dict
-from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
@@ -47,16 +45,16 @@ TAG_CALL = sys.intern("call")
 class Macro(NamedTuple):
     """A macro block and its arguments."""
 
-    args: List[Argument]
+    args: list[Argument]
     block: BlockNode
 
 
 class BoundArgs(NamedTuple):
     """Expressions bound to `call` ready to be evaluated."""
 
-    args: Dict[str, Expression]
-    excess_args: List[Expression]
-    excess_kwargs: Dict[str, Expression]
+    args: dict[str, Expression]
+    excess_args: list[Expression]
+    excess_kwargs: dict[str, Expression]
 
 
 class MacroNode(Node):
@@ -68,7 +66,7 @@ class MacroNode(Node):
         self,
         tok: Token,
         name: str,
-        args: List[Argument],
+        args: list[Argument],
         block: BlockNode,
     ):
         self.tok = tok
@@ -77,7 +75,7 @@ class MacroNode(Node):
         self.block = block
 
     def __str__(self) -> str:  # pragma: no cover
-        args: List[str] = []
+        args: list[str] = []
         for arg, default in self.args:
             if default is not NIL:
                 args.append(f"{arg}={default}")
@@ -95,7 +93,7 @@ class MacroNode(Node):
         context.tag_namespace["macros"][self.name] = Macro(self.args, self.block)
         return False
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
                 linenum=self.tok.linenum,
@@ -118,8 +116,8 @@ class CallNode(Node):
         self,
         tok: Token,
         name: str,
-        args: List[Expression],
-        kwargs: List[Argument],
+        args: list[Expression],
+        kwargs: list[Argument],
     ):
         self.tok = tok
         self.name = name
@@ -142,7 +140,7 @@ class CallNode(Node):
 
         # Bind positional arguments to names. If there are more positional arguments
         # than names defined in the macro, they'll be stored in `excess_args`.
-        excess_args: List[Expression] = []
+        excess_args: list[Expression] = []
         for name, expr in itertools.zip_longest(macro_names, self.args, fillvalue=NIL):
             if name == NIL:
                 excess_args.append(expr)
@@ -157,7 +155,7 @@ class CallNode(Node):
         # than once.
 
         # Update default and/or missing arguments with keyword arguments.
-        excess_kwargs: Dict[str, Expression] = {}
+        excess_kwargs: dict[str, Expression] = {}
         for name, expr in self.kwargs:
             assert isinstance(name, str)
             if name in macro_set:
@@ -170,7 +168,7 @@ class CallNode(Node):
     def _make_context(self, context: Context, macro: Macro) -> Context:
         args, excess_args, excess_kwargs = self._bind_args(macro)
 
-        excess: Dict[str, object] = {
+        excess: dict[str, object] = {
             "kwargs": {
                 name: expr.evaluate(context) for name, expr in excess_kwargs.items()
             },
@@ -178,7 +176,7 @@ class CallNode(Node):
         }
 
         # NOTE: default arguments are bound late.
-        bound_args: Dict[str, object] = {}
+        bound_args: dict[str, object] = {}
         for name, expr in args.items():
             if expr == NIL:
                 bound_args[name] = context.env.undefined(name)
@@ -196,7 +194,7 @@ class CallNode(Node):
     async def _make_context_async(self, context: Context, macro: Macro) -> Context:
         args, excess_args, excess_kwargs = self._bind_args(macro)
 
-        excess: Dict[str, object] = {
+        excess: dict[str, object] = {
             "kwargs": {
                 name: await expr.evaluate_async(context)
                 for name, expr in excess_kwargs.items()
@@ -205,7 +203,7 @@ class CallNode(Node):
         }
 
         # NOTE: default arguments are bound late.
-        bound_args: Dict[str, object] = {}
+        bound_args: dict[str, object] = {}
         for name, expr in args.items():
             if expr == NIL:
                 bound_args[name] = context.env.undefined(name)
@@ -257,7 +255,7 @@ class CallNode(Node):
 
         return True
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [
             *[
                 ChildNode(linenum=self.tok.linenum, expression=expr)
@@ -314,8 +312,8 @@ class CallTag(Tag):
         name, _args = parse_call_arguments(stream.current.value, linenum=tok.linenum)
 
         # Args can be positional (no default), or keyword (with default).
-        args: List[Expression] = []
-        kwargs: List[Argument] = []
+        args: list[Expression] = []
+        kwargs: list[Argument] = []
 
         for key, val in _args:
             if key is None:

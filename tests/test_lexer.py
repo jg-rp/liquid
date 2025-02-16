@@ -1,7 +1,6 @@
 """Test tokenizing of liquid templates and expressions."""
 
 from typing import Any
-from typing import List
 from typing import NamedTuple
 from unittest import TestCase
 
@@ -29,7 +28,7 @@ class LiquidLexerTestCase(TestCase):
     def setUp(self) -> None:
         self.env = Environment()
 
-    def _test(self, test_cases: List[Case]) -> None:
+    def _test(self, test_cases: list[Case]) -> None:
         tokenize = get_lexer(
             self.env.tag_start_string,
             self.env.tag_end_string,

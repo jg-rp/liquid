@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -70,7 +69,7 @@ class IfChangedNode(Node):
             return True
         return False
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return self.block.children()
 
 

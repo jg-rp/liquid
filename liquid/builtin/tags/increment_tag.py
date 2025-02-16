@@ -1,7 +1,6 @@
 """Tag and node definition for the built-in "increment" tag."""
 
 import sys
-from typing import List
 from typing import Optional
 from typing import TextIO
 
@@ -37,7 +36,7 @@ class IncrementNode(Node):
         buffer.write(str(context.increment(self.identifier)))
         return True
 
-    def children(self) -> List[ChildNode]:
+    def children(self) -> list[ChildNode]:
         return [ChildNode(linenum=self.tok.linenum, template_scope=[self.identifier])]
 
 

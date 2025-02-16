@@ -1,14 +1,12 @@
 """Analyze template tags from tokenized source text."""
+
 from __future__ import annotations
 
 from collections import defaultdict
 from typing import TYPE_CHECKING
-from typing import Dict
 from typing import Iterable
-from typing import List
 from typing import Mapping
 from typing import Optional
-from typing import Tuple
 
 from liquid.token import TOKEN_TAG
 
@@ -25,7 +23,7 @@ DEFAULT_INNER_TAG_MAP = {
 }
 
 InnerTagMap = Mapping[str, Iterable[str]]
-TagMap = Dict[str, List[Tuple[str, int]]]
+TagMap = dict[str, list[tuple[str, int]]]
 
 
 class TagAnalysis:
@@ -58,7 +56,7 @@ class TagAnalysis:
         *,
         env: Environment,
         name: str,
-        tokens: List[Token],
+        tokens: list[Token],
         inner_tags: Optional[InnerTagMap] = None,
     ) -> None:
         self.template_name = name
@@ -86,7 +84,7 @@ class TagAnalysis:
             self.unknown_tags,
         ) = self._audit_tags(env, tokens)
 
-    def _all_tags(self, tokens: List[Token]) -> TagMap:
+    def _all_tags(self, tokens: list[Token]) -> TagMap:
         """Map tag names to their locations, similar to `Template.analyze` etc."""
         tags = defaultdict(list)
         for token in tokens:
@@ -97,9 +95,9 @@ class TagAnalysis:
     def _audit_tags(  # noqa: PLR0912
         self,
         env: Environment,
-        tokens: List[Token],
-    ) -> Tuple[TagMap, TagMap, TagMap]:
-        block_stack: List[_BlockStackItem] = []
+        tokens: list[Token],
+    ) -> tuple[TagMap, TagMap, TagMap]:
+        block_stack: list[_BlockStackItem] = []
         unclosed_tags: TagMap = defaultdict(list)
         unexpected_tags: TagMap = defaultdict(list)
         unknown_tags: TagMap = defaultdict(list)
@@ -184,7 +182,7 @@ class TagAnalysis:
     def _valid_inner_tag(
         self,
         tag_names: Iterable[str],
-        block_stack: List[_BlockStackItem],
+        block_stack: list[_BlockStackItem],
     ) -> bool:
         return any(tag_name in block_stack for tag_name in tag_names)
 

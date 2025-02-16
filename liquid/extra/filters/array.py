@@ -1,12 +1,11 @@
 """Extra array filters."""
+
 import math
 import re
 from decimal import Decimal
 from operator import getitem
 from typing import Any
-from typing import List
 from typing import Sequence
-from typing import Tuple
 from typing import Union
 
 from liquid.filter import array_filter
@@ -30,7 +29,7 @@ RE_NUMERIC = re.compile(r"-?\d+")
 
 
 @sequence_filter
-def sort_numeric(left: Sequence[object], key: object = None) -> List[object]:
+def sort_numeric(left: Sequence[object], key: object = None) -> list[object]:
     """Return a copy of `left` sorted by numeric values found in `left`'s items."""
     if key:
         _key = str(key)
@@ -46,7 +45,7 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
         return default
 
 
-def _ints(obj: object) -> Tuple[Union[int, float, Decimal], ...]:
+def _ints(obj: object) -> tuple[Union[int, float, Decimal], ...]:
     """Key function for the `sort_numeric` filter."""
     if isinstance(obj, bool):
         # isinstance(False, int) == True

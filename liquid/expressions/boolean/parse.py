@@ -1,7 +1,6 @@
 """Functions for parsing boolean expressions."""
 
 from typing import Callable
-from typing import Dict
 
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import BooleanExpression
@@ -73,7 +72,7 @@ PRECEDENCES = {
 }
 
 
-TOKEN_MAP: Dict[str, Callable[[TokenStream], Expression]] = {
+TOKEN_MAP: dict[str, Callable[[TokenStream], Expression]] = {
     TOKEN_FALSE: parse_boolean,
     TOKEN_TRUE: parse_boolean,
     TOKEN_NIL: parse_nil,
