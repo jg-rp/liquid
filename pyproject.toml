@@ -66,7 +66,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=missing --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 benchmark = "python -O scripts/performance.py"
 cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 lint = "ruff check ."
