@@ -47,6 +47,7 @@ packages = ["liquid"]
 dependencies = [
   "pytest",
   "pytest-cov",
+  "pytest-mock",
   "mypy",
   "pyyaml",
   "types-pyyaml",
@@ -54,6 +55,7 @@ dependencies = [
   "ruff",
   "mock",
   "types-python-dateutil",
+  "types-mock",
 ]
 
 [tool.hatch.envs.default.scripts]
