@@ -1,7 +1,9 @@
-import cProfile
+from __future__ import annotations
+
 import json
-import sys
 import timeit
+from dataclasses import dataclass
+from dataclasses import field
 from pathlib import Path
 
 from liquid import DictLoader
@@ -12,15 +14,34 @@ from liquid.undefined import StrictUndefined
 tokenize = get_lexer()
 
 
-def fixture(path_to_templates: Path) -> dict[str, str]:
-    # TODO: dataclass
-    # TODO: inc data
-    loader_dict: dict[str, str] = {}
+@dataclass
+class Fixture:
+    """Benchmark fixture data and templates."""
 
-    for input_file in path_to_templates.glob("*html"):
-        loader_dict[input_file.name] = input_file.read_text()
+    name: str
+    data: dict[str, object]
+    templates: dict[str, str] = field(default_factory=dict)
 
-    return loader_dict
+    @staticmethod
+    def load(path: Path) -> Fixture:
+        """Load a benchmark fixture from _path_."""
+        templates: dict[str, str] = {}
+
+        for input_file in (path / "templates").glob("*liquid"):
+            templates[input_file.name] = input_file.read_text()
+
+        with (path / "data.json").open() as fd:
+            data = json.load(fd)
+
+        return Fixture(name=path.parts[-1], data=data, templates=templates)
+
+    def env(self) -> Environment:
+        """Return a new Liquid environment for this fixture."""
+        return Environment(
+            loader=DictLoader(self.templates),
+            undefined=StrictUndefined,
+            globals=self.data,
+        )
 
 
 def print_result(
@@ -36,21 +57,16 @@ def print_result(
     print(f"{name:>31}: {best:.2}s ({per_sec:.2f} ops/s, {i_per_s:.2f} i/s)")
 
 
-def benchmark(search_path: str, number: int = 1000, repeat: int = 5) -> None:
-    data = json.load((Path(search_path).parent / "data.json").open())
-    templates = fixture(Path(search_path))
-    env = Environment(
-        loader=DictLoader(templates),
-        globals=data,
-        undefined=StrictUndefined,
+def benchmark(path: str, number: int = 1000, repeat: int = 5) -> None:
+    fixture = Fixture.load(Path(path))
+    env = fixture.env()
+
+    source = fixture.templates["index.liquid"]
+    template = env.get_template("index.liquid")
+
+    print(
+        f"({fixture.name}) Best of {repeat} rounds with {number} iterations per round."
     )
-    source = templates["main.html"]
-    # NOTE: included templates get parsed, main.html does not
-    template = env.get_template("main.html")
-
-    print(len(source))
-
-    print((f"Best of {repeat} rounds with {number} iterations per round."))
 
     print_result(
         "scan template",
@@ -59,7 +75,6 @@ def benchmark(search_path: str, number: int = 1000, repeat: int = 5) -> None:
             globals={
                 "template": source,
                 "tokenize": tokenize,
-                "env": Environment(),
             },
             number=number,
             repeat=repeat,
@@ -74,7 +89,7 @@ def benchmark(search_path: str, number: int = 1000, repeat: int = 5) -> None:
             "env.from_string(template)",
             globals={
                 "template": source,
-                "env": Environment(),
+                "env": env,
             },
             number=number,
             repeat=repeat,
@@ -98,37 +113,15 @@ def benchmark(search_path: str, number: int = 1000, repeat: int = 5) -> None:
     )
 
 
-def profile_parse(search_path: str) -> None:
-    # TODO: move to profile.py
-    templates = fixture(Path(search_path))
-    template = templates["main.html"]
-    env = Environment()
-
-    cProfile.runctx(
-        "[env.from_string(template) for _ in range(1000)]",
-        globals={
-            "env": env,
-            "template": template,
-        },
-        locals={},
-        sort="cumtime",
-    )
-
-
 def main() -> None:
-    # TODO: argparse
-    search_path = "performance/fixtures/002/templates/"
+    fixtures = [
+        "performance/fixtures/001",
+        "performance/fixtures/002",
+    ]
 
-    args = sys.argv
-    n_args = len(args)
-
-    if n_args == 1:
-        benchmark(search_path)
-    elif n_args == 2 and args[1] == "--profile":
-        profile_parse(search_path)
-    else:
-        sys.stderr.write(f"usage: python {args[0]} [--profile]\n")
-        sys.exit(1)
+    for fixture in fixtures:
+        benchmark(fixture)
+        print()
 
 
 if __name__ == "__main__":
