@@ -11,11 +11,11 @@ from liquid.expression import Identifier
 from liquid.expression import IdentifierPathElement
 from liquid.expression import InfixExpression
 from liquid.expression import IntegerLiteral
+from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
 from liquid.expression import StringLiteral
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
-from liquid.expressions.boolean.parse import PrefixExpression
 
 
 class Case(NamedTuple):
@@ -265,14 +265,14 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
         ),
     ]
 
-    def test_parse_boolean_expression(self):
+    def test_parse_boolean_expression(self) -> None:
         """Test that we can parse standard boolean expressions."""
         for case in self.test_cases:
             with self.subTest(msg=case.description):
                 expr = parse_boolean_expression(case.expression)
                 self.assertEqual(expr, case.expect)
 
-    def test_parse_boolean_expression_with_parens(self):
+    def test_parse_boolean_expression_with_parens(self) -> None:
         """Test that the non-standard boolean expression parser is backwards
         compatible with standard boolean expressions."""
         for case in self.test_cases:
@@ -280,7 +280,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(expr, case.expect)
 
-    def test_parse_boolean_expression_precedence(self):
+    def test_parse_boolean_expression_precedence(self) -> None:
         """Test that we get the expected precedence when parsing boolean expressions."""
         test_cases = [
             Case(

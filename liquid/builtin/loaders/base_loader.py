@@ -188,12 +188,9 @@ class BaseLoader(ABC):  # noqa: B024
         `get_source_with_args()` when implementing a custom caching loader. Where cache
         handling happens in `load_*` methods.
         """
-        try:
-            source, filename, uptodate, matter = self.get_source_with_args(
-                env, name, **kwargs
-            )
-        except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+        source, filename, uptodate, matter = self.get_source_with_args(
+            env, name, **kwargs
+        )
 
         template = env.from_string(
             source,
@@ -213,11 +210,8 @@ class BaseLoader(ABC):  # noqa: B024
         **kwargs: object,
     ) -> BoundTemplate:
         """An async version of `load_with_args()`."""
-        try:
-            template_source = await self.get_source_with_args_async(env, name, **kwargs)
-            source, filename, uptodate, matter = template_source
-        except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+        template_source = await self.get_source_with_args_async(env, name, **kwargs)
+        source, filename, uptodate, matter = template_source
 
         template = env.from_string(
             source,

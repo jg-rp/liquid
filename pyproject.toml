@@ -47,6 +47,7 @@ packages = ["liquid"]
 dependencies = [
   "pytest",
   "pytest-cov",
+  "pytest-mock",
   "mypy",
   "pyyaml",
   "types-pyyaml",
@@ -54,6 +55,7 @@ dependencies = [
   "ruff",
   "mock",
   "types-python-dateutil",
+  "types-mock",
 ]
 
 [tool.hatch.envs.default.scripts]
@@ -148,8 +150,8 @@ convention = "google"
 "liquid/builtin/filters/__init__.py" = ["D104", "I001"]
 "liquid/builtin/loaders/__init__.py" = ["D104", "I001"]
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
-"scripts/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
+"performance/*" = ["D103", "PLR2004", "T201", "D100"]
 
 [tool.ruff.lint]
 # Allow unused variables when underscore-prefixed.

@@ -2,7 +2,6 @@
 
 import operator
 from dataclasses import dataclass
-from typing import Any
 
 import pytest
 
@@ -17,7 +16,7 @@ class Case:
 
     description: str
     template: str
-    context: dict[str, Any]
+    context: dict[str, object]
     expect: str
 
 

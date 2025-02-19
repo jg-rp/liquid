@@ -41,6 +41,8 @@ class Parser:
         root = ParseTree()
         statements = root.statements
 
+        # TODO: factor in parse_statement
+        # TODO: benchmark with local tag vars
         while stream.current.type != TOKEN_EOF:
             try:
                 statements.append(self.parse_statement(stream))
@@ -98,6 +100,7 @@ class Parser:
         return block
 
 
+# TODO: move to TokenStream.eat_block()
 def eat_block(stream: TokenStream, end: Container[str]) -> None:
     """Advance the stream pointer past the next end tag.
 
