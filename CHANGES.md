@@ -16,6 +16,8 @@
 
 ### Tag expression parsing migration
 
+TODO: A `TOKEN_RANGE_LITERAL` will always precede a `(` token.
+
 `parse_common_expression(stream)` -> `parse_primitive(stream)`
 `tokenize_common_expression(str, linenum)` -> TODO
 `parse_identifier(stream)` -> `Path.parse(stream)`

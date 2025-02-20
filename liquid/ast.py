@@ -18,7 +18,7 @@ from liquid.token import Token
 
 # ruff: noqa: D102
 
-IllegalToken = Token(-1, TOKEN_ILLEGAL, "")
+IllegalToken = Token(TOKEN_ILLEGAL, "", -1, "")  # XXX
 
 
 class Node(ABC):
