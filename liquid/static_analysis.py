@@ -23,7 +23,7 @@ from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
 from liquid.expression import FilteredExpression
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import IdentifierTuple
 from liquid.expression import StringLiteral
 from liquid.extra.tags.extends import BlockNode as InheritanceBlockNode
@@ -264,7 +264,9 @@ class _TemplateCounter:
             children = node.children()
         except NotImplementedError:
             name = node.__class__.__name__
-            self.failed_visits[name].append((self._template_name, node.token().linenum))
+            self.failed_visits[name].append(
+                (self._template_name, node.token().start_index)
+            )
             return
 
         for child in children:
@@ -302,7 +304,9 @@ class _TemplateCounter:
             children = node.children()
         except NotImplementedError:
             name = node.__class__.__name__
-            self.failed_visits[name].append((self._template_name, node.token().linenum))
+            self.failed_visits[name].append(
+                (self._template_name, node.token().start_index)
+            )
             return
 
         for child in children:
@@ -356,8 +360,7 @@ class _TemplateCounter:
             _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
             if (
                 _ref not in self._scope
-                and Identifier(path=[IdentifierPathElement(_ref)])
-                not in self.template_locals
+                and Identifier(path=[Segment(_ref)]) not in self.template_locals
             ):
                 self.template_globals[ref].append((self._template_name, child.linenum))
 
@@ -369,7 +372,7 @@ class _TemplateCounter:
             return
 
         for name in child.template_scope:
-            self.template_locals[Identifier(path=[IdentifierPathElement(name)])].append(
+            self.template_locals[Identifier(path=[Segment(name)])].append(
                 (self._template_name, child.linenum)
             )
 
@@ -678,10 +681,10 @@ class _TemplateCounter:
         # Count `extends` and `block` tags here, as we don't get the chance later.
         if count_tags and ast_extends_node:
             token = ast_extends_node.token()
-            self.tags[token.value].append((template_name, token.linenum))
+            self.tags[token.value].append((template_name, token.start_index))
         for ast_node in ast_block_nodes:
             token = ast_node.token()
-            self.tags[token.value].append((template_name, token.linenum))
+            self.tags[token.value].append((template_name, token.start_index))
 
         if ast_extends_node:
             return ast_extends_node.name.evaluate(stack_context), ast_block_nodes
@@ -689,8 +692,8 @@ class _TemplateCounter:
 
     def _count_tag(self, node: Node) -> None:
         token = node.token()
-        if not isinstance(node, BlockNode) and token.type == TOKEN_TAG:
-            self.tags[token.value].append((self._template_name, token.linenum))
+        if not isinstance(node, BlockNode) and token.kind == TOKEN_TAG:
+            self.tags[token.value].append((self._template_name, token.start_index))
 
     def _update_reference_counters(self, refs: _TemplateCounter) -> None:
         # Accumulate references from the partial/child template into its parent.

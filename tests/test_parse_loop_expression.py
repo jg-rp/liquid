@@ -4,7 +4,7 @@ from typing import Union
 
 from liquid.expression import Expression
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import LoopExpression
 from liquid.expression import RangeLiteral
@@ -29,8 +29,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                 ),
@@ -42,8 +42,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     limit=IntegerLiteral(5),
@@ -56,11 +56,11 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
-                    limit=Identifier(path=[IdentifierPathElement("max")]),
+                    limit=Identifier(path=[Segment("max")]),
                 ),
             ),
             Case(
@@ -70,8 +70,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     offset=IntegerLiteral(2),
@@ -84,8 +84,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     limit=IntegerLiteral(5),
@@ -99,8 +99,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     limit=IntegerLiteral(5),
@@ -114,8 +114,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     reversed_=True,
@@ -128,8 +128,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collection"),
-                            IdentifierPathElement("products"),
+                            Segment("collection"),
+                            Segment("products"),
                         ],
                     ),
                     limit=IntegerLiteral(5),
@@ -157,9 +157,9 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                         start=IntegerLiteral(1),
                         stop=Identifier(
                             path=[
-                                IdentifierPathElement("collection"),
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement("size"),
+                                Segment("collection"),
+                                Segment("products"),
+                                Segment("size"),
                             ],
                         ),
                     ),
@@ -171,12 +171,12 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 LoopExpression(
                     name="product",
                     iterable=RangeLiteral(
-                        start=Identifier(path=[IdentifierPathElement("num")]),
+                        start=Identifier(path=[Segment("num")]),
                         stop=Identifier(
                             path=[
-                                IdentifierPathElement("collection"),
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement("size"),
+                                Segment("collection"),
+                                Segment("products"),
+                                Segment("size"),
                             ],
                         ),
                     ),
@@ -203,9 +203,9 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collections"),
-                            IdentifierPathElement(0),
-                            IdentifierPathElement("tags"),
+                            Segment("collections"),
+                            Segment(0),
+                            Segment("tags"),
                         ],
                     ),
                 ),
@@ -217,9 +217,9 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="product",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("collections"),
-                            IdentifierPathElement(0),
-                            IdentifierPathElement("tags"),
+                            Segment("collections"),
+                            Segment(0),
+                            Segment("tags"),
                         ],
                     ),
                 ),
@@ -231,7 +231,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                     name="i",
                     iterable=Identifier(
                         path=[
-                            IdentifierPathElement("array"),
+                            Segment("array"),
                         ],
                     ),
                     limit=IntegerLiteral(4),

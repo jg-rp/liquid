@@ -138,7 +138,7 @@ class BlockNode(Node):
             if self.required:
                 raise RequiredBlockError(
                     f"block {self.name!r} must be overridden",
-                    linenum=self.tok.linenum,
+                    token=self.tok,
                 )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return self.block.render(context, buffer)
@@ -148,8 +148,8 @@ class BlockNode(Node):
         if stack_item.required:
             raise RequiredBlockError(
                 f"block {self.name!r} must be overridden",
-                linenum=self.tok.linenum,
-                filename=stack_item.source_name,
+                token=self.tok,
+                template_name=stack_item.source_name,
             )
 
         ctx = context.copy(
@@ -171,7 +171,8 @@ class BlockNode(Node):
             # This base template is being rendered directly.
             if self.required:
                 raise RequiredBlockError(
-                    f"block {self.name} must be overridden", linenum=self.tok.linenum
+                    f"block {self.name} must be overridden",
+                    token=self.tok,
                 )
             with context.extend({"block": BlockDrop(context, buffer, self.name, None)}):
                 return await self.block.render_async(context, buffer)
@@ -180,7 +181,7 @@ class BlockNode(Node):
 
         if stack_item.required:
             raise RequiredBlockError(
-                f"block {self.name!r} must be overridden", linenum=self.tok.linenum
+                f"block {self.name!r} must be overridden", token=self.tok
             )
 
         ctx = context.copy(
@@ -192,8 +193,10 @@ class BlockNode(Node):
 
     def children(self) -> list[ChildNode]:
         return [
-            ChildNode(linenum=self.tok.linenum, expression=self.expr),
-            ChildNode(linenum=self.tok.linenum, node=self.block, block_scope=["block"]),
+            ChildNode(linenum=self.tok.start_index, expression=self.expr),
+            ChildNode(
+                linenum=self.tok.start_index, node=self.block, block_scope=["block"]
+            ),
         ]
 
 
@@ -214,7 +217,7 @@ class ExtendsNode(Node):
             raise LiquidEnvironmentError(
                 "the 'extends' tag requires the current render context to keep a "
                 "reference to its template as Context.template",
-                linenum=self.tok.linenum,
+                token=self.tok,
             )
 
         base_template = build_block_stacks(
@@ -235,7 +238,7 @@ class ExtendsNode(Node):
             raise LiquidEnvironmentError(
                 "the 'extends' tag requires the current render context to keep a "
                 "reference to its template as Context.template",
-                linenum=self.tok.linenum,
+                token=self.tok,
             )
 
         base_template = await build_block_stacks_async(
@@ -252,7 +255,7 @@ class ExtendsNode(Node):
     def children(self) -> list[ChildNode]:
         return [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 expression=self.name,
                 load_mode="extends",
                 load_context={"tag": self.tag},
@@ -277,12 +280,12 @@ class BlockTag(Tag):
 
         stream.expect(TOKEN_EXPRESSION)
         expr_stream = TokenStream(
-            tokenize_common_expression(stream.current.value, linenum=tok.linenum)
+            tokenize_common_expression(stream.current.value, linenum=tok.start_index)
         )
         block_name = self._parse_block_name(expr_stream)
         next(expr_stream)
 
-        if expr_stream.current[2] == "required":
+        if expr_stream.current.value == "required":
             required = True
             next(expr_stream)
         else:
@@ -294,11 +297,11 @@ class BlockTag(Tag):
         block = self.parser.parse_block(stream, (self.end, TOKEN_EOF))
         stream.expect(TOKEN_TAG, value=self.end)
 
-        if stream.peek.type == TOKEN_EXPRESSION:
+        if stream.peek.kind == TOKEN_EXPRESSION:
             next(stream)
             expr_stream = TokenStream(
                 tokenize_common_expression(
-                    stream.current.value, linenum=stream.current.linenum
+                    stream.current.value, linenum=stream.current.start_index
                 )
             )
             end_block_name = self._parse_block_name(expr_stream)
@@ -308,17 +311,17 @@ class BlockTag(Tag):
             if end_block_name != block_name:
                 raise TemplateInheritanceError(
                     f"expected endblock for {block_name}, found {end_block_name}",
-                    linenum=stream.current.linenum,
+                    token=stream.current,
                 )
 
         return self.node_class(tok, block_name, block, required)
 
     def _parse_block_name(self, stream: TokenStream) -> StringLiteral:
         if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
-            return StringLiteral(stream.current[2])
+            return StringLiteral(stream.current.value)
         raise LiquidSyntaxError(
-            f"invalid identifier '{stream.current[2]}' for {self.name!r} tag",
-            linenum=stream.current[0],
+            f"invalid identifier '{stream.current.value}' for {self.name!r} tag",
+            token=stream.current,
         )
 
 
@@ -335,7 +338,7 @@ class ExtendsTag(Tag):
 
         stream.expect(TOKEN_EXPRESSION)
         expr_stream = TokenStream(
-            tokenize_common_expression(stream.current.value, linenum=tok.linenum)
+            tokenize_common_expression(stream.current.value, linenum=tok.start_index)
         )
         parent_template_name = parse_string_literal(expr_stream)
         next(expr_stream)
@@ -378,8 +381,8 @@ def build_block_stacks(
         if parent_template_name in seen:
             raise TemplateInheritanceError(
                 f"circular extends {parent_template_name!r}",
-                linenum=extends_node.tok.linenum,
-                filename=template.name,
+                token=extends_node.tok,
+                template_name=template.name,
             )
         seen.add(parent_template_name)
     else:
@@ -395,8 +398,8 @@ def build_block_stacks(
             if parent_template_name in seen:
                 raise TemplateInheritanceError(
                     f"circular extends {parent_template_name!r}",
-                    linenum=extends_node.tok.linenum,
-                    filename=parent.name,
+                    token=extends_node.tok,
+                    template_name=parent.name,
                 )
             seen.add(parent_template_name)
         else:
@@ -440,8 +443,8 @@ async def build_block_stacks_async(
         if parent_template_name in seen:
             raise TemplateInheritanceError(
                 f"circular extends {parent_template_name!r}",
-                linenum=extends_node.tok.linenum,
-                filename=template.name,
+                token=extends_node.tok,
+                template_name=template.name,
             )
         seen.add(parent_template_name)
     else:
@@ -459,8 +462,8 @@ async def build_block_stacks_async(
             if parent_template_name in seen:
                 raise TemplateInheritanceError(
                     f"circular extends {parent_template_name!r}",
-                    linenum=extends_node.tok.linenum,
-                    filename=parent.name,
+                    token=extends_node.tok,
+                    template_name=parent.name,
                 )
             seen.add(parent_template_name)
         else:
@@ -519,15 +522,15 @@ def stack_blocks(
     if len(extends) > 1:
         raise TemplateInheritanceError(
             "too many 'extends' tags",
-            linenum=extends[1].tok.linenum,
-            filename=template_name,
+            token=extends[1].tok,
+            template_name=template_name,
         )
 
     seen_block_names: Set[str] = set()
     for block in blocks:
         if block.name in seen_block_names:
             raise TemplateInheritanceError(
-                f"duplicate block {block.name}", linenum=block.tok.linenum
+                f"duplicate block {block.name}", token=block.tok
             )
         seen_block_names.add(block.name)
 

@@ -60,10 +60,12 @@ class WithNode(Node):
     def children(self) -> list[ChildNode]:
         return [
             ChildNode(
-                linenum=self.tok.linenum, node=self.block, block_scope=list(self.args)
+                linenum=self.tok.start_index,
+                node=self.block,
+                block_scope=list(self.args),
             ),
             *[
-                ChildNode(linenum=self.tok.linenum, expression=expr)
+                ChildNode(linenum=self.tok.start_index, expression=expr)
                 for expr in self.args.values()
             ],
         ]

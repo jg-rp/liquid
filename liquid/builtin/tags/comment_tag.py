@@ -81,9 +81,9 @@ class CommentTextTag(CommentTag):
         tok = stream.current
 
         text = []
-        while stream.current.type != TOKEN_EOF:
+        while stream.current.kind != TOKEN_EOF:
             if (
-                stream.current.type == TOKEN_TAG
+                stream.current.kind == TOKEN_TAG
                 and stream.current.value == TAG_ENDCOMMENT
             ):
                 break

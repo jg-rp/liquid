@@ -73,17 +73,17 @@ class LiquidTag(Tag):
         tok = stream.current
         stream.next_token()
 
-        if stream.current.type == TOKEN_EOF:
+        if stream.current.kind == TOKEN_EOF:
             # Empty liquid tag. Empty block.
             block = BlockNode(tok, [])
-        elif stream.current.type == TOKEN_TAG:
+        elif stream.current.kind == TOKEN_TAG:
             parser = get_parser(self.env)
             block = parser.parse_block(stream, end=())
         else:
             stream.expect(TOKEN_EXPRESSION)
             expr_stream = TokenStream(
                 self.tokenize_liquid_expression(
-                    stream.current.value, line_count=stream.current.linenum
+                    stream.current.value, line_count=stream.current.start_index
                 )
             )
             parser = get_parser(self.env)

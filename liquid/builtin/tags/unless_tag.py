@@ -142,7 +142,7 @@ class UnlessNode(Node):
     def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
-                linenum=self.consequence.tok.linenum,
+                linenum=self.consequence.tok.start_index,
                 node=self.consequence,
                 expression=self.condition,
             )
@@ -150,7 +150,7 @@ class UnlessNode(Node):
         _children.extend(
             [
                 ChildNode(
-                    linenum=alt.tok.linenum,
+                    linenum=alt.tok.start_index,
                     node=alt.block,
                     expression=alt.condition,
                 )
@@ -160,7 +160,7 @@ class UnlessNode(Node):
         if self.alternative:
             _children.append(
                 ChildNode(
-                    linenum=self.alternative.tok.linenum,
+                    linenum=self.alternative.tok.start_index,
                     node=self.alternative,
                     expression=None,
                 )
@@ -186,7 +186,7 @@ class UnlessTag(Tag):
         """Parse a boolean expression from a stream of tokens."""
         stream.expect(TOKEN_EXPRESSION)
         return self.env.parse_boolean_expression_value(
-            stream.current.value, stream.current.linenum
+            stream.current.value, stream.current.start_index
         )
 
     def parse(self, stream: TokenStream) -> Union[UnlessNode, IllegalNode]:
@@ -201,7 +201,7 @@ class UnlessTag(Tag):
 
         conditional_alternatives = []
 
-        while stream.current.istag(TAG_ELSIF):
+        while stream.current.is_tag(TAG_ELSIF):
             stream.next_token()
 
             try:
@@ -221,24 +221,24 @@ class UnlessTag(Tag):
 
         alternative: Optional[BlockNode] = None
 
-        if stream.current.istag(TAG_ELSE):
+        if stream.current.is_tag(TAG_ELSE):
             stream.next_token()
-            if stream.current.type == TOKEN_EXPRESSION:
+            if stream.current.kind == TOKEN_EXPRESSION:
                 if self.mode == Mode.LAX:
                     # Superfluous expressions inside an `else` tag are ignored.
                     stream.next_token()
                 else:
                     raise LiquidSyntaxError(
                         "found an 'else' tag expression, did you mean 'elsif'?",
-                        stream.current.linenum,
+                        token=stream.current,
                     )
             alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
 
-        if not stream.current.istag(TAG_ENDUNLESS) and self.mode == Mode.LAX:
+        if not stream.current.is_tag(TAG_ENDUNLESS) and self.mode == Mode.LAX:
             # Extraneous `else` and `elsif` blocks are ignored.
-            while stream.current.type != TOKEN_EOF:
+            while stream.current.kind != TOKEN_EOF:
                 if (
-                    stream.current.type == TOKEN_TAG
+                    stream.current.kind == TOKEN_TAG
                     and stream.current.value == TAG_ENDUNLESS
                 ):
                     break

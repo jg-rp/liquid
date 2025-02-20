@@ -40,7 +40,7 @@ class DecrementNode(ast.Node):
     def children(self) -> list[ast.ChildNode]:
         return [
             ast.ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 template_scope=[self.identifier],
             )
         ]
@@ -62,7 +62,9 @@ class DecrementTag(Tag):
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(
-                    TokenStream(tokenize(stream.current.value, stream.current.linenum))
+                    TokenStream(
+                        tokenize(stream.current.value, stream.current.start_index)
+                    )
                 )
             ),
         )

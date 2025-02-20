@@ -153,7 +153,7 @@ class IncludeNode(Node):
         block_scope: list[str] = list(self.args.keys())
         _children = [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=None,
                 expression=self.name,
                 block_scope=block_scope,
@@ -168,12 +168,12 @@ class IncludeNode(Node):
                 block_scope.append(str(self.name.value).split(".", 1)[0])
             _children.append(
                 ChildNode(
-                    linenum=self.tok.linenum,
+                    linenum=self.tok.start_index,
                     expression=self.var,
                 )
             )
         for expr in self.args.values():
-            _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
+            _children.append(ChildNode(linenum=self.tok.start_index, expression=expr))
         return _children
 
 
@@ -194,7 +194,7 @@ class IncludeTag(Tag):
         expr_stream = TokenStream(
             tokenize(
                 stream.current.value,
-                linenum=tok.linenum,
+                linenum=tok.start_index,
             )
         )
 
@@ -238,7 +238,7 @@ class IncludeTag(Tag):
                 typ = expr_stream.current[1]
                 raise LiquidSyntaxError(
                     f"expected a comma separated list of arguments, found {typ}",
-                    linenum=tok.linenum,
+                    token=tok,
                 )
 
         return self.node_class(tok, name=name, var=identifier, alias=alias, args=args)

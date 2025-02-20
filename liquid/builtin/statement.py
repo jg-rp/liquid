@@ -48,7 +48,7 @@ class StatementNode(Node):
         return None
 
     def children(self) -> list[ChildNode]:
-        return [ChildNode(linenum=self.tok.linenum, expression=self.expression)]
+        return [ChildNode(linenum=self.tok.start_index, expression=self.expression)]
 
 
 class Statement(Tag):
@@ -62,5 +62,5 @@ class Statement(Tag):
         tok = stream.current
         stream.expect(TOKEN_STATEMENT)
         return self.node_class(
-            tok, self.env.parse_filtered_expression_value(tok.value, tok.linenum)
+            tok, self.env.parse_filtered_expression_value(tok.value, tok.start_index)
         )

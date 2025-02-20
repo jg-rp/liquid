@@ -19,5 +19,5 @@ class IfNotTag(IfTag):
         """Pare a boolean expression from a stream of tokens."""
         stream.expect(TOKEN_EXPRESSION)
         return self.env.parse_boolean_expression_value_with_parens(
-            stream.current.value, stream.current.linenum
+            stream.current.value, stream.current.start_index
         )

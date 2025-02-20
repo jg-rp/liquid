@@ -1,9 +1,10 @@
 """Liquid specific Exceptions and warnings."""
 
-from pathlib import Path
 from typing import Optional
 from typing import Type
-from typing import Union
+
+from .token import TOKEN_STRING
+from .token import Token
 
 
 class Error(Exception):
@@ -12,20 +13,46 @@ class Error(Exception):
     def __init__(
         self,
         *args: object,
-        linenum: Optional[int] = None,
-        filename: Optional[Union[str, Path]] = None,
+        token: Optional[Token],
+        template_name: str | None = None,
     ):
-        self.linenum = linenum
-        self.filename = filename
         super().__init__(*args)
+        self.token = token
+        self.template_name = template_name
 
     def __str__(self) -> str:
-        msg = super().__str__()
-        if self.linenum:
-            msg = f"{msg}, on line {self.linenum}"
-        if self.filename:
-            msg += f" of {self.filename}"
-        return msg
+        return self.detailed_message()
+
+    def detailed_message(self) -> str:
+        """Return an error message formatted with extra context info."""
+        if not self.token or self.token.start_index < 0:
+            return super().__str__()
+
+        lineno, col, _prev, current, _next = self._error_context(
+            self.token.source, self.token.start_index
+        )
+
+        template_and_pos = (
+            f"{self.template_name}:{lineno}:{col}"
+            if self.template_name
+            else f"'{current}' {lineno}:{col}"
+        )
+
+        pad = " " * len(str(lineno))
+        length = len(self.token.value)
+
+        if self.token.kind == TOKEN_STRING:
+            length += 2
+
+        pointer = (" " * col) + ("^" * max(length, 1))
+
+        return (
+            f"{self.message}\n"
+            f"{pad} -> {template_and_pos}\n"
+            f"{pad} |\n"
+            f"{lineno} | {current}\n"
+            f"{pad} | {pointer} {self._pointer_message()}\n"
+        )
 
     @property
     def message(self) -> object:
@@ -34,17 +61,49 @@ class Error(Exception):
             return self.args[0]
         return None
 
-    @property
-    def name(self) -> str:
-        """The name of the template that raised this exception.
+    def _pointer_message(self) -> object:
+        return self.message
 
-        An empty string is return if a name is not available.
+    def context(self) -> tuple[int, int, str, str, str] | None:
+        """Return context information for this error.
+
+        Returns (line, col, previous line, current line, next line) or None
+        if no context information is available.
         """
-        if isinstance(self.filename, Path):
-            return self.filename.as_posix()
-        if self.filename:
-            return str(self.filename)
-        return ""
+        if self.token is None or self.token.start_index < 0:
+            return None
+        return self._error_context(self.token.source, self.token.start_index)
+
+    def _error_context(self, text: str, index: int) -> tuple[int, int, str, str, str]:
+        lines = text.splitlines(keepends=True)
+        cumulative_length = 0
+        target_line_index = -1
+
+        for i, line in enumerate(lines):
+            cumulative_length += len(line)
+            if index < cumulative_length:
+                target_line_index = i
+                break
+
+        if target_line_index == -1:
+            raise ValueError("index is out of bounds for the given string")
+
+        # Line number (1-based)
+        line_number = target_line_index + 1
+        # Column number within the line
+        column_number = index - (cumulative_length - len(lines[target_line_index]))
+
+        previous_line = (
+            lines[target_line_index - 1].rstrip() if target_line_index > 0 else ""
+        )
+        current_line = lines[target_line_index].rstrip()
+        next_line = (
+            lines[target_line_index + 1].rstrip()
+            if target_line_index < len(lines) - 1
+            else ""
+        )
+
+        return line_number, column_number, previous_line, current_line, next_line
 
 
 class LiquidInterrupt(Exception):
@@ -67,30 +126,12 @@ class LiquidEnvironmentError(Error):
 class LiquidSyntaxError(Error):
     """Exception raised when there is a parser error."""
 
-    def __init__(
-        self,
-        *args: object,
-        linenum: Optional[int] = None,
-        filename: Optional[Union[str, Path]] = None,
-    ):
-        super().__init__(*args, linenum=linenum, filename=filename)
-        self.source: Optional[str] = None
-
 
 class TemplateInheritanceError(Error):
     """An exceptions raised when template inheritance tags are used incorrectly.
 
     This could occur when parsing a template or at render time.
     """
-
-    def __init__(
-        self,
-        *args: object,
-        linenum: Optional[int] = None,
-        filename: Optional[Union[str, Path]] = None,
-    ):
-        super().__init__(*args, linenum=linenum, filename=filename)
-        self.source: Optional[str] = None
 
 
 class RequiredBlockError(TemplateInheritanceError):

@@ -66,7 +66,7 @@ class MockChildNode(MockNode):
     """Mock AST node."""
 
     def children(self) -> list[ChildNode]:
-        return [ChildNode(self.tok.linenum, expression=MockExpression())]
+        return [ChildNode(self.tok.start_index, expression=MockExpression())]
 
 
 class MockChildTag(MockTag):

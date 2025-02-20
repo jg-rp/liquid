@@ -1,8 +1,9 @@
 """Test cases for representing an Identifier as a tuple."""
+
 from unittest import TestCase
 
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 
 
 class IdentifierAsTupleTestCase(TestCase):
@@ -10,15 +11,15 @@ class IdentifierAsTupleTestCase(TestCase):
 
     def test_simple_variable(self):
         """Test that we can represent a simple variable as a tuple."""
-        ident = Identifier(path=[IdentifierPathElement("some")])
+        ident = Identifier(path=[Segment("some")])
         self.assertEqual(ident.as_tuple(), ("some",))
 
     def test_dotted_variable(self):
         """Test that we can represent a dotted variable as a tuple."""
         ident = Identifier(
             path=[
-                IdentifierPathElement("some"),
-                IdentifierPathElement("thing"),
+                Segment("some"),
+                Segment("thing"),
             ]
         )
         self.assertEqual(ident.as_tuple(), ("some", "thing"))
@@ -27,8 +28,8 @@ class IdentifierAsTupleTestCase(TestCase):
         """Test that we can represent a bracketed variable as a tuple."""
         ident = Identifier(
             path=[
-                IdentifierPathElement("some"),
-                IdentifierPathElement("other.thing"),
+                Segment("some"),
+                Segment("other.thing"),
             ]
         )
         self.assertEqual(ident.as_tuple(), ("some", "other.thing"))
@@ -37,20 +38,20 @@ class IdentifierAsTupleTestCase(TestCase):
         """Test that we can represent nested variables as a tuple."""
         ident = Identifier(
             path=[
-                IdentifierPathElement("some"),
+                Segment("some"),
                 Identifier(
                     path=[
-                        IdentifierPathElement("foo"),
-                        IdentifierPathElement("bar"),
+                        Segment("foo"),
+                        Segment("bar"),
                         Identifier(
                             path=[
-                                IdentifierPathElement("a"),
-                                IdentifierPathElement("b"),
+                                Segment("a"),
+                                Segment("b"),
                             ]
                         ),
                     ]
                 ),
-                IdentifierPathElement("other.thing"),
+                Segment("other.thing"),
             ]
         )
         self.assertEqual(

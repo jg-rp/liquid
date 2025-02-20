@@ -38,10 +38,10 @@ class Node(ABC):
     def raise_for_disabled(self, disabled_tags: Collection[str]) -> None:
         """Raise a DisabledTagError if this node's type is in the given list."""
         tok = self.token()
-        if tok.type == TOKEN_TAG and tok.value in disabled_tags:
+        if tok.kind == TOKEN_TAG and tok.value in disabled_tags:
             raise DisabledTagError(
                 f"{tok.value} usage is not allowed in this context",
-                linenum=tok.linenum,
+                linenum=tok.start_index,
             )
 
     def render(self, context: RenderContext, buffer: TextIO) -> Optional[bool]:
@@ -199,7 +199,7 @@ class BlockNode(Node):
     def children(self) -> list["ChildNode"]:
         return [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=stmt,
             )
             for stmt in self.statements
@@ -239,7 +239,7 @@ class ConditionalBlockNode(Node):
     def children(self) -> list["ChildNode"]:
         return [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=self.block,
                 expression=self.condition,
             )

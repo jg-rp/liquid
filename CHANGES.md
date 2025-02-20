@@ -7,11 +7,27 @@
 - Renamed `liquid.Context` to `liquid.RenderContext`.
 - Change the `liquid.RenderContext` constructor (previously `liquid.Context`) to require an instance of `BoundTemplate` as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
 - Renamed `VariableCaptureContext` to `CaptureRenderContext`.
+- Changed `liquid.token.Token` to be a named tuple of (kind, value, index, source). It used to be (linenum, type, value).
 - Removed legacy expression parsing functions. If you're importing anything from `liquid.parse` for your custom tags, you'll need to use functions from `liquid.expressions` instead.
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
 - Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.
 - All tokens are now named tuples. Previously functions in `liquid.expressions` would generate and use plain tuples internally.
 - We now depend on markupsafe>=3. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
+
+### Tag expression parsing migration
+
+`parse_common_expression(stream)` -> `parse_primitive(stream)`
+`tokenize_common_expression(str, linenum)` -> TODO
+`parse_identifier(stream)` -> `Path.parse(stream)`
+`parse_unchained_identifier(stream)` -> `parse_identifier(stream)`
+`parse_string_or_identifier` -> unchanged
+`parse_boolean` -> removed, use `parse_primitive` instead
+`parse_nil` -> removed, use `parse_primitive` instead
+`parse_empty` -> removed, use `parse_primitive` instead
+`parse_blank` -> removed, use `parse_primitive` instead
+`parse_string_literal` -> removed, use `parse_primitive` instead
+`parse_integer_literal` -> removed, use `parse_primitive` instead
+`parse_float_literal` -> removed, use `parse_primitive` instead
 
 **Features**
 

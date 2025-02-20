@@ -16,6 +16,7 @@ from typing import Iterator
 from typing import Pattern
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_LITERAL
@@ -99,32 +100,41 @@ def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
 def _tokenize_liquid_expression(
     source: str,
     rules: Pattern[str],
-    line_count: int = 1,
+    token: Token,
     comment_start_string: str = "",
 ) -> Iterator[Token]:
-    """Tokenize a "liquid" tag expression."""
+    """Tokenize a "{% liquid %}" tag."""
     for match in rules.finditer(source):
         kind = match.lastgroup
         assert kind is not None
 
-        line_num = line_count
         value = match.group()
-        line_count += value.count("\n")
 
         if kind == "LIQUID_EXPR":
             name = match.group("name")
             if name == comment_start_string:
                 continue
 
-            yield Token(line_num, TOKEN_TAG, name)
+            yield Token(
+                TOKEN_TAG,
+                value=name,
+                start_index=token.start_index + match.start(),
+                source=token.source,
+            )
 
             if match.group("expr"):
-                yield Token(line_num, TOKEN_EXPRESSION, match.group("expr"))
+                yield Token(
+                    TOKEN_EXPRESSION,
+                    value=match.group("expr"),
+                    start_index=token.start_index + match.start(),
+                    source=token.source,
+                )
         elif kind == "SKIP":
             continue
         else:
             raise LiquidSyntaxError(
-                f"expected newline delimited tag expressions, found {value!r}"
+                f"expected newline delimited tag expressions, found {value!r}",
+                token=token,
             )
 
 
@@ -166,16 +176,13 @@ tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string=""
 
 
 def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
-    line_count = 1
     lstrip = False
 
     for match in rules.finditer(source):
         kind = match.lastgroup
         assert kind is not None
 
-        line_num = line_count
         value = match.group()
-        line_count += value.count("\n")
 
         if kind == TOKEN_STATEMENT:
             value = match.group("stmt")
@@ -183,12 +190,15 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
         elif kind == "TAG":
             name = match.group("name")
-            yield Token(line_num, TOKEN_TAG, name)
+            yield Token(
+                kind=TOKEN_TAG,
+                value=name,
+                start_index=match.start(),
+                source=source,
+            )
 
             kind = TOKEN_EXPRESSION
             value = match.group("expr")
-            # Need to count newlines before and after the tag name.
-            line_num += match.group("pre").count("\n")
             lstrip = bool(match.group("rst"))
 
             if not value:
@@ -214,14 +224,26 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
             if value.startswith(r"{{"):
                 raise LiquidSyntaxError(
-                    "expected '}}', found 'eof'", linenum=line_count
+                    "expected '}}', found 'eof'",
+                    token=Token(
+                        TOKEN_EOF,
+                        value=match.group(),
+                        start_index=match.start(),
+                        source=source,
+                    ),
                 )
             if value.startswith(r"{%"):
                 raise LiquidSyntaxError(
-                    "expected '%}', found 'eof'", linenum=line_count
+                    "expected '%}', found 'eof'",
+                    token=Token(
+                        TOKEN_EOF,
+                        value=match.group(),
+                        start_index=match.start(),
+                        source=source,
+                    ),
                 )
 
-        yield Token(line_num, kind, value)
+        yield Token(kind, value, start_index=match.start(), source=source)
 
 
 @lru_cache(maxsize=128)

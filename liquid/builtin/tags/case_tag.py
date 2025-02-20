@@ -110,7 +110,7 @@ class CaseNode(ast.Node):
     def children(self) -> list[ast.ChildNode]:
         _children = [
             ast.ChildNode(
-                linenum=alt.tok.linenum,
+                linenum=alt.tok.start_index,
                 node=alt.block,
                 expression=alt.condition,
             )
@@ -119,7 +119,7 @@ class CaseNode(ast.Node):
         if self.default:
             _children.append(
                 ast.ChildNode(
-                    linenum=self.default.tok.linenum,
+                    linenum=self.default.tok.start_index,
                     node=self.default,
                     expression=None,
                 )
@@ -145,19 +145,21 @@ class CaseTag(Tag):
 
         # Parse the case expression.
         stream.expect(TOKEN_EXPRESSION)
-        case = self._parse_case_expression(stream.current.value, stream.current.linenum)
+        case = self._parse_case_expression(
+            stream.current.value, stream.current.start_index
+        )
         stream.next_token()
 
         # Eat whitespace or junk between `case` and when/else/endcase
         while (
-            stream.current.type != TOKEN_TAG
+            stream.current.kind != TOKEN_TAG
             and stream.current.value not in ENDWHENBLOCK
         ):
             stream.next_token()
 
         whens: list[ast.ConditionalBlockNode] = []
 
-        while stream.current.istag(TAG_WHEN):
+        while stream.current.is_tag(TAG_WHEN):
             when_tok = stream.current
             stream.next_token()  # Eat WHEN
             stream.expect(TOKEN_EXPRESSION)
@@ -166,7 +168,7 @@ class CaseTag(Tag):
             when_exprs = [
                 BooleanExpression(InfixExpression(case, "==", expr))
                 for expr in self._parse_when_expression(
-                    stream.current.value, stream.current.linenum
+                    stream.current.value, stream.current.start_index
                 )
             ]
 
@@ -184,7 +186,7 @@ class CaseTag(Tag):
 
         default: Optional[ast.BlockNode] = None
 
-        if stream.current.istag(TAG_ELSE):
+        if stream.current.is_tag(TAG_ELSE):
             stream.next_token()
             default = self.parser.parse_block(stream, ENDCASEBLOCK)
 

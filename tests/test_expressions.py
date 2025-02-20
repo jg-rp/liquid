@@ -9,7 +9,7 @@ from liquid.expression import BLANK
 from liquid.expression import CONTINUE
 from liquid.expression import NIL
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
@@ -72,5 +72,5 @@ class HashExpressionTestCase(TestCase):
 
     def test_hash_identifier(self) -> None:
         """Test that range identifiers are hashable."""
-        ident = Identifier([IdentifierPathElement(0)])
+        ident = Identifier([Segment(0)])
         hash(ident)

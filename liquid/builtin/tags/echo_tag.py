@@ -11,6 +11,7 @@ from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
+from liquid.token import Token
 
 TAG_ECHO = sys.intern("echo")
 
@@ -29,7 +30,7 @@ class EchoTag(Tag):
     block = False
     node_class = EchoNode
 
-    def _parse_expression(self, value: str, linenum: int) -> Expression:
+    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
         return self.env.parse_filtered_expression_value(value, linenum)
 
     def parse(self, stream: TokenStream) -> Node:  # noqa: D102
@@ -37,9 +38,9 @@ class EchoTag(Tag):
         tok = stream.current
         stream.next_token()
 
-        if stream.current.type == TOKEN_EOF:
+        if stream.current.kind == TOKEN_EOF:
             expr: Expression = NIL
         else:
             stream.expect(TOKEN_EXPRESSION)
-            expr = self._parse_expression(stream.current.value, tok.linenum)
+            expr = self._parse_expression(stream.current.value, tok)
         return self.node_class(tok, expression=expr)

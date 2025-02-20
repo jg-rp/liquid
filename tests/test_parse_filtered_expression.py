@@ -10,7 +10,7 @@ from liquid.expression import Filter
 from liquid.expression import FilteredExpression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import InfixExpression
 from liquid.expression import IntegerLiteral
 from liquid.expression import PrefixExpression
@@ -109,13 +109,13 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
                 expression=RangeLiteral(
                     Identifier(
                         path=[
-                            IdentifierPathElement("a"),
+                            Segment("a"),
                         ]
                     ),
                     Identifier(
                         path=[
-                            IdentifierPathElement("b"),
-                            IdentifierPathElement("c"),
+                            Segment("b"),
+                            Segment("c"),
                         ]
                     ),
                 ),
@@ -127,7 +127,7 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             "collection",
             FilteredExpression(
                 expression=Identifier(
-                    path=[IdentifierPathElement("collection")],
+                    path=[Segment("collection")],
                 ),
                 filters=[],
             ),
@@ -138,8 +138,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                     ],
                 ),
                 filters=[],
@@ -151,8 +151,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                     ],
                 ),
                 filters=[],
@@ -164,9 +164,9 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
-                        IdentifierPathElement(0),
+                        Segment("collection"),
+                        Segment("products"),
+                        Segment(0),
                     ],
                 ),
                 filters=[],
@@ -178,9 +178,9 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
-                        IdentifierPathElement("title"),
+                        Segment("collection"),
+                        Segment("products"),
+                        Segment("title"),
                     ],
                 ),
                 filters=[],
@@ -192,8 +192,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                     ],
                 ),
                 filters=[],
@@ -205,9 +205,9 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
-                        IdentifierPathElement(0),
+                        Segment("collection"),
+                        Segment("products"),
+                        Segment(0),
                     ],
                 ),
                 filters=[],
@@ -219,10 +219,10 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                         Identifier(
-                            path=[IdentifierPathElement("i")],
+                            path=[Segment("i")],
                         ),
                     ],
                 ),
@@ -235,13 +235,13 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                         Identifier(
                             path=[
-                                IdentifierPathElement("some"),
-                                IdentifierPathElement("object"),
-                                IdentifierPathElement("count"),
+                                Segment("some"),
+                                Segment("object"),
+                                Segment("count"),
                             ],
                         ),
                     ],
@@ -255,12 +255,12 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("linklists"),
+                        Segment("linklists"),
                         Identifier(
                             path=[
-                                IdentifierPathElement("section"),
-                                IdentifierPathElement("settings"),
-                                IdentifierPathElement("menu"),
+                                Segment("section"),
+                                Segment("settings"),
+                                Segment("menu"),
                             ],
                         ),
                     ],
@@ -277,15 +277,15 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("linklists"),
+                        Segment("linklists"),
                         Identifier(
                             path=[
-                                IdentifierPathElement("section"),
-                                IdentifierPathElement("settings"),
-                                IdentifierPathElement("menu"),
+                                Segment("section"),
+                                Segment("settings"),
+                                Segment("menu"),
                             ],
                         ),
-                        IdentifierPathElement("links"),
+                        Segment("links"),
                     ],
                 ),
                 filters=[],
@@ -313,8 +313,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("title"),
+                        Segment("collection"),
+                        Segment("title"),
                     ],
                 ),
                 filters=[Filter(name="upcase", args=[])],
@@ -355,8 +355,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
                         args=[
                             Identifier(
                                 path=[
-                                    IdentifierPathElement("collection"),
-                                    IdentifierPathElement("title"),
+                                    Segment("collection"),
+                                    Segment("title"),
                                 ],
                             )
                         ],
@@ -419,8 +419,8 @@ class ParseFilteredExpressionTestCase(unittest.TestCase):
             FilteredExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("products"),
-                        IdentifierPathElement(-1),
+                        Segment("products"),
+                        Segment(-1),
                     ],
                 ),
                 filters=[],
@@ -544,12 +544,12 @@ class ParseConditionalExpressionTestCase(unittest.TestCase):
                 expression=FilteredExpression(
                     Identifier(
                         path=[
-                            IdentifierPathElement("products"),
-                            IdentifierPathElement(0),
+                            Segment("products"),
+                            Segment(0),
                         ]
                     )
                 ),
-                condition=Identifier(path=[IdentifierPathElement("products")]),
+                condition=Identifier(path=[Segment("products")]),
                 alternative=FilteredExpression(StringLiteral("bar")),
             ),
         ),

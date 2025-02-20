@@ -164,7 +164,7 @@ class BoundTemplate:
                     if not partial or block_scope:
                         self.env.error(
                             LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().linenum
+                                f"unexpected '{err}'", linenum=node.token().start_index
                             )
                         )
                     else:
@@ -173,7 +173,7 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().linenum)
+                    self.env.error(err, linenum=node.token().start_index)
 
     async def render_with_context_async(
         self,
@@ -201,7 +201,7 @@ class BoundTemplate:
                     if not partial or block_scope:
                         self.env.error(
                             LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().linenum
+                                f"unexpected '{err}'", linenum=node.token().start_index
                             )
                         )
                     else:
@@ -210,7 +210,7 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().linenum)
+                    self.env.error(err, linenum=node.token().start_index)
 
     @property
     def is_up_to_date(self) -> bool:

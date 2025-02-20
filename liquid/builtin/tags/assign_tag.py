@@ -50,7 +50,7 @@ class AssignNode(Node):
     def children(self) -> list[ChildNode]:
         return [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 expression=self.expression,
                 template_scope=[self.expression.name],
             )
@@ -64,7 +64,7 @@ class AssignTag(Tag):
     block = False
     node_class = AssignNode
 
-    def _parse_expression(self, value: str, linenum: int) -> Expression:
+    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
         return self.env.parse_filtered_expression_value(value, linenum)
 
     def parse(self, stream: TokenStream) -> AssignNode:
@@ -78,13 +78,13 @@ class AssignTag(Tag):
         else:
             raise LiquidSyntaxError(
                 f'invalid assignment expression "{stream.current.value}"',
-                linenum=stream.current.linenum,
+                token=stream.current,
             )
 
         return self.node_class(
             tok,
             AssignmentExpression(
                 name,
-                self._parse_expression(right, stream.current.linenum),
+                self._parse_expression(right, stream.current),
             ),
         )

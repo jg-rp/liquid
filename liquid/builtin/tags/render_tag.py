@@ -210,7 +210,7 @@ class RenderNode(Node):
         block_scope: list[str] = list(self.args.keys())
         _children = [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=None,
                 expression=self.name,
                 block_scope=block_scope,
@@ -225,12 +225,12 @@ class RenderNode(Node):
                 block_scope.append(str(self.name.value).split(".", 1)[0])
             _children.append(
                 ChildNode(
-                    linenum=self.tok.linenum,
+                    linenum=self.tok.start_index,
                     expression=self.var,
                 )
             )
         for expr in self.args.values():
-            _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
+            _children.append(ChildNode(linenum=self.tok.start_index, expression=expr))
         return _children
 
 
@@ -248,7 +248,7 @@ class RenderTag(Tag):
         tok = next(stream)
         stream.expect(TOKEN_EXPRESSION)
         expr_stream = TokenStream(
-            tokenize(stream.current.value, stream.current.linenum)
+            tokenize(stream.current.value, stream.current.start_index)
         )
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
@@ -294,7 +294,7 @@ class RenderTag(Tag):
                 typ = expr_stream.current[1]
                 raise LiquidSyntaxError(
                     f"expected a comma separated list of arguments, found {typ}",
-                    linenum=tok.linenum,
+                    token=tok,
                 )
 
         return self.node_class(

@@ -8,7 +8,7 @@ from liquid.expression import BooleanExpression
 from liquid.expression import Expression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import InfixExpression
 from liquid.expression import IntegerLiteral
 from liquid.expression import PrefixExpression
@@ -66,7 +66,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             "collection",
             BooleanExpression(
                 expression=Identifier(
-                    path=[IdentifierPathElement("collection")],
+                    path=[Segment("collection")],
                 ),
             ),
         ),
@@ -76,8 +76,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             BooleanExpression(
                 expression=Identifier(
                     path=[
-                        IdentifierPathElement("collection"),
-                        IdentifierPathElement("products"),
+                        Segment("collection"),
+                        Segment("products"),
                     ],
                 ),
             ),
@@ -136,8 +136,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expression=InfixExpression(
                     left=Identifier(
                         path=[
-                            IdentifierPathElement("user"),
-                            IdentifierPathElement("age"),
+                            Segment("user"),
+                            Segment("age"),
                         ],
                     ),
                     operator=">",
@@ -151,7 +151,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             BooleanExpression(
                 expression=InfixExpression(
                     left=Identifier(
-                        path=[IdentifierPathElement("age")],
+                        path=[Segment("age")],
                     ),
                     operator="<",
                     right=IntegerLiteral(18),
@@ -164,7 +164,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             BooleanExpression(
                 expression=InfixExpression(
                     left=Identifier(
-                        path=[IdentifierPathElement("age")],
+                        path=[Segment("age")],
                     ),
                     operator="<=",
                     right=IntegerLiteral(18),
@@ -177,7 +177,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
             BooleanExpression(
                 expression=InfixExpression(
                     left=Identifier(
-                        path=[IdentifierPathElement("age")],
+                        path=[Segment("age")],
                     ),
                     operator=">=",
                     right=IntegerLiteral(18),
@@ -202,8 +202,8 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expression=InfixExpression(
                     left=Identifier(
                         path=[
-                            IdentifierPathElement("product"),
-                            IdentifierPathElement("tags"),
+                            Segment("product"),
+                            Segment("tags"),
                         ],
                     ),
                     operator="contains",
@@ -218,7 +218,7 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expression=InfixExpression(
                     left=Identifier(
                         path=[
-                            IdentifierPathElement("foo"),
+                            Segment("foo"),
                         ],
                     ),
                     operator="==",
@@ -236,9 +236,9 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expression=InfixExpression(
                     left=Identifier(
                         path=[
-                            IdentifierPathElement("users"),
-                            IdentifierPathElement(0),
-                            IdentifierPathElement("age"),
+                            Segment("users"),
+                            Segment(0),
+                            Segment("age"),
                         ],
                     ),
                     operator=">",
@@ -253,9 +253,9 @@ class ParseBooleanExpressionTestCase(unittest.TestCase):
                 expression=InfixExpression(
                     left=Identifier(
                         path=[
-                            IdentifierPathElement("users"),
-                            IdentifierPathElement(0),
-                            IdentifierPathElement("age"),
+                            Segment("users"),
+                            Segment(0),
+                            Segment("age"),
                         ],
                     ),
                     operator=">",

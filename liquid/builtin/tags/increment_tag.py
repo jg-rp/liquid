@@ -39,7 +39,9 @@ class IncrementNode(Node):
         return True
 
     def children(self) -> list[ChildNode]:
-        return [ChildNode(linenum=self.tok.linenum, template_scope=[self.identifier])]
+        return [
+            ChildNode(linenum=self.tok.start_index, template_scope=[self.identifier])
+        ]
 
 
 class IncrementTag(Tag):
@@ -58,7 +60,9 @@ class IncrementTag(Tag):
             tok=tok,
             identifier=str(
                 parse_unchained_identifier(
-                    TokenStream(tokenize(stream.current.value, stream.current.linenum))
+                    TokenStream(
+                        tokenize(stream.current.value, stream.current.start_index)
+                    )
                 )
             ),
         )

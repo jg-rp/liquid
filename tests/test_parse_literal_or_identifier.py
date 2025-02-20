@@ -9,7 +9,7 @@ from liquid.expression import NIL
 from liquid.expression import TRUE
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import RangeLiteral
 from liquid.expression import StringLiteral
@@ -124,11 +124,11 @@ class ParseLiteralOrIdentifierTestCase(unittest.TestCase):
             rv,
             Identifier(
                 [
-                    IdentifierPathElement("a"),
-                    IdentifierPathElement("b"),
-                    IdentifierPathElement(1),
-                    IdentifierPathElement("c"),
-                    IdentifierPathElement("foo"),
+                    Segment("a"),
+                    Segment("b"),
+                    Segment(1),
+                    Segment("c"),
+                    Segment("foo"),
                 ]
             ),
         )
@@ -144,13 +144,13 @@ class ParseLiteralOrIdentifierTestCase(unittest.TestCase):
             rv,
             Identifier(
                 [
-                    IdentifierPathElement("a"),
-                    IdentifierPathElement("b"),
+                    Segment("a"),
+                    Segment("b"),
                     Identifier(
                         [
-                            IdentifierPathElement("c"),
-                            IdentifierPathElement("d"),
-                            IdentifierPathElement(1),
+                            Segment("c"),
+                            Segment("d"),
+                            Segment(1),
                         ]
                     ),
                 ]
@@ -168,9 +168,9 @@ class ParseLiteralOrIdentifierTestCase(unittest.TestCase):
             rv,
             Identifier(
                 [
-                    IdentifierPathElement("a"),
-                    IdentifierPathElement("b"),
-                    IdentifierPathElement(1),
+                    Segment("a"),
+                    Segment("b"),
+                    Segment(1),
                 ]
             ),
         )

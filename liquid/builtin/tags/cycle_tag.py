@@ -86,9 +86,11 @@ class CycleNode(Node):
     def children(self) -> list[ChildNode]:
         _children: list[ChildNode] = []
         if self.group:
-            _children.append(ChildNode(linenum=self.tok.linenum, expression=self.group))
+            _children.append(
+                ChildNode(linenum=self.tok.start_index, expression=self.group)
+            )
         for arg in self.args:
-            _children.append(ChildNode(linenum=self.tok.linenum, expression=arg))
+            _children.append(ChildNode(linenum=self.tok.start_index, expression=arg))
         return _children
 
 
@@ -114,7 +116,7 @@ class CycleTag(Tag):
     def parse(self, stream: TokenStream) -> CycleNode:
         tok = next(stream)
         stream.expect(TOKEN_EXPRESSION)
-        tokens = tokenize(stream.current.value, linenum=tok.linenum)
+        tokens = tokenize(stream.current.value, linenum=tok.start_index)
         group_name: Optional[Expression] = None
 
         parts = list(split_at_first_colon(tokens))
@@ -135,7 +137,7 @@ class CycleTag(Tag):
             else:
                 raise LiquidSyntaxError(
                     f"expected a comma separated list of arguments, found {typ}",
-                    linenum=expr_stream.current[0],
+                    token=expr_stream.current,
                 )
 
         return self.node_class(tok, group_name, args)

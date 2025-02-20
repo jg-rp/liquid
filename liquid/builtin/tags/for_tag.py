@@ -260,7 +260,7 @@ class ForNode(Node):
     def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
-                linenum=self.block.tok.linenum,
+                linenum=self.block.tok.start_index,
                 node=self.block,
                 expression=self.expression,
                 block_scope=[self.expression.name, "forloop"],
@@ -269,7 +269,7 @@ class ForNode(Node):
         if self.default:
             _children.append(
                 ChildNode(
-                    linenum=self.default.tok.linenum,
+                    linenum=self.default.tok.start_index,
                     node=self.default,
                 )
             )
@@ -337,14 +337,14 @@ class ForTag(Tag):
         stream.expect(TOKEN_EXPRESSION)
         expr = self.env.parse_loop_expression_value(
             stream.current.value,
-            stream.current.linenum,
+            stream.current.start_index,
         )
         stream.next_token()
 
         block = parser.parse_block(stream, ENDFORBLOCK)
         default: Optional[BlockNode] = None
 
-        if stream.current.istag(TAG_ELSE):
+        if stream.current.is_tag(TAG_ELSE):
             stream.next_token()
             default = parser.parse_block(stream, ENDFORELSEBLOCK)
 

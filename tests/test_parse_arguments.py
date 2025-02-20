@@ -13,7 +13,7 @@ from liquid.expression import TRUE
 from liquid.expression import Expression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import IdentifierPathElement
+from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import StringLiteral
 from liquid.expressions import parse_call_arguments
@@ -103,13 +103,13 @@ class ParseKeywordArgumentsTestCase(unittest.TestCase):
                     "c: products[0], d: products['foo'].title"
                 ),
                 expect=[
-                    ("a", Identifier([IdentifierPathElement("title")])),
+                    ("a", Identifier([Segment("title")])),
                     (
                         "b",
                         Identifier(
                             [
-                                IdentifierPathElement("product"),
-                                IdentifierPathElement("title"),
+                                Segment("product"),
+                                Segment("title"),
                             ]
                         ),
                     ),
@@ -117,8 +117,8 @@ class ParseKeywordArgumentsTestCase(unittest.TestCase):
                         "c",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement(0),
+                                Segment("products"),
+                                Segment(0),
                             ]
                         ),
                     ),
@@ -126,9 +126,9 @@ class ParseKeywordArgumentsTestCase(unittest.TestCase):
                         "d",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement("foo"),
-                                IdentifierPathElement("title"),
+                                Segment("products"),
+                                Segment("foo"),
+                                Segment("title"),
                             ]
                         ),
                     ),
@@ -233,13 +233,13 @@ class ParseCallArgumentsTestCase(unittest.TestCase):
                     "a: title, b: product.title, c: products[0], d: products[0].title"
                 ),
                 expect=[
-                    ("a", Identifier([IdentifierPathElement("title")])),
+                    ("a", Identifier([Segment("title")])),
                     (
                         "b",
                         Identifier(
                             [
-                                IdentifierPathElement("product"),
-                                IdentifierPathElement("title"),
+                                Segment("product"),
+                                Segment("title"),
                             ]
                         ),
                     ),
@@ -247,8 +247,8 @@ class ParseCallArgumentsTestCase(unittest.TestCase):
                         "c",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement(0),
+                                Segment("products"),
+                                Segment(0),
                             ]
                         ),
                     ),
@@ -256,9 +256,9 @@ class ParseCallArgumentsTestCase(unittest.TestCase):
                         "d",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement(0),
-                                IdentifierPathElement("title"),
+                                Segment("products"),
+                                Segment(0),
+                                Segment("title"),
                             ]
                         ),
                     ),
@@ -374,13 +374,13 @@ class ParseMacroArgumentsTestCase(unittest.TestCase):
                     "a: title, b: product.title, c: products[0], d: products[0].title"
                 ),
                 expect=[
-                    ("a", Identifier([IdentifierPathElement("title")])),
+                    ("a", Identifier([Segment("title")])),
                     (
                         "b",
                         Identifier(
                             [
-                                IdentifierPathElement("product"),
-                                IdentifierPathElement("title"),
+                                Segment("product"),
+                                Segment("title"),
                             ]
                         ),
                     ),
@@ -388,8 +388,8 @@ class ParseMacroArgumentsTestCase(unittest.TestCase):
                         "c",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement(0),
+                                Segment("products"),
+                                Segment(0),
                             ]
                         ),
                     ),
@@ -397,9 +397,9 @@ class ParseMacroArgumentsTestCase(unittest.TestCase):
                         "d",
                         Identifier(
                             [
-                                IdentifierPathElement("products"),
-                                IdentifierPathElement(0),
-                                IdentifierPathElement("title"),
+                                Segment("products"),
+                                Segment(0),
+                                Segment("title"),
                             ]
                         ),
                     ),

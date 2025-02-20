@@ -88,8 +88,8 @@ class TagAnalysis:
         """Map tag names to their locations, similar to `Template.analyze` etc."""
         tags = defaultdict(list)
         for token in tokens:
-            if token.type == TOKEN_TAG:
-                tags[token.value].append((self.template_name, token.linenum))
+            if token.kind == TOKEN_TAG:
+                tags[token.value].append((self.template_name, token.start_index))
         return dict(tags)
 
     def _audit_tags(  # noqa: PLR0912
@@ -106,7 +106,7 @@ class TagAnalysis:
         end_tags = {
             token.value
             for token in tokens
-            if token.type == TOKEN_TAG and token.value.startswith("end")
+            if token.kind == TOKEN_TAG and token.value.startswith("end")
         }
 
         # Infer which tags are block tags. This may or may not match what the
@@ -129,7 +129,7 @@ class TagAnalysis:
         }
 
         for token in tokens:
-            if token.type != TOKEN_TAG:
+            if token.kind != TOKEN_TAG:
                 continue
 
             tag_name = token.value
@@ -141,7 +141,7 @@ class TagAnalysis:
                 if start_block_tag != tag_name[3:]:
                     # if start_block_tag.name not in inline_tags:
                     unclosed_tags[start_block_tag.name].append(
-                        (self.template_name, start_block_tag.token.linenum)
+                        (self.template_name, start_block_tag.token.start_index)
                     )
                 continue
 
@@ -150,18 +150,22 @@ class TagAnalysis:
                 enclosing_tags: Iterable[str] = self._inner_tags.get(tag_name, [])
                 if not enclosing_tags:
                     # Not an inner tag for any block.
-                    unknown_tags[tag_name].append((self.template_name, token.linenum))
+                    unknown_tags[tag_name].append(
+                        (self.template_name, token.start_index)
+                    )
                 elif not self._valid_inner_tag(
                     self._inner_tags.get(tag_name, []), block_stack
                 ):
                     # An inner tag, but not valid for any blocks currently on the stack.
                     unexpected_tags[tag_name].append(
-                        (self.template_name, token.linenum)
+                        (self.template_name, token.start_index)
                     )
 
         # Catch any unclosed tags.
         for block in block_stack:
-            unclosed_tags[block.name].append((self.template_name, block.token.linenum))
+            unclosed_tags[block.name].append(
+                (self.template_name, block.token.start_index)
+            )
 
         # Catch bad "end" tags.
         for tag_name, locations in self.all_tags.items():

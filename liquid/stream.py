@@ -44,7 +44,7 @@ class TokenStream:
 
         def __next__(self) -> Token:
             tok = self.stream.current
-            if tok.type is TOKEN_EOF:
+            if tok.kind is TOKEN_EOF:
                 self.stream.close()
                 raise StopIteration
             next(self.stream)
@@ -57,7 +57,7 @@ class TokenStream:
         tok = self.current
         if self._pushed:
             self.current = self._pushed.popleft()
-        elif self.current.type is not TOKEN_EOF:
+        elif self.current.kind is not TOKEN_EOF:
             try:
                 self.current = next(self.iter)
             except StopIteration:
@@ -93,8 +93,8 @@ class TokenStream:
         self.current = Token(0, TOKEN_EOF, "")
 
     def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> None:
-        if tok.type != typ or (value is not None and tok.value != value):
-            _typ = reverse_operators.get(tok.type, tok.type)
+        if tok.kind != typ or (value is not None and tok.value != value):
+            _typ = reverse_operators.get(tok.kind, tok.kind)
             _expected_typ = reverse_operators.get(typ, typ)
             if value is not None:
                 msg = (
@@ -103,7 +103,7 @@ class TokenStream:
                 )
             else:
                 msg = f"expected '{_expected_typ}', found '{_typ}'"
-            raise LiquidSyntaxError(msg, linenum=tok.linenum)
+            raise LiquidSyntaxError(msg, linenum=tok.start_index)
 
     def expect(self, typ: str, value: Optional[str] = None) -> None:
         """Check the current token in the stream matches the given type and value.

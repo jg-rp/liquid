@@ -12,6 +12,7 @@ from liquid.builtin.tags.echo_tag import EchoTag
 from liquid.expression import Expression
 from liquid.stream import TokenStream
 from liquid.token import TOKEN_STATEMENT
+from liquid.token import Token
 
 # ruff: noqa: D102 D205
 
@@ -25,7 +26,7 @@ class InlineIfStatement(Statement):
         tok = stream.current
         stream.expect(TOKEN_STATEMENT)
         return StatementNode(
-            tok, self.env.parse_conditional_expression_value(tok.value, tok.linenum)
+            tok, self.env.parse_conditional_expression_value(tok.value, tok.start_index)
         )
 
 
@@ -34,7 +35,7 @@ class InlineIfAssignTag(AssignTag):
     inline `if` expressions.
     """
 
-    def _parse_expression(self, value: str, linenum: int) -> Expression:
+    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
         return self.env.parse_conditional_expression_value(value, linenum)
 
 
@@ -59,7 +60,7 @@ class InlineIfStatementWithParens(Statement):
         return StatementNode(
             tok,
             self.env.parse_conditional_expression_value_with_parens(
-                tok.value, tok.linenum
+                tok.value, tok.start_index
             ),
         )
 
@@ -70,7 +71,7 @@ class InlineIfAssignTagWithParens(AssignTag):
     terms with parentheses.
     """
 
-    def _parse_expression(self, value: str, linenum: int) -> Expression:
+    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
         return self.env.parse_conditional_expression_value_with_parens(value, linenum)
 
 
@@ -80,5 +81,5 @@ class InlineIfEchoTagWithParens(EchoTag):
     terms with parentheses.
     """
 
-    def _parse_expression(self, value: str, linenum: int) -> Expression:
+    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
         return self.env.parse_conditional_expression_value_with_parens(value, linenum)

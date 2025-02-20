@@ -43,11 +43,11 @@ class Parser:
 
         # TODO: factor in parse_statement
         # TODO: benchmark with local tag vars
-        while stream.current.type != TOKEN_EOF:
+        while stream.current.kind != TOKEN_EOF:
             try:
                 statements.append(self.parse_statement(stream))
             except Error as err:
-                self.env.error(err, linenum=stream.current.linenum)
+                self.env.error(err, linenum=stream.current.start_index)
 
             stream.next_token()
 
@@ -55,9 +55,9 @@ class Parser:
 
     def parse_statement(self, stream: TokenStream) -> Node:
         """Parse a node from a stream of tokens."""
-        if stream.current.type == TOKEN_STATEMENT:
+        if stream.current.kind == TOKEN_STATEMENT:
             node = self.statement.get_node(stream)
-        elif stream.current.type == TOKEN_TAG:
+        elif stream.current.kind == TOKEN_TAG:
             tag = self.tags.get(stream.current.value, self.illegal)
             node = tag.get_node(stream)
 
@@ -65,7 +65,7 @@ class Parser:
             if isinstance(node, IllegalNode):
                 raise LiquidSyntaxError(
                     f"unexpected tag '{node.token().value}'",
-                    linenum=node.token().linenum,
+                    token=node.token(),
                 )
         else:
             node = self.literal.get_node(stream)
@@ -81,8 +81,8 @@ class Parser:
         block = BlockNode(stream.current)
         statements = block.statements
 
-        while stream.current.type != TOKEN_EOF:
-            if stream.current.type == TOKEN_TAG and stream.current.value in end:
+        while stream.current.kind != TOKEN_EOF:
+            if stream.current.kind == TOKEN_TAG and stream.current.value in end:
                 break
             stmt = self.parse_statement(stream)
             statements.append(stmt)
@@ -107,8 +107,8 @@ def eat_block(stream: TokenStream, end: Container[str]) -> None:
     This is used to discard blocks after a syntax error is found, in the hope
     that we can continue to parse more of the stream after the offending block.
     """
-    while stream.current.type != TOKEN_EOF:
-        if stream.current.type == TOKEN_TAG and stream.current.value in end:
+    while stream.current.kind != TOKEN_EOF:
+        if stream.current.kind == TOKEN_TAG and stream.current.value in end:
             break
         stream.next_token()
 

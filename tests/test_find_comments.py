@@ -16,7 +16,7 @@ class FindCommentsTestCase(unittest.TestCase):
     def _find_comment_text(self, template: BoundTemplate) -> Iterator[tuple[int, str]]:
         def visit(node: "Node") -> Iterator[tuple[int, str]]:
             if isinstance(node, CommentNode) and node.text is not None:
-                yield (node.tok.linenum, node.text)
+                yield (node.tok.start_index, node.text)
             for child in node.children():
                 if child.node:
                     yield from visit(child.node)

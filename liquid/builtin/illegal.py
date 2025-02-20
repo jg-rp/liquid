@@ -18,7 +18,9 @@ class Illegal(Tag):
         tok = stream.current
         stream.next_token()
 
-        if stream.current.type == TOKEN_EXPRESSION:
+        if stream.current.kind == TOKEN_EXPRESSION:
             stream.next_token()
 
-        raise LiquidSyntaxError(f"unexpected tag '{tok.value}'", linenum=tok.linenum)
+        raise LiquidSyntaxError(
+            f"unexpected tag '{tok.value}'", linenum=tok.start_index
+        )

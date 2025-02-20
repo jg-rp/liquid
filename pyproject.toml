@@ -152,6 +152,9 @@ convention = "google"
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
 "performance/*" = ["D103", "PLR2004", "T201", "D100"]
+"liquid/builtin/expressions/primitive.py" = ["D101", "D102"]
+"liquid/builtin/expressions/path.py" = ["D101", "D102"]
+"liquid/builtin/expressions/logical.py" = ["D101", "D102"]
 
 [tool.ruff.lint]
 # Allow unused variables when underscore-prefixed.

@@ -61,7 +61,7 @@ __all__ = (
     "Undefined",
 )
 
-ContextPath = Union[str, Sequence[Union[str, int]]]
+ContextPath = Union[str, Sequence[Any]]
 Namespace = Mapping[str, object]
 
 

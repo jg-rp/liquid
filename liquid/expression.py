@@ -8,6 +8,7 @@ from abc import abstractmethod
 from collections import abc
 from decimal import Decimal
 from itertools import islice
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Awaitable
 from typing import Callable
@@ -20,21 +21,25 @@ from typing import Optional
 from typing import TypeVar
 from typing import Union
 
-from liquid import Markup
-from liquid.context import FutureContext
-from liquid.context import RenderContext
-from liquid.exceptions import Error
-from liquid.exceptions import FilterValueError
-from liquid.exceptions import LiquidTypeError
-from liquid.exceptions import NoSuchFilterFunc
-from liquid.limits import to_int
-from liquid.undefined import Undefined
+from markupsafe import Markup
+
+from .context import FutureContext
+from .context import RenderContext
+from .exceptions import Error
+from .exceptions import FilterValueError
+from .exceptions import LiquidTypeError
+from .exceptions import NoSuchFilterFunc
+from .limits import to_int
+from .undefined import Undefined
+
+if TYPE_CHECKING:
+    from .environment import Environment
 
 # ruff: noqa: D102 D101
 
 
 class Expression(ABC):
-    __slots__ = ()
+    __slots__ = ("env",)
 
     @abstractmethod
     def evaluate(self, context: RenderContext) -> object:
@@ -301,11 +306,11 @@ class RangeLiteral(Expression):
         return [self.start, self.stop]
 
 
-class IdentifierPathElement(Literal[Union[int, str]]):
+class Segment(Literal[Union[int, str]]):
     __slots__ = ()
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, IdentifierPathElement) and self.value == other.value
+        return isinstance(other, Segment) and self.value == other.value
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -317,7 +322,7 @@ class IdentifierPathElement(Literal[Union[int, str]]):
         return str(self.value)
 
 
-IdentifierPath = list[Union[IdentifierPathElement, "Identifier"]]
+IdentifierPath = list[Union[Segment, "Identifier"]]
 IdentifierTuple = tuple[Union[str, "IdentifierTuple"], ...]
 
 

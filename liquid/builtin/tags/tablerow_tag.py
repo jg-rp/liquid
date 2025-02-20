@@ -279,7 +279,7 @@ class TablerowNode(Node):
     def children(self) -> list[ChildNode]:
         return [
             ChildNode(
-                linenum=self.block.tok.linenum,
+                linenum=self.block.tok.start_index,
                 node=self.block,
                 expression=self.expression,
                 block_scope=["tablerowloop", self.expression.name],
@@ -303,7 +303,7 @@ class TablerowTag(Tag):
 
         stream.expect(TOKEN_EXPRESSION)
         loop_expression = self.env.parse_loop_expression_value(
-            stream.current.value, stream.current.linenum
+            stream.current.value, stream.current.start_index
         )
         stream.next_token()
 

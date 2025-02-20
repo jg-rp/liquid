@@ -1,4 +1,5 @@
 """Liquid tag base class."""
+
 from __future__ import annotations
 
 from abc import ABC
@@ -32,7 +33,7 @@ class Tag(ABC):
             return self.parse(stream)
         except Error as err:
             if not err.linenum:
-                err.linenum = tok.linenum
+                err.linenum = tok.start_index
 
             self.env.error(err)
 

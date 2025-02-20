@@ -102,7 +102,7 @@ class LaxCaseNode(ast.Node):
             if isinstance(block, ast.BlockNode):
                 _children.append(
                     ast.ChildNode(
-                        linenum=block.tok.linenum,
+                        linenum=block.tok.start_index,
                         node=block,
                         expression=None,
                     )
@@ -110,7 +110,7 @@ class LaxCaseNode(ast.Node):
             elif isinstance(block, ast.ConditionalBlockNode):
                 _children.append(
                     ast.ChildNode(
-                        linenum=block.tok.linenum,
+                        linenum=block.tok.start_index,
                         node=block,
                         expression=block.condition,
                     )
@@ -129,12 +129,14 @@ class LaxCaseTag(CaseTag):
 
         # Parse the case expression.
         stream.expect(TOKEN_EXPRESSION)
-        case = self._parse_case_expression(stream.current.value, stream.current.linenum)
+        case = self._parse_case_expression(
+            stream.current.value, stream.current.start_index
+        )
         stream.next_token()
 
         # Eat whitespace or junk between `case` and when/else/endcase
         while (
-            stream.current.type != TOKEN_TAG
+            stream.current.kind != TOKEN_TAG
             and stream.current.value not in ENDWHENBLOCK
         ):
             stream.next_token()
@@ -142,11 +144,11 @@ class LaxCaseTag(CaseTag):
         # Collect all `when` and `else` tags regardless of te order n which they appear.
         blocks: list[Union[ast.BlockNode, ast.ConditionalBlockNode]] = []
 
-        while not stream.current.istag(TAG_ENDCASE):
-            if stream.current.istag(TAG_ELSE):
+        while not stream.current.is_tag(TAG_ENDCASE):
+            if stream.current.is_tag(TAG_ELSE):
                 stream.next_token()
                 blocks.append(self.parser.parse_block(stream, ENDWHENBLOCK))
-            elif stream.current.istag(TAG_WHEN):
+            elif stream.current.is_tag(TAG_WHEN):
                 when_tok = stream.next_token()
                 stream.expect(TOKEN_EXPRESSION)
 
@@ -155,7 +157,7 @@ class LaxCaseTag(CaseTag):
                 when_exprs = [
                     BooleanExpression(InfixExpression(case, "==", expr))
                     for expr in self._parse_when_expression(
-                        stream.current.value, stream.current.linenum
+                        stream.current.value, stream.current.start_index
                     )
                 ]
 
@@ -175,7 +177,7 @@ class LaxCaseTag(CaseTag):
             else:
                 raise LiquidSyntaxError(
                     f"unexpected tag {stream.current.value}",
-                    linenum=stream.current.linenum,
+                    linenum=stream.current.start_index,
                 )
 
         stream.expect(TOKEN_TAG, value=TAG_ENDCASE)

@@ -22,10 +22,10 @@ from liquid.expression import Expression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
 from liquid.expression import IdentifierPath
-from liquid.expression import IdentifierPathElement
 from liquid.expression import IntegerLiteral
 from liquid.expression import Nil
 from liquid.expression import RangeLiteral
+from liquid.expression import Segment
 from liquid.expression import StringLiteral
 from liquid.limits import to_int
 from liquid.token import TOKEN_BLANK
@@ -109,17 +109,17 @@ def parse_blank(_: "TokenStream") -> Blank:
 
 def parse_string_literal(stream: "TokenStream") -> StringLiteral:
     """Read a string from the token stream."""
-    return StringLiteral(value=stream.current[2])
+    return StringLiteral(value=stream.current.value)
 
 
 def parse_integer_literal(stream: "TokenStream") -> IntegerLiteral:
     """Read an integer from the token stream."""
-    return IntegerLiteral(value=to_int(stream.current[2]))
+    return IntegerLiteral(value=to_int(stream.current.value))
 
 
 def parse_float_literal(stream: "TokenStream") -> FloatLiteral:
     """Read a float from the token stream."""
-    return FloatLiteral(value=float(stream.current[2]))
+    return FloatLiteral(value=float(stream.current.value))
 
 
 def parse_identifier(stream: "TokenStream") -> Identifier:
@@ -133,9 +133,9 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
     while True:
         pos, typ, val = stream.current
         if typ == TOKEN_IDENTIFIER:
-            path.append(IdentifierPathElement(val))
+            path.append(Segment(val))
         elif typ == TOKEN_IDENTINDEX:
-            path.append(IdentifierPathElement(to_int(val)))
+            path.append(Segment(to_int(val)))
         elif typ == TOKEN_LBRACKET:
             stream.next_token()
             path.append(parse_identifier(stream))
@@ -144,16 +144,14 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
             stream.expect(TOKEN_RBRACKET)
         elif typ == TOKEN_FLOAT:
             if stream.shorthand_indexes:
-                path.extend(
-                    IdentifierPathElement(to_int(i)) for i in val.rstrip(".").split(".")
-                )
+                path.extend(Segment(to_int(i)) for i in val.rstrip(".").split("."))
             else:
                 raise LiquidSyntaxError(
                     f"expected an identifier, found {val!r}",
                     linenum=pos,
                 )
         elif typ == TOKEN_INTEGER and stream.shorthand_indexes:
-            path.append(IdentifierPathElement(to_int(val)))
+            path.append(Segment(to_int(val)))
         elif typ == TOKEN_DOT:
             pass
         else:
@@ -216,7 +214,7 @@ def make_parse_range(
         # Parse start
         if stream.current[1] not in (TOKEN_IDENTIFIER, TOKEN_INTEGER, TOKEN_FLOAT):
             raise LiquidSyntaxError(
-                f"unexpected {stream.current[2]!r} in range expression",
+                f"unexpected {stream.current.value!r} in range expression",
                 linenum=stream.current[0],
             )
         start = parse_obj(stream)
@@ -229,7 +227,7 @@ def make_parse_range(
         # Parse stop
         if stream.current[1] not in (TOKEN_IDENTIFIER, TOKEN_INTEGER, TOKEN_FLOAT):
             raise LiquidSyntaxError(
-                f"unexpected {stream.current[2]!r} in range expression",
+                f"unexpected {stream.current.value!r} in range expression",
                 linenum=stream.current[0],
             )
         stop = parse_obj(stream)
@@ -268,9 +266,9 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
     while True:
         pos, _type, value = stream.current
         if _type == TOKEN_IDENTIFIER:
-            path.append(IdentifierPathElement(value))
+            path.append(Segment(value))
         elif _type == TOKEN_IDENTINDEX:
-            path.append(IdentifierPathElement(to_int(value)))
+            path.append(Segment(to_int(value)))
         elif _type == TOKEN_LBRACKET:
             stream.next_token()
             path.append(_parse_common_identifier(stream))
@@ -278,17 +276,14 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
             stream.expect(TOKEN_RBRACKET)
         elif _type == TOKEN_FLOAT:
             if stream.shorthand_indexes:
-                path.extend(
-                    IdentifierPathElement(to_int(i))
-                    for i in value.rstrip(".").split(".")
-                )
+                path.extend(Segment(to_int(i)) for i in value.rstrip(".").split("."))
             else:
                 raise LiquidSyntaxError(
                     f"expected an identifier, found {value!r}",
                     linenum=pos,
                 )
         elif _type == TOKEN_INTEGER and stream.shorthand_indexes:
-            path.append(IdentifierPathElement(to_int(value)))
+            path.append(Segment(to_int(value)))
         elif _type == TOKEN_DOT:
             pass
 
@@ -391,7 +386,7 @@ def parse_common_expression(stream: TokenStream) -> Expression:
         return LITERAL_OR_IDENT_MAP[stream.current[1]](stream)
     except KeyError as err:
         raise LiquidSyntaxError(
-            f"expected a literal or variable, found {stream.current[2]}",
+            f"expected a literal or variable, found {stream.current.value}",
             linenum=stream.current[0],
         ) from err
 

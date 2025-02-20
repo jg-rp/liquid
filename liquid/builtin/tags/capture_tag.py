@@ -69,7 +69,7 @@ class CaptureNode(ast.Node):
     def children(self) -> list[ast.ChildNode]:
         return [
             ast.ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=self.block,
                 template_scope=[self.name],
             )
@@ -98,7 +98,7 @@ class CaptureTag(Tag):
         else:
             raise LiquidSyntaxError(
                 f'invalid capture identifier "{stream.current.value}"',
-                linenum=stream.current.linenum,
+                token=stream.current,
             )
 
         stream.next_token()

@@ -96,14 +96,16 @@ class MacroNode(Node):
     def children(self) -> list[ChildNode]:
         _children = [
             ChildNode(
-                linenum=self.tok.linenum,
+                linenum=self.tok.start_index,
                 node=self.block,
                 block_scope=[key for key, _ in self.args],
             )
         ]
         for _, expr in self.args:
             if expr != NIL:
-                _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
+                _children.append(
+                    ChildNode(linenum=self.tok.start_index, expression=expr)
+                )
         return _children
 
 
@@ -262,11 +264,11 @@ class CallNode(Node):
     def children(self) -> list[ChildNode]:
         return [
             *[
-                ChildNode(linenum=self.tok.linenum, expression=expr)
+                ChildNode(linenum=self.tok.start_index, expression=expr)
                 for expr in self.args
             ],
             *[
-                ChildNode(linenum=self.tok.linenum, expression=val)
+                ChildNode(linenum=self.tok.start_index, expression=val)
                 for _, val in self.kwargs
             ],
         ]
@@ -290,7 +292,9 @@ class MacroTag(Tag):
 
         # Parse the expression
         stream.expect(TOKEN_EXPRESSION)
-        name, args = parse_macro_arguments(stream.current.value, linenum=tok.linenum)
+        name, args = parse_macro_arguments(
+            stream.current.value, linenum=tok.start_index
+        )
         stream.next_token()
 
         # Parse the block
@@ -313,7 +317,9 @@ class CallTag(Tag):
 
         stream.next_token()
         stream.expect(TOKEN_EXPRESSION)
-        name, _args = parse_call_arguments(stream.current.value, linenum=tok.linenum)
+        name, _args = parse_call_arguments(
+            stream.current.value, linenum=tok.start_index
+        )
 
         # Args can be positional (no default), or keyword (with default).
         args: list[Expression] = []

@@ -1,4 +1,5 @@
 """Token stream test cases."""
+
 from unittest import TestCase
 
 from liquid.stream import TokenStream
@@ -51,8 +52,8 @@ class TokenStreamTestCase(TestCase):
         """Test that we get an EOF token when the stream is exhausted."""
         stream = TokenStream(iter(self.tokens))
         _ = list(stream)
-        self.assertEqual(stream.current.type, TOKEN_EOF)
-        self.assertEqual(next(stream).type, TOKEN_EOF)
+        self.assertEqual(stream.current.kind, TOKEN_EOF)
+        self.assertEqual(next(stream).kind, TOKEN_EOF)
 
     def test_peek(self):
         """Test that we can peek at the next token."""
