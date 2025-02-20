@@ -4,9 +4,9 @@ import asyncio
 import unittest
 from typing import Optional
 
-from liquid import Context
 from liquid import DictLoader
 from liquid import Environment
+from liquid import RenderContext
 from liquid import Template
 from liquid.filter import with_context
 from liquid.template import BoundTemplate
@@ -252,7 +252,7 @@ class ContextualAnalysisTestCase(unittest.TestCase):
         """Test that calls to `Context.resolve()` are counted."""
 
         @with_context
-        def mock_filter(val, *, context: Context) -> str:
+        def mock_filter(val, *, context: RenderContext) -> str:
             context.resolve("x")
             return f"{val} mock"
 

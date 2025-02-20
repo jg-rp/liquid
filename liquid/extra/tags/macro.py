@@ -14,8 +14,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
-from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
+from liquid.context import RenderContext
 from liquid.context import Undefined
 from liquid.context import is_undefined
 from liquid.expression import NIL
@@ -86,7 +86,7 @@ class MacroNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"MacroNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
-    def render_to_output(self, context: Context, _: TextIO) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, _: TextIO) -> Optional[bool]:
         if "macros" not in context.tag_namespace:
             context.tag_namespace["macros"] = {}
 
@@ -165,7 +165,7 @@ class CallNode(Node):
 
         return BoundArgs(args, excess_args, excess_kwargs)
 
-    def _make_context(self, context: Context, macro: Macro) -> Context:
+    def _make_context(self, context: RenderContext, macro: Macro) -> RenderContext:
         args, excess_args, excess_kwargs = self._bind_args(macro)
 
         excess: dict[str, object] = {
@@ -191,7 +191,9 @@ class CallNode(Node):
             carry_loop_iterations=True,
         )
 
-    async def _make_context_async(self, context: Context, macro: Macro) -> Context:
+    async def _make_context_async(
+        self, context: RenderContext, macro: Macro
+    ) -> RenderContext:
         args, excess_args, excess_kwargs = self._bind_args(macro)
 
         excess: dict[str, object] = {
@@ -218,14 +220,16 @@ class CallNode(Node):
             carry_loop_iterations=True,
         )
 
-    def _get_macro(self, context: Context) -> Union[Macro, Undefined]:
+    def _get_macro(self, context: RenderContext) -> Union[Macro, Undefined]:
         macro = context.tag_namespace.get("macros", {}).get(
             self.name, context.env.undefined(self.name)
         )
         assert isinstance(macro, (Macro, Undefined))
         return macro
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         macro = self._get_macro(context)
 
         if is_undefined(macro):
@@ -240,7 +244,7 @@ class CallNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         macro = self._get_macro(context)
 

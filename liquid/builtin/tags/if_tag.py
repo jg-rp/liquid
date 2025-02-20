@@ -24,7 +24,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.expression import Expression
     from liquid.stream import TokenStream
 
@@ -91,7 +91,9 @@ class IfNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"IfNode(tok={self.tok}, condition='{self.condition}')"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         # This intermediate buffer is used to detect and possibly suppress blocks that,
         # when rendered, contain only whitespace.
         buf = context.get_buffer(buffer)
@@ -115,7 +117,7 @@ class IfNode(Node):
         return rendered
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
 

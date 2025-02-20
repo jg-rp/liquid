@@ -21,8 +21,8 @@ from typing import TypeVar
 from typing import Union
 
 from liquid import Markup
-from liquid.context import Context
 from liquid.context import FutureContext
+from liquid.context import RenderContext
 from liquid.exceptions import Error
 from liquid.exceptions import FilterValueError
 from liquid.exceptions import LiquidTypeError
@@ -37,10 +37,10 @@ class Expression(ABC):
     __slots__ = ()
 
     @abstractmethod
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         """Evaluate the expression with the given context."""
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         """An async version of `liquid.expression.Expression.evaluate`."""
         return self.evaluate(context)
 
@@ -61,7 +61,7 @@ class Nil(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return ""
 
-    def evaluate(self, _: Context) -> None:
+    def evaluate(self, _: RenderContext) -> None:
         return None
 
     def children(self) -> list[Expression]:
@@ -85,7 +85,7 @@ class Empty(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "empty"
 
-    def evaluate(self, _: Context) -> Empty:
+    def evaluate(self, _: RenderContext) -> Empty:
         return self
 
     def children(self) -> list[Expression]:
@@ -111,7 +111,7 @@ class Blank(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "blank"
 
-    def evaluate(self, _: Context) -> Blank:
+    def evaluate(self, _: RenderContext) -> Blank:
         return self
 
     def children(self) -> list[Expression]:
@@ -133,7 +133,7 @@ class Continue(Expression):
     def __str__(self) -> str:  # pragma: no cover
         return "continue"
 
-    def evaluate(self, _: Context) -> int:
+    def evaluate(self, _: RenderContext) -> int:
         return 0
 
     def children(self) -> list[Expression]:
@@ -164,7 +164,7 @@ class Literal(Expression, Generic[T]):
     def __sizeof__(self) -> int:
         return sys.getsizeof(self.value)
 
-    def evaluate(self, _: Context) -> object:
+    def evaluate(self, _: RenderContext) -> object:
         return self.value
 
     def children(self) -> list[Expression]:
@@ -206,7 +206,7 @@ class StringLiteral(Literal[str]):
     def __sizeof__(self) -> int:
         return sys.getsizeof(self.value)
 
-    def evaluate(self, context: Context) -> Union[str, Markup]:
+    def evaluate(self, context: RenderContext) -> Union[str, Markup]:
         if context.autoescape:
             return Markup(self.value)
         return self.value
@@ -286,12 +286,12 @@ class RangeLiteral(Expression):
 
         return range(start, stop + 1)
 
-    def evaluate(self, context: Context) -> range:
+    def evaluate(self, context: RenderContext) -> range:
         return self._make_range(
             self.start.evaluate(context), self.stop.evaluate(context)
         )
 
-    async def evaluate_async(self, context: Context) -> range:
+    async def evaluate_async(self, context: RenderContext) -> range:
         return self._make_range(
             await self.start.evaluate_async(context),
             await self.stop.evaluate_async(context),
@@ -362,11 +362,11 @@ class Identifier(Expression):
     def __sizeof__(self) -> int:
         return super().__sizeof__() + sys.getsizeof(self.path)
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         path: list[Any] = [elem.evaluate(context) for elem in self.path]
         return context.get(path)
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         path: list[Any] = [await elem.evaluate_async(context) for elem in self.path]
         return await context.get_async(path)
 
@@ -404,10 +404,10 @@ class PrefixExpression(Expression):
 
         raise LiquidTypeError(f"unknown operator {self.operator}")
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         return self._evaluate(self.right.evaluate(context))
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         return self._evaluate(await self.right.evaluate_async(context))
 
     def children(self) -> list[Expression]:
@@ -444,12 +444,12 @@ class InfixExpression(Expression):
     def __str__(self) -> str:
         return f"({self.left} {self.operator} {self.right})"
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         return compare(
             self.left.evaluate(context), self.operator, self.right.evaluate(context)
         )
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         return compare(
             await self.left.evaluate_async(context),
             self.operator,
@@ -497,22 +497,22 @@ class Filter:
 
         return "".join(buf)
 
-    def evaluate_args(self, context: Context) -> list[object]:
+    def evaluate_args(self, context: RenderContext) -> list[object]:
         """Return a list of filter arguments evaluated with the given context."""
         return [arg.evaluate(context) for arg in self.args]
 
-    async def evaluate_args_async(self, context: Context) -> list[object]:
+    async def evaluate_args_async(self, context: RenderContext) -> list[object]:
         """An async version of `evaluate_args`."""
         return [await arg.evaluate_async(context) for arg in self.args]
 
-    def evaluate_kwargs(self, context: Context) -> dict[str, object]:
+    def evaluate_kwargs(self, context: RenderContext) -> dict[str, object]:
         """Return evaluated keyword arguments for this filter."""
         # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
             return {}
         return {k: v.evaluate(context) for k, v in self.kwargs.items()}
 
-    async def evaluate_kwargs_async(self, context: Context) -> dict[str, object]:
+    async def evaluate_kwargs_async(self, context: RenderContext) -> dict[str, object]:
         """An async version of `evaluate_kwargs`."""
         # Shortcut for the common case. Most filters do not use named parameters.
         if not self.kwargs:
@@ -540,10 +540,10 @@ class BooleanExpression(Expression):
     def __repr__(self) -> str:  # pragma: no cover
         return f"BooleanExpression(expression={self.expression!r})"
 
-    def evaluate(self, context: Context) -> bool:
+    def evaluate(self, context: RenderContext) -> bool:
         return is_truthy(self.expression.evaluate(context))
 
-    async def evaluate_async(self, context: Context) -> bool:
+    async def evaluate_async(self, context: RenderContext) -> bool:
         return is_truthy(await self.expression.evaluate_async(context))
 
     def children(self) -> list[Expression]:
@@ -581,7 +581,7 @@ class FilteredExpression(Expression):
         self,
         left: object,
         filters: Iterable[Filter],
-        context: Context,
+        context: RenderContext,
     ) -> object:
         """Return the result of applying all filters in this expression to an object."""
         rv = left
@@ -622,7 +622,7 @@ class FilteredExpression(Expression):
         self,
         left: object,
         filters: Iterable[Filter],
-        context: Context,
+        context: RenderContext,
     ) -> object:
         """Return the result of applying all filters in this expression to an object."""
         rv = left
@@ -660,7 +660,7 @@ class FilteredExpression(Expression):
         left: object,
         _filter: Filter,
         func: Callable[..., object],
-        context: Context,
+        context: RenderContext,
     ) -> object:
         """Call a filter with async evaluated arguments."""
         if not _filter.args and not _filter.kwargs:
@@ -678,7 +678,7 @@ class FilteredExpression(Expression):
         left: object,
         _filter: Filter,
         func: Callable[[object], Awaitable[object]],
-        context: Context,
+        context: RenderContext,
     ) -> object:
         """Await an async filter."""
         if not _filter.args and not _filter.kwargs:
@@ -691,14 +691,14 @@ class FilteredExpression(Expression):
             **(await _filter.evaluate_kwargs_async(context)),
         )
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         return self.apply_filters(
             self.expression.evaluate(context),
             self.filters,
             context,
         )
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         return await self.apply_filters_async(
             await self.expression.evaluate_async(context),
             self.filters,
@@ -766,7 +766,7 @@ class ConditionalExpression(FilteredExpression):
             f"filters={self.filters})"
         )
 
-    def evaluate(self, context: Context) -> object:
+    def evaluate(self, context: RenderContext) -> object:
         if self.condition:
             if is_truthy(self.condition.evaluate(context)):
                 result = self.expression.evaluate(context)
@@ -783,7 +783,7 @@ class ConditionalExpression(FilteredExpression):
 
         return result
 
-    async def evaluate_async(self, context: Context) -> object:
+    async def evaluate_async(self, context: RenderContext) -> object:
         if self.condition:
             if is_truthy(await self.condition.evaluate_async(context)):
                 result = await self.expression.evaluate_async(context)
@@ -838,11 +838,11 @@ class AssignmentExpression(Expression):
             f"AssignmentExpression(name='{self.name}', expression={self.expression!r})"
         )
 
-    def evaluate(self, context: Context) -> str:
+    def evaluate(self, context: RenderContext) -> str:
         context.assign(key=self.name, val=self.expression.evaluate(context))
         return ""
 
-    async def evaluate_async(self, context: Context) -> str:
+    async def evaluate_async(self, context: RenderContext) -> str:
         context.assign(
             key=self.name,
             val=(await self.expression.evaluate_async(context)),
@@ -941,7 +941,7 @@ class LoopExpression(Expression):
         size: int,
         limit: Optional[int],
         offset: Optional[int | Continue],
-        context: Context,
+        context: RenderContext,
     ) -> tuple[Iterator[Any], int]:
         """Slice iterable `it` according to `limit` and `offset`."""
         length = size
@@ -980,7 +980,9 @@ class LoopExpression(Expression):
             return reversed(list(it)), length
         return it, length
 
-    def _obj_to_iter(self, obj: object, context: Context) -> tuple[Iterator[Any], int]:
+    def _obj_to_iter(
+        self, obj: object, context: RenderContext
+    ) -> tuple[Iterator[Any], int]:
         if isinstance(obj, abc.Mapping):
             return iter(obj.items()), len(obj)
         if isinstance(obj, range):
@@ -1000,7 +1002,7 @@ class LoopExpression(Expression):
         if arg is not None and not isinstance(arg, int):
             raise LiquidTypeError(f"expected an integer argument, found {arg!r}")
 
-    def evaluate(self, context: Context) -> tuple[Iterator[Any], int]:
+    def evaluate(self, context: RenderContext) -> tuple[Iterator[Any], int]:
         obj = self.iterable.evaluate(context)
         it, length = self._obj_to_iter(obj, context)
 
@@ -1024,7 +1026,7 @@ class LoopExpression(Expression):
             context=context,
         )
 
-    async def evaluate_async(self, context: Context) -> tuple[Iterator[Any], int]:
+    async def evaluate_async(self, context: RenderContext) -> tuple[Iterator[Any], int]:
         obj = await self.iterable.evaluate_async(context)
         it, length = self._obj_to_iter(obj, context)
 

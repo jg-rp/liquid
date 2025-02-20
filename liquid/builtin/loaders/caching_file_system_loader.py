@@ -1,4 +1,5 @@
 """A file system loader that caches parsed templates in memory."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -11,7 +12,7 @@ from .mixins import CachingLoaderMixin
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from liquid import Context
+    from liquid import RenderContext
 
     from .base_loader import TemplateSource
 
@@ -61,14 +62,14 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileExtensionLoader):
         )
 
     def get_source_with_context(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         # In this case, our cache key and real file name are the same.
         name = self.cache_key_with_context(template_name, context, **kwargs)
         return self.get_source(context.env, name)
 
     async def get_source_with_context_async(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         # In this case, our cache key and real file name are the same.
         name = self.cache_key_with_context(template_name, context, **kwargs)

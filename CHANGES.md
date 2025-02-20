@@ -4,6 +4,8 @@
 
 **Breaking changes**
 
+- Renamed `liquid.Context` to `liquid.RenderContext`.
+- Change the `liquid.RenderContext` (previously `liquid.Context`) constructor to require an instance of `BoundTemplate` as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
 - Removed legacy expression parsing functions. If you're importing anything from `liquid.parse` for your custom tags, you'll need to use functions from `liquid.expressions` instead.
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
 - Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.

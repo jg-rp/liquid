@@ -1,11 +1,12 @@
 """Test cases for parsing loop-style expressions."""
+
 import unittest
 from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
-from liquid import Context
 from liquid import Environment
+from liquid import RenderContext
 from liquid.expressions import parse_loop_expression
 
 
@@ -21,7 +22,7 @@ class Case(NamedTuple):
 class EvalLoopExpressionTestCase(unittest.TestCase):
     """Test cases for evaluating `for` loop expressions."""
 
-    def test_eval_loop_expression(self):
+    def test_eval_loop_expression(self) -> None:
         """Test that we can evaluate loop expressions."""
         test_cases = [
             Case(
@@ -74,19 +75,21 @@ class EvalLoopExpressionTestCase(unittest.TestCase):
         ]
 
         env = Environment()
+        template = env.from_string("")
 
         for case in test_cases:
-            context = Context(env, case.context)
+            context = RenderContext(template, globals=case.context)
             with self.subTest(msg=case.description):
                 expr = parse_loop_expression(case.expression)
                 loop_iter, length = expr.evaluate(context)
                 self.assertEqual(list(loop_iter), case.expect)
                 self.assertEqual(length, len(case.expect))
 
-    def test_eval_continue_loop_expression(self):
+    def test_eval_continue_loop_expression(self) -> None:
         """Test that we can evaluate loop expressions that use a continue offset."""
         env = Environment()
-        context = Context(env, {"array": [1, 2, 3, 4, 5, 6]})
+        template = env.from_string("")
+        context = RenderContext(template, globals={"array": [1, 2, 3, 4, 5, 6]})
 
         # Mock a for loop with a limit
         context.stopindex("item-array", 3)

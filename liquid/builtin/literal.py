@@ -5,7 +5,7 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_LITERAL
@@ -27,7 +27,7 @@ class LiteralNode(Node):
         return f"LiteralNode(tok={self.tok})"
 
     def render_to_output(  # noqa: D102
-        self, _: Context, buffer: TextIO
+        self, _: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buffer.write(self.tok.value)
         return None

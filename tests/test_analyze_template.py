@@ -10,7 +10,7 @@ from liquid import Environment
 from liquid import Template
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateTraversalError
 from liquid.expression import Expression
@@ -30,10 +30,10 @@ from liquid.token import Token
 class MockExpression(Expression):
     """Mock expression."""
 
-    def evaluate(self, _: Context) -> object:
+    def evaluate(self, _: RenderContext) -> object:
         return "mock expression"
 
-    async def evaluate_async(self, _: Context) -> object:
+    async def evaluate_async(self, _: RenderContext) -> object:
         return "mock expression"
 
 
@@ -43,11 +43,11 @@ class MockNode(Node):
     def __init__(self, token: Token) -> None:
         self.tok = token
 
-    def render_to_output(self, _: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(self, _: RenderContext, buffer: TextIO) -> Optional[bool]:
         buffer.write("mock node")
 
     async def render_to_output_async(
-        self, _: Context, buffer: TextIO
+        self, _: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buffer.write("mock node")
 

@@ -5,7 +5,7 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.expression import Expression
 from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
@@ -33,13 +33,15 @@ class StatementNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"StatementNode(tok={self.tok}, expression={self.expression!r})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         val = self.expression.evaluate(context)
         buffer.write(to_liquid_string(val, context.autoescape))
         return None
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         val = await self.expression.evaluate_async(context)
         buffer.write(to_liquid_string(val, context.autoescape))

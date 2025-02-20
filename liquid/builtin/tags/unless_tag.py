@@ -25,7 +25,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.expression import Expression
     from liquid.stream import TokenStream
 
@@ -89,7 +89,9 @@ class UnlessNode(Node):
             buf.append(f"else {{ {self.alternative} }}")
         return " ".join(buf)
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         # This intermediate buffer is used to detect and possibly suppress blocks that,
         # when rendered, contain only whitespace.
         buf = context.get_buffer(buffer)
@@ -113,7 +115,7 @@ class UnlessNode(Node):
         return rendered
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         # This intermediate buffer is used to detect and possibly suppress blocks that,
         # when rendered, contain only whitespace.

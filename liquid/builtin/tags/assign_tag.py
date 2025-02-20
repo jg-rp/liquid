@@ -7,7 +7,7 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import AssignmentExpression
 from liquid.expression import Expression
@@ -37,12 +37,12 @@ class AssignNode(Node):
     def __str__(self) -> str:
         return f"var ({self.expression})"
 
-    def render_to_output(self, context: Context, _: TextIO) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, _: TextIO) -> Optional[bool]:
         self.expression.evaluate(context)
         return False
 
     async def render_to_output_async(
-        self, context: Context, _: TextIO
+        self, context: RenderContext, _: TextIO
     ) -> Optional[bool]:
         await self.expression.evaluate_async(context)
         return False

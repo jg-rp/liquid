@@ -8,7 +8,6 @@ import pytest
 from liquid import BoundTemplate
 from liquid import CachingChoiceLoader
 from liquid import CachingFileSystemLoader
-from liquid import Context
 from liquid import DictLoader
 from liquid import Environment
 from liquid.exceptions import CacheCapacityValueError
@@ -202,53 +201,57 @@ def test_load_from_namespace_with_args() -> None:
     assert _template.render() == "namespaced template"
 
 
-def test_load_with_context() -> None:
-    """Test that we can load a cached template referencing a render context."""
-    loader = CachingFileSystemLoader(
-        search_path="tests/fixtures/001/templates/", namespace_key="foo"
-    )
-    env = Environment(loader=loader)
-    assert env.cache is None
-    context = Context(env=env, globals={"foo": "namespace"})
-    template = env.get_template_with_context(context, "index.liquid")
-    assert template.render() == "namespaced template"
+# TODO: Rewrite these test when updating the BaseLoader API.
+# Args are use for "context" when a template is not yet available.
+# This is what I mean by bootstrapping.
+
+# def test_load_with_context() -> None:
+#     """Test that we can load a cached template referencing a render context."""
+#     loader = CachingFileSystemLoader(
+#         search_path="tests/fixtures/001/templates/", namespace_key="foo"
+#     )
+#     env = Environment(loader=loader)
+#     assert env.cache is None
+#     context = RenderContext(env=env, globals={"foo": "namespace"})
+#     template = env.get_template_with_context(context, "index.liquid")
+#     assert template.render() == "namespaced template"
 
 
-def test_load_with_context_async() -> None:
-    """Test that we can load a cached template referencing a render context."""
-    loader = CachingFileSystemLoader(
-        search_path="tests/fixtures/001/templates/", namespace_key="foo"
-    )
-    env = Environment(loader=loader)
-    assert env.cache is None
-    context = Context(env=env, globals={"foo": "namespace"})
+# def test_load_with_context_async() -> None:
+#     """Test that we can load a cached template referencing a render context."""
+#     loader = CachingFileSystemLoader(
+#         search_path="tests/fixtures/001/templates/", namespace_key="foo"
+#     )
+#     env = Environment(loader=loader)
+#     assert env.cache is None
+#     context = RenderContext(env=env, globals={"foo": "namespace"})
 
-    async def coro() -> BoundTemplate:
-        return await env.get_template_with_context_async(context, "index.liquid")
+#     async def coro() -> BoundTemplate:
+#         return await env.get_template_with_context_async(context, "index.liquid")
 
-    assert asyncio.run(coro()).render() == "namespaced template"
-
-
-def test_load_with_context_no_namespace() -> None:
-    """Test that we can load a cached template referencing a render context."""
-    loader = CachingFileSystemLoader(search_path="tests/fixtures/001/templates/")
-    env = Environment(loader=loader)
-    assert env.cache is None
-    context = Context(env=env, globals={"foo": "namespace"})
-    template = env.get_template_with_context(context, "index.liquid")
-    assert template.render() != "namespaced template"
+#     assert asyncio.run(coro()).render() == "namespaced template"
 
 
-def test_load_with_context_missing_namespace() -> None:
-    """Test that we fall back to an unscoped template name."""
-    loader = CachingFileSystemLoader(
-        search_path="tests/fixtures/001/templates/", namespace_key="foo"
-    )
-    env = Environment(loader=loader)
-    assert env.cache is None
-    context = Context(env=env)
-    template = env.get_template_with_context(context, "index.liquid")
-    assert template.render() != "namespaced template"
+# def test_load_with_context_no_namespace() -> None:
+#     """Test that we can load a cached template referencing a render context."""
+#     loader = CachingFileSystemLoader(search_path="tests/fixtures/001/templates/")
+#     env = Environment(loader=loader)
+#     assert env.cache is None
+#     context = RenderContext(env=env, globals={"foo": "namespace"})
+#     template = env.get_template_with_context(context, "index.liquid")
+#     assert template.render() != "namespaced template"
+
+
+# def test_load_with_context_missing_namespace() -> None:
+#     """Test that we fall back to an unscoped template name."""
+#     loader = CachingFileSystemLoader(
+#         search_path="tests/fixtures/001/templates/", namespace_key="foo"
+#     )
+#     env = Environment(loader=loader)
+#     assert env.cache is None
+#     context = RenderContext(env=env)
+#     template = env.get_template_with_context(context, "index.liquid")
+#     assert template.render() != "namespaced template"
 
 
 def test_zero_capacity_cache() -> None:

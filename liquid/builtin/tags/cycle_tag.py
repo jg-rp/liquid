@@ -8,7 +8,7 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expressions import Token as ExprToken
@@ -49,7 +49,9 @@ class CycleNode(Node):
         buf.append(")")
         return "".join(buf)
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         if self.group:
             _group = self.group.evaluate(context)
             group_name = "__UNDEFINED" if is_undefined(_group) else str(_group)
@@ -65,7 +67,7 @@ class CycleNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         if self.group:
             _group = await self.group.evaluate_async(context)

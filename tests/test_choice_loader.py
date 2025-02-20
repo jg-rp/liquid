@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-from liquid import Context
 from liquid import DictLoader
 from liquid import Environment
+from liquid import RenderContext
 from liquid.exceptions import TemplateNotFound
 from liquid.loaders import BaseLoader
 from liquid.loaders import ChoiceLoader
@@ -47,14 +47,14 @@ class MockContextLoader(DictLoader):
         super().__init__(templates)
 
     def get_source_with_context(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         self.kwargs.update(kwargs)
         self.kwargs["uid"] = context.resolve("uid", default=None)
         return super().get_source(context.env, template_name)
 
     async def get_source_with_context_async(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         self.kwargs.update(kwargs)
         self.kwargs["uid"] = context.resolve("uid", default=None)

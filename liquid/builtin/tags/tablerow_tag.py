@@ -10,7 +10,7 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
 from liquid.expression import NIL
@@ -180,7 +180,9 @@ class TablerowNode(Node):
         except ValueError:
             return 0
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         name = self.expression.name
         loop_iter, length = self.expression.evaluate(context)
 
@@ -227,7 +229,7 @@ class TablerowNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         name = self.expression.name
         loop_iter, length = await self.expression.evaluate_async(context)

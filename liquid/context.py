@@ -44,14 +44,13 @@ from liquid.undefined import Undefined
 from liquid.undefined import is_undefined
 
 if TYPE_CHECKING:
-    from liquid import Environment
     from liquid.builtin.tags.for_tag import ForLoop
     from liquid.template import BoundTemplate
 
 # ruff: noqa: D102
 
 __all__ = (
-    "Context",
+    "RenderContext",
     "DebugUndefined",
     "get_item",
     "is_undefined",
@@ -167,7 +166,7 @@ async def _liquid_last_async(
         raise
 
 
-class Context:
+class RenderContext:
     """A template render context.
 
     A new render context is created automatically each time `BoundTemplate.render`
@@ -192,25 +191,18 @@ class Context:
         "template",
     )
 
-    # NOTE: The `template` argument has been added for the benefit of tags like
-    # `{% extends %}`, which need access to the current template when rendering. With
-    # hindsight, `template` should be the only positional arguments, with `env`
-    # accessible via `template`, and all others arguments should be keyword only. We
-    # leave `template` optional for backwards compatibility reasons only. This might
-    # change in Python Liquid version 2.0.
-
     def __init__(
         self,
-        env: Environment,
+        template: BoundTemplate,
+        *,
         globals: Optional[Namespace] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
-        parent_context: Optional[Context] = None,
+        parent_context: Optional[RenderContext] = None,
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
-        template: Optional[BoundTemplate] = None,
     ):
-        self.env = env
+        self.env = template.env
         self.template = template
 
         # A namespace for template local variables. Those that are bound with
@@ -446,13 +438,15 @@ class Context:
     @contextmanager
     def extend(
         self, namespace: Namespace, template: Optional[BoundTemplate] = None
-    ) -> Iterator[Context]:
+    ) -> Iterator[RenderContext]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
                 "maximum context depth reached, possible recursive include"
             )
 
+        # Remember the current template so we can restore it upon exiting the
+        # context manager.
         _template = self.template
         if template:
             self.template = template
@@ -467,7 +461,7 @@ class Context:
             self.scope.pop()
 
     @contextmanager
-    def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[Context]:
+    def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[RenderContext]:
         """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
@@ -504,7 +498,7 @@ class Context:
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
         block_scope: bool = False,
-    ) -> Context:
+    ) -> RenderContext:
         """Return a copy of this render context.
 
         Local variables and other state for stateful tags are not copied.
@@ -525,7 +519,7 @@ class Context:
 
         if block_scope:
             ctx = self.__class__(
-                self.env,
+                template or self.template,
                 globals=ReadOnlyChainMap(namespace, self.scope),
                 disabled_tags=disabled_tags,
                 copy_depth=self._copy_depth + 1,
@@ -538,7 +532,7 @@ class Context:
             ctx.tag_namespace["extends"] = self.tag_namespace["extends"]
         else:
             ctx = self.__class__(
-                self.env,
+                template or self.template,
                 globals=ReadOnlyChainMap(namespace, self.globals),
                 disabled_tags=disabled_tags,
                 copy_depth=self._copy_depth + 1,
@@ -547,7 +541,6 @@ class Context:
                 local_namespace_size_carry=self.get_size_of_locals(),
             )
 
-        ctx.template = template or self.template
         return ctx
 
     def error(self, exc: Error) -> None:
@@ -608,7 +601,7 @@ class Context:
 # "capturing" more than variable names.
 
 
-class VariableCaptureContext(Context):
+class VariableCaptureContext(RenderContext):
     """A render context that captures template variable and filter names."""
 
     __slots__ = (
@@ -624,7 +617,8 @@ class VariableCaptureContext(Context):
 
     def __init__(
         self,
-        env: Environment,
+        template: BoundTemplate,
+        *,
         globals: Optional[Namespace] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
@@ -633,7 +627,7 @@ class VariableCaptureContext(Context):
         local_namespace_size_carry: int = 0,
     ):
         super().__init__(
-            env,
+            template,
             globals=globals,
             disabled_tags=disabled_tags,
             copy_depth=copy_depth,
@@ -706,7 +700,7 @@ class VariableCaptureContext(Context):
         self.root_context.all_references.append(ref)
 
 
-class FutureContext(Context):
+class FutureContext(RenderContext):
     """A render context configured for maximum compatibility with the Ruby liquid.
 
     These "fixes" have not been implemented in the default `Context` for the benefit of
@@ -757,7 +751,7 @@ def get_item(
 ) -> Any:
     """Chained item getter."""
     try:
-        itm: Any = reduce(Context.getitem, items, obj)
+        itm: Any = reduce(RenderContext.getitem, items, obj)
     except (KeyError, IndexError, TypeError):
         itm = default
     return itm

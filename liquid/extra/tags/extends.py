@@ -39,7 +39,7 @@ from liquid.token import Token
 if TYPE_CHECKING:
     from liquid import BoundTemplate
     from liquid import Environment
-    from liquid.context import Context
+    from liquid.context import RenderContext
 
 
 # ruff: noqa: D102
@@ -56,7 +56,7 @@ class BlockDrop(Mapping[str, object]):
 
     def __init__(
         self,
-        context: Context,
+        context: RenderContext,
         buffer: TextIO,
         name: str,
         parent: Optional["_BlockStackItem"],
@@ -125,7 +125,9 @@ class BlockNode(Node):
         self.block = block
         self.required = required
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         # We should be in a base template. Render the block at the top of the "stack".
         block_stack: Sequence[_BlockStackItem] = context.tag_namespace.get(
             "extends", {}
@@ -158,7 +160,7 @@ class BlockNode(Node):
         return stack_item.block.block.render(ctx, buffer)
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         # We should be in a base template. Render the block at the top of the "stack".
         block_stack: Sequence[_BlockStackItem] = context.tag_namespace.get(
@@ -205,7 +207,9 @@ class ExtendsNode(Node):
         self.tok = tok
         self.name = name
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         if not context.template:
             raise LiquidEnvironmentError(
                 "the 'extends' tag requires the current render context to keep a "
@@ -225,7 +229,7 @@ class ExtendsNode(Node):
         raise StopRender
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         if not context.template:
             raise LiquidEnvironmentError(
@@ -340,7 +344,7 @@ class ExtendsTag(Tag):
 
 
 def build_block_stacks(
-    context: Context,
+    context: RenderContext,
     template: BoundTemplate,
     parent_name: str,
     tag: str = TAG_EXTENDS,
@@ -402,7 +406,7 @@ def build_block_stacks(
 
 
 async def build_block_stacks_async(
-    context: Context,
+    context: RenderContext,
     template: BoundTemplate,
     parent_name: str,
     tag: str = TAG_EXTENDS,
@@ -503,7 +507,7 @@ def _visit_node(
 
 
 def stack_blocks(
-    context: Context, template: BoundTemplate
+    context: RenderContext, template: BoundTemplate
 ) -> tuple[Optional[ExtendsNode], list[BlockNode]]:
     """Find template inheritance nodes in `template`.
 
@@ -535,7 +539,9 @@ def stack_blocks(
     return extends[0], blocks
 
 
-def _store_blocks(context: Context, blocks: list[BlockNode], source_name: str) -> None:
+def _store_blocks(
+    context: RenderContext, blocks: list[BlockNode], source_name: str
+) -> None:
     block_stacks: DefaultDict[str, list[_BlockStackItem]] = context.tag_namespace[
         "extends"
     ]

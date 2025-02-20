@@ -15,8 +15,8 @@ from typing import Union
 from liquid.exceptions import TemplateNotFound
 
 if TYPE_CHECKING:
-    from liquid import Context
     from liquid import Environment
+    from liquid import RenderContext
     from liquid.template import BoundTemplate
 
 # ruff: noqa: D102 D101
@@ -107,7 +107,7 @@ class BaseLoader(ABC):  # noqa: B024
 
     def get_source_with_context(
         self,
-        context: Context,
+        context: RenderContext,
         template_name: str,
         **kwargs: str,  # noqa: ARG002
     ) -> TemplateSource:
@@ -116,7 +116,7 @@ class BaseLoader(ABC):  # noqa: B024
 
     async def get_source_with_context_async(
         self,
-        context: Context,
+        context: RenderContext,
         template_name: str,
         **kwargs: str,  # noqa: ARG002
     ) -> TemplateSource:
@@ -225,7 +225,7 @@ class BaseLoader(ABC):  # noqa: B024
 
     def load_with_context(
         self,
-        context: Context,
+        context: RenderContext,
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
@@ -249,7 +249,7 @@ class BaseLoader(ABC):  # noqa: B024
 
     async def load_with_context_async(
         self,
-        context: Context,
+        context: RenderContext,
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
