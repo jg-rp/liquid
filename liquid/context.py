@@ -57,7 +57,7 @@ __all__ = (
     "ReadOnlyChainMap",
     "StrictDefaultUndefined",
     "StrictUndefined",
-    "VariableCaptureContext",
+    "CaptureRenderContext",
     "Undefined",
 )
 
@@ -597,11 +597,7 @@ class RenderContext:
         return await _get_item(obj, key)
 
 
-# NOTE: The name `VariableCaptureContext` is now a little misleading. We are
-# "capturing" more than variable names.
-
-
-class VariableCaptureContext(RenderContext):
+class CaptureRenderContext(RenderContext):
     """A render context that captures template variable and filter names."""
 
     __slots__ = (
@@ -622,7 +618,7 @@ class VariableCaptureContext(RenderContext):
         globals: Optional[Namespace] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
-        parent_context: Optional[VariableCaptureContext] = None,
+        parent_context: Optional[CaptureRenderContext] = None,
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
     ):
@@ -640,9 +636,9 @@ class VariableCaptureContext(RenderContext):
         self.undefined_references: list[str] = []
         self.filters: list[str] = []
 
-        root_context: VariableCaptureContext = self
+        root_context: CaptureRenderContext = self
         while root_context.parent_context and isinstance(
-            root_context.parent_context, VariableCaptureContext
+            root_context.parent_context, CaptureRenderContext
         ):
             root_context = root_context.parent_context
         self.root_context = root_context
@@ -740,7 +736,7 @@ class FutureContext(RenderContext):
         return rv
 
 
-class FutureVariableCaptureContext(VariableCaptureContext, FutureContext):
+class FutureVariableCaptureContext(CaptureRenderContext, FutureContext):
     """A context that captures information about template variables and filters."""
 
 

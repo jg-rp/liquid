@@ -16,11 +16,11 @@ from typing import TextIO
 from typing import Type
 from typing import Union
 
+from liquid.context import CaptureRenderContext
 from liquid.context import FutureContext
 from liquid.context import FutureVariableCaptureContext
 from liquid.context import ReadOnlyChainMap
 from liquid.context import RenderContext
-from liquid.context import VariableCaptureContext
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
@@ -76,7 +76,7 @@ class BoundTemplate:
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
     # `Context` when rendering templates.
     context_class: Type[RenderContext] = RenderContext
-    capture_context_class: Type[VariableCaptureContext] = VariableCaptureContext
+    capture_context_class: Type[CaptureRenderContext] = CaptureRenderContext
 
     def __init__(
         self,
