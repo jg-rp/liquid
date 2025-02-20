@@ -9,7 +9,7 @@ from liquid import DictLoader
 from liquid import Environment
 from liquid.analyze_tags import TagAnalysis
 from liquid.analyze_tags import TagMap
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.extra.tags import WithTag
 
 
@@ -224,7 +224,7 @@ class AnalyzeTagsTestCase(TestCase):
         loader = DictLoader({"some.liquid": case.source})
         env = Environment(loader=loader)
 
-        async def coro():
+        async def coro() -> TagAnalysis:
             return await env.analyze_tags_async("some.liquid")
 
         def assert_tags(tag_analysis: TagAnalysis) -> None:
@@ -255,9 +255,10 @@ class AnalyzeTagsTestCase(TestCase):
 
         loader = DictLoader({"some.liquid": case.source})
         env = Environment(loader=loader)
-        context = Context(env)
+        template = env.get_template("some.liquid")
+        context = RenderContext(template)
 
-        async def coro():
+        async def coro() -> TagAnalysis:
             return await env.analyze_tags_async("some.liquid", context=context)
 
         def assert_tags(tag_analysis: TagAnalysis) -> None:

@@ -10,8 +10,8 @@ from .base_loader import BaseLoader
 from .mixins import CachingLoaderMixin
 
 if TYPE_CHECKING:
-    from liquid import Context
     from liquid import Environment
+    from liquid import RenderContext
 
     from .base_loader import TemplateSource
 
@@ -85,7 +85,7 @@ class ChoiceLoader(BaseLoader):
         raise TemplateNotFound(template_name)
 
     def get_source_with_context(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         """Get source code for a template from one of the configured loaders."""
         for loader in self.loaders:
@@ -97,7 +97,7 @@ class ChoiceLoader(BaseLoader):
         raise TemplateNotFound(template_name)
 
     async def get_source_with_context_async(
-        self, context: Context, template_name: str, **kwargs: str
+        self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         """Get source code for a template from one of the configured loaders."""
         for loader in self.loaders:

@@ -17,7 +17,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.stream import TokenStream
 
 # ruff: noqa: D102
@@ -43,7 +43,9 @@ class IfChangedNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"IfChanged(tok={self.tok})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         # Render to an intermediate buffer.
         buf = context.get_buffer(buffer)
         self.block.render(context, buf)
@@ -56,7 +58,7 @@ class IfChangedNode(Node):
         return False
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         # Render to an intermediate buffer.
         buf = context.get_buffer(buffer)

@@ -6,7 +6,7 @@ from typing import TextIO
 
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.stream import TokenStream
@@ -32,7 +32,9 @@ class IncrementNode(Node):
     def __str__(self) -> str:
         return f"{self.identifier} += 1"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         buffer.write(str(context.increment(self.identifier)))
         return True
 

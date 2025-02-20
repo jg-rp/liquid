@@ -42,7 +42,7 @@ from liquid.utils import LRUCache
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.expression import BooleanExpression
     from liquid.expression import FilteredExpression
     from liquid.expression import LoopExpression
@@ -421,7 +421,7 @@ class Environment:
 
     def get_template_with_context(
         self,
-        context: "Context",
+        context: "RenderContext",
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
@@ -434,7 +434,7 @@ class Environment:
 
     async def get_template_with_context_async(
         self,
-        context: "Context",
+        context: "RenderContext",
         name: str,
         **kwargs: str,
     ) -> BoundTemplate:
@@ -472,7 +472,7 @@ class Environment:
         self,
         name: str,
         *,
-        context: Optional["Context"] = None,
+        context: Optional["RenderContext"] = None,
         inner_tags: Optional[InnerTagMap] = None,
         **kwargs: str,
     ) -> TagAnalysis:
@@ -511,7 +511,7 @@ class Environment:
         self,
         name: str,
         *,
-        context: Optional["Context"] = None,
+        context: Optional["RenderContext"] = None,
         inner_tags: Optional[InnerTagMap] = None,
         **kwargs: str,
     ) -> TagAnalysis:

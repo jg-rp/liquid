@@ -4,8 +4,8 @@ from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
-from liquid import Context
 from liquid import Environment
+from liquid import RenderContext
 from liquid.expressions import parse_boolean_expression
 from liquid.expressions import parse_boolean_expression_with_parens
 
@@ -473,10 +473,11 @@ class EvalBooleanExpressionTestCase(unittest.TestCase):
     def test_eval_boolean_expression(self) -> None:
         """Test that we can evaluate standard boolean expressions."""
         env = Environment()
+        template = env.from_string("Hello, {{ you }}")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_boolean_expression(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -484,10 +485,11 @@ class EvalBooleanExpressionTestCase(unittest.TestCase):
         """Test that we can evaluation of non-standard boolean expressions
         is backwards compatible."""
         env = Environment()
+        template = env.from_string("Hello, {{ you }}")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -574,8 +576,10 @@ class EvalBooleanNotExpressionTestCase(unittest.TestCase):
         """Test that we can evaluate boolean expressions that support logical
         `not` and grouping terms with parentheses."""
         env = Environment()
+        template = env.from_string("")
+
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_boolean_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)

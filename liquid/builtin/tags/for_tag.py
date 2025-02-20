@@ -22,7 +22,7 @@ from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
 if TYPE_CHECKING:
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.expression import LoopExpression
     from liquid.stream import TokenStream
 
@@ -165,7 +165,9 @@ class ForNode(Node):
 
         return tag_str
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         # This intermediate buffer is used to detect and possibly suppress blocks that,
         # when rendered, contain only whitespace.
         buf = context.get_buffer(buffer)
@@ -211,7 +213,7 @@ class ForNode(Node):
         return rendered
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
         rendered: Optional[bool] = False
@@ -287,7 +289,7 @@ class BreakNode(Node):
 
     def render_to_output(
         self,
-        _: Context,
+        _: RenderContext,
         __: TextIO,
     ) -> Optional[bool]:
         raise BreakLoop("break")
@@ -309,7 +311,7 @@ class ContinueNode(Node):
 
     def render_to_output(
         self,
-        _: Context,
+        _: RenderContext,
         __: TextIO,
     ) -> Optional[bool]:
         raise ContinueLoop("continue")

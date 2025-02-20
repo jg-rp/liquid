@@ -8,7 +8,7 @@ from typing import TextIO
 
 from liquid import Markup
 from liquid import ast
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
@@ -44,20 +44,22 @@ class CaptureNode(ast.Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"CaptureNode(tok={self.tok}, name={self.name}, block='{self.block}')"
 
-    def _assign(self, context: Context, buf: StringIO) -> None:
+    def _assign(self, context: RenderContext, buf: StringIO) -> None:
         if context.autoescape:
             context.assign(self.name, Markup(buf.getvalue()))
         else:
             context.assign(self.name, buf.getvalue())
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
         self.block.render(context, buf)
         self._assign(context, buf)
         return False
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
         await self.block.render_async(context, buf)

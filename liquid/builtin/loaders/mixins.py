@@ -14,8 +14,8 @@ from liquid.utils import LRUCache
 
 if TYPE_CHECKING:
     from liquid import BoundTemplate
-    from liquid import Context
     from liquid import Environment
+    from liquid import RenderContext
 
     from .base_loader import TemplateNamespace
 
@@ -57,14 +57,14 @@ class _CachingLoaderProtocol(Protocol):
 
     def load_with_context(
         self,
-        context: Context,
+        context: RenderContext,
         name: str,
         **kwargs: str,
     ) -> BoundTemplate: ...
 
     async def load_with_context_async(
         self,
-        context: Context,
+        context: RenderContext,
         name: str,
         **kwargs: str,
     ) -> BoundTemplate: ...
@@ -189,7 +189,7 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
         )
 
     def load_with_context(
-        self, context: Context, name: str, **kwargs: str
+        self, context: RenderContext, name: str, **kwargs: str
     ) -> BoundTemplate:
         cache_key = self.cache_key_with_context(name, context, **kwargs)
         return self._check_cache(
@@ -200,7 +200,7 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
         )
 
     async def load_with_context_async(
-        self, context: Context, name: str, **kwargs: str
+        self, context: RenderContext, name: str, **kwargs: str
     ) -> BoundTemplate:
         cache_key = self.cache_key_with_context(name, context, **kwargs)
         return await self._check_cache_async(
@@ -222,7 +222,7 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
     def cache_key_with_context(
         self,
         name: str,
-        context: Context,
+        context: RenderContext,
         **kwargs: str,  # noqa: ARG002
     ) -> str:
         if not self.namespace_key:

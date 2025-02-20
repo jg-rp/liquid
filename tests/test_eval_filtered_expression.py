@@ -3,8 +3,8 @@ from typing import Any
 from typing import Mapping
 from typing import NamedTuple
 
-from liquid import Context
 from liquid import Environment
+from liquid import RenderContext
 from liquid.context import Undefined
 from liquid.expressions import parse_conditional_expression
 from liquid.expressions import parse_conditional_expression_with_parens
@@ -170,10 +170,11 @@ class EvalFilteredExpressionTestCase(unittest.TestCase):
     def test_eval_filtered_expression(self) -> None:
         """Test that we can evaluate standard boolean expressions."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_filtered_expression(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -181,10 +182,11 @@ class EvalFilteredExpressionTestCase(unittest.TestCase):
         """Test that we can evaluation of non-standard boolean expressions
         is backwards compatible."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_conditional_expression(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -192,10 +194,11 @@ class EvalFilteredExpressionTestCase(unittest.TestCase):
         """Test that we can evaluation of non-standard boolean expressions
         is backwards compatible."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_conditional_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -251,10 +254,11 @@ class EvalConditionalExpressionTestCase(unittest.TestCase):
     def test_eval_conditional(self) -> None:
         """Test that we can evaluate conditional expressions."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_conditional_expression(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -262,10 +266,11 @@ class EvalConditionalExpressionTestCase(unittest.TestCase):
         """Test that we can evaluate conditional expressions that support logical
         `not` and grouping terms with parentheses."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_conditional_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -323,10 +328,11 @@ class EvalConditionalNotExpressionTestCase(unittest.TestCase):
         """Test that we can evaluate conditional expressions that support logical
         `not` and grouping terms with parentheses."""
         env = Environment()
+        template = env.from_string("")
 
         for case in self.test_cases:
             with self.subTest(msg=case.description):
-                context = Context(env, globals=case.context)
+                context = RenderContext(template, globals=case.context)
                 expr = parse_conditional_expression_with_parens(case.expression)
                 self.assertEqual(expr.evaluate(context), case.expect)
 
@@ -337,7 +343,8 @@ class MalformedConditionalExpressionTestCase(unittest.TestCase):
     def test_missing_condition(self) -> None:
         """Test that we handle conditional expressions with missing conditions."""
         env = Environment(undefined=Undefined)
-        context = Context(env)
+        template = env.from_string("")
+        context = RenderContext(template)
 
         # Condition defaults to `Undefined`
         expr = parse_conditional_expression("'foo' if")
@@ -350,7 +357,8 @@ class MalformedConditionalExpressionTestCase(unittest.TestCase):
     def test_missing_alternative(self) -> None:
         """Test that we handle conditional expressions with a missing alternative."""
         env = Environment(undefined=Undefined)
-        context = Context(env)
+        template = env.from_string("")
+        context = RenderContext(template)
 
         # Alternative defaults to `Undefined`
         expr = parse_conditional_expression("'foo' if false else")
@@ -363,7 +371,8 @@ class MalformedConditionalExpressionTestCase(unittest.TestCase):
     def test_missing_condition_followed_by_else(self) -> None:
         """Test that we handle missing boolean expressions."""
         env = Environment(undefined=Undefined)
-        context = Context(env)
+        template = env.from_string("")
+        context = RenderContext(template)
 
         # Alternative defaults to `Undefined`
         expr = parse_conditional_expression("'foo' if else 'bar'")

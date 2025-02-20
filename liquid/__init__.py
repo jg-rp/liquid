@@ -16,7 +16,7 @@ from .loaders import PackageLoader
 from .loaders import make_choice_loader
 from .loaders import make_file_system_loader
 
-from .context import Context
+from .context import RenderContext
 from .context import DebugUndefined
 from .context import is_undefined
 from .context import FutureContext
@@ -50,7 +50,7 @@ __all__ = (
     "CachingChoiceLoader",
     "CachingFileSystemLoader",
     "ChoiceLoader",
-    "Context",
+    "RenderContext",
     "ContextualTemplateAnalysis",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",

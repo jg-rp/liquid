@@ -21,7 +21,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.expression import Expression
     from liquid.stream import TokenStream
 
@@ -42,14 +42,16 @@ class WithNode(Node):
         self.args = args
         self.block = block
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         namespace = {k: v.evaluate(context) for k, v in self.args.items()}
 
         with context.extend(namespace):
             return self.block.render(context, buffer)
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         namespace = {k: await v.evaluate_async(context) for k, v in self.args.items()}
         with context.extend(namespace):

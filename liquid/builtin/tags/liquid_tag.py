@@ -8,7 +8,7 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.lex import get_liquid_expression_lexer
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
@@ -41,11 +41,13 @@ class LiquidNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"LiquidNode(tok={self.tok}, block={self.block!r})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         return self.block.render(context, buffer)
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         return await self.block.render_async(context, buffer)
 

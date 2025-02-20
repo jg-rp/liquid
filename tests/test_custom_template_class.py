@@ -5,8 +5,8 @@ import unittest
 from typing import Any
 from typing import Optional
 
-from liquid import Context
 from liquid import Environment
+from liquid import RenderContext
 from liquid.context import ContextPath
 from liquid.context import Namespace
 from liquid.template import BoundTemplate
@@ -15,7 +15,7 @@ from liquid.template import BoundTemplate
 class CustomTemplateClassTestCase(unittest.TestCase):
     """Test that we can customize the template class."""
 
-    def test_bound_template_subclass(self):
+    def test_bound_template_subclass(self) -> None:
         """Test that we can use a subclass of BoundTemplate with an Environment."""
 
         class CustomTemplate(BoundTemplate):
@@ -27,20 +27,26 @@ class CustomTemplateClassTestCase(unittest.TestCase):
         template = env.from_string("Hello, {{ you }}!")
         self.assertIsInstance(template, CustomTemplate)
 
-    def test_context_subclass(self):
+    def test_context_subclass(self) -> None:
         """Test that we can use a subclass of Context with an Environment."""
 
-        class CustomContext(Context):
+        class CustomContext(RenderContext):
             """Mock context subclass."""
 
             def __init__(
                 self,
-                env: Environment,
+                template: BoundTemplate,
+                *,
                 globals: Optional[Namespace] = None,  # noqa: A002
                 disabled_tags: Optional[list[str]] = None,
                 copy_depth: int = 0,
             ):
-                super().__init__(env, globals, disabled_tags, copy_depth)
+                super().__init__(
+                    template,
+                    globals=globals,
+                    disabled_tags=disabled_tags,
+                    copy_depth=copy_depth,
+                )
                 self.assign_counter = 0
 
             def assign(self, key: str, val: Any) -> None:
@@ -59,27 +65,33 @@ class CustomTemplateClassTestCase(unittest.TestCase):
         self.assertIsInstance(template, CustomTemplate)
 
         buf = io.StringIO()
-        ctx = CustomContext(env)
+        ctx = CustomContext(template)
         template.render_with_context(ctx, buf)
 
         self.assertEqual(buf.getvalue(), "Hello, Brian!")
         self.assertEqual(ctx.assign_counter, 1)
 
-    def test_capture_variables_from_context_subclass(self):
+    def test_capture_variables_from_context_subclass(self) -> None:
         """Test that we can capture a template's variables from a Context subclass."""
         _missing = object()
 
-        class CustomContext(Context):
+        class CustomContext(RenderContext):
             """Mock context subclass."""
 
             def __init__(
                 self,
-                env: Environment,
+                template: BoundTemplate,
+                *,
                 globals: Optional[Namespace] = None,  # noqa: A002
                 disabled_tags: Optional[list[str]] = None,
                 copy_depth: int = 0,
             ):
-                super().__init__(env, globals, disabled_tags, copy_depth)
+                super().__init__(
+                    template,
+                    globals=globals,
+                    disabled_tags=disabled_tags,
+                    copy_depth=copy_depth,
+                )
                 self.references: list[str] = []
 
             def get(self, path: ContextPath, default: object = ...) -> object:
@@ -114,7 +126,7 @@ class CustomTemplateClassTestCase(unittest.TestCase):
         self.assertIsInstance(template, CustomTemplate)
 
         buf = io.StringIO()
-        ctx = CustomContext(env)
+        ctx = CustomContext(template)
         template.render_with_context(ctx, buf)
 
         self.assertEqual(buf.getvalue(), "Hello, Brian!")

@@ -9,8 +9,8 @@ from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
-from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
+from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Identifier
@@ -80,7 +80,9 @@ class RenderNode(Node):
     def __repr__(self) -> str:
         return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         path = self.name.evaluate(context)
         assert isinstance(path, str)
         template = context.get_template_with_context(path, tag=self.tag)
@@ -141,7 +143,7 @@ class RenderNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         path = await self.name.evaluate_async(context)
         assert isinstance(path, str)

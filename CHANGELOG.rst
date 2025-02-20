@@ -1,1 +1,0 @@
-Python Liquid's change log has moved to `CHANGES.md <https://github.com/jg-rp/liquid/blob/main/CHANGES.md>`_.

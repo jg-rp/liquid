@@ -14,8 +14,8 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import ParseTree
-from liquid.context import Context
 from liquid.context import ReadOnlyChainMap
+from liquid.context import RenderContext
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateNotFound
@@ -230,7 +230,7 @@ class _TemplateCounter:
         self._partials = partials if partials is not None else []
 
         # get_template_with_context requires a `Context`.
-        self._empty_context = Context(self.template.env)
+        self._empty_context = RenderContext(self.template)
 
     def analyze(self) -> _TemplateCounter:
         """Traverse the template's syntax tree and count variables as we go.
@@ -667,7 +667,10 @@ class _TemplateCounter:
             raise
 
     def _stack_blocks(
-        self, stack_context: Context, template: BoundTemplate, count_tags: bool = True
+        self,
+        stack_context: RenderContext,
+        template: BoundTemplate,
+        count_tags: bool = True,
     ) -> tuple[Optional[str], list[InheritanceBlockNode]]:
         template_name = template.name or "<string>"
         ast_extends_node, ast_block_nodes = stack_blocks(stack_context, template)
@@ -744,7 +747,7 @@ class _InheritanceChainCounter(_TemplateCounter):
     def __init__(
         self,
         base_template: BoundTemplate,
-        stack_context: Context,
+        stack_context: RenderContext,
         *,
         parent_block_stack_item: Optional[_BlockStackItem] = None,
         follow_partials: bool = True,

@@ -5,7 +5,7 @@ from typing import Optional
 from typing import TextIO
 
 from liquid import ast
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.expressions.common import parse_unchained_identifier
 from liquid.expressions.filtered.lex import tokenize
 from liquid.stream import TokenStream
@@ -31,7 +31,9 @@ class DecrementNode(ast.Node):
     def __str__(self) -> str:
         return f"{self.identifier} -= 1"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         buffer.write(str(context.decrement(self.identifier)))
         return True
 

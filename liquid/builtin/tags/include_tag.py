@@ -7,7 +7,7 @@ from typing import TextIO
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.expression import Identifier
@@ -74,7 +74,9 @@ class IncludeNode(Node):
     def __repr__(self) -> str:
         return f"IncludeNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         name = self.name.evaluate(context)
         template = context.get_template_with_context(str(name), tag=self.tag)
         namespace: dict[str, object] = {}
@@ -114,7 +116,7 @@ class IncludeNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         name = await self.name.evaluate_async(context)
         template = await context.get_template_with_context_async(

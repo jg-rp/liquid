@@ -20,7 +20,7 @@ from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
 if TYPE_CHECKING:
-    from liquid.context import Context
+    from liquid.context import RenderContext
     from liquid.stream import TokenStream
 
 
@@ -56,7 +56,9 @@ class LaxCaseNode(ast.Node):
 
         return " ".join(buf)
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
         rendered: Optional[bool] = False
 
@@ -76,7 +78,7 @@ class LaxCaseNode(ast.Node):
         return rendered
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         buf = context.get_buffer(buffer)
         rendered: Optional[bool] = False

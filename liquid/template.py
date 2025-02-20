@@ -13,13 +13,14 @@ from typing import Iterator
 from typing import Mapping
 from typing import Optional
 from typing import TextIO
+from typing import Type
 from typing import Union
 
-from liquid.context import Context
+from liquid.context import CaptureRenderContext
 from liquid.context import FutureContext
 from liquid.context import FutureVariableCaptureContext
 from liquid.context import ReadOnlyChainMap
-from liquid.context import VariableCaptureContext
+from liquid.context import RenderContext
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
@@ -74,8 +75,8 @@ class BoundTemplate:
 
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
     # `Context` when rendering templates.
-    context_class = Context
-    capture_context_class = VariableCaptureContext
+    context_class: Type[RenderContext] = RenderContext
+    capture_context_class: Type[CaptureRenderContext] = CaptureRenderContext
 
     def __init__(
         self,
@@ -101,9 +102,8 @@ class BoundTemplate:
         Accepts the same arguments as the `dict` constructor.
         """
         context = self.context_class(
-            self.env,
+            self,
             globals=self.make_globals(dict(*args, **kwargs)),
-            template=self,
         )
         buf = self._get_buffer()
         self.render_with_context(context, buf)
@@ -112,9 +112,8 @@ class BoundTemplate:
     async def render_async(self, *args: Any, **kwargs: Any) -> str:
         """An async version of `liquid.template.BoundTemplate.render`."""
         context = self.context_class(
-            self.env,
+            self,
             globals=self.make_globals(dict(*args, **kwargs)),
-            template=self,
         )
         buf = self._get_buffer()
         await self.render_with_context_async(context, buf)
@@ -127,7 +126,7 @@ class BoundTemplate:
 
     def render_with_context(
         self,
-        context: Context,
+        context: RenderContext,
         buffer: TextIO,
         *args: Any,
         partial: bool = False,
@@ -178,7 +177,7 @@ class BoundTemplate:
 
     async def render_with_context_async(
         self,
-        context: Context,
+        context: RenderContext,
         buffer: TextIO,
         *args: Any,
         partial: bool = False,
@@ -341,7 +340,7 @@ class BoundTemplate:
         Accepts the same arguments as `render`.
         """
         context = self.capture_context_class(
-            self.env, globals=self.make_globals(dict(*args, **kwargs))
+            self, globals=self.make_globals(dict(*args, **kwargs))
         )
         buf = self._get_buffer()
         self.render_with_context(context, buf)
@@ -357,7 +356,7 @@ class BoundTemplate:
     ) -> ContextualTemplateAnalysis:
         """An async version of `analyze_with_context`."""
         context = self.capture_context_class(
-            self.env, globals=self.make_globals(dict(*args, **kwargs))
+            self, globals=self.make_globals(dict(*args, **kwargs))
         )
         buf = self._get_buffer()
         await self.render_with_context_async(context, buf)

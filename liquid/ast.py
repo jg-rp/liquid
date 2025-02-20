@@ -8,7 +8,7 @@ from typing import NamedTuple
 from typing import Optional
 from typing import TextIO
 
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.exceptions import DisabledTagError
 from liquid.exceptions import Error
 from liquid.expression import Expression
@@ -44,13 +44,15 @@ class Node(ABC):
                 linenum=tok.linenum,
             )
 
-    def render(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render(self, context: RenderContext, buffer: TextIO) -> Optional[bool]:
         """Check disabled tags before delegating to `render_to_output`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         return self.render_to_output(context, buffer)
 
-    async def render_async(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    async def render_async(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         """An async version of `liquid.ast.Node.render`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
@@ -61,14 +63,14 @@ class Node(ABC):
     @abstractmethod
     def render_to_output(
         self,
-        context: Context,
+        context: RenderContext,
         buffer: TextIO,
     ) -> Optional[bool]:
         """Render this node to the output buffer."""
 
     async def render_to_output_async(
         self,
-        context: Context,
+        context: RenderContext,
         buffer: TextIO,
     ) -> Optional[bool]:
         """An async version of `liquid.ast.Node.render_to_output`."""
@@ -126,7 +128,9 @@ class ParseTree(Node):
     def __repr__(self) -> str:
         return f"ParseTree({self.statements})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         for stmt in self.statements:
             stmt.render(context, buffer)
         return None
@@ -151,7 +155,9 @@ class IllegalNode(Node):
     def __repr__(self) -> str:  # pragma: no cover
         return f"IllegalNode(tok={self.tok})"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         pass
 
 
@@ -168,7 +174,9 @@ class BlockNode(Node):
     def __str__(self) -> str:
         return "".join(str(s) for s in self.statements)
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         for stmt in self.statements:
             try:
                 stmt.render(context, buffer)
@@ -178,7 +186,7 @@ class BlockNode(Node):
         return True
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         for stmt in self.statements:
             try:
@@ -212,14 +220,16 @@ class ConditionalBlockNode(Node):
     def __str__(self) -> str:
         return f"{self.condition} {{ {self.block} }}"
 
-    def render_to_output(self, context: Context, buffer: TextIO) -> Optional[bool]:
+    def render_to_output(
+        self, context: RenderContext, buffer: TextIO
+    ) -> Optional[bool]:
         if self.condition.evaluate(context):
             self.block.render(context, buffer)
             return True
         return False
 
     async def render_to_output_async(
-        self, context: Context, buffer: TextIO
+        self, context: RenderContext, buffer: TextIO
     ) -> Optional[bool]:
         if await self.condition.evaluate_async(context):
             await self.block.render_async(context, buffer)

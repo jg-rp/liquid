@@ -5,7 +5,7 @@ from typing import Optional
 from typing import TextIO
 
 from liquid import ast
-from liquid.context import Context
+from liquid.context import RenderContext
 from liquid.parse import eat_block
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -37,7 +37,7 @@ class CommentNode(ast.Node):
 
     def render_to_output(
         self,
-        _: Context,
+        _: RenderContext,
         __: TextIO,
     ) -> Optional[bool]:
         return False
