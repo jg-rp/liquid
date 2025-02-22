@@ -5,7 +5,6 @@ import sys
 from typing import Iterator
 
 from liquid.exceptions import LiquidSyntaxError
-from liquid.expressions.common import Token
 from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_BLANK
@@ -46,6 +45,7 @@ from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_WITH
 from liquid.token import TOKEN_WORD
+from liquid.token import Token
 from liquid.token import operators
 
 GROUP_QUOTE = sys.intern("quote")
@@ -145,16 +145,6 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
 
         if kind == TOKEN_WORD and value in _keywords:
             kind = value
-        elif kind == TOKEN_RANGE_LITERAL:
-            # XXX: Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
-            # via the `yield` at the end of this loop.
-            yield Token(
-                kind,
-                kind,
-                start_index=parent_token.start_index + match.start(),
-                source=parent_token.source,
-            )
-            kind = TOKEN_LPAREN
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
         elif kind == TOKEN_IDENTSTRING:

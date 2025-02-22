@@ -27,25 +27,26 @@ from typing import Sequence
 from typing import TextIO
 from typing import Union
 
-from liquid import Mode
-from liquid.chain_map import ReadOnlyChainMap
-from liquid.exceptions import ContextDepthError
-from liquid.exceptions import Error
-from liquid.exceptions import LocalNamespaceLimitError
-from liquid.exceptions import LoopIterationLimitError
-from liquid.exceptions import NoSuchFilterFunc
-from liquid.exceptions import lookup_warning
-from liquid.output import LimitedStringIO
-from liquid.undefined import UNDEFINED
-from liquid.undefined import DebugUndefined
-from liquid.undefined import StrictDefaultUndefined
-from liquid.undefined import StrictUndefined
-from liquid.undefined import Undefined
-from liquid.undefined import is_undefined
+from .chain_map import ReadOnlyChainMap
+from .exceptions import ContextDepthError
+from .exceptions import Error
+from .exceptions import LocalNamespaceLimitError
+from .exceptions import LoopIterationLimitError
+from .exceptions import NoSuchFilterFunc
+from .exceptions import lookup_warning
+from .mode import Mode
+from .output import LimitedStringIO
+from .undefined import UNDEFINED
+from .undefined import DebugUndefined
+from .undefined import StrictDefaultUndefined
+from .undefined import StrictUndefined
+from .undefined import Undefined
+from .undefined import is_undefined
 
 if TYPE_CHECKING:
-    from liquid.builtin.tags.for_tag import ForLoop
-    from liquid.template import BoundTemplate
+    from .builtin.tags.for_tag import ForLoop
+    from .template import BoundTemplate
+    from .token import Token
 
 # ruff: noqa: D102
 
@@ -263,7 +264,7 @@ class RenderContext:
             self.env.local_namespace_limit
             and self.get_size_of_locals() > self.env.local_namespace_limit
         ):
-            raise LocalNamespaceLimitError("local namespace limit reached")
+            raise LocalNamespaceLimitError("local namespace limit reached", token=None)
 
     def get_size_of_locals(self) -> int:
         """Return the "size" or a "score" for the current local namespace.
@@ -351,12 +352,12 @@ class RenderContext:
                 return self.env.undefined(name)
             return default
 
-    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
+    def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
         """Return the filter function with given name."""
         try:
             filter_func = self.env.filters[name]
         except KeyError as err:
-            raise NoSuchFilterFunc(f"unknown filter '{name}'") from err
+            raise NoSuchFilterFunc(f"unknown filter '{name}'", token=token) from err
 
         kwargs: dict[str, Any] = {}
 
@@ -442,7 +443,7 @@ class RenderContext:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
-                "maximum context depth reached, possible recursive include"
+                "maximum context depth reached, possible recursive include", token=None
             )
 
         # Remember the current template so we can restore it upon exiting the
@@ -489,7 +490,7 @@ class RenderContext:
             )
             > self.env.loop_iteration_limit
         ):
-            raise LoopIterationLimitError("loop iteration limit reached")
+            raise LoopIterationLimitError("loop iteration limit reached", token=None)
 
     def copy(
         self,
@@ -505,7 +506,7 @@ class RenderContext:
         """
         if self._copy_depth > self.env.context_depth_limit:
             raise ContextDepthError(
-                "maximum context depth reached, possible recursive render"
+                "maximum context depth reached, possible recursive render", token=None
             )
 
         if carry_loop_iterations:
@@ -670,9 +671,9 @@ class CaptureRenderContext(RenderContext):
         self.root_context.local_references.append(name)
         return super().decrement(name)
 
-    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
+    def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
         self.root_context.filters.append(name)
-        return super().filter(name)
+        return super().filter(name, token)
 
     def _count_reference(self, path: ContextPath, result: object) -> None:
         if isinstance(path, str):

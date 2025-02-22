@@ -103,7 +103,7 @@ class TokenStream:
         self._expect(self.peek, typ, value)
 
     def eat(self, typ: str) -> Token:
-        """Consume an return the next token.
+        """Consume and return the next token.
 
         If the type of the next token is equal to _typ_, raise an exceptions.
 
@@ -113,6 +113,22 @@ class TokenStream:
         if tok.kind != typ:
             msg = (
                 f"expected {reverse_operators.get(typ, typ)!r}, "
+                f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
+            )
+            raise LiquidSyntaxError(msg, token=tok)
+        return tok
+
+    def eat_one_of(self, *typ: str) -> Token:
+        """Consume and return the next token.
+
+        If the type of the next token is equal to _typ_, raise an exceptions.
+
+        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
+        """
+        tok = self.current
+        if tok.kind not in typ:
+            msg = (
+                f"expected on of {typ!r}, "
                 f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
             )
             raise LiquidSyntaxError(msg, token=tok)

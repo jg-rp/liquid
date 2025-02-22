@@ -11,16 +11,15 @@ from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LIMIT
-from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_REVERSED
 from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_WORD
 
 
 class Case(NamedTuple):
@@ -65,7 +64,6 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_WORD, "num", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "10", start_index=0, source=""),
@@ -80,7 +78,6 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_WORD, "num", start_index=0, source=""),
@@ -94,7 +91,6 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_FLOAT, "2.4", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),

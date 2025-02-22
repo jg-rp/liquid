@@ -11,15 +11,14 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_INTEGER
-from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_WORD
 
 
 class Case(NamedTuple):
@@ -81,7 +80,6 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_WORD, "foo", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "3", start_index=0, source=""),

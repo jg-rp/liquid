@@ -16,7 +16,6 @@ from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_GT
-from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LE
 from liquid.token import TOKEN_LG
@@ -31,6 +30,7 @@ from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WORD
 
 
 class Case(NamedTuple):
@@ -212,14 +212,12 @@ TEST_CASES: list[Case] = [
         "(1..3) == (1..3)",
         [
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=1, source=""),
             Token(TOKEN_RANGE, "..", start_index=2, source=""),
             Token(TOKEN_INTEGER, "3", start_index=4, source=""),
             Token(TOKEN_RPAREN, ")", start_index=5, source=""),
             Token(TOKEN_EQ, "==", start_index=7, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=10, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=10, source=""),
             Token(TOKEN_INTEGER, "1", start_index=11, source=""),
             Token(TOKEN_RANGE, "..", start_index=12, source=""),
             Token(TOKEN_INTEGER, "3", start_index=14, source=""),

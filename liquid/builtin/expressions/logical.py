@@ -12,6 +12,7 @@ from liquid.expression import Expression
 from liquid.limits import to_int
 from liquid.token import TOKEN_AND
 from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EQ
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
@@ -97,7 +98,8 @@ class BooleanExpression(Expression):
 
     __slots__ = ("expression",)
 
-    def __init__(self, expression: Expression):
+    def __init__(self, token: Token, expression: Expression):
+        super().__init__(token)
         self.expression = expression
 
     def __eq__(self, other: object) -> bool:
@@ -142,6 +144,20 @@ class BooleanExpression(Expression):
     def children(self) -> list[Expression]:
         return [self.expression]
 
+    @staticmethod
+    def parse(
+        env: Environment, tokens: TokenStream, *, inline: bool = False
+    ) -> BooleanExpression:
+        """Return a new BooleanExpression parsed from tokens in _tokens_.
+
+        If _inline_ is `False`, we expect the stream to be empty after parsing
+        a Boolean expression and will raise a syntax error if it's not.
+        """
+        expr = parse_boolean_primitive(env, tokens)
+        if not inline:
+            tokens.eat(TOKEN_EOF)
+        return BooleanExpression(expr.token, expr)
+
 
 class LogicalNotExpression(Expression):
     __slots__ = ("right",)
@@ -164,6 +180,12 @@ class LogicalNotExpression(Expression):
 
     def children(self) -> list[Expression]:
         return [self.right]
+
+    @staticmethod
+    def parse(env: Environment, tokens: TokenStream) -> LogicalNotExpression:
+        """Parse a not expression from _tokens_."""
+        expr = parse_boolean_primitive(env, tokens)
+        return LogicalNotExpression(expr.token, expr)
 
 
 class LogicalAndExpression(Expression):
@@ -415,7 +437,7 @@ def parse_boolean_primitive(  # noqa: PLR0912
         left = FloatLiteral(token, float(token.value))
     if kind == TOKEN_STRING:
         left = StringLiteral(token, token.value)
-    if kind in (TOKEN_RANGE_LITERAL, TOKEN_LPAREN):
+    if kind == TOKEN_RANGE_LITERAL:
         RangeLiteral.parse(env, tokens)
     if kind == TOKEN_WORD:
         if token.value == "empty":
@@ -425,6 +447,10 @@ def parse_boolean_primitive(  # noqa: PLR0912
         left = Path.parse(env, tokens)
     if kind == TOKEN_LBRACKET:
         left = Path.parse(env, tokens)
+    if kind == TOKEN_LPAREN:
+        left = parse_grouped_expression(env, tokens)
+    if kind == TOKEN_NOT:
+        left = LogicalNotExpression.parse(env, tokens)
     else:
         raise LiquidSyntaxError(
             f"expected a primitive expression, found {token.kind}",

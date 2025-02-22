@@ -241,7 +241,6 @@ TEST_CASES: list[Case] = [
         "(1..5)",
         [
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),
@@ -253,7 +252,6 @@ TEST_CASES: list[Case] = [
         "(2.4..5)",
         [
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_FLOAT, "2.4", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),
@@ -265,7 +263,6 @@ TEST_CASES: list[Case] = [
         "(a..b)",
         [
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
-            Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_WORD, "a", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_WORD, "b", start_index=0, source=""),
