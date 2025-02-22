@@ -16,7 +16,7 @@ from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_GT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LE
 from liquid.token import TOKEN_LG
@@ -53,7 +53,7 @@ TEST_CASES: list[Case] = [
         "not nil identifier",
         "user != nil",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_NE, "!=", start_index=5, source=""),
             Token(TOKEN_NIL, "nil", start_index=8, source=""),
         ],
@@ -62,7 +62,7 @@ TEST_CASES: list[Case] = [
         "not null identifier",
         "user != null",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_NE, "!=", start_index=5, source=""),
             Token(TOKEN_NULL, "null", start_index=8, source=""),
         ],
@@ -71,7 +71,7 @@ TEST_CASES: list[Case] = [
         "alternate not nil",
         "user <> nil",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_LG, "<>", start_index=5, source=""),
             Token(TOKEN_NIL, "nil", start_index=8, source=""),
         ],
@@ -80,9 +80,9 @@ TEST_CASES: list[Case] = [
         "identifier equals string literal",
         "user.name == 'brian'",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=4, source=""),
-            Token(TOKEN_IDENTIFIER, "name", start_index=5, source=""),
+            Token(TOKEN_WORD, "name", start_index=5, source=""),
             Token(TOKEN_EQ, "==", start_index=10, source=""),
             Token(TOKEN_STRING, "brian", start_index=13, source=""),
         ],
@@ -91,15 +91,15 @@ TEST_CASES: list[Case] = [
         "equality with or",
         "user.name == 'bill' or user.name == 'bob'",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=4, source=""),
-            Token(TOKEN_IDENTIFIER, "name", start_index=5, source=""),
+            Token(TOKEN_WORD, "name", start_index=5, source=""),
             Token(TOKEN_EQ, "==", start_index=10, source=""),
             Token(TOKEN_STRING, "bill", start_index=13, source=""),
             Token(TOKEN_OR, "or", start_index=20, source=""),
-            Token(TOKEN_IDENTIFIER, "user", start_index=23, source=""),
+            Token(TOKEN_WORD, "user", start_index=23, source=""),
             Token(TOKEN_DOT, ".", start_index=27, source=""),
-            Token(TOKEN_IDENTIFIER, "name", start_index=28, source=""),
+            Token(TOKEN_WORD, "name", start_index=28, source=""),
             Token(TOKEN_EQ, "==", start_index=33, source=""),
             Token(TOKEN_STRING, "bob", start_index=36, source=""),
         ],
@@ -108,15 +108,15 @@ TEST_CASES: list[Case] = [
         "equality with and",
         "user.name == 'bob' and user.age > 45",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=4, source=""),
-            Token(TOKEN_IDENTIFIER, "name", start_index=5, source=""),
+            Token(TOKEN_WORD, "name", start_index=5, source=""),
             Token(TOKEN_EQ, "==", start_index=10, source=""),
             Token(TOKEN_STRING, "bob", start_index=13, source=""),
             Token(TOKEN_AND, "and", start_index=19, source=""),
-            Token(TOKEN_IDENTIFIER, "user", start_index=23, source=""),
+            Token(TOKEN_WORD, "user", start_index=23, source=""),
             Token(TOKEN_DOT, ".", start_index=27, source=""),
-            Token(TOKEN_IDENTIFIER, "age", start_index=28, source=""),
+            Token(TOKEN_WORD, "age", start_index=28, source=""),
             Token(TOKEN_GT, ">", start_index=32, source=""),
             Token(TOKEN_INTEGER, "45", start_index=34, source=""),
         ],
@@ -125,9 +125,9 @@ TEST_CASES: list[Case] = [
         "greater than or equal to integer literal",
         "user.age >= 21",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=4, source=""),
-            Token(TOKEN_IDENTIFIER, "age", start_index=5, source=""),
+            Token(TOKEN_WORD, "age", start_index=5, source=""),
             Token(TOKEN_GE, ">=", start_index=9, source=""),
             Token(TOKEN_INTEGER, "21", start_index=12, source=""),
         ],
@@ -136,9 +136,9 @@ TEST_CASES: list[Case] = [
         "less than or equal to integer literal",
         "user.age <= 21",
         [
-            Token(TOKEN_IDENTIFIER, "user", start_index=0, source=""),
+            Token(TOKEN_WORD, "user", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=4, source=""),
-            Token(TOKEN_IDENTIFIER, "age", start_index=5, source=""),
+            Token(TOKEN_WORD, "age", start_index=5, source=""),
             Token(TOKEN_LE, "<=", start_index=9, source=""),
             Token(TOKEN_INTEGER, "21", start_index=12, source=""),
         ],
@@ -147,9 +147,9 @@ TEST_CASES: list[Case] = [
         "identifier contains string",
         "product.tags contains 'sale'",
         [
-            Token(TOKEN_IDENTIFIER, "product", start_index=0, source=""),
+            Token(TOKEN_WORD, "product", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=7, source=""),
-            Token(TOKEN_IDENTIFIER, "tags", start_index=8, source=""),
+            Token(TOKEN_WORD, "tags", start_index=8, source=""),
             Token(TOKEN_CONTAINS, "contains", start_index=13, source=""),
             Token(TOKEN_STRING, "sale", start_index=22, source=""),
         ],
@@ -158,9 +158,9 @@ TEST_CASES: list[Case] = [
         "identifier equals blank",
         "product.title == blank",
         [
-            Token(TOKEN_IDENTIFIER, "product", start_index=0, source=""),
+            Token(TOKEN_WORD, "product", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=7, source=""),
-            Token(TOKEN_IDENTIFIER, "title", start_index=8, source=""),
+            Token(TOKEN_WORD, "title", start_index=8, source=""),
             Token(TOKEN_EQ, "==", start_index=14, source=""),
             Token(TOKEN_BLANK, "blank", start_index=17, source=""),
         ],
@@ -169,9 +169,9 @@ TEST_CASES: list[Case] = [
         "identifier equals empty",
         "product.title == empty",
         [
-            Token(TOKEN_IDENTIFIER, "product", start_index=0, source=""),
+            Token(TOKEN_WORD, "product", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=7, source=""),
-            Token(TOKEN_IDENTIFIER, "title", start_index=8, source=""),
+            Token(TOKEN_WORD, "title", start_index=8, source=""),
             Token(TOKEN_EQ, "==", start_index=14, source=""),
             Token(TOKEN_EMPTY, "empty", start_index=17, source=""),
         ],

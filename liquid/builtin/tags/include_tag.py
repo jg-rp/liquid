@@ -25,7 +25,7 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_WITH
 from liquid.token import Token
 
@@ -209,7 +209,7 @@ class IncludeTag(Tag):
         # Optionally bind a variable to the included template context
         if expr_stream.current[1] in BIND_TOKENS:
             next(expr_stream)  # Eat 'with' or 'for'
-            expr_stream.expect(TOKEN_IDENTIFIER)
+            expr_stream.expect(TOKEN_WORD)
             identifier = parse_identifier(expr_stream)
             next(expr_stream)
 
@@ -217,7 +217,7 @@ class IncludeTag(Tag):
             # or an alias if an identifier follows the "as" keyword.
             if expr_stream.current[1] == TOKEN_AS:
                 next(expr_stream)  # Eat 'as'
-                expr_stream.expect(TOKEN_IDENTIFIER)
+                expr_stream.expect(TOKEN_WORD)
                 alias = str(parse_unchained_identifier(expr_stream))
                 next(expr_stream)
 
@@ -225,7 +225,7 @@ class IncludeTag(Tag):
         args: dict[str, Expression] = {}
 
         # The first keyword argument might follow immediately or after a comma.
-        if expr_stream.current[1] == TOKEN_IDENTIFIER:
+        if expr_stream.current[1] == TOKEN_WORD:
             key, val = _parse_argument(expr_stream)
             args[key] = val
 

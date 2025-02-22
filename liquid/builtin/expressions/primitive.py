@@ -11,11 +11,30 @@ from typing import Union
 
 from markupsafe import Markup
 
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.limits import to_int
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_RANGE
+from liquid.token import TOKEN_RANGE_LITERAL
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WORD
+
+from .path import Path
 
 if TYPE_CHECKING:
+    from liquid import Environment
     from liquid import RenderContext
+    from liquid import Token
+    from liquid import TokenStream
 
 
 class Nil(Expression):
@@ -37,9 +56,6 @@ class Nil(Expression):
         return []
 
 
-NIL = Nil()
-
-
 class Empty(Expression):
     __slots__ = ()
 
@@ -59,9 +75,6 @@ class Empty(Expression):
 
     def children(self) -> list[Expression]:
         return []
-
-
-EMPTY = Empty()
 
 
 class Blank(Expression):
@@ -87,9 +100,6 @@ class Blank(Expression):
         return []
 
 
-BLANK = Blank()
-
-
 class Continue(Expression):
     __slots__ = ()
 
@@ -109,16 +119,14 @@ class Continue(Expression):
         return []
 
 
-CONTINUE = Continue()
-
-
 T = TypeVar("T")
 
 
 class Literal(Expression, Generic[T]):
     __slots__ = ("value",)
 
-    def __init__(self, value: T):
+    def __init__(self, token: Token, value: T):
+        super().__init__(token)
         self.value = value
 
     def __str__(self) -> str:
@@ -140,28 +148,37 @@ class Literal(Expression, Generic[T]):
         return []
 
 
-class Boolean(Literal[bool]):
+class TrueLiteral(Literal[bool]):
     __slots__ = ()
 
-    def __init__(self, value: bool):
-        super().__init__(value)
+    def __init__(self, token: Token):
+        super().__init__(token, True)
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Boolean) and self.value == other.value
+        return isinstance(other, TrueLiteral)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"Boolean(value={self.value})"
+    def __str__(self) -> str:
+        return "true"
 
 
-TRUE = Boolean(True)
-FALSE = Boolean(False)
+class FalseLiteral(Literal[bool]):
+    __slots__ = ()
+
+    def __init__(self, token: Token):
+        super().__init__(token, False)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, FalseLiteral)
+
+    def __str__(self) -> str:
+        return "false"
 
 
 class StringLiteral(Literal[str]):
     __slots__ = ()
 
-    def __init__(self, value: str):
-        super().__init__(value)
+    def __init__(self, token: Token, value: str):
+        super().__init__(token, value)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, StringLiteral) and self.value == other.value
@@ -184,8 +201,8 @@ class StringLiteral(Literal[str]):
 class IntegerLiteral(Literal[int]):
     __slots__ = ()
 
-    def __init__(self, value: int):
-        super().__init__(value)
+    def __init__(self, token: Token, value: int):
+        super().__init__(token, value)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, IntegerLiteral) and self.value == other.value
@@ -200,8 +217,8 @@ class IntegerLiteral(Literal[int]):
 class FloatLiteral(Literal[float]):
     __slots__ = ()
 
-    def __init__(self, value: float):
-        super().__init__(value)
+    def __init__(self, token: Token, value: float):
+        super().__init__(token, value)
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, FloatLiteral) and self.value == other.value
@@ -213,7 +230,8 @@ class FloatLiteral(Literal[float]):
 class RangeLiteral(Expression):
     __slots__ = ("start", "stop")
 
-    def __init__(self, start: Expression, stop: Expression):
+    def __init__(self, token: Token, start: Expression, stop: Expression):
+        super().__init__(token)
         self.start = start
         self.stop = stop
 
@@ -269,5 +287,96 @@ class RangeLiteral(Expression):
     def children(self) -> list[Expression]:
         return [self.start, self.stop]
 
+    @staticmethod
+    def parse(env: Environment, tokens: TokenStream) -> RangeLiteral:
+        token = tokens.eat(TOKEN_RANGE_LITERAL)
+        start = parse_primitive(env, tokens)
+        tokens.eat(TOKEN_RANGE)
+        stop = parse_primitive(env, tokens)
+        tokens.eat(TOKEN_RPAREN)
+        return RangeLiteral(token, start, stop)
 
-# TODO: parse_primitive(env: Environment, token: Token) -> Expression
+
+def parse_primitive(env: Environment, tokens: TokenStream) -> Expression:  # noqa: PLR0911
+    """Parse a primitive expression from _tokens_."""
+    token = next(tokens)
+    kind = token.kind
+
+    if kind == TOKEN_TRUE:
+        return TrueLiteral(token)
+    if kind == TOKEN_FALSE:
+        return FalseLiteral(token)
+    if kind in (TOKEN_NIL, TOKEN_NULL):
+        return Nil(token)
+    if kind == TOKEN_INTEGER:
+        return IntegerLiteral(token, to_int(token.value))
+    if kind == TOKEN_FLOAT:
+        return FloatLiteral(token, float(token.value))
+    if kind == TOKEN_STRING:
+        return StringLiteral(token, token.value)
+    if kind in (TOKEN_RANGE_LITERAL, TOKEN_LPAREN):
+        RangeLiteral.parse(env, tokens)
+    if kind == TOKEN_WORD:
+        if token.value == "empty":
+            return Empty(token)
+        if token.value == "blank":
+            return Blank(token)
+        return Path.parse(env, tokens)
+    if kind == TOKEN_LBRACKET:
+        return Path.parse(env, tokens)
+
+    raise LiquidSyntaxError(
+        f"expected a primitive expression, found {token.kind}", token=token
+    )
+
+
+class Identifier(str):
+    """A string, token pair."""
+
+    def __new__(
+        cls, obj: object, *args: object, token: Token, **kwargs: object
+    ) -> Identifier:
+        instance = super().__new__(cls, obj, *args, **kwargs)
+        instance.token = token
+        return instance
+
+    def __init__(
+        self,
+        obj: object,  # noqa: ARG002
+        *args: object,  # noqa: ARG002
+        token: Token,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
+    ) -> None:
+        super().__init__()
+        self.token: Token
+
+    def __eq__(self, value: object) -> bool:
+        return super().__eq__(value)
+
+    def __hash__(self) -> int:
+        return super().__hash__()
+
+
+def parse_identifier(env: Environment, tokens: TokenStream) -> Identifier:
+    """Parse a word that might otherwise be considered a path with one segment."""
+    expr = parse_primitive(env, tokens)
+    if not isinstance(expr, Path):
+        raise LiquidSyntaxError(
+            f"expected an identifier, found {expr.__class__.__name__}", token=expr.token
+        )
+
+    if len(expr.path) != 1:
+        raise LiquidSyntaxError(
+            "expected an identifier, found a path with multiple segments",
+            token=expr.token,
+        )
+
+    word = expr.path[0]
+
+    if not isinstance(word, str):
+        raise LiquidSyntaxError(
+            f"expected an identifier, found {word.__class__.__name__}",
+            token=expr.token,
+        )
+
+    return Identifier(word, token=expr.token)

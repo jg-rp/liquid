@@ -14,7 +14,6 @@ from liquid.token import TOKEN_ELSE
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_INTEGER
@@ -29,6 +28,7 @@ from liquid.token import TOKEN_RBRACKET
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WORD
 
 
 class Case(NamedTuple):
@@ -75,45 +75,45 @@ TEST_CASES: list[Case] = [
     Case(
         "lone identifier",
         "collection",
-        [Token(TOKEN_IDENTIFIER, "collection", start_index=0, source="")],
+        [Token(TOKEN_WORD, "collection", start_index=0, source="")],
     ),
     Case(
         "lone identifier with a hyphen",
         "main-collection",
-        [Token(TOKEN_IDENTIFIER, "main-collection", start_index=0, source="")],
+        [Token(TOKEN_WORD, "main-collection", start_index=0, source="")],
     ),
     Case(
         "chained identifier",
         "collection.products",
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
         ],
     ),
     Case(
         "chained identifier by double quoted key",
         'collection["products"]',
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
         ],
     ),
     Case(
         "chained identifier by single quoted key",
         "collection['products']",
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
         ],
     ),
     Case(
         "chained identifier with array index",
         "collection.products[0]",
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_IDENTINDEX, "0", start_index=0, source=""),
         ],
     ),
@@ -121,11 +121,11 @@ TEST_CASES: list[Case] = [
         "chained identifier with array index from identifier",
         "collection.products[i]",
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_LBRACKET, "[", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "i", start_index=0, source=""),
+            Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_RBRACKET, "]", start_index=0, source=""),
         ],
     ),
@@ -135,18 +135,18 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
         "identifier with filter",
         "collection.title | upcase",
         [
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "title", start_index=0, source=""),
+            Token(TOKEN_WORD, "title", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
@@ -155,7 +155,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_INTEGER, "4", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "at_least", start_index=0, source=""),
+            Token(TOKEN_WORD, "at_least", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),
         ],
@@ -166,7 +166,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_FLOAT, "4.1", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "divided_by", start_index=0, source=""),
+            Token(TOKEN_WORD, "divided_by", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_FLOAT, "5.2", start_index=0, source=""),
         ],
@@ -177,7 +177,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "append", start_index=0, source=""),
+            Token(TOKEN_WORD, "append", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_STRING, "bar", start_index=0, source=""),
         ],
@@ -188,11 +188,11 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "append", start_index=0, source=""),
+            Token(TOKEN_WORD, "append", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "title", start_index=0, source=""),
+            Token(TOKEN_WORD, "title", start_index=0, source=""),
         ],
     ),
     Case(
@@ -201,7 +201,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "Liquid", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "slice", start_index=0, source=""),
+            Token(TOKEN_WORD, "slice", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "2", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
@@ -214,13 +214,13 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "Liquid", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "slice", start_index=0, source=""),
+            Token(TOKEN_WORD, "slice", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "2", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
@@ -229,7 +229,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "Liquid", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "slice", start_index=0, source=""),
+            Token(TOKEN_WORD, "slice", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "2", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
@@ -266,9 +266,9 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
             Token(TOKEN_LPAREN, "(", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "a", start_index=0, source=""),
+            Token(TOKEN_WORD, "a", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "b", start_index=0, source=""),
+            Token(TOKEN_WORD, "b", start_index=0, source=""),
             Token(TOKEN_RPAREN, ")", start_index=0, source=""),
         ],
     ),
@@ -287,9 +287,9 @@ TEST_CASES: list[Case] = [
         expect=[
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_IF, "if", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "x", start_index=0, source=""),
+            Token(TOKEN_WORD, "x", start_index=0, source=""),
             Token(TOKEN_LT, "<", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "y", start_index=0, source=""),
+            Token(TOKEN_WORD, "y", start_index=0, source=""),
         ],
     ),
     Case(
@@ -309,7 +309,7 @@ TEST_CASES: list[Case] = [
         expect=[
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
             Token(TOKEN_IF, "if", start_index=0, source=""),
             Token(TOKEN_TRUE, "true", start_index=0, source=""),
             Token(TOKEN_ELSE, "else", start_index=0, source=""),
@@ -326,7 +326,7 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_ELSE, "else", start_index=0, source=""),
             Token(TOKEN_STRING, "bar", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
@@ -339,7 +339,7 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_ELSE, "else", start_index=0, source=""),
             Token(TOKEN_STRING, "bar", start_index=0, source=""),
             Token(TOKEN_DPIPE, "||", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
@@ -352,7 +352,7 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_ELSE, "else", start_index=0, source=""),
             Token(TOKEN_STRING, "bar", start_index=0, source=""),
             Token(TOKEN_DPIPE, "||", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
         ],
     ),
     Case(
@@ -399,7 +399,7 @@ TEST_CASES: list[Case] = [
         expect=[
             Token(TOKEN_STRING, "foo", start_index=0, source=""),
             Token(TOKEN_PIPE, "|", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "upcase", start_index=0, source=""),
+            Token(TOKEN_WORD, "upcase", start_index=0, source=""),
             Token(TOKEN_IF, "if", start_index=0, source=""),
             Token(TOKEN_NOT, "not", start_index=0, source=""),
             Token(TOKEN_TRUE, "true", start_index=0, source=""),

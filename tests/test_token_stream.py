@@ -6,7 +6,7 @@ from liquid.stream import TokenStream
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_STRING
@@ -20,7 +20,7 @@ class TokenStreamTestCase(TestCase):
         self.tokens = [
             Token(1, TOKEN_STRING, "Liquid"),
             Token(1, TOKEN_PIPE, "|"),
-            Token(1, TOKEN_IDENTIFIER, "slice"),
+            Token(1, TOKEN_WORD, "slice"),
             Token(1, TOKEN_COLON, ":"),
             Token(1, TOKEN_INTEGER, "2"),
             Token(1, TOKEN_COMMA, ","),

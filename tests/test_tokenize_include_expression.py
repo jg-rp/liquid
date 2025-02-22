@@ -11,7 +11,7 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LPAREN
@@ -40,9 +40,9 @@ TEST_CASES: list[Case] = [
         "name from identifier and no local variable",
         "section.name",
         [
-            Token(TOKEN_IDENTIFIER, "section", start_index=0, source=""),
+            Token(TOKEN_WORD, "section", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "name", start_index=0, source=""),
+            Token(TOKEN_WORD, "name", start_index=0, source=""),
         ],
     ),
     Case(
@@ -51,7 +51,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_WITH, "with", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_IDENTINDEX, "0", start_index=0, source=""),
         ],
     ),
@@ -61,15 +61,15 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "foo", start_index=0, source=""),
+            Token(TOKEN_WORD, "foo", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_STRING, "bar", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "some", start_index=0, source=""),
+            Token(TOKEN_WORD, "some", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "other", start_index=0, source=""),
+            Token(TOKEN_WORD, "other", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "tags", start_index=0, source=""),
+            Token(TOKEN_WORD, "tags", start_index=0, source=""),
         ],
     ),
     Case(
@@ -78,7 +78,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "foo", start_index=0, source=""),
+            Token(TOKEN_WORD, "foo", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
             Token(TOKEN_LPAREN, "(", start_index=0, source=""),
@@ -94,10 +94,10 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_WITH, "with", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_IDENTINDEX, "0", start_index=0, source=""),
             Token(TOKEN_AS, "as", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "foo", start_index=0, source=""),
+            Token(TOKEN_WORD, "foo", start_index=0, source=""),
         ],
     ),
     Case(
@@ -106,7 +106,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_FOR, "for", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
         ],
     ),
     Case(
@@ -115,9 +115,9 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_FOR, "for", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_AS, "as", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "foo", start_index=0, source=""),
+            Token(TOKEN_WORD, "foo", start_index=0, source=""),
         ],
     ),
     Case(
@@ -126,16 +126,16 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_STRING, "product", start_index=0, source=""),
             Token(TOKEN_WITH, "with", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_IDENTINDEX, "0", start_index=0, source=""),
             Token(TOKEN_AS, "as", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "foo", start_index=0, source=""),
+            Token(TOKEN_WORD, "foo", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "bar", start_index=0, source=""),
+            Token(TOKEN_WORD, "bar", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "42", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "baz", start_index=0, source=""),
+            Token(TOKEN_WORD, "baz", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_STRING, "hello", start_index=0, source=""),
         ],

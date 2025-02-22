@@ -11,7 +11,7 @@ from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LIMIT
@@ -34,22 +34,22 @@ TEST_CASES: list[Case] = [
         "loop over identifier",
         "product in collection.products",
         [
-            Token(TOKEN_IDENTIFIER, "product", start_index=0, source=""),
+            Token(TOKEN_WORD, "product", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
         ],
     ),
     Case(
         "loop over identifier with limit and offset",
         "product in collection.products limit:4 offset:2",
         [
-            Token(TOKEN_IDENTIFIER, "product", start_index=0, source=""),
+            Token(TOKEN_WORD, "product", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "collection", start_index=0, source=""),
+            Token(TOKEN_WORD, "collection", start_index=0, source=""),
             Token(TOKEN_DOT, ".", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "products", start_index=0, source=""),
+            Token(TOKEN_WORD, "products", start_index=0, source=""),
             Token(TOKEN_LIMIT, "limit", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "4", start_index=0, source=""),
@@ -62,7 +62,7 @@ TEST_CASES: list[Case] = [
         "loop over reversed range",
         "num in (1..10) reversed",
         [
-            Token(TOKEN_IDENTIFIER, "num", start_index=0, source=""),
+            Token(TOKEN_WORD, "num", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
             Token(TOKEN_LPAREN, "(", start_index=0, source=""),
@@ -77,13 +77,13 @@ TEST_CASES: list[Case] = [
         "loop over range with identifier",
         "i in (1..num)",
         [
-            Token(TOKEN_IDENTIFIER, "i", start_index=0, source=""),
+            Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
             Token(TOKEN_LPAREN, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "num", start_index=0, source=""),
+            Token(TOKEN_WORD, "num", start_index=0, source=""),
             Token(TOKEN_RPAREN, ")", start_index=0, source=""),
         ],
     ),
@@ -91,7 +91,7 @@ TEST_CASES: list[Case] = [
         "loop over range with float start",
         "i in (2.4..5)",
         [
-            Token(TOKEN_IDENTIFIER, "i", start_index=0, source=""),
+            Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
             Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
             Token(TOKEN_LPAREN, "(", start_index=0, source=""),
@@ -105,9 +105,9 @@ TEST_CASES: list[Case] = [
         description="loop over named iterable with continue offset",
         source="item in array limit: 3 offset: continue",
         expect=[
-            Token(TOKEN_IDENTIFIER, "item", start_index=0, source=""),
+            Token(TOKEN_WORD, "item", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "array", start_index=0, source=""),
+            Token(TOKEN_WORD, "array", start_index=0, source=""),
             Token(TOKEN_LIMIT, "limit", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
             Token(TOKEN_INTEGER, "3", start_index=0, source=""),
@@ -120,9 +120,9 @@ TEST_CASES: list[Case] = [
         description="comma separated arguments",
         source="i in array, limit: 4, offset: 2",
         expect=[
-            Token(TOKEN_IDENTIFIER, "i", start_index=0, source=""),
+            Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_IDENTIFIER, "array", start_index=0, source=""),
+            Token(TOKEN_WORD, "array", start_index=0, source=""),
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
             Token(TOKEN_LIMIT, "limit", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),

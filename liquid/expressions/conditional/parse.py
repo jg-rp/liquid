@@ -28,7 +28,7 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_DPIPE
 from liquid.token import TOKEN_ELSE
 from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_PIPE
 
@@ -72,7 +72,7 @@ def _parse_filter(
         )
 
     stream = TokenStream(iter(tokens), shorthand_indexes=shorthand_indexes)
-    stream.expect(TOKEN_IDENTIFIER)
+    stream.expect(TOKEN_WORD)
     name = stream.current[2]
 
     next(stream)
@@ -90,7 +90,7 @@ def _parse_filter(
     while stream.current[1] != TOKEN_EOF:
         if stream.peek[1] == TOKEN_COLON:
             # A keyword argument
-            stream.expect(TOKEN_IDENTIFIER)
+            stream.expect(TOKEN_WORD)
             key = next(stream)[2]
             # Eat colon
             next(stream)

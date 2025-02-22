@@ -34,7 +34,7 @@ from liquid.token import TOKEN_DOT
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_ILLEGAL
@@ -132,7 +132,7 @@ def parse_identifier(stream: "TokenStream") -> Identifier:
 
     while True:
         pos, typ, val = stream.current
-        if typ == TOKEN_IDENTIFIER:
+        if typ == TOKEN_WORD:
             path.append(Segment(val))
         elif typ == TOKEN_IDENTINDEX:
             path.append(Segment(to_int(val)))
@@ -171,7 +171,7 @@ def parse_string_or_identifier(
     If the stream is not at a string or identifier expression, raise a syntax error.
     """
     typ = stream.current[1]
-    if typ in (TOKEN_IDENTIFIER, TOKEN_LBRACKET):
+    if typ in (TOKEN_WORD, TOKEN_LBRACKET):
         expr: Union[StringLiteral, Identifier] = parse_identifier(stream)
     elif typ == TOKEN_STRING:
         expr = parse_string_literal(stream)
@@ -212,7 +212,7 @@ def make_parse_range(
         stream.next_token()
 
         # Parse start
-        if stream.current[1] not in (TOKEN_IDENTIFIER, TOKEN_INTEGER, TOKEN_FLOAT):
+        if stream.current[1] not in (TOKEN_WORD, TOKEN_INTEGER, TOKEN_FLOAT):
             raise LiquidSyntaxError(
                 f"unexpected {stream.current.value!r} in range expression",
                 linenum=stream.current[0],
@@ -225,7 +225,7 @@ def make_parse_range(
         stream.next_token()
 
         # Parse stop
-        if stream.current[1] not in (TOKEN_IDENTIFIER, TOKEN_INTEGER, TOKEN_FLOAT):
+        if stream.current[1] not in (TOKEN_WORD, TOKEN_INTEGER, TOKEN_FLOAT):
             raise LiquidSyntaxError(
                 f"unexpected {stream.current.value!r} in range expression",
                 linenum=stream.current[0],
@@ -245,7 +245,7 @@ def make_parse_range(
 
 _IDENT_TOKENS = frozenset(
     (
-        TOKEN_IDENTIFIER,
+        TOKEN_WORD,
         TOKEN_IDENTINDEX,
         TOKEN_DOT,
         TOKEN_LBRACKET,
@@ -265,7 +265,7 @@ def _parse_common_identifier(stream: "TokenStream") -> Identifier:
 
     while True:
         pos, _type, value = stream.current
-        if _type == TOKEN_IDENTIFIER:
+        if _type == TOKEN_WORD:
             path.append(Segment(value))
         elif _type == TOKEN_IDENTINDEX:
             path.append(Segment(to_int(value)))
@@ -303,7 +303,7 @@ LITERAL_OR_IDENT_TOKEN_RULES = (
     (TOKEN_FLOAT, r"-?\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"-?\d+\b"),
     (TOKEN_DOT, r"\."),
-    (TOKEN_IDENTIFIER, IDENTIFIER_PATTERN),
+    (TOKEN_WORD, IDENTIFIER_PATTERN),
     (TOKEN_LPAREN, r"\("),
     (TOKEN_RPAREN, r"\)"),
     (TOKEN_LBRACKET, r"\["),
@@ -327,7 +327,7 @@ LITERAL_OR_IDENT_KEYWORDS = frozenset(
 )
 
 LITERAL_OR_IDENT_MAP = {
-    TOKEN_IDENTIFIER: _parse_common_identifier,
+    TOKEN_WORD: _parse_common_identifier,
     TOKEN_STRING: parse_string_literal,
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
@@ -356,12 +356,12 @@ def tokenize_common_expression(expr: str, linenum: int = 1) -> Iterator[Token]:
         value = match.group()
         newlines = value.count("\n")
 
-        if kind == TOKEN_IDENTIFIER and value in _keywords:
+        if kind == TOKEN_WORD and value in _keywords:
             kind = value
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
         elif kind == TOKEN_IDENTSTRING:
-            kind = TOKEN_IDENTIFIER
+            kind = TOKEN_WORD
             value = match.group(GROUP_IDENTQUOTED)
         elif kind == TOKEN_STRING:
             value = match.group(GROUP_QUOTED)

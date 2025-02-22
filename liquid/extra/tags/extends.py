@@ -31,7 +31,7 @@ from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
@@ -317,7 +317,7 @@ class BlockTag(Tag):
         return self.node_class(tok, block_name, block, required)
 
     def _parse_block_name(self, stream: TokenStream) -> StringLiteral:
-        if stream.current[1] in (TOKEN_IDENTIFIER, TOKEN_STRING):
+        if stream.current[1] in (TOKEN_WORD, TOKEN_STRING):
             return StringLiteral(stream.current.value)
         raise LiquidSyntaxError(
             f"invalid identifier '{stream.current.value}' for {self.name!r} tag",

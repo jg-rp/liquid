@@ -21,7 +21,6 @@ from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_IDENTIFIER
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IF
@@ -46,6 +45,7 @@ from liquid.token import TOKEN_SKIP
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_WORD
 from liquid.token import operators
 
 GROUP_QUOTE = sys.intern("quote")
@@ -86,7 +86,7 @@ _rules = (
     (TOKEN_FLOAT, r"-?\d+\.(?!\.)\d*"),
     (TOKEN_INTEGER, r"-?\d+\b"),
     (TOKEN_DOT, r"\."),
-    (TOKEN_IDENTIFIER, IDENTIFIER_PATTERN),
+    (TOKEN_WORD, IDENTIFIER_PATTERN),
     (TOKEN_LPAREN, r"\("),
     (TOKEN_RPAREN, r"\)"),
     (TOKEN_LBRACKET, r"\["),
@@ -143,10 +143,10 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
 
         value = match.group()
 
-        if kind == TOKEN_IDENTIFIER and value in _keywords:
+        if kind == TOKEN_WORD and value in _keywords:
             kind = value
         elif kind == TOKEN_RANGE_LITERAL:
-            # Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
+            # XXX: Yield a TOKEN_RANGE_LITERAL, then yield a TOKEN_LPAREN
             # via the `yield` at the end of this loop.
             yield Token(
                 kind,
@@ -158,7 +158,7 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
         elif kind == TOKEN_IDENTSTRING:
-            kind = TOKEN_IDENTIFIER
+            kind = TOKEN_WORD
             value = match.group(GROUP_IDENTQUOTED)
         elif kind == TOKEN_STRING:
             value = match.group(GROUP_QUOTED)

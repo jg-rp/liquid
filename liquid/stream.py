@@ -17,6 +17,8 @@ from .token import reverse_operators
 class TokenStream:
     """Step through or iterate a stream of tokens."""
 
+    eof = Token(TOKEN_EOF, "", -1, "")
+
     def __init__(
         self,
         tokeniter: Iterator[Token],
@@ -28,30 +30,10 @@ class TokenStream:
         # Queue of peeked tokens
         self._pushed: Deque[Token] = deque()
 
-        self.current: Token = Token(0, TOKEN_INITIAL, "")
+        self.current: Token = Token(TOKEN_INITIAL, "", 0, "")
         next(self)
 
-        self.shorthand_indexes = shorthand_indexes
-
-    class TokenStreamIterator:
-        """An iterable token stream."""
-
-        def __init__(self, stream: TokenStream):
-            self.stream = stream
-
-        def __iter__(self) -> Iterator[Token]:
-            return self
-
-        def __next__(self) -> Token:
-            tok = self.stream.current
-            if tok.kind is TOKEN_EOF:
-                self.stream.close()
-                raise StopIteration
-            next(self.stream)
-            return tok
-
-    def __iter__(self) -> Iterator[Token]:
-        return self.TokenStreamIterator(self)
+        self.shorthand_indexes = shorthand_indexes  # TODO:
 
     def __next__(self) -> Token:
         tok = self.current
@@ -90,7 +72,8 @@ class TokenStream:
 
     def close(self) -> None:
         """Close the stream."""
-        self.current = Token(0, TOKEN_EOF, "")
+        # TODO: loose close
+        self.current = self.eof
 
     def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> None:
         if tok.kind != typ or (value is not None and tok.value != value):
@@ -103,7 +86,7 @@ class TokenStream:
                 )
             else:
                 msg = f"expected '{_expected_typ}', found '{_typ}'"
-            raise LiquidSyntaxError(msg, linenum=tok.start_index)
+            raise LiquidSyntaxError(msg, token=tok)
 
     def expect(self, typ: str, value: Optional[str] = None) -> None:
         """Check the current token in the stream matches the given type and value.
@@ -118,3 +101,19 @@ class TokenStream:
         Raises a `LiquidSyntaxError` if they don't.
         """
         self._expect(self.peek, typ, value)
+
+    def eat(self, typ: str) -> Token:
+        """Consume an return the next token.
+
+        If the type of the next token is equal to _typ_, raise an exceptions.
+
+        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
+        """
+        tok = self.current
+        if tok.kind != typ:
+            msg = (
+                f"expected {reverse_operators.get(typ, typ)!r}, "
+                f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
+            )
+            raise LiquidSyntaxError(msg, token=tok)
+        return tok

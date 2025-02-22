@@ -31,7 +31,7 @@ from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
@@ -52,7 +52,7 @@ TOKEN_MAP: dict[str, Callable[[TokenStream], Expression]] = {
     TOKEN_STRING: parse_string_literal,
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
-    TOKEN_IDENTIFIER: parse_identifier,
+    TOKEN_WORD: parse_identifier,
     TOKEN_LBRACKET: parse_identifier,
 }
 
@@ -191,7 +191,7 @@ def _parse_filter(
         )
 
     stream = TokenStream(iter(tokens), shorthand_indexes=shorthand_indexes)
-    stream.expect(TOKEN_IDENTIFIER)
+    stream.expect(TOKEN_WORD)
     name = stream.current[2]
 
     next(stream)
@@ -209,7 +209,7 @@ def _parse_filter(
     while stream.current[1] != TOKEN_EOF:
         if stream.peek[1] == TOKEN_COLON:
             # A keyword argument
-            stream.expect(TOKEN_IDENTIFIER)
+            stream.expect(TOKEN_WORD)
             key = next(stream)[2]
             # Eat colon
             next(stream)

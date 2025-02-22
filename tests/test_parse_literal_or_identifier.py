@@ -20,7 +20,7 @@ from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IDENTINDEX
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_NIL
@@ -132,7 +132,7 @@ class ParseLiteralOrIdentifierTestCase(unittest.TestCase):
                 ]
             ),
         )
-        self.assertEqual(stream.current, (1, TOKEN_IDENTIFIER, "foo"))
+        self.assertEqual(stream.current, (1, TOKEN_WORD, "foo"))
 
     def test_parse_nested_identifier(self) -> None:
         """Test that we can parse a nested identifier."""

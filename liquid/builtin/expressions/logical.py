@@ -1,15 +1,95 @@
 """Built-in logical expressions."""
 
+from __future__ import annotations
+
 from decimal import Decimal
+from typing import TYPE_CHECKING
 from typing import Collection
 
-from liquid import RenderContext
+from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
 from liquid.expression import Expression
+from liquid.limits import to_int
+from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_EQ
+from liquid.token import TOKEN_FALSE
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_GE
+from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_LE
+from liquid.token import TOKEN_LG
+from liquid.token import TOKEN_LPAREN
+from liquid.token import TOKEN_LT
+from liquid.token import TOKEN_NE
+from liquid.token import TOKEN_NIL
+from liquid.token import TOKEN_NOT
+from liquid.token import TOKEN_NULL
+from liquid.token import TOKEN_OR
+from liquid.token import TOKEN_RANGE_LITERAL
+from liquid.token import TOKEN_RPAREN
+from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TRUE
+from liquid.token import TOKEN_WORD
 from liquid.token import Token
 
+from .path import Path
 from .primitive import Blank
 from .primitive import Empty
+from .primitive import FalseLiteral
+from .primitive import FloatLiteral
+from .primitive import IntegerLiteral
+from .primitive import Nil
+from .primitive import RangeLiteral
+from .primitive import StringLiteral
+from .primitive import TrueLiteral
+
+if TYPE_CHECKING:
+    from liquid import Environment
+    from liquid import RenderContext
+    from liquid import TokenStream
+
+PRECEDENCE_LOWEST = 1
+PRECEDENCE_LOGICAL_RIGHT = 2
+PRECEDENCE_LOGICAL_OR = 3
+PRECEDENCE_LOGICAL_AND = 4
+PRECEDENCE_RELATIONAL = 5
+PRECEDENCE_MEMBERSHIP = 6
+PRECEDENCE_PREFIX = 7
+
+PRECEDENCES = {
+    TOKEN_EQ: PRECEDENCE_RELATIONAL,
+    TOKEN_LT: PRECEDENCE_RELATIONAL,
+    TOKEN_GT: PRECEDENCE_RELATIONAL,
+    TOKEN_NE: PRECEDENCE_RELATIONAL,
+    TOKEN_LG: PRECEDENCE_RELATIONAL,
+    TOKEN_LE: PRECEDENCE_RELATIONAL,
+    TOKEN_GE: PRECEDENCE_RELATIONAL,
+    TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
+    # TOKEN_IN: PRECEDENCE_MEMBERSHIP,
+    TOKEN_AND: PRECEDENCE_LOGICAL_RIGHT,
+    TOKEN_OR: PRECEDENCE_LOGICAL_RIGHT,
+    TOKEN_NOT: PRECEDENCE_PREFIX,
+    TOKEN_RPAREN: PRECEDENCE_LOWEST,
+}
+
+BINARY_OPERATORS = frozenset(
+    [
+        TOKEN_EQ,
+        TOKEN_LT,
+        TOKEN_GT,
+        TOKEN_LG,
+        TOKEN_NE,
+        TOKEN_LE,
+        TOKEN_GE,
+        TOKEN_CONTAINS,
+        # TOKEN_IN,
+        TOKEN_AND,
+        TOKEN_OR,
+    ]
+)
 
 
 class BooleanExpression(Expression):
@@ -315,7 +395,135 @@ class ContainsExpression(Expression):
         return [self.left, self.right]
 
 
-# TODO: parse_boolean_primitive(env: Environment, stream: TokenStream, precedence: int=PRECEDENCE_LOWEST)
+def parse_boolean_primitive(  # noqa: PLR0912
+    env: Environment, tokens: TokenStream, precedence: int = PRECEDENCE_LOWEST
+) -> Expression:
+    """Parse a Boolean expression from tokens in _stream_."""
+    left: Expression
+    token = next(tokens)
+    kind = token.kind
+
+    if kind == TOKEN_TRUE:
+        left = TrueLiteral(token)
+    if kind == TOKEN_FALSE:
+        left = FalseLiteral(token)
+    if kind in (TOKEN_NIL, TOKEN_NULL):
+        left = Nil(token)
+    if kind == TOKEN_INTEGER:
+        left = IntegerLiteral(token, to_int(token.value))
+    if kind == TOKEN_FLOAT:
+        left = FloatLiteral(token, float(token.value))
+    if kind == TOKEN_STRING:
+        left = StringLiteral(token, token.value)
+    if kind in (TOKEN_RANGE_LITERAL, TOKEN_LPAREN):
+        RangeLiteral.parse(env, tokens)
+    if kind == TOKEN_WORD:
+        if token.value == "empty":
+            left = Empty(token)
+        if token.value == "blank":
+            left = Blank(token)
+        left = Path.parse(env, tokens)
+    if kind == TOKEN_LBRACKET:
+        left = Path.parse(env, tokens)
+    else:
+        raise LiquidSyntaxError(
+            f"expected a primitive expression, found {token.kind}",
+            token=tokens.current,
+        )
+
+    while True:
+        token = tokens.current
+        if (
+            token == tokens.eof
+            or PRECEDENCES.get(token.kind, PRECEDENCE_LOWEST) < precedence
+        ):
+            break
+
+        if token.kind not in BINARY_OPERATORS:
+            return left
+
+        left = parse_infix_expression(env, tokens, left)
+
+    return left
+
+
+def parse_infix_expression(  # noqa: PLR0911
+    env: Environment, stream: TokenStream, left: Expression
+) -> Expression:  # noqa: PLR0911
+    """Return a logical, comparison, or membership expression parsed from _stream_."""
+    token = next(stream)
+    assert token is not None
+    precedence = PRECEDENCES.get(token.kind, PRECEDENCE_LOWEST)
+
+    if token.kind == TOKEN_EQ:
+        return EqExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_LT:
+        return LtExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_GT:
+        return GtExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind in (TOKEN_NE, TOKEN_LG):
+        return NeExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_LE:
+        return LeExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_GE:
+        return GeExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_CONTAINS:
+        return ContainsExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    # if token.kind == TOKEN_IN:
+    #     return InExpression(
+    #         token, left, parse_boolean_primitive(env, stream, precedence)
+    #     )
+    if token.kind == TOKEN_AND:
+        return LogicalAndExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+    if token.kind == TOKEN_OR:
+        return LogicalOrExpression(
+            token, left, parse_boolean_primitive(env, stream, precedence)
+        )
+
+    raise LiquidSyntaxError(
+        f"expected an infix expression, found {token.kind}",
+        token=token,
+    )
+
+
+def parse_grouped_expression(env: Environment, tokens: TokenStream) -> Expression:
+    """Parse an expression from tokens in _tokens_ until the next right parenthesis."""
+    # TODO: error if no group expressions
+    expr = parse_boolean_primitive(env, tokens)
+    token = next(tokens)
+
+    while token.kind != TOKEN_RPAREN:
+        if token is None:
+            raise LiquidSyntaxError("unbalanced parentheses", token=token)
+
+        if token.kind not in BINARY_OPERATORS:
+            raise LiquidSyntaxError(
+                f"expected an infix expression, found {tokens.current.kind}",
+                token=token,
+            )
+
+        expr = parse_infix_expression(env, tokens, expr)
+
+    if token.kind != TOKEN_RPAREN:
+        raise LiquidSyntaxError("unbalanced parentheses", token=token)
+
+    return expr
 
 
 def is_truthy(obj: object) -> bool:

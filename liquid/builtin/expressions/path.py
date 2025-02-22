@@ -13,11 +13,23 @@ from typing import TypeAlias
 from typing import Union
 
 from liquid.expression import Expression
+from liquid.limits import to_int
+from liquid.token import TOKEN_DOT
+from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IDENTSTRING
+from liquid.token import TOKEN_INTEGER
+from liquid.token import TOKEN_LBRACKET
+from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_WORD
 
 if TYPE_CHECKING:
+    from liquid import Environment
     from liquid import RenderContext
+    from liquid import Token
+    from liquid import TokenStream
 
-Segments: TypeAlias = tuple[Union[str, int, "Path"], ...]
+Segments: TypeAlias = list[Union[str, int, "Path"]]
 Location: TypeAlias = tuple[Union[str, int, "Location"], ...]
 
 
@@ -28,7 +40,8 @@ RE_PROPERTY = re.compile(r"[\u0080-\uFFFFa-zA-Z_][\u0080-\uFFFFa-zA-Z0-9_-]*")
 class Path(Expression):
     __slots__ = ("path",)
 
-    def __init__(self, path: Segments):
+    def __init__(self, token: Token, path: Segments):
+        super().__init__(token)
         self.path = path
 
     def __eq__(self, other: object) -> bool:
@@ -81,3 +94,30 @@ class Path(Expression):
 
     def children(self) -> list[Expression]:
         return [p for p in self.path if isinstance(p, Expression)]
+
+    @staticmethod
+    def parse(env: Environment, tokens: TokenStream) -> Path:
+        token = tokens.current
+        segments: Segments = []
+
+        # TODO: fix me regarding dots
+        # TODO: floats and shorthand indexes
+        while True:
+            kind, value, index, _ = tokens.current
+
+            if kind == TOKEN_WORD:
+                segments.append(value)
+            elif kind == TOKEN_IDENTINDEX:
+                segments.append(to_int(value))
+            elif kind == TOKEN_LBRACKET:
+                next(tokens)
+                segments.append(Path.parse(env, tokens))
+                tokens.eat(TOKEN_RBRACKET)
+            elif kind == TOKEN_DOT:
+                pass
+            else:
+                break
+
+            next(tokens)
+
+        return Path(token, segments)

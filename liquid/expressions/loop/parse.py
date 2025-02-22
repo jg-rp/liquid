@@ -27,7 +27,7 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_FLOAT
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
@@ -64,7 +64,7 @@ def parse_string_argument(stream: TokenStream) -> LoopArgument:
 
 
 TOKEN_MAP: dict[str, Callable[[TokenStream], LoopArgument]] = {
-    TOKEN_IDENTIFIER: parse_identifier,
+    TOKEN_WORD: parse_identifier,
     TOKEN_LBRACKET: parse_identifier,
     TOKEN_INTEGER: parse_integer_literal,
     TOKEN_FLOAT: parse_float_literal,
@@ -113,14 +113,14 @@ def parse(
 ) -> LoopExpression:
     """Parse a loop expression string."""
     stream = TokenStream(tokenize(expr, linenum), shorthand_indexes=shorthand_indexes)
-    stream.expect(TOKEN_IDENTIFIER)
+    stream.expect(TOKEN_WORD)
     name = next(stream)[2]
 
     # Eat TOKEN_IN
     stream.expect(TOKEN_IN)
     next(stream)
 
-    if stream.current[1] == TOKEN_IDENTIFIER:
+    if stream.current[1] == TOKEN_WORD:
         expression: LoopIterable = parse_identifier(stream)
         next(stream)
     elif stream.current[1] == TOKEN_STRING:
