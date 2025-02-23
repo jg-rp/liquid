@@ -1,4 +1,4 @@
-"""Tag and node definition for the built-in "for" tag."""
+"""The built-in _for_ tag."""
 
 from __future__ import annotations
 
@@ -13,11 +13,11 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.builtin.expressions import LoopExpression
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
 from liquid.parse import get_parser
 from liquid.tag import Tag
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from liquid.context import RenderContext
     from liquid.stream import TokenStream
 
-# ruff: noqa: D102
 
 TAG_FOR = sys.intern("for")
 TAG_ENDFOR = sys.intern("endfor")
@@ -136,51 +135,42 @@ class ForLoop(Mapping[str, object]):
 
 
 class ForNode(Node):
-    """Parse tree node for the built-in "for" tag."""
+    """The built-in _for_ tag."""
 
-    __slots__ = ("tok", "expression", "block", "default", "forced_output")
+    __slots__ = ("expression", "block", "default")
 
     def __init__(
         self,
-        tok: Token,
+        token: Token,
         expression: LoopExpression,
         block: BlockNode,
         default: Optional[BlockNode] = None,
     ):
-        self.tok = tok
+        super().__init__(token)
         self.expression = expression
         self.block = block
         self.default = default
-
-        self.forced_output = self.force_output or any(
-            b.forced_output for b in (self.block, self.default) if b
-        )
+        self.blank = block.blank and (not default or default.blank)
 
     def __str__(self) -> str:
-        tag_str = f"for ({self.expression}) {{ {self.block} }}"
+        default = ""
 
         if self.default:
-            tag_str += f" else {{ {self.default} }}"
+            default = f"{{% else %}} {self.default}"
 
-        return tag_str
+        return f"{{% for {self.expression} %}}{self.block}{default}{{% endfor %}}"
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        # This intermediate buffer is used to detect and possibly suppress blocks that,
-        # when rendered, contain only whitespace.
-        buf = context.get_buffer(buffer)
-        rendered: Optional[bool] = False
-
-        loop_iter, length = self.expression.evaluate(context)
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        it, length = self.expression.evaluate(context)
 
         if length:
-            rendered = True
-            name = self.expression.name
+            character_count = 0
+            name = self.expression.identifier
 
             forloop = ForLoop(
                 name=f"{name}-{self.expression.iterable}",
-                it=loop_iter,
+                it=it,
                 length=length,
                 parentloop=context.parentloop(),
             )
@@ -196,36 +186,29 @@ class ForNode(Node):
                 for itm in forloop:
                     namespace[name] = itm
                     try:
-                        self.block.render(context, buf)
+                        character_count += self.block.render(context, buffer)
                     except ContinueLoop:
                         continue
                     except BreakLoop:
                         break
 
-        elif self.default:
-            rendered = self.default.render(context, buf)
+            return character_count
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
-
-        return rendered
+        return self.default.render(context, buffer) if self.default else 0
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        buf = context.get_buffer(buffer)
-        rendered: Optional[bool] = False
-
-        loop_iter, length = await self.expression.evaluate_async(context)
+    ) -> int:
+        """Render the node to the output buffer."""
+        it, length = await self.expression.evaluate_async(context)
 
         if length:
-            rendered = True
-            name = self.expression.name
+            character_count = 0
+            name = self.expression.identifier
 
             forloop = ForLoop(
                 name=f"{name}-{self.expression.iterable}",
-                it=loop_iter,
+                it=it,
                 length=length,
                 parentloop=context.parentloop(),
             )
@@ -241,34 +224,32 @@ class ForNode(Node):
                 for itm in forloop:
                     namespace[name] = itm
                     try:
-                        await self.block.render_async(context, buf)
+                        character_count += await self.block.render_async(
+                            context, buffer
+                        )
                     except ContinueLoop:
                         continue
                     except BreakLoop:
                         break
 
-        elif self.default:
-            rendered = await self.default.render_async(context, buf)
+            return character_count
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
-
-        return rendered
+        return await self.default.render_async(context, buffer) if self.default else 0
 
     def children(self) -> list[ChildNode]:
+        """Return this node's children."""
         _children = [
             ChildNode(
-                linenum=self.block.tok.start_index,
+                linenum=self.block.token.start_index,
                 node=self.block,
                 expression=self.expression,
-                block_scope=[self.expression.name, "forloop"],
+                block_scope=[self.expression.identifier, "forloop"],
             )
         ]
         if self.default:
             _children.append(
                 ChildNode(
-                    linenum=self.default.tok.start_index,
+                    linenum=self.default.token.start_index,
                     node=self.default,
                 )
             )
@@ -290,10 +271,12 @@ class BreakNode(Node):
         self,
         _: RenderContext,
         __: TextIO,
-    ) -> Optional[bool]:
+    ) -> int:
+        """Render the node to the output buffer."""
         raise BreakLoop("break")
 
     def children(self) -> list[ChildNode]:
+        """Return this node's children."""
         return []
 
 
@@ -312,62 +295,58 @@ class ContinueNode(Node):
         self,
         _: RenderContext,
         __: TextIO,
-    ) -> Optional[bool]:
+    ) -> int:
+        """Render the node to the output buffer."""
         raise ContinueLoop("continue")
 
     def children(self) -> list[ChildNode]:
+        """Return this node's children."""
         return []
 
 
 class ForTag(Tag):
-    """The built-in "for" tag."""
+    """The built-in _for_ tag."""
 
     name = TAG_FOR
     end = TAG_ENDFOR
     node_class = ForNode
 
     def parse(self, stream: TokenStream) -> Node:
-        parser = get_parser(self.env)
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
+        expr = LoopExpression.parse(self.env, stream.into_inner())
 
-        stream.expect(TOKEN_TAG, value=TAG_FOR)
-        tok = stream.current
-        stream.next_token()
-
-        stream.expect(TOKEN_EXPRESSION)
-        expr = self.env.parse_loop_expression_value(
-            stream.current.value,
-            stream.current.start_index,
-        )
-        stream.next_token()
-
-        block = parser.parse_block(stream, ENDFORBLOCK)
+        parse_block = get_parser(self.env).parse_block
+        block = parse_block(stream, ENDFORBLOCK)
         default: Optional[BlockNode] = None
 
         if stream.current.is_tag(TAG_ELSE):
-            stream.next_token()
-            default = parser.parse_block(stream, ENDFORELSEBLOCK)
+            next(stream)
+            default = parse_block(stream, ENDFORELSEBLOCK)
 
         stream.expect(TOKEN_TAG, value=TAG_ENDFOR)
-        return self.node_class(tok, expression=expr, block=block, default=default)
+        return self.node_class(token, expression=expr, block=block, default=default)
 
 
 class BreakTag(Tag):
-    """The built-in "break" tag."""
+    """The built-in _break_ tag."""
 
     name = TAG_BREAK
     block = False
 
     def parse(self, stream: TokenStream) -> BreakNode:
+        """Parse tokens from _stream_ into an AST node."""
         stream.expect(TOKEN_TAG, value=TAG_BREAK)
         return BreakNode(stream.current)
 
 
 class ContinueTag(Tag):
-    """The built-in "continue" tag."""
+    """The built-in _continue_ tag."""
 
     name = TAG_CONTINUE
     block = False
 
     def parse(self, stream: TokenStream) -> ContinueNode:
+        """Parse tokens from _stream_ into an AST node."""
         stream.expect(TOKEN_TAG, value=TAG_CONTINUE)
         return ContinueNode(stream.current)

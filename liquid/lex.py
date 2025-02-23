@@ -20,7 +20,7 @@ from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_LITERAL
-from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_OUTOUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
@@ -67,7 +67,7 @@ def compile_liquid_rules(
 
         liquid_rules = [
             ("RAW", raw_pattern),
-            (TOKEN_STATEMENT, statement_pattern),
+            (TOKEN_OUTOUT, statement_pattern),
             ("TAG", tag_pattern),
             (TOKEN_LITERAL, literal_pattern),
         ]
@@ -78,7 +78,7 @@ def compile_liquid_rules(
         liquid_rules = [
             ("RAW", raw_pattern),
             ("COMMENT", comment_pattern),
-            (TOKEN_STATEMENT, statement_pattern),
+            (TOKEN_OUTOUT, statement_pattern),
             ("TAG", tag_pattern),
             (TOKEN_LITERAL, literal_pattern),
         ]
@@ -184,7 +184,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
         value = match.group()
 
-        if kind == TOKEN_STATEMENT:
+        if kind == TOKEN_OUTOUT:
             value = match.group("stmt")
             lstrip = bool(match.group("rss"))
 

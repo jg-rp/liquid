@@ -1,45 +1,33 @@
-"""Tag and node definition for the built-in "echo" tag."""
+"""The built-in _echo_ tag."""
 
 import sys
 
 from liquid.ast import Node
-from liquid.builtin.statement import StatementNode
-from liquid.expression import Expression
+from liquid.builtin.expressions import FilteredExpression
+from liquid.builtin.output import OutputNode
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
-from liquid.token import Token
 
 TAG_ECHO = sys.intern("echo")
 
 
-class EchoNode(StatementNode):
-    """Parse tree node for the built-in "echo" tag."""
+class EchoNode(OutputNode):
+    """The built-in _echo_ tag."""
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"EchoNode(tok={self.tok}, expression={self.expression!r})"
+    def __str__(self) -> str:
+        return f"{{% echo {self.expression} %}}"
 
 
 class EchoTag(Tag):
-    """The built-in "echo" tag."""
+    """The built-in _echo_ tag."""
 
     name = TAG_ECHO
     block = False
     node_class = EchoNode
 
-    def _parse_expression(self, value: str, parent_token: Token) -> Expression:
-        return self.env.parse_filtered_expression_value(value, linenum)
-
     def parse(self, stream: TokenStream) -> Node:  # noqa: D102
-        stream.expect(TOKEN_TAG, value=TAG_ECHO)
-        tok = stream.current
-        stream.next_token()
-
-        if stream.current.kind == TOKEN_EOF:
-            expr: Expression = NIL
-        else:
-            stream.expect(TOKEN_EXPRESSION)
-            expr = self._parse_expression(stream.current.value, tok)
-        return self.node_class(tok, expression=expr)
+        token = stream.eat(TOKEN_TAG)
+        return self.node_class(
+            token, FilteredExpression.parse(self.env, stream.into_inner())
+        )

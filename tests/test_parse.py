@@ -19,7 +19,7 @@ from liquid.builtin import include_tag
 from liquid.builtin import increment_tag
 from liquid.builtin import literal
 from liquid.builtin import render_tag
-from liquid.builtin import statement
+from liquid.builtin import output
 from liquid.builtin import tablerow_tag
 from liquid.builtin import unless_tag
 from liquid.environment import Environment
@@ -76,7 +76,7 @@ class ParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, statement.StatementNode)
+        self._test(test_cases, output.OutputNode)
 
     def test_illegal_tag(self):
         """Test that we can handle illegal tokens in lax mode."""

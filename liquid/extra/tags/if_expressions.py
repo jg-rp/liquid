@@ -5,13 +5,13 @@ and `echo` tag that support inline `if` expressions, optionally including
 the logical `not` operator and grouping terms with parentheses.
 """
 
-from liquid.builtin.statement import Statement
-from liquid.builtin.statement import StatementNode
+from liquid.builtin.output import Statement
+from liquid.builtin.output import OutputNode
 from liquid.builtin.tags.assign_tag import AssignTag
 from liquid.builtin.tags.echo_tag import EchoTag
 from liquid.expression import Expression
 from liquid.stream import TokenStream
-from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_OUTOUT
 from liquid.token import Token
 
 # ruff: noqa: D102 D205
@@ -22,10 +22,10 @@ class InlineIfStatement(Statement):
     inline `if` expressions.
     """
 
-    def parse(self, stream: TokenStream) -> StatementNode:
+    def parse(self, stream: TokenStream) -> OutputNode:
         tok = stream.current
-        stream.expect(TOKEN_STATEMENT)
-        return StatementNode(
+        stream.expect(TOKEN_OUTOUT)
+        return OutputNode(
             tok, self.env.parse_conditional_expression_value(tok.value, tok.start_index)
         )
 
@@ -54,10 +54,10 @@ class InlineIfStatementWithParens(Statement):
     terms with parentheses.
     """
 
-    def parse(self, stream: TokenStream) -> StatementNode:
+    def parse(self, stream: TokenStream) -> OutputNode:
         tok = stream.current
-        stream.expect(TOKEN_STATEMENT)
-        return StatementNode(
+        stream.expect(TOKEN_OUTOUT)
+        return OutputNode(
             tok,
             self.env.parse_conditional_expression_value_with_parens(
                 tok.value, tok.start_index

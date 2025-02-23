@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from . import illegal
 from . import literal
-from . import statement
+from . import output
 from .filters.array import compact
 from .filters.array import concat
 from .filters.array import find
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
 def register(env: Environment) -> None:  # noqa: PLR0915
     """Register all built-in tags and filters with an environment."""
     env.add_tag(literal.Literal)
-    env.add_tag(statement.Statement)
+    env.add_tag(output.Statement)
     env.add_tag(illegal.Illegal)
     env.add_tag(if_tag.IfTag)
     env.add_tag(comment_tag.CommentTextTag)

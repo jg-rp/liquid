@@ -1,68 +1,57 @@
-"""Tag and node definition for the built-in "decrement" tag."""
+"""The built-in _decrement_ tag."""
 
 import sys
-from typing import Optional
 from typing import TextIO
 
 from liquid import ast
+from liquid.builtin.expressions import parse_identifier
 from liquid.context import RenderContext
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
-
-# ruff: noqa: D102
 
 TAG_DECREMENT = sys.intern("decrement")
 
 
 class DecrementNode(ast.Node):
-    """Parse tree node for the built-in "decrement" tag."""
+    """The built-in _decrement_ tag."""
 
-    __slots__ = ("tok", "identifier")
+    __slots__ = ("name",)
 
-    def __init__(self, tok: Token, identifier: str):
-        self.tok = tok
-        self.identifier = identifier
+    def __init__(self, token: Token, name: str):
+        super().__init__(token)
+        self.name = name
+        self.blank = False
 
     def __str__(self) -> str:
-        return f"{self.identifier} -= 1"
+        return f"{{% decrement {self.name} %}}"
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        buffer.write(str(context.decrement(self.identifier)))
-        return True
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        return buffer.write(str(context.decrement(self.name)))
 
     def children(self) -> list[ast.ChildNode]:
+        """Return this node's expressions."""
         return [
             ast.ChildNode(
-                linenum=self.tok.start_index,
-                template_scope=[self.identifier],
+                linenum=self.token.start_index,
+                template_scope=[self.name],
             )
         ]
 
 
 class DecrementTag(Tag):
-    """The built-in "decrement" tag."""
+    """The built-in _decrement_ tag."""
 
     name = TAG_DECREMENT
     block = False
     node_class = DecrementNode
 
     def parse(self, stream: TokenStream) -> DecrementNode:
-        stream.expect(TOKEN_TAG, value=TAG_DECREMENT)
-        tok = stream.current
-        stream.next_token()
-        stream.expect(TOKEN_EXPRESSION)
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
         return self.node_class(
-            tok=tok,
-            identifier=str(
-                parse_unchained_identifier(
-                    TokenStream(
-                        tokenize(stream.current.value, stream.current.start_index)
-                    )
-                )
-            ),
+            token,
+            name=parse_identifier(self.env, stream.into_inner()),
         )
