@@ -45,6 +45,7 @@ from .undefined import is_undefined
 
 if TYPE_CHECKING:
     from .builtin.tags.for_tag import ForLoop
+    from .environment import Environment
     from .template import BoundTemplate
     from .token import Token
 
@@ -203,7 +204,7 @@ class RenderContext:
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
     ):
-        self.env = template.env
+        self.env: Environment = template.env
         self.template = template
 
         # A namespace for template local variables. Those that are bound with
@@ -212,7 +213,7 @@ class RenderContext:
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
-        self.globals = globals or {}
+        self.globals: dict[str, object] = globals or {}
 
         # A namespace for `increment` and `decrement` counters.
         self.counters: dict[str, int] = {}
@@ -284,14 +285,16 @@ class RenderContext:
             + self.local_namespace_size_carry
         )
 
-    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
+    def get(
+        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
-            return self._resolve(path, default)
+            return self._resolve(path, token=token, default=default)
 
         name, items = path[0], path[1:]
         assert isinstance(name, str)
-        obj = self._resolve(name, default)
+        obj = self._resolve(name, token=token, default=default)
 
         if items:
             try:
@@ -307,20 +310,23 @@ class RenderContext:
                 if default == UNDEFINED:
                     return self.env.undefined(
                         name=name,
+                        token=token,
                         hint=hint,
                     )
                 return default
 
         return obj
 
-    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
+    async def get_async(
+        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> object:
         """Return the value at path `path` if it is in scope, else default."""
         if isinstance(path, str):
-            return self._resolve(path, default)
+            return self._resolve(path, token=token, default=default)
 
         name, items = path[0], path[1:]
         assert isinstance(name, str)
-        obj = self._resolve(name, default)
+        obj = self._resolve(name, token=token, default=default)
 
         if items:
             _gi = self.getitem_async
@@ -331,25 +337,30 @@ class RenderContext:
                 if default == UNDEFINED:
                     return self.env.undefined(
                         name=name,
+                        token=token,
                         hint=f"{err}: {name}{''.join([f'[{i}]' for i in items])}",
                     )
 
         return obj
 
-    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
+    def resolve(
+        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> Any:
         """Return the object/value at `name` in the current scope.
 
         This is like `get`, but does a single, top-level lookup rather than a
         chained lookup from a sequence of keys.
         """
-        return self._resolve(name, default)
+        return self._resolve(name, token=token, default=default)
 
-    def _resolve(self, name: str, default: object = UNDEFINED) -> Any:
+    def _resolve(
+        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> Any:
         try:
             return self.scope[name]
         except KeyError:
             if default == UNDEFINED:
-                return self.env.undefined(name)
+                return self.env.undefined(name, token=token)
             return default
 
     def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
@@ -477,7 +488,7 @@ class RenderContext:
         try:
             return self.loops[-1]
         except IndexError:
-            return self.env.undefined("parentloop")
+            return self.env.undefined("parentloop", token=None)
 
     def raise_for_loop_limit(self, length: int = 1) -> None:
         """Raise a `LoopIterationLimitError` if loop stack is bigger than the limit."""
@@ -648,18 +659,24 @@ class CaptureRenderContext(RenderContext):
         self.root_context.local_references.append(key)
         return super().assign(key, val)
 
-    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        result = super().get(path, default)
+    def get(
+        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> object:
+        result = super().get(path, token=token, default=default)
         self._count_reference(path, result)
         return result
 
-    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        result = await super().get_async(path, default)
+    async def get_async(
+        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> object:
+        result = await super().get_async(path, token=token, default=default)
         self._count_reference(path, result)
         return result
 
-    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
-        result = super().resolve(name, default)
+    def resolve(
+        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> Any:
+        result = super().resolve(name, token=token, default=default)
         self._count_reference(name, result)
         return result
 

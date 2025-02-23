@@ -12,8 +12,8 @@ from typing import Union
 from dateutil import parser
 
 from liquid import Markup
+from liquid.builtin.expressions import is_empty
 from liquid.exceptions import FilterArgumentError
-from liquid.expression import EMPTY
 from liquid.filter import liquid_filter
 from liquid.filter import with_environment
 from liquid.undefined import is_undefined
@@ -54,7 +54,7 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
     if allow_false is True and _obj is False:
         return obj
 
-    if _obj in (None, False, EMPTY):
+    if _obj in (None, False) or is_empty(_obj):
         return default_
 
     return obj
@@ -112,7 +112,7 @@ def date(  # noqa: PLR0912 PLR0911
         # Handle "%s" as a special case.
         if fmt == r"%s":
             return str(dat.timestamp()).split(".")[0]
-        raise FilterArgumentError(str(err)) from err
+        raise FilterArgumentError(str(err), token=None) from err
 
     if environment.autoescape and isinstance(fmt, Markup):
         return Markup(rv)

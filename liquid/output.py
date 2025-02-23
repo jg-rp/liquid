@@ -1,4 +1,5 @@
 """Template output streams."""
+
 from io import StringIO
 from typing import Optional
 
@@ -22,5 +23,5 @@ class LimitedStringIO(StringIO):
         if __s:
             self.size += len(__s.encode("utf-8"))
             if self.size > self.limit:
-                raise OutputStreamLimitError("output stream limit reached")
+                raise OutputStreamLimitError("output stream limit reached", token=None)
         return super().write(__s)

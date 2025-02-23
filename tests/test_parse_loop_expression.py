@@ -4,10 +4,10 @@ from typing import Union
 
 from liquid.expression import Expression
 from liquid.expression import Identifier
-from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import LoopExpression
 from liquid.expression import RangeLiteral
+from liquid.expression import Segment
 from liquid.expressions import parse_loop_expression
 
 

@@ -13,8 +13,8 @@ from liquid.expression import TRUE
 from liquid.expression import Expression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
+from liquid.expression import Segment
 from liquid.expression import StringLiteral
 from liquid.expressions import parse_call_arguments
 from liquid.expressions import parse_keyword_arguments

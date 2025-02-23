@@ -4,7 +4,6 @@ import sys
 
 from liquid.ast import Node
 from liquid.builtin.statement import StatementNode
-from liquid.expression import NIL
 from liquid.expression import Expression
 from liquid.stream import TokenStream
 from liquid.tag import Tag

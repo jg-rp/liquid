@@ -13,8 +13,6 @@ from liquid.ast import Node
 from liquid.context import RenderContext
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
-from liquid.expression import NIL
-from liquid.expression import LoopExpression
 from liquid.limits import to_int
 from liquid.parse import get_parser
 from liquid.stream import TokenStream

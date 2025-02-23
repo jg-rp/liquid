@@ -23,17 +23,14 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
-from liquid.expression import StringLiteral
-from liquid.expressions.common import parse_string_literal
-from liquid.expressions.common import tokenize_common_expression
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TAG
+from liquid.token import TOKEN_WORD
 from liquid.token import Token
 
 if TYPE_CHECKING:

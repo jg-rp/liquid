@@ -11,10 +11,6 @@ from liquid.ast import Node
 from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
-from liquid.expressions import Token as ExprToken
-from liquid.expressions.common import parse_string_or_identifier
-from liquid.expressions.filtered.lex import tokenize
-from liquid.expressions.filtered.parse import parse_obj
 from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
@@ -92,18 +88,6 @@ class CycleNode(Node):
         for arg in self.args:
             _children.append(ChildNode(linenum=self.tok.start_index, expression=arg))
         return _children
-
-
-def split_at_first_colon(tokens: Iterable[ExprToken]) -> Iterator[list[ExprToken]]:
-    """Split tokens on into lists, using TOKEN_COLON as the delimiter."""
-    buf: list[ExprToken] = []
-    for token in tokens:
-        if token[1] == TOKEN_COLON:
-            yield buf
-            buf = []
-        else:
-            buf.append(token)
-    yield buf
 
 
 class CycleTag(Tag):

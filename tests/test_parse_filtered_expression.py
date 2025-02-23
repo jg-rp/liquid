@@ -10,11 +10,11 @@ from liquid.expression import Filter
 from liquid.expression import FilteredExpression
 from liquid.expression import FloatLiteral
 from liquid.expression import Identifier
-from liquid.expression import Segment
 from liquid.expression import InfixExpression
 from liquid.expression import IntegerLiteral
 from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
+from liquid.expression import Segment
 from liquid.expression import StringLiteral
 from liquid.expressions import parse_conditional_expression
 from liquid.expressions import parse_conditional_expression_with_parens

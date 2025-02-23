@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import warnings
 from functools import lru_cache
-from functools import partial
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
@@ -26,12 +25,6 @@ from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import lookup_warning
-from liquid.expressions import parse_boolean_expression
-from liquid.expressions import parse_boolean_expression_with_parens
-from liquid.expressions import parse_conditional_expression
-from liquid.expressions import parse_conditional_expression_with_parens
-from liquid.expressions import parse_filtered_expression
-from liquid.expressions import parse_loop_expression
 from liquid.lex import get_lexer
 from liquid.mode import Mode
 from liquid.parse import get_parser
@@ -43,9 +36,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from liquid.context import RenderContext
-    from liquid.expression import BooleanExpression
-    from liquid.expression import FilteredExpression
-    from liquid.expression import LoopExpression
     from liquid.tag import Tag
     from liquid.token import Token
 
@@ -328,11 +318,10 @@ class Environment:
         try:
             parse_tree = self.parse(source)
         except (LiquidSyntaxError, TemplateInheritanceError) as err:
-            err.filename = path
-            err.source = source
+            err.template_name = path
             raise err
         except Exception as err:  # noqa: BLE001
-            raise Error("unexpected liquid parsing error") from err
+            raise Error("unexpected liquid parsing error", token=None) from err
         return self.template_class(
             env=self,
             name=name,
@@ -545,13 +534,13 @@ class Environment:
         self,
         exc: Union[Type[Error], Error],
         msg: Optional[str] = None,
-        linenum: Optional[int] = None,
+        token: Optional[Token] = None,
     ) -> None:
         """Raise, warn or ignore the given exception according to the current mode."""
         if not isinstance(exc, Error):
-            exc = exc(msg, linenum=linenum)
-        elif not exc.linenum:
-            exc.linenum = linenum
+            exc = exc(msg, token=token)
+        elif not exc.token:
+            exc.token = token
 
         if self.mode == Mode.STRICT:
             raise exc
@@ -578,81 +567,9 @@ class Environment:
             self.parse_loop_expression_value,
         ) = self._get_expression_parsers(self.expression_cache_size)
 
-    def _get_expression_parsers(
-        self, cache_size: int = 0
-    ) -> tuple[
-        Callable[[str, int], BooleanExpression],
-        Callable[[str, int], BooleanExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], LoopExpression],
-    ]:
-        if cache_size >= 1:
-            return (
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_boolean_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_boolean_expression_with_parens,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_conditional_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_conditional_expression_with_parens,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_filtered_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_loop_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-            )
-        return (
-            partial(
-                parse_boolean_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_boolean_expression_with_parens,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_conditional_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_conditional_expression_with_parens,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_filtered_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_loop_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-        )
+    def _get_expression_parsers(self, cache_size: int = 0) -> Any:
+        # TODO
+        raise Exception("TODO")
 
 
 @lru_cache(maxsize=10)

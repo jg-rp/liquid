@@ -14,18 +14,15 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.ast import ParseTree
+from liquid.builtin.expressions import FilteredExpression
+from liquid.builtin.expressions import Path
+from liquid.builtin.expressions import StringLiteral
 from liquid.context import ReadOnlyChainMap
 from liquid.context import RenderContext
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import TemplateTraversalError
-from liquid.expression import Expression
-from liquid.expression import FilteredExpression
-from liquid.expression import Identifier
-from liquid.expression import Segment
-from liquid.expression import IdentifierTuple
-from liquid.expression import StringLiteral
 from liquid.extra.tags.extends import BlockNode as InheritanceBlockNode
 from liquid.extra.tags.extends import _BlockStackItem
 from liquid.extra.tags.extends import stack_blocks
@@ -33,6 +30,8 @@ from liquid.token import TOKEN_TAG
 
 if TYPE_CHECKING:
     from liquid import BoundTemplate
+    from liquid.builtin.expressions import Location
+    from liquid.expression import Expression
 
 RE_SPLIT_IDENT = re.compile(r"(\.|\[)")
 
@@ -48,13 +47,13 @@ class ReferencedVariable(str):
     def __init__(self, _: object) -> None:
         super().__init__()
         self.obj: object
-        if isinstance(self.obj, Identifier):
-            self._parts = self.obj.as_tuple()
+        if isinstance(self.obj, Path):
+            self._parts = self.obj.location()
         else:
             self._parts = (str(self.obj),)
 
     @property
-    def parts(self) -> IdentifierTuple:
+    def parts(self) -> Location:
         """A tuple representation of the variable's parts.
 
         `parts` might contain nested tuples for nested variables. For example, the
@@ -66,15 +65,15 @@ class ReferencedVariable(str):
 
 
 # (template_name, line_number).
-Location = tuple[str, int]
+Location_ = tuple[str, int]
 
-Refs = dict[ReferencedVariable, list[Location]]
+Refs = dict[ReferencedVariable, list[Location_]]
 """A mapping of template variables to their (template_name, line_number) locations."""
 
-# A mapping of Identifier expressions to their (template_name, line_number) locations.
-IdentifierMap = DefaultDict[Identifier, list[Location]]
+# A mapping of Path expressions to their (template_name, line_number) locations.
+IdentifierMap = DefaultDict[Path, list[Location_]]
 
-NameRefs = dict[str, list[Location]]
+NameRefs = dict[str, list[Location_]]
 """A mapping of template, tag or filter names to (template_name, lineno) locations."""
 
 
@@ -360,7 +359,7 @@ class _TemplateCounter:
             _ref = RE_SPLIT_IDENT.split(str(ref), 1)[0]
             if (
                 _ref not in self._scope
-                and Identifier(path=[Segment(_ref)]) not in self.template_locals
+                and Path(path=[Segment(_ref)]) not in self.template_locals
             ):
                 self.template_globals[ref].append((self._template_name, child.linenum))
 
@@ -372,7 +371,7 @@ class _TemplateCounter:
             return
 
         for name in child.template_scope:
-            self.template_locals[Identifier(path=[Segment(name)])].append(
+            self.template_locals[Path(path=[Segment(name)])].append(
                 (self._template_name, child.linenum)
             )
 
@@ -380,7 +379,7 @@ class _TemplateCounter:
         """Return a list of references used in the given expression."""
         refs: References = References()
 
-        if isinstance(expression, Identifier):
+        if isinstance(expression, Path):
             refs.append_variable(expression)
 
         if isinstance(expression, FilteredExpression):
@@ -825,11 +824,11 @@ class _InheritanceChainCounter(_TemplateCounter):
             self._update_reference_counters(refs)
 
     def _contains_super(self, expression: Expression) -> bool:
-        if isinstance(expression, Identifier) and str(expression) == "block.super":
+        if isinstance(expression, Path) and str(expression) == "block.super":
             return True
 
         if isinstance(expression, FilteredExpression) and (
-            isinstance(expression.expression, Identifier)
+            isinstance(expression.expression, Path)
             and str(expression.expression) == "block.super"
         ):
             return True
@@ -890,10 +889,10 @@ class References:
     """Collect references for Template.analyze and friends."""
 
     def __init__(self) -> None:
-        self.variable_references: list[Identifier] = []
+        self.variable_references: list[Path] = []
         self.filter_references: list[str] = []
 
-    def append_variable(self, var: Identifier) -> None:
+    def append_variable(self, var: Path) -> None:
         """Add a variable reference."""
         self.variable_references.append(var)
 

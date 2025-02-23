@@ -3,6 +3,10 @@
 When rendering a Liquid template, if a variable name can not be resolved, an instance of
 liquid.Undefined, or a subclass, is used instead.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterable
 from typing import Iterator
@@ -10,6 +14,9 @@ from typing import Mapping
 from typing import Optional
 
 from liquid.exceptions import UndefinedError
+
+if TYPE_CHECKING:
+    from liquid import Token
 
 UNDEFINED = object()
 
@@ -22,8 +29,16 @@ class Undefined(Mapping[Any, object]):
 
     __slots__ = ("name", "obj", "hint")
 
-    def __init__(self, name: str, obj: object = UNDEFINED, hint: Optional[str] = None):
+    def __init__(
+        self,
+        name: str,
+        *,
+        token: Optional[Token],
+        obj: object = UNDEFINED,
+        hint: Optional[str] = None,
+    ):
         self.name = name
+        self.token = token
         self.obj = obj
         self.hint = hint
 
@@ -90,47 +105,54 @@ class StrictUndefined(Undefined):
         ]
     )
 
-    def __init__(self, name: str, obj: object = UNDEFINED, hint: Optional[str] = None):
-        super().__init__(name, obj=obj, hint=hint)
+    def __init__(
+        self,
+        name: str,
+        *,
+        token: Optional[Token],
+        obj: object = UNDEFINED,
+        hint: Optional[str] = None,
+    ):
+        super().__init__(name, token=token, obj=obj, hint=hint)
         self.msg = self.hint if self.hint else f"'{self.name}' is undefined"
 
     def __getattribute__(self, name: str) -> object:
         if name in object.__getattribute__(self, "allowed_properties"):
             return object.__getattribute__(self, name)
-        raise UndefinedError(object.__getattribute__(self, "msg"))
+        raise UndefinedError(object.__getattribute__(self, "msg"), token=self.token)
 
     def __contains__(self, item: object) -> bool:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __eq__(self, other: object) -> bool:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __getitem__(self, key: str) -> object:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __len__(self) -> int:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __iter__(self) -> Iterator[Any]:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __str__(self) -> str:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __repr__(self) -> str:
         return f"StrictUndefined({self.name})"
 
     def __bool__(self) -> bool:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __int__(self) -> int:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __hash__(self) -> int:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
     def __reversed__(self) -> Iterable[Any]:
-        raise UndefinedError(self.msg)
+        raise UndefinedError(self.msg, token=self.token)
 
 
 class StrictDefaultUndefined(StrictUndefined):

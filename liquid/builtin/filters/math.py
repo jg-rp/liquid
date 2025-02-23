@@ -57,7 +57,9 @@ def divided_by(num: Union[float, int], other: object) -> Union[float, int]:
     except ZeroDivisionError as err:
         # TODO: [VERSION_2] move inclusion of filter name in error messages to
         # FilteredExpression, where the filter is applied.
-        raise FilterArgumentError(f"divided_by: can't divide by {other}") from err
+        raise FilterArgumentError(
+            f"divided_by: can't divide by {other}", token=None
+        ) from err
 
 
 @math_filter
@@ -131,4 +133,6 @@ def modulo(num: Union[float, int], other: Union[float, int]) -> Union[float, int
     except ZeroDivisionError as err:
         # TODO: [VERSION_2] move inclusion of filter name in error messages to
         # FilteredExpression, where the filter is applied.
-        raise FilterArgumentError(f"modulo: can't divide by {other}") from err
+        raise FilterArgumentError(
+            f"modulo: can't divide by {other}", token=None
+        ) from err

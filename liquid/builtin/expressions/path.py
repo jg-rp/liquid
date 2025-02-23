@@ -9,7 +9,6 @@ from __future__ import annotations
 import re
 import sys
 from typing import TYPE_CHECKING
-from typing import TypeAlias
 from typing import Union
 
 from liquid.expression import Expression
@@ -29,8 +28,8 @@ if TYPE_CHECKING:
     from liquid import Token
     from liquid import TokenStream
 
-Segments: TypeAlias = list[Union[str, int, "Path"]]
-Location: TypeAlias = tuple[Union[str, int, "Location"], ...]
+Segments = list[Union[str, int, "Path"]]
+Location = tuple[Union[str, int, "Location"], ...]
 
 
 # This is use for pretty printing paths with shorthand notation where possible.

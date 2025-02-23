@@ -13,8 +13,6 @@ from liquid.builtin.tags.case_tag import TAG_ENDCASE
 from liquid.builtin.tags.case_tag import TAG_WHEN
 from liquid.builtin.tags.case_tag import CaseTag
 from liquid.exceptions import LiquidSyntaxError
-from liquid.expression import BooleanExpression
-from liquid.expression import InfixExpression
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token

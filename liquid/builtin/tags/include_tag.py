@@ -10,13 +10,6 @@ from liquid.builtin.drops import IterableDrop
 from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
-from liquid.expression import Identifier
-from liquid.expression import Literal
-from liquid.expressions.common import parse_identifier
-from liquid.expressions.common import parse_string_or_identifier
-from liquid.expressions.common import parse_unchained_identifier
-from liquid.expressions.filtered.parse import parse_obj
-from liquid.expressions.include.lex import tokenize
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
@@ -25,8 +18,8 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_WORD
 from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_WORD
 from liquid.token import Token
 
 # ruff: noqa: D102

@@ -7,8 +7,6 @@ from typing import TextIO
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import RenderContext
-from liquid.expressions.common import parse_unchained_identifier
-from liquid.expressions.filtered.lex import tokenize
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION

@@ -380,3 +380,8 @@ def parse_identifier(env: Environment, tokens: TokenStream) -> Identifier:
         )
 
     return Identifier(word, token=expr.token)
+
+
+def is_empty(obj: object) -> bool:
+    """Return True if _obj_ is considered empty."""
+    return isinstance(obj, (list, dict, str)) and not obj

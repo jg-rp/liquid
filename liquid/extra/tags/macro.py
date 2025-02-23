@@ -18,10 +18,7 @@ from liquid.context import ReadOnlyChainMap
 from liquid.context import RenderContext
 from liquid.context import Undefined
 from liquid.context import is_undefined
-from liquid.expression import NIL
 from liquid.expression import Expression
-from liquid.expressions import parse_call_arguments
-from liquid.expressions import parse_macro_arguments
 from liquid.extra.tags.extends import TAG_BLOCK
 from liquid.parse import get_parser
 from liquid.tag import Tag
@@ -32,7 +29,6 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
-    from liquid.expressions.arguments.parse import Argument
     from liquid.stream import TokenStream
 
 # ruff: noqa: D102

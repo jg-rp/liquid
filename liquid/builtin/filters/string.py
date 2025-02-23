@@ -165,14 +165,14 @@ def _slice_arg(val: Any) -> int:
     # The reference implementation does not cast floats to int.
     if isinstance(val, float):
         raise FilterArgumentError(
-            f"slice expected an integer start, found {type(val).__name__}"
+            f"slice expected an integer start, found {type(val).__name__}", token=None
         )
 
     try:
         rv = to_int(val)
     except (ValueError, TypeError) as err:
         raise FilterArgumentError(
-            f"slice expected an integer start, found {type(val).__name__}"
+            f"slice expected an integer start, found {type(val).__name__}", token=None
         ) from err
 
     rv = min(rv, MAX_SLICE_ARG)
@@ -190,7 +190,9 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
         val = str(val)
 
     if is_undefined(start):
-        raise FilterArgumentError("slice expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "slice expected an integer, found Undefined", token=None
+        )
 
     if is_undefined(length):
         length = 1
@@ -254,13 +256,15 @@ def strip_newlines(val: str, *, environment: Environment) -> str:
 def truncate(val: str, num: Any = 50, end: str = "...") -> str:
     """Return a copy of _val_ truncated to _num_ characters."""
     if is_undefined(num):
-        raise FilterArgumentError("truncate expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "truncate expected an integer, found Undefined", token=None
+        )
 
     try:
         num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
-            f"truncate expected an integer, found {type(num).__name__}"
+            f"truncate expected an integer, found {type(num).__name__}", token=None
         ) from err
 
     end = str(end)
@@ -275,13 +279,15 @@ MAX_TRUNC_WORDS = (1 << 31) - 1
 def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
     """Return a copy of _val_ truncated to at most _num_ words."""
     if is_undefined(num):
-        raise FilterArgumentError("truncate expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "truncate expected an integer, found Undefined", token=None
+        )
 
     try:
         num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
-            f"truncate expected an integer, found {type(num).__name__}"
+            f"truncate expected an integer, found {type(num).__name__}", token=None
         ) from err
 
     end = str(end)
@@ -334,7 +340,7 @@ def base64_decode(val: str) -> str:
     try:
         return base64.b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("invalid base64-encoded string") from err
+        raise FilterError("invalid base64-encoded string", token=None) from err
 
 
 @string_filter
@@ -352,4 +358,4 @@ def base64_url_safe_decode(val: str) -> str:
     try:
         return base64.urlsafe_b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("invalid base64-encoded string") from err
+        raise FilterError("invalid base64-encoded string", token=None) from err

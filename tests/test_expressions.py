@@ -9,10 +9,10 @@ from liquid.expression import BLANK
 from liquid.expression import CONTINUE
 from liquid.expression import NIL
 from liquid.expression import Identifier
-from liquid.expression import Segment
 from liquid.expression import IntegerLiteral
 from liquid.expression import PrefixExpression
 from liquid.expression import RangeLiteral
+from liquid.expression import Segment
 from liquid.expression import StringLiteral
 
 

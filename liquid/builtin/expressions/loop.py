@@ -219,33 +219,33 @@ class LoopExpression(Expression):
             arg_token = next(tokens)
 
             if arg_token.kind == TOKEN_WORD:
-                match arg_token.value:
-                    case "reversed":
-                        reversed_ = True
-                    case "limit":
-                        tokens.eat_one_of(
-                            TOKEN_COLON, TOKEN_ASSIGN
-                        )  # TODO: optionally disable
-                        limit = parse_primitive(env, tokens)
-                    case "cols":
-                        tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
-                        cols = parse_primitive(env, tokens)
-                    case "offset":
-                        tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
-                        offset_token = tokens.peek
-                        if (
-                            offset_token.kind == TOKEN_WORD
-                            and offset_token.value == "continue"
-                        ):
-                            next(tokens)
-                            offset = StringLiteral(token=offset_token, value="continue")
-                        else:
-                            offset = parse_primitive(env, tokens)
-                    case _:
-                        raise LiquidSyntaxError(
-                            "expected 'reversed', 'offset' or 'limit', ",
-                            token=arg_token,
-                        )
+                value = arg_token.value
+                if value == "reversed":
+                    reversed_ = True
+                if value == "limit":
+                    tokens.eat_one_of(
+                        TOKEN_COLON, TOKEN_ASSIGN
+                    )  # TODO: optionally disable
+                    limit = parse_primitive(env, tokens)
+                if value == "cols":
+                    tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
+                    cols = parse_primitive(env, tokens)
+                if value == "offset":
+                    tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
+                    offset_token = tokens.peek
+                    if (
+                        offset_token.kind == TOKEN_WORD
+                        and offset_token.value == "continue"
+                    ):
+                        next(tokens)
+                        offset = StringLiteral(token=offset_token, value="continue")
+                    else:
+                        offset = parse_primitive(env, tokens)
+                else:
+                    raise LiquidSyntaxError(
+                        "expected 'reversed', 'offset' or 'limit', ",
+                        token=arg_token,
+                    )
             elif arg_token.kind == TOKEN_COMMA:
                 continue
             elif arg_token.kind == TOKEN_EOF:

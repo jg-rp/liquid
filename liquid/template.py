@@ -163,9 +163,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().start_index
-                            )
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token())
                         )
                     else:
                         raise
@@ -200,9 +198,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().start_index
-                            )
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token())
                         )
                     else:
                         raise
@@ -221,7 +217,8 @@ class BoundTemplate:
         uptodate = self.uptodate()
         if not isinstance(uptodate, bool):
             raise Error(
-                f"expected a boolean from uptodate, found {type(uptodate).__name__}"
+                f"expected a boolean from uptodate, found {type(uptodate).__name__}",
+                token=None,
             )
         return uptodate
 

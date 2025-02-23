@@ -1,7 +1,9 @@
 """Liquid specific Exceptions and warnings."""
 
+from pathlib import Path
 from typing import Optional
 from typing import Type
+from typing import Union
 
 from .token import TOKEN_STRING
 from .token import Token
@@ -14,7 +16,7 @@ class Error(Exception):
         self,
         *args: object,
         token: Optional[Token],
-        template_name: str | None = None,
+        template_name: Union[str, Path, None] = None,
     ):
         super().__init__(*args)
         self.token = token
@@ -64,7 +66,7 @@ class Error(Exception):
     def _pointer_message(self) -> object:
         return self.message
 
-    def context(self) -> tuple[int, int, str, str, str] | None:
+    def context(self) -> Optional[tuple[int, int, str, str, str]]:
         """Return context information for this error.
 
         Returns (line, col, previous line, current line, next line) or None

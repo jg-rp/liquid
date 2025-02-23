@@ -11,7 +11,6 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
-from liquid.expressions import parse_keyword_arguments
 from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF

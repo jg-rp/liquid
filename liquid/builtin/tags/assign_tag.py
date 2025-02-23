@@ -9,9 +9,7 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import RenderContext
 from liquid.exceptions import LiquidSyntaxError
-from liquid.expression import AssignmentExpression
 from liquid.expression import Expression
-from liquid.expressions.common import ASSIGN_IDENTIFIER_PATTERN
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
@@ -20,7 +18,8 @@ from liquid.token import Token
 
 # ruff: noqa: D102
 
-RE_ASSIGNMENT = re.compile(rf"^({ASSIGN_IDENTIFIER_PATTERN})\s*=\s*(.+)$")
+# TODO:
+RE_ASSIGNMENT = re.compile(rf"^(TODO)\s*=\s*(.+)$")
 
 TAG_ASSIGN = sys.intern("assign")
 
@@ -30,7 +29,7 @@ class AssignNode(Node):
 
     __slots__ = ("tok", "expression")
 
-    def __init__(self, tok: Token, expression: AssignmentExpression):
+    def __init__(self, tok: Token, expression: Expression):
         self.tok = tok
         self.expression = expression
 

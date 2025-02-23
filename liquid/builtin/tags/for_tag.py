@@ -23,7 +23,6 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid.context import RenderContext
-    from liquid.expression import LoopExpression
     from liquid.stream import TokenStream
 
 # ruff: noqa: D102

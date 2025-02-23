@@ -14,10 +14,10 @@ from typing import Sequence
 from typing import Union
 
 from liquid import Markup
+from liquid.builtin.expressions import Nil
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterItemTypeError
-from liquid.expression import NIL
 from liquid.filter import array_filter
 from liquid.filter import decimal_arg
 from liquid.filter import liquid_filter
@@ -111,9 +111,9 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
 def map_(sequence: ArrayT, key: object) -> list[object]:
     """Return an array/list of items in _sequence_ selected by _key_."""
     try:
-        return [_getitem(itm, str(key), default=NIL) for itm in sequence]
+        return [_getitem(itm, str(key), default=_NULL) for itm in sequence]
     except TypeError as err:
-        raise FilterError("can't map sequence") from err
+        raise FilterError("can't map sequence", token=None) from err
 
 
 @array_filter
@@ -136,7 +136,7 @@ def sort(sequence: ArrayT, key: object = None) -> list[object]:
     try:
         return sorted(sequence)
     except TypeError as err:
-        raise FilterError("can't sort sequence") from err
+        raise FilterError("can't sort sequence", token=None) from err
 
 
 @array_filter
@@ -233,7 +233,7 @@ def uniq(sequence: ArrayT, key: object = None) -> list[object]:
                 item = MISSING
             except TypeError as err:
                 raise FilterArgumentError(
-                    f"can't read property '{key}' of {obj}"
+                    f"can't read property '{key}' of {obj}", token=None
                 ) from err
 
             if item not in keys:
@@ -252,7 +252,9 @@ def compact(sequence: ArrayT, key: object = None) -> list[object]:
         try:
             return [itm for itm in sequence if itm[key] is not None]
         except TypeError as err:
-            raise FilterArgumentError(f"can't read property '{key}'") from err
+            raise FilterArgumentError(
+                f"can't read property '{key}'", token=None
+            ) from err
     return [itm for itm in sequence if itm is not None]
 
 
@@ -291,7 +293,7 @@ def _getitem(sequence: Any, key: object, default: object = None) -> Any:
         return default
     except TypeError as err:
         if sequence is None:
-            raise FilterItemTypeError(str(err)) from err
+            raise FilterItemTypeError(str(err), token=None) from err
         if isinstance(sequence, str) and isinstance(key, str) and key in sequence:
             return key
         if isinstance(sequence, int) and isinstance(key, int):
@@ -307,3 +309,16 @@ def _lower(obj: Any) -> str:
         return str(obj).lower()
     except AttributeError:
         return ""
+
+
+class _Null:
+    """A null without a token for use in the map filter."""
+
+    def __eq__(self, other: object) -> bool:
+        return other is None or isinstance(other, (_Null, Nil))
+
+    def __str__(self) -> str:  # pragma: no cover
+        return ""
+
+
+_NULL = _Null()
