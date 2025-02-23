@@ -1,8 +1,6 @@
 """Tag and node definition for the built-in "cycle" tag."""
 
 import sys
-from typing import Iterable
-from typing import Iterator
 from typing import Optional
 from typing import TextIO
 
@@ -29,25 +27,22 @@ TAG_CYCLE = sys.intern("cycle")
 class CycleNode(Node):
     """Parse tree node for the built-in "cycle" tag."""
 
-    __slots__ = ("tok", "group", "args", "key")
+    __slots__ = ("group", "args", "key")
 
-    def __init__(self, tok: Token, group: Optional[Expression], args: list[Expression]):
-        self.tok = tok
+    def __init__(
+        self, token: Token, group: Optional[Expression], args: list[Expression]
+    ):
+        super().__init__(token)
         self.group = group
         self.args = args
+        self.blank = False
 
     def __str__(self) -> str:
-        buf = ["cycle ("]
-        if self.group:
-            buf.append(f"{self.group}: ")
+        name = f"{self.group.token.value}: " if self.group else ""
+        items = ", ".join(str(i) for i in self.args)
+        return f"{{% cycle {name}{items} %}}"
 
-        buf.append(", ".join([str(arg) for arg in self.args]))
-        buf.append(")")
-        return "".join(buf)
-
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         if self.group:
             _group = self.group.evaluate(context)
             group_name = "__UNDEFINED" if is_undefined(_group) else str(_group)
@@ -64,7 +59,7 @@ class CycleNode(Node):
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    ) -> int:
         if self.group:
             _group = await self.group.evaluate_async(context)
             group_name = "__UNDEFINED" if is_undefined(_group) else str(_group)
@@ -83,15 +78,15 @@ class CycleNode(Node):
         _children: list[ChildNode] = []
         if self.group:
             _children.append(
-                ChildNode(linenum=self.tok.start_index, expression=self.group)
+                ChildNode(linenum=self.token.start_index, expression=self.group)
             )
         for arg in self.args:
-            _children.append(ChildNode(linenum=self.tok.start_index, expression=arg))
+            _children.append(ChildNode(linenum=self.token.start_index, expression=arg))
         return _children
 
 
 class CycleTag(Tag):
-    """The built-in "cycle" tag."""
+    """The built-in _cycle_ tag."""
 
     name = TAG_CYCLE
     block = False

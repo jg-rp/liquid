@@ -21,7 +21,7 @@ class FindCommentsTestCase(unittest.TestCase):
                 if child.node:
                     yield from visit(child.node)
 
-        for child in template.tree.statements:
+        for child in template.tree.nodes:
             yield from visit(child)
 
     def test_find_comment_tag_text(self):

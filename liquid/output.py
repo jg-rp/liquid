@@ -25,3 +25,11 @@ class LimitedStringIO(StringIO):
             if self.size > self.limit:
                 raise OutputStreamLimitError("output stream limit reached", token=None)
         return super().write(__s)
+
+
+class NullIO(StringIO):
+    """A StringIO subclass that is a null op. It doesn't write anything."""
+
+    def write(self, _s: str) -> int:
+        """Pretend to write the string to the stream."""
+        return 0

@@ -236,7 +236,7 @@ class _TemplateCounter:
 
         It is not safe to call this method multiple times.
         """
-        for node in self.template.tree.statements:
+        for node in self.template.tree.nodes:
             try:
                 self._analyze(node)
             except StopRender:
@@ -247,7 +247,7 @@ class _TemplateCounter:
 
     async def analyze_async(self) -> _TemplateCounter:
         """An async version of `_TemplateVariableCounter.analyze()`."""
-        for node in self.template.tree.statements:
+        for node in self.template.tree.nodes:
             try:
                 await self._analyze_async(node)
             except StopRender:
@@ -879,7 +879,7 @@ class _InheritanceChainCounter(_TemplateCounter):
 
     def _make_template(self, item: _BlockStackItem) -> BoundTemplate:
         parse_tree = ParseTree()
-        parse_tree.statements = [item.block.block]
+        parse_tree.nodes = [item.block.block]
         return self.template.env.template_class(
             self.template.env, parse_tree=parse_tree, name=item.source_name
         )

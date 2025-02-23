@@ -1,27 +1,33 @@
-"""Tag and node definition for the built-in "case" tag."""
+"""The built-in _case_ tag."""
 
 from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
-from liquid import ast
+from liquid.ast import ChildNode
+from liquid.ast import Node
+from liquid.builtin.expressions import parse_primitive
+from liquid.builtin.expressions.logical import _eq
+from liquid.expression import Expression
 from liquid.parse import get_parser
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_ELSE
 from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_OR
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid import Environment
+    from liquid import TokenStream
+    from liquid.ast import BlockNode
     from liquid.context import RenderContext
-    from liquid.expression import Expression
+
 
 # ruff: noqa: D102
 
@@ -34,97 +40,82 @@ ENDWHENBLOCK = frozenset((TAG_ENDCASE, TAG_WHEN, TAG_ELSE, TOKEN_EOF))
 ENDCASEBLOCK = frozenset((TAG_ENDCASE,))
 
 
-class CaseNode(ast.Node):
-    """Parse tree node for the built-in "case" tag."""
+class CaseNode(Node):
+    """The built-in _case_ tag."""
 
-    __slots__ = ("tok", "whens", "default", "forced_output")
+    __slots__ = ("whens", "default", "expression")
 
     def __init__(
         self,
-        tok: Token,
-        whens: list[ast.ConditionalBlockNode],
-        default: Optional[ast.BlockNode] = None,
+        token: Token,
+        expression: Expression,
+        whens: list[MultiExpressionBlockNode],
+        default: Optional[BlockNode] = None,
     ):
-        self.tok = tok
+        super().__init__(token)
+        self.expression = expression
         self.whens = whens
         self.default = default
 
-        self.forced_output = self.force_output or any(
-            n.forced_output for n in (*self.whens, self.default) if n
+        self.blank = all(node.blank for node in self.whens) and (
+            not self.default or self.default.blank
         )
 
     def __str__(self) -> str:
-        buf = ["if (False) { }"] if not self.whens else [f"if {self.whens[0]}"]
-
-        if len(self.whens) > 1:
-            for when in self.whens[1:]:
-                buf.append(f"elsif {when}")
+        default = ""
 
         if self.default:
-            buf.append(f"else {{ {self.default} }}")
+            default = f"{{% else %}}{self.default}"
 
-        return " ".join(buf)
+        return (
+            f"{{% case {self.expression} %}}\n"
+            f"{''.join(str(w) for w in self.whens)}"
+            f"{default}"
+            f"{{% endcase %}}"
+        )
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        buf = context.get_buffer(buffer)
-        rendered: Optional[bool] = False
-
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        count = 0
         for when in self.whens:
-            if when.render(context, buf):
-                rendered = True
+            count += when.render(context, buffer)
 
-        if not rendered and self.default:
-            rendered = self.default.render(context, buf)
+        if not count and self.default is not None:
+            count += self.default.render(context, buffer)
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
-
-        return rendered
+        return count
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        buf = context.get_buffer(buffer)
-        rendered: Optional[bool] = False
-
+    ) -> int:
+        count = 0
         for when in self.whens:
-            if await when.render_async(context, buf):
-                rendered = True
+            count += await when.render_async(context, buffer)
 
-        if not rendered and self.default:
-            rendered = await self.default.render_async(context, buf)
+        if not count and self.default is not None:
+            count += await self.default.render_async(context, buffer)
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
+        return count
 
-        return rendered
-
-    def children(self) -> list[ast.ChildNode]:
+    def children(self) -> list[ChildNode]:
         _children = [
-            ast.ChildNode(
-                linenum=alt.tok.start_index,
-                node=alt.block,
-                expression=alt.condition,
+            ChildNode(
+                linenum=alt.token.start_index,
+                node=alt,
             )
             for alt in self.whens
         ]
         if self.default:
             _children.append(
-                ast.ChildNode(
-                    linenum=self.default.tok.start_index,
+                ChildNode(
+                    linenum=self.default.token.start_index,
                     node=self.default,
-                    expression=None,
                 )
             )
         return _children
 
 
 class CaseTag(Tag):
-    """The built-in cycle tag."""
+    """The built-in _case_ tag."""
 
     name = TAG_CASE
     end = TAG_ENDCASE
@@ -134,17 +125,11 @@ class CaseTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
-    def parse(self, stream: TokenStream) -> ast.Node:
-        stream.expect(TOKEN_TAG, value=TAG_CASE)
-        tok = stream.current
-        stream.next_token()
-
-        # Parse the case expression.
-        stream.expect(TOKEN_EXPRESSION)
-        case = self._parse_case_expression(
-            stream.current.value, stream.current.start_index
-        )
-        stream.next_token()
+    def parse(self, stream: TokenStream) -> Node:
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner()
+        left = parse_primitive(self.env, tokens)
+        tokens.expect_eos()
 
         # Eat whitespace or junk between `case` and when/else/endcase
         while (
@@ -153,62 +138,120 @@ class CaseTag(Tag):
         ):
             stream.next_token()
 
-        whens: list[ast.ConditionalBlockNode] = []
+        whens: list[MultiExpressionBlockNode] = []
+        default: BlockNode | None = None
+
+        parse_block = get_parser(self.env).parse_block
 
         while stream.current.is_tag(TAG_WHEN):
-            when_tok = stream.current
-            stream.next_token()  # Eat WHEN
-            stream.expect(TOKEN_EXPRESSION)
+            alternative_token = stream.current
+            expressions = self._parse_when_expression(stream.into_inner())
+            alternative_block = parse_block(stream, ENDCASEBLOCK)
 
-            # One conditional block for every object in a comma or `or` separated list.
-            when_exprs = [
-                BooleanExpression(InfixExpression(case, "==", expr))
-                for expr in self._parse_when_expression(
-                    stream.current.value, stream.current.start_index
+            whens.append(
+                MultiExpressionBlockNode(
+                    alternative_token,
+                    alternative_block,
+                    _AnyExpression(alternative_token, left, expressions),
                 )
-            ]
-
-            stream.next_token()
-            when_block = self.parser.parse_block(stream, ENDWHENBLOCK)
-
-            whens.extend(
-                ast.ConditionalBlockNode(
-                    tok=when_tok,
-                    condition=expr,
-                    block=when_block,
-                )
-                for expr in when_exprs
             )
 
-        default: Optional[ast.BlockNode] = None
+        if stream.current.kind == TOKEN_ELSE:
+            next(stream)  # else
+            default = parse_block(stream, ENDWHENBLOCK)
 
-        if stream.current.is_tag(TAG_ELSE):
-            stream.next_token()
-            default = self.parser.parse_block(stream, ENDCASEBLOCK)
+        stream.expect(TAG_ENDCASE)
 
-        stream.expect(TOKEN_TAG, value=TAG_ENDCASE)
-        return self.node_class(tok, whens=whens, default=default)
-
-    def _parse_case_expression(self, expr: str, linenum: int) -> Expression:
-        stream = TokenStream(
-            tokenize_common_expression(expr, linenum=linenum),
-            shorthand_indexes=self.env.shorthand_indexes,
-        )
-        return parse_common_expression(stream)
-
-    def _parse_when_expression(self, expr: str, linenum: int) -> list[Expression]:
-        expressions = []
-        stream = TokenStream(
-            tokenize_common_expression(expr, linenum=linenum),
-            shorthand_indexes=self.env.shorthand_indexes,
+        return self.node_class(
+            token,
+            left,
+            whens,
+            default,
         )
 
-        while True:
-            expressions.append(parse_common_expression(stream))
+    def _parse_when_expression(self, stream: TokenStream) -> list[Expression]:
+        expressions: list[Expression] = [parse_primitive(self.env, stream)]
+        while stream.current.kind in (TOKEN_COMMA, TOKEN_OR):
             next(stream)
-            if stream.current[1] in (TOKEN_COMMA, TOKEN_OR):
-                next(stream)
-            else:
-                break
-
+            expressions.append(parse_primitive(self.env, stream))
+        stream.expect_eos()
         return expressions
+
+
+class _AnyExpression(Expression):
+    __slots__ = (
+        "left",
+        "expressions",
+    )
+
+    def __init__(
+        self, token: Token, left: Expression, expressions: list[Expression]
+    ) -> None:
+        super().__init__(token)
+        self.left = left
+        self.expressions = expressions
+
+    def __str__(self) -> str:
+        return ", ".join(str(expr) for expr in self.expressions)
+
+    def evaluate(self, context: RenderContext) -> object:
+        left = self.left.evaluate(context)
+        return any((_eq(left, right.evaluate(context)) for right in self.expressions))
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = await self.left.evaluate_async(context)
+        for expr in self.expressions:
+            right = await expr.evaluate_async(context)
+            if _eq(left, right):
+                return True
+        return False
+
+    def children(self) -> list[Expression]:
+        return self.expressions
+
+
+class MultiExpressionBlockNode(Node):
+    """A node containing a sequence of nodes guarded by a choice of expressions."""
+
+    __slots__ = ("block", "expression")
+
+    def __init__(
+        self,
+        token: Token,
+        block: BlockNode,
+        expression: _AnyExpression,
+    ) -> None:
+        super().__init__(token)
+        self.block = block
+        self.expression = expression
+        self.blank = self.block.blank
+
+    def __str__(self) -> str:
+        return f"{{% when {self.expression} %}}{self.block}"
+
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        if self.expression.evaluate(context):
+            return self.block.render(context, buffer)
+        return 0
+
+    async def render_to_output_async(
+        self, context: RenderContext, buffer: TextIO
+    ) -> int:
+        """Render the node to the output buffer."""
+        if await self.expression.evaluate_async(context):
+            return await self.block.render_async(context, buffer)
+        return 0
+
+    # TODO:
+    # def children(
+    #     self,
+    #     static_context: RenderContext,  # noqa: ARG002
+    #     *,
+    # ) -> Iterable[Node]:
+    #     """Return this node's children."""
+    #     yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression

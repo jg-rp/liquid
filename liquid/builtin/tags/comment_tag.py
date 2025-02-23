@@ -1,4 +1,4 @@
-"""Tag and node definition for the built-in "comment" tag."""
+"""The built-in _comment_ tag."""
 
 import sys
 from typing import Optional
@@ -22,32 +22,26 @@ END_COMMENTBLOCK = frozenset((TAG_ENDCOMMENT,))
 
 
 class CommentNode(ast.Node):
-    """Parse tree node for the built-in "comment" tag."""
+    """The built-in _comment_ tag."""
 
-    __slots__ = ("tok", "text")
+    __slots__ = ("text",)
 
-    def __init__(self, tok: Token, text: Optional[str] = None):
-        self.tok = tok
+    def __init__(self, token: Token, text: Optional[str] = None):
+        super().__init__(token)
         self.text = text
 
     def __str__(self) -> str:
-        if self.text:
-            return f"/* {self.text} */"
-        return "/* */"
+        return f"{{% comment %}}{self.text}{{% endcomment %}}"
 
-    def render_to_output(
-        self,
-        _: RenderContext,
-        __: TextIO,
-    ) -> Optional[bool]:
-        return False
+    def render_to_output(self, _: RenderContext, __: TextIO) -> int:
+        return 0
 
     def children(self) -> list[ast.ChildNode]:
         return []
 
 
 class CommentTag(Tag):
-    """The built-in "comment" tag.
+    """The built-in _comment_ tag.
 
     This implementation does not include comment text in the resulting
     AST node.
@@ -58,15 +52,13 @@ class CommentTag(Tag):
     node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:
-        stream.expect(TOKEN_TAG, value=TAG_COMMENT)
-        stream.next_token()
-        node = self.node_class(stream.current)
+        node = self.node_class(stream.eat(TOKEN_TAG))
         eat_block(stream, end=END_COMMENTBLOCK)
         return node
 
 
 class CommentTextTag(CommentTag):
-    """An implementation of the built-in "comment" tag that retains comment text.
+    """An implementation of the built-in _comment_ tag that retains comment text.
 
     Some Liquid markup might be stripped out by the lexer, so comment text is not
     guaranteed to be identical to that in the source document.
@@ -76,9 +68,7 @@ class CommentTextTag(CommentTag):
     end = TAG_ENDCOMMENT
 
     def parse(self, stream: TokenStream) -> CommentNode:
-        stream.expect(TOKEN_TAG, value=TAG_COMMENT)
-        stream.next_token()
-        tok = stream.current
+        token = stream.eat(TOKEN_TAG)
 
         text = []
         while stream.current.kind != TOKEN_EOF:
@@ -88,6 +78,6 @@ class CommentTextTag(CommentTag):
             ):
                 break
             text.append(stream.current.value)
-            stream.next_token()
+            next(stream)
 
-        return self.node_class(tok, text="".join(text))
+        return self.node_class(token, text="".join(text))

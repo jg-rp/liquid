@@ -152,7 +152,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.statements:
+            for node in self.tree.nodes:
                 try:
                     node.render(context, buffer)
                 except LiquidInterrupt as err:
@@ -187,7 +187,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.statements:
+            for node in self.tree.nodes:
                 try:
                     await node.render_async(context, buffer)
                 except LiquidInterrupt as err:

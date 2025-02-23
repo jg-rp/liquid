@@ -476,7 +476,7 @@ def find_inheritance_nodes(
     extends_nodes: list["ExtendsNode"] = []
     block_nodes: list[BlockNode] = []
 
-    for node in template.tree.statements:
+    for node in template.tree.nodes:
         _visit_node(
             node,
             extends_nodes=extends_nodes,

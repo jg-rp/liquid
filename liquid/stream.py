@@ -7,8 +7,10 @@ from typing import Deque
 from typing import Iterator
 from typing import Optional
 
+from .builtin.expressions import tokenize
 from .exceptions import LiquidSyntaxError
 from .token import TOKEN_EOF
+from .token import TOKEN_EXPRESSION
 from .token import TOKEN_INITIAL
 from .token import Token
 from .token import reverse_operators
@@ -133,3 +135,26 @@ class TokenStream:
             )
             raise LiquidSyntaxError(msg, token=tok)
         return tok
+
+    def into_inner(self) -> TokenStream:
+        """Return a stream of tokens for the current expression token.
+
+        If the current token is not an expression, a LiquidSyntaxError is
+        raised.
+        """
+        token = self.current
+        if token.kind != TOKEN_EXPRESSION:
+            msg = (
+                "expected an expression, "
+                f"found {reverse_operators.get(token.kind, token.kind)!r}"
+            )
+            raise LiquidSyntaxError(msg, token=token)
+        next(self)
+        return TokenStream(tokenize(token.value, parent_token=token))
+
+    def expect_eos(self) -> None:
+        """Raise a syntax error if we're not at the end of the stream."""
+        if self.current.kind != TOKEN_EOF:
+            raise LiquidSyntaxError(
+                f"unexpected token {self.current.kind}", token=self.current
+            )

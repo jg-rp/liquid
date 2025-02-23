@@ -1,4 +1,5 @@
 """Expression caching test cases."""
+
 from unittest import TestCase
 
 from liquid import Environment
@@ -13,7 +14,7 @@ class ExpressionCacheTestCase(TestCase):
         template = env.from_string(
             "{% if x == 1 %}{% endif %}{% if x == 1 %}{% endif %}"
         )
-        nodes = template.tree.statements
+        nodes = template.tree.nodes
         self.assertEqual(len(nodes), 2)
 
         node1, node2 = nodes
@@ -28,7 +29,7 @@ class ExpressionCacheTestCase(TestCase):
         template = env.from_string(
             "{% if x == 1 %}{% endif %}{% if x == 1 %}{% endif %}"
         )
-        nodes = template.tree.statements
+        nodes = template.tree.nodes
         self.assertEqual(len(nodes), 2)
 
         node1, node2 = nodes
@@ -44,7 +45,7 @@ class ExpressionCacheTestCase(TestCase):
             expression_cache_size=0,
         )
 
-        nodes = template.tree.statements
+        nodes = template.tree.nodes
         self.assertEqual(len(nodes), 2)
 
         node1, node2 = nodes
@@ -60,7 +61,7 @@ class ExpressionCacheTestCase(TestCase):
             expression_cache_size=1,
         )
 
-        nodes = template.tree.statements
+        nodes = template.tree.nodes
         self.assertEqual(len(nodes), 2)
 
         node1, node2 = nodes

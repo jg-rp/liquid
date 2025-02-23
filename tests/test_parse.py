@@ -50,9 +50,9 @@ class ParserTestCase(unittest.TestCase):
                 template = env.from_string(case.template)
 
                 self.assertIsNotNone(template)
-                self.assertEqual(len(template.tree.statements), case.expect_statements)
+                self.assertEqual(len(template.tree.nodes), case.expect_statements)
                 if case.expect_statements:
-                    self.assertIsInstance(template.tree.statements[0], instance)
+                    self.assertIsInstance(template.tree.nodes[0], instance)
                     self.assertIn(str(template.tree), case.expected)
 
     def test_template_literal(self):
@@ -102,7 +102,7 @@ class ParserTestCase(unittest.TestCase):
                 template = env.from_string(case.template)
 
                 self.assertIsNotNone(template)
-                self.assertEqual(len(template.tree.statements), case.expect_statements)
+                self.assertEqual(len(template.tree.nodes), case.expect_statements)
 
                 if case.expect_statements:
                     self.assertEqual(str(template.tree), case.expect)

@@ -39,7 +39,7 @@ class Parser:
     def parse(self, stream: TokenStream) -> ParseTree:
         """Parse the given stream of tokens into a tree."""
         root = ParseTree()
-        statements = root.statements
+        statements = root.nodes
 
         # TODO: factor in parse_statement
         # TODO: benchmark with local tag vars
@@ -79,7 +79,7 @@ class Parser:
         stream.
         """
         block = BlockNode(stream.current)
-        statements = block.statements
+        statements = block.nodes
 
         while stream.current.kind != TOKEN_EOF:
             if stream.current.kind == TOKEN_TAG and stream.current.value in end:
