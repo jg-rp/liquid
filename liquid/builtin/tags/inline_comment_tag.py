@@ -1,4 +1,4 @@
-"""Tag an node definition for the built-in "inline comment" tag."""
+"""The built-in inline comment tag."""
 
 import re
 import sys
@@ -14,15 +14,15 @@ RE_INVALID_INLINE_COMMENT = re.compile(r"\n\s*[^#\s]")
 
 
 class InlineCommentTag(Tag):
-    """The built-in inline comment ("#") tag."""
+    """The built-in inline comment tag."""
 
     block = False
     name = sys.intern("#")
     node_class = CommentNode
 
-    def parse(self, stream: TokenStream) -> CommentNode:  # noqa: D102
-        stream.expect(TOKEN_TAG, value=self.name)
-        tok = stream.current
+    def parse(self, stream: TokenStream) -> CommentNode:
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
         # Empty comment tag?
         if stream.peek.kind == TOKEN_EXPRESSION:
             next(stream)
@@ -31,4 +31,4 @@ class InlineCommentTag(Tag):
                     "every line of an inline comment must start with a '#' character",
                     token=stream.current,
                 )
-        return self.node_class(tok, text=stream.current.value)
+        return self.node_class(token, text=stream.current.value)

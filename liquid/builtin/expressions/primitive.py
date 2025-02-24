@@ -382,6 +382,19 @@ def parse_identifier(env: Environment, tokens: TokenStream) -> Identifier:
     return Identifier(word, token=expr.token)
 
 
+def parse_string_or_path(
+    env: Environment, tokens: TokenStream
+) -> Union[Path, StringLiteral]:
+    """Parse a string literal or path to a string variable."""
+    expr = parse_primitive(env, tokens)
+    if not isinstance(expr, (Path, StringLiteral)):
+        raise LiquidSyntaxError(
+            f"expected an string or variable, found {expr.__class__.__name__}",
+            token=expr.token,
+        )
+    return expr
+
+
 def is_empty(obj: object) -> bool:
     """Return True if _obj_ is considered empty."""
     return isinstance(obj, (list, dict, str)) and not obj

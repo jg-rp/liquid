@@ -9,7 +9,7 @@ from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import RenderContext
-from liquid.lex import get_liquid_expression_lexer
+from liquid.lex import get_liquid_expression_lexer  # TODO: move here
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -17,8 +17,6 @@ from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
-
-# ruff: noqa: D102
 
 if TYPE_CHECKING:
     from liquid import Environment
