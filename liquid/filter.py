@@ -59,7 +59,7 @@ def string_filter(_filter: FilterT) -> FilterT:
         try:
             return _filter(val, *args, **kwargs)
         except TypeError as err:
-            raise FilterArgumentError(err) from err
+            raise FilterArgumentError(err, token=None) from err
 
     return wrapper
 
@@ -70,12 +70,14 @@ def array_filter(_filter: FilterT) -> FilterT:
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
         if not isinstance(val, (list, tuple, Undefined, range)):
-            raise FilterValueError(f"expected an array, found {type(val).__name__}")
+            raise FilterValueError(
+                f"expected an array, found {type(val).__name__}", token=None
+            )
 
         try:
             return _filter(val, *args, **kwargs)
         except TypeError as err:
-            raise FilterArgumentError(err) from err
+            raise FilterArgumentError(err, token=None) from err
 
     return wrapper
 
@@ -101,7 +103,7 @@ def sequence_filter(_filter: FilterT) -> FilterT:
             # call to the filter callable.
             return None
         except TypeError as err:
-            raise FilterArgumentError(err) from err
+            raise FilterArgumentError(err, token=None) from err
 
     return wrapper
 
@@ -114,7 +116,7 @@ def liquid_filter(_filter: FilterT) -> FilterT:
         try:
             return _filter(val, *args, **kwargs)
         except TypeError as err:
-            raise FilterArgumentError(err) from err
+            raise FilterArgumentError(err, token=None) from err
 
     return wrapper
 
@@ -127,7 +129,7 @@ def int_arg(val: Any, default: Optional[int] = None) -> int:
         if default is not None:
             return default
         raise FilterArgumentError(
-            f"expected an int or string, found {type(val).__name__}"
+            f"expected an int or string, found {type(val).__name__}", token=None
         ) from err
 
 
@@ -151,14 +153,14 @@ def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
             if default is not None:
                 return default
             raise FilterArgumentError(
-                f"could not cast string '{val}' to a number"
+                f"could not cast string '{val}' to a number", token=None
             ) from err
 
     elif default is not None:
         return default
 
     raise FilterArgumentError(
-        f"expected an int, float or string, found {type(val).__name__}"
+        f"expected an int, float or string, found {type(val).__name__}", token=None
     )
 
 
@@ -186,14 +188,14 @@ def decimal_arg(
             if default is not None:
                 return default
             raise FilterArgumentError(
-                f"could not cast string '{val}' to a number"
+                f"could not cast string '{val}' to a number", token=None
             ) from err
 
     elif default is not None:
         return default
 
     raise FilterArgumentError(
-        f"expected an int, float or string, found {type(val).__name__}"
+        f"expected an int, float or string, found {type(val).__name__}", token=None
     )
 
 
@@ -207,7 +209,7 @@ def math_filter(_filter: FilterT) -> FilterT:
         try:
             return _filter(val, *args, **kwargs)
         except TypeError as err:
-            raise FilterArgumentError(err) from err
+            raise FilterArgumentError(err, token=None) from err
 
     return wrapper
 

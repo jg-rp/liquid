@@ -427,29 +427,30 @@ def parse_boolean_primitive(  # noqa: PLR0912
 
     if kind == TOKEN_TRUE:
         left = TrueLiteral(token)
-    if kind == TOKEN_FALSE:
+    elif kind == TOKEN_FALSE:
         left = FalseLiteral(token)
-    if kind in (TOKEN_NIL, TOKEN_NULL):
+    elif kind in (TOKEN_NIL, TOKEN_NULL):
         left = Nil(token)
-    if kind == TOKEN_INTEGER:
+    elif kind == TOKEN_INTEGER:
         left = IntegerLiteral(token, to_int(token.value))
-    if kind == TOKEN_FLOAT:
+    elif kind == TOKEN_FLOAT:
         left = FloatLiteral(token, float(token.value))
-    if kind == TOKEN_STRING:
+    elif kind == TOKEN_STRING:
         left = StringLiteral(token, token.value)
-    if kind == TOKEN_RANGE_LITERAL:
+    elif kind == TOKEN_RANGE_LITERAL:
         RangeLiteral.parse(env, tokens)
-    if kind == TOKEN_WORD:
+    elif kind == TOKEN_WORD:
         if token.value == "empty":
             left = Empty(token)
-        if token.value == "blank":
+        elif token.value == "blank":
             left = Blank(token)
+        else:
+            left = Path.parse(env, tokens)
+    elif kind == TOKEN_LBRACKET:
         left = Path.parse(env, tokens)
-    if kind == TOKEN_LBRACKET:
-        left = Path.parse(env, tokens)
-    if kind == TOKEN_LPAREN:
+    elif kind == TOKEN_LPAREN:
         left = parse_grouped_expression(env, tokens)
-    if kind == TOKEN_NOT:
+    elif kind == TOKEN_NOT:
         left = LogicalNotExpression.parse(env, tokens)
     else:
         raise LiquidSyntaxError(

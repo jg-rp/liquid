@@ -139,7 +139,7 @@ class BaseLoader(ABC):  # noqa: B024
         try:
             source, filename, uptodate, matter = self.get_source(env, name)
         except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+            raise TemplateNotFound(name, token=None) from err
 
         template = env.from_string(
             source,
@@ -162,7 +162,7 @@ class BaseLoader(ABC):  # noqa: B024
             template_source = await self.get_source_async(env, name)
             source, filename, uptodate, matter = template_source
         except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+            raise TemplateNotFound(name, token=None) from err
 
         template = env.from_string(
             source,
@@ -235,7 +235,7 @@ class BaseLoader(ABC):  # noqa: B024
                 context, name, **kwargs
             )
         except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+            raise TemplateNotFound(name, token=None) from err
 
         template = context.env.from_string(
             source,
@@ -262,7 +262,7 @@ class BaseLoader(ABC):  # noqa: B024
                 matter,
             ) = await self.get_source_with_context_async(context, name, **kwargs)
         except Exception as err:  # noqa: BLE001
-            raise TemplateNotFound(name) from err
+            raise TemplateNotFound(name, token=None) from err
 
         template = context.env.from_string(
             source,
@@ -290,6 +290,6 @@ class DictLoader(BaseLoader):
         try:
             source = self.templates[template_name]
         except KeyError as err:
-            raise TemplateNotFound(template_name) from err
+            raise TemplateNotFound(template_name, token=None) from err
 
         return TemplateSource(source, template_name, None)

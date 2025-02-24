@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections import Counter
-from collections import abc
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -26,29 +24,20 @@ from liquid.exceptions import LiquidInterrupt
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import StopRender
 from liquid.output import LimitedStringIO
-from liquid.static_analysis import ContextualTemplateAnalysis
-from liquid.static_analysis import NameRefs
-from liquid.static_analysis import ReferencedVariable
-from liquid.static_analysis import Refs
-from liquid.static_analysis import TemplateAnalysis
-from liquid.static_analysis import _TemplateCounter
 
 if TYPE_CHECKING:
+    from collections import abc
+
     from liquid import Environment
-    from liquid.ast import ParseTree
+    from liquid.ast import Node
     from liquid.loaders import UpToDate
 
 
 __all__ = (
     "AwareBoundTemplate",
     "BoundTemplate",
-    "ContextualTemplateAnalysis",
     "FutureAwareBoundTemplate",
     "FutureBoundTemplate",
-    "NameRefs",
-    "Refs",
-    "ReferencedVariable",
-    "TemplateAnalysis",
     "TemplateDrop",
 )
 
@@ -81,7 +70,7 @@ class BoundTemplate:
     def __init__(
         self,
         env: Environment,
-        parse_tree: ParseTree,
+        nodes: list[Node],
         name: str = "",
         path: Optional[Union[str, Path]] = None,
         globals: Optional[dict[str, object]] = None,  # noqa: A002
@@ -89,7 +78,7 @@ class BoundTemplate:
         uptodate: UpToDate = None,
     ):
         self.env = env
-        self.tree = parse_tree
+        self.nodes = nodes
         self.globals = globals or {}
         self.matter = matter or {}
         self.name = name
@@ -152,7 +141,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.nodes:
+            for node in self.nodes:
                 try:
                     node.render(context, buffer)
                 except LiquidInterrupt as err:
@@ -163,7 +152,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token())
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token)
                         )
                     else:
                         raise
@@ -171,7 +160,7 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().start_index)
+                    self.env.error(err, token=node.token)
 
     async def render_with_context_async(
         self,
@@ -187,7 +176,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.nodes:
+            for node in self.nodes:
                 try:
                     await node.render_async(context, buffer)
                 except LiquidInterrupt as err:
@@ -198,7 +187,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token())
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token)
                         )
                     else:
                         raise
@@ -206,7 +195,7 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().start_index)
+                    self.env.error(err, token=node.token)
 
     @property
     def is_up_to_date(self) -> bool:
@@ -257,112 +246,6 @@ class BoundTemplate:
 
     def __repr__(self) -> str:
         return f"Template(name='{self.name}', path='{self.path}')"  # pragma: no cover
-
-    def analyze(
-        self, follow_partials: bool = True, raise_for_failures: bool = True
-    ) -> TemplateAnalysis:
-        """Statically analyze this template and any included/rendered templates.
-
-        Args:
-            follow_partials: If `True`, we will try to load partial templates and
-                analyze those templates too.
-            raise_for_failures: If `True`, will raise an exception if an
-                `ast.Node` or `expression.Expression` does not define a `children()`
-                method, or if a partial template can not be loaded. When `False`, no
-                exception is raised and a mapping of failed nodes and expressions is
-                available as the `failed_visits` property. A mapping of unloadable
-                partial templates is stored in the `unloadable_partials` property.
-        """
-        refs = _TemplateCounter(
-            self,
-            follow_partials=follow_partials,
-            raise_for_failures=raise_for_failures,
-        ).analyze()
-
-        return TemplateAnalysis(
-            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
-            local_variables={
-                ReferencedVariable(k): v for k, v in refs.template_locals.items()
-            },
-            global_variables={
-                ReferencedVariable(k): v for k, v in refs.template_globals.items()
-            },
-            failed_visits=dict(refs.failed_visits),
-            unloadable_partials=dict(refs.unloadable_partials),
-            filters=dict(refs.filters),
-            tags=dict(refs.tags),
-        )
-
-    async def analyze_async(
-        self, follow_partials: bool = True, raise_for_failures: bool = True
-    ) -> TemplateAnalysis:
-        """An async version of `analyze`."""
-        refs = await _TemplateCounter(
-            self,
-            follow_partials=follow_partials,
-            raise_for_failures=raise_for_failures,
-        ).analyze_async()
-
-        return TemplateAnalysis(
-            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
-            local_variables={
-                ReferencedVariable(k): v for k, v in refs.template_locals.items()
-            },
-            global_variables={
-                ReferencedVariable(k): v for k, v in refs.template_globals.items()
-            },
-            failed_visits=dict(refs.failed_visits),
-            unloadable_partials=dict(refs.unloadable_partials),
-            filters=dict(refs.filters),
-            tags=dict(refs.tags),
-        )
-
-    def analyze_with_context(
-        self, *args: Any, **kwargs: Any
-    ) -> ContextualTemplateAnalysis:
-        """Analyze a path through this template's syntax tree given some context data.
-
-        Unlike `analyze`, this form of template analysis does perform a render,
-        capturing template variables as we go.
-
-        Python Liquid does not currently support template introspection from within a
-        render context or `Expression` object. Meaning line numbers and template names
-        are not available. Only variable names are reported along with the number of
-        times they were referenced.
-
-        It's also, using this method, not currently possible to detect names added to a
-        block's scope. For example, `forloop.index` will be included in the results
-        object if referenced within a `for` loop block.
-
-        Accepts the same arguments as `render`.
-        """
-        context = self.capture_context_class(
-            self, globals=self.make_globals(dict(*args, **kwargs))
-        )
-        buf = self._get_buffer()
-        self.render_with_context(context, buf)
-        return ContextualTemplateAnalysis(
-            all_variables=dict(Counter(context.all_references)),
-            local_variables=dict(Counter(context.local_references)),
-            undefined_variables=dict(Counter(context.undefined_references)),
-            filters=dict(Counter(context.filters)),
-        )
-
-    async def analyze_with_context_async(
-        self, *args: Any, **kwargs: Any
-    ) -> ContextualTemplateAnalysis:
-        """An async version of `analyze_with_context`."""
-        context = self.capture_context_class(
-            self, globals=self.make_globals(dict(*args, **kwargs))
-        )
-        buf = self._get_buffer()
-        await self.render_with_context_async(context, buf)
-        return ContextualTemplateAnalysis(
-            all_variables=dict(Counter(context.all_references)),
-            local_variables=dict(Counter(context.local_references)),
-            undefined_variables=dict(Counter(context.undefined_references)),
-            filters=dict(Counter(context.filters)),
-        )
 
 
 class AwareBoundTemplate(BoundTemplate):

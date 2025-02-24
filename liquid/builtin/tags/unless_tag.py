@@ -1,4 +1,4 @@
-"""Tag and node definition for the built-in "unless" tag."""
+"""The built-in _unless_ tag."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ import sys
 from typing import TYPE_CHECKING
 from typing import Optional
 from typing import TextIO
-from typing import Union
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import ConditionalBlockNode
 from liquid.ast import IllegalNode
 from liquid.ast import Node
+from liquid.builtin.expressions import BooleanExpression
 from liquid.exceptions import LiquidSyntaxError
 from liquid.mode import Mode
 from liquid.parse import eat_block
@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from liquid.expression import Expression
     from liquid.stream import TokenStream
 
-# ruff: noqa: D102
 
 TAG_UNLESS = sys.intern("unless")
 TAG_ENDUNLESS = sys.intern("endunless")
@@ -42,107 +41,85 @@ ENDUNLESSELSEBLOCK = frozenset((TAG_ENDUNLESS, TAG_ELSIF, TAG_ELSE))
 
 
 class UnlessNode(Node):
-    """Parse tree node for the built-in "unless" tag."""
+    """The built-in _unless_ tag."""
 
     __slots__ = (
-        "tok",
         "condition",
         "consequence",
-        "conditional_alternatives",
-        "alternative",
-        "forced_output",
+        "alternatives",
+        "default",
     )
 
     def __init__(
         self,
-        tok: Token,
+        token: Token,
         condition: Expression,
         consequence: BlockNode,
-        conditional_alternatives: Optional[list[ConditionalBlockNode]] = None,
-        alternative: Optional[BlockNode] = None,
+        alternatives: Optional[list[ConditionalBlockNode]] = None,
+        default: Optional[BlockNode] = None,
     ):
-        self.tok = tok
+        super().__init__(token)
         self.condition = condition
         self.consequence = consequence
-        self.conditional_alternatives = conditional_alternatives or []
-        self.alternative = alternative
+        self.alternatives = alternatives or []
+        self.default = default
 
-        self.forced_output = self.force_output or any(
-            getattr(n, "forced_output", False)
-            for n in (
-                self.consequence,
-                *self.conditional_alternatives,
-                self.alternative,
-            )
-            if n
+        self.blank = (
+            consequence.blank
+            and all(node.blank for node in self.alternatives)
+            and (not default or default.blank)
         )
 
     def __str__(self) -> str:
-        buf = [
-            f"if !{self.condition} {{ {self.consequence} }}",
-        ]
+        alts = "".join(str(alt) for alt in self.alternatives)
+        default = ""
 
-        for alt in self.conditional_alternatives:
-            buf.append(f"elsif {alt}")
+        if self.default:
+            default = f"{{% else %}}{self.default}"
 
-        if self.alternative:
-            buf.append(f"else {{ {self.alternative} }}")
-        return " ".join(buf)
+        return (
+            f"{{% unless {self.condition} %}}"
+            f"{self.consequence}"
+            f"{alts}"
+            f"{default}"
+            f"{{% endunless %}}"
+        )
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        # This intermediate buffer is used to detect and possibly suppress blocks that,
-        # when rendered, contain only whitespace.
-        buf = context.get_buffer(buffer)
-
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
         if not self.condition.evaluate(context):
-            rendered = self.consequence.render(context, buf)
-        else:
-            rendered = False
-            for alt in self.conditional_alternatives:
-                if alt.render(context, buf):
-                    rendered = True
-                    break
+            return self.consequence.render(context, buffer)
 
-            if not rendered and self.alternative:
-                rendered = self.alternative.render(context, buf)
+        for alternative in self.alternatives:
+            if alternative.condition.evaluate(context):
+                return alternative.block.render(context, buffer)
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
+        if self.default:
+            return self.default.render(context, buffer)
 
-        return rendered
+        return 0
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        # This intermediate buffer is used to detect and possibly suppress blocks that,
-        # when rendered, contain only whitespace.
-        buf = context.get_buffer(buffer)
-
+    ) -> int:
+        """Render the node to the output buffer."""
         if not await self.condition.evaluate_async(context):
-            rendered = await self.consequence.render_async(context, buf)
-        else:
-            rendered = False
-            for alt in self.conditional_alternatives:
-                if await alt.render_async(context, buf):
-                    rendered = True
-                    break
+            return await self.consequence.render_async(context, buffer)
 
-            if not rendered and self.alternative:
-                rendered = await self.alternative.render_async(context, buf)
+        for alternative in self.alternatives:
+            if await alternative.condition.evaluate_async(context):
+                return await alternative.block.render_async(context, buffer)
 
-        val = buf.getvalue()
-        if self.forced_output or not val.isspace():
-            buffer.write(val)
+        if self.default:
+            return await self.default.render_async(context, buffer)
 
-        return rendered
+        return 0
 
     def children(self) -> list[ChildNode]:
+        """Return this node's children."""
         _children = [
             ChildNode(
-                linenum=self.consequence.tok.start_index,
+                linenum=self.consequence.token.start_index,
                 node=self.consequence,
                 expression=self.condition,
             )
@@ -150,18 +127,18 @@ class UnlessNode(Node):
         _children.extend(
             [
                 ChildNode(
-                    linenum=alt.tok.start_index,
+                    linenum=alt.token.start_index,
                     node=alt.block,
                     expression=alt.condition,
                 )
-                for alt in self.conditional_alternatives
+                for alt in self.alternatives
             ]
         )
-        if self.alternative:
+        if self.default:
             _children.append(
                 ChildNode(
-                    linenum=self.alternative.tok.start_index,
-                    node=self.alternative,
+                    linenum=self.default.token.start_index,
+                    node=self.default,
                     expression=None,
                 )
             )
@@ -182,40 +159,31 @@ class UnlessTag(Tag):
         super().__init__(env)
         self.parser = get_parser(self.env)
 
-    def parse_expression(self, stream: TokenStream) -> Expression:
-        """Parse a boolean expression from a stream of tokens."""
-        stream.expect(TOKEN_EXPRESSION)
-        return self.env.parse_boolean_expression_value(
-            stream.current.value, stream.current.start_index
-        )
-
-    def parse(self, stream: TokenStream) -> Union[UnlessNode, IllegalNode]:
-        stream.expect(TOKEN_TAG, value=TAG_UNLESS)
-        tok = stream.current
-        stream.next_token()
-
-        condition = self.parse_expression(stream)
-        stream.next_token()
-
-        consequence = self.parser.parse_block(stream, ENDUNLESSBLOCK)
-
-        conditional_alternatives = []
+    def parse(self, stream: TokenStream) -> Node:
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner()
+        condition = BooleanExpression.parse(self.env, tokens)
+        parse_block = get_parser(self.env).parse_block
+        consequence = parse_block(stream, ENDUNLESSBLOCK)
+        alternatives = []
 
         while stream.current.is_tag(TAG_ELSIF):
             stream.next_token()
 
+            # If the expression can't be parsed, eat the "elsif" block and
+            # continue to parse more "elsif" expression, if any.
             try:
-                expr = self.parse_expression(stream)
+                expr = BooleanExpression.parse(self.env, stream.into_inner())
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)
-                return IllegalNode(tok)
+                return IllegalNode(token)
 
-            alt_tok = stream.current
-            stream.next_token()
-            alt_block = self.parser.parse_block(stream, ENDELSIFBLOCK)
+            alt_tok = stream.next_token()
+            alt_block = parse_block(stream, ENDELSIFBLOCK)
 
-            conditional_alternatives.append(
+            alternatives.append(
                 ConditionalBlockNode(alt_tok, condition=expr, block=alt_block)
             )
 
@@ -232,10 +200,10 @@ class UnlessTag(Tag):
                         "found an 'else' tag expression, did you mean 'elsif'?",
                         token=stream.current,
                     )
-            alternative = self.parser.parse_block(stream, ENDUNLESSELSEBLOCK)
+            alternative = parse_block(stream, ENDUNLESSELSEBLOCK)
 
+        # Extraneous `else` and `elsif` blocks are ignored.
         if not stream.current.is_tag(TAG_ENDUNLESS) and self.mode == Mode.LAX:
-            # Extraneous `else` and `elsif` blocks are ignored.
             while stream.current.kind != TOKEN_EOF:
                 if (
                     stream.current.kind == TOKEN_TAG
@@ -247,9 +215,9 @@ class UnlessTag(Tag):
         stream.expect(TOKEN_TAG, value=TAG_ENDUNLESS)
 
         return self.node_class(
-            tok,
+            token=token,
             condition=condition,
             consequence=consequence,
-            conditional_alternatives=conditional_alternatives,
-            alternative=alternative,
+            alternatives=alternatives,
+            default=alternative,
         )

@@ -35,14 +35,12 @@ from .template import FutureBoundTemplate
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
-from .static_analysis import TemplateAnalysis
-from .static_analysis import ContextualTemplateAnalysis
 
 from .stream import TokenStream
 
 from . import future
 
-__version__ = "1.13.0"
+__version__ = "2.0.0"
 
 __all__ = (
     "AwareBoundTemplate",
@@ -51,7 +49,6 @@ __all__ = (
     "CachingFileSystemLoader",
     "ChoiceLoader",
     "RenderContext",
-    "ContextualTemplateAnalysis",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
     "DictLoader",
@@ -75,7 +72,6 @@ __all__ = (
     "StrictUndefined",
     "TagAnalysis",
     "Template",
-    "TemplateAnalysis",
     "Token",
     "Undefined",
     "TokenStream",

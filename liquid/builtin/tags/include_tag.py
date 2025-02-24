@@ -16,7 +16,6 @@ from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_string_or_path
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_WITH
@@ -171,7 +170,6 @@ class IncludeTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Read an IncludeNode from the given stream of tokens."""
         token = stream.eat(TOKEN_TAG)
-        stream.expect(TOKEN_EXPRESSION)
         tokens = stream.into_inner()
 
         # Need a string or identifier that resolves to a string. This is the name

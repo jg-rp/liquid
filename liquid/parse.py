@@ -9,7 +9,6 @@ from typing import Container
 from .ast import BlockNode
 from .ast import IllegalNode
 from .ast import Node
-from .ast import ParseTree
 from .exceptions import Error
 from .exceptions import LiquidSyntaxError
 from .token import TOKEN_EOF
@@ -36,22 +35,21 @@ class Parser:
         self.literal = self.tags[TOKEN_LITERAL]
         self.statement = self.tags[TOKEN_OUTOUT]
 
-    def parse(self, stream: TokenStream) -> ParseTree:
+    def parse(self, stream: TokenStream) -> list[Node]:
         """Parse the given stream of tokens into a tree."""
-        root = ParseTree()
-        statements = root.nodes
+        nodes: list[Node] = []
 
         # TODO: factor in parse_statement
         # TODO: benchmark with local tag vars
         while stream.current.kind != TOKEN_EOF:
             try:
-                statements.append(self.parse_statement(stream))
+                nodes.append(self.parse_statement(stream))
             except Error as err:
-                self.env.error(err, linenum=stream.current.start_index)
+                self.env.error(err, token=stream.current)
 
             stream.next_token()
 
-        return root
+        return nodes
 
     def parse_statement(self, stream: TokenStream) -> Node:
         """Parse a node from a stream of tokens."""
@@ -64,8 +62,8 @@ class Parser:
             # Tag parse functions can choose to return an IllegalNode.
             if isinstance(node, IllegalNode):
                 raise LiquidSyntaxError(
-                    f"unexpected tag '{node.token().value}'",
-                    token=node.token(),
+                    f"unexpected tag '{node.token.value}'",
+                    token=node.token,
                 )
         else:
             node = self.literal.get_node(stream)
@@ -78,24 +76,13 @@ class Parser:
         Stop parsing nodes when we find a token in `end` or we reach the end of the
         stream.
         """
-        block = BlockNode(stream.current)
-        statements = block.nodes
+        block = BlockNode(stream.current, [])
+        nodes = block.nodes
 
         while stream.current.kind != TOKEN_EOF:
             if stream.current.kind == TOKEN_TAG and stream.current.value in end:
                 break
-            stmt = self.parse_statement(stream)
-            statements.append(stmt)
-            # Detect output nodes in any of this block's children. This is used by
-            # some tags to automatically suppress whitespace when no other output is
-            # present.
-            if (
-                self.env.render_whitespace_only_blocks
-                or stmt.force_output
-                or getattr(stmt, "forced_output", False)
-            ):
-                block.forced_output = True
-            stream.next_token()
+            nodes.append(self.parse_statement(stream))
 
         return block
 

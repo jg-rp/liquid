@@ -80,7 +80,8 @@ class Path(Expression):
 
     def evaluate(self, context: RenderContext) -> object:
         return context.get(
-            [p.evaluate(context) if isinstance(p, Path) else p for p in self.path]
+            [p.evaluate(context) if isinstance(p, Path) else p for p in self.path],
+            token=self.token,
         )
 
     async def evaluate_async(self, context: RenderContext) -> object:
@@ -88,7 +89,8 @@ class Path(Expression):
             [
                 await p.evaluate_async(context) if isinstance(p, Path) else p
                 for p in self.path
-            ]
+            ],
+            token=self.token,
         )
 
     def children(self) -> list[Expression]:

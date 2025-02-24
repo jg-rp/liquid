@@ -64,6 +64,7 @@ class KeywordArgument:
                     f"expected an argument name, found {token.kind}", token=token
                 )
 
+        # TODO: expect EOS?
         return args
 
 

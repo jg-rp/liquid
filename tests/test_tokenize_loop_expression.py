@@ -143,6 +143,6 @@ def test_tokenize_loop(case: Case) -> None:
 
     assert len(tokens) == len(case.expect)
 
-    for token, expect in zip(tokens, case.expect, strict=True):
+    for token, expect in zip(tokens, case.expect):
         assert token.kind == expect.kind
         assert token.value == expect.value

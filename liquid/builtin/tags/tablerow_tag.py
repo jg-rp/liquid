@@ -1,15 +1,15 @@
-"""Tag and node definition for the built-in "tablerow" tag."""
+"""The built-in _tablerow_ tag."""
 
 import sys
 from typing import Any
 from typing import Iterator
 from typing import Mapping
-from typing import Optional
 from typing import TextIO
 
 from liquid.ast import BlockNode
 from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.builtin.expressions import LoopExpression
 from liquid.context import RenderContext
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
@@ -17,11 +17,8 @@ from liquid.limits import to_int
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
-
-# ruff: noqa: D102
 
 TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
@@ -152,22 +149,23 @@ class TableRow(Mapping[str, object]):
 
 
 class TablerowNode(Node):
-    """Parse tree node for the built-in "tablerow" tag."""
+    """The built-in _tablerow_ tag."""
 
     interrupts = False
     """If _true_, handle `break` and `continue` interrupts inside a tablerow loop."""
 
-    __slots__ = ("tok", "expression", "block")
+    __slots__ = ("expression", "block")
 
     def __init__(
         self,
-        tok: Token,
+        token: Token,
         expression: LoopExpression,
         block: BlockNode,
     ):
-        self.tok = tok
+        super().__init__(token)
         self.expression = expression
         self.block = block
+        self.blank = False
 
     def __str__(self) -> str:
         return f"tablerow({self.expression}) {{ {self.block} }}"
@@ -178,13 +176,12 @@ class TablerowNode(Node):
         except ValueError:
             return 0
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        name = self.expression.name
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Return this node's children."""
+        name = self.expression.identifier
         loop_iter, length = self.expression.evaluate(context)
 
-        if self.expression.cols and self.expression.cols != NIL:
+        if self.expression.cols:
             cols = self._int_or_zero(self.expression.cols.evaluate(context))
         else:
             cols = length
@@ -228,11 +225,12 @@ class TablerowNode(Node):
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        name = self.expression.name
+    ) -> int:
+        """Return this node's children."""
+        name = self.expression.identifier
         loop_iter, length = await self.expression.evaluate_async(context)
 
-        if self.expression.cols and self.expression.cols != NIL:
+        if self.expression.cols:
             cols = self._int_or_zero(await self.expression.cols.evaluate_async(context))
         else:
             cols = length
@@ -275,37 +273,29 @@ class TablerowNode(Node):
         return True
 
     def children(self) -> list[ChildNode]:
+        """Return this node's children."""
         return [
             ChildNode(
-                linenum=self.block.tok.start_index,
+                linenum=self.block.token.start_index,
                 node=self.block,
                 expression=self.expression,
-                block_scope=["tablerowloop", self.expression.name],
+                block_scope=["tablerowloop", self.expression.identifier],
             )
         ]
 
 
 class TablerowTag(Tag):
-    """The built-in "tablerow" tag."""
+    """The built-in _tablerow_ tag."""
 
     name = TAG_TABLEROW
     end = TAG_ENDTABLEROW
     node_class = TablerowNode
 
     def parse(self, stream: TokenStream) -> TablerowNode:
-        parser = get_parser(self.env)
-
-        stream.expect(TOKEN_TAG, value=TAG_TABLEROW)
-        tok = stream.current
-        stream.next_token()
-
-        stream.expect(TOKEN_EXPRESSION)
-        loop_expression = self.env.parse_loop_expression_value(
-            stream.current.value, stream.current.start_index
-        )
-        stream.next_token()
-
-        block = parser.parse_block(stream, END_TAGBLOCK)
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner()
+        expr = LoopExpression.parse(self.env, tokens)
+        block = get_parser(self.env).parse_block(stream, END_TAGBLOCK)
         stream.expect(TOKEN_TAG, value=TAG_ENDTABLEROW)
-
-        return self.node_class(tok, expression=loop_expression, block=block)
+        return self.node_class(token, expression=expr, block=block)

@@ -49,14 +49,14 @@ class FileSystemLoader(BaseLoader):
         template_path = Path(template_name)
 
         if os.path.pardir in template_path.parts:
-            raise TemplateNotFound(template_name)
+            raise TemplateNotFound(template_name, token=None)
 
         for path in self.search_path:
             source_path = path.joinpath(template_path)
             if not source_path.exists():
                 continue
             return source_path
-        raise TemplateNotFound(template_name)
+        raise TemplateNotFound(template_name, token=None)
 
     def _read(self, source_path: Path) -> tuple[str, float]:
         with source_path.open(encoding=self.encoding) as fd:
@@ -121,7 +121,7 @@ class FileExtensionLoader(FileSystemLoader):
 
         # Don't allow "../" to escape the search path.
         if os.path.pardir in template_path.parts:
-            raise TemplateNotFound(template_name)
+            raise TemplateNotFound(template_name, token=None)
 
         for path in self.search_path:
             source_path = path.joinpath(template_path)
@@ -129,4 +129,4 @@ class FileExtensionLoader(FileSystemLoader):
             if not source_path.exists():
                 continue
             return source_path
-        raise TemplateNotFound(template_name)
+        raise TemplateNotFound(template_name, token=None)

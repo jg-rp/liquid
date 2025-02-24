@@ -15,7 +15,6 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from liquid import ast
 from liquid import builtin
 from liquid import loaders
 from liquid.analyze_tags import InnerTagMap
@@ -35,9 +34,10 @@ from liquid.utils import LRUCache
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from liquid.context import RenderContext
-    from liquid.tag import Tag
-    from liquid.token import Token
+    from .ast import Node
+    from .context import RenderContext
+    from .tag import Tag
+    from .token import Token
 
 
 class Environment:
@@ -81,8 +81,6 @@ class Environment:
         cache_size: The capacity of the template cache in number of templates.
             If `cache_size` is `None` or less than `1`, it has the effect of setting
             `auto_reload` to `False`.
-        expression_cache_size: The capacity of each of the common expression caches.
-            A `cache_size` of `0` will disabling expression caching.
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
 
@@ -165,7 +163,6 @@ class Environment:
         template_comments: bool = False,
         comment_start_string: str = "{#",
         comment_end_string: str = "#}",
-        expression_cache_size: int = 0,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
@@ -218,17 +215,6 @@ class Environment:
         else:
             self.cache = None
             self.auto_reload = False
-
-        # Common expression parsing functions that might be cached.
-        self.expression_cache_size = expression_cache_size
-        (
-            self.parse_boolean_expression_value,
-            self.parse_boolean_expression_value_with_parens,
-            self.parse_conditional_expression_value,
-            self.parse_conditional_expression_value_with_parens,
-            self.parse_filtered_expression_value,
-            self.parse_loop_expression_value,
-        ) = self._get_expression_parsers(self.expression_cache_size)
 
         self.setup_tags_and_filters()
 
@@ -287,7 +273,7 @@ class Environment:
         """Add default tags and filters to this environment."""
         builtin.register(self)
 
-    def parse(self, source: str) -> ast.ParseTree:
+    def parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.
 
         More often than not you'll want to use `Environment.from_string` instead.
@@ -316,7 +302,7 @@ class Environment:
                 with the template. Could be "front matter" or other meta data.
         """
         try:
-            parse_tree = self.parse(source)
+            nodes = self.parse(source)
         except (LiquidSyntaxError, TemplateInheritanceError) as err:
             err.template_name = path
             raise err
@@ -326,7 +312,7 @@ class Environment:
             env=self,
             name=name,
             path=path,
-            parse_tree=parse_tree,
+            nodes=nodes,
             globals=self.make_globals(globals),
             matter=matter,
         )
@@ -549,28 +535,6 @@ class Environment:
                 str(exc), category=lookup_warning(exc.__class__), stacklevel=2
             )
 
-    def set_expression_cache_size(self, maxsize: int = 0) -> None:
-        """Create or replace cached versions of the common expression parsers.
-
-        If `maxsize` is less than `1`, no expression caching will happen.
-
-        Args:
-            maxsize: The maximum size of each expression cache.
-        """
-        self.expression_cache_size = maxsize
-        (
-            self.parse_boolean_expression_value,
-            self.parse_boolean_expression_value_with_parens,
-            self.parse_conditional_expression_value,
-            self.parse_conditional_expression_value_with_parens,
-            self.parse_filtered_expression_value,
-            self.parse_loop_expression_value,
-        ) = self._get_expression_parsers(self.expression_cache_size)
-
-    def _get_expression_parsers(self, cache_size: int = 0) -> Any:
-        # TODO
-        raise Exception("TODO")
-
 
 @lru_cache(maxsize=10)
 def get_implicit_environment(
@@ -590,7 +554,6 @@ def get_implicit_environment(
     template_comments: bool,
     comment_start_string: str,
     comment_end_string: str,
-    expression_cache_size: int,
 ) -> Environment:
     """Return an `Environment` initialized with the given arguments."""
     return Environment(
@@ -610,7 +573,6 @@ def get_implicit_environment(
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
-        expression_cache_size=expression_cache_size,
     )
 
 
@@ -636,7 +598,6 @@ def Template(  # noqa: N802, D417
     template_comments: bool = False,
     comment_start_string: str = "{#",
     comment_end_string: str = "#}",
-    expression_cache_size: int = 0,
 ) -> BoundTemplate:
     """Parse a template, automatically creating an `Environment` to bind it to.
 
@@ -701,7 +662,6 @@ def Template(  # noqa: N802, D417
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
-        expression_cache_size=expression_cache_size,
     )
 
     return env.from_string(source, globals=globals)

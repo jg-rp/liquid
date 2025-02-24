@@ -213,7 +213,7 @@ class RenderContext:
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
-        self.globals: dict[str, object] = globals or {}
+        self.globals: Mapping[str, object] = globals or {}
 
         # A namespace for `increment` and `decrement` counters.
         self.counters: dict[str, int] = {}

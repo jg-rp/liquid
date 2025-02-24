@@ -9,6 +9,7 @@ from liquid.builtin import assign_tag
 from liquid.builtin import capture_tag
 from liquid.builtin import case_tag
 from liquid.builtin import comment_tag
+from liquid.builtin import content
 from liquid.builtin import cycle_tag
 from liquid.builtin import decrement_tag
 from liquid.builtin import echo_tag
@@ -17,9 +18,8 @@ from liquid.builtin import if_tag
 from liquid.builtin import ifchanged_tag
 from liquid.builtin import include_tag
 from liquid.builtin import increment_tag
-from liquid.builtin import literal
-from liquid.builtin import render_tag
 from liquid.builtin import output
+from liquid.builtin import render_tag
 from liquid.builtin import tablerow_tag
 from liquid.builtin import unless_tag
 from liquid.environment import Environment
@@ -61,7 +61,7 @@ class ParserTestCase(unittest.TestCase):
             Case("plain html", "<HTML>Some text</HTML>", "<HTML>Some text</HTML>"),
         ]
 
-        self._test(test_cases, literal.LiteralNode)
+        self._test(test_cases, content.ContentNode)
 
     def test_output_statement(self):
         """Test that we can parse output statements."""
@@ -441,7 +441,7 @@ class ParserTestCase(unittest.TestCase):
             ),
         ]
 
-        self._test(test_cases, literal.LiteralNode)
+        self._test(test_cases, content.ContentNode)
 
     def test_capture_tag(self):
         """Test that we can parse capture tags."""

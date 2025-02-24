@@ -2,8 +2,8 @@ from __future__ import annotations  # noqa: D104
 
 from typing import TYPE_CHECKING
 
+from . import content
 from . import illegal
-from . import literal
 from . import output
 from .filters.array import compact
 from .filters.array import concat
@@ -89,8 +89,8 @@ if TYPE_CHECKING:
 
 def register(env: Environment) -> None:  # noqa: PLR0915
     """Register all built-in tags and filters with an environment."""
-    env.add_tag(literal.Literal)
-    env.add_tag(output.Statement)
+    env.add_tag(content.Literal)
+    env.add_tag(output.Output)
     env.add_tag(illegal.Illegal)
     env.add_tag(if_tag.IfTag)
     env.add_tag(comment_tag.CommentTextTag)

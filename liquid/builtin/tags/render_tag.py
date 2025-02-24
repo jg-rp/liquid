@@ -1,4 +1,4 @@
-"""Parse tree node and tag definition for the built in "render" tag."""
+"""The built-in _render_ tag."""
 
 import sys
 from typing import Optional
@@ -7,75 +7,64 @@ from typing import TextIO
 from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
+from liquid.builtin.expressions import KeywordArgument
+from liquid.builtin.expressions import Path
+from liquid.builtin.expressions import parse_identifier
+from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
 from liquid.context import ReadOnlyChainMap
 from liquid.context import RenderContext
-from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
 from liquid.token import TOKEN_STRING
+from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_WITH
 from liquid.token import TOKEN_WORD
 from liquid.token import Token
-
-# ruff: noqa: D102
 
 TAG_RENDER = sys.intern("render")
 
 
 class RenderNode(Node):
-    """Parse tree node for the built-in "render" tag."""
+    """The built-in _render_ tag."""
 
-    __slots__ = ("tok", "name", "var", "loop", "alias", "args")
+    __slots__ = ("name", "var", "loop", "alias", "args")
     tag = TAG_RENDER
 
     def __init__(
         self,
-        tok: Token,
+        token: Token,
         name: Expression,
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[str] = None,
-        args: Optional[dict[str, Expression]] = None,
+        args: Optional[list[KeywordArgument]] = None,
     ):
-        self.tok = tok
+        super().__init__(token)
         self.name = name
         self.var = var
         self.loop = loop
         self.alias = alias
-        self.args = args or {}
+        self.args = args or []
+        self.blank = False
 
     def __str__(self) -> str:
-        buf = [f"{self.name}"]
-
+        var = ""
         if self.var:
-            buf.append(f" with {self.var}")
-
+            var = f" for {self.var}" if self.loop else f" with {self.var}"
         if self.alias:
-            buf.append(f" as {self.alias}")
-
+            var += f" as {self.alias}"
         if self.args:
-            buf.append(", ")
+            var += ","
+        args = " " + ", ".join(str(arg) for arg in self.args) if self.args else ""
+        return f"{{% render {self.name}{var}{args} %}}"
 
-        args = (f"{key}={val}" for key, val in self.args.items())
-        buf.append(", ".join(args))
-
-        return f"{self.tag}({''.join(buf)})"
-
-    def __repr__(self) -> str:
-        return f"RenderNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
-
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
         path = self.name.evaluate(context)
         assert isinstance(path, str)
         template = context.get_template_with_context(path, tag=self.tag)
@@ -83,7 +72,7 @@ class RenderNode(Node):
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
         # arguments for each loop (if any).
-        args = {k: v.evaluate(context) for k, v in self.args.items()}
+        args = {arg.name: arg.value.evaluate(context) for arg in self.args}
 
         # We're using a chain map here in case we need to push a forloop drop into
         # it. As drops are read only, the built-in collections.ChainMap will not do.
@@ -112,7 +101,7 @@ class RenderNode(Node):
                     name=key,
                     it=iter(val),
                     length=len(val),
-                    parentloop=context.env.undefined("parentloop"),
+                    parentloop=context.env.undefined("parentloop", token=self.token),
                 )
 
                 args["forloop"] = forloop
@@ -137,7 +126,8 @@ class RenderNode(Node):
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    ) -> int:
+        """Render the node to the output buffer."""
         path = await self.name.evaluate_async(context)
         assert isinstance(path, str)
         template = await context.get_template_with_context_async(path, tag=self.tag)
@@ -145,7 +135,7 @@ class RenderNode(Node):
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
         # arguments for each loop (if any).
-        args = {k: await v.evaluate_async(context) for k, v in self.args.items()}
+        args = {arg.name: await arg.value.evaluate_async(context) for arg in self.args}
 
         # We're using a chain map here in case we need to push a forloop drop into
         # it. As drops are read only, the built-in collections.ChainMap will not do.
@@ -174,7 +164,7 @@ class RenderNode(Node):
                     name=key,
                     it=iter(val),
                     length=len(val),
-                    parentloop=context.env.undefined("parentloop"),
+                    parentloop=context.env.undefined("parentloop", token=self.token),
                 )
 
                 args["forloop"] = forloop
@@ -200,10 +190,11 @@ class RenderNode(Node):
         return True
 
     def children(self) -> list[ChildNode]:
-        block_scope: list[str] = list(self.args.keys())
+        """Return this node's children."""
+        block_scope: list[str] = [arg.name for arg in self.args]
         _children = [
             ChildNode(
-                linenum=self.tok.start_index,
+                linenum=self.token.start_index,
                 node=None,
                 expression=self.name,
                 block_scope=block_scope,
@@ -211,19 +202,12 @@ class RenderNode(Node):
                 load_context={"tag": "render"},
             )
         ]
-        if self.var:
-            if self.alias:
-                block_scope.append(self.alias)
-            elif isinstance(self.name, Literal):
-                block_scope.append(str(self.name.value).split(".", 1)[0])
+        # TODO: if self.var:
+
+        for arg in self.args:
             _children.append(
-                ChildNode(
-                    linenum=self.tok.start_index,
-                    expression=self.var,
-                )
+                ChildNode(linenum=self.token.start_index, expression=arg.value)
             )
-        for expr in self.args.values():
-            _children.append(ChildNode(linenum=self.tok.start_index, expression=expr))
         return _children
 
 
@@ -231,81 +215,40 @@ BIND_TAGS = frozenset((TOKEN_WITH, TOKEN_FOR))
 
 
 class RenderTag(Tag):
-    """The built-in "render" tag."""
+    """The built-in _render_ tag."""
 
     name = TAG_RENDER
     block = False
     node_class = RenderNode
 
     def parse(self, stream: TokenStream) -> Node:
-        tok = next(stream)
-        stream.expect(TOKEN_EXPRESSION)
-        expr_stream = TokenStream(
-            tokenize(stream.current.value, stream.current.start_index)
-        )
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner()
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
         # This is the name of the template to be included.
-        expr_stream.expect(TOKEN_STRING)
-        name = parse_string_literal(expr_stream)
-        expr_stream.next_token()
+        tokens.expect(TOKEN_STRING)
+        name = parse_primitive(self.env, tokens)
 
         alias: Optional[str] = None
-        identifier: Optional[Identifier] = None
+        var: Optional[Path] = None
         loop: bool = False
 
         # Optionally bind a variable to the included template context
-        if expr_stream.current[1] in BIND_TAGS:
-            loop = expr_stream.current[1] == TOKEN_FOR
-            expr_stream.next_token()  # Eat 'with' or 'for'
-            expr_stream.expect(TOKEN_WORD)
-            identifier = parse_identifier(expr_stream)
-            expr_stream.next_token()
+        if tokens.current.kind in BIND_TAGS:
+            loop = tokens.current.kind == TOKEN_FOR
+            next(tokens)  # Eat 'with' or 'for'
+            tokens.expect(TOKEN_WORD)
+            var = Path.parse(self.env, tokens)
 
             # The bound variable will take the name of the template by default,
             # or an alias if an identifier follows the "as" keyword.
-            if expr_stream.current[1] == TOKEN_AS:
-                expr_stream.next_token()  # Eat 'as'
-                expr_stream.expect(TOKEN_WORD)
-                alias = str(parse_unchained_identifier(expr_stream))
-                expr_stream.next_token()
+            if tokens.current.kind == TOKEN_AS:
+                next(tokens)  # Eat 'as'
+                tokens.expect(TOKEN_WORD)
+                alias = str(parse_identifier(self.env, tokens))
 
         # Zero or more keyword arguments
-        args = {}
-
-        # The first keyword argument might follow immediately or after a comma.
-        if expr_stream.current[1] == TOKEN_WORD:
-            key, val = parse_argument(expr_stream)
-            args[key] = val
-
-        while expr_stream.current[1] != TOKEN_EOF:
-            if expr_stream.current[1] == TOKEN_COMMA:
-                expr_stream.next_token()  # Eat comma
-                key, val = parse_argument(expr_stream)
-                args[key] = val
-            else:
-                typ = expr_stream.current[1]
-                raise LiquidSyntaxError(
-                    f"expected a comma separated list of arguments, found {typ}",
-                    token=tok,
-                )
-
-        return self.node_class(
-            tok,
-            name=name,
-            var=identifier,
-            loop=loop,
-            alias=alias,
-            args=args,
-        )
-
-
-def parse_argument(stream: TokenStream) -> tuple[str, Expression]:
-    """Return the next key/value pair from the stream."""
-    key = str(parse_unchained_identifier(stream))
-    stream.next_token()
-    stream.expect(TOKEN_COLON)
-    stream.next_token()  # Eat colon
-    val = parse_obj(stream)
-    stream.next_token()
-    return key, val
+        args = KeywordArgument.parse(self.env, tokens)
+        return self.node_class(token, name, var, loop, alias, args)

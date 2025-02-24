@@ -18,16 +18,10 @@ from typing import Pattern
 from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_ILLEGAL
 from liquid.token import TOKEN_LITERAL
 from liquid.token import TOKEN_OUTOUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
-
-__all__ = (
-    "get_lexer",
-    "get_liquid_expression_lexer",
-)
 
 
 def compile_liquid_rules(
@@ -90,89 +84,6 @@ def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
     """Compile the given rules into a single regular expression."""
     pattern = "|".join(f"(?P<{name}>{pattern})" for name, pattern in rules)
     return re.compile(pattern, re.DOTALL)
-
-
-# NOTE: Here we're talking about expressions found in "liquid" tags only. Each line
-# starts with a tag name, optionally followed by zero or more space or tab characters
-# and an expression, which is terminated by a newline.
-
-
-def _tokenize_liquid_expression(
-    source: str,
-    rules: Pattern[str],
-    token: Token,
-    comment_start_string: str = "",
-) -> Iterator[Token]:
-    """Tokenize a "{% liquid %}" tag."""
-    for match in rules.finditer(source):
-        kind = match.lastgroup
-        assert kind is not None
-
-        value = match.group()
-
-        if kind == "LIQUID_EXPR":
-            name = match.group("name")
-            if name == comment_start_string:
-                continue
-
-            yield Token(
-                TOKEN_TAG,
-                value=name,
-                start_index=token.start_index + match.start(),
-                source=token.source,
-            )
-
-            if match.group("expr"):
-                yield Token(
-                    TOKEN_EXPRESSION,
-                    value=match.group("expr"),
-                    start_index=token.start_index + match.start(),
-                    source=token.source,
-                )
-        elif kind == "SKIP":
-            continue
-        else:
-            raise LiquidSyntaxError(
-                f"expected newline delimited tag expressions, found {value!r}",
-                token=token,
-            )
-
-
-@lru_cache(maxsize=128)
-def get_liquid_expression_lexer(
-    comment_start_string: str = "",
-) -> Callable[..., Iterator[Token]]:
-    """Return a tokenizer that yields tokens from a `liquid` tag's expression."""
-    # Dubious assumption here.
-    comment_start_string = comment_start_string.replace("{", "")
-    if comment_start_string:
-        comment = re.escape(comment_start_string)
-        rules = (
-            (
-                "LIQUID_EXPR",
-                rf"[ \t]*(?P<name>(\w+|{comment}))[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
-            ),
-            ("SKIP", r"[\r\n]+"),
-            (TOKEN_ILLEGAL, r"."),
-        )
-    else:
-        rules = (
-            (
-                "LIQUID_EXPR",
-                r"[ \t]*(?P<name>#|\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
-            ),
-            ("SKIP", r"[\r\n]+"),
-            (TOKEN_ILLEGAL, r"."),
-        )
-    return partial(
-        _tokenize_liquid_expression,
-        rules=_compile_rules(rules),
-        comment_start_string=comment_start_string,
-    )
-
-
-# TODO: move me
-tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string="")
 
 
 def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
