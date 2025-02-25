@@ -104,7 +104,7 @@ class FilteredExpression(Expression):
     ) -> Union[FilteredExpression, TernaryFilteredExpression]:
         """Parse a filtered expression from _tokens_."""
         left = parse_primitive(env, tokens)
-        filters = Filter.parse(env, tokens)
+        filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE,))
         # TODO: optionally disable
         if tokens.current.kind == TOKEN_IF:
             return TernaryFilteredExpression.parse(
@@ -215,10 +215,10 @@ class TernaryFilteredExpression(Expression):
             alternative = parse_primitive(env, tokens)
 
             if tokens.current.kind == TOKEN_PIPE:
-                filters = Filter.parse(env, tokens)
+                filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE,))
 
         if tokens.current.kind == TOKEN_DPIPE:
-            tail_filters = Filter.parse(env, tokens)
+            tail_filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE, TOKEN_DPIPE))
 
         tokens.eat(TOKEN_EOF)
         return TernaryFilteredExpression(
@@ -241,7 +241,7 @@ class Filter:
 
     def __str__(self) -> str:
         if self.args:
-            return f"{self.name}: {''.join(str(arg) for arg in self.args)}"
+            return f"{self.name}: {', '.join(str(arg) for arg in self.args)}"
         return self.name
 
     def validate_filter_arguments(self, env: Environment) -> None:
@@ -310,10 +310,11 @@ class Filter:
         return [arg.value for arg in self.args]
 
     @staticmethod
-    def parse(env: Environment, tokens: TokenStream) -> list[Filter]:
+    def parse(
+        env: Environment, tokens: TokenStream, *, delim: tuple[str, ...]
+    ) -> list[Filter]:
         """Parse filters from _tokens_."""
         filters: list[Filter] = []
-        delim = (TOKEN_PIPE, TOKEN_DPIPE)
 
         while tokens.current.kind in delim:
             next(tokens)
@@ -342,7 +343,7 @@ class Filter:
                 elif tok.kind in FILTER_TOKENS:
                     args.append(PositionalArgument(parse_primitive(env, tokens)))
                 elif tok.kind == TOKEN_COMMA:
-                    pass
+                    next(tokens)
                 else:
                     break
 

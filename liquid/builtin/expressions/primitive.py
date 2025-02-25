@@ -299,23 +299,23 @@ class RangeLiteral(Expression):
 
 def parse_primitive(env: Environment, tokens: TokenStream) -> Expression:  # noqa: PLR0911
     """Parse a primitive expression from _tokens_."""
-    token = next(tokens)
+    token = tokens.current
     kind = token.kind
 
     if kind == TOKEN_TRUE:
-        return TrueLiteral(token)
+        return TrueLiteral(next(tokens))
     if kind == TOKEN_FALSE:
-        return FalseLiteral(token)
+        return FalseLiteral(next(tokens))
     if kind in (TOKEN_NIL, TOKEN_NULL):
-        return Nil(token)
+        return Nil(next(tokens))
     if kind == TOKEN_INTEGER:
-        return IntegerLiteral(token, to_int(token.value))
+        return IntegerLiteral(next(tokens), to_int(token.value))
     if kind == TOKEN_FLOAT:
-        return FloatLiteral(token, float(token.value))
+        return FloatLiteral(next(tokens), float(token.value))
     if kind == TOKEN_STRING:
-        return StringLiteral(token, token.value)
-    if kind in (TOKEN_RANGE_LITERAL, TOKEN_LPAREN):
-        RangeLiteral.parse(env, tokens)
+        return StringLiteral(next(tokens), token.value)
+    if kind == TOKEN_RANGE_LITERAL:
+        return RangeLiteral.parse(env, tokens)
     if kind == TOKEN_WORD:
         if token.value == "empty":
             return Empty(token)

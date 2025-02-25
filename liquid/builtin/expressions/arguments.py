@@ -32,7 +32,7 @@ class KeywordArgument:
         self.value = value
 
     def __str__(self) -> str:
-        return f"{self.name}:{self.value}"
+        return f"{self.name}: {self.value}"
 
     def evaluate(self, context: RenderContext) -> tuple[str, object]:
         return (self.name, self.value.evaluate(context))
@@ -138,6 +138,7 @@ def parse_arguments(
 
     while True:
         token = next(tokens)
+        print("!!", token)
 
         if token.kind == TOKEN_COMMA:
             token = next(tokens)
