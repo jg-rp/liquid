@@ -184,6 +184,7 @@ class LogicalNotExpression(Expression):
     @staticmethod
     def parse(env: Environment, tokens: TokenStream) -> LogicalNotExpression:
         """Parse a not expression from _tokens_."""
+        tokens.eat(TOKEN_NOT)
         expr = parse_boolean_primitive(env, tokens)
         return LogicalNotExpression(expr.token, expr)
 
@@ -422,23 +423,29 @@ def parse_boolean_primitive(  # noqa: PLR0912
 ) -> Expression:
     """Parse a Boolean expression from tokens in _stream_."""
     left: Expression
-    token = next(tokens)
+    token = tokens.current
     kind = token.kind
 
     if kind == TOKEN_TRUE:
         left = TrueLiteral(token)
+        next(tokens)
     elif kind == TOKEN_FALSE:
         left = FalseLiteral(token)
+        next(tokens)
     elif kind in (TOKEN_NIL, TOKEN_NULL):
         left = Nil(token)
+        next(tokens)
     elif kind == TOKEN_INTEGER:
         left = IntegerLiteral(token, to_int(token.value))
+        next(tokens)
     elif kind == TOKEN_FLOAT:
         left = FloatLiteral(token, float(token.value))
+        next(tokens)
     elif kind == TOKEN_STRING:
         left = StringLiteral(token, token.value)
+        next(tokens)
     elif kind == TOKEN_RANGE_LITERAL:
-        RangeLiteral.parse(env, tokens)
+        left = RangeLiteral.parse(env, tokens)
     elif kind == TOKEN_WORD:
         if token.value == "empty":
             left = Empty(token)
@@ -449,8 +456,10 @@ def parse_boolean_primitive(  # noqa: PLR0912
     elif kind == TOKEN_LBRACKET:
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:
+        # TODO: raise for no grouped expressions
         left = parse_grouped_expression(env, tokens)
     elif kind == TOKEN_NOT:
+        # TODO: raise for no not operator
         left = LogicalNotExpression.parse(env, tokens)
     else:
         raise LiquidSyntaxError(
@@ -532,6 +541,7 @@ def parse_infix_expression(  # noqa: PLR0911
 def parse_grouped_expression(env: Environment, tokens: TokenStream) -> Expression:
     """Parse an expression from tokens in _tokens_ until the next right parenthesis."""
     # TODO: error if no group expressions
+    tokens.eat(TOKEN_LPAREN)
     expr = parse_boolean_primitive(env, tokens)
     token = next(tokens)
 

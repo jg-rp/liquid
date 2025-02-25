@@ -118,7 +118,7 @@ class TokenStream:
                 f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
             )
             raise LiquidSyntaxError(msg, token=tok)
-        return tok
+        return next(self)
 
     def eat_one_of(self, *typ: str) -> Token:
         """Consume and return the next token.
