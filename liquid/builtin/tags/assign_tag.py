@@ -71,7 +71,7 @@ class AssignTag(Tag):
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         tokens = stream.into_inner(eat=False)
-        name = parse_identifier(self.env, tokens)
+        name = parse_identifier(self.env, tokens, allow_trailing_question_mark=False)
         tokens.eat(TOKEN_ASSIGN)
         return self.node_class(
             token, name=name, expression=FilteredExpression.parse(self.env, tokens)

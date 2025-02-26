@@ -14,6 +14,8 @@ from markupsafe import Markup
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.limits import to_int
+from liquid.token import TOKEN_BLANK
+from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_INTEGER
@@ -43,9 +45,6 @@ class Nil(Expression):
     def __eq__(self, other: object) -> bool:
         return other is None or isinstance(other, Nil)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return "NIL()"
-
     def __str__(self) -> str:  # pragma: no cover
         return ""
 
@@ -64,11 +63,8 @@ class Empty(Expression):
             return True
         return isinstance(other, (list, dict, str)) and not other
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return "Empty()"
-
     def __str__(self) -> str:  # pragma: no cover
-        return "empty"
+        return ""
 
     def evaluate(self, _: RenderContext) -> Empty:
         return self
@@ -87,11 +83,8 @@ class Blank(Expression):
             return True
         return isinstance(other, Blank)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return "Blank()"
-
     def __str__(self) -> str:  # pragma: no cover
-        return "blank"
+        return ""
 
     def evaluate(self, _: RenderContext) -> Blank:
         return self
@@ -316,11 +309,11 @@ def parse_primitive(env: Environment, tokens: TokenStream) -> Expression:  # noq
         return StringLiteral(next(tokens), token.value)
     if kind == TOKEN_RANGE_LITERAL:
         return RangeLiteral.parse(env, tokens)
+    if kind == TOKEN_EMPTY:
+        return Empty(next(tokens))
+    if kind == TOKEN_BLANK:
+        return Blank(next(tokens))
     if kind == TOKEN_WORD:
-        if token.value == "empty":
-            return Empty(token)
-        if token.value == "blank":
-            return Blank(token)
         return Path.parse(env, tokens)
     if kind == TOKEN_LBRACKET:
         return Path.parse(env, tokens)
@@ -357,9 +350,18 @@ class Identifier(str):
         return super().__hash__()
 
 
-def parse_identifier(env: Environment, tokens: TokenStream) -> Identifier:
+def parse_identifier(
+    env: Environment,
+    tokens: TokenStream,
+    *,
+    allow_trailing_question_mark: bool = True,
+) -> Identifier:
     """Parse a word that might otherwise be considered a path with one segment."""
     expr = parse_primitive(env, tokens)
+
+    if isinstance(expr, IntegerLiteral):
+        return Identifier(str(expr.value), token=expr.token)
+
     if not isinstance(expr, Path):
         raise LiquidSyntaxError(
             f"expected an identifier, found {expr.__class__.__name__}", token=expr.token
@@ -378,6 +380,9 @@ def parse_identifier(env: Environment, tokens: TokenStream) -> Identifier:
             f"expected an identifier, found {word.__class__.__name__}",
             token=expr.token,
         )
+
+    if not allow_trailing_question_mark and word.endswith("?"):
+        raise LiquidSyntaxError("invalid identifier", token=expr.token)
 
     return Identifier(word, token=expr.token)
 

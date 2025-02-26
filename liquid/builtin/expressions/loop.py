@@ -18,12 +18,12 @@ from liquid.token import TOKEN_ASSIGN
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_COLS
 from liquid.token import TOKEN_COMMA
+from liquid.token import TOKEN_CONTINUE
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_IN
 from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
-from liquid.token import TOKEN_WORD
 
 from .primitive import StringLiteral
 from .primitive import parse_identifier
@@ -155,7 +155,7 @@ class LoopExpression(Expression):
 
         if isinstance(self.offset, StringLiteral):
             offset: Union[str, int, None] = self.offset.value
-            if offset == "continue":
+            if offset != "continue":
                 offset = self._to_int(offset, token=self.offset.token)
         elif self.offset is None:
             offset = None
@@ -229,8 +229,8 @@ class LoopExpression(Expression):
                 reversed_ = True
             elif kind == TOKEN_OFFSET:
                 tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
-                offset_token = tokens.peek
-                if offset_token.kind == TOKEN_WORD and offset_token.value == "continue":
+                offset_token = tokens.current
+                if offset_token.kind == TOKEN_CONTINUE:
                     next(tokens)
                     offset = StringLiteral(token=offset_token, value="continue")
                 else:

@@ -11,7 +11,9 @@ from liquid.exceptions import LiquidTypeError
 from liquid.expression import Expression
 from liquid.limits import to_int
 from liquid.token import TOKEN_AND
+from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_CONTAINS
+from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EQ
 from liquid.token import TOKEN_FALSE
@@ -35,6 +37,7 @@ from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TRUE
 from liquid.token import TOKEN_WORD
 from liquid.token import Token
+from liquid.undefined import is_undefined
 
 from .path import Path
 from .primitive import Blank
@@ -446,14 +449,13 @@ def parse_boolean_primitive(  # noqa: PLR0912
         next(tokens)
     elif kind == TOKEN_RANGE_LITERAL:
         left = RangeLiteral.parse(env, tokens)
-    elif kind == TOKEN_WORD:
-        if token.value == "empty":
-            left = Empty(token)
-        elif token.value == "blank":
-            left = Blank(token)
-        else:
-            left = Path.parse(env, tokens)
-    elif kind == TOKEN_LBRACKET:
+    elif kind == TOKEN_BLANK:
+        left = Blank(token)
+        next(tokens)
+    elif kind == TOKEN_EMPTY:
+        left = Empty(token)
+        next(tokens)
+    elif kind in (TOKEN_WORD, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:
         # TODO: raise for no grouped expressions
@@ -567,6 +569,8 @@ def is_truthy(obj: object) -> bool:
     """Return _True_ if _obj_ is considered Liquid truthy."""
     if hasattr(obj, "__liquid__"):
         obj = obj.__liquid__()
+    if is_undefined(obj):
+        return False
     return not (obj is False or obj is None)
 
 

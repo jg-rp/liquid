@@ -46,9 +46,6 @@ class Path(Expression):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Path) and self.path == other.path
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"Identifier(path={self.path})"
-
     def __str__(self) -> str:
         it = iter(self.path)
         buf = [str(next(it))]
@@ -113,7 +110,7 @@ class Path(Expression):
             elif kind == TOKEN_LBRACKET:
                 next(tokens)
                 segments.append(Path.parse(env, tokens))
-                tokens.eat(TOKEN_RBRACKET)
+                tokens.expect(TOKEN_RBRACKET)
             elif kind == TOKEN_DOT:
                 pass
             else:
@@ -121,4 +118,5 @@ class Path(Expression):
 
             next(tokens)
 
-        return Path(token, segments)
+        p = Path(token, segments)
+        return p

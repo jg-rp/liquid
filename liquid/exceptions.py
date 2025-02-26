@@ -174,7 +174,7 @@ class TemplateNotFound(Error):
     def __init__(
         self,
         *args: object,
-        filename: str | None = None,
+        filename: Union[str, None] = None,
     ):
         super().__init__(*args, token=None, template_name=filename)
 

@@ -1,13 +1,21 @@
 """The built-in _echo_ tag."""
 
-import sys
+from __future__ import annotations
 
-from liquid.ast import Node
+import sys
+from typing import TYPE_CHECKING
+
 from liquid.builtin.expressions import FilteredExpression
+from liquid.builtin.expressions import Nil
 from liquid.builtin.output import OutputNode
-from liquid.stream import TokenStream
 from liquid.tag import Tag
+from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
+
+if TYPE_CHECKING:
+    from liquid.ast import Node
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
 
 TAG_ECHO = sys.intern("echo")
 
@@ -28,6 +36,8 @@ class EchoTag(Tag):
 
     def parse(self, stream: TokenStream) -> Node:  # noqa: D102
         token = stream.eat(TOKEN_TAG)
-        return self.node_class(
-            token, FilteredExpression.parse(self.env, stream.into_inner(eat=False))
-        )
+        if stream.current.kind == TOKEN_EOF:
+            expr: Expression = Nil(stream.current)
+        else:
+            expr = FilteredExpression.parse(self.env, stream.into_inner(eat=False))
+        return self.node_class(token, expr)

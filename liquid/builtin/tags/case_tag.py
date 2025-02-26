@@ -12,6 +12,7 @@ from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.expressions.logical import _eq
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.parse import get_parser
 from liquid.tag import Tag
@@ -173,8 +174,12 @@ class CaseTag(Tag):
         expressions: list[Expression] = [parse_primitive(self.env, stream)]
         while stream.current.kind in (TOKEN_COMMA, TOKEN_OR):
             next(stream)
-            expressions.append(parse_primitive(self.env, stream))
-        stream.expect_eos()
+            try:
+                expressions.append(parse_primitive(self.env, stream))
+            except LiquidSyntaxError:
+                # Use expressions we have so far an discard the rest.
+                return expressions
+
         return expressions
 
 
@@ -194,17 +199,17 @@ class _AnyExpression(Expression):
     def __str__(self) -> str:
         return ", ".join(str(expr) for expr in self.expressions)
 
-    def evaluate(self, context: RenderContext) -> object:
+    def evaluate(self, context: RenderContext) -> int:
         left = self.left.evaluate(context)
-        return any((_eq(left, right.evaluate(context)) for right in self.expressions))
+        return [_eq(left, right.evaluate(context)) for right in self.expressions].count(
+            True
+        )
 
-    async def evaluate_async(self, context: RenderContext) -> object:
+    async def evaluate_async(self, context: RenderContext) -> int:
         left = await self.left.evaluate_async(context)
-        for expr in self.expressions:
-            right = await expr.evaluate_async(context)
-            if _eq(left, right):
-                return True
-        return False
+        return [
+            _eq(left, await right.evaluate_async(context)) for right in self.expressions
+        ].count(True)
 
     def children(self) -> list[Expression]:
         return self.expressions
@@ -231,17 +236,21 @@ class MultiExpressionBlockNode(Node):
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
-        if self.expression.evaluate(context):
-            return self.block.render(context, buffer)
-        return 0
+        return sum(
+            self.block.render(context, buffer)
+            for _ in range(self.expression.evaluate(context))
+        )
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
     ) -> int:
         """Render the node to the output buffer."""
-        if await self.expression.evaluate_async(context):
-            return await self.block.render_async(context, buffer)
-        return 0
+        return sum(
+            [
+                await self.block.render_async(context, buffer)
+                for _ in range(await self.expression.evaluate_async(context))
+            ]
+        )
 
     # TODO:
     # def children(
