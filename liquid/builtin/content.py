@@ -7,7 +7,7 @@ from liquid.ast import Node
 from liquid.context import RenderContext
 from liquid.stream import TokenStream
 from liquid.tag import Tag
-from liquid.token import TOKEN_LITERAL
+from liquid.token import TOKEN_CONTENT
 
 
 class ContentNode(Node):
@@ -28,8 +28,8 @@ class ContentNode(Node):
 class Literal(Tag):
     """Pseudo "tag" for template content."""
 
-    name = TOKEN_LITERAL
+    name = TOKEN_CONTENT
     node_class = ContentNode
 
     def parse(self, stream: TokenStream) -> ContentNode:  # noqa: D102
-        return self.node_class(stream.current)
+        return self.node_class(stream.expect(TOKEN_CONTENT))  # TODO:

@@ -16,9 +16,9 @@ from typing import Iterator
 from typing import Pattern
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.token import TOKEN_CONTENT
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_LITERAL
 from liquid.token import TOKEN_OUTOUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
@@ -57,16 +57,16 @@ def compile_liquid_rules(
 
     if not comment_start_string:
         # Do not support shorthand comment syntax
-        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"
+        content_pattern = rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"
 
         liquid_rules = [
             ("RAW", raw_pattern),
             (TOKEN_OUTOUT, statement_pattern),
             ("TAG", tag_pattern),
-            (TOKEN_LITERAL, literal_pattern),
+            (TOKEN_CONTENT, content_pattern),
         ]
     else:
-        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s}|{comment_s})(?P<rstrip>-?))|$)"
+        content_pattern = rf".+?(?=(({tag_s}|{stmt_s}|{comment_s})(?P<rstrip>-?))|$)"
         comment_pattern = rf"{comment_s}(?P<comment>.*?)(?P<rsc>-?){comment_e}"
 
         liquid_rules = [
@@ -74,7 +74,7 @@ def compile_liquid_rules(
             ("COMMENT", comment_pattern),
             (TOKEN_OUTOUT, statement_pattern),
             ("TAG", tag_pattern),
-            (TOKEN_LITERAL, literal_pattern),
+            (TOKEN_CONTENT, content_pattern),
         ]
 
     return _compile_rules(liquid_rules)
@@ -120,11 +120,11 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
             continue
 
         elif kind == "RAW":
-            kind = TOKEN_LITERAL
+            kind = TOKEN_CONTENT
             value = match.group("raw")
             lstrip = bool(match.group("rsr_e"))
 
-        elif kind == TOKEN_LITERAL:
+        elif kind == TOKEN_CONTENT:
             if lstrip:
                 value = value.lstrip()
             if match.group("rstrip"):

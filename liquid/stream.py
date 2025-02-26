@@ -134,7 +134,7 @@ class TokenStream:
                 f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
             )
             raise LiquidSyntaxError(msg, token=tok)
-        return tok
+        return next(self)
 
     def into_inner(self) -> TokenStream:
         """Return a stream of tokens for the current expression token.

@@ -9,8 +9,8 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.lex import get_lexer
 from liquid.lex import tokenize_liquid_expression
 from liquid.stream import TokenStream
+from liquid.token import TOKEN_CONTENT
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_LITERAL
 from liquid.token import TOKEN_OUTOUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
@@ -49,126 +49,126 @@ class LiquidLexerTestCase(TestCase):
             Case(
                 "simple template literal",
                 "<HTML>some</HTML>",
-                [Token(1, TOKEN_LITERAL, "<HTML>some</HTML>")],
+                [Token(1, TOKEN_CONTENT, "<HTML>some</HTML>")],
             ),
             Case(
                 "template literal and object",
                 r"<HTML>{{ other }}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_OUTOUT, "other"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "template literal and object with filters",
                 r"<HTML>{{ other | upper }}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_OUTOUT, "other | upper"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "template literal and object with whitespace control",
                 r"<HTML>{{- other -}}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_OUTOUT, "other"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "template literal and control flow",
                 "<HTML>{% if product %}some{% else %}other{% endif %}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
-                    Token(1, TOKEN_LITERAL, "some"),
+                    Token(1, TOKEN_CONTENT, "some"),
                     Token(1, TOKEN_TAG, "else"),
-                    Token(1, TOKEN_LITERAL, "other"),
+                    Token(1, TOKEN_CONTENT, "other"),
                     Token(1, TOKEN_TAG, "endif"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "template literal and control flow and inconsistent whitespace",
                 "<HTML>{%if  product %}some{% else  %}other{% endif%}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
-                    Token(1, TOKEN_LITERAL, "some"),
+                    Token(1, TOKEN_CONTENT, "some"),
                     Token(1, TOKEN_TAG, "else"),
-                    Token(1, TOKEN_LITERAL, "other"),
+                    Token(1, TOKEN_CONTENT, "other"),
                     Token(1, TOKEN_TAG, "endif"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "newlines inside tags",
                 "<HTML>{%if\nproduct %}some{% else\n %}other{% endif%}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(2, TOKEN_EXPRESSION, "product"),
-                    Token(2, TOKEN_LITERAL, "some"),
+                    Token(2, TOKEN_CONTENT, "some"),
                     Token(2, TOKEN_TAG, "else"),
-                    Token(3, TOKEN_LITERAL, "other"),
+                    Token(3, TOKEN_CONTENT, "other"),
                     Token(3, TOKEN_TAG, "endif"),
-                    Token(3, TOKEN_LITERAL, "</HTML>"),
+                    Token(3, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "carriage return inside tags",
                 "<HTML>{%if\rproduct %}some{% else\r %}other{% endif%}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
-                    Token(1, TOKEN_LITERAL, "some"),
+                    Token(1, TOKEN_CONTENT, "some"),
                     Token(1, TOKEN_TAG, "else"),
-                    Token(1, TOKEN_LITERAL, "other"),
+                    Token(1, TOKEN_CONTENT, "other"),
                     Token(1, TOKEN_TAG, "endif"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "carriage return and newline inside tags",
                 "<HTML>{%if\r\nproduct %}some{% else\r\n %}other{% endif%}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(2, TOKEN_EXPRESSION, "product"),
-                    Token(2, TOKEN_LITERAL, "some"),
+                    Token(2, TOKEN_CONTENT, "some"),
                     Token(2, TOKEN_TAG, "else"),
-                    Token(3, TOKEN_LITERAL, "other"),
+                    Token(3, TOKEN_CONTENT, "other"),
                     Token(3, TOKEN_TAG, "endif"),
-                    Token(3, TOKEN_LITERAL, "</HTML>"),
+                    Token(3, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "inconsistent whitespace and whitespace control",
                 "<HTML>{%if  product %}some  {%- else  %}other{% endif -%}</HTML>",
                 [
-                    Token(1, TOKEN_LITERAL, "<HTML>"),
+                    Token(1, TOKEN_CONTENT, "<HTML>"),
                     Token(1, TOKEN_TAG, "if"),
                     Token(1, TOKEN_EXPRESSION, "product"),
-                    Token(1, TOKEN_LITERAL, "some"),
+                    Token(1, TOKEN_CONTENT, "some"),
                     Token(1, TOKEN_TAG, "else"),
-                    Token(1, TOKEN_LITERAL, "other"),
+                    Token(1, TOKEN_CONTENT, "other"),
                     Token(1, TOKEN_TAG, "endif"),
-                    Token(1, TOKEN_LITERAL, "</HTML>"),
+                    Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
             Case(
                 "line numbers",
                 ("Some\n\n{{ obj }}\n{% assign x = 1 %}"),
                 [
-                    Token(1, TOKEN_LITERAL, "Some\n\n"),
+                    Token(1, TOKEN_CONTENT, "Some\n\n"),
                     Token(3, TOKEN_OUTOUT, "obj"),
-                    Token(3, TOKEN_LITERAL, "\n"),
+                    Token(3, TOKEN_CONTENT, "\n"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
                 ],
@@ -177,9 +177,9 @@ class LiquidLexerTestCase(TestCase):
                 "line numbers with carriage return",
                 ("Some\r\n\r\n{{ obj }}\r\n{% assign x = 1 %}"),
                 [
-                    Token(1, TOKEN_LITERAL, "Some\r\n\r\n"),
+                    Token(1, TOKEN_CONTENT, "Some\r\n\r\n"),
                     Token(3, TOKEN_OUTOUT, "obj"),
-                    Token(3, TOKEN_LITERAL, "\r\n"),
+                    Token(3, TOKEN_CONTENT, "\r\n"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
                 ],
@@ -188,7 +188,7 @@ class LiquidLexerTestCase(TestCase):
                 "line numbers and whitespace control",
                 "Some\n\n{{- obj -}}\n{% assign x = 1 %}",
                 [
-                    Token(1, TOKEN_LITERAL, "Some"),
+                    Token(1, TOKEN_CONTENT, "Some"),
                     Token(3, TOKEN_OUTOUT, "obj"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
@@ -198,7 +198,7 @@ class LiquidLexerTestCase(TestCase):
                 "raw",
                 "{% raw %}{{ hello }} %}{% {{ {% endraw %}",
                 [
-                    Token(1, TOKEN_LITERAL, r"{{ hello }} %}{% {{ "),
+                    Token(1, TOKEN_CONTENT, r"{{ hello }} %}{% {{ "),
                 ],
             ),
             Case(
@@ -227,9 +227,9 @@ class LiquidLexerTestCase(TestCase):
                 [
                     Token(1, TOKEN_TAG, "capture"),
                     Token(1, TOKEN_EXPRESSION, "greeting"),
-                    Token(1, TOKEN_LITERAL, "Hello, "),
+                    Token(1, TOKEN_CONTENT, "Hello, "),
                     Token(1, TOKEN_OUTOUT, "customer.first_name"),
-                    Token(1, TOKEN_LITERAL, "."),
+                    Token(1, TOKEN_CONTENT, "."),
                     Token(1, TOKEN_TAG, "endcapture"),
                 ],
             ),
@@ -374,7 +374,7 @@ class LiquidLexerTestCase(TestCase):
                 description="no close statement bracket",
                 source=r"text {{method oh no!",
                 expect=[
-                    Token(1, TOKEN_LITERAL, "text "),
+                    Token(1, TOKEN_CONTENT, "text "),
                     Token(1, TOKEN_OUTOUT, "method oh no!"),
                 ],
             ),
@@ -382,7 +382,7 @@ class LiquidLexerTestCase(TestCase):
                 description="no close statement bracket eof",
                 source=r"text {{",
                 expect=[
-                    Token(1, TOKEN_LITERAL, "text "),
+                    Token(1, TOKEN_CONTENT, "text "),
                     Token(1, TOKEN_OUTOUT, ""),
                 ],
             ),
@@ -390,7 +390,7 @@ class LiquidLexerTestCase(TestCase):
                 description="no close tag eof",
                 source=r"text {%",
                 expect=[
-                    Token(1, TOKEN_LITERAL, "text "),
+                    Token(1, TOKEN_CONTENT, "text "),
                     Token(1, TOKEN_TAG, ""),
                 ],
             ),
@@ -398,7 +398,7 @@ class LiquidLexerTestCase(TestCase):
                 description="single close statement bracket",
                 source=r"text {{method} oh no!",
                 expect=[
-                    Token(1, TOKEN_LITERAL, "text "),
+                    Token(1, TOKEN_CONTENT, "text "),
                     Token(1, TOKEN_OUTOUT, "method} oh no!"),
                 ],
             ),
@@ -406,7 +406,7 @@ class LiquidLexerTestCase(TestCase):
                 description="single close statement bracket",
                 source=r"text {{ %} oh no!",
                 expect=[
-                    Token(1, TOKEN_LITERAL, "text "),
+                    Token(1, TOKEN_CONTENT, "text "),
                     Token(1, TOKEN_OUTOUT, "%} oh no!"),
                 ],
             ),

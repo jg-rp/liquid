@@ -12,7 +12,7 @@ __all__ = (
     "TOKEN_TAG",
     "TOKEN_EXPRESSION",
     "TOKEN_OUTOUT",
-    "TOKEN_LITERAL",
+    "TOKEN_CONTENT",
     "TOKEN_WORD",
     "TOKEN_STRING",
     "TOKEN_INTEGER",
@@ -70,9 +70,9 @@ TOKEN_SKIP = sys.intern("skip")
 TOKEN_TAG = sys.intern("tag")
 TOKEN_EXPRESSION = sys.intern("expression")
 TOKEN_OUTOUT = sys.intern("statement")
-TOKEN_LITERAL = sys.intern("literal")
+TOKEN_CONTENT = sys.intern("content")
 
-TOKEN_WORD = sys.intern("identifier")
+TOKEN_WORD = sys.intern("word")
 TOKEN_IDENTINDEX = sys.intern("identindex")
 TOKEN_IDENTSTRING = sys.intern("identstring")
 TOKEN_STRING = sys.intern("string")

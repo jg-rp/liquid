@@ -85,6 +85,9 @@ class BoundTemplate:
         self.path = path
         self.uptodate = uptodate
 
+    def __str__(self) -> str:
+        return "".join(str(node) for node in self.nodes)
+
     def render(self, *args: Any, **kwargs: Any) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
 
