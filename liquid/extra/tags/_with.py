@@ -74,5 +74,4 @@ class WithTag(Tag):
         # Parse the block
         block = get_parser(self.env).parse_block(stream, (TAG_ENDWITH, TOKEN_EOF))
         stream.expect(TOKEN_TAG, value=TAG_ENDWITH)
-
         return self.node_class(token, args=args, block=block)

@@ -50,14 +50,14 @@ class MockContextLoader(DictLoader):
         self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         self.kwargs.update(kwargs)
-        self.kwargs["uid"] = context.resolve("uid", default=None)
+        self.kwargs["uid"] = context.resolve("uid", default=None, token=None)
         return super().get_source(context.env, template_name)
 
     async def get_source_with_context_async(
         self, context: RenderContext, template_name: str, **kwargs: str
     ) -> TemplateSource:
         self.kwargs.update(kwargs)
-        self.kwargs["uid"] = context.resolve("uid", default=None)
+        self.kwargs["uid"] = context.resolve("uid", default=None, token=None)
         return await super().get_source_async(context.env, template_name)
 
 

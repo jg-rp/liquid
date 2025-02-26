@@ -289,7 +289,7 @@ class AsyncMatterDictLoader(DictLoader):
         try:
             source = self.templates[template_name]
         except KeyError as err:
-            raise TemplateNotFound(template_name) from err
+            raise TemplateNotFound(template_name, token=None) from err
 
         return TemplateSource(
             source=source,

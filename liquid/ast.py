@@ -113,23 +113,6 @@ class ChildNode(NamedTuple):
     load_context: Optional[dict[str, str]] = None
 
 
-class ParseTree(Node):
-    """The root node of all syntax trees."""
-
-    __slots__ = ("nodes",)
-
-    def __init__(self, token: Token) -> None:
-        super().__init__(token)
-        self.nodes: list[Node] = []
-
-    def __str__(self) -> str:  # pragma: no cover
-        return "".join(str(s) for s in self.nodes)
-
-    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
-        """Render the node to the output buffer."""
-        return sum(node.render(context, buffer) for node in self.nodes)
-
-
 class IllegalNode(Node):
     """Parse tree node representing an illegal or unregistered tag.
 
@@ -163,7 +146,7 @@ class BlockNode(Node):
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
-        if context.env.render_whitespace_only_blocks and self.blank:
+        if context.env.suppress_blank_control_flow_blocks and self.blank:
             buf = NullIO()
             for node in self.nodes:
                 node.render(context, buf)
@@ -175,7 +158,7 @@ class BlockNode(Node):
         self, context: RenderContext, buffer: TextIO
     ) -> int:
         """Render the node to the output buffer."""
-        if context.env.render_whitespace_only_blocks and self.blank:
+        if context.env.suppress_blank_control_flow_blocks and self.blank:
             buf = NullIO()
             for node in self.nodes:
                 await node.render_async(context, buf)

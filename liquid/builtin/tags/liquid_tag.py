@@ -33,17 +33,21 @@ TAG_LIQUID = sys.intern("liquid")
 class LiquidNode(Node):
     """The built-in _liquid_ tag."""
 
-    __slots__ = ("block",)
+    __slots__ = (
+        "liquid_token",
+        "block",
+    )
 
-    def __init__(self, token: Token, block: BlockNode):
+    def __init__(self, token: Token, liquid_token: Token, block: BlockNode):
         super().__init__(token)
+        self.liquid_token = liquid_token
         self.block = block
         self.blank = block.blank
 
     def __str__(self) -> str:
         # NOTE: We're using a string representation of the token, not the node.
         # Which might cause issues later.
-        return self.token.value
+        return f"{{% liquid {self.liquid_token.value} %}}"
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
@@ -78,12 +82,12 @@ class LiquidTag(Tag):
             parser = get_parser(self.env)
             block = parser.parse_block(stream, end=())
         else:
-            token_ = stream.eat(TOKEN_EXPRESSION)
+            token_ = stream.expect(TOKEN_EXPRESSION)
             block = get_parser(self.env).parse_block(
                 TokenStream(_tokenize(token_.value, token=token_)), end=()
             )
 
-        return self.node_class(token, block=block)
+        return self.node_class(token, token_, block=block)
 
 
 _RULES = (

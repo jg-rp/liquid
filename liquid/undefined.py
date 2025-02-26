@@ -27,7 +27,7 @@ class Undefined(Mapping[Any, object]):
     Always evaluates to an empty string. Can be iterated over and indexed without error.
     """
 
-    __slots__ = ("name", "obj", "hint")
+    __slots__ = ("name", "obj", "hint", "token")
 
     def __init__(
         self,

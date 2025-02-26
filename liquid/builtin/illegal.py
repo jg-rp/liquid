@@ -15,10 +15,11 @@ class Illegal(Tag):
     name = TOKEN_ILLEGAL
     block = False
 
-    def parse(self, stream: TokenStream) -> IllegalNode:  # noqa: D102
-        token = stream.eat(TOKEN_TAG)
+    def parse(self, stream: TokenStream) -> IllegalNode:
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.expect(TOKEN_TAG)
 
-        if stream.current.kind == TOKEN_EXPRESSION:
+        if stream.peek.kind == TOKEN_EXPRESSION:
             stream.next_token()
 
         raise LiquidSyntaxError(f"unexpected tag '{token.value}'", token=token)

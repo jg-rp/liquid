@@ -171,9 +171,24 @@ class FilterItemTypeError(Error):
 class TemplateNotFound(Error):
     """Exception raised when a template could not be found."""
 
+    def __init__(
+        self,
+        *args: object,
+        filename: str | None = None,
+    ):
+        super().__init__(*args, token=None, template_name=filename)
+
     def __str__(self) -> str:
-        msg = super().__str__()
-        return f"template not found {msg}"
+        if not self.token:
+            return repr(super().__str__())
+        return super().__str__()
+
+    def _pointer_message(self) -> object:
+        if self.args:
+            if self.token:
+                return "template not found"
+            return self.args[0]
+        return None
 
 
 class ResourceLimitError(Error):

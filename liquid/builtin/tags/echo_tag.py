@@ -29,5 +29,5 @@ class EchoTag(Tag):
     def parse(self, stream: TokenStream) -> Node:  # noqa: D102
         token = stream.eat(TOKEN_TAG)
         return self.node_class(
-            token, FilteredExpression.parse(self.env, stream.into_inner())
+            token, FilteredExpression.parse(self.env, stream.into_inner(eat=False))
         )

@@ -47,7 +47,7 @@ class Parser:
             except Error as err:
                 self.env.error(err, token=stream.current)
 
-        next(stream)
+            next(stream)
 
         return nodes
 
@@ -70,14 +70,14 @@ class Parser:
 
         return node
 
+    # TODO: move to stream.parse_block?
     def parse_block(self, stream: TokenStream, end: Container[str]) -> BlockNode:
         """Parse multiple nodes from a stream of tokens.
 
         Stop parsing nodes when we find a token in `end` or we reach the end of the
         stream.
         """
-        block = BlockNode(stream.current, [])
-        nodes = block.nodes
+        nodes = []
 
         while stream.current.kind != TOKEN_EOF:
             if stream.current.kind == TOKEN_TAG and stream.current.value in end:
@@ -85,7 +85,7 @@ class Parser:
             nodes.append(self.parse_statement(stream))
             next(stream)
 
-        return block
+        return BlockNode(stream.current, nodes)
 
 
 # TODO: move to TokenStream.eat_block()

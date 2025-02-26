@@ -139,7 +139,7 @@ class Environment:
     template_class: Type[BoundTemplate] = BoundTemplate
 
     # Whether to output blocks that only contain only whitespace when rendered.
-    render_whitespace_only_blocks: bool = False
+    suppress_blank_control_flow_blocks: bool = True
 
     # When `True`, accept indexes without enclosing square brackets in paths to
     # variables. Defaults to `False`.

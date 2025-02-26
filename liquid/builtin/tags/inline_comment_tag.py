@@ -13,16 +13,23 @@ from liquid.token import TOKEN_TAG
 RE_INVALID_INLINE_COMMENT = re.compile(r"\n\s*[^#\s]")
 
 
+class InlineCommentNode(CommentNode):
+    """The built-in inline comment tag."""
+
+    def __str__(self) -> str:
+        return f"{{% # {self.text} %}}"
+
+
 class InlineCommentTag(Tag):
     """The built-in inline comment tag."""
 
     block = False
     name = sys.intern("#")
-    node_class = CommentNode
+    node_class = InlineCommentNode
 
-    def parse(self, stream: TokenStream) -> CommentNode:
+    def parse(self, stream: TokenStream) -> InlineCommentNode:
         """Parse tokens from _stream_ into an AST node."""
-        token = stream.eat(TOKEN_TAG)
+        token = stream.expect(TOKEN_TAG)
         # Empty comment tag?
         if stream.peek.kind == TOKEN_EXPRESSION:
             next(stream)

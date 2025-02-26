@@ -77,7 +77,7 @@ class TokenStream:
         # TODO: loose close
         self.current = self.eof
 
-    def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> None:
+    def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> Token:
         if tok.kind != typ or (value is not None and tok.value != value):
             _typ = reverse_operators.get(tok.kind, tok.kind)
             _expected_typ = reverse_operators.get(typ, typ)
@@ -89,20 +89,23 @@ class TokenStream:
             else:
                 msg = f"expected '{_expected_typ}', found '{_typ}'"
             raise LiquidSyntaxError(msg, token=tok)
+        return tok
 
-    def expect(self, typ: str, value: Optional[str] = None) -> None:
+    def expect(self, typ: str, value: Optional[str] = None) -> Token:
         """Check the current token in the stream matches the given type and value.
 
-        Raises a `LiquidSyntaxError` if they don't.
+        Returns the current token if its type matches _typ_.
+        Raises a `LiquidSyntaxError` if it doesn't.
         """
-        self._expect(self.current, typ, value)
+        return self._expect(self.current, typ, value)
 
-    def expect_peek(self, typ: str, value: Optional[str] = None) -> None:
+    def expect_peek(self, typ: str, value: Optional[str] = None) -> Token:
         """Check the next token in the stream matches the given type and value.
 
-        Raises a `LiquidSyntaxError` if they don't.
+        Returns the next token if its type matches _typ_.
+        Raises a `LiquidSyntaxError` it doesn't.
         """
-        self._expect(self.peek, typ, value)
+        return self._expect(self.peek, typ, value)
 
     def eat(self, typ: str) -> Token:
         """Consume and return the next token.
@@ -136,11 +139,13 @@ class TokenStream:
             raise LiquidSyntaxError(msg, token=tok)
         return next(self)
 
-    def into_inner(self) -> TokenStream:
+    def into_inner(self, *, eat: bool = True) -> TokenStream:
         """Return a stream of tokens for the current expression token.
 
         If the current token is not an expression, a LiquidSyntaxError is
         raised.
+
+        If _eat_ is true (the default), the current token is consumed.
         """
         token = self.current
         if token.kind != TOKEN_EXPRESSION:
@@ -149,7 +154,9 @@ class TokenStream:
                 f"found {reverse_operators.get(token.kind, token.kind)!r}"
             )
             raise LiquidSyntaxError(msg, token=token)
-        next(self)
+
+        if eat:
+            next(self)
         return TokenStream(tokenize(token.value, parent_token=token))
 
     def expect_eos(self) -> None:

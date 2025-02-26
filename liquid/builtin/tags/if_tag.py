@@ -172,14 +172,14 @@ class IfTag(Tag):
                 eat_block(stream, ENDELSIFBLOCK)
                 return IllegalNode(token)
 
-            alt_tok = stream.next_token()
+            alt_tok = stream.current
             alt_block = parse_block(stream, ENDELSIFBLOCK)
 
             alternatives.append(
                 ConditionalBlockNode(alt_tok, condition=expr, block=alt_block)
             )
 
-        alternative: Optional[BlockNode] = None
+        default: Optional[BlockNode] = None
 
         if stream.current.is_tag(TAG_ELSE):
             stream.next_token()
@@ -192,7 +192,7 @@ class IfTag(Tag):
                         "found an 'else' tag expression, did you mean 'elsif'?",
                         token=stream.current,
                     )
-            alternative = parse_block(stream, ENDIFELSEBLOCK)
+            default = parse_block(stream, ENDIFELSEBLOCK)
 
         # Extraneous `else` and `elsif` blocks are ignored.
         if not stream.current.is_tag(TAG_ENDIF) and self.mode == Mode.LAX:
@@ -211,5 +211,5 @@ class IfTag(Tag):
             condition=condition,
             consequence=consequence,
             alternatives=alternatives,
-            default=alternative,
+            default=default,
         )

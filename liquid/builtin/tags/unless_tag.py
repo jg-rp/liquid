@@ -180,7 +180,7 @@ class UnlessTag(Tag):
                 eat_block(stream, ENDELSIFBLOCK)
                 return IllegalNode(token)
 
-            alt_tok = stream.next_token()
+            alt_tok = stream.current
             alt_block = parse_block(stream, ENDELSIFBLOCK)
 
             alternatives.append(

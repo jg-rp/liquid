@@ -156,7 +156,7 @@ class ForNode(Node):
         default = ""
 
         if self.default:
-            default = f"{{% else %}} {self.default}"
+            default = f"{{% else %}}{self.default}"
 
         return f"{{% for {self.expression} %}}{self.block}{default}{{% endfor %}}"
 
@@ -259,13 +259,8 @@ class ForNode(Node):
 class BreakNode(Node):
     """Parse tree node for the built-in "break" tag."""
 
-    __slots__ = ("tok",)
-
-    def __init__(self, tok: Token):
-        self.tok = tok
-
     def __str__(self) -> str:
-        return "`break`"
+        return "{% break %}"
 
     def render_to_output(
         self,
@@ -283,13 +278,8 @@ class BreakNode(Node):
 class ContinueNode(Node):
     """Parse tree node for the built-in "continue" tag."""
 
-    __slots__ = ("tok",)
-
-    def __init__(self, tok: Token):
-        self.tok = tok
-
     def __str__(self) -> str:
-        return "`continue`"
+        return "{% continue %}"
 
     def render_to_output(
         self,

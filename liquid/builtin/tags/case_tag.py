@@ -144,9 +144,9 @@ class CaseTag(Tag):
         parse_block = get_parser(self.env).parse_block
 
         while stream.current.is_tag(TAG_WHEN):
-            alternative_token = stream.current
+            alternative_token = next(stream)
             expressions = self._parse_when_expression(stream.into_inner())
-            alternative_block = parse_block(stream, ENDCASEBLOCK)
+            alternative_block = parse_block(stream, ENDWHENBLOCK)
 
             whens.append(
                 MultiExpressionBlockNode(
@@ -156,11 +156,11 @@ class CaseTag(Tag):
                 )
             )
 
-        if stream.current.kind == TOKEN_ELSE:
+        if stream.current.kind == TOKEN_TAG and stream.current.value == TOKEN_ELSE:
             next(stream)  # else
-            default = parse_block(stream, ENDWHENBLOCK)
+            default = parse_block(stream, ENDCASEBLOCK)
 
-        stream.expect(TAG_ENDCASE)
+        stream.expect(TOKEN_TAG, TAG_ENDCASE)
 
         return self.node_class(
             token,

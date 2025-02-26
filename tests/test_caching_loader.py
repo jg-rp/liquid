@@ -44,7 +44,7 @@ def test_cached_template() -> None:
     assert template.is_up_to_date is True
     another = env.get_template(name="index.liquid", globals={"foo": "bar"})
     assert another.is_up_to_date is True
-    assert template.tree is another.tree
+    assert template.nodes is another.nodes
     assert len(loader.cache) == 1
 
 
@@ -64,7 +64,7 @@ def test_cached_template_async() -> None:
     assert asyncio.run(is_up_to_date(template)) is True
     another = asyncio.run(get_template())
     assert asyncio.run(is_up_to_date(another)) is True
-    assert template.tree is another.tree
+    assert template.nodes is another.nodes
     assert len(loader.cache) == 1
 
 
@@ -91,7 +91,7 @@ def test_auto_reload_template() -> None:
 
         same_template = asyncio.run(get_template())
         assert asyncio.run(is_up_to_date(template)) is True
-        assert template.tree is same_template.tree
+        assert template.nodes is same_template.nodes
 
         # Update template content.
         time.sleep(0.01)  # Make sure some time has passed.
@@ -101,7 +101,7 @@ def test_auto_reload_template() -> None:
         assert asyncio.run(is_up_to_date(template)) is False
         updated_template = asyncio.run(get_template())
         assert asyncio.run(is_up_to_date(updated_template)) is True
-        assert template.tree is not updated_template.tree
+        assert template.nodes is not updated_template.nodes
 
 
 def test_auto_reload_template_async() -> None:
@@ -121,7 +121,7 @@ def test_auto_reload_template_async() -> None:
 
         same_template = env.get_template(name=str(template_path))
         assert template.is_up_to_date is True
-        assert template.tree == same_template.tree
+        assert template.nodes == same_template.nodes
 
         # Update template content.
         time.sleep(0.01)  # Make sure some time has passed.
@@ -131,7 +131,7 @@ def test_auto_reload_template_async() -> None:
         assert template.is_up_to_date is False
         updated_template = env.get_template(name=str(template_path))  # type: ignore
         assert updated_template.is_up_to_date is True
-        assert template.tree is not updated_template.tree
+        assert template.nodes is not updated_template.nodes
 
 
 def test_without_auto_reload_template() -> None:
@@ -153,7 +153,7 @@ def test_without_auto_reload_template() -> None:
 
         same_template = env.get_template(name=str(template_path))
         assert template.is_up_to_date is True
-        assert template.tree == same_template.tree
+        assert template.nodes == same_template.nodes
 
         # Update template content.
         time.sleep(0.01)  # Make sure some time has passed.
@@ -163,7 +163,7 @@ def test_without_auto_reload_template() -> None:
         assert template.is_up_to_date is False
         updated_template = env.get_template(name=str(template_path))  # type: ignore
         assert updated_template.is_up_to_date is False
-        assert template.tree is updated_template.tree
+        assert template.nodes is updated_template.nodes
 
 
 def test_load_with_args() -> None:

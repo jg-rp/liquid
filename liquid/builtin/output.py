@@ -63,7 +63,7 @@ class Output(Tag):
 
     def parse(self, stream: TokenStream) -> OutputNode:
         """Parse tokens from _stream_ into an AST node."""
-        token = stream.eat(TOKEN_OUTOUT)
+        token = stream.expect(TOKEN_OUTOUT)
         return self.node_class(
             token,
             FilteredExpression.parse(

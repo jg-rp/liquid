@@ -32,7 +32,7 @@ class KeywordArgument:
         self.value = value
 
     def __str__(self) -> str:
-        return f"{self.name}: {self.value}"
+        return f"{self.name}:{self.value}"
 
     def evaluate(self, context: RenderContext) -> tuple[str, object]:
         return (self.name, self.value.evaluate(context))
@@ -95,20 +95,13 @@ class PositionalArgument:
         args: list[PositionalArgument] = []
 
         while True:
-            token = next(tokens)
+            if tokens.current.kind == TOKEN_COMMA:
+                next(tokens)
 
-            if token.kind == TOKEN_COMMA:
-                token = next(tokens)
-
-            if token.kind == TOKEN_EOF:
+            if tokens.current.kind == TOKEN_EOF:
                 break
 
-            if token.kind == TOKEN_WORD:
-                args.append(PositionalArgument(parse_primitive(env, tokens)))
-            else:
-                raise LiquidSyntaxError(
-                    f"expected an argument, found {token.kind}", token=token
-                )
+            args.append(PositionalArgument(parse_primitive(env, tokens)))
 
         return args
 
@@ -138,7 +131,6 @@ def parse_arguments(
 
     while True:
         token = next(tokens)
-        print("!!", token)
 
         if token.kind == TOKEN_COMMA:
             token = next(tokens)

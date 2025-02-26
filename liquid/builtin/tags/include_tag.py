@@ -170,7 +170,7 @@ class IncludeTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Read an IncludeNode from the given stream of tokens."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(eat=False)
 
         # Need a string or identifier that resolves to a string. This is the name
         # of the template to be included.
