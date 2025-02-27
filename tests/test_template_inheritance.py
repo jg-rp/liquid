@@ -14,7 +14,7 @@ from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import UndefinedError
 from liquid.extra import add_inheritance_tags
-from liquid.loaders import DictLoader
+from liquid.loader import DictLoader
 
 
 class Case(NamedTuple):

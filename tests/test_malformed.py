@@ -20,7 +20,7 @@ from liquid.exceptions import lookup_warning
 from liquid.extra import IfNotTag
 from liquid.extra import add_extended_inline_expression_tags
 from liquid.extra import add_inline_expression_tags
-from liquid.loaders import DictLoader
+from liquid.loader import DictLoader
 from liquid.mode import Mode
 
 

@@ -10,15 +10,11 @@ from typing import Callable
 from typing import ClassVar
 from typing import Iterator
 from typing import Mapping
-from typing import MutableMapping
 from typing import Optional
 from typing import Type
 from typing import Union
 
 from liquid import builtin
-from liquid import loaders
-from liquid.analyze_tags import InnerTagMap
-from liquid.analyze_tags import TagAnalysis
 from liquid.context import Undefined
 from liquid.exceptions import Error
 from liquid.exceptions import LiquidSyntaxError
@@ -29,13 +25,15 @@ from liquid.mode import Mode
 from liquid.parse import get_parser
 from liquid.stream import TokenStream
 from liquid.template import BoundTemplate
-from liquid.utils import LRUCache
+
+from .builtin import DictLoader
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from .ast import Node
     from .context import RenderContext
+    from .loader import BaseLoader
     from .tag import Tag
     from .token import Token
 
@@ -74,13 +72,6 @@ class Environment:
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
             output unless they've been explicitly marked as "safe".
-        auto_reload: If `True`, loaders that have an `uptodate` callable will
-            reload template source data automatically. For deployments where template
-            sources don't change between service reloads, setting auto_reload to `False`
-            can yield an increase in performance by avoiding calls to `uptodate`.
-        cache_size: The capacity of the template cache in number of templates.
-            If `cache_size` is `None` or less than `1`, it has the effect of setting
-            `auto_reload` to `False`.
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
 
@@ -108,8 +99,6 @@ class Environment:
         filters: A dictionary mapping filter names to callable objects implementing a
             filter's behavior.
         mode: The current tolerance mode.
-        cache: The template cache.
-        auto_reload: Indicates if automatic reloading of templates is enabled.
         template_class: `Environment.get_template` and `Environment.from_string`
             return an instance of `Environment.template_class`.
         globals: A dictionary of variables that will be added to the context of every
@@ -153,12 +142,10 @@ class Environment:
         statement_end_string: str = r"}}",
         strip_tags: bool = False,
         tolerance: Mode = Mode.STRICT,
-        loader: Optional[loaders.BaseLoader] = None,
+        loader: Optional[BaseLoader] = None,
         undefined: Type[Undefined] = Undefined,
         strict_filters: bool = True,
         autoescape: bool = False,
-        auto_reload: bool = True,
-        cache_size: int = 300,
         globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         template_comments: bool = False,
         comment_start_string: str = "{#",
@@ -174,7 +161,7 @@ class Environment:
 
         # An instance of a template loader implementing `liquid.loaders.BaseLoader`.
         # `get_template()` will delegate to this loader.
-        self.loader = loader or loaders.DictLoader({})
+        self.loader = loader or DictLoader({})
 
         # A mapping of template variable names to python objects. These variables will
         # be added to the global namespace of any template rendered from this
@@ -207,14 +194,6 @@ class Environment:
 
         # tolerance mode
         self.mode: Mode = tolerance
-
-        # Template cache
-        if cache_size and cache_size > 0 and not self.loader.caching_loader:
-            self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
-            self.auto_reload: bool = auto_reload
-        else:
-            self.cache = None
-            self.auto_reload = False
 
         self.setup_tags_and_filters()
 
@@ -320,7 +299,10 @@ class Environment:
     def get_template(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        *,
+        globals: Mapping[str, object] | None = None,  # noqa: A002
+        context: RenderContext | None = None,
+        **kwargs: object,
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
@@ -329,182 +311,112 @@ class Environment:
                 the name. It could be the name of a file or some other identifier.
             globals: A mapping of render context variables attached to the
                 resulting template.
+            context: An optional render context that can be used to narrow the template
+                source search space.
+            kwargs: Arbitrary arguments that can be used to narrow the template source
+                search space.
 
         Raises:
             TemplateNotFound: If a template with the given name can not be found.
         """
-        if self.cache is not None:
-            cached = self.cache.get(name)
-            if isinstance(cached, BoundTemplate) and (
-                not self.auto_reload or cached.is_up_to_date
-            ):
-                cached.globals.update(self.make_globals(globals))
-                return cached
-
-        template = self.loader.load(self, name, globals=self.make_globals(globals))
-        if self.cache is not None:
-            self.cache[name] = template
-        return template
+        try:
+            return self.loader.load(
+                env=self,
+                name=name,
+                globals=self.make_globals(globals),
+                context=context,
+                **kwargs,
+            )
+        except Error as err:
+            if not err.template_name:
+                err.template_name = name
+            raise
 
     async def get_template_async(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-    ) -> BoundTemplate:
-        """An async version of `get_template`."""
-        if self.cache is not None:
-            cached = self.cache.get(name)
-            if isinstance(cached, BoundTemplate) and (
-                not self.auto_reload or await cached.is_up_to_date_async()
-            ):
-                cached.globals.update(self.make_globals(globals))
-                return cached
-
-        template = await self.loader.load_async(
-            self, name, globals=self.make_globals(globals)
-        )
-        if self.cache is not None:
-            self.cache[name] = template
-        return template
-
-    def get_template_with_args(
-        self,
-        name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        *,
+        globals: Mapping[str, object] | None = None,  # noqa: A002
+        context: RenderContext | None = None,
         **kwargs: object,
     ) -> BoundTemplate:
-        """Load and parse a template with arbitrary loader arguments.
-
-        This method bypasses the environment's template cache. You should use a caching
-        loader instead when the loader requires extra keyword arguments.
-
-        _New in version 1.9.0._
-        """
-        return self.loader.load_with_args(self, name, globals, **kwargs)
-
-    async def get_template_with_args_async(
-        self,
-        name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-        **kwargs: object,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_args`.
-
-        _New in version 1.9.0._
-        """
-        return await self.loader.load_with_args_async(self, name, globals, **kwargs)
-
-    def get_template_with_context(
-        self,
-        context: "RenderContext",
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """Load and parse a template with reference to a render context.
-
-        This method bypasses the environment's template cache. You should consider using
-        a caching loader.
-        """
-        return self.loader.load_with_context(context, name, **kwargs)
-
-    async def get_template_with_context_async(
-        self,
-        context: "RenderContext",
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_context`."""
-        return await self.loader.load_with_context_async(context, name, **kwargs)
-
-    def analyze_tags_from_string(
-        self,
-        source: str,
-        name: str = "<string>",
-        *,
-        inner_tags: Optional[InnerTagMap] = None,
-    ) -> TagAnalysis:
-        """Analyze tags in template source text.
-
-        Unlike template static or contextual analysis, a tag audit does not parse the
-        template source text into an AST, nor does it attempt to load partial templates
-        from `{% include %}` or `{% render %}` tags.
-
-        Args:
-            source: The source text of the template.
-            name: A name or identifier for the template.
-            inner_tags: A mapping of block tags to a list of allowed "inner" tags for
-                the block. For example, `{% if %}` blocks are allowed to contain
-                `{% elsif %}` and `{% else %}` tags.
-        """
-        return TagAnalysis(
-            env=self,
-            name=name,
-            tokens=list(self.tokenizer()(source)),
-            inner_tags=inner_tags,
-        )
-
-    def analyze_tags(
-        self,
-        name: str,
-        *,
-        context: Optional["RenderContext"] = None,
-        inner_tags: Optional[InnerTagMap] = None,
-        **kwargs: str,
-    ) -> TagAnalysis:
-        """Audit template tags without parsing source text into an abstract syntax tree.
-
-        This is useful for identifying unknown, misplaced and unbalanced tags in a
-        template's source text. See also `liquid.template.BoundTemplate.analyze`.
-
-        Args:
-            name: The template's name or identifier, as you would use with
-                `Environment.get_template`. Use `Environment.analyze_tags_from_string`
-                to audit tags in template text without using a template loader.
-            context: An optional render context the loader might use to modify the
-                template search space. If given, uses
-                `liquid.loaders.BaseLoader.get_source_with_context` from the current
-                loader.
-            inner_tags: A mapping of block tags to a list of allowed "inner" tags for
-                the block. For example, `{% if %}` blocks are allowed to contain
-                `{% elsif %}` and `{% else %}` tags.
-            kwargs: Loader context.
-        """
-        if context:
-            template_source = self.loader.get_source_with_context(
-                context=context, template_name=name, **kwargs
+        """An async version of `get_template()`."""
+        try:
+            return await self.loader.load_async(
+                env=self,
+                name=name,
+                globals=self.make_globals(globals),
+                context=context,
+                **kwargs,
             )
-        else:
-            template_source = self.loader.get_source(self, template_name=name)
+        except Error as err:
+            if not err.template_name:
+                err.template_name = name
+            raise
 
-        return self.analyze_tags_from_string(
-            template_source.source,
-            name=template_source.filename,
-            inner_tags=inner_tags,
-        )
+    # TODO:
+    # def analyze_tags(
+    #     self,
+    #     name: str,
+    #     *,
+    #     context: Optional["RenderContext"] = None,
+    #     inner_tags: Optional[InnerTagMap] = None,
+    #     **kwargs: str,
+    # ) -> TagAnalysis:
+    #     """Audit template tags without parsing source text into an abstract syntax tree.
 
-    async def analyze_tags_async(
-        self,
-        name: str,
-        *,
-        context: Optional["RenderContext"] = None,
-        inner_tags: Optional[InnerTagMap] = None,
-        **kwargs: str,
-    ) -> TagAnalysis:
-        """An async version of `Environment.analyze_tags`."""
-        if context:
-            template_source = await self.loader.get_source_with_context_async(
-                context=context, template_name=name, **kwargs
-            )
-        else:
-            template_source = await self.loader.get_source_async(
-                env=self, template_name=name
-            )
+    #     This is useful for identifying unknown, misplaced and unbalanced tags in a
+    #     template's source text. See also `liquid.template.BoundTemplate.analyze`.
 
-        return self.analyze_tags_from_string(
-            template_source.source,
-            name=template_source.filename,
-            inner_tags=inner_tags,
-        )
+    #     Args:
+    #         name: The template's name or identifier, as you would use with
+    #             `Environment.get_template`. Use `Environment.analyze_tags_from_string`
+    #             to audit tags in template text without using a template loader.
+    #         context: An optional render context the loader might use to modify the
+    #             template search space. If given, uses
+    #             `liquid.loaders.BaseLoader.get_source_with_context` from the current
+    #             loader.
+    #         inner_tags: A mapping of block tags to a list of allowed "inner" tags for
+    #             the block. For example, `{% if %}` blocks are allowed to contain
+    #             `{% elsif %}` and `{% else %}` tags.
+    #         kwargs: Loader context.
+    #     """
+    #     if context:
+    #         template_source = self.loader.get_source_with_context(
+    #             context=context, template_name=name, **kwargs
+    #         )
+    #     else:
+    #         template_source = self.loader.get_source(self, template_name=name)
+
+    #     return self.analyze_tags_from_string(
+    #         template_source.source,
+    #         name=template_source.filename,
+    #         inner_tags=inner_tags,
+    #     )
+
+    # async def analyze_tags_async(
+    #     self,
+    #     name: str,
+    #     *,
+    #     context: Optional["RenderContext"] = None,
+    #     inner_tags: Optional[InnerTagMap] = None,
+    #     **kwargs: str,
+    # ) -> TagAnalysis:
+    #     """An async version of `Environment.analyze_tags`."""
+    #     if context:
+    #         template_source = await self.loader.get_source_with_context_async(
+    #             context=context, template_name=name, **kwargs
+    #         )
+    #     else:
+    #         template_source = await self.loader.get_source_async(
+    #             env=self, template_name=name
+    #         )
+
+    #     return self.analyze_tags_from_string(
+    #         template_source.source,
+    #         name=template_source.filename,
+    #         inner_tags=inner_tags,
+    #     )
 
     def make_globals(
         self,
@@ -544,12 +456,10 @@ def get_implicit_environment(
     statement_end_string: str,
     strip_tags: bool,
     tolerance: Mode,
-    loader: Optional[loaders.BaseLoader],
+    loader: Optional[BaseLoader],
     undefined: Type[Undefined],
     strict_filters: bool,
     autoescape: bool,
-    auto_reload: bool,
-    cache_size: int,
     globals: Optional[Mapping[str, object]],  # noqa: A002
     template_comments: bool,
     comment_start_string: str,
@@ -567,8 +477,6 @@ def get_implicit_environment(
         undefined=undefined,
         strict_filters=strict_filters,
         autoescape=autoescape,
-        auto_reload=auto_reload,
-        cache_size=cache_size,
         globals=globals,
         template_comments=template_comments,
         comment_start_string=comment_start_string,
@@ -592,8 +500,6 @@ def Template(  # noqa: N802, D417
     undefined: Type[Undefined] = Undefined,
     strict_filters: bool = True,
     autoescape: bool = False,
-    auto_reload: bool = True,
-    cache_size: int = 300,
     globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     template_comments: bool = False,
     comment_start_string: str = "{#",
@@ -631,15 +537,6 @@ def Template(  # noqa: N802, D417
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
             output unless they've been explicitly marked as "safe".
-        auto_reload: If `True`, loaders that have an `uptodate` callable will
-            reload template source data automatically. For deployments where template
-            sources don't change between service reloads, setting auto_reload to `False`
-            can yield an increase in performance by avoiding calls to `uptodate`.
-        cache_size: The capacity of the template cache in number of templates.
-            If `cache_size` is `None` or less than `1`, it has the effect of setting
-            `auto_reload` to `False`.
-        expression_cache_size: The capacity of each of the common expression caches.
-            A `cache_size` of `0` will disabling expression caching.
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
     """
@@ -656,8 +553,6 @@ def Template(  # noqa: N802, D417
         undefined=undefined,
         strict_filters=strict_filters,
         autoescape=autoescape,
-        auto_reload=auto_reload,
-        cache_size=cache_size,
         globals=None,
         template_comments=template_comments,
         comment_start_string=comment_start_string,

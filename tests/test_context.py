@@ -9,6 +9,7 @@ from liquid.context import ReadOnlyChainMap
 from liquid.context import builtin
 from liquid.context import get_item
 from liquid.environment import Environment
+from liquid.exceptions import Error
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import lookup_warning
 from liquid.mode import Mode
@@ -19,7 +20,7 @@ class Case(NamedTuple):
 
     description: str
     template: str
-    expect_exception: Type[Exception]
+    expect_exception: Type[Error]
     expect_msg: str
     expect_render: str = ""
 
@@ -27,12 +28,12 @@ class Case(NamedTuple):
 class BadContextTemplateTestCase(TestCase):
     """Bad context test case."""
 
-    def _test(self, test_cases, mode=Mode.STRICT):
+    def _test(self, test_cases: list[Case], mode: Mode = Mode.STRICT) -> None:
         """Helper method for running lists of `Case`s."""
         env = Environment()
         env.mode = mode
 
-        global_context = {"arr": [], "hash": {}}
+        global_context: dict[str, object] = {"arr": [], "hash": {}}
 
         for case in test_cases:
             with self.subTest(msg=case.description):
@@ -57,7 +58,7 @@ class BadContextTemplateTestCase(TestCase):
                     result = template.render()
                     self.assertEqual(result, case.expect_render)
 
-    def test_bad_context(self):
+    def test_bad_context(self) -> None:
         """Test that we handle render time errors due to incorrect context."""
         test_cases = [
             Case(
@@ -76,7 +77,7 @@ class BadContextTemplateTestCase(TestCase):
 class ReadOnlyChainMapTestCase(TestCase):
     """Read only chain map test case."""
 
-    def test_get(self):
+    def test_get(self) -> None:
         """Test that we can get items from a chain map."""
         test_cases = [
             {
@@ -101,7 +102,7 @@ class ReadOnlyChainMapTestCase(TestCase):
                 chain_map = ReadOnlyChainMap(*case["maps"])
                 self.assertEqual(chain_map.get("foo"), case["expect"])
 
-    def test_iter(self):
+    def test_iter(self) -> None:
         """Test that we can iterate a chain map."""
         chain_map = ReadOnlyChainMap({"foo": 1}, {"bar": 2}, {"foo": 3})
         self.assertEqual(list(chain_map), ["foo", "bar", "foo"])
@@ -110,7 +111,7 @@ class ReadOnlyChainMapTestCase(TestCase):
 class ChainedItemGetterTestCase(TestCase):
     """Chained item getter test case."""
 
-    def test_get_item(self):
+    def test_get_item(self) -> None:
         """Test that we can get nested items."""
         test_cases = [
             {
@@ -153,22 +154,22 @@ class ChainedItemGetterTestCase(TestCase):
 class BuiltinDynamicScopeTestCase(TestCase):
     """Built-in dynamic scope test case."""
 
-    def test_builtin_contains_now(self):
+    def test_builtin_contains_now(self) -> None:
         """Test that `now` is in the builtin scope."""
         self.assertTrue("now" in builtin)
 
-    def test_builtin_contains_today(self):
+    def test_builtin_contains_today(self) -> None:
         """Test that `today` is in the builtin scope."""
         self.assertTrue("today" in builtin)
 
-    def test_builtin_not_contains(self):
+    def test_builtin_not_contains(self) -> None:
         """Test that garbage is not in the builtin scope."""
         self.assertFalse("foo" in builtin)
 
-    def test_builtin_length(self):
+    def test_builtin_length(self) -> None:
         """Test that builtin has a length."""
         self.assertEqual(len(builtin), 2)
 
-    def test_builtin_iter(self):
+    def test_builtin_iter(self) -> None:
         """Test that builtin has a length."""
         self.assertEqual(list(builtin), ["now", "today"])

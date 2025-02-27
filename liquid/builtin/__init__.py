@@ -65,6 +65,14 @@ from .filters.string import truncatewords
 from .filters.string import upcase
 from .filters.string import url_decode
 from .filters.string import url_encode
+from .loaders.caching_file_system_loader import CachingFileSystemLoader
+from .loaders.choice_loader import CachingChoiceLoader
+from .loaders.choice_loader import ChoiceLoader
+from .loaders.dict_loader import CachingDictLoader
+from .loaders.dict_loader import DictLoader
+from .loaders.file_system_loader import FileSystemLoader
+from .loaders.mixins import CachingLoaderMixin
+from .loaders.package_loader import PackageLoader
 from .tags import assign_tag
 from .tags import capture_tag
 from .tags import case_tag
@@ -85,6 +93,17 @@ from .tags import unless_tag
 
 if TYPE_CHECKING:
     from liquid import Environment
+
+__all__ = (
+    "CachingFileSystemLoader",
+    "CachingChoiceLoader",
+    "ChoiceLoader",
+    "CachingDictLoader",
+    "DictLoader",
+    "FileSystemLoader",
+    "CachingLoaderMixin",
+    "PackageLoader",
+)
 
 
 def register(env: Environment) -> None:  # noqa: PLR0915

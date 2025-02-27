@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from liquid import Environment
     from liquid.ast import Node
-    from liquid.loaders import UpToDate
+    from liquid.loader import UpToDate
 
 
 __all__ = (
@@ -73,7 +73,7 @@ class BoundTemplate:
         nodes: list[Node],
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[dict[str, object]] = None,  # noqa: A002
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):
@@ -87,6 +87,13 @@ class BoundTemplate:
 
     def __str__(self) -> str:
         return "".join(str(node) for node in self.nodes)
+
+    def full_name(self) -> str:
+        """Return this template's path, if available, joined with its name."""
+        if self.path:
+            path = Path(self.path)
+            return str(path / self.name if not path.name else path)
+        return self.name
 
     def render(self, *args: Any, **kwargs: Any) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
@@ -200,7 +207,6 @@ class BoundTemplate:
                     # Raise or warn according to the current mode.
                     self.env.error(err, token=node.token)
 
-    @property
     def is_up_to_date(self) -> bool:
         """`False` if the template has bee modified, `True` otherwise."""
         if not self.uptodate:

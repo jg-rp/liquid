@@ -1,7 +1,7 @@
 from liquid import DictLoader
 from liquid import Environment
 from liquid.exceptions import TemplateNotFound
-from liquid.loaders import TemplateSource
+from liquid.loader import TemplateSource
 
 
 class MatterDictLoader(DictLoader):

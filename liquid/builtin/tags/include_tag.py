@@ -14,6 +14,7 @@ from liquid.builtin.expressions import KeywordArgument
 from liquid.builtin.expressions import Path
 from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_string_or_path
+from liquid.exceptions import TemplateNotFound
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_FOR
@@ -63,7 +64,16 @@ class IncludeNode(Node):
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
         name = self.name.evaluate(context)
-        template = context.get_template_with_context(str(name), tag=self.tag)
+
+        try:
+            template = context.env.get_template(
+                str(name), context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
+
         namespace: dict[str, object] = {
             arg.name: arg.value.evaluate(context) for arg in self.args
         }
@@ -104,9 +114,14 @@ class IncludeNode(Node):
         """Render the node to the output buffer."""
         name = await self.name.evaluate_async(context)
 
-        template = await context.get_template_with_context_async(
-            str(name), tag=self.tag
-        )
+        try:
+            template = await context.env.get_template_async(
+                str(name), context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
 
         namespace: dict[str, object] = {
             arg.name: await arg.value.evaluate_async(context) for arg in self.args

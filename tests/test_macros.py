@@ -10,7 +10,7 @@ from liquid.context import StrictUndefined
 from liquid.environment import Environment
 from liquid.exceptions import UndefinedError
 from liquid.extra import add_macro_tags
-from liquid.loaders import DictLoader
+from liquid.loader import DictLoader
 
 
 class Case(NamedTuple):

@@ -9,12 +9,14 @@ from liquid.ast import Node
 from liquid.builtin.drops import IterableDrop
 from liquid.builtin.expressions import KeywordArgument
 from liquid.builtin.expressions import Path
+from liquid.builtin.expressions import StringLiteral
 from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
 from liquid.context import ReadOnlyChainMap
 from liquid.context import RenderContext
+from liquid.exceptions import TemplateNotFound
 from liquid.expression import Expression
 from liquid.stream import TokenStream
 from liquid.tag import Tag
@@ -38,7 +40,7 @@ class RenderNode(Node):
     def __init__(
         self,
         token: Token,
-        name: Expression,
+        name: StringLiteral,
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[str] = None,
@@ -65,9 +67,14 @@ class RenderNode(Node):
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
-        path = self.name.evaluate(context)
-        assert isinstance(path, str)
-        template = context.get_template_with_context(path, tag=self.tag)
+        try:
+            template = context.env.get_template(
+                self.name.value, context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -128,9 +135,14 @@ class RenderNode(Node):
         self, context: RenderContext, buffer: TextIO
     ) -> int:
         """Render the node to the output buffer."""
-        path = await self.name.evaluate_async(context)
-        assert isinstance(path, str)
-        template = await context.get_template_with_context_async(path, tag=self.tag)
+        try:
+            template = await context.env.get_template_async(
+                self.name.value, context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -230,6 +242,7 @@ class RenderTag(Tag):
         # This is the name of the template to be included.
         tokens.expect(TOKEN_STRING)
         name = parse_primitive(self.env, tokens)
+        assert isinstance(name, StringLiteral)
 
         alias: Optional[str] = None
         var: Optional[Path] = None

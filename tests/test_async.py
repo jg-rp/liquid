@@ -16,9 +16,9 @@ from liquid import Environment
 from liquid import FileSystemLoader
 from liquid import Template
 from liquid.exceptions import TemplateNotFound
-from liquid.loaders import ChoiceLoader
-from liquid.loaders import DictLoader
-from liquid.loaders import TemplateSource
+from liquid.loader import ChoiceLoader
+from liquid.loader import DictLoader
+from liquid.loader import TemplateSource
 from liquid.template import BoundTemplate
 
 

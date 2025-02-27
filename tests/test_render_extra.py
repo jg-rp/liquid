@@ -12,7 +12,7 @@ from liquid.extra import WithTag
 from liquid.extra import add_extended_inline_expression_tags
 from liquid.extra import add_inline_expression_tags
 from liquid.golden.case import Case
-from liquid.loaders import DictLoader
+from liquid.loader import DictLoader
 
 if TYPE_CHECKING:
     from liquid.template import BoundTemplate

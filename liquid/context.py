@@ -344,7 +344,7 @@ class RenderContext:
         return obj
 
     def resolve(
-        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+        self, name: str, *, token: Optional[Token] = None, default: object = UNDEFINED
     ) -> Any:
         """Return the object/value at `name` in the current scope.
 
@@ -397,18 +397,6 @@ class RenderContext:
     async def get_template_async(self, name: str) -> BoundTemplate:
         """Load a template from the environment asynchronously."""
         return await self.env.get_template_async(name)
-
-    def get_template_with_context(self, name: str, **kwargs: str) -> BoundTemplate:
-        """Load a template referencing the current render context."""
-        return self.env.get_template_with_context(self, name, **kwargs)
-
-    async def get_template_with_context_async(
-        self,
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_context`."""
-        return await self.env.get_template_with_context_async(self, name, **kwargs)
 
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
@@ -674,7 +662,7 @@ class CaptureRenderContext(RenderContext):
         return result
 
     def resolve(
-        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+        self, name: str, *, token: Optional[Token] = None, default: object = UNDEFINED
     ) -> Any:
         result = super().resolve(name, token=token, default=default)
         self._count_reference(name, result)
