@@ -14,23 +14,23 @@ from typing import TextIO
 from typing import Type
 from typing import Union
 
-from liquid.context import CaptureRenderContext
-from liquid.context import FutureContext
-from liquid.context import FutureVariableCaptureContext
-from liquid.context import ReadOnlyChainMap
-from liquid.context import RenderContext
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidInterrupt
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import StopRender
-from liquid.output import LimitedStringIO
+from .context import CaptureRenderContext
+from .context import FutureContext
+from .context import FutureVariableCaptureContext
+from .context import RenderContext
+from .exceptions import Error
+from .exceptions import LiquidInterrupt
+from .exceptions import LiquidSyntaxError
+from .exceptions import StopRender
+from .output import LimitedStringIO
+from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
     from collections import abc
 
-    from liquid import Environment
-    from liquid.ast import Node
-    from liquid.loader import UpToDate
+    from .ast import Node
+    from .environment import Environment
+    from .loader import UpToDate
 
 
 __all__ = (

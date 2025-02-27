@@ -7,6 +7,7 @@ from unittest import TestCase
 from liquid import Environment
 from liquid import FutureContext
 from liquid import is_undefined
+
 # from liquid.future import Environment as RubyEnvironment
 
 

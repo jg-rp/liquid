@@ -14,19 +14,18 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from liquid import builtin
-from liquid.context import Undefined
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import TemplateInheritanceError
-from liquid.exceptions import lookup_warning
-from liquid.lex import get_lexer
-from liquid.mode import Mode
-from liquid.parse import get_parser
-from liquid.stream import TokenStream
-from liquid.template import BoundTemplate
-
+from . import builtin
 from .builtin import DictLoader
+from .exceptions import Error
+from .exceptions import LiquidSyntaxError
+from .exceptions import TemplateInheritanceError
+from .exceptions import lookup_warning
+from .lex import get_lexer
+from .mode import Mode
+from .parse import get_parser
+from .stream import TokenStream
+from .template import BoundTemplate
+from .undefined import Undefined
 
 if TYPE_CHECKING:
     from pathlib import Path

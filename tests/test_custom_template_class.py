@@ -1,136 +1,142 @@
 """Test Template and Context subclassing."""
 
+from __future__ import annotations
+
 import io
-import unittest
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Optional
 
 from liquid import Environment
 from liquid import RenderContext
-from liquid.context import ContextPath
-from liquid.context import Namespace
 from liquid.template import BoundTemplate
 
+if TYPE_CHECKING:
+    from liquid import Token
 
-class CustomTemplateClassTestCase(unittest.TestCase):
-    """Test that we can customize the template class."""
 
-    def test_bound_template_subclass(self) -> None:
-        """Test that we can use a subclass of BoundTemplate with an Environment."""
+def test_bound_template_subclass() -> None:
+    """Test that we can use a subclass of BoundTemplate with an Environment."""
 
-        class CustomTemplate(BoundTemplate):
-            """Mock template subclass."""
+    class CustomTemplate(BoundTemplate):
+        """Mock template subclass."""
 
-        env = Environment()
-        env.template_class = CustomTemplate
+    env = Environment()
+    env.template_class = CustomTemplate
 
-        template = env.from_string("Hello, {{ you }}!")
-        self.assertIsInstance(template, CustomTemplate)
+    template = env.from_string("Hello, {{ you }}!")
+    assert isinstance(template, CustomTemplate)
 
-    def test_context_subclass(self) -> None:
-        """Test that we can use a subclass of Context with an Environment."""
 
-        class CustomContext(RenderContext):
-            """Mock context subclass."""
+def test_context_subclass() -> None:
+    """Test that we can use a subclass of Context with an Environment."""
 
-            def __init__(
-                self,
-                template: BoundTemplate,
-                *,
-                globals: Optional[Namespace] = None,  # noqa: A002
-                disabled_tags: Optional[list[str]] = None,
-                copy_depth: int = 0,
-            ):
-                super().__init__(
-                    template,
-                    globals=globals,
-                    disabled_tags=disabled_tags,
-                    copy_depth=copy_depth,
-                )
-                self.assign_counter = 0
+    class CustomContext(RenderContext):
+        """Mock context subclass."""
 
-            def assign(self, key: str, val: Any) -> None:
-                self.assign_counter += 1
-                return super().assign(key, val)
+        def __init__(
+            self,
+            template: BoundTemplate,
+            *,
+            globals: Optional[dict[str, object]] = None,  # noqa: A002
+            disabled_tags: Optional[list[str]] = None,
+            copy_depth: int = 0,
+        ):
+            super().__init__(
+                template,
+                globals=globals,
+                disabled_tags=disabled_tags,
+                copy_depth=copy_depth,
+            )
+            self.assign_counter = 0
 
-        class CustomTemplate(BoundTemplate):
-            """Mock template subclass."""
+        def assign(self, key: str, val: Any) -> None:
+            self.assign_counter += 1
+            return super().assign(key, val)
 
-            context_class = CustomContext
+    class CustomTemplate(BoundTemplate):
+        """Mock template subclass."""
 
-        env = Environment()
-        env.template_class = CustomTemplate
+        context_class = CustomContext
 
-        template = env.from_string("{% assign you = 'Brian' %}Hello, {{ you }}!")
-        self.assertIsInstance(template, CustomTemplate)
+    env = Environment()
+    env.template_class = CustomTemplate
 
-        buf = io.StringIO()
-        ctx = CustomContext(template)
-        template.render_with_context(ctx, buf)
+    template = env.from_string("{% assign you = 'Brian' %}Hello, {{ you }}!")
+    assert isinstance(template, CustomTemplate)
 
-        self.assertEqual(buf.getvalue(), "Hello, Brian!")
-        self.assertEqual(ctx.assign_counter, 1)
+    buf = io.StringIO()
+    ctx = CustomContext(template)
+    template.render_with_context(ctx, buf)
 
-    def test_capture_variables_from_context_subclass(self) -> None:
-        """Test that we can capture a template's variables from a Context subclass."""
-        _missing = object()
+    assert buf.getvalue() == "Hello, Brian!"
+    assert ctx.assign_counter == 1
 
-        class CustomContext(RenderContext):
-            """Mock context subclass."""
 
-            def __init__(
-                self,
-                template: BoundTemplate,
-                *,
-                globals: Optional[Namespace] = None,  # noqa: A002
-                disabled_tags: Optional[list[str]] = None,
-                copy_depth: int = 0,
-            ):
-                super().__init__(
-                    template,
-                    globals=globals,
-                    disabled_tags=disabled_tags,
-                    copy_depth=copy_depth,
-                )
-                self.references: list[str] = []
+def test_capture_variables_from_context_subclass() -> None:
+    """Test that we can capture a template's variables from a Context subclass."""
+    _missing = object()
 
-            def get(self, path: ContextPath, default: object = ...) -> object:
-                self._count_reference(path)
-                return super().get(path, default)
+    class CustomContext(RenderContext):
+        """Mock context subclass."""
 
-            async def get_async(
-                self, path: ContextPath, default: object = ...
-            ) -> object:
-                self._count_reference(path)
-                return await super().get_async(path, default)
+        def __init__(
+            self,
+            template: BoundTemplate,
+            *,
+            globals: Optional[dict[str, object]] = None,  # noqa: A002
+            disabled_tags: Optional[list[str]] = None,
+            copy_depth: int = 0,
+        ):
+            super().__init__(
+                template,
+                globals=globals,
+                disabled_tags=disabled_tags,
+                copy_depth=copy_depth,
+            )
+            self.references: list[str] = []
 
-            def resolve(self, name: str, default: object = _missing) -> Any:
-                self._count_reference(name)
-                return super().resolve(name, default)
+        def get(
+            self, path: list[object], token: Optional[Token], default: object = ...
+        ) -> object:
+            self._count_reference(path)
+            return super().get(path, token=token, default=default)
 
-            def _count_reference(self, path: ContextPath) -> None:
-                if isinstance(path, str):
-                    self.references.append(path)
-                else:
-                    self.references.append(".".join(str(p) for p in path))
+        async def get_async(
+            self, path: list[object], token: Optional[Token], default: object = ...
+        ) -> object:
+            self._count_reference(path)
+            return await super().get_async(path, token=token, default=default)
 
-        class CustomTemplate(BoundTemplate):
-            """Mock template subclass."""
+        def resolve(
+            self,
+            name: str,
+            token: Optional[Token] = None,
+            default: object = _missing,
+        ) -> Any:
+            self._count_reference([name])
+            return super().resolve(name, token=token, default=default)
 
-            context_class = CustomContext
+        def _count_reference(self, path: list[object]) -> None:
+            self.references.append(".".join(str(p) for p in path))
 
-        env = Environment()
-        env.template_class = CustomTemplate
+    class CustomTemplate(BoundTemplate):
+        """Mock template subclass."""
 
-        template = env.from_string("{% assign you = 'Brian' %}Hello, {{ you }}!")
-        self.assertIsInstance(template, CustomTemplate)
+        context_class = CustomContext
 
-        buf = io.StringIO()
-        ctx = CustomContext(template)
-        template.render_with_context(ctx, buf)
+    env = Environment()
+    env.template_class = CustomTemplate
 
-        self.assertEqual(buf.getvalue(), "Hello, Brian!")
-        self.assertEqual(ctx.references, ["you"])
+    template = env.from_string("{% assign you = 'Brian' %}Hello, {{ you }}!")
+    assert isinstance(template, CustomTemplate)
 
-        ctx.resolve("you")
-        self.assertEqual(ctx.references, ["you", "you"])
+    buf = io.StringIO()
+    ctx = CustomContext(template)
+    template.render_with_context(ctx, buf)
+
+    assert buf.getvalue() == "Hello, Brian!"
+    assert ctx.references == ["you"]
+
+    ctx.resolve("you")
+    assert ctx.references == ["you", "you"]

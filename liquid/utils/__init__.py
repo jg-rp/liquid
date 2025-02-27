@@ -1,3 +1,4 @@
+from .chain_map import ReadOnlyChainMap
 from .html import strip_tags
 from .lru_cache import LRUCache
 from .lru_cache import ThreadSafeLRUCache
@@ -10,4 +11,5 @@ __all__ = (
     "strip_tags",
     "truncate_chars",
     "truncate_words",
+    "ReadOnlyChainMap",
 )

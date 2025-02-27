@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import collections.abc
 import datetime
 import itertools
 import re
@@ -13,21 +12,19 @@ from functools import partial
 from functools import reduce
 from io import StringIO
 from itertools import cycle
-from operator import getitem
 from operator import mul
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Awaitable
 from typing import Callable
 from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
 from typing import Sequence
+from typing import Sized
 from typing import TextIO
 from typing import Union
 
-from .chain_map import ReadOnlyChainMap
 from .exceptions import ContextDepthError
 from .exceptions import Error
 from .exceptions import LocalNamespaceLimitError
@@ -37,135 +34,15 @@ from .exceptions import lookup_warning
 from .mode import Mode
 from .output import LimitedStringIO
 from .undefined import UNDEFINED
-from .undefined import DebugUndefined
-from .undefined import StrictDefaultUndefined
-from .undefined import StrictUndefined
 from .undefined import Undefined
 from .undefined import is_undefined
+from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
     from .builtin.tags.for_tag import ForLoop
     from .environment import Environment
     from .template import BoundTemplate
     from .token import Token
-
-# ruff: noqa: D102
-
-__all__ = (
-    "RenderContext",
-    "DebugUndefined",
-    "get_item",
-    "is_undefined",
-    "ReadOnlyChainMap",
-    "StrictDefaultUndefined",
-    "StrictUndefined",
-    "CaptureRenderContext",
-    "Undefined",
-)
-
-ContextPath = Union[str, Sequence[Any]]
-Namespace = Mapping[str, object]
-
-
-class BuiltIn(Mapping[str, object]):
-    """Mapping-like object for resolving built-in, dynamic objects."""
-
-    def __contains__(self, item: object) -> bool:
-        return item in ("now", "today")
-
-    def __getitem__(self, key: str) -> object:
-        if key == "now":
-            return datetime.datetime.now()
-        if key == "today":
-            return datetime.date.today()
-        raise KeyError(str(key))
-
-    def __len__(self) -> int:
-        return 2
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(["now", "today"])
-
-
-builtin = BuiltIn()
-
-
-def _liquid_size(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "size")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, collections.abc.Sized):
-            return len(obj)
-        raise
-
-
-def _liquid_first(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "first")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Mapping) and obj:
-            return list(itertools.islice(obj.items(), 1))[0]
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[0]
-        raise
-
-
-def _liquid_last(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "last")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[-1]
-        raise
-
-
-async def _liquid_size_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "size")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, collections.abc.Sized):
-            return len(obj)
-        raise
-
-
-async def _liquid_first_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "first")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Mapping) and obj:
-            return list(itertools.islice(obj.items(), 1))[0]
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[0]
-        raise
-
-
-async def _liquid_last_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "last")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[-1]
-        raise
 
 
 class RenderContext:
@@ -197,7 +74,7 @@ class RenderContext:
         self,
         template: BoundTemplate,
         *,
-        globals: Optional[Namespace] = None,  # noqa: A002
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[RenderContext] = None,
@@ -259,7 +136,7 @@ class RenderContext:
         self.local_namespace_size_carry = local_namespace_size_carry
 
     def assign(self, key: str, val: Any) -> None:
-        """Add `val` to the context with key `key`."""
+        """Add or replace the context variable named _key_ with the value _val_."""
         self.locals[key] = val
         if (
             self.env.local_namespace_limit
@@ -285,61 +162,83 @@ class RenderContext:
             + self.local_namespace_size_carry
         )
 
-    def get(
-        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    def get(  # noqa: PLR0911
+        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
     ) -> object:
-        """Return the value at path `path` if it is in scope, else default."""
-        if isinstance(path, str):
-            return self._resolve(path, token=token, default=default)
+        """Resolve and return _path_ in the current scope.
 
-        name, items = path[0], path[1:]
-        assert isinstance(name, str)
-        obj = self._resolve(name, token=token, default=default)
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
 
-        if items:
+        Returns _default_ is the path is not in scope.
+        """
+        it = iter(path)
+        root = next(it)
+        assert isinstance(root, str)
+
+        try:
+            obj = self.scope[root]
+        except (KeyError, TypeError, IndexError):
+            if default == UNDEFINED:
+                hint = f"{root!r} is undefined"
+                return self.env.undefined(root, hint=hint, token=token)
+            return default
+
+        for i, segment in enumerate(it):
             try:
-                return reduce(self.getitem, items, obj)
-            except (KeyError, IndexError, TypeError) as err:
-                if isinstance(err, KeyError):
-                    hint = (
-                        f"key error: {err}, {name}{''.join([f'[{i}]' for i in items])}"
-                    )
-                else:
-                    hint = f"{err}: {name}{''.join([f'[{i}]' for i in items])}"
-
+                obj = self.get_item(obj, segment)
+            except (KeyError, TypeError):
                 if default == UNDEFINED:
-                    return self.env.undefined(
-                        name=name,
-                        token=token,
-                        hint=hint,
-                    )
+                    hint = f"{_segments_str(path[: i + 2])} is undefined"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
+            except IndexError:
+                if default == UNDEFINED:
+                    hint = "index out of range"
+                    return self.env.undefined(root, hint=hint, token=token)
                 return default
 
         return obj
 
-    async def get_async(
-        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+    async def get_async(  # noqa: PLR0911
+        self,
+        path: list[object],
+        *,
+        token: Optional[Token],
+        default: object = UNDEFINED,
     ) -> object:
-        """Return the value at path `path` if it is in scope, else default."""
-        if isinstance(path, str):
-            return self._resolve(path, token=token, default=default)
+        """Resolve and return _path_ in the current scope.
 
-        name, items = path[0], path[1:]
-        assert isinstance(name, str)
-        obj = self._resolve(name, token=token, default=default)
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
 
-        if items:
-            _gi = self.getitem_async
+        Returns _default_ is the path is not in scope.
+        """
+        it = iter(path)
+        root = next(it)
+        assert isinstance(root, str)
+
+        try:
+            obj = self.scope[root]
+        except (KeyError, TypeError, IndexError):
+            if default == UNDEFINED:
+                hint = f"{root!r} is undefined"
+                return self.env.undefined(root, hint=hint, token=token)
+            return default
+
+        for i, segment in enumerate(it):
             try:
-                for item in items:
-                    obj = await _gi(obj, item)
-            except (KeyError, IndexError, TypeError) as err:
+                obj = await self.get_item_async(obj, segment)
+            except (KeyError, TypeError):
                 if default == UNDEFINED:
-                    return self.env.undefined(
-                        name=name,
-                        token=token,
-                        hint=f"{err}: {name}{''.join([f'[{i}]' for i in items])}",
-                    )
+                    hint = f"{_segments_str(path[: i + 2])} is undefined"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
+            except IndexError:
+                if default == UNDEFINED:
+                    hint = "index out of range"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
 
         return obj
 
@@ -437,7 +336,7 @@ class RenderContext:
 
     @contextmanager
     def extend(
-        self, namespace: Namespace, template: Optional[BoundTemplate] = None
+        self, namespace: Mapping[str, object], template: Optional[BoundTemplate] = None
     ) -> Iterator[RenderContext]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
@@ -461,7 +360,9 @@ class RenderContext:
             self.scope.pop()
 
     @contextmanager
-    def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[RenderContext]:
+    def loop(
+        self, namespace: Mapping[str, object], forloop: ForLoop
+    ) -> Iterator[RenderContext]:
         """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
@@ -493,7 +394,7 @@ class RenderContext:
 
     def copy(
         self,
-        namespace: Namespace,
+        namespace: Mapping[str, object],
         disabled_tags: Optional[list[str]] = None,
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
@@ -560,39 +461,74 @@ class RenderContext:
         carry = buf.size if isinstance(buf, LimitedStringIO) else 0
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
-    @classmethod
-    def getitem(cls, obj: Any, key: Any) -> Any:
-        """Item getter with special methods for arrays/lists and hashes/dicts."""
+    def get_item(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911
+        """An item getter used when resolving a Liquid path.
+
+        Override this to change the behavior of `.first`, `.last` and `.size`.
+        """
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            return _liquid_size(obj)
+            try:
+                return obj["size"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sized):
+                    return len(obj)
+                raise
         if key == "first":
-            return _liquid_first(obj)
+            try:
+                return obj["first"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Mapping) and obj:
+                    return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, Sequence):
+                    return obj[0]
+                raise
         if key == "last":
-            return _liquid_last(obj)
+            try:
+                return obj["last"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sequence):
+                    return obj[-1]
+                raise
 
-        return getitem(obj, key)
+        return obj[key]
 
-    @classmethod
-    async def getitem_async(cls, obj: Any, key: Any) -> object:
-        """Item getter with special methods for arrays/lists and hashes/dicts."""
+    async def get_item_async(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911
+        """An async item getter for resolving paths."""
 
         async def _get_item(obj: Any, key: Any) -> object:
             if hasattr(obj, "__getitem_async__"):
                 return await obj.__getitem_async__(key)
-            return getitem(obj, key)
+            return obj[key]
 
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            return await _liquid_size_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "size")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sized):
+                    return len(obj)
+                raise
         if key == "first":
-            return await _liquid_first_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "first")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Mapping) and obj:
+                    return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, Sequence):
+                    return obj[0]
+                raise
         if key == "last":
-            return await _liquid_last_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "last")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sequence):
+                    return obj[-1]
+                raise
 
         return await _get_item(obj, key)
 
@@ -615,7 +551,7 @@ class CaptureRenderContext(RenderContext):
         self,
         template: BoundTemplate,
         *,
-        globals: Optional[Namespace] = None,  # noqa: A002
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[CaptureRenderContext] = None,
@@ -644,19 +580,34 @@ class CaptureRenderContext(RenderContext):
         self.root_context = root_context
 
     def assign(self, key: str, val: Any) -> None:
+        """Add or replace the context variable named _key_ with the value _val_."""
         self.root_context.local_references.append(key)
         return super().assign(key, val)
 
     def get(
-        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
     ) -> object:
+        """Resolve and return _path_ in the current scope.
+
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
+
+        Returns _default_ is the path is not in scope.
+        """
         result = super().get(path, token=token, default=default)
         self._count_reference(path, result)
         return result
 
     async def get_async(
-        self, path: ContextPath, *, token: Optional[Token], default: object = UNDEFINED
+        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
     ) -> object:
+        """Resolve and return _path_ in the current scope.
+
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
+
+        Returns _default_ is the path is not in scope.
+        """
         result = await super().get_async(path, token=token, default=default)
         self._count_reference(path, result)
         return result
@@ -664,38 +615,39 @@ class CaptureRenderContext(RenderContext):
     def resolve(
         self, name: str, *, token: Optional[Token] = None, default: object = UNDEFINED
     ) -> Any:
+        """Resolve variable _name_ in the current scope."""
         result = super().resolve(name, token=token, default=default)
-        self._count_reference(name, result)
+        self._count_reference([name], result)
         return result
 
     def increment(self, name: str) -> int:
+        """Increment the named counter and return its value."""
         self.root_context.local_references.append(name)
         return super().increment(name)
 
     def decrement(self, name: str) -> int:
+        """Decrement the named counter and return its value."""
         self.root_context.local_references.append(name)
         return super().decrement(name)
 
     def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
+        """Return the filter function with given name."""
         self.root_context.filters.append(name)
         return super().filter(name, token)
 
-    def _count_reference(self, path: ContextPath, result: object) -> None:
-        if isinstance(path, str):
-            ref = path
-        else:
-            _path = []
-            for elem in path:
-                if isinstance(elem, int):
-                    _path.append(f"[{elem}]")
-                elif self.re_ident.match(elem):  # noqa: PLR5501
-                    if _path:
-                        _path.append(f".{elem}")
-                    else:
-                        _path.append(f"{elem}")
+    def _count_reference(self, path: list[object], result: object) -> None:
+        _path = []
+        for elem in path:
+            if isinstance(elem, int):
+                _path.append(f"[{elem}]")
+            elif isinstance(elem, str) and self.re_ident.match(elem):  # noqa: PLR5501
+                if _path:
+                    _path.append(f".{elem}")
                 else:
-                    _path.append(f'["{elem}"]')
-            ref = "".join(_path)
+                    _path.append(f"{elem}")
+            else:
+                _path.append(f'["{elem}"]')
+        ref = "".join(_path)
 
         if is_undefined(result):
             self.root_context.undefined_references.append(ref)
@@ -713,19 +665,21 @@ class FutureContext(RenderContext):
 
     """
 
-    @classmethod
-    def getitem(cls, obj: Any, key: Any) -> Any:
-        if isinstance(obj, str) and isinstance(key, int):
-            raise IndexError("string indices are not allowed")
-        return super().getitem(obj, key)
+    # TODO
+    # @classmethod
+    # def getitem(cls, obj: Any, key: Any) -> Any:
+    #     if isinstance(obj, str) and isinstance(key, int):
+    #         raise IndexError("string indices are not allowed")
+    #     return super().getitem(obj, key)
 
-    @classmethod
-    async def getitem_async(cls, obj: Any, key: Any) -> object:
-        if isinstance(obj, str) and isinstance(key, int):
-            raise IndexError("string indices are not allowed")
-        return await super().getitem_async(obj, key)
+    # @classmethod
+    # async def getitem_async(cls, obj: Any, key: Any) -> object:
+    #     if isinstance(obj, str) and isinstance(key, int):
+    #         raise IndexError("string indices are not allowed")
+    #     return await super().getitem_async(obj, key)
 
     def cycle(self, group_name: str, args: Sequence[object]) -> object:
+        """Return the next item in the cycle of the given arguments."""
         key = group_name if group_name else str(args)
         namespace: dict[str, int] = self.tag_namespace["cycles"]
         index = namespace.setdefault(key, 0)
@@ -746,14 +700,38 @@ class FutureVariableCaptureContext(CaptureRenderContext, FutureContext):
     """A context that captures information about template variables and filters."""
 
 
-def get_item(
-    obj: Sequence[Any],
-    *items: Any,
-    default: Optional[object] = UNDEFINED,
-) -> Any:
-    """Chained item getter."""
-    try:
-        itm: Any = reduce(RenderContext.getitem, items, obj)
-    except (KeyError, IndexError, TypeError):
-        itm = default
-    return itm
+class BuiltIn(Mapping[str, object]):
+    """Mapping-like object for resolving built-in, dynamic objects."""
+
+    def __contains__(self, item: object) -> bool:
+        return item in ("now", "today")
+
+    def __getitem__(self, key: str) -> object:
+        if key == "now":
+            return datetime.datetime.now()
+        if key == "today":
+            return datetime.date.today()
+        raise KeyError(str(key))
+
+    def __len__(self) -> int:
+        return 2
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(["now", "today"])
+
+
+builtin = BuiltIn()
+
+RE_PROPERTY = re.compile(r"[\u0080-\uFFFFa-zA-Z_][\u0080-\uFFFFa-zA-Z0-9_-]*")
+
+
+def _segments_str(segments: list[object]) -> str:
+    it = iter(segments)
+    buf = [str(next(it))]
+    for segment in it:
+        if isinstance(segment, str):
+            if RE_PROPERTY.fullmatch(segment):
+                buf.append(f".{segment}")
+            else:
+                buf.append(f"[{segment!r}]")
+    return "".join(buf)

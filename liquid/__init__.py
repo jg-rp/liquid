@@ -11,12 +11,12 @@ from .token import Token
 from .expression import Expression
 
 from .context import RenderContext
-from .context import DebugUndefined
-from .context import is_undefined
 from .context import FutureContext
-from .context import StrictDefaultUndefined
-from .context import StrictUndefined
-from .context import Undefined
+from .undefined import DebugUndefined
+from .undefined import is_undefined
+from .undefined import StrictDefaultUndefined
+from .undefined import StrictUndefined
+from .undefined import Undefined
 
 from .environment import Environment
 from .environment import Template
