@@ -8,6 +8,7 @@ from functools import partial
 from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Iterator
+from typing import Optional
 from typing import Pattern
 from typing import TextIO
 
@@ -38,7 +39,7 @@ class LiquidNode(Node):
         "block",
     )
 
-    def __init__(self, token: Token, liquid_token: Token, block: BlockNode):
+    def __init__(self, token: Token, liquid_token: Optional[Token], block: BlockNode):
         super().__init__(token)
         self.liquid_token = liquid_token
         self.block = block
@@ -47,7 +48,8 @@ class LiquidNode(Node):
     def __str__(self) -> str:
         # NOTE: We're using a string representation of the token, not the node.
         # Which might cause issues later.
-        return f"{{% liquid {self.liquid_token.value} %}}"
+        expr = self.liquid_token.value if self.liquid_token else ""
+        return f"{{% liquid {expr} %}}"
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
@@ -74,6 +76,7 @@ class LiquidTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
+        token_: Optional[Token] = None
 
         if stream.current.kind == TOKEN_EOF:
             # Empty liquid tag. Empty block.

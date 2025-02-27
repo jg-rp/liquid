@@ -18,7 +18,6 @@ from liquid.builtin.expressions import Nil
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
 from liquid.exceptions import FilterItemTypeError
-from liquid.filter import array_filter
 from liquid.filter import decimal_arg
 from liquid.filter import liquid_filter
 from liquid.filter import sequence_filter
@@ -116,13 +115,13 @@ def map_(sequence: ArrayT, key: object) -> list[object]:
         raise FilterError("can't map sequence", token=None) from err
 
 
-@array_filter
+@sequence_filter
 def reverse(array: ArrayT) -> list[object]:
     """Reverses the order of the items in an array."""
     return list(reversed(array))
 
 
-@array_filter
+@sequence_filter
 def sort(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ in ascending order.
 
@@ -139,7 +138,7 @@ def sort(sequence: ArrayT, key: object = None) -> list[object]:
         raise FilterError("can't sort sequence", token=None) from err
 
 
-@array_filter
+@sequence_filter
 def sort_natural(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ in ascending order, with case-insensitive comparison.
 
@@ -163,12 +162,10 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> list[object]:
 
 
 @sequence_filter
-def reject(
-    sequence: ArrayT, attr: object, value: object = None
-) -> Union[list[object], None]:
+def reject(sequence: ArrayT, attr: object, value: object = None) -> list[object]:
     """Return a list of items from _sequence_ where _attr_ is not equal to _value_."""
     if attr is None or is_undefined(attr):
-        return None
+        return []
 
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) != value]

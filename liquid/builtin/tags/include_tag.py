@@ -71,7 +71,7 @@ class IncludeNode(Node):
         with context.extend(namespace, template=template):
             # Bind a variable to the included template.
             if self.var is not None:
-                val = self.var
+                val = self.var.evaluate(context)
                 key = self.alias or template.name.split(".")[0]
 
                 # If the variable is array-like, render the template once for each
@@ -114,7 +114,7 @@ class IncludeNode(Node):
 
         with context.extend(namespace, template=template):
             if self.var is not None:
-                val = self.var
+                val = await self.var.evaluate_async(context)
                 key = self.alias or template.name.split(".")[0]
 
                 if isinstance(val, (tuple, list, IterableDrop)):

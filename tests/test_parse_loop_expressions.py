@@ -11,7 +11,6 @@ from liquid import Token
 from liquid import TokenStream
 from liquid.builtin.expressions import LoopExpression
 from liquid.builtin.expressions import tokenize
-from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_EXPRESSION
 
 

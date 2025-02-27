@@ -34,7 +34,7 @@ class IfChangedNode(Node):
     def __init__(self, token: Token, block: BlockNode):
         super().__init__(token)
         self.block = block
-        # TODO: self.blank
+        self.blank = block.blank
 
     def __str__(self) -> str:
         return f"{{% ifchanged %}}{{ {self.block} }}{{% endifchanged %}}"

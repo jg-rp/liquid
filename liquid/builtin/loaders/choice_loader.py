@@ -35,7 +35,7 @@ class ChoiceLoader(BaseLoader):
             except TemplateNotFound:
                 pass
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     async def get_source_async(
         self,
@@ -49,7 +49,7 @@ class ChoiceLoader(BaseLoader):
             except TemplateNotFound:
                 pass
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     def get_source_with_args(
         self,
@@ -65,7 +65,7 @@ class ChoiceLoader(BaseLoader):
                 pass
 
         # TODO: include arguments in TemplateNotFound exception.
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     async def get_source_with_args_async(
         self,
@@ -82,7 +82,7 @@ class ChoiceLoader(BaseLoader):
             except TemplateNotFound:
                 pass
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     def get_source_with_context(
         self, context: RenderContext, template_name: str, **kwargs: str
@@ -94,7 +94,7 @@ class ChoiceLoader(BaseLoader):
             except TemplateNotFound:
                 pass
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     async def get_source_with_context_async(
         self, context: RenderContext, template_name: str, **kwargs: str
@@ -108,7 +108,7 @@ class ChoiceLoader(BaseLoader):
             except TemplateNotFound:
                 pass
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
 
 class CachingChoiceLoader(CachingLoaderMixin, ChoiceLoader):

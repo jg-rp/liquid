@@ -59,7 +59,7 @@ class PackageLoader(BaseLoader):
         # Don't build a path that escapes package/package_path.
         # Does ".." appear in template_name?
         if os.path.pardir in template_path.parts:
-            raise TemplateNotFound(template_name, token=None)
+            raise TemplateNotFound(template_name)
 
         # Add suffix self.ext if template name does not have a suffix.
         if not template_path.suffix:
@@ -71,7 +71,7 @@ class PackageLoader(BaseLoader):
                 # MyPy seems to think source_path has `Any` type :(
                 return source_path  # type: ignore
 
-        raise TemplateNotFound(template_name, token=None)
+        raise TemplateNotFound(template_name)
 
     def get_source(  # noqa: D102
         self,
