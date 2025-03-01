@@ -1,19 +1,29 @@
 """Parse tree node and tag definition for the built-in "capture" tag."""
 
+from __future__ import annotations
+
 import sys
-from io import StringIO
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
 from liquid import Markup
-from liquid import ast
+from liquid.ast import BlockNode
+from liquid.ast import Node
 from liquid.builtin.expressions import parse_identifier
-from liquid.context import RenderContext
 from liquid.parse import get_parser
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
+
+if TYPE_CHECKING:
+    from io import StringIO
+
+    from liquid.builtin.expressions import Identifier
+    from liquid.context import RenderContext
+    from liquid.stream import TokenStream
+
 
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
@@ -21,12 +31,12 @@ TAG_ENDCAPTURE = sys.intern("endcapture")
 ENDCAPTUREBLOCK = frozenset((TAG_ENDCAPTURE, TOKEN_EOF))
 
 
-class CaptureNode(ast.Node):
+class CaptureNode(Node):
     """Parse tree node for the built-in "capture" tag."""
 
     __slots__ = ("name", "block")
 
-    def __init__(self, token: Token, name: str, block: ast.BlockNode):
+    def __init__(self, token: Token, name: Identifier, block: BlockNode):
         super().__init__(token)
         self.name = name
         self.block = block
@@ -57,15 +67,18 @@ class CaptureNode(ast.Node):
         self._assign(context, buf)
         return False
 
-    def children(self) -> list[ast.ChildNode]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        return [
-            ast.ChildNode(
-                linenum=self.token.start_index,
-                node=self.block,
-                template_scope=[self.name],
-            )
-        ]
+        yield self.block
+
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        yield self.name
 
 
 class CaptureTag(Tag):

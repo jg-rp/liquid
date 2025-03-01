@@ -1,20 +1,27 @@
 """Base class for all template nodes."""
 
+from __future__ import annotations
+
 from abc import ABC
 from abc import abstractmethod
+from enum import Enum
+from enum import auto
+from typing import TYPE_CHECKING
 from typing import Collection
-from typing import Literal
-from typing import NamedTuple
-from typing import Optional
+from typing import Iterable
 from typing import TextIO
 
-from .context import RenderContext
 from .exceptions import DisabledTagError
-from .expression import Expression
 from .output import NullIO
 from .token import TOKEN_ILLEGAL
 from .token import TOKEN_TAG
 from .token import Token
+
+if TYPE_CHECKING:
+    from .builtin.expressions import Identifier
+    from .context import RenderContext
+    from .expression import Expression
+
 
 IllegalToken = Token(TOKEN_ILLEGAL, "", -1, "")  # XXX
 
@@ -74,43 +81,66 @@ class Node(ABC):
         """An async version of `liquid.ast.Node.render_to_output`."""
         return self.render_to_output(context, buffer)
 
-    def children(self) -> list["ChildNode"]:
-        """Return a list of child nodes and/or expressions associated with this node."""
-        raise NotImplementedError(f"{self.__class__.__name__}.children")
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        return []
+
+    async def children_async(
+        self,
+        static_context: RenderContext,
+        *,
+        include_partials: bool = True,
+    ) -> Iterable[Node]:
+        """An async version of `children()`."""
+        return self.children(static_context, include_partials=include_partials)
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        return []
+
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        return []
+
+    def block_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the node's block scope."""
+        return []
+
+    def partial_scope(self) -> Partial | None:
+        """Return information about a partial template loaded by this node."""
+        return None
 
 
-# TODO: rewrite
-class ChildNode(NamedTuple):
-    """An AST node and expression pair with optional scope and load data.
+class PartialScope(Enum):
+    """The kind of scope a partial template should have when loaded."""
+
+    SHARED = auto()
+    ISOLATED = auto()
+    INHERITED = auto()
+
+
+class Partial:
+    """Partial template meta data.
 
     Args:
-        linenum: The line number of the child's first token in the template source text.
-        expression: An `liquid.expression.Expression`. If not `None`, this expression is
-            expected to be related to the given `liquid.ast.Node`.
-        node: A `liquid.ast.Node`. Typically a `BlockNode` or `ConditionalBlockNode`.
-        template_scope: A list of names the parent node adds to the template "local"
-            scope. For example, the built-in `assign`, `capture`, `increment` and
-            `decrement` tags all add names to the template scope. This helps us
-            identify, through static analysis, names that are assumed to be "global".
-        block_scope: A list of names available to the given child node. For example,
-            the `for` tag adds the name "forloop" for the duration of its block.
-        load_mode: If not `None`, indicates that the given expression should be used to
-            load a partial template. In "render" mode, the partial will be analyzed in
-            an isolated namespace, without access to the parent's template local scope.
-            In "include" mode, the partial will have access to the parents template
-            local scope and the parent's scope can be updated by the partial template
-            too.
-        load_context: Meta data a template `Loader` might need to find the source
-            of a partial template.
+        name: An expression resolving to the name associated with the partial template.
+        scope: The kind of scope the partial template should have when loaded.
+        in_scope: Names that will be added to the partial template scope.
     """
 
-    linenum: int
-    expression: Optional[Expression] = None
-    node: Optional[Node] = None
-    template_scope: Optional[list[str]] = None
-    block_scope: Optional[list[str]] = None
-    load_mode: Optional[Literal["render", "include", "extends"]] = None
-    load_context: Optional[dict[str, str]] = None
+    __slots__ = ("name", "scope", "in_scope")
+
+    def __init__(
+        self, name: Expression, scope: PartialScope, in_scope: Iterable[Identifier]
+    ) -> None:
+        self.name = name
+        self.scope = scope
+        self.in_scope = in_scope
 
 
 class IllegalNode(Node):
@@ -165,35 +195,34 @@ class BlockNode(Node):
             return 0
         return sum([await node.render_async(context, buffer) for node in self.nodes])
 
-    def children(self) -> list["ChildNode"]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        return [
-            ChildNode(
-                linenum=self.token.start_index,
-                node=stmt,
-            )
-            for stmt in self.nodes
-        ]
+        return self.nodes
 
 
 class ConditionalBlockNode(Node):
     """A node containing a sequence of statements and a conditional expression."""
 
-    __slots__ = ("condition", "block")
+    __slots__ = ("expression", "block")
 
-    def __init__(self, token: Token, condition: Expression, block: BlockNode):
+    def __init__(self, token: Token, expression: Expression, block: BlockNode):
         super().__init__(token)
-        self.condition = condition
+        self.expression = expression
         self.block = block
         self.blank = block.blank
 
     def __str__(self) -> str:
         # TODO: WC
-        return f"{{% elsif {self.condition} %}}{self.block}"
+        return f"{{% elsif {self.expression} %}}{self.block}"
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
-        if self.condition.evaluate(context):
+        if self.expression.evaluate(context):
             return self.block.render(context, buffer)
         return 0
 
@@ -201,16 +230,19 @@ class ConditionalBlockNode(Node):
         self, context: RenderContext, buffer: TextIO
     ) -> int:
         """Render the node to the output buffer."""
-        if await self.condition.evaluate_async(context):
+        if await self.expression.evaluate_async(context):
             return await self.block.render_async(context, buffer)
         return 0
 
-    def children(self) -> list["ChildNode"]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        return [
-            ChildNode(
-                linenum=self.token.start_index,
-                node=self.block,
-                expression=self.condition,
-            )
-        ]
+        yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression

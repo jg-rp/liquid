@@ -1,19 +1,23 @@
 """The built-in _comment_ tag."""
 
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
 from typing import Optional
 from typing import TextIO
 
 from liquid import ast
-from liquid.context import RenderContext
 from liquid.parse import eat_block
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
-# ruff: noqa: D102
+if TYPE_CHECKING:
+    from liquid.context import RenderContext
+    from liquid.stream import TokenStream
+
 
 TAG_COMMENT = sys.intern("comment")
 TAG_ENDCOMMENT = sys.intern("endcomment")
@@ -34,10 +38,8 @@ class CommentNode(ast.Node):
         return f"{{% comment %}}{self.text}{{% endcomment %}}"
 
     def render_to_output(self, _: RenderContext, __: TextIO) -> int:
+        """Render the node to the output buffer."""
         return 0
-
-    def children(self) -> list[ast.ChildNode]:
-        return []
 
 
 class CommentTag(Tag):
@@ -52,6 +54,7 @@ class CommentTag(Tag):
     node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:
+        """Parse tokens from _stream_ into an AST node."""
         node = self.node_class(stream.eat(TOKEN_TAG))
         eat_block(stream, end=END_COMMENTBLOCK)
         return node
@@ -68,6 +71,7 @@ class CommentTextTag(CommentTag):
     end = TAG_ENDCOMMENT
 
     def parse(self, stream: TokenStream) -> CommentNode:
+        """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
 
         text = []

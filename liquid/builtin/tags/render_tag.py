@@ -1,24 +1,27 @@
 """The built-in _render_ tag."""
 
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.ast import Partial
+from liquid.ast import PartialScope
 from liquid.builtin.drops import IterableDrop
+from liquid.builtin.expressions import Identifier
 from liquid.builtin.expressions import KeywordArgument
+from liquid.builtin.expressions import Literal
 from liquid.builtin.expressions import Path
 from liquid.builtin.expressions import StringLiteral
 from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
-from liquid.context import ReadOnlyChainMap
-from liquid.context import RenderContext
 from liquid.exceptions import TemplateNotFound
-from liquid.expression import Expression
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_FOR
@@ -27,6 +30,13 @@ from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_WITH
 from liquid.token import TOKEN_WORD
 from liquid.token import Token
+from liquid.utils import ReadOnlyChainMap
+
+if TYPE_CHECKING:
+    from liquid.context import RenderContext
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
+
 
 TAG_RENDER = sys.intern("render")
 
@@ -43,7 +53,7 @@ class RenderNode(Node):
         name: StringLiteral,
         var: Optional[Expression] = None,
         loop: bool = False,
-        alias: Optional[str] = None,
+        alias: Optional[Identifier] = None,
         args: Optional[list[KeywordArgument]] = None,
     ):
         super().__init__(token)
@@ -201,26 +211,63 @@ class RenderNode(Node):
 
         return True
 
-    def children(self) -> list[ChildNode]:
+    def children(
+        self, static_context: RenderContext, *, include_partials: bool = True
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        block_scope: list[str] = [arg.name for arg in self.args]
-        _children = [
-            ChildNode(
-                linenum=self.token.start_index,
-                node=None,
-                expression=self.name,
-                block_scope=block_scope,
-                load_mode="render",
-                load_context={"tag": "render"},
-            )
-        ]
-        # TODO: if self.var:
+        if include_partials:
+            name = self.name.evaluate(static_context)
+            try:
+                template = static_context.env.get_template(
+                    str(name), context=static_context, tag=self.tag
+                )
+                yield from template.nodes
+            except TemplateNotFound as err:
+                err.token = self.name.token
+                err.template_name = static_context.template.full_name()
+                raise
 
-        for arg in self.args:
-            _children.append(
-                ChildNode(linenum=self.token.start_index, expression=arg.value)
-            )
-        return _children
+    async def children_async(
+        self, static_context: RenderContext, *, include_partials: bool = True
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        if include_partials:
+            name = await self.name.evaluate_async(static_context)
+            try:
+                template = await static_context.env.get_template_async(
+                    str(name), context=static_context, tag=self.tag
+                )
+                return template.nodes
+            except TemplateNotFound as err:
+                err.token = self.name.token
+                err.template_name = static_context.template.full_name()
+                raise
+        return []
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.name
+        if self.var:
+            yield self.var
+        yield from (arg.value for arg in self.args)
+
+    def partial_scope(self) -> Partial | None:
+        """Return information about a partial template loaded by this node."""
+        scope: list[Identifier] = [
+            Identifier(arg.name, token=arg.token) for arg in self.args
+        ]
+
+        if self.var:
+            if self.alias:
+                scope.append(self.alias)
+            elif isinstance(self.name, Literal):
+                scope.append(
+                    Identifier(
+                        str(self.name.value).split(".", 1)[0], token=self.name.token
+                    )
+                )
+
+        return Partial(name=self.name, scope=PartialScope.ISOLATED, in_scope=scope)
 
 
 BIND_TAGS = frozenset((TOKEN_WITH, TOKEN_FOR))
@@ -244,7 +291,7 @@ class RenderTag(Tag):
         name = parse_primitive(self.env, tokens)
         assert isinstance(name, StringLiteral)
 
-        alias: Optional[str] = None
+        alias: Optional[Identifier] = None
         var: Optional[Path] = None
         loop: bool = False
 
@@ -260,7 +307,7 @@ class RenderTag(Tag):
             if tokens.current.kind == TOKEN_AS:
                 next(tokens)  # Eat 'as'
                 tokens.expect(TOKEN_WORD)
-                alias = str(parse_identifier(self.env, tokens))
+                alias = parse_identifier(self.env, tokens)
 
         # Zero or more keyword arguments
         args = KeywordArgument.parse(self.env, tokens)

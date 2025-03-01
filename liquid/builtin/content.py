@@ -2,7 +2,6 @@
 
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.context import RenderContext
 from liquid.stream import TokenStream
@@ -27,10 +26,6 @@ class ContentNode(Node):
     def render_to_output(self, _: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
         return buffer.write(self.text)
-
-    def children(self) -> list[ChildNode]:
-        """Return this node's children."""
-        return []
 
 
 class Literal(Tag):

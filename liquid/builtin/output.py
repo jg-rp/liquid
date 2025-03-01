@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.expressions import FilteredExpression
 from liquid.builtin.expressions import tokenize
@@ -49,9 +49,9 @@ class OutputNode(Node):
             )
         )
 
-    def children(self) -> list[ChildNode]:
+    def expressions(self) -> Iterable[Expression]:
         """Return this node's children."""
-        return [ChildNode(linenum=self.token.start_index, expression=self.expression)]
+        yield self.expression
 
 
 class Output(Tag):

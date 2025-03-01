@@ -5,8 +5,10 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
+from typing import Iterable
 
 if TYPE_CHECKING:
+    from .builtin.expressions import Identifier
     from .context import RenderContext
     from .token import Token
 
@@ -27,6 +29,13 @@ class Expression(ABC):
         """Evaluate this expression asynchronously."""
         return self.evaluate(context)
 
-    def children(self) -> list[Expression]:
-        """Return a list of expressions that are children of this expression."""
-        raise NotImplementedError(f"{self.__class__.__name__}.children")
+    @abstractmethod
+    def children(self) -> Iterable[Expression]:
+        """Return this expression's child expressions."""
+
+    def scope(self) -> Iterable[Identifier]:
+        """Return variables this expression adds the scope of any child expressions.
+
+        Used by lambda expressions only.
+        """
+        return []

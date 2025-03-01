@@ -12,11 +12,11 @@ from typing import Iterator
 from typing import Optional
 from typing import Union
 
-from liquid.context import Undefined
-from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterItemTypeError
-from liquid.exceptions import FilterValueError
-from liquid.limits import to_int
+from .exceptions import FilterArgumentError
+from .exceptions import FilterItemTypeError
+from .exceptions import FilterValueError
+from .limits import to_int
+from .undefined import Undefined
 
 if TYPE_CHECKING:
     FilterT = Callable[..., Any]

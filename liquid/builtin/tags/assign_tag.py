@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.expressions import FilteredExpression
 from liquid.builtin.expressions import Identifier
@@ -49,15 +49,13 @@ class AssignNode(Node):
         context.assign(self.name, await self.expression.evaluate_async(context))
         return 0
 
-    def children(self) -> list[ChildNode]:
-        """Return this node's children."""
-        return [
-            ChildNode(
-                linenum=self.token.start_index,
-                expression=self.expression,
-                template_scope=[self.name],
-            )
-        ]
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression
+
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        yield self.name
 
 
 class AssignTag(Tag):

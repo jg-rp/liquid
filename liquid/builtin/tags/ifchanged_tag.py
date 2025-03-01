@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
 from liquid.ast import BlockNode
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.parse import get_parser
 from liquid.tag import Tag
@@ -65,9 +65,14 @@ class IfChangedNode(Node):
             return buffer.write(val)
         return 0
 
-    def children(self) -> list[ChildNode]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        return self.block.children()
+        yield self.block
 
 
 class IfChangedTag(Tag):

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
 from liquid.ast import BlockNode
-from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.builtin.expressions import Identifier
 from liquid.builtin.expressions import KeywordArgument
 from liquid.parse import get_parser
 from liquid.tag import Tag
@@ -46,18 +47,18 @@ class WithNode(Node):
         with context.extend(namespace):
             return await self.block.render_async(context, buffer)
 
-    def children(self) -> list[ChildNode]:
-        return [
-            ChildNode(
-                linenum=self.token.start_index,
-                node=self.block,
-                block_scope=[arg.name for arg in self.args],
-            ),
-            *[
-                ChildNode(linenum=self.token.start_index, expression=arg.value)
-                for arg in self.args
-            ],
-        ]
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield self.block
+
+    def block_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the node's block scope."""
+        yield from (Identifier(p.name, token=p.token) for p in self.args)
 
 
 class WithTag(Tag):

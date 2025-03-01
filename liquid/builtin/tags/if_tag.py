@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
 from liquid.ast import BlockNode
-from liquid.ast import ChildNode
 from liquid.ast import ConditionalBlockNode
 from liquid.ast import IllegalNode
 from liquid.ast import Node
@@ -86,7 +86,7 @@ class IfNode(Node):
             return self.consequence.render(context, buffer)
 
         for alternative in self.alternatives:
-            if alternative.condition.evaluate(context):
+            if alternative.expression.evaluate(context):
                 return alternative.block.render(context, buffer)
 
         if self.default:
@@ -102,7 +102,7 @@ class IfNode(Node):
             return await self.consequence.render_async(context, buffer)
 
         for alternative in self.alternatives:
-            if await alternative.condition.evaluate_async(context):
+            if await alternative.expression.evaluate_async(context):
                 return await alternative.render_async(context, buffer)
 
         if self.default:
@@ -110,35 +110,21 @@ class IfNode(Node):
 
         return 0
 
-    def children(self) -> list[ChildNode]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        _children = [
-            ChildNode(
-                linenum=self.token.start_index,
-                node=self.consequence,
-                expression=self.condition,
-            )
-        ]
-        _children.extend(
-            [
-                ChildNode(
-                    linenum=alt.token.start_index,
-                    node=alt.block,
-                    expression=alt.condition,
-                )
-                for alt in self.alternatives
-            ]
-        )
+        yield self.consequence
+        yield from self.alternatives
         if self.default:
-            _children.append(
-                ChildNode(
-                    linenum=self.default.token.start_index,
-                    node=self.default,
-                    expression=None,
-                )
-            )
+            yield self.default
 
-        return _children
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.condition
 
 
 class IfTag(Tag):
@@ -176,7 +162,7 @@ class IfTag(Tag):
             alt_block = parse_block(stream, ENDELSIFBLOCK)
 
             alternatives.append(
-                ConditionalBlockNode(alt_tok, condition=expr, block=alt_block)
+                ConditionalBlockNode(alt_tok, expression=expr, block=alt_block)
             )
 
         default: Optional[BlockNode] = None

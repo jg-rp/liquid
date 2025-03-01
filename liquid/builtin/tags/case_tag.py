@@ -8,7 +8,6 @@ from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.expressions.logical import _eq
@@ -29,8 +28,6 @@ if TYPE_CHECKING:
     from liquid.ast import BlockNode
     from liquid.context import RenderContext
 
-
-# ruff: noqa: D102
 
 TAG_CASE = sys.intern("case")
 TAG_ENDCASE = sys.intern("endcase")
@@ -76,6 +73,7 @@ class CaseNode(Node):
         )
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
         count = 0
         for when in self.whens:
             count += when.render(context, buffer)
@@ -88,6 +86,7 @@ class CaseNode(Node):
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
     ) -> int:
+        """Render the node to the output buffer."""
         count = 0
         for when in self.whens:
             count += await when.render_async(context, buffer)
@@ -97,22 +96,21 @@ class CaseNode(Node):
 
         return count
 
-    def children(self) -> list[ChildNode]:
-        _children = [
-            ChildNode(
-                linenum=alt.token.start_index,
-                node=alt,
-            )
-            for alt in self.whens
-        ]
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield from self.whens
+
         if self.default:
-            _children.append(
-                ChildNode(
-                    linenum=self.default.token.start_index,
-                    node=self.default,
-                )
-            )
-        return _children
+            yield self.default
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression
 
 
 class CaseTag(Tag):
@@ -127,6 +125,7 @@ class CaseTag(Tag):
         self.parser = get_parser(self.env)
 
     def parse(self, stream: TokenStream) -> Node:
+        """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         tokens = stream.into_inner()
         left = parse_primitive(self.env, tokens)

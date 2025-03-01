@@ -1,24 +1,32 @@
 """The built-in _tablerow_ tag."""
 
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
 from typing import Any
+from typing import Iterable
 from typing import Iterator
 from typing import Mapping
 from typing import TextIO
 
 from liquid.ast import BlockNode
-from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.builtin.expressions import Identifier
 from liquid.builtin.expressions import LoopExpression
-from liquid.context import RenderContext
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
 from liquid.limits import to_int
 from liquid.parse import get_parser
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
+
+if TYPE_CHECKING:
+    from liquid.context import RenderContext
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
+
 
 TAG_TABLEROW = sys.intern("tablerow")
 TAG_ENDTABLEROW = sys.intern("endtablerow")
@@ -272,16 +280,23 @@ class TablerowNode(Node):
         buffer.write("</tr>\n")
         return True
 
-    def children(self) -> list[ChildNode]:
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
         """Return this node's children."""
-        return [
-            ChildNode(
-                linenum=self.block.token.start_index,
-                node=self.block,
-                expression=self.expression,
-                block_scope=["tablerowloop", self.expression.identifier],
-            )
-        ]
+        yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression
+
+    def block_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the node's block scope."""
+        yield Identifier(self.expression.identifier, token=self.expression.token)
+        yield Identifier("tablerowloop", token=self.token)
 
 
 class TablerowTag(Tag):

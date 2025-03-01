@@ -1,15 +1,22 @@
 """The built-in _decrement_ tag."""
 
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
 from liquid import ast
 from liquid.builtin.expressions import parse_identifier
-from liquid.context import RenderContext
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
+
+if TYPE_CHECKING:
+    from liquid.builtin.expressions import Identifier
+    from liquid.context import RenderContext
+    from liquid.stream import TokenStream
 
 TAG_DECREMENT = sys.intern("decrement")
 
@@ -19,7 +26,7 @@ class DecrementNode(ast.Node):
 
     __slots__ = ("name",)
 
-    def __init__(self, token: Token, name: str):
+    def __init__(self, token: Token, name: Identifier):
         super().__init__(token)
         self.name = name
         self.blank = False
@@ -31,14 +38,9 @@ class DecrementNode(ast.Node):
         """Render the node to the output buffer."""
         return buffer.write(str(context.decrement(self.name)))
 
-    def children(self) -> list[ast.ChildNode]:
-        """Return this node's expressions."""
-        return [
-            ast.ChildNode(
-                linenum=self.token.start_index,
-                template_scope=[self.name],
-            )
-        ]
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        yield self.name
 
 
 class DecrementTag(Tag):

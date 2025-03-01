@@ -13,7 +13,6 @@ from typing import Pattern
 from typing import TextIO
 
 from liquid.ast import BlockNode
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
 from liquid.parse import get_parser
@@ -61,9 +60,14 @@ class LiquidNode(Node):
         """Render the node to the output buffer."""
         return await self.block.render_async(context, buffer)
 
-    def children(self) -> list[ChildNode]:
-        """Return this node's expressions."""
-        return self.block.children()
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield self.block
 
 
 class LiquidTag(Tag):

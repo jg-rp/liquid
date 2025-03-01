@@ -113,7 +113,7 @@ class RenderContext:
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
         # use "include" tags.
-        self.disabled_tags = disabled_tags or []
+        self.disabled_tags: list[str] = disabled_tags or []
 
         # Indicates if HTML auto-escaping is enabled.
         self.autoescape = self.env.autoescape

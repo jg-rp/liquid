@@ -5,10 +5,10 @@ import math
 from typing import Optional
 from typing import Union
 
-from liquid.context import is_undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.filter import math_filter
 from liquid.filter import num_arg
+from liquid.undefined import is_undefined
 
 # TODO: Version 2 - Either handle all filter function argument type
 # conversions in a decorator or all in the function itself. Having these type

@@ -1,22 +1,28 @@
 """The built-in _cycle_ tag."""
 
+from __future__ import annotations
+
 import sys
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
 from liquid.builtin.expressions import PositionalArgument
 from liquid.builtin.expressions import parse_primitive
-from liquid.context import RenderContext
-from liquid.expression import Expression
-from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
 from liquid.token import TOKEN_COLON
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 from liquid.undefined import is_undefined
+
+if TYPE_CHECKING:
+    from liquid.context import RenderContext
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
+
 
 TAG_CYCLE = sys.intern("cycle")
 
@@ -71,16 +77,11 @@ class CycleNode(Node):
             )
         )
 
-    def children(self) -> list[ChildNode]:
+    def expressions(self) -> Iterable[Expression]:
         """Return this node's expressions."""
-        _children: list[ChildNode] = []
         if self.group:
-            _children.append(
-                ChildNode(linenum=self.token.start_index, expression=self.group)
-            )
-        for arg in self.args:
-            _children.append(ChildNode(linenum=self.token.start_index, expression=arg))
-        return _children
+            yield self.group
+        yield from self.args
 
 
 class CycleTag(Tag):
