@@ -20,6 +20,8 @@ from .exceptions import Error
 from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
 from .exceptions import lookup_warning
+from .extra import BlockTag
+from .extra import ExtendsTag
 from .lex import get_lexer
 from .mode import Mode
 from .parse import get_parser
@@ -250,6 +252,9 @@ class Environment:
     def setup_tags_and_filters(self) -> None:
         """Add default tags and filters to this environment."""
         builtin.register(self)
+        # TODO:
+        self.add_tag(ExtendsTag)
+        self.add_tag(BlockTag)
 
     def parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.

@@ -387,6 +387,35 @@ def parse_identifier(
     return Identifier(word, token=expr.token)
 
 
+def parse_name(env: Environment, tokens: TokenStream) -> Identifier:
+    """Parse a quoted or unquoted word."""
+    expr = parse_primitive(env, tokens)
+
+    if isinstance(expr, StringLiteral):
+        return Identifier(expr.value, token=expr.token)
+
+    if not isinstance(expr, Path):
+        raise LiquidSyntaxError(
+            f"expected a name, found {expr.__class__.__name__}", token=expr.token
+        )
+
+    if len(expr.path) != 1:
+        raise LiquidSyntaxError(
+            f"expected a name, found a path with multiple segments, {expr.path!r}",
+            token=expr.token,
+        )
+
+    word = expr.path[0]
+
+    if not isinstance(word, str):
+        raise LiquidSyntaxError(
+            f"expected a name, found {word.__class__.__name__}",
+            token=expr.token,
+        )
+
+    return Identifier(word, token=expr.token)
+
+
 def parse_string_or_path(
     env: Environment, tokens: TokenStream
 ) -> Union[Path, StringLiteral]:

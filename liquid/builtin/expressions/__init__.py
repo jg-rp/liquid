@@ -15,6 +15,7 @@ from .primitive import StringLiteral
 from .primitive import is_empty
 from .primitive import parse_identifier
 from .primitive import parse_primitive
+from .primitive import parse_name
 from .primitive import parse_string_or_path
 from .tokenize import tokenize
 
@@ -38,4 +39,5 @@ __all__ = (
     "StringLiteral",
     "TernaryFilteredExpression",
     "tokenize",
+    "parse_name",
 )

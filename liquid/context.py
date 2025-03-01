@@ -7,6 +7,7 @@ import itertools
 import re
 import sys
 import warnings
+from collections import defaultdict
 from contextlib import contextmanager
 from functools import partial
 from functools import reduce
@@ -105,6 +106,7 @@ class RenderContext:
             "cycles": {},
             "ifchanged": "",
             "stopindex": {},
+            "extends": defaultdict(list),
         }
 
         # As stack of forloop objects. Used for populating forloop.parentloop.

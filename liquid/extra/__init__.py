@@ -7,18 +7,17 @@ from .filters import index
 from .filters import script_tag
 from .filters import sort_numeric
 from .filters import stylesheet_tag
+from .tags import BlockTag
+from .tags import ExtendsTag
 from .tags import WithTag
 
 if TYPE_CHECKING:
     from liquid import Environment
 
 __all__ = (
-    "add_extended_inline_expression_tags",
     "add_filters",
-    "add_inline_expression_tags",
     "add_macro_tags",
     "add_tags_and_filters",
-    "add_tags",
     "BlockTag",
     "CallTag",
     "ExtendsTag",
