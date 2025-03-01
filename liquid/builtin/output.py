@@ -12,7 +12,8 @@ from liquid.builtin.expressions import tokenize
 from liquid.stream import TokenStream
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
-from liquid.token import TOKEN_OUTOUT
+from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_OUTPUT
 from liquid.token import Token
 
 if TYPE_CHECKING:
@@ -57,16 +58,17 @@ class OutputNode(Node):
 class Output(Tag):
     """Pseudo "tag" to register output statements with the environment."""
 
-    name = TOKEN_OUTOUT
+    name = TOKEN_OUTPUT
     block = False
     node_class = OutputNode
 
     def parse(self, stream: TokenStream) -> OutputNode:
         """Parse tokens from _stream_ into an AST node."""
-        token = stream.expect(TOKEN_OUTOUT)
+        token = stream.eat(TOKEN_OUTPUT)
+        expr_token = stream.expect(TOKEN_EXPRESSION)
         return self.node_class(
             token,
             FilteredExpression.parse(
-                self.env, TokenStream(tokenize(token.value, token))
+                self.env, TokenStream(tokenize(expr_token.value, expr_token))
             ),
         )

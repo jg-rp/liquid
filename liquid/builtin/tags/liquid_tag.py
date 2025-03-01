@@ -125,7 +125,7 @@ def _tokenize_liquid_expression(
             yield Token(
                 TOKEN_TAG,
                 value=name,
-                start_index=token.start_index + match.start(),
+                start_index=token.start_index + match.start("name"),
                 source=token.source,
             )
 
@@ -133,7 +133,7 @@ def _tokenize_liquid_expression(
                 yield Token(
                     TOKEN_EXPRESSION,
                     value=match.group("expr"),
-                    start_index=token.start_index + match.start(),
+                    start_index=token.start_index + match.start("expr"),
                     source=token.source,
                 )
         elif kind == "SKIP":

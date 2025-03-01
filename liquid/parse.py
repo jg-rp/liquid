@@ -14,7 +14,7 @@ from .exceptions import LiquidSyntaxError
 from .token import TOKEN_CONTENT
 from .token import TOKEN_EOF
 from .token import TOKEN_ILLEGAL
-from .token import TOKEN_OUTOUT
+from .token import TOKEN_OUTPUT
 from .token import TOKEN_TAG
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class Parser:
 
         self.illegal = self.tags[TOKEN_ILLEGAL]
         self.content = self.tags[TOKEN_CONTENT]
-        self.statement = self.tags[TOKEN_OUTOUT]
+        self.statement = self.tags[TOKEN_OUTPUT]
 
     def parse(self, stream: TokenStream) -> list[Node]:
         """Parse the given stream of tokens into a tree."""
@@ -53,7 +53,7 @@ class Parser:
 
     def parse_statement(self, stream: TokenStream) -> Node:
         """Parse a node from a stream of tokens."""
-        if stream.current.kind == TOKEN_OUTOUT:
+        if stream.current.kind == TOKEN_OUTPUT:
             node = self.statement.get_node(stream)
         elif stream.current.kind == TOKEN_TAG:
             tag = self.tags.get(stream.current.value, self.illegal)

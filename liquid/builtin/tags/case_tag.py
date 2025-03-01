@@ -251,14 +251,14 @@ class MultiExpressionBlockNode(Node):
             ]
         )
 
-    # TODO:
-    # def children(
-    #     self,
-    #     static_context: RenderContext,  # noqa: ARG002
-    #     *,
-    # ) -> Iterable[Node]:
-    #     """Return this node's children."""
-    #     yield self.block
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield self.block
 
     def expressions(self) -> Iterable[Expression]:
         """Return this node's expressions."""

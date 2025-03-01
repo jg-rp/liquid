@@ -19,7 +19,7 @@ from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_CONTENT
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_OUTOUT
+from liquid.token import TOKEN_OUTPUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
@@ -61,7 +61,7 @@ def compile_liquid_rules(
 
         liquid_rules = [
             ("RAW", raw_pattern),
-            (TOKEN_OUTOUT, statement_pattern),
+            (TOKEN_OUTPUT, statement_pattern),
             ("TAG", tag_pattern),
             (TOKEN_CONTENT, content_pattern),
         ]
@@ -72,7 +72,7 @@ def compile_liquid_rules(
         liquid_rules = [
             ("RAW", raw_pattern),
             ("COMMENT", comment_pattern),
-            (TOKEN_OUTOUT, statement_pattern),
+            (TOKEN_OUTPUT, statement_pattern),
             ("TAG", tag_pattern),
             (TOKEN_CONTENT, content_pattern),
         ]
@@ -95,10 +95,23 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
         value = match.group()
 
-        if kind == TOKEN_OUTOUT:
-            value = match.group("stmt")
-            lstrip = bool(match.group("rss"))
+        if kind == TOKEN_OUTPUT:
+            yield Token(
+                kind=TOKEN_OUTPUT,
+                value=match.group(),
+                start_index=match.start(),
+                source=source,
+            )
 
+            yield Token(
+                TOKEN_EXPRESSION,
+                match.group("stmt"),
+                start_index=match.start("stmt"),
+                source=source,
+            )
+
+            lstrip = bool(match.group("rss"))
+            continue
         elif kind == "TAG":
             name = match.group("name")
             yield Token(
@@ -108,12 +121,18 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
                 source=source,
             )
 
-            kind = TOKEN_EXPRESSION
             value = match.group("expr")
             lstrip = bool(match.group("rst"))
 
-            if not value:
-                continue
+            if value:
+                yield Token(
+                    kind=TOKEN_EXPRESSION,
+                    value=value,
+                    start_index=match.start("expr"),
+                    source=source,
+                )
+
+            continue
 
         elif kind == "COMMENT":
             lstrip = bool(match.group("rsc"))

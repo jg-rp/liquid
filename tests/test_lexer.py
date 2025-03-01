@@ -11,7 +11,7 @@ from liquid.lex import tokenize_liquid_expression
 from liquid.stream import TokenStream
 from liquid.token import TOKEN_CONTENT
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_OUTOUT
+from liquid.token import TOKEN_OUTPUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
@@ -56,7 +56,7 @@ class LiquidLexerTestCase(TestCase):
                 r"<HTML>{{ other }}</HTML>",
                 [
                     Token(1, TOKEN_CONTENT, "<HTML>"),
-                    Token(1, TOKEN_OUTOUT, "other"),
+                    Token(1, TOKEN_OUTPUT, "other"),
                     Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
@@ -65,7 +65,7 @@ class LiquidLexerTestCase(TestCase):
                 r"<HTML>{{ other | upper }}</HTML>",
                 [
                     Token(1, TOKEN_CONTENT, "<HTML>"),
-                    Token(1, TOKEN_OUTOUT, "other | upper"),
+                    Token(1, TOKEN_OUTPUT, "other | upper"),
                     Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
@@ -74,7 +74,7 @@ class LiquidLexerTestCase(TestCase):
                 r"<HTML>{{- other -}}</HTML>",
                 [
                     Token(1, TOKEN_CONTENT, "<HTML>"),
-                    Token(1, TOKEN_OUTOUT, "other"),
+                    Token(1, TOKEN_OUTPUT, "other"),
                     Token(1, TOKEN_CONTENT, "</HTML>"),
                 ],
             ),
@@ -167,7 +167,7 @@ class LiquidLexerTestCase(TestCase):
                 ("Some\n\n{{ obj }}\n{% assign x = 1 %}"),
                 [
                     Token(1, TOKEN_CONTENT, "Some\n\n"),
-                    Token(3, TOKEN_OUTOUT, "obj"),
+                    Token(3, TOKEN_OUTPUT, "obj"),
                     Token(3, TOKEN_CONTENT, "\n"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
@@ -178,7 +178,7 @@ class LiquidLexerTestCase(TestCase):
                 ("Some\r\n\r\n{{ obj }}\r\n{% assign x = 1 %}"),
                 [
                     Token(1, TOKEN_CONTENT, "Some\r\n\r\n"),
-                    Token(3, TOKEN_OUTOUT, "obj"),
+                    Token(3, TOKEN_OUTPUT, "obj"),
                     Token(3, TOKEN_CONTENT, "\r\n"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
@@ -189,7 +189,7 @@ class LiquidLexerTestCase(TestCase):
                 "Some\n\n{{- obj -}}\n{% assign x = 1 %}",
                 [
                     Token(1, TOKEN_CONTENT, "Some"),
-                    Token(3, TOKEN_OUTOUT, "obj"),
+                    Token(3, TOKEN_OUTPUT, "obj"),
                     Token(4, TOKEN_TAG, "assign"),
                     Token(4, TOKEN_EXPRESSION, "x = 1"),
                 ],
@@ -228,7 +228,7 @@ class LiquidLexerTestCase(TestCase):
                     Token(1, TOKEN_TAG, "capture"),
                     Token(1, TOKEN_EXPRESSION, "greeting"),
                     Token(1, TOKEN_CONTENT, "Hello, "),
-                    Token(1, TOKEN_OUTOUT, "customer.first_name"),
+                    Token(1, TOKEN_OUTPUT, "customer.first_name"),
                     Token(1, TOKEN_CONTENT, "."),
                     Token(1, TOKEN_TAG, "endcapture"),
                 ],
@@ -375,7 +375,7 @@ class LiquidLexerTestCase(TestCase):
                 source=r"text {{method oh no!",
                 expect=[
                     Token(1, TOKEN_CONTENT, "text "),
-                    Token(1, TOKEN_OUTOUT, "method oh no!"),
+                    Token(1, TOKEN_OUTPUT, "method oh no!"),
                 ],
             ),
             Case(
@@ -383,7 +383,7 @@ class LiquidLexerTestCase(TestCase):
                 source=r"text {{",
                 expect=[
                     Token(1, TOKEN_CONTENT, "text "),
-                    Token(1, TOKEN_OUTOUT, ""),
+                    Token(1, TOKEN_OUTPUT, ""),
                 ],
             ),
             Case(
@@ -399,7 +399,7 @@ class LiquidLexerTestCase(TestCase):
                 source=r"text {{method} oh no!",
                 expect=[
                     Token(1, TOKEN_CONTENT, "text "),
-                    Token(1, TOKEN_OUTOUT, "method} oh no!"),
+                    Token(1, TOKEN_OUTPUT, "method} oh no!"),
                 ],
             ),
             Case(
@@ -407,7 +407,7 @@ class LiquidLexerTestCase(TestCase):
                 source=r"text {{ %} oh no!",
                 expect=[
                     Token(1, TOKEN_CONTENT, "text "),
-                    Token(1, TOKEN_OUTOUT, "%} oh no!"),
+                    Token(1, TOKEN_OUTPUT, "%} oh no!"),
                 ],
             ),
         ]

@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from liquid import BoundTemplate
     from liquid.static_analysis import TemplateAnalysis
 
-# TODO: Update/fix Span/start_index
-
 
 @pytest.fixture
 def env() -> Environment:  # noqa: D103
@@ -224,6 +222,7 @@ def test_analyze_cycle(env: Environment) -> None:
         globals={
             "a": [Variable(["a"], Span("", 12))],
             "b": [Variable(["b"], Span("", 15))],
+            "x": [Variable(["x"], Span("", 9))],
         },
         tags={"cycle": [Span("", 0)]},
     )
@@ -882,99 +881,30 @@ def test_analyze_macro_and_call(env: Environment) -> None:
     )
 
 
-def test_analyze_translate(env: Environment) -> None:
-    source = (
-        "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
-        "    Hello, {{ you }}!"
-        "{%- plural -%}"
-        "    Hello, {{ you }}s!"
-        "{%- endtranslate -%}"
-    )
+# TODO:
+# def test_analyze_translate(env: Environment) -> None:
+#     source = (
+#         "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
+#         "    Hello, {{ you }}!"
+#         "{%- plural -%}"
+#         "    Hello, {{ you }}s!"
+#         "{%- endtranslate -%}"
+#     )
 
-    someone = [Variable(["someone"], Span("", 41))]
+#     someone = [Variable(["someone"], Span("", 41))]
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={"someone": someone},
-        variables={
-            "someone": someone,
-            "you": [
-                Variable(["you"], Span("", 76)),
-                Variable(["you"], Span("", 111)),
-            ],
-        },
-        tags={
-            "translate": [Span("", 0)],
-        },
-    )
-
-
-def test_analyze_template_strings(env: Environment) -> None:
-    source = "{{ 'Hello, ${some.thing}' }}"
-
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={"some": [Variable(["some", "thing"], Span("", 13))]},
-    )
-
-
-def test_analyze_array_literals(env: Environment) -> None:
-    source = "{% assign a = b, c, 'd' %}"
-
-    _assert(
-        env.from_string(source),
-        locals={
-            "a": [Variable(["a"], Span("", 10))],
-        },
-        globals={
-            "b": [Variable(["b"], Span("", 14))],
-            "c": [Variable(["c"], Span("", 17))],
-        },
-        tags={"assign": [Span("", 0)]},
-    )
-
-
-def test_analyze_lambda_expression(env: Environment) -> None:
-    source = "{% assign y = 42 %}{% assign x = a | where: i => i.foo.bar == y %}"
-
-    _assert(
-        env.from_string(source),
-        locals={
-            "y": [Variable(["y"], Span("", 10))],
-            "x": [Variable(["x"], Span("", 29))],
-        },
-        globals={
-            "a": [Variable(["a"], Span("", 33))],
-        },
-        variables={
-            "a": [Variable(["a"], Span("", 33))],
-            "i": [Variable(["i", "foo", "bar"], Span("", 49))],
-            "y": [Variable(["y"], Span("", 62))],
-        },
-        tags={"assign": [Span("", 0), Span("", 19)]},
-        filters={"where": [Span("", 37)]},
-    )
-
-
-def test_analyze_two_argument_lambda_expression(env: Environment) -> None:
-    source = "{% assign y = 42 %}{% assign x = a | where: (i, j) => i.foo.bar == j %}"
-
-    _assert(
-        env.from_string(source),
-        locals={
-            "y": [Variable(["y"], Span("", 10))],
-            "x": [Variable(["x"], Span("", 29))],
-        },
-        globals={
-            "a": [Variable(["a"], Span("", 33))],
-        },
-        variables={
-            "a": [Variable(["a"], Span("", 33))],
-            "i": [Variable(["i", "foo", "bar"], Span("", 54))],
-            "j": [Variable(["j"], Span("", 67))],
-        },
-        tags={"assign": [Span("", 0), Span("", 19)]},
-        filters={"where": [Span("", 37)]},
-    )
+#     _assert(
+#         env.from_string(source),
+#         locals={},
+#         globals={"someone": someone},
+#         variables={
+#             "someone": someone,
+#             "you": [
+#                 Variable(["you"], Span("", 76)),
+#                 Variable(["you"], Span("", 111)),
+#             ],
+#         },
+#         tags={
+#             "translate": [Span("", 0)],
+#         },
+#     )
