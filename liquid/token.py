@@ -113,6 +113,9 @@ TOKEN_CONTINUE = sys.intern("continue")
 # Tablerow specific argument
 TOKEN_COLS = sys.intern("cols")
 
+# Template inheritance keywords
+TOKEN_REQUIRED = sys.intern("required")
+
 # Comparison symbols and logic operators for `if` and `unless` tags.
 TOKEN_EQ = sys.intern("eq")
 TOKEN_NE = sys.intern("ne")

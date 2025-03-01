@@ -69,7 +69,7 @@ TEST_CASES: list[Case] = [
         '"Liquid"    | slice: 2,     5',
         "'Liquid' | slice: 2, 5",
     ),
-    Case("filter, named argument", "thing | default: 'hello', allow_false: true"),
+    Case("filter, named argument", "thing | default: 'hello', allow_false:true"),
     Case("inline condition", "'foo' if true"),
     Case("inline condition with alternative", "'foo' if true else 'bar'"),
     Case(

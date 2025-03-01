@@ -29,8 +29,8 @@ from liquid.parse import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
+from liquid.token import TOKEN_REQUIRED
 from liquid.token import TOKEN_TAG
-from liquid.token import TOKEN_WORD
 
 if TYPE_CHECKING:
     from liquid import BoundTemplate
@@ -288,8 +288,9 @@ class BlockTag(Tag):
         tokens = stream.into_inner()
         block_name = parse_name(self.env, tokens)
 
-        if tokens.current.kind == TOKEN_WORD and tokens.current.value == "required":
+        if tokens.current.kind == TOKEN_REQUIRED:
             required = True
+            next(tokens)
         else:
             required = False
 

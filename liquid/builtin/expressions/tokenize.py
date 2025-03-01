@@ -38,6 +38,7 @@ from liquid.token import TOKEN_PIPE
 from liquid.token import TOKEN_RANGE
 from liquid.token import TOKEN_RANGE_LITERAL
 from liquid.token import TOKEN_RBRACKET
+from liquid.token import TOKEN_REQUIRED
 from liquid.token import TOKEN_REVERSED
 from liquid.token import TOKEN_RPAREN
 from liquid.token import TOKEN_SKIP
@@ -126,6 +127,7 @@ _keywords = frozenset(
         TOKEN_AS,
         TOKEN_IF,
         TOKEN_ELSE,
+        TOKEN_REQUIRED,
     ]
 )
 
@@ -143,6 +145,7 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
 
         value = match.group()
 
+        # TODO: extra, user-defined keywords?
         if kind == TOKEN_WORD and value in _keywords:
             kind = value
         elif kind == TOKEN_IDENTINDEX:

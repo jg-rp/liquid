@@ -98,10 +98,14 @@ class StrictUndefined(Undefined):
     allowed_properties = frozenset(
         [
             "__repr__",
+            "__class__",
+            "force_liquid_default",
             "name",
             "hint",
             "obj",
             "msg",
+            "path",
+            "token",
         ]
     )
 
@@ -162,17 +166,17 @@ class StrictDefaultUndefined(StrictUndefined):
     # without inspecting this class type.
     force_liquid_default = True
 
-    # Properties that don't raise an UndefinedError.
-    allowed_properties = frozenset(
-        [
-            "__repr__",
-            "force_liquid_default",
-            "name",
-            "hint",
-            "obj",
-            "msg",
-        ]
-    )
+    # # Properties that don't raise an UndefinedError.
+    # allowed_properties = frozenset(
+    #     [
+    #         "__repr__",
+    #         "force_liquid_default",
+    #         "name",
+    #         "hint",
+    #         "obj",
+    #         "msg",
+    #     ]
+    # )
 
 
 def is_undefined(obj: object) -> bool:

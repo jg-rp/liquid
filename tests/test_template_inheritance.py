@@ -94,7 +94,7 @@ def test_override_required_block_in_stack() -> None:
     """Test that we can override a required block somewhere on the block stack."""
     source = "{% extends 'bar' %}"
     partials = {
-        "foo": "{% block baz required %}{% endblock %}",
+        "foo": "{% block baz %}{% endblock %}",
         "bar": "{% extends 'foo' %}{% block baz %}hello{% endblock %}",
     }
     expect = "hello"
