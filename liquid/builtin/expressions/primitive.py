@@ -18,6 +18,7 @@ from liquid.token import TOKEN_BLANK
 from liquid.token import TOKEN_EMPTY
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
+from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LPAREN
@@ -313,9 +314,7 @@ def parse_primitive(env: Environment, tokens: TokenStream) -> Expression:  # noq
         return Empty(next(tokens))
     if kind == TOKEN_BLANK:
         return Blank(next(tokens))
-    if kind == TOKEN_WORD:
-        return Path.parse(env, tokens)
-    if kind == TOKEN_LBRACKET:
+    if kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         return Path.parse(env, tokens)
 
     raise LiquidSyntaxError(

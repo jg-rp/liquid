@@ -11,6 +11,8 @@ import sys
 from typing import TYPE_CHECKING
 from typing import Union
 
+from liquid import Mode
+from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.limits import to_int
 from liquid.token import TOKEN_DOT
@@ -98,12 +100,17 @@ class Path(Expression):
         token = tokens.current
         segments: Segments = []
 
-        # TODO: fix me regarding dots
         # TODO: floats and shorthand indexes
         while True:
-            kind, value, index, _ = tokens.current
+            kind, value, _index, _source = tokens.current
 
             if kind == TOKEN_WORD:
+                segments.append(value)
+                if tokens.peek.kind == TOKEN_WORD:
+                    # Two consecutive words indicate end of path.
+                    next(tokens)
+                    break
+            elif kind == TOKEN_IDENTSTRING:
                 segments.append(value)
             elif kind == TOKEN_IDENTINDEX:
                 segments.append(to_int(value))
@@ -112,11 +119,14 @@ class Path(Expression):
                 segments.append(Path.parse(env, tokens))
                 tokens.expect(TOKEN_RBRACKET)
             elif kind == TOKEN_DOT:
-                pass
+                if env.mode == Mode.STRICT and tokens.peek.kind != TOKEN_WORD:
+                    raise LiquidSyntaxError(
+                        f"expected an identifier, found {tokens.peek.kind}",
+                        token=tokens.peek,
+                    )
             else:
                 break
 
             next(tokens)
 
-        p = Path(token, segments)
-        return p
+        return Path(token, segments)

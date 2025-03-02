@@ -23,26 +23,30 @@ class Case(NamedTuple):
 
 TEST_CASES: list[Case] = [
     Case("empty", ""),
-    Case("string value", "val: 'hello'"),
-    Case("no whitespace", "val:'hello'", "val: 'hello'"),
-    Case("extra whitespace", " val  :\n  'hello'", "val: 'hello'"),
-    Case("leading comma", ", val: 'hello'", "val: 'hello'"),
-    Case("trailing comma", ", val: 'hello',", "val: 'hello'"),
-    Case("multiple arguments", "a: 'foo', b: 'bar', c: 'baz'"),
+    Case("string value", "val: 'hello'", "val:'hello'"),
+    Case("no whitespace", "val:'hello'"),
+    Case("extra whitespace", " val  :\n  'hello'", "val:'hello'"),
+    Case("leading comma", ", val: 'hello'", "val:'hello'"),
+    Case("trailing comma", ", val: 'hello',", "val:'hello'"),
+    Case(
+        "multiple arguments",
+        "a: 'foo', b: 'bar', c: 'baz'",
+        "a:'foo', b:'bar', c:'baz'",
+    ),
     Case(
         "multiple arguments, double quotes",
         'a: "foo", b: "bar", c: "baz"',
-        "a: 'foo', b: 'bar', c: 'baz'",
+        "a:'foo', b:'bar', c:'baz'",
     ),
     Case(
         "primitive values",
         "a: 'hello', b: false, c: true, d: nil, e: 1, f: 1.1",
-        "a: 'hello', b: false, c: true, d: , e: 1, f: 1.1",
+        "a:'hello', b:false, c:true, d:, e:1, f:1.1",
     ),
     Case(
         "paths",
         "a: products[0], b: products['foo'].title",
-        "a: products[0], b: products.foo.title",
+        "a:products[0], b:products.foo.title",
     ),
     # TODO: = separated separated arguments
 ]

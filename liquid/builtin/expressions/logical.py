@@ -20,6 +20,7 @@ from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_GE
 from liquid.token import TOKEN_GT
+from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
 from liquid.token import TOKEN_LE
@@ -455,7 +456,7 @@ def parse_boolean_primitive(  # noqa: PLR0912
     elif kind == TOKEN_EMPTY:
         left = Empty(token)
         next(tokens)
-    elif kind in (TOKEN_WORD, TOKEN_LBRACKET):
+    elif kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:
         # TODO: raise for no grouped expressions

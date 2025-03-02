@@ -82,6 +82,7 @@ __all__ = (
     "TokenStream",
     "parse",
     "render",
+    "render_async",
 )
 
 DEFAULT_ENVIRONMENT = Environment()
@@ -95,6 +96,11 @@ def parse(source: str) -> BoundTemplate:
 def render(source: str, **data: object) -> str:
     """Parse and render source text using the default environment."""
     return DEFAULT_ENVIRONMENT.from_string(source).render(**data)
+
+
+async def render_async(source: str, **data: object) -> str:
+    """Parse and render source text using the default environment."""
+    return await DEFAULT_ENVIRONMENT.from_string(source).render_async(**data)
 
 
 def make_file_system_loader(

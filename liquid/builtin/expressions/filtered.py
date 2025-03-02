@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Union
 
+from liquid import Mode
+from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import NoSuchFilterFunc
 from liquid.expression import Expression
@@ -343,6 +345,12 @@ class Filter:
                 elif tok.kind in FILTER_TOKENS:
                     args.append(PositionalArgument(parse_primitive(env, tokens)))
                 elif tok.kind == TOKEN_COMMA:
+                    if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_COMMA:
+                        raise LiquidSyntaxError(
+                            "expected a comma separated list of arguments, "
+                            f"found {tok.kind}",
+                            token=tokens.peek,
+                        )
                     next(tokens)
                 else:
                     break

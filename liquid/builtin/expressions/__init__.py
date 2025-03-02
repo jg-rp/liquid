@@ -1,4 +1,5 @@
-from .arguments import KeywordArgument
+from .arguments import KeywordArgument  # noqa: D104
+from .arguments import Parameter
 from .arguments import PositionalArgument
 from .arguments import parse_arguments
 from .filtered import FilteredExpression
@@ -14,8 +15,8 @@ from .primitive import Nil
 from .primitive import StringLiteral
 from .primitive import is_empty
 from .primitive import parse_identifier
-from .primitive import parse_primitive
 from .primitive import parse_name
+from .primitive import parse_primitive
 from .primitive import parse_string_or_path
 from .tokenize import tokenize
 
@@ -40,4 +41,5 @@ __all__ = (
     "TernaryFilteredExpression",
     "tokenize",
     "parse_name",
+    "Parameter",
 )

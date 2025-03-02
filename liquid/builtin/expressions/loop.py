@@ -10,6 +10,7 @@ from typing import Mapping
 from typing import Sequence
 from typing import Union
 
+from liquid import Mode
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
 from liquid.expression import Expression
@@ -218,6 +219,10 @@ class LoopExpression(Expression):
         limit: Expression | None = None
         cols: Expression | None = None
 
+        # Leading commas are OK
+        if tokens.current.kind == TOKEN_COMMA:
+            next(tokens)
+
         while True:
             arg_token = next(tokens)
             kind = arg_token.kind
@@ -239,6 +244,11 @@ class LoopExpression(Expression):
                 tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
                 cols = parse_primitive(env, tokens)
             elif kind == TOKEN_COMMA:
+                if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_COMMA:
+                    raise LiquidSyntaxError(
+                        f"expected 'reversed', 'offset' or 'limit', found {kind}",
+                        token=tokens.peek,
+                    )
                 continue
             elif kind == TOKEN_EOF:
                 break

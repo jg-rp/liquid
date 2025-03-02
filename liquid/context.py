@@ -107,6 +107,7 @@ class RenderContext:
             "ifchanged": "",
             "stopindex": {},
             "extends": defaultdict(list),
+            "macros": {},
         }
 
         # As stack of forloop objects. Used for populating forloop.parentloop.

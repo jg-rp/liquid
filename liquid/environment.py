@@ -21,7 +21,9 @@ from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
 from .exceptions import lookup_warning
 from .extra import BlockTag
+from .extra import CallTag
 from .extra import ExtendsTag
+from .extra import MacroTag
 from .lex import get_lexer
 from .mode import Mode
 from .parse import get_parser
@@ -255,6 +257,8 @@ class Environment:
         # TODO:
         self.add_tag(ExtendsTag)
         self.add_tag(BlockTag)
+        self.add_tag(MacroTag)
+        self.add_tag(CallTag)
 
     def parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.

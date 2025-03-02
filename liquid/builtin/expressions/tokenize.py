@@ -151,7 +151,6 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
         elif kind == TOKEN_IDENTINDEX:
             value = match.group(GROUP_IDENTINDEX)
         elif kind == TOKEN_IDENTSTRING:
-            kind = TOKEN_WORD
             value = match.group(GROUP_IDENTQUOTED)
         elif kind == TOKEN_STRING:
             value = match.group(GROUP_QUOTED)
