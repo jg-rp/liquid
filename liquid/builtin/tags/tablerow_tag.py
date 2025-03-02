@@ -159,7 +159,7 @@ class TableRow(Mapping[str, object]):
 class TablerowNode(Node):
     """The built-in _tablerow_ tag."""
 
-    interrupts = False
+    interrupts = True
     """If _true_, handle `break` and `continue` interrupts inside a tablerow loop."""
 
     __slots__ = ("expression", "block")

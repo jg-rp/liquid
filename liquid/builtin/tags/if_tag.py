@@ -134,7 +134,7 @@ class IfTag(Tag):
     end = TAG_ENDIF
     node_class = IfNode
 
-    mode = Mode.STRICT
+    mode = Mode.LAX
     """Tag specific parsing mode, independent from environment tolerance mode."""
 
     def parse(self, stream: TokenStream) -> Node:

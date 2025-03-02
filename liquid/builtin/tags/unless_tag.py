@@ -139,7 +139,7 @@ class UnlessTag(Tag):
     end = TAG_ENDUNLESS
     node_class = UnlessNode
 
-    mode = Mode.STRICT
+    mode = Mode.LAX
     """Tag specific parsing mode, independent from environment tolerance mode."""
 
     def __init__(self, env: Environment):

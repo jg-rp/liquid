@@ -89,11 +89,15 @@ class LoopExpression(Expression):
 
         return " ".join(buf)
 
-    def _to_iter(self, obj: object) -> tuple[Iterator[Any], int]:
+    def _to_iter(
+        self, obj: object, context: RenderContext
+    ) -> tuple[Iterator[Any], int]:
         if isinstance(obj, Mapping):
             return iter(obj.items()), len(obj)
         if isinstance(obj, range):
             return iter(obj), len(obj)
+        if isinstance(obj, str) and not context.env.string_sequences:
+            return iter([obj]), 1
         if isinstance(obj, Sequence):
             return iter(obj), len(obj)
 
@@ -147,7 +151,7 @@ class LoopExpression(Expression):
         return it, length
 
     def evaluate(self, context: RenderContext) -> tuple[Iterator[object], int]:
-        it, length = self._to_iter(self.iterable.evaluate(context))
+        it, length = self._to_iter(self.iterable.evaluate(context), context)
         limit = (
             self._to_int(self.limit.evaluate(context), token=self.limit.token)
             if self.limit
@@ -170,7 +174,7 @@ class LoopExpression(Expression):
     async def evaluate_async(
         self, context: RenderContext
     ) -> tuple[Iterator[object], int]:
-        it, length = self._to_iter(await self.iterable.evaluate_async(context))
+        it, length = self._to_iter(await self.iterable.evaluate_async(context), context)
         limit = (
             self._to_int(
                 await self.limit.evaluate_async(context), token=self.limit.token

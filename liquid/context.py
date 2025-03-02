@@ -12,7 +12,6 @@ from contextlib import contextmanager
 from functools import partial
 from functools import reduce
 from io import StringIO
-from itertools import cycle
 from operator import mul
 from typing import TYPE_CHECKING
 from typing import Any
@@ -312,13 +311,12 @@ class RenderContext:
         self.counters[name] = val
         return val
 
-    def cycle(self, group_name: str, args: Sequence[object]) -> object:
-        """Return the next item in the cycle of the given arguments."""
-        key = (group_name, tuple(args))
-        namespace = self.tag_namespace["cycles"]
-        if key not in namespace:
-            namespace[key] = cycle(range(len(args)))
-        return args[next(namespace[key])]
+    def cycle(self, key: object, length: int) -> int:
+        """Return the index of the next item in the cycle."""
+        namespace: dict[object, int] = self.tag_namespace["cycles"]
+        idx = namespace.setdefault(key, 0)
+        namespace[key] = (idx + 1) % length
+        return idx
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
@@ -464,7 +462,7 @@ class RenderContext:
         carry = buf.size if isinstance(buf, LimitedStringIO) else 0
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
-    def get_item(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911
+    def get_item(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911, PLR0912
         """An item getter used when resolving a Liquid path.
 
         Override this to change the behavior of `.first`, `.last` and `.size`.
@@ -479,26 +477,39 @@ class RenderContext:
                 if isinstance(obj, Sized):
                     return len(obj)
                 raise
+
         if key == "first":
             try:
                 return obj["first"]
             except (KeyError, IndexError, TypeError):
                 if isinstance(obj, Mapping) and obj:
                     return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'first'") from None
                 if isinstance(obj, Sequence):
                     return obj[0]
                 raise
+
         if key == "last":
             try:
                 return obj["last"]
             except (KeyError, IndexError, TypeError):
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'last'") from None
                 if isinstance(obj, Sequence):
                     return obj[-1]
                 raise
 
+        if (
+            not self.env.string_sequences
+            and isinstance(key, int)
+            and isinstance(obj, str)
+        ):
+            raise TypeError("string object is not subscriptable")
+
         return obj[key]
 
-    async def get_item_async(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911
+    async def get_item_async(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911, PLR0912
         """An async item getter for resolving paths."""
 
         async def _get_item(obj: Any, key: Any) -> object:
@@ -516,22 +527,35 @@ class RenderContext:
                 if isinstance(obj, Sized):
                     return len(obj)
                 raise
+
         if key == "first":
             try:
                 return await _get_item(obj, "first")
             except (KeyError, IndexError, TypeError):
                 if isinstance(obj, Mapping) and obj:
                     return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'first'") from None
                 if isinstance(obj, Sequence):
                     return obj[0]
                 raise
+
         if key == "last":
             try:
                 return await _get_item(obj, "last")
             except (KeyError, IndexError, TypeError):
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'last'") from None
                 if isinstance(obj, Sequence):
                     return obj[-1]
                 raise
+
+        if (
+            not self.env.string_sequences
+            and isinstance(key, int)
+            and isinstance(obj, str)
+        ):
+            raise TypeError("string object is not subscriptable")
 
         return await _get_item(obj, key)
 
@@ -667,36 +691,6 @@ class FutureContext(RenderContext):
     https://github.com/jg-rp/liquid/issues/90.
 
     """
-
-    # TODO
-    # @classmethod
-    # def getitem(cls, obj: Any, key: Any) -> Any:
-    #     if isinstance(obj, str) and isinstance(key, int):
-    #         raise IndexError("string indices are not allowed")
-    #     return super().getitem(obj, key)
-
-    # @classmethod
-    # async def getitem_async(cls, obj: Any, key: Any) -> object:
-    #     if isinstance(obj, str) and isinstance(key, int):
-    #         raise IndexError("string indices are not allowed")
-    #     return await super().getitem_async(obj, key)
-
-    def cycle(self, group_name: str, args: Sequence[object]) -> object:
-        """Return the next item in the cycle of the given arguments."""
-        key = group_name if group_name else str(args)
-        namespace: dict[str, int] = self.tag_namespace["cycles"]
-        index = namespace.setdefault(key, 0)
-        try:
-            rv = args[index]
-        except IndexError:
-            rv = None
-
-        index += 1
-        if index >= len(args):
-            index = 0
-
-        namespace[key] = index
-        return rv
 
 
 class FutureVariableCaptureContext(CaptureRenderContext, FutureContext):

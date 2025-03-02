@@ -139,6 +139,15 @@ class Environment:
     # variables. Defaults to `False`.
     shorthand_indexes: bool = False
 
+    # When `True`, strings are treated as sequences. That is, characters (Unicode code
+    # points) in a string can be looped over and selected by index. Defaults to `False`.
+    string_sequences: bool = False
+
+    # When `True`, the special `first` and `last` properties will return the first and
+    # last charters of a string. Otherwise `first` and `last` will resolve to Undefined
+    # when applied to a string. Defaults to `False`.
+    string_first_and_last: bool = False
+
     def __init__(
         self,
         tag_start_string: str = r"{%",

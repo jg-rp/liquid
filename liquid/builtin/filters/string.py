@@ -212,12 +212,20 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
 
 
 @string_filter
-def split(val: str, seq: str) -> list[str]:
-    """Return a list of strings from splitting _value_ on _seq_."""
-    if not seq:
+def split(val: str, sep: str) -> list[str]:
+    """Split string _val_ on delimiter _sep_.
+
+    If _sep_ is empty or _undefined_, _val_ is split into a list of single
+    characters. If _val_ is empty or equal to _sep_, an empty list is returned.
+    """
+    if not sep:
         return list(val)
 
-    return val.split(soft_str(seq))
+    sep = soft_str(sep)
+    if not val or val == sep:
+        return []
+
+    return val.split(sep)
 
 
 @string_filter

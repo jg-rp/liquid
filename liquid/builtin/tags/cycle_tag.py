@@ -32,6 +32,10 @@ class CycleNode(Node):
 
     __slots__ = ("group", "args")
 
+    group_by_args: bool = False
+    """If `True`, use cycle arguments as well as group name when building cycle
+    context keys."""
+
     def __init__(
         self, token: Token, group: Optional[Expression], args: list[Expression]
     ):
@@ -54,10 +58,19 @@ class CycleNode(Node):
             group_name = ""
 
         args = [arg.evaluate(context) for arg in self.args]
+
+        if self.group_by_args:
+            key: object = (group_name, tuple(args))
+        else:
+            key = group_name if group_name else str(args)
+
+        index = context.cycle(key, len(args))
+
+        if index >= len(args):
+            return 0
+
         return buffer.write(
-            to_liquid_string(
-                context.cycle(group_name, args), autoescape=context.autoescape
-            )
+            to_liquid_string(args[index], autoescape=context.autoescape)
         )
 
     async def render_to_output_async(
@@ -71,10 +84,19 @@ class CycleNode(Node):
             group_name = ""
 
         args = [await arg.evaluate_async(context) for arg in self.args]
+
+        if self.group_by_args:
+            key: object = (group_name, tuple(args))
+        else:
+            key = group_name if group_name else str(args)
+
+        index = context.cycle(key, len(args))
+
+        if index >= len(args):
+            return 0
+
         return buffer.write(
-            to_liquid_string(
-                context.cycle(group_name, args), autoescape=context.autoescape
-            )
+            to_liquid_string(args[index], autoescape=context.autoescape)
         )
 
     def expressions(self) -> Iterable[Expression]:
