@@ -18,6 +18,7 @@ from .builtin.expressions import Path
 from .builtin.expressions import TernaryFilteredExpression
 from .builtin.tags.case_tag import MultiExpressionBlockNode
 from .context import RenderContext
+from .span import Span
 from .token import TOKEN_TAG
 
 if TYPE_CHECKING:
@@ -27,19 +28,6 @@ if TYPE_CHECKING:
 
 
 RE_PROPERTY = re.compile(r"[\u0080-\uFFFFa-zA-Z_][\u0080-\uFFFFa-zA-Z0-9_-]*")
-
-
-@dataclass
-class Span:
-    """The location of a variable, tag or filter in a template."""
-
-    template_name: str
-    """The template name."""
-
-    index: int
-    """A start index into the template source text."""
-
-
 Segments = list[Union[int, str, "Segments"]]
 
 

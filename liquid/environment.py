@@ -15,6 +15,8 @@ from typing import Type
 from typing import Union
 
 from . import builtin
+from .analyze_tags import InnerTagMap
+from .analyze_tags import TagAnalysis
 from .builtin import DictLoader
 from .exceptions import Error
 from .exceptions import LiquidSyntaxError
@@ -362,69 +364,87 @@ class Environment:
                 err.template_name = name
             raise
 
-    # TODO:
-    # def analyze_tags(
-    #     self,
-    #     name: str,
-    #     *,
-    #     context: Optional["RenderContext"] = None,
-    #     inner_tags: Optional[InnerTagMap] = None,
-    #     **kwargs: str,
-    # ) -> TagAnalysis:
-    #     """Audit template tags without parsing source text into an abstract syntax tree.
+    def analyze_tags_from_string(
+        self,
+        source: str,
+        name: str = "<string>",
+        *,
+        inner_tags: Optional[InnerTagMap] = None,
+    ) -> TagAnalysis:
+        """Analyze tags in template source text.
 
-    #     This is useful for identifying unknown, misplaced and unbalanced tags in a
-    #     template's source text. See also `liquid.template.BoundTemplate.analyze`.
+        Unlike template static or contextual analysis, a tag audit does not parse the
+        template source text into an AST, nor does it attempt to load partial templates
+        from `{% include %}` or `{% render %}` tags.
 
-    #     Args:
-    #         name: The template's name or identifier, as you would use with
-    #             `Environment.get_template`. Use `Environment.analyze_tags_from_string`
-    #             to audit tags in template text without using a template loader.
-    #         context: An optional render context the loader might use to modify the
-    #             template search space. If given, uses
-    #             `liquid.loaders.BaseLoader.get_source_with_context` from the current
-    #             loader.
-    #         inner_tags: A mapping of block tags to a list of allowed "inner" tags for
-    #             the block. For example, `{% if %}` blocks are allowed to contain
-    #             `{% elsif %}` and `{% else %}` tags.
-    #         kwargs: Loader context.
-    #     """
-    #     if context:
-    #         template_source = self.loader.get_source_with_context(
-    #             context=context, template_name=name, **kwargs
-    #         )
-    #     else:
-    #         template_source = self.loader.get_source(self, template_name=name)
+        Args:
+            source: The source text of the template.
+            name: A name or identifier for the template.
+            inner_tags: A mapping of block tags to a list of allowed "inner" tags for
+                the block. For example, `{% if %}` blocks are allowed to contain
+                `{% elsif %}` and `{% else %}` tags.
+        """
+        return TagAnalysis(
+            env=self,
+            name=name,
+            tokens=list(self.tokenizer()(source)),
+            inner_tags=inner_tags,
+        )
 
-    #     return self.analyze_tags_from_string(
-    #         template_source.source,
-    #         name=template_source.filename,
-    #         inner_tags=inner_tags,
-    #     )
+    def analyze_tags(
+        self,
+        name: str,
+        *,
+        context: Optional["RenderContext"] = None,
+        inner_tags: Optional[InnerTagMap] = None,
+        **kwargs: str,
+    ) -> TagAnalysis:
+        """Audit template tags without parsing source text into an abstract syntax tree.
 
-    # async def analyze_tags_async(
-    #     self,
-    #     name: str,
-    #     *,
-    #     context: Optional["RenderContext"] = None,
-    #     inner_tags: Optional[InnerTagMap] = None,
-    #     **kwargs: str,
-    # ) -> TagAnalysis:
-    #     """An async version of `Environment.analyze_tags`."""
-    #     if context:
-    #         template_source = await self.loader.get_source_with_context_async(
-    #             context=context, template_name=name, **kwargs
-    #         )
-    #     else:
-    #         template_source = await self.loader.get_source_async(
-    #             env=self, template_name=name
-    #         )
+        This is useful for identifying unknown, misplaced and unbalanced tags in a
+        template's source text. See also `liquid.template.BoundTemplate.analyze`.
 
-    #     return self.analyze_tags_from_string(
-    #         template_source.source,
-    #         name=template_source.filename,
-    #         inner_tags=inner_tags,
-    #     )
+        Args:
+            name: The template's name or identifier, as you would use with
+                `Environment.get_template`. Use `Environment.analyze_tags_from_string`
+                to audit tags in template text without using a template loader.
+            context: An optional render context the loader might use to modify the
+                template search space. If given, uses
+                `liquid.loaders.BaseLoader.get_source_with_context` from the current
+                loader.
+            inner_tags: A mapping of block tags to a list of allowed "inner" tags for
+                the block. For example, `{% if %}` blocks are allowed to contain
+                `{% elsif %}` and `{% else %}` tags.
+            kwargs: Loader context.
+        """
+        template_source = self.loader.get_source(
+            self, template_name=name, context=context, **kwargs
+        )
+
+        return self.analyze_tags_from_string(
+            template_source.source,
+            name=template_source.name,
+            inner_tags=inner_tags,
+        )
+
+    async def analyze_tags_async(
+        self,
+        name: str,
+        *,
+        context: Optional["RenderContext"] = None,
+        inner_tags: Optional[InnerTagMap] = None,
+        **kwargs: str,
+    ) -> TagAnalysis:
+        """An async version of `Environment.analyze_tags`."""
+        template_source = await self.loader.get_source_async(
+            env=self, template_name=name, context=context, **kwargs
+        )
+
+        return self.analyze_tags_from_string(
+            template_source.source,
+            name=template_source.name,
+            inner_tags=inner_tags,
+        )
 
     def make_globals(
         self,
