@@ -621,6 +621,8 @@ def _lt(token: Token, left: object, right: object) -> bool:
 
 
 def _contains(token: Token, left: object, right: object) -> bool:
+    if not is_truthy(left) or not is_truthy(right):
+        return False
     if isinstance(left, str):
         return str(right) in left
     if isinstance(left, Collection):

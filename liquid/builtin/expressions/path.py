@@ -112,12 +112,27 @@ class Path(Expression):
                     break
             elif kind == TOKEN_IDENTSTRING:
                 segments.append(value)
+                if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_WORD:
+                    raise LiquidSyntaxError(
+                        f"expected a dot or bracket notation, found {tokens.peek.kind}",
+                        token=tokens.peek,
+                    )
             elif kind == TOKEN_IDENTINDEX:
                 segments.append(to_int(value))
+                if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_WORD:
+                    raise LiquidSyntaxError(
+                        f"expected a dot or bracket notation, found {tokens.peek.kind}",
+                        token=tokens.peek,
+                    )
             elif kind == TOKEN_LBRACKET:
                 next(tokens)
                 segments.append(Path.parse(env, tokens))
                 tokens.expect(TOKEN_RBRACKET)
+                if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_WORD:
+                    raise LiquidSyntaxError(
+                        f"expected a dot or bracket notation, found {tokens.peek.kind}",
+                        token=tokens.peek,
+                    )
             elif kind == TOKEN_DOT:
                 if env.mode == Mode.STRICT and tokens.peek.kind != TOKEN_WORD:
                     raise LiquidSyntaxError(

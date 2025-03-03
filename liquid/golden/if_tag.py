@@ -412,6 +412,15 @@ cases = [
         strict=False,
     ),
     Case(
+        description="array contains false",
+        template="{% if a contains false %}TRUE{% else %}FALSE{% endif %}",
+        expect="FALSE",
+        globals={"a": [1, 2, 3, False]},
+        partials={},
+        error=False,
+        strict=False,
+    ),
+    Case(
         description="object contains undefined",
         template="{% if obj contains nosuchthing %}TRUE{% else %}FALSE{% endif %}",
         expect="FALSE",

@@ -59,6 +59,18 @@ cases = [
         future=True,
     ),
     Case(
+        description="argument is nil",
+        template='{{ "Hello there" | split: nil | join: "#" }}',
+        expect="H#e#l#l#o# #t#h#e#r#e",
+        future=True,
+    ),
+    Case(
+        description="argument is false",
+        template='{{ "Hello there" | split: false | join: "#" }}',
+        expect="Hello there",
+        future=True,
+    ),
+    Case(
         description="argument is a newline",
         template=(
             '{% assign a = "a b\nc" | split: x %}'

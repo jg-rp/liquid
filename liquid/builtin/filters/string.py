@@ -212,20 +212,21 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
 
 
 @string_filter
-def split(val: str, sep: str) -> list[str]:
+def split(val: str, sep: Any) -> list[str]:
     """Split string _val_ on delimiter _sep_.
 
     If _sep_ is empty or _undefined_, _val_ is split into a list of single
     characters. If _val_ is empty or equal to _sep_, an empty list is returned.
     """
-    if not sep:
+    if sep is None or is_undefined(sep) or sep == "":
         return list(val)
 
     sep = soft_str(sep)
+
     if not val or val == sep:
         return []
 
-    return val.split(sep)
+    return val.split(None if sep == " " else sep)
 
 
 @string_filter
