@@ -270,4 +270,16 @@ cases = [
         strict=True,
         error=True,
     ),
+    Case(
+        description="array index out of bounds",
+        template="{{ a[3] }}",
+        expect="",
+        globals={"a": [1, 2, 3]},
+    ),
+    Case(
+        description="negative array index out of bounds",
+        template="{{ a[-4] }}",
+        expect="",
+        globals={"a": [1, 2, 3]},
+    ),
 ]
