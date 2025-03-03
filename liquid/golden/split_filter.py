@@ -50,6 +50,25 @@ cases = [
         future=True,
     ),
     Case(
+        description="argument is a single space",
+        template=(
+            '{% assign a = "a b\nc" | split: " " %}'
+            r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        expect="#0a#1b#2c",
+        future=True,
+    ),
+    Case(
+        description="argument is a newline",
+        template=(
+            '{% assign a = "a b\nc" | split: x %}'
+            r"{% for i in a %}#{{ forloop.index0 }}{{ i }}{% endfor %}"
+        ),
+        globals={"x": "\n"},
+        expect="#0a b#1c",
+        future=True,
+    ),
+    Case(
         description="argument does not appear in string",
         template=(
             r'{% assign a = "abc" | split: "," %}'

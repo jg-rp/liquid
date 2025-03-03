@@ -127,8 +127,7 @@ cases = [
     ),
     Case(
         description=(
-            "render a default given a literal false "
-            "with 'allow false' equal to false"
+            "render a default given a literal false with 'allow false' equal to false"
         ),
         template=r"{{ false | default: 'bar', allow_false: false }}",
         expect="bar",
@@ -236,5 +235,39 @@ cases = [
         template=r"{{ ['bar baz'].qux }}",
         expect="42",
         globals={"bar baz": {"qux": 42}},
+    ),
+    Case(
+        description="whitespace between word and dot",
+        template="{{ foo \n\t.bar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between dot and word",
+        template="{{ foo. \n\tbar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between bracket notation",
+        template="{{ ['foo'] \n\t['bar'] }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between words",
+        template="{{ foo \n\tbar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+        strict=True,
+        error=True,
+    ),
+    Case(
+        description="double dot",
+        template="{{ foo..bar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+        strict=True,
+        error=True,
     ),
 ]
