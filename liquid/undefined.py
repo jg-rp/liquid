@@ -72,6 +72,13 @@ class Undefined(Mapping[Any, object]):
     def __reversed__(self) -> Iterable[Any]:
         return []
 
+    def __liquid__(self) -> object:
+        return None
+
+    def poke(self) -> bool:
+        """Prod the type, giving it the opportunity to raise an exception."""
+        return True
+
 
 class DebugUndefined(Undefined):
     """An undefined that returns debug information when rendered."""
@@ -80,7 +87,7 @@ class DebugUndefined(Undefined):
 
     def __str__(self) -> str:
         if self.hint:
-            return f"undefined: {self.hint}"
+            return self.hint
         if self.obj is not UNDEFINED:
             return f"{type(self.obj).__name__} has no attribute '{self.name}'"
         return f"'{self.name}' is undefined"
@@ -98,7 +105,7 @@ class StrictUndefined(Undefined):
     allowed_properties = frozenset(
         [
             "__repr__",
-            "__class__",
+            # "__class__",
             "force_liquid_default",
             "name",
             "hint",

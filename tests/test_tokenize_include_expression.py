@@ -79,7 +79,7 @@ TEST_CASES: list[Case] = [
             Token(TOKEN_COMMA, ",", start_index=0, source=""),
             Token(TOKEN_WORD, "foo", start_index=0, source=""),
             Token(TOKEN_COLON, ":", start_index=0, source=""),
-            Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
+            Token(TOKEN_RANGE_LITERAL, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "3", start_index=0, source=""),

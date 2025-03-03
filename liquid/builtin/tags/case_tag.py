@@ -67,7 +67,9 @@ class CaseNode(Node):
             else:
                 blocks.append(str(block))
 
-        return f"{{% case {self.expression} %}}\n{blocks}{{% endcase %}}"
+        blocks_ = "".join(blocks)
+
+        return f"{{% case {self.expression} %}}\n{blocks_}{{% endcase %}}"
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""

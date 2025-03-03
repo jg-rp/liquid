@@ -21,6 +21,7 @@ from liquid.filter import liquid_filter
 from liquid.filter import string_filter
 from liquid.filter import with_environment
 from liquid.limits import to_int
+from liquid.undefined import Undefined
 from liquid.undefined import is_undefined
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
@@ -218,7 +219,11 @@ def split(val: str, sep: Any) -> list[str]:
     If _sep_ is empty or _undefined_, _val_ is split into a list of single
     characters. If _val_ is empty or equal to _sep_, an empty list is returned.
     """
-    if sep is None or is_undefined(sep) or sep == "":
+    if isinstance(sep, Undefined):
+        sep.poke()
+        return list(val)
+
+    if sep is None or sep == "":
         return list(val)
 
     sep = soft_str(sep)

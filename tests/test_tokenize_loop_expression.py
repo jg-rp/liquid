@@ -63,7 +63,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_WORD, "num", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
+            Token(TOKEN_RANGE_LITERAL, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "10", start_index=0, source=""),
@@ -77,7 +77,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
+            Token(TOKEN_RANGE_LITERAL, "(", start_index=0, source=""),
             Token(TOKEN_INTEGER, "1", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_WORD, "num", start_index=0, source=""),
@@ -90,7 +90,7 @@ TEST_CASES: list[Case] = [
         [
             Token(TOKEN_WORD, "i", start_index=0, source=""),
             Token(TOKEN_IN, "in", start_index=0, source=""),
-            Token(TOKEN_RANGE_LITERAL, "rangeliteral", start_index=0, source=""),
+            Token(TOKEN_RANGE_LITERAL, "(", start_index=0, source=""),
             Token(TOKEN_FLOAT, "2.4", start_index=0, source=""),
             Token(TOKEN_RANGE, "..", start_index=0, source=""),
             Token(TOKEN_INTEGER, "5", start_index=0, source=""),

@@ -15,6 +15,7 @@ from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FALSE
 from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTINDEX
+from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_IF
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
@@ -96,7 +97,7 @@ TEST_CASES: list[Case] = [
         'collection["products"]',
         [
             Token(TOKEN_WORD, "collection", start_index=0, source=""),
-            Token(TOKEN_WORD, "products", start_index=0, source=""),
+            Token(TOKEN_IDENTSTRING, "products", start_index=0, source=""),
         ],
     ),
     Case(
@@ -104,7 +105,7 @@ TEST_CASES: list[Case] = [
         "collection['products']",
         [
             Token(TOKEN_WORD, "collection", start_index=0, source=""),
-            Token(TOKEN_WORD, "products", start_index=0, source=""),
+            Token(TOKEN_IDENTSTRING, "products", start_index=0, source=""),
         ],
     ),
     Case(

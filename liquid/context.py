@@ -269,6 +269,8 @@ class RenderContext:
         try:
             filter_func = self.env.filters[name]
         except KeyError as err:
+            if not self.env.strict_filters:
+                return _no_op_filter
             raise NoSuchFilterFunc(f"unknown filter '{name}'", token=token) from err
 
         kwargs: dict[str, Any] = {}
@@ -732,3 +734,7 @@ def _segments_str(segments: list[object]) -> str:
             else:
                 buf.append(f"[{segment!r}]")
     return "".join(buf)
+
+
+def _no_op_filter(left: object, *_args: object, **_kwargs: object) -> object:
+    return left

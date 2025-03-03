@@ -1,38 +1,35 @@
 """Test case for the `Template` API."""
 
-import unittest
-
 from liquid import Environment
 from liquid import Mode
 from liquid import Template
 
 
-class TemplateAPITestCase(unittest.TestCase):
-    """Test case for the `Template` API."""
+def test_implicit_environment() -> None:
+    """Test that an Environment is created automatically."""
+    template = Template(r"Hello, {{ you }}")
+    assert template.env is not None
 
-    def test_implicit_environment(self):
-        """Test that an Environment is created automatically."""
-        template = Template(r"Hello, {{ you }}")
-        self.assertIsNotNone(template.env)
 
-    def test_environment_cache(self):
-        """Test that we reuse Environments."""
-        template = Template(r"Hello, {{ you }}!")
-        another = Template(r"Goodbye, {{ you }}.")
+def test_environment_cache() -> None:
+    """Test that we reuse Environments."""
+    template = Template(r"Hello, {{ you }}!")
+    another = Template(r"Goodbye, {{ you }}.")
 
-        self.assertEqual(template.env, another.env)
+    assert template.env == another.env
 
-        lax = Template("something", tolerance=Mode.LAX)
-        self.assertNotEqual(lax.env, template.env)
+    lax = Template("something", tolerance=Mode.LAX)
+    assert lax.env != template.env
 
-    def test_implicit_explicit(self):
-        """Test that an implicit environment renders the same as an explicit one."""
-        env = Environment()
 
-        source = r"Hello, {{ you }}"
-        context = {"you": "there"}
+def test_implicit_explicit() -> None:
+    """Test that an implicit environment renders the same as an explicit one."""
+    env = Environment()
 
-        some = env.from_string(source)
-        other = Template(source)
+    source = r"Hello, {{ you }}"
+    context = {"you": "there"}
 
-        self.assertEqual(some.render(**context), other.render(**context))
+    some = env.from_string(source)
+    other = Template(source)
+
+    assert some.render(**context) == other.render(**context)

@@ -15,6 +15,8 @@ from .token import TOKEN_INITIAL
 from .token import Token
 from .token import reverse_operators
 
+# TODO: optimize for short expressions
+
 
 class TokenStream:
     """Step through or iterate a stream of tokens."""
