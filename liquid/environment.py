@@ -148,6 +148,9 @@ class Environment:
     # when applied to a string. Defaults to `False`.
     string_first_and_last: bool = False
 
+    # TODO: disable logical not and parens
+    # TODO: disable ternary expressions
+
     def __init__(
         self,
         tag_start_string: str = r"{%",

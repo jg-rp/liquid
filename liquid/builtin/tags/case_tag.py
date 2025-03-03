@@ -54,6 +54,11 @@ class CaseNode(Node):
 
         self.blank = all(node.blank for node in self.blocks)
 
+        for node in self.blocks:
+            node.blank = self.blank
+            if isinstance(node, MultiExpressionBlockNode):
+                node.block.blank = self.blank
+
     def __str__(self) -> str:
         blocks: list[str] = []
         for block in self.blocks:

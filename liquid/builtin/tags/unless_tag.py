@@ -70,6 +70,14 @@ class UnlessNode(Node):
             and (not default or default.blank)
         )
 
+        self.consequence.blank = self.blank
+
+        for node in self.alternatives:
+            node.blank = self.blank
+
+        if self.default:
+            self.default.blank = self.blank
+
     def __str__(self) -> str:
         alts = "".join(str(alt) for alt in self.alternatives)
         default = ""
