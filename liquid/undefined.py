@@ -33,7 +33,7 @@ class Undefined(Mapping[Any, object]):
         self,
         name: str,
         *,
-        token: Optional[Token],
+        token: Optional[Token] = None,
         obj: object = UNDEFINED,
         hint: Optional[str] = None,
     ):

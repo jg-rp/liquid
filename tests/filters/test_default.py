@@ -11,7 +11,6 @@ from liquid import Environment
 from liquid.builtin.filters.misc import default
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
-from liquid.expression import EMPTY
 
 
 @dataclass
@@ -142,13 +141,6 @@ TEST_CASES = [
     Case(
         description="false returns default",
         val=False,
-        args=["bar"],
-        kwargs={},
-        expect="bar",
-    ),
-    Case(
-        description="empty returns default",
-        val=EMPTY,
         args=["bar"],
         kwargs={},
         expect="bar",

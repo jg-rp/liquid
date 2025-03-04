@@ -273,6 +273,8 @@ class Filter:
         positional_args, keyword_args = await self.evaluate_args_async(context)
 
         try:
+            if hasattr(func, "filter_async"):
+                return await func.filter_async(left, *positional_args, **keyword_args)
             return func(left, *positional_args, **keyword_args)
         except TypeError as err:
             raise LiquidTypeError(f"{self.name}: {err}", token=self.token) from err

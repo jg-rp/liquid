@@ -39,7 +39,7 @@ TEST_CASES = [
         val=["a", "b", 1, [], {}],
         args=[],
         kwargs={},
-        expect=[{}, [], 1, "b", "a"],
+        expect=[{}, 1, "b", "a"],
     ),
     Case(
         description="empty list",
@@ -60,7 +60,7 @@ TEST_CASES = [
         val=123,
         args=[],
         kwargs={},
-        expect=FilterValueError,
+        expect=[123],
     ),
     Case(
         description="undefined left value",

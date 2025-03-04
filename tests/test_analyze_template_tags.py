@@ -37,53 +37,51 @@ def _assert_tags(tag_analysis: TagAnalysis, case: Case) -> None:
     assert tag_analysis.unknown_tags == case.unknown_tags
 
 
-# TODO: replace line numbers with indexes
-
 TEST_CASES: list[Case] = [
     Case(description="no tags", source="hello"),
     Case(
         description="inline tag",
         source="{% assign foo = 'bar' %}",
-        all_tags={"assign": [Span("<string>", 0)]},
-        tags={"assign": [Span("<string>", 0)]},
+        all_tags={"assign": [Span("<string>", 3)]},
+        tags={"assign": [Span("<string>", 3)]},
     ),
     Case(
         description="one block tag",
         source="{% if foo %}{% endif %}",
         all_tags={
-            "if": [Span("<string>", 0)],
-            "endif": [Span("<string>", 12)],
+            "if": [Span("<string>", 3)],
+            "endif": [Span("<string>", 15)],
         },
-        tags={"if": [Span("<string>", 0)]},
+        tags={"if": [Span("<string>", 3)]},
     ),
     Case(
         description="two block tags",
         source="{% if foo %}{% endif %}\n{% if bar %}{% endif %}",
         all_tags={
-            "if": [Span("<string>", 0), Span("<string>", 24)],
-            "endif": [Span("<string>", 12), Span("<string>", 36)],
+            "if": [Span("<string>", 3), Span("<string>", 27)],
+            "endif": [Span("<string>", 15), Span("<string>", 39)],
         },
-        tags={"if": [Span("<string>", 0), Span("<string>", 24)]},
+        tags={"if": [Span("<string>", 3), Span("<string>", 27)]},
     ),
     Case(
         description="unknown block tag",
         source="{% form foo %}{% endform %}",
         all_tags={
-            "form": [Span("<string>", 0)],
-            "endform": [Span("<string>", 14)],
+            "form": [Span("<string>", 3)],
+            "endform": [Span("<string>", 17)],
         },
-        tags={"form": [Span("<string>", 0)]},
-        unknown_tags={"form": [Span("<string>", 0)]},
+        tags={"form": [Span("<string>", 3)]},
+        unknown_tags={"form": [Span("<string>", 3)]},
     ),
     Case(
         description="unbalanced block tag",
         source="{% if foo %}{% if bar %}{% endif %}\n{% if baz %}{% endif %}",
         all_tags={
-            "if": [Span("<string>", 0), Span("<string>", 12), Span("<string>", 36)],
-            "endif": [Span("<string>", 24), Span("<string>", 48)],
+            "if": [Span("<string>", 3), Span("<string>", 15), Span("<string>", 39)],
+            "endif": [Span("<string>", 27), Span("<string>", 51)],
         },
-        tags={"if": [Span("<string>", 0), Span("<string>", 12), Span("<string>", 36)]},
-        unclosed_tags={"if": [Span("<string>", 0)]},
+        tags={"if": [Span("<string>", 3), Span("<string>", 15), Span("<string>", 39)]},
+        unclosed_tags={"if": [Span("<string>", 3)]},
     ),
     Case(
         description="unbalanced block tag without inferred end tag",
@@ -91,108 +89,108 @@ TEST_CASES: list[Case] = [
             "{% for foo in bar %}\n{% if foo %}\n    {{ foo | upcase }}\n{% endif %}"
         ),
         all_tags={
-            "for": [Span("<string>", 0)],
-            "if": [Span("<string>", 21)],
-            "endif": [Span("<string>", 57)],
+            "for": [Span("<string>", 3)],
+            "if": [Span("<string>", 24)],
+            "endif": [Span("<string>", 60)],
         },
-        tags={"if": [Span("<string>", 21)], "for": [Span("<string>", 0)]},
-        unclosed_tags={"for": [Span("<string>", 0)]},
+        tags={"if": [Span("<string>", 24)], "for": [Span("<string>", 3)]},
+        unclosed_tags={"for": [Span("<string>", 3)]},
     ),
     Case(
         description="end block typo",
         source="{% if foo %}{% if bar %}{% endif %}\n{% endi %}",
         all_tags={
-            "if": [Span("<string>", 0), Span("<string>", 12)],
-            "endif": [Span("<string>", 24)],
-            "endi": [Span("<string>", 36)],
+            "if": [Span("<string>", 3), Span("<string>", 15)],
+            "endif": [Span("<string>", 27)],
+            "endi": [Span("<string>", 39)],
         },
-        tags={"if": [Span("<string>", 0), Span("<string>", 12)]},
-        unclosed_tags={"if": [Span("<string>", 0)]},
-        unknown_tags={"endi": [Span("<string>", 36)]},
+        tags={"if": [Span("<string>", 3), Span("<string>", 15)]},
+        unclosed_tags={"if": [Span("<string>", 3)]},
+        unknown_tags={"endi": [Span("<string>", 39)]},
     ),
     Case(
         description="end block with wrong name",
         source="{% if foo %}{% if bar %}{% endif %}\n{% endfor %}",
         all_tags={
-            "if": [Span("<string>", 0), Span("<string>", 12)],
-            "endif": [Span("<string>", 24)],
-            "endfor": [Span("<string>", 36)],
+            "if": [Span("<string>", 3), Span("<string>", 15)],
+            "endif": [Span("<string>", 27)],
+            "endfor": [Span("<string>", 39)],
         },
-        tags={"if": [Span("<string>", 0), Span("<string>", 12)]},
-        unclosed_tags={"if": [Span("<string>", 0)]},
+        tags={"if": [Span("<string>", 3), Span("<string>", 15)]},
+        unclosed_tags={"if": [Span("<string>", 3)]},
     ),
     Case(
         description="unexpected closing of inline tag",
         source="{% increment foo %}{% endincrement %}",
         all_tags={
-            "increment": [Span("<string>", 0)],
-            "endincrement": [Span("<string>", 19)],
+            "increment": [Span("<string>", 3)],
+            "endincrement": [Span("<string>", 22)],
         },
-        tags={"increment": [Span("<string>", 0)]},
-        unknown_tags={"endincrement": [Span("<string>", 19)]},
+        tags={"increment": [Span("<string>", 3)]},
+        unknown_tags={"endincrement": [Span("<string>", 22)]},
     ),
     Case(
         description="inner tag",
         source="{% if foo %}{% else %}{% endif %}",
         all_tags={
-            "if": [Span("<string>", 0)],
-            "else": [Span("<string>", 12)],
-            "endif": [Span("<string>", 22)],
+            "if": [Span("<string>", 3)],
+            "else": [Span("<string>", 15)],
+            "endif": [Span("<string>", 25)],
         },
-        tags={"if": [Span("<string>", 0)]},
+        tags={"if": [Span("<string>", 3)]},
     ),
     Case(
         description="inner break tag",
         source="{% for foo in bar %}{% break %}{% endfor %}",
         all_tags={
-            "for": [Span("<string>", 0)],
-            "break": [Span("<string>", 20)],
-            "endfor": [Span("<string>", 31)],
+            "for": [Span("<string>", 3)],
+            "break": [Span("<string>", 23)],
+            "endfor": [Span("<string>", 34)],
         },
-        tags={"for": [Span("<string>", 0)]},
+        tags={"for": [Span("<string>", 3)]},
     ),
     Case(
         description="inner continue tag",
         source="{% for foo in bar %}{% continue %}{% endfor %}",
         all_tags={
-            "for": [Span("<string>", 0)],
-            "continue": [Span("<string>", 20)],
-            "endfor": [Span("<string>", 34)],
+            "for": [Span("<string>", 3)],
+            "continue": [Span("<string>", 23)],
+            "endfor": [Span("<string>", 37)],
         },
-        tags={"for": [Span("<string>", 0)]},
+        tags={"for": [Span("<string>", 3)]},
     ),
     Case(
         description="orphaned inner tag",
         source="{% if foo %}{% endif %}{% else %}",
         all_tags={
-            "if": [Span("<string>", 0)],
-            "else": [Span("<string>", 23)],
-            "endif": [Span("<string>", 12)],
+            "if": [Span("<string>", 3)],
+            "else": [Span("<string>", 26)],
+            "endif": [Span("<string>", 15)],
         },
-        tags={"if": [Span("<string>", 0)]},
-        unexpected_tags={"else": [Span("<string>", 23)]},
+        tags={"if": [Span("<string>", 3)]},
+        unexpected_tags={"else": [Span("<string>", 26)]},
     ),
     Case(
         description="orphaned break tag",
         source="{% for foo in bar %}{% endfor %}{% break %}",
         all_tags={
-            "for": [Span("<string>", 0)],
-            "break": [Span("<string>", 32)],
-            "endfor": [Span("<string>", 20)],
+            "for": [Span("<string>", 3)],
+            "break": [Span("<string>", 35)],
+            "endfor": [Span("<string>", 23)],
         },
-        tags={"for": [Span("<string>", 0)]},
-        unexpected_tags={"break": [Span("<string>", 32)]},
+        tags={"for": [Span("<string>", 3)]},
+        unexpected_tags={"break": [Span("<string>", 35)]},
     ),
     Case(
         description="orphaned continue tag",
         source="{% for foo in bar %}{% endfor %}{% continue %}",
         all_tags={
-            "for": [Span("<string>", 0)],
-            "continue": [Span("<string>", 32)],
-            "endfor": [Span("<string>", 20)],
+            "for": [Span("<string>", 3)],
+            "continue": [Span("<string>", 35)],
+            "endfor": [Span("<string>", 23)],
         },
-        tags={"for": [Span("<string>", 0)]},
-        unexpected_tags={"continue": [Span("<string>", 32)]},
+        tags={"for": [Span("<string>", 3)]},
+        unexpected_tags={"continue": [Span("<string>", 35)]},
     ),
 ]
 
@@ -210,12 +208,12 @@ def test_analyze_tags_with_loader() -> None:
         description="",
         source="{% for foo in bar %}{% if foo %}\n{% endif %}{% endfor %}",
         all_tags={
-            "if": [Span("some.liquid", 20)],
-            "for": [Span("some.liquid", 0)],
-            "endif": [Span("some.liquid", 33)],
-            "endfor": [Span("some.liquid", 44)],
+            "if": [Span("some.liquid", 23)],
+            "for": [Span("some.liquid", 3)],
+            "endif": [Span("some.liquid", 36)],
+            "endfor": [Span("some.liquid", 47)],
         },
-        tags={"if": [Span("some.liquid", 20)], "for": [Span("some.liquid", 0)]},
+        tags={"if": [Span("some.liquid", 23)], "for": [Span("some.liquid", 3)]},
     )
 
     loader = DictLoader({"some.liquid": case.source})
@@ -234,12 +232,12 @@ def test_analyze_tags_with_loader_context() -> None:
         description="",
         source="{% for foo in bar %}{% if foo %}\n{% endif %}{% endfor %}",
         all_tags={
-            "if": [Span("some.liquid", 20)],
-            "for": [Span("some.liquid", 0)],
-            "endif": [Span("some.liquid", 33)],
-            "endfor": [Span("some.liquid", 44)],
+            "if": [Span("some.liquid", 23)],
+            "for": [Span("some.liquid", 3)],
+            "endif": [Span("some.liquid", 36)],
+            "endfor": [Span("some.liquid", 47)],
         },
-        tags={"if": [Span("some.liquid", 20)], "for": [Span("some.liquid", 0)]},
+        tags={"if": [Span("some.liquid", 23)], "for": [Span("some.liquid", 3)]},
     )
 
     loader = DictLoader({"some.liquid": case.source})
@@ -260,10 +258,10 @@ def test_analyze_tags_with_extra_tag() -> None:
         description="",
         source="{% with foo:bar %}{% endwith %}",
         all_tags={
-            "with": [Span("<string>", 0)],
-            "endwith": [Span("<string>", 18)],
+            "with": [Span("<string>", 3)],
+            "endwith": [Span("<string>", 21)],
         },
-        tags={"with": [Span("<string>", 0)]},
+        tags={"with": [Span("<string>", 3)]},
     )
 
     env = Environment()

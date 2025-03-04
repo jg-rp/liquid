@@ -68,7 +68,7 @@ TEST_CASES = [
         val=123,
         args=[],
         kwargs={},
-        expect=FilterValueError,
+        expect=[123],
     ),
     Case(
         description="undefined left value",

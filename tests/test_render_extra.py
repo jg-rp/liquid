@@ -4,15 +4,12 @@ import asyncio
 import unittest
 from typing import TYPE_CHECKING
 
+from liquid import DictLoader
 from liquid import golden
 from liquid.environment import Environment
 from liquid.exceptions import Error
-from liquid.extra import IfNotTag
 from liquid.extra import WithTag
-from liquid.extra import add_extended_inline_expression_tags
-from liquid.extra import add_inline_expression_tags
 from liquid.golden.case import Case
-from liquid.loader import DictLoader
 
 if TYPE_CHECKING:
     from liquid.template import BoundTemplate
@@ -22,7 +19,7 @@ class BaseRenderTestCase(unittest.TestCase):
     """Base class for test cases that render synchronously and asynchronously."""
 
     def setUp(self) -> None:
-        self.partials = {}
+        self.partials: dict[str, str] = {}
         self.loader = DictLoader(self.partials)
         self.env = Environment(loader=self.loader)
 
@@ -42,7 +39,7 @@ class BaseRenderTestCase(unittest.TestCase):
                     result = template.render()
                     self.assertEqual(result, case.expect)
 
-        async def coro(template: "BoundTemplate"):
+        async def coro(template: "BoundTemplate") -> str:
             return await template.render_async()
 
         for case in test_cases:
@@ -63,10 +60,6 @@ class BaseRenderTestCase(unittest.TestCase):
 
 class RenderIfNotTagTestCase(BaseRenderTestCase):
     """Test cases for non-standard `if` tag."""
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.env.add_tag(IfNotTag)
 
     def test_render_standard_if_tag(self) -> None:
         """Test that the `if (not)` tag renders standard `if` tags."""
@@ -144,10 +137,6 @@ class RenderIfNotTagTestCase(BaseRenderTestCase):
 
 class RenderInlineIfTestCase(BaseRenderTestCase):
     """Test cases for rendering inline `if` tags and output statements."""
-
-    def setUp(self) -> None:
-        super().setUp()
-        add_inline_expression_tags(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""
@@ -293,10 +282,6 @@ class RenderInlineIfTestCase(BaseRenderTestCase):
 class RenderInlineIfWithParensTestCase(BaseRenderTestCase):
     """Test cases for rendering inline `if` tags that support logical `not`
     and grouping terms with parentheses."""
-
-    def setUp(self) -> None:
-        super().setUp()
-        add_extended_inline_expression_tags(self.env)
 
     def test_render_inline_if_output_statement(self) -> None:
         """Test that we can render output statements with inline `if` expressions."""

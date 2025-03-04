@@ -8,7 +8,7 @@ from liquid.builtin.tags.if_tag import IfNode
 
 
 class ExpressionCacheTestCase(TestCase):
-    def test_env_with_no_expression_caching(self):
+    def test_env_with_no_expression_caching(self) -> None:
         """Test that there is no expression caching by default."""
         env = Environment(expression_cache_size=0)
         template = env.from_string(
@@ -23,7 +23,7 @@ class ExpressionCacheTestCase(TestCase):
 
         self.assertNotEqual(id(node1.condition), id(node2.condition))
 
-    def test_env_with_expression_caching(self):
+    def test_env_with_expression_caching(self) -> None:
         """Test that there is no expression caching by default."""
         env = Environment(expression_cache_size=1)
         template = env.from_string(
@@ -38,7 +38,7 @@ class ExpressionCacheTestCase(TestCase):
 
         self.assertEqual(id(node1.condition), id(node2.condition))
 
-    def test_template_with_no_expression_caching(self):
+    def test_template_with_no_expression_caching(self) -> None:
         """Test that there is no expression caching by default."""
         template = Template(
             "{% if x == 1 %}{% endif %}{% if x == 1 %}{% endif %}",
@@ -54,7 +54,7 @@ class ExpressionCacheTestCase(TestCase):
 
         self.assertNotEqual(id(node1.condition), id(node2.condition))
 
-    def test_template_with_expression_caching(self):
+    def test_template_with_expression_caching(self) -> None:
         """Test that there is no expression caching by default."""
         template = Template(
             "{% if x == 1 %}{% endif %}{% if x == 1 %}{% endif %}",

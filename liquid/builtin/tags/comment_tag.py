@@ -73,7 +73,6 @@ class CommentTextTag(CommentTag):
     def parse(self, stream: TokenStream) -> CommentNode:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-
         text = []
         while stream.current.kind != TOKEN_EOF:
             if (
