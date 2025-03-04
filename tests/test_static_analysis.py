@@ -11,7 +11,7 @@ import pytest
 from liquid import Environment
 from liquid.builtin import DictLoader
 from liquid.exceptions import TemplateNotFound
-from liquid.static_analysis import Span
+from liquid.span import Span
 from liquid.static_analysis import Variable
 
 if TYPE_CHECKING:
@@ -164,7 +164,7 @@ def test_analyze_assign(env: Environment) -> None:
             "z": [Variable(["z"], Span("", 26))],
         },
         filters={"append": [Span("", 18)]},
-        tags={"assign": [Span("", 0)]},
+        tags={"assign": [Span("", 3)]},
     )
 
 
@@ -178,8 +178,8 @@ def test_analyze_capture(env: Environment) -> None:
             "y": [Variable(["y"], Span("", 21))],
         },
         tags={
-            "capture": [Span("", 0)],
-            "if": [Span("", 15)],
+            "capture": [Span("", 3)],
+            "if": [Span("", 18)],
         },
     )
 
@@ -209,7 +209,7 @@ def test_analyze_case(env: Environment) -> None:
             "b": [Variable(["b"], Span("", 54))],
             "c": [Variable(["c"], Span("", 75))],
         },
-        tags={"case": [Span("", 0)]},
+        tags={"case": [Span("", 3)]},
     )
 
 
@@ -224,7 +224,7 @@ def test_analyze_cycle(env: Environment) -> None:
             "b": [Variable(["b"], Span("", 15))],
             "x": [Variable(["x"], Span("", 9))],
         },
-        tags={"cycle": [Span("", 0)]},
+        tags={"cycle": [Span("", 3)]},
     )
 
 
@@ -235,7 +235,7 @@ def test_analyze_decrement(env: Environment) -> None:
         env.from_string(source),
         locals={"x": [Variable(["x"], Span("", 13))]},
         globals={},
-        tags={"decrement": [Span("", 0)]},
+        tags={"decrement": [Span("", 3)]},
     )
 
 
@@ -253,7 +253,7 @@ def test_analyze_echo(env: Environment) -> None:
         filters={
             "default": [Span("", 12)],
         },
-        tags={"echo": [Span("", 0)]},
+        tags={"echo": [Span("", 3)]},
     )
 
 
@@ -284,9 +284,9 @@ def test_analyze_for(env: Environment) -> None:
         },
         filters={},
         tags={
-            "for": [Span("", 0)],
-            "break": [Span("", 32)],
-            "continue": [Span("", 65)],
+            "for": [Span("", 3)],
+            "break": [Span("", 35)],
+            "continue": [Span("", 68)],
         },
     )
 
@@ -316,7 +316,7 @@ def test_analyze_if(env: Environment) -> None:
         },
         filters={},
         tags={
-            "if": [Span("", 0)],
+            "if": [Span("", 3)],
         },
     )
 
@@ -328,7 +328,7 @@ def test_analyze_increment(env: Environment) -> None:
         env.from_string(source),
         locals={"x": [Variable(["x"], Span("", 13))]},
         globals={},
-        tags={"increment": [Span("", 0)]},
+        tags={"increment": [Span("", 3)]},
     )
 
 
@@ -359,7 +359,7 @@ endfor %}"""
         },
         filters={"upcase": [Span("", 42), Span("", 77)]},
         tags={
-            "liquid": [Span("", 0)],
+            "liquid": [Span("", 3)],
             "echo": [Span("", 31), Span("", 58), Span("", 111)],
             "for": [Span("", 91)],
             "if": [Span("", 10)],
@@ -388,7 +388,7 @@ def test_analyze_unless(env: Environment) -> None:
             "c": [Variable(["c"], Span("", 65))],
         },
         tags={
-            "unless": [Span("", 0)],
+            "unless": [Span("", 3)],
         },
     )
 
@@ -405,7 +405,7 @@ def test_analyze_include() -> None:
             "x": [Variable(["x"], Span("a", 3))],
         },
         tags={
-            "include": [Span("", 0)],
+            "include": [Span("", 3)],
         },
     )
 
@@ -428,8 +428,8 @@ def test_analyze_included_assign() -> None:
             "y": [Variable(["y"], Span("", 20))],
         },
         tags={
-            "include": [Span("", 0)],
-            "assign": [Span("a", 7)],
+            "include": [Span("", 3)],
+            "assign": [Span("a", 10)],
         },
     )
 
@@ -446,7 +446,7 @@ def test_analyze_include_once() -> None:
             "x": [Variable(["x"], Span("a", 3))],
         },
         tags={
-            "include": [Span("", 0), Span("", 17)],
+            "include": [Span("", 3), Span("", 20)],
         },
     )
 
@@ -464,8 +464,8 @@ def test_analyze_include_recursive() -> None:
         },
         tags={
             "include": [
-                Span("", 0),
-                Span("a", 7),
+                Span("", 3),
+                Span("a", 10),
             ],
         },
     )
@@ -490,7 +490,7 @@ def test_analyze_include_with_bound_variable() -> None:
             "y": [Variable(["y"], Span("a", 15))],
             "a": [Variable(["a"], Span("a", 22))],
         },
-        tags={"include": [Span("", 0)]},
+        tags={"include": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -512,7 +512,7 @@ def test_analyze_include_with_bound_alias() -> None:
             "x": [Variable(["x"], Span("a", 3))],
             "y": [Variable(["y"], Span("a", 15))],
         },
-        tags={"include": [Span("", 0)]},
+        tags={"include": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -542,7 +542,7 @@ def test_analyze_include_with_arguments() -> None:
                 Variable(["x"], Span("", 31)),
             ],
         },
-        tags={"include": [Span("", 0)]},
+        tags={"include": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -578,8 +578,8 @@ def test_analyze_render_assign() -> None:
             "y": [Variable(["y"], Span("", 19))],
         },
         tags={
-            "render": [Span("", 0)],
-            "assign": [Span("a", 7)],
+            "render": [Span("", 3)],
+            "assign": [Span("a", 10)],
         },
     )
 
@@ -596,7 +596,7 @@ def test_analyze_render_once() -> None:
             "x": [Variable(["x"], Span("a", 3))],
         },
         tags={
-            "render": [Span("", 0), Span("", 16)],
+            "render": [Span("", 3), Span("", 19)],
         },
     )
 
@@ -614,8 +614,8 @@ def test_analyze_render_recursive() -> None:
         },
         tags={
             "render": [
-                Span("", 0),
-                Span("a", 7),
+                Span("", 3),
+                Span("a", 10),
             ],
         },
     )
@@ -642,7 +642,7 @@ def test_analyze_render_with_bound_variable() -> None:
             "y": [Variable(["y"], Span("a", 15))],
             "a": [Variable(["a"], Span("a", 22))],
         },
-        tags={"render": [Span("", 0)]},
+        tags={"render": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -664,7 +664,7 @@ def test_analyze_render_with_bound_alias() -> None:
             "x": [Variable(["x"], Span("a", 3))],
             "y": [Variable(["y"], Span("a", 15))],
         },
-        tags={"render": [Span("", 0)]},
+        tags={"render": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -694,7 +694,7 @@ def test_analyze_render_with_arguments() -> None:
                 Variable(["y"], Span("a", 15)),
             ],
         },
-        tags={"render": [Span("", 0)]},
+        tags={"render": [Span("", 3)]},
         filters={"append": [Span("a", 7)]},
     )
 
@@ -771,19 +771,19 @@ def test_analyze_inheritance_chain() -> None:
         },
         tags={
             "assign": [
-                Span("base", 7),
-                Span("other", 86),
+                Span("base", 10),
+                Span("other", 89),
             ],
             "extends": [
-                Span("some", 0),
-                Span("other", 0),
+                Span("some", 3),
+                Span("other", 3),
             ],
             "block": [
-                Span("base", 29),
-                Span("base", 79),
-                Span("other", 20),
-                Span("other", 71),
-                Span("some", 40),
+                Span("base", 32),
+                Span("base", 82),
+                Span("other", 23),
+                Span("other", 74),
+                Span("some", 43),
             ],
         },
         filters={
@@ -810,8 +810,8 @@ def test_analyze_recursive_extends() -> None:
         globals={},
         tags={
             "extends": [
-                Span("some", 0),
-                Span("other", 0),
+                Span("some", 3),
+                Span("other", 3),
             ],
         },
     )
@@ -842,11 +842,11 @@ def test_analyze_super() -> None:
         },
         tags={
             "extends": [
-                Span("some", 0),
+                Span("some", 3),
             ],
             "block": [
-                Span("base", 7),
-                Span("some", 20),
+                Span("base", 10),
+                Span("some", 23),
             ],
         },
         filters={
@@ -874,9 +874,9 @@ def test_analyze_macro_and_call(env: Environment) -> None:
         globals={"n": n},
         variables={"n": n, "you": you, "x": [Variable(["x"], Span("", 128))]},
         tags={
-            "macro": [Span("", 0)],
-            "call": [Span("", 70), Span("", 108)],
-            "assign": [Span("", 86)],
+            "macro": [Span("", 3)],
+            "call": [Span("", 73), Span("", 111)],
+            "assign": [Span("", 89)],
         },
     )
 

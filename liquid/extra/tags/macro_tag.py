@@ -106,7 +106,7 @@ class MacroTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(tag=token)
         name = parse_name(self.env, tokens)
         args = Parameter.parse(self.env, tokens)
         block = get_parser(self.env).parse_block(stream, ("endmacro",))
@@ -262,7 +262,7 @@ class CallTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner(eat=False)
+        tokens = stream.into_inner(tag=token, eat=False)
         name = parse_name(self.env, tokens)
         args, kwargs = parse_arguments(self.env, tokens)
         return self.node_class(token, name, args, kwargs)

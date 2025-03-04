@@ -26,6 +26,7 @@ from .extra import BlockTag
 from .extra import CallTag
 from .extra import ExtendsTag
 from .extra import MacroTag
+from .extra import WithTag
 from .lex import get_lexer
 from .mode import Mode
 from .parse import get_parser
@@ -273,6 +274,7 @@ class Environment:
         self.add_tag(BlockTag)
         self.add_tag(MacroTag)
         self.add_tag(CallTag)
+        self.add_tag(WithTag)
 
     def parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.

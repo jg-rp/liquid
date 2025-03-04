@@ -139,7 +139,7 @@ class CaseTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(tag=token)
         left = parse_primitive(self.env, tokens)
         tokens.expect_eos()
 
@@ -159,7 +159,9 @@ class CaseTag(Tag):
                 blocks.append(parse_block(stream, ENDWHENBLOCK))
             elif stream.current.is_tag(TAG_WHEN):
                 alternative_token = next(stream)
-                expressions = self._parse_when_expression(stream.into_inner())
+                expressions = self._parse_when_expression(
+                    stream.into_inner(tag=alternative_token)
+                )
                 alternative_block = parse_block(stream, ENDWHENBLOCK)
 
                 blocks.append(

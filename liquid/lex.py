@@ -117,7 +117,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
             yield Token(
                 kind=TOKEN_TAG,
                 value=name,
-                start_index=match.start(),
+                start_index=match.start("name"),
                 source=source,
             )
 
@@ -154,7 +154,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
             if value.startswith(r"{{"):
                 raise LiquidSyntaxError(
-                    "expected '}}', found 'eof'",
+                    "expected '}}', found end of file",
                     token=Token(
                         TOKEN_EOF,
                         value=match.group(),
@@ -164,7 +164,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
                 )
             if value.startswith(r"{%"):
                 raise LiquidSyntaxError(
-                    "expected '%}', found 'eof'",
+                    "expected '%}', found end of file",
                     token=Token(
                         TOKEN_EOF,
                         value=match.group(),

@@ -116,7 +116,7 @@ class CycleTag(Tag):
     def parse(self, stream: TokenStream) -> CycleNode:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner(eat=False)
+        tokens = stream.into_inner(tag=token, eat=False)
 
         group_name: Optional[Expression] = None
         if tokens.peek.kind == TOKEN_COLON:

@@ -159,7 +159,13 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
                 kind = operators[value]
             except KeyError as err:
                 raise LiquidSyntaxError(
-                    f"unknown operator {value!r}", token=parent_token
+                    f"unknown operator {value!r}",
+                    token=Token(
+                        kind,
+                        value,
+                        start_index=parent_token.start_index + match.start(),
+                        source=parent_token.source,
+                    ),
                 ) from err
         elif kind == TOKEN_SKIP:
             continue

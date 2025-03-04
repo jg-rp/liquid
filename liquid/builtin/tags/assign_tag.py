@@ -68,7 +68,7 @@ class AssignTag(Tag):
     def parse(self, stream: TokenStream) -> AssignNode:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner(eat=False)
+        tokens = stream.into_inner(tag=token, eat=False)
         name = parse_identifier(self.env, tokens, allow_trailing_question_mark=False)
         tokens.eat(TOKEN_ASSIGN)
         return self.node_class(

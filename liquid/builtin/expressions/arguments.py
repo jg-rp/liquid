@@ -60,8 +60,8 @@ class KeywordArgument:
                 break
 
             if token.kind == TOKEN_WORD:
-                # TODO: allow colon or assign
-                tokens.eat(TOKEN_COLON)
+                # TODO: optionally disable assign
+                tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
                 value = parse_primitive(env, tokens)
                 args.append(KeywordArgument(token, token.value, value))
                 if env.mode == Mode.STRICT and tokens.current.kind == TOKEN_WORD:

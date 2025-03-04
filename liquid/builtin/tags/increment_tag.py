@@ -56,5 +56,5 @@ class IncrementTag(Tag):
         token = stream.eat(TOKEN_TAG)
         return self.node_class(
             token,
-            name=parse_identifier(self.env, stream.into_inner(eat=False)),
+            name=parse_identifier(self.env, stream.into_inner(tag=token, eat=False)),
         )

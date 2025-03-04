@@ -61,10 +61,12 @@ class Parser:
 
             # Tag parse functions can choose to return an IllegalNode.
             if isinstance(node, IllegalNode):
-                raise LiquidSyntaxError(
-                    f"unexpected tag '{node.token.value}'",
-                    token=node.token,
+                msg = (
+                    "missing tag name"
+                    if not node.token.value
+                    else f"unexpected tag '{node.token.value}'"
                 )
+                raise LiquidSyntaxError(msg, token=node.token)
         else:
             node = self.content.get_node(stream)
 

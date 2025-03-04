@@ -148,19 +148,19 @@ class IfTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(tag=token)
         condition = BooleanExpression.parse(self.env, tokens)
         parse_block = get_parser(self.env).parse_block
         consequence = parse_block(stream, ENDIFBLOCK)
         alternatives = []
 
         while stream.current.is_tag(TAG_ELSIF):
-            stream.next_token()
-
             # If the expression can't be parsed, eat the "elsif" block and
             # continue to parse more "elsif" expression, if any.
             try:
-                expr = BooleanExpression.parse(self.env, stream.into_inner())
+                expr = BooleanExpression.parse(
+                    self.env, stream.into_inner(tag=stream.next_token())
+                )
             except LiquidSyntaxError as err:
                 self.env.error(err)
                 eat_block(stream, ENDELSIFBLOCK)

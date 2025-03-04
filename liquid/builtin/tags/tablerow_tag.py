@@ -309,7 +309,7 @@ class TablerowTag(Tag):
     def parse(self, stream: TokenStream) -> TablerowNode:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(tag=token)
         expr = LoopExpression.parse(self.env, tokens)
         block = get_parser(self.env).parse_block(stream, END_TAGBLOCK)
         stream.expect(TOKEN_TAG, value=TAG_ENDTABLEROW)

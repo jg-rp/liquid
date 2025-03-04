@@ -123,7 +123,7 @@ class ExtendsTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner(eat=False)
+        tokens = stream.into_inner(tag=token, eat=False)
         name = parse_name(self.env, tokens)
         tokens.expect_eos()
         return self.node_class(token=token, name=name)
@@ -285,7 +285,7 @@ class BlockTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner()
+        tokens = stream.into_inner(tag=token)
         block_name = parse_name(self.env, tokens)
 
         if tokens.current.kind == TOKEN_REQUIRED:
@@ -304,7 +304,7 @@ class BlockTag(Tag):
 
         if stream.peek.kind == TOKEN_EXPRESSION:
             next(stream)
-            tokens = stream.into_inner(eat=False)
+            tokens = stream.into_inner(tag=token, eat=False)
             if tokens.current.kind != TOKEN_EOF:
                 end_block_name = parse_name(self.env, tokens)
                 if end_block_name != block_name:

@@ -70,7 +70,7 @@ class WithTag(Tag):
 
     def parse(self, stream: TokenStream) -> Node:
         token = stream.eat(TOKEN_TAG)
-        args = KeywordArgument.parse(self.env, stream.into_inner())
+        args = KeywordArgument.parse(self.env, stream.into_inner(tag=token))
 
         # Parse the block
         block = get_parser(self.env).parse_block(stream, (TAG_ENDWITH, TOKEN_EOF))

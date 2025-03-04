@@ -76,20 +76,17 @@ class TokenStream:
 
     def close(self) -> None:
         """Close the stream."""
-        # TODO: loose close
+        # TODO: lose close
         self.current = self.eof
 
     def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> Token:
         if tok.kind != typ or (value is not None and tok.value != value):
-            _typ = reverse_operators.get(tok.kind, tok.kind)
-            _expected_typ = reverse_operators.get(typ, typ)
+            _typ = self._operator(tok.kind)
+            _expected_typ = self._operator(typ)
             if value is not None:
-                msg = (
-                    f"expected {_expected_typ} with value '{value}', "
-                    f"found {_typ} with value '{tok.value}'"
-                )
+                msg = f"expected {_expected_typ} {value}, found {_typ}"
             else:
-                msg = f"expected '{_expected_typ}', found '{_typ}'"
+                msg = f"expected {_expected_typ}, found {_typ}"
             raise LiquidSyntaxError(msg, token=tok)
         return tok
 
@@ -118,10 +115,7 @@ class TokenStream:
         """
         tok = self.current
         if tok.kind != typ:
-            msg = (
-                f"expected {reverse_operators.get(typ, typ)!r}, "
-                f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
-            )
+            msg = f"expected {self._operator(typ)}, found {self._operator(tok.kind)}"
             raise LiquidSyntaxError(msg, token=tok)
         return next(self)
 
@@ -134,28 +128,26 @@ class TokenStream:
         """
         tok = self.current
         if tok.kind not in typ:
-            msg = (
-                f"expected on of {typ!r}, "
-                f"found {reverse_operators.get(tok.kind, tok.kind)!r}"
-            )
+            msg = f"expected one of {typ!r}, found {self._operator(tok.kind)}"
             raise LiquidSyntaxError(msg, token=tok)
         return next(self)
 
-    def into_inner(self, *, eat: bool = True) -> TokenStream:
+    def into_inner(
+        self, *, tag: Optional[Token] = None, eat: bool = True
+    ) -> TokenStream:
         """Return a stream of tokens for the current expression token.
 
-        If the current token is not an expression, a LiquidSyntaxError is
+        If the current token is not an expression, a `LiquidSyntaxError` is
         raised.
+
+        If _tag_ is given, it will be used to add context information to the
+        syntax error, should one be raised.
 
         If _eat_ is true (the default), the current token is consumed.
         """
         token = self.current
         if token.kind != TOKEN_EXPRESSION:
-            msg = (
-                "expected an expression, "
-                f"found {reverse_operators.get(token.kind, token.kind)!r}"
-            )
-            raise LiquidSyntaxError(msg, token=token)
+            raise LiquidSyntaxError("missing expression", token=tag or token)
 
         if eat:
             next(self)
@@ -167,3 +159,9 @@ class TokenStream:
             raise LiquidSyntaxError(
                 f"unexpected token {self.current.kind}", token=self.current
             )
+
+    def _operator(self, kind: str) -> str:
+        try:
+            return repr(reverse_operators[kind])
+        except KeyError:
+            return kind

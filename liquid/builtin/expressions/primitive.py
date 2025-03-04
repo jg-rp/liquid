@@ -100,9 +100,6 @@ class Continue(Expression):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Continue)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return "Continue()"
-
     def __str__(self) -> str:  # pragma: no cover
         return "continue"
 
@@ -180,9 +177,6 @@ class StringLiteral(Literal[str]):
     def __hash__(self) -> int:
         return hash(self.value)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"StringLiteral(value='{self.value}')"
-
     def __sizeof__(self) -> int:
         return sys.getsizeof(self.value)
 
@@ -204,9 +198,6 @@ class IntegerLiteral(Literal[int]):
     def __hash__(self) -> int:
         return hash(self.value)
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"IntegerLiteral(value={self.value})"
-
 
 class FloatLiteral(Literal[float]):
     __slots__ = ()
@@ -216,9 +207,6 @@ class FloatLiteral(Literal[float]):
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, FloatLiteral) and self.value == other.value
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"FloatLiteral(value={self.value})"
 
 
 class RangeLiteral(Expression):
@@ -238,9 +226,6 @@ class RangeLiteral(Expression):
 
     def __str__(self) -> str:
         return f"({self.start}..{self.stop})"
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"RangeLiteral(start={self.start}, stop={self.stop})"
 
     def __hash__(self) -> int:
         return hash((self.start, self.stop))

@@ -1,3 +1,4 @@
+from ._tokenize import tokenize
 from .arguments import KeywordArgument  # noqa: D104
 from .arguments import Parameter
 from .arguments import PositionalArgument
@@ -18,7 +19,6 @@ from .primitive import parse_identifier
 from .primitive import parse_name
 from .primitive import parse_primitive
 from .primitive import parse_string_or_path
-from .tokenize import tokenize
 
 __all__ = (
     "BooleanExpression",

@@ -283,7 +283,7 @@ class RenderTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        tokens = stream.into_inner(eat=False)
+        tokens = stream.into_inner(tag=token, eat=False)
 
         # Need a string. 'render' does not accept identifiers that resolve to a string.
         # This is the name of the template to be included.

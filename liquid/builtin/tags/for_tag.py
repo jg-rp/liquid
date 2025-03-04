@@ -202,7 +202,7 @@ class ForTag(Tag):
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
-        expr = LoopExpression.parse(self.env, stream.into_inner())
+        expr = LoopExpression.parse(self.env, stream.into_inner(tag=token))
 
         parse_block = get_parser(self.env).parse_block
         block = parse_block(stream, ENDFORBLOCK)

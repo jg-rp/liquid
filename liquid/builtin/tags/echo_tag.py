@@ -39,5 +39,7 @@ class EchoTag(Tag):
         if stream.current.kind == TOKEN_EOF:
             expr: Expression = Nil(stream.current)
         else:
-            expr = FilteredExpression.parse(self.env, stream.into_inner(eat=False))
+            expr = FilteredExpression.parse(
+                self.env, stream.into_inner(tag=token, eat=False)
+            )
         return self.node_class(token, expr)

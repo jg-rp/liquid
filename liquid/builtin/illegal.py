@@ -22,4 +22,7 @@ class Illegal(Tag):
         if stream.peek.kind == TOKEN_EXPRESSION:
             stream.next_token()
 
-        raise LiquidSyntaxError(f"unexpected tag '{token.value}'", token=token)
+        msg = (
+            "missing tag name" if not token.value else f"unexpected tag '{token.value}'"
+        )
+        raise LiquidSyntaxError(msg, token=token)

@@ -63,7 +63,7 @@ __all__ = (
 
 TOKEN_ILLEGAL = sys.intern("illegal")
 TOKEN_INITIAL = sys.intern("initial")
-TOKEN_EOF = sys.intern("eof")
+TOKEN_EOF = sys.intern("end of expression")
 TOKEN_NEWLINE = sys.intern("newline")
 TOKEN_SKIP = sys.intern("skip")
 
@@ -104,7 +104,7 @@ TOKEN_IN = sys.intern("in")
 TOKEN_LPAREN = sys.intern("lparen")
 TOKEN_RPAREN = sys.intern("rparen")
 TOKEN_RANGE = sys.intern("range")
-TOKEN_RANGE_LITERAL = sys.intern("rangeliteral")
+TOKEN_RANGE_LITERAL = sys.intern("rangeexpression")
 TOKEN_LIMIT = sys.intern("limit")
 TOKEN_OFFSET = sys.intern("offset")
 TOKEN_REVERSED = sys.intern("reversed")

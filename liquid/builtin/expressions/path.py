@@ -151,4 +151,10 @@ class Path(Expression):
 
             next(tokens)
 
+        if not segments:
+            raise LiquidSyntaxError(
+                "missing or unexpected path segment",
+                token=tokens.current,
+            )
+
         return Path(token, segments)
