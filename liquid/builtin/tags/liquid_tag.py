@@ -25,7 +25,8 @@ from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
 if TYPE_CHECKING:
-    from liquid.context import RenderContext
+    from liquid import Environment
+    from liquid import RenderContext
 
 TAG_LIQUID = sys.intern("liquid")
 
@@ -77,6 +78,37 @@ class LiquidTag(Tag):
     block = False
     node_class = LiquidNode
 
+    def __init__(self, env: Environment):
+        super().__init__(env)
+
+        comment_start_string = env.comment_start_string.replace("{", "")
+
+        if comment_start_string:
+            seq = re.escape(comment_start_string)
+            rules = (
+                (
+                    "LIQUID_EXPR",
+                    rf"[ \t]*(?P<name>(\w+|{seq}))[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
+                ),
+                ("SKIP", r"[\r\n]+"),
+                (TOKEN_ILLEGAL, r"."),
+            )
+        else:
+            rules = (
+                (
+                    "LIQUID_EXPR",
+                    r"[ \t]*(?P<name>#|\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
+                ),
+                ("SKIP", r"[\r\n]+"),
+                (TOKEN_ILLEGAL, r"."),
+            )
+
+        self._tokenize = partial(
+            _tokenize_liquid_expression,
+            rules=_compile_rules(rules),
+            comment_start_string=comment_start_string,
+        )
+
     def parse(self, stream: TokenStream) -> Node:
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
@@ -91,26 +123,23 @@ class LiquidTag(Tag):
         else:
             token_ = stream.expect(TOKEN_EXPRESSION)
             block = get_parser(self.env).parse_block(
-                TokenStream(_tokenize(token_.value, token=token_)), end=()
+                TokenStream(
+                    self._tokenize(
+                        token_.value,
+                        token=token_,
+                    )
+                ),
+                end=(),
             )
 
         return self.node_class(token, token_, block=block)
-
-
-_RULES = (
-    (
-        "LIQUID_EXPR",
-        r"[ \t]*(?P<name>#|\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
-    ),
-    ("SKIP", r"[\r\n]+"),
-    (TOKEN_ILLEGAL, r"."),
-)
 
 
 def _tokenize_liquid_expression(
     source: str,
     rules: Pattern[str],
     token: Token,
+    comment_start_string: str,
 ) -> Iterator[Token]:
     """Tokenize a "{% liquid %}" tag."""
     for match in rules.finditer(source):
@@ -121,6 +150,8 @@ def _tokenize_liquid_expression(
 
         if kind == "LIQUID_EXPR":
             name = match.group("name")
+            if name == comment_start_string:
+                continue
 
             yield Token(
                 TOKEN_TAG,
@@ -149,9 +180,3 @@ def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
     """Compile the given rules into a single regular expression."""
     pattern = "|".join(f"(?P<{name}>{pattern})" for name, pattern in rules)
     return re.compile(pattern, re.DOTALL)
-
-
-_tokenize = partial(
-    _tokenize_liquid_expression,
-    rules=_compile_rules(_RULES),
-)

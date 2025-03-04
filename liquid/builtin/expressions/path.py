@@ -96,11 +96,10 @@ class Path(Expression):
         return [p for p in self.path if isinstance(p, Expression)]
 
     @staticmethod
-    def parse(env: Environment, tokens: TokenStream) -> Path:
+    def parse(env: Environment, tokens: TokenStream) -> Path:  # noqa: PLR0912
         token = tokens.current
         segments: Segments = []
 
-        # TODO: floats and shorthand indexes
         while True:
             kind, value, _index, _source = tokens.current
 
@@ -134,11 +133,19 @@ class Path(Expression):
                         token=tokens.peek,
                     )
             elif kind == TOKEN_DOT:
-                if env.mode == Mode.STRICT and tokens.peek.kind != TOKEN_WORD:
+                if (
+                    not env.shorthand_indexes
+                    and env.mode == Mode.STRICT
+                    and tokens.peek.kind != TOKEN_WORD
+                ):
                     raise LiquidSyntaxError(
                         f"expected an identifier, found {tokens.peek.kind}",
                         token=tokens.peek,
                     )
+            elif kind == TOKEN_FLOAT and env.shorthand_indexes:
+                segments.extend(to_int(i) for i in value.rstrip(".").split("."))
+            elif kind == TOKEN_INTEGER and env.shorthand_indexes:
+                segments.append(to_int(value))
             else:
                 break
 

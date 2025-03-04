@@ -2,8 +2,6 @@ import pytest
 
 from liquid import Environment
 from liquid.exceptions import LiquidSyntaxError
-from liquid.extra import add_inline_expression_tags
-from liquid.extra.tags import IfNotTag
 
 
 def test_shorthand_indexes_with_default_environment() -> None:
@@ -67,8 +65,6 @@ def test_shorthand_indexes_in_case_tag() -> None:
 
 def test_shorthand_indexes_in_ternary_expressions() -> None:
     env = MockEnv()
-    add_inline_expression_tags(env)
-
     data = {"foo": ["World", "Liquid"]}
     template = env.from_string("Hello, {{ foo.0 }}!")
     assert template.render(**data) == "Hello, World!"
@@ -80,8 +76,6 @@ def test_shorthand_indexes_in_ternary_expressions() -> None:
 
 def test_shorthand_indexes_in_logical_not_expressions() -> None:
     env = MockEnv()
-    env.add_tag(IfNotTag)
-
     data = {"foo": ["World", "Liquid"]}
     template = env.from_string("{% if not foo.0 %}Hello, {{ foo.0 }}!{% endif %}")
     assert template.render(**data) == ""

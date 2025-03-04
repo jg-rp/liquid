@@ -6,6 +6,7 @@ from typing import Type
 from typing import Union
 from unittest import TestCase
 
+from liquid import DictLoader
 from liquid import Template
 from liquid.environment import Environment
 from liquid.exceptions import ContextDepthError
@@ -17,10 +18,6 @@ from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import LiquidWarning
 from liquid.exceptions import TemplateNotFound
 from liquid.exceptions import lookup_warning
-from liquid.extra import IfNotTag
-from liquid.extra import add_extended_inline_expression_tags
-from liquid.extra import add_inline_expression_tags
-from liquid.loader import DictLoader
 from liquid.mode import Mode
 
 
@@ -60,8 +57,6 @@ class MalformedTemplateTestCase(TestCase):
 
         # Test with non-standard conditional and boolean expressions
         env = Environment(tolerance=mode)
-        env.add_tag(IfNotTag)
-        add_inline_expression_tags(env)
         # Skip test cases that are not considered malformed with non-standard
         # expressions.
         self._test_with_env(
@@ -69,7 +64,6 @@ class MalformedTemplateTestCase(TestCase):
         )
 
         # Same again for conditional expressions that support `not` and parens.
-        add_extended_inline_expression_tags(env)
         self._test_with_env(
             env, [case for case in test_cases if "||" not in case.template]
         )
