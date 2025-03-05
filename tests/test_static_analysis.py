@@ -881,6 +881,24 @@ def test_analyze_macro_and_call(env: Environment) -> None:
     )
 
 
+def test_span_line_and_col(env: Environment) -> None:
+    source = "\n".join(
+        [
+            r"{% for x in (1..y) %}",
+            r"  {{ x }}",
+            r"{% break %}",
+            r"{% else %}",
+            r"  {{ z }}",
+            r"{% continue %}",
+            r"{% endfor %}",
+        ]
+    )
+
+    analysis = env.from_string(source).analyze()
+    assert analysis.globals["y"][0].span.line_col(source) == (1, 16)
+    assert analysis.variables["x"][0].span.line_col(source) == (2, 5)
+
+
 # TODO:
 # def test_analyze_translate(env: Environment) -> None:
 #     source = (

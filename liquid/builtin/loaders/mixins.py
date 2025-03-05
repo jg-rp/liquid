@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 class _CachingLoaderProtocol(Protocol):
-    def load(
+    def load(  # pragma: no cover
         self,
         env: Environment,
         name: str,
@@ -37,7 +37,7 @@ class _CachingLoaderProtocol(Protocol):
         **kwargs: object,
     ) -> BoundTemplate: ...
 
-    async def load_async(
+    async def load_async(  # pragma: no cover
         self,
         env: Environment,
         name: str,

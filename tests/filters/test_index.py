@@ -1,13 +1,11 @@
 import operator
 from dataclasses import dataclass
 from dataclasses import field
-from inspect import isclass
 from typing import Any
 
 import pytest
 
 from liquid import Environment
-from liquid.exceptions import Error
 from liquid.extra.filters.array import index
 
 
@@ -44,8 +42,4 @@ TEST_CASES = [
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_index_filter(case: Case) -> None:
-    if isclass(case.expect) and issubclass(case.expect, Error):
-        with pytest.raises(case.expect):
-            index(case.val, *case.args, **case.kwargs)
-    else:
-        assert index(case.val, *case.args, **case.kwargs) == case.expect
+    assert index(case.val, *case.args, **case.kwargs) == case.expect

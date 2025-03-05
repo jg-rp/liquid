@@ -112,7 +112,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_tag(output.Output)
     env.add_tag(illegal.Illegal)
     env.add_tag(if_tag.IfTag)
-    env.add_tag(comment_tag.CommentTextTag)
+    env.add_tag(comment_tag.CommentTag)
     env.add_tag(unless_tag.UnlessTag)
     env.add_tag(case_tag.CaseTag)
     env.add_tag(for_tag.ForTag)

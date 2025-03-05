@@ -9,7 +9,6 @@ from typing import TextIO
 
 from liquid import ast
 from liquid.exceptions import LiquidSyntaxError
-from liquid.parse import eat_block
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
@@ -44,24 +43,6 @@ class CommentNode(ast.Node):
 
 
 class CommentTag(Tag):
-    """The built-in _comment_ tag.
-
-    This implementation does not include comment text in the resulting
-    AST node.
-    """
-
-    name = TAG_COMMENT
-    end = TAG_ENDCOMMENT
-    node_class = CommentNode
-
-    def parse(self, stream: TokenStream) -> CommentNode:
-        """Parse tokens from _stream_ into an AST node."""
-        node = self.node_class(stream.eat(TOKEN_TAG))
-        eat_block(stream, end=END_COMMENTBLOCK)
-        return node
-
-
-class CommentTextTag(CommentTag):
     """An implementation of the built-in _comment_ tag that retains comment text.
 
     Some Liquid markup might be stripped out by the lexer, so comment text is not
@@ -70,6 +51,7 @@ class CommentTextTag(CommentTag):
 
     name = TAG_COMMENT
     end = TAG_ENDCOMMENT
+    node_class = CommentNode
 
     def parse(self, stream: TokenStream) -> CommentNode:
         """Parse tokens from _stream_ into an AST node."""

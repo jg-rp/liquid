@@ -81,6 +81,18 @@ cases = [
         future=True,
     ),
     Case(
+        description="nested comment blocks, with nested tags",
+        template=(
+            r"{% comment %}"
+            r"    {% comment %}"
+            r"    {% comment %}{% if true %}hello{%endif%}{%    endcomment     %}"
+            r"    {% endcomment %}"
+            r"{% endcomment %}"
+        ),
+        expect="",
+        future=True,
+    ),
+    Case(
         description="unclosed nested comment blocks",
         template=(
             r"{% comment %}"

@@ -5,7 +5,6 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from .token import TOKEN_STRING
 from .token import Token
 
 
@@ -42,10 +41,6 @@ class Error(Exception):
 
         pad = " " * len(str(lineno))
         length = len(self.token.value)
-
-        if self.token.kind == TOKEN_STRING:
-            length += 2
-
         pointer = (" " * col) + ("^" * max(length, 1))
 
         return (
