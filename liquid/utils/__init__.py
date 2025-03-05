@@ -1,4 +1,4 @@
-from .chain_map import ReadOnlyChainMap
+from .chain_map import ReadOnlyChainMap  # noqa: D104
 from .html import strip_tags
 from .lru_cache import LRUCache
 from .lru_cache import ThreadSafeLRUCache

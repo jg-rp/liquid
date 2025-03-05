@@ -10,7 +10,6 @@ from liquid import Environment
 from liquid.builtin.filters.array import reverse
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
 
 
 @dataclass

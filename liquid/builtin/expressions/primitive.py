@@ -21,7 +21,6 @@ from liquid.token import TOKEN_FLOAT
 from liquid.token import TOKEN_IDENTSTRING
 from liquid.token import TOKEN_INTEGER
 from liquid.token import TOKEN_LBRACKET
-from liquid.token import TOKEN_LPAREN
 from liquid.token import TOKEN_NIL
 from liquid.token import TOKEN_NULL
 from liquid.token import TOKEN_RANGE

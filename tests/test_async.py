@@ -301,7 +301,7 @@ class AsyncMatterDictLoader(DictLoader):
             raise TemplateNotFound(template_name) from err
 
         return TemplateSource(
-            source=source,
+            text=source,
             name=template_name,
             uptodate=None,
             matter=self.matter.get(template_name),

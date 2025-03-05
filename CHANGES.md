@@ -2,38 +2,71 @@
 
 ## Version 2.0.0 (unreleased)
 
-**Breaking changes**
+This major release:
+
+- Drops support for Python version 3.7 and 3.8.
+- Introduces API changes [discussed here](https://github.com/jg-rp/liquid/discussions/137).
+- Promotes rendering behavior from `liquid.future.Environment` to be the default, so as to improve Shopify/liquid compatibility by default.
+- Fixes variable/identifier/path parsing described in [issue #39](https://github.com/jg-rp/liquid/issues/39).
+- Improves Liquid syntax error messages and exposes source index, line numbers and column numbers through methods on Liquid exceptions. See [#53](https://github.com/jg-rp/liquid/issues/53).
+- Changes comment tag parsing to better match Shopify/Liquid.
+- Removes `BoundTemplate.analyze_with_context()`. Shout if you need contextual analysis and we'll restore this feature.
+- Removes the `expression_cache_size` argument to `liquid.Environment` and `liquid.Template`. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
+- Makes markupsafe>=3 a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
+- Adds new filters `reject`, `has`, `find` and `find_index`.
+
+### API changes
+
+#### Miscellaneous
 
 - Renamed `liquid.Context` to `liquid.RenderContext`.
 - Change the `liquid.RenderContext` constructor (previously `liquid.Context`) to require an instance of `BoundTemplate` as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
-- Renamed `VariableCaptureContext` to `CaptureRenderContext`.
+
+#### Template loaders
+
+- Changed `BaseLoader.get_source` and `BaseLoader.get_source_async` to accept and optional `context` keyword argument and arbitrary keyword arguments as "load context".
+- Removed `BaseLoader.get_source_with_args` and `BaseLoader.get_source_with_context`, and their async equivalents. `BaseLoader.get_source` now accepts optional context and load context arguments.
+- Changed `TemplateSource` (a named tuple) to be (text, name, uptodate, matter). It used to be (source, filename, uptodate, matter)
+
+#### Builtin expressions
+
+- Removed `liquid.expression.*`. Now built-in expressions live in `liquid.builtin.expressions`.
+- Renamed `Identifier` to `Path`.
+- Removed `IdentifierPathElement`. Path segments are now `list[str | int | Path]]`.
+- Removed constant versions of `True`, `False`, `Nil`, `Empty` and `Blank`. Each of these primitive expressions now require a token, so they can't be constant.
+
+#### Tag expression parsing
+
 - Changed `liquid.token.Token` to be a named tuple of (kind, value, index, source). It used to be (linenum, type, value).
-- Removed legacy expression parsing functions. If you're importing anything from `liquid.parse` for your custom tags, you'll need to use functions from `liquid.expressions` instead.
+- Removed legacy expression parsing functions. If you're importing anything from `liquid.parse` for your custom tags, you'll need to use functions/methods from `liquid.builtin.expressions` instead.
 - Removed `liquid.parse.expect()` and `liquid.parse.expect_peek()` in favour of `TokenStream.expect()` and `TokenStream.expect_peek()`.
 - Removed `liquid.expressions.TokenStream`. Now there's only one `TokenStream` class, `liquid.stream.TokenStream`, reexported as `liquid.TokenStream`.
 - All tokens are now named tuples. Previously functions in `liquid.expressions` would generate and use plain tuples internally.
-- We now depend on markupsafe>=3. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
+- Added the `TOKEN_RANGE_LITERAL` token kind. The opening parenthesis of a range expression will use this kind to differentiate logical grouping parentheses from range expressions.
+- Split tokens with kind `TOKEN_OUTPUT` in to two tokens, `TOKEN_OUTPUT` and `TOKEN_EXPRESSION`. Previously the value associated with `TOKEN_OUTPUT` would be the expression, now the expression follows in the next token, just like `TOKEN_TAG`.
 
-### Tag expression parsing migration
+Here's a summary mapping from old expression parsing functions to the recommended new parsing functions/methods.
 
-TODO: A `TOKEN_RANGE_LITERAL` will always precede a `(` token.
-
-`parse_common_expression(stream)` -> `parse_primitive(stream)`
-`tokenize_common_expression(str, linenum)` -> TODO
-`parse_identifier(stream)` -> `Path.parse(stream)`
-`parse_unchained_identifier(stream)` -> `parse_identifier(stream)`
-`parse_string_or_identifier` -> unchanged
-`parse_boolean` -> removed, use `parse_primitive` instead
-`parse_nil` -> removed, use `parse_primitive` instead
-`parse_empty` -> removed, use `parse_primitive` instead
-`parse_blank` -> removed, use `parse_primitive` instead
-`parse_string_literal` -> removed, use `parse_primitive` instead
-`parse_integer_literal` -> removed, use `parse_primitive` instead
-`parse_float_literal` -> removed, use `parse_primitive` instead
-
-**Features**
-
-- Added new filters `reject`, `has`, `find` and `find_index`.
+| Old                                        | New                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| `tokenize_common_expression(str, linenum)` | `liquid.builtin.expressions.tokenize(source, parent_token)`        |
+| `*.tokenize(source, linenum)`              | `liquid.builtin.expressions.tokenize(source, parent_token)`        |
+| `parse_common_expression(stream)`          | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_keyword_arguments(expr, linenum)`   | `liquid.builtin.expressions.KeywordArgument.parse(env, stream)`    |
+| `parse_identifier(stream)`                 | `liquid.builtin.expressions.Path.parse(env, stream)`               |
+| `parse_unchained_identifier(stream)`       | `liquid.builtin.expressions.parse_identifier(env, stream)`         |
+| `parse_string_or_identifier`               | `liquid.builtin.expressions.parse_string_or_path(env, stream)`     |
+| `parse_unchained_identifier`               | `liquid.builtin.expressions.parse_name(env, stream)`               |
+| `parse_boolean`                            | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_nil`                                | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_empty`                              | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_blank`                              | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_string_literal`                     | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_integer_literal`                    | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `parse_float_literal`                      | `liquid.builtin.expressions.parse_primitive(env, stream)`          |
+| `Environment.parse_boolean_expression`     | `liquid.builtin.expressions.BooleanExpression.parse(env, stream)`  |
+| `Environment.parse_filtered_expression`    | `liquid.builtin.expressions.FilteredExpression.parse(env, stream)` |
+| `Environment.parse_loop_expression`        | `liquid.builtin.expressions.LoopExpression.parse(env, stream)`     |
 
 ## Version 1.13.0
 

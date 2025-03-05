@@ -7,6 +7,7 @@ from typing import Optional
 import pytest
 
 from liquid import Environment
+from liquid import Mode
 from liquid import Token
 from liquid import TokenStream
 from liquid.builtin.expressions import FilteredExpression
@@ -141,7 +142,7 @@ def test_double_comma() -> None:
 
 def test_missing_comma() -> None:
     source = '"hello" | slice: 2 4'
-    env = Environment()
+    env = Environment(tolerance=Mode.STRICT)
     tokens = tokenize(source, Token(TOKEN_EXPRESSION, source, 0, source))
 
     with pytest.raises(LiquidSyntaxError):

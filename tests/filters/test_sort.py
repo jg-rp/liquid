@@ -11,7 +11,6 @@ from liquid.builtin.filters.array import sort
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
-from liquid.exceptions import FilterValueError
 
 
 @dataclass

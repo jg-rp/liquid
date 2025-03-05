@@ -83,7 +83,7 @@ class PackageLoader(BaseLoader):
         """Get source information for a template."""
         source_path = self._resolve_path(template_name)
         return TemplateSource(
-            source=source_path.read_text(self.encoding),
+            text=source_path.read_text(self.encoding),
             name=str(source_path),
             uptodate=None,
         )
@@ -112,7 +112,7 @@ class PackageLoader(BaseLoader):
         )
 
         return TemplateSource(
-            source=source_text,
+            text=source_text,
             name=str(source_path),
             uptodate=None,
         )

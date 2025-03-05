@@ -35,7 +35,6 @@ from .mode import Mode
 from .output import LimitedStringIO
 from .undefined import UNDEFINED
 from .undefined import Undefined
-from .undefined import is_undefined
 from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
@@ -562,141 +561,8 @@ class RenderContext:
         return await _get_item(obj, key)
 
 
-class CaptureRenderContext(RenderContext):
-    """A render context that captures template variable and filter names."""
-
-    __slots__ = (
-        "local_references",
-        "all_references",
-        "undefined_references",
-        "root_context",
-        "filters",
-    )
-
-    # Used for formatting context path strings.
-    re_ident = re.compile(r"^[\w_][\w_\-]*$")
-
-    def __init__(
-        self,
-        template: BoundTemplate,
-        *,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-        disabled_tags: Optional[list[str]] = None,
-        copy_depth: int = 0,
-        parent_context: Optional[CaptureRenderContext] = None,
-        loop_iteration_carry: int = 1,
-        local_namespace_size_carry: int = 0,
-    ):
-        super().__init__(
-            template,
-            globals=globals,
-            disabled_tags=disabled_tags,
-            copy_depth=copy_depth,
-            parent_context=parent_context,
-            loop_iteration_carry=loop_iteration_carry,
-            local_namespace_size_carry=local_namespace_size_carry,
-        )
-        self.local_references: list[str] = []
-        self.all_references: list[str] = []
-        self.undefined_references: list[str] = []
-        self.filters: list[str] = []
-
-        root_context: CaptureRenderContext = self
-        while root_context.parent_context and isinstance(
-            root_context.parent_context, CaptureRenderContext
-        ):
-            root_context = root_context.parent_context
-        self.root_context = root_context
-
-    def assign(self, key: str, val: Any) -> None:
-        """Add or replace the context variable named _key_ with the value _val_."""
-        self.root_context.local_references.append(key)
-        return super().assign(key, val)
-
-    def get(
-        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
-    ) -> object:
-        """Resolve and return _path_ in the current scope.
-
-        If _token_ is not None, it will be used to give error messages extra contextual
-        information.
-
-        Returns _default_ is the path is not in scope.
-        """
-        result = super().get(path, token=token, default=default)
-        self._count_reference(path, result)
-        return result
-
-    async def get_async(
-        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
-    ) -> object:
-        """Resolve and return _path_ in the current scope.
-
-        If _token_ is not None, it will be used to give error messages extra contextual
-        information.
-
-        Returns _default_ is the path is not in scope.
-        """
-        result = await super().get_async(path, token=token, default=default)
-        self._count_reference(path, result)
-        return result
-
-    def resolve(
-        self, name: str, *, token: Optional[Token] = None, default: object = UNDEFINED
-    ) -> Any:
-        """Resolve variable _name_ in the current scope."""
-        result = super().resolve(name, token=token, default=default)
-        self._count_reference([name], result)
-        return result
-
-    def increment(self, name: str) -> int:
-        """Increment the named counter and return its value."""
-        self.root_context.local_references.append(name)
-        return super().increment(name)
-
-    def decrement(self, name: str) -> int:
-        """Decrement the named counter and return its value."""
-        self.root_context.local_references.append(name)
-        return super().decrement(name)
-
-    def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
-        """Return the filter function with given name."""
-        self.root_context.filters.append(name)
-        return super().filter(name, token)
-
-    def _count_reference(self, path: list[object], result: object) -> None:
-        _path = []
-        for elem in path:
-            if isinstance(elem, int):
-                _path.append(f"[{elem}]")
-            elif isinstance(elem, str) and self.re_ident.match(elem):  # noqa: PLR5501
-                if _path:
-                    _path.append(f".{elem}")
-                else:
-                    _path.append(f"{elem}")
-            else:
-                _path.append(f'["{elem}"]')
-        ref = "".join(_path)
-
-        if is_undefined(result):
-            self.root_context.undefined_references.append(ref)
-        self.root_context.all_references.append(ref)
-
-
 class FutureContext(RenderContext):
-    """A render context configured for maximum compatibility with the Ruby liquid.
-
-    These "fixes" have not been implemented in the default `Context` for the benefit of
-    existing Python Liquid users that rely on past behavior.
-
-    This render context currently fixes https://github.com/jg-rp/liquid/issues/43 and
-    https://github.com/jg-rp/liquid/issues/90.
-
-    """
-
-
-class FutureVariableCaptureContext(CaptureRenderContext, FutureContext):
-    """A context that captures information about template variables and filters."""
+    """A render context configured for maximum compatibility with the Ruby liquid."""
 
 
 class BuiltIn(Mapping[str, object]):

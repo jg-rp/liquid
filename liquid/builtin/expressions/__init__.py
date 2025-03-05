@@ -1,4 +1,4 @@
-from ._tokenize import tokenize
+from ._tokenize import tokenize  # noqa: D104
 from .arguments import KeywordArgument  # noqa: D104
 from .arguments import Parameter
 from .arguments import PositionalArgument

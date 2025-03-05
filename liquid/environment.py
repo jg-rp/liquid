@@ -436,7 +436,7 @@ class Environment:
         )
 
         return self.analyze_tags_from_string(
-            template_source.source,
+            template_source.text,
             name=template_source.name,
             inner_tags=inner_tags,
         )
@@ -455,7 +455,7 @@ class Environment:
         )
 
         return self.analyze_tags_from_string(
-            template_source.source,
+            template_source.text,
             name=template_source.name,
             inner_tags=inner_tags,
         )

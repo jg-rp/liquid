@@ -15,9 +15,7 @@ from typing import TextIO
 from typing import Type
 from typing import Union
 
-from .context import CaptureRenderContext
 from .context import FutureContext
-from .context import FutureVariableCaptureContext
 from .context import RenderContext
 from .exceptions import Error
 from .exceptions import LiquidInterrupt
@@ -70,7 +68,6 @@ class BoundTemplate:
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
     # `Context` when rendering templates.
     context_class: Type[RenderContext] = RenderContext
-    capture_context_class: Type[CaptureRenderContext] = CaptureRenderContext
 
     def __init__(
         self,
@@ -549,7 +546,6 @@ class FutureBoundTemplate(BoundTemplate):
     """
 
     context_class = FutureContext
-    capture_context_class = FutureVariableCaptureContext
 
 
 class FutureAwareBoundTemplate(AwareBoundTemplate):
@@ -561,7 +557,6 @@ class FutureAwareBoundTemplate(AwareBoundTemplate):
     """
 
     context_class = FutureContext
-    capture_context_class = FutureVariableCaptureContext
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):

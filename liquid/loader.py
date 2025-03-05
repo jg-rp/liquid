@@ -127,7 +127,7 @@ class TemplateSource(NamedTuple):
     """A Liquid template source as returned by the `get_source` method of a `loader`.
 
     Attributes:
-        source: The liquid template source code.
+        text: The liquid template source code.
         name: The liquid template file name or other string identifying its origin.
         uptodate: Optional callable that will return `True` if the template is up to
             date, or `False` if it needs to be reloaded.
@@ -135,7 +135,7 @@ class TemplateSource(NamedTuple):
             Could be "front matter" or other meta data.
     """
 
-    source: str
+    text: str
     name: str
     uptodate: Union[Callable[[], bool], Callable[[], Awaitable[bool]], None]
     matter: Union[dict[str, object], None] = None

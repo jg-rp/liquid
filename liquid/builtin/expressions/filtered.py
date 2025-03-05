@@ -54,6 +54,7 @@ FILTER_TOKENS = set(  # noqa: C405
         TOKEN_RANGE_LITERAL,
         TOKEN_LBRACKET,
         TOKEN_LPAREN,
+        TOKEN_WORD,
     ]
 )
 
@@ -344,13 +345,28 @@ class Filter:
                         )
                     else:
                         args.append(PositionalArgument(parse_primitive(env, tokens)))
+
+                    if tokens.current.kind in FILTER_TOKENS:
+                        raise LiquidSyntaxError(
+                            "expected a comma separated list of arguments, "
+                            f"found {tokens.current.kind}",
+                            token=tokens.current,
+                        )
                 elif tok.kind in FILTER_TOKENS:
                     args.append(PositionalArgument(parse_primitive(env, tokens)))
+
+                    # There should be a comma between filter tokens.
+                    if tokens.current.kind in FILTER_TOKENS:
+                        raise LiquidSyntaxError(
+                            "expected a comma separated list of arguments, "
+                            f"found {tokens.current.kind}",
+                            token=tokens.current,
+                        )
                 elif tok.kind == TOKEN_COMMA:
                     if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_COMMA:
                         raise LiquidSyntaxError(
                             "expected a comma separated list of arguments, "
-                            f"found {tok.kind}",
+                            f"found {tokens.peek.kind}",
                             token=tokens.peek,
                         )
                     next(tokens)
