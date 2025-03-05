@@ -8,6 +8,7 @@ from typing import Optional
 from typing import TextIO
 
 from liquid import ast
+from liquid.exceptions import LiquidSyntaxError
 from liquid.parse import eat_block
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
@@ -74,6 +75,10 @@ class CommentTextTag(CommentTag):
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         text = []
+
+        if stream.current.kind == TOKEN_EOF:
+            raise LiquidSyntaxError("comment tag was never closed", token=token)
+
         while stream.current.kind != TOKEN_EOF:
             if (
                 stream.current.kind == TOKEN_TAG

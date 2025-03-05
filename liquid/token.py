@@ -3,64 +3,6 @@
 import sys
 from typing import NamedTuple
 
-__all__ = (
-    "TOKEN_ILLEGAL",
-    "TOKEN_INITIAL",
-    "TOKEN_EOF",
-    "TOKEN_NEWLINE",
-    "TOKEN_SKIP",
-    "TOKEN_TAG",
-    "TOKEN_EXPRESSION",
-    "TOKEN_OUTPUT",
-    "TOKEN_CONTENT",
-    "TOKEN_WORD",
-    "TOKEN_STRING",
-    "TOKEN_INTEGER",
-    "TOKEN_FLOAT",
-    "TOKEN_EMPTY",
-    "TOKEN_NIL",
-    "TOKEN_NULL",
-    "TOKEN_BLANK",
-    "TOKEN_WITH",
-    "TOKEN_FOR",
-    "TOKEN_AS",
-    "TOKEN_BY",
-    "TOKEN_NEGATIVE",
-    "TOKEN_TRUE",
-    "TOKEN_FALSE",
-    "TOKEN_CONTAINS",
-    "TOKEN_IN",
-    "TOKEN_LPAREN",
-    "TOKEN_RPAREN",
-    "TOKEN_RANGE",
-    "TOKEN_RANGE_LITERAL",
-    "TOKEN_LIMIT",
-    "TOKEN_OFFSET",
-    "TOKEN_REVERSED",
-    "TOKEN_CONTINUE",
-    "TOKEN_COLS",
-    "TOKEN_PIPE",
-    "TOKEN_COLON",
-    "TOKEN_COMMA",
-    "TOKEN_DOT",
-    "TOKEN_LBRACKET",
-    "TOKEN_RBRACKET",
-    "TOKEN_ASSIGN",
-    "TOKEN_AND",
-    "TOKEN_OR",
-    "TOKEN_NOT",
-    "TOKEN_EQ",
-    "TOKEN_NE",
-    "TOKEN_LG",
-    "TOKEN_LT",
-    "TOKEN_GT",
-    "TOKEN_LE",
-    "TOKEN_GE",
-    "operators",
-    "reverse_operators",
-    "Token",
-)
-
 TOKEN_ILLEGAL = sys.intern("illegal")
 TOKEN_INITIAL = sys.intern("initial")
 TOKEN_EOF = sys.intern("end of expression")
@@ -71,6 +13,7 @@ TOKEN_TAG = sys.intern("tag")
 TOKEN_EXPRESSION = sys.intern("expression")
 TOKEN_OUTPUT = sys.intern("output")
 TOKEN_CONTENT = sys.intern("content")
+TOKEN_COMMENT = sys.intern("comment")
 
 TOKEN_WORD = sys.intern("word")
 TOKEN_IDENTINDEX = sys.intern("identindex")

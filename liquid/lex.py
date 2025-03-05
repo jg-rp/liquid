@@ -16,6 +16,7 @@ from typing import Iterator
 from typing import Pattern
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.token import TOKEN_COMMENT
 from liquid.token import TOKEN_CONTENT
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
@@ -86,14 +87,48 @@ def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
     return re.compile(pattern, re.DOTALL)
 
 
-def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
+def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # noqa: PLR0912, PLR0915
     lstrip = False
+    comment_index = 0
+    comment_text: list[str] = []
+    comment_depth = 0
 
     for match in rules.finditer(source):
         kind = match.lastgroup
         assert kind is not None
 
         value = match.group()
+
+        if comment_depth:
+            if kind == "TAG":
+                name = match.group("name")
+                if name == "endcomment":
+                    comment_depth -= 1
+                    if not comment_depth:
+                        yield Token(
+                            kind=TOKEN_COMMENT,
+                            value="".join(comment_text),
+                            start_index=comment_index,
+                            source=source,
+                        )
+
+                        comment_index = 0
+                        comment_text.clear()
+
+                        yield Token(
+                            kind=TOKEN_TAG,
+                            value=name,
+                            start_index=match.start("name"),
+                            source=source,
+                        )
+
+                        lstrip = bool(match.group("rst"))
+                        continue
+                elif name == "comment":
+                    comment_depth += 1
+
+            comment_text.append(value)
+            continue
 
         if kind == TOKEN_OUTPUT:
             yield Token(
@@ -131,6 +166,11 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
                     start_index=match.start("expr"),
                     source=source,
                 )
+
+            if name == "comment":
+                if not comment_depth:
+                    comment_index = match.end()
+                comment_depth += 1
 
             continue
 
