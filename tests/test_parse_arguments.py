@@ -48,7 +48,6 @@ TEST_CASES: list[Case] = [
         "a: products[0], b: products['foo'].title",
         "a:products[0], b:products.foo.title",
     ),
-    # TODO: = separated separated arguments
 ]
 
 
@@ -98,6 +97,3 @@ def test_missing_comma() -> None:
 
     with pytest.raises(LiquidSyntaxError):
         KeywordArgument.parse(env, TokenStream(tokens))
-
-
-# TODO: test call and macro arguments

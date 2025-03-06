@@ -217,7 +217,6 @@ class ConditionalBlockNode(Node):
         self.blank = block.blank
 
     def __str__(self) -> str:
-        # TODO: WC
         return f"{{% elsif {self.expression} %}}{self.block}"
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:

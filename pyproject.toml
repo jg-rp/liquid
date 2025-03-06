@@ -191,7 +191,6 @@ select = [
   "YTT",
 ]
 
-# TODO: review ignores
 ignore = [
   "A005",
   "S105",

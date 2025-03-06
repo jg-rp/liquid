@@ -36,7 +36,6 @@ class AssignNode(Node):
         self.expression = expression
 
     def __str__(self) -> str:
-        # TODO: WC
         return f"{{% assign {self.name} = {self.expression} %}}"
 
     def render_to_output(self, context: RenderContext, _: TextIO) -> int:

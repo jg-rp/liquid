@@ -42,7 +42,6 @@ class CaptureNode(Node):
         self.block = block
 
     def __str__(self) -> str:
-        # TODO: WC
         return f"{{% capture {self.name} %}}{self.block}{{% endcapture %}}"
 
     def _assign(self, context: RenderContext, buf: StringIO) -> None:

@@ -73,6 +73,12 @@ Here's a summary mapping from old expression parsing functions to the recommende
 | `Environment.parse_filtered_expression`    | `liquid.builtin.expressions.FilteredExpression.parse(env, stream)` |
 | `Environment.parse_loop_expression`        | `liquid.builtin.expressions.LoopExpression.parse(env, stream)`     |
 
+#### Template inheritance
+
+- Added methods `variables()`, `variable_paths()`, `variable_segments()`, `global_variables()`, `global_variable_paths()`, `global_variable_segments()` and their async equivalents to `liquid.BoundTemplate`. These are convenience methods for reporting variables using static analysis.
+- Added methods `filter_names()`, `tag_names()` and their async equivalents to `liquid.BoundTemplate`.
+- Changed `liquid.ast.Node.children()` and added `expressions()`, `template_scope()`, `block_scope()` and `partial_scope()` methods. See docs.
+
 ## Version 1.13.0
 
 **Features**
