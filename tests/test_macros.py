@@ -4,9 +4,14 @@ import pytest
 
 from liquid import Environment
 from liquid import Undefined
-from liquid import render
-from liquid import render_async
 from liquid.exceptions import LiquidSyntaxError
+
+
+class MockEnv(Environment):
+    keyword_assignment = True
+
+
+ENV = MockEnv()
 
 
 def test_define_a_macro() -> None:
@@ -14,9 +19,9 @@ def test_define_a_macro() -> None:
     want = ""
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -25,9 +30,9 @@ def test_define_and_call_a_macro() -> None:
     want = "Hello, World!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -39,9 +44,9 @@ def test_unquoted_macro_names() -> None:
     want = "Hello, World!Hello, World!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -55,9 +60,9 @@ def test_call_macro_with_a_positional_argument() -> None:
     want = "Hello, World!Hello, Liquid!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -71,9 +76,9 @@ def test_call_macro_with_a_default_argument() -> None:
     want = "Hello, Brian! Hello, Liquid!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -87,9 +92,9 @@ def test_call_macro_with_a_default_argument_by_name() -> None:
     want = "Hello, Brian! Hello, Liquid!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -104,9 +109,9 @@ def test_call_macro_with_a_variable_default_argument() -> None:
     data = {"a": {"b": "Brian"}}
 
     async def coro() -> str:
-        return await render_async(source, **data)
+        return await ENV.render_async(source, **data)
 
-    assert render(source, **data) == want
+    assert ENV.render(source, **data) == want
     assert asyncio.run(coro()) == want
 
 
@@ -118,9 +123,9 @@ def test_excess_arguments() -> None:
     want = "1-2"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -137,9 +142,9 @@ def test_excess_keyword_arguments() -> None:
     want = "a => 1, b => 2, "
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -152,7 +157,7 @@ def test_missing_argument_is_undefined() -> None:
     source = "{% macro 'func', foo %}{{ foo }}{% endmacro %}{% call 'func' %}"
     want = "UNDEFINED"
 
-    env = Environment(undefined=MockUndefined)
+    env = MockEnv(undefined=MockUndefined)
 
     async def coro() -> str:
         return await env.from_string(source).render_async()
@@ -165,7 +170,7 @@ def test_undefined_macro() -> None:
     source = "{% call 'func' %}"
     want = "UNDEFINED"
 
-    env = Environment(undefined=MockUndefined)
+    env = MockEnv(undefined=MockUndefined)
 
     async def coro() -> str:
         return await env.from_string(source).render_async()
@@ -186,9 +191,9 @@ def test_default_argument_before_positional() -> None:
     want = ", brian! Goodbye, World!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -202,9 +207,9 @@ def test_no_comma_between_name_and_arg() -> None:
     want = "Hello, World!Hello, Liquid!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -218,9 +223,9 @@ def test_trailing_comma() -> None:
     want = "Hello, World!Hello, Liquid!"
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
-    assert render(source) == want
+    assert ENV.render(source) == want
     assert asyncio.run(coro()) == want
 
 
@@ -232,10 +237,10 @@ def test_excess_commas() -> None:
     )
 
     async def coro() -> str:
-        return await render_async(source)
+        return await ENV.render_async(source)
 
     with pytest.raises(LiquidSyntaxError):
-        render(source)
+        ENV.render(source)
 
     with pytest.raises(LiquidSyntaxError):
         assert asyncio.run(coro())

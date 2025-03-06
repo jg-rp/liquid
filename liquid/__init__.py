@@ -95,12 +95,12 @@ def parse(source: str) -> BoundTemplate:
 
 def render(source: str, **data: object) -> str:
     """Parse and render source text using the default environment."""
-    return DEFAULT_ENVIRONMENT.from_string(source).render(**data)
+    return DEFAULT_ENVIRONMENT.render(source, **data)
 
 
 async def render_async(source: str, **data: object) -> str:
     """Parse and render source text using the default environment."""
-    return await DEFAULT_ENVIRONMENT.from_string(source).render_async(**data)
+    return await DEFAULT_ENVIRONMENT.render_async(source, **data)
 
 
 def make_file_system_loader(

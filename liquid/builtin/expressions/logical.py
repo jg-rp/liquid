@@ -543,7 +543,11 @@ def parse_infix_expression(  # noqa: PLR0911
 
 def parse_grouped_expression(env: Environment, tokens: TokenStream) -> Expression:
     """Parse an expression from tokens in _tokens_ until the next right parenthesis."""
-    # TODO: error if no group expressions
+    if not env.logical_parentheses:
+        raise LiquidSyntaxError(
+            "disallowed parentheses in logical expression", token=tokens.current
+        )
+
     tokens.eat(TOKEN_LPAREN)
     expr = parse_boolean_primitive(env, tokens)
     token = next(tokens)

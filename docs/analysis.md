@@ -3,16 +3,7 @@
 ::: liquid.static_analysis.TemplateAnalysis
     handler: python
 
-::: liquid.static_analysis.ReferencedVariable
-    handler: python
-
-::: liquid.static_analysis.Refs
-    handler: python
-
-::: liquid.static_analysis.NameRefs
-    handler: python
-
-::: liquid.static_analysis.ContextualTemplateAnalysis
+::: liquid.static_analysis.Variable
     handler: python
 
 ::: liquid.analyze_tags.TagAnalysis

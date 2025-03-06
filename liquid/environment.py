@@ -149,8 +149,17 @@ class Environment:
     # when applied to a string. Defaults to `False`.
     string_first_and_last: bool = False
 
-    # TODO: disable logical not and parens
-    # TODO: disable ternary expressions
+    logical_parentheses: bool = False
+    """When `True`, allow the use of parentheses in logical expressions to group terms.
+    Defaults to `False.`"""
+
+    ternary_expressions: bool = False
+    """When `True`, allow the use of ternary expression in output statements, assign
+    tags and echo tags. Defaults to `False`."""
+
+    keyword_assignment: bool = False
+    """When `True` accept `=` or `:` as the separator token between argument names
+    and argument values. By default only `:` is allowed."""
 
     def __init__(
         self,
@@ -276,7 +285,7 @@ class Environment:
         self.add_tag(CallTag)
         self.add_tag(WithTag)
 
-    def parse(self, source: str) -> list[Node]:
+    def _parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.
 
         More often than not you'll want to use `Environment.from_string` instead.
@@ -305,7 +314,7 @@ class Environment:
                 with the template. Could be "front matter" or other meta data.
         """
         try:
-            nodes = self.parse(source)
+            nodes = self._parse(source)
         except (LiquidSyntaxError, TemplateInheritanceError) as err:
             err.template_name = path
             raise err
@@ -319,6 +328,16 @@ class Environment:
             globals=self.make_globals(globals),
             matter=matter,
         )
+
+    parse = from_string
+
+    def render(self, source: str, **data: object) -> str:
+        """Parse and render source text."""
+        return self.parse(source).render(**data)
+
+    async def render_async(self, source: str, **data: object) -> str:
+        """Parse and render source text."""
+        return await self.parse(source).render_async(**data)
 
     def get_template(
         self,

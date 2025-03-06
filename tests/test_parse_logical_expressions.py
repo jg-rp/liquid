@@ -62,11 +62,17 @@ TEST_CASES: list[Case] = [
 ]
 
 
+class MockEnv(Environment):
+    logical_parentheses = True
+
+
+ENV = MockEnv()
+
+
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_parse_logical(case: Case) -> None:
-    env = Environment()
     tokens = tokenize(case.source, Token(TOKEN_EXPRESSION, case.source, 0, case.source))
-    expr = BooleanExpression.parse(env, TokenStream(tokens))
+    expr = BooleanExpression.parse(ENV, TokenStream(tokens))
     if case.expect is not None:
         assert str(expr) == case.expect
     else:

@@ -223,6 +223,10 @@ class LoopExpression(Expression):
         limit: Expression | None = None
         cols: Expression | None = None
 
+        argument_separators = (
+            (TOKEN_COLON, TOKEN_ASSIGN) if env.keyword_assignment else (TOKEN_COLON,)
+        )
+
         # Leading commas are OK
         if tokens.current.kind == TOKEN_COMMA:
             next(tokens)
@@ -232,12 +236,12 @@ class LoopExpression(Expression):
             kind = arg_token.kind
 
             if kind == TOKEN_LIMIT:
-                tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)  # TODO: optionally disable
+                tokens.eat_one_of(*argument_separators)
                 limit = parse_primitive(env, tokens)
             elif kind == TOKEN_REVERSED:
                 reversed_ = True
             elif kind == TOKEN_OFFSET:
-                tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
+                tokens.eat_one_of(*argument_separators)
                 offset_token = tokens.current
                 if offset_token.kind == TOKEN_CONTINUE:
                     next(tokens)
@@ -245,7 +249,7 @@ class LoopExpression(Expression):
                 else:
                     offset = parse_primitive(env, tokens)
             elif kind == TOKEN_COLS:
-                tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
+                tokens.eat_one_of(*argument_separators)
                 cols = parse_primitive(env, tokens)
             elif kind == TOKEN_COMMA:
                 if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_COMMA:

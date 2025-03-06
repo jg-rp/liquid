@@ -12,6 +12,7 @@ def test_shorthand_indexes_with_default_environment() -> None:
 
 class MockEnv(Environment):
     shorthand_indexes = True
+    ternary_expressions = True
 
 
 ENV = MockEnv()

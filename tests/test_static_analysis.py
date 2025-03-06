@@ -19,9 +19,13 @@ if TYPE_CHECKING:
     from liquid.static_analysis import TemplateAnalysis
 
 
+class MockEnv(Environment):
+    ternary_expressions = True
+
+
 @pytest.fixture
 def env() -> Environment:  # noqa: D103
-    return Environment()
+    return MockEnv()
 
 
 def _assert(

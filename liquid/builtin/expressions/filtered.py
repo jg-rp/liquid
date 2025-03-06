@@ -108,8 +108,13 @@ class FilteredExpression(Expression):
         """Parse a filtered expression from _tokens_."""
         left = parse_primitive(env, tokens)
         filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE,))
-        # TODO: optionally disable
+
         if tokens.current.kind == TOKEN_IF:
+            if not env.ternary_expressions:
+                raise LiquidSyntaxError(
+                    "disallowed ternary expression", token=tokens.current
+                )
+
             return TernaryFilteredExpression.parse(
                 env, FilteredExpression(left.token, left, filters), tokens
             )
@@ -320,6 +325,9 @@ class Filter:
     ) -> list[Filter]:
         """Parse filters from _tokens_."""
         filters: list[Filter] = []
+        argument_separators = (
+            (TOKEN_COLON, TOKEN_ASSIGN) if env.keyword_assignment else (TOKEN_COLON,)
+        )
 
         while tokens.current.kind in delim:
             next(tokens)
@@ -335,7 +343,7 @@ class Filter:
             while True:
                 tok = tokens.current
                 if tok.kind == TOKEN_WORD:
-                    if tokens.peek.kind in (TOKEN_ASSIGN, TOKEN_COLON):  # XXX:
+                    if tokens.peek.kind in argument_separators:
                         next(tokens)  # word
                         next(tokens)  # : or =
                         args.append(

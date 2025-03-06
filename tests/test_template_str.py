@@ -1,6 +1,12 @@
 """Test that templates can be serialized back to a string."""
 
+from liquid import Environment
 from liquid import parse
+
+
+class MockEnv(Environment):
+    logical_parentheses = True
+    ternary_expressions = True
 
 
 def test_content_str() -> None:
@@ -73,7 +79,7 @@ def test_increment_str() -> None:
 
 def test_echo_str() -> None:
     source = "{% echo foo | upcase if bar else baz %}"
-    template = parse(source)
+    template = MockEnv().parse(source)
     assert str(template) == source
 
 
@@ -160,16 +166,11 @@ def test_liquid_str_with_trailing_newline() -> None:
     assert str(template) == "{% liquid echo 'a'\nassign b = 'c'\necho b %}"
 
 
-# def test_raw_str() -> None:
-#     source = "{% raw %}{{ a }}{% endraw %}"
-#     template = parse(source)
-#     assert str(template) == source
-
-
 def test_logical_expression_str() -> None:
-    template = parse(
+    template = MockEnv().parse(
         "{% if not (true and (false and (false or a < b))) %}Hello{% endif %}"
     )
+
     assert (
         str(template)
         == "{% if not (true and false and (false or a < b)) %}Hello{% endif %}"
@@ -178,13 +179,13 @@ def test_logical_expression_str() -> None:
 
 def test_ternary_str() -> None:
     source = "{{ foo | upcase if bar else baz || append: '!' }}"
-    template = parse(source)
+    template = MockEnv().parse(source)
     assert str(template) == source
 
 
 def test_ternary_str_no_alternative() -> None:
     source = "{{ foo | upcase if a <= b }}"
-    template = parse(source)
+    template = MockEnv().parse(source)
     assert str(template) == source
 
 

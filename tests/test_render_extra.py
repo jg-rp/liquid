@@ -15,13 +15,18 @@ if TYPE_CHECKING:
     from liquid.template import BoundTemplate
 
 
+class MockEnv(Environment):
+    logical_parentheses = True
+    ternary_expressions = True
+
+
 class BaseRenderTestCase(unittest.TestCase):
     """Base class for test cases that render synchronously and asynchronously."""
 
     def setUp(self) -> None:
         self.partials: dict[str, str] = {}
         self.loader = DictLoader(self.partials)
-        self.env = Environment(loader=self.loader)
+        self.env = MockEnv(loader=self.loader)
 
     def _test(self, test_cases: list[Case]) -> None:
         for case in test_cases:

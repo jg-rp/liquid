@@ -5,7 +5,6 @@ import pytest
 
 from liquid import Environment
 from liquid import Mode
-from liquid import parse
 from liquid.exceptions import LiquidSyntaxError
 
 
@@ -232,13 +231,20 @@ TEST_CASES = [
 ]
 
 
+class MockEnv(Environment):
+    keyword_assignment = True
+
+
+ENV = MockEnv()
+
+
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_syntax_errors(case: Case) -> None:
     with pytest.raises(LiquidSyntaxError, match=case.expect_msg):
-        parse(case.template).render()
+        ENV.parse(case.template).render()
 
 
-LAX_ENV = Environment(tolerance=Mode.LAX)
+LAX_ENV = MockEnv(tolerance=Mode.LAX)
 
 SKIP = [
     "missing output closing bracket",

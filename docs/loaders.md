@@ -1,34 +1,31 @@
 # Template Loaders
 
-::: liquid.loaders.CachingFileSystemLoader
+::: liquid.builtin.CachingFileSystemLoader
     handler: python
 
-::: liquid.loaders.FileSystemLoader
+::: liquid.builtin.FileSystemLoader
     handler: python
 
-::: liquid.loaders.FileExtensionLoader
+::: liquid.builtin.DictLoader
     handler: python
 
-::: liquid.loaders.DictLoader
+::: liquid.builtin.ChoiceLoader
     handler: python
 
-::: liquid.loaders.ChoiceLoader
+::: liquid.builtin.CachingChoiceLoader
     handler: python
 
-::: liquid.loaders.CachingChoiceLoader
+::: liquid.builtin.PackageLoader
     handler: python
 
-::: liquid.loaders.PackageLoader
+::: liquid.loader.BaseLoader
     handler: python
 
-::: liquid.loaders.BaseLoader
+::: liquid.loader.TemplateSource
     handler: python
 
-::: liquid.loaders.TemplateSource
+::: liquid.make_choice_loader
     handler: python
 
-::: liquid.loaders.make_choice_loader
-    handler: python
-
-::: liquid.loaders.make_file_system_loader
+::: liquid.make_file_system_loader
     handler: python

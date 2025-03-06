@@ -54,7 +54,7 @@ class BoundTemplate:
 
     Args:
         env: The environment this template is bound to.
-        parse_tree: The parse tree representing this template.
+        nodes: The parse tree representing this template.
         name: Optional name of the template. Defaults to an empty string.
         path: Optional origin path or identifier for the template.
         globals: An optional mapping of context variables made available every

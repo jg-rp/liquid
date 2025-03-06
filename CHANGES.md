@@ -21,6 +21,8 @@ This major release:
 
 - Renamed `liquid.Context` to `liquid.RenderContext`.
 - Change the `liquid.RenderContext` constructor (previously `liquid.Context`) to require an instance of `BoundTemplate` as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
+- Renamed `liquid.Environment.parse` to `liquid.Environment._parse`, which returns a list of nodes, not a template.
+- Aliased `liquid.Environment.from_string` as `liquid.Environment.parse`.
 
 #### Template loaders
 

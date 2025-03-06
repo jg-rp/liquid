@@ -44,6 +44,10 @@ class KeywordArgument:
     @staticmethod
     def parse(env: Environment, tokens: TokenStream) -> list[KeywordArgument]:
         """Parse a keyword arguments from _tokens_."""
+        argument_separators = (
+            (TOKEN_COLON, TOKEN_ASSIGN) if env.keyword_assignment else (TOKEN_COLON,)
+        )
+
         args: list[KeywordArgument] = []
 
         # Leading commas are OK
@@ -60,8 +64,7 @@ class KeywordArgument:
                 break
 
             if token.kind == TOKEN_WORD:
-                # TODO: optionally disable assign
-                tokens.eat_one_of(TOKEN_COLON, TOKEN_ASSIGN)
+                tokens.eat_one_of(*argument_separators)
                 value = parse_primitive(env, tokens)
                 args.append(KeywordArgument(token, token.value, value))
                 if env.mode == Mode.STRICT and tokens.current.kind == TOKEN_WORD:
@@ -75,7 +78,6 @@ class KeywordArgument:
                     f"expected an argument name, found {token.kind}", token=token
                 )
 
-        # TODO: expect EOS?
         return args
 
 
@@ -134,6 +136,9 @@ class Parameter:
     def parse(env: Environment, tokens: TokenStream) -> dict[str, Parameter]:
         """Parse macro tag parameters from _tokens_."""
         params: dict[str, Parameter] = {}
+        argument_separators = (
+            (TOKEN_COLON, TOKEN_ASSIGN) if env.keyword_assignment else (TOKEN_COLON,)
+        )
 
         while True:
             token = next(tokens)
@@ -146,8 +151,7 @@ class Parameter:
                 break
 
             if token.kind == TOKEN_WORD:
-                # TODO: optionally disable
-                if tokens.current.kind in (TOKEN_COLON, TOKEN_ASSIGN):
+                if tokens.current.kind in argument_separators:
                     # A parameter with a default value
                     next(tokens)  # Move past ":" or "="
                     value = parse_primitive(env, tokens)
@@ -169,6 +173,9 @@ def parse_arguments(
     """Parse arguments from _tokens_ until end of input."""
     args: list[PositionalArgument] = []
     kwargs: list[KeywordArgument] = []
+    argument_separators = (
+        (TOKEN_COLON, TOKEN_ASSIGN) if env.keyword_assignment else (TOKEN_COLON,)
+    )
 
     # Leading commas are OK
     if tokens.current.kind == TOKEN_COMMA:
@@ -181,8 +188,7 @@ def parse_arguments(
             break
 
         if token.kind == TOKEN_WORD:
-            # TODO: optionally disable equals
-            if tokens.peek.kind in (TOKEN_COLON, TOKEN_ASSIGN):
+            if tokens.peek.kind in argument_separators:
                 name_token = next(tokens)
                 next(tokens)  # = or :
                 value = parse_primitive(env, tokens)
@@ -199,7 +205,3 @@ def parse_arguments(
         tokens.eat(TOKEN_COMMA)
 
     return args, kwargs
-
-
-# TODO: parse_macro_arguments
-# TODO: parse_call_arguments
