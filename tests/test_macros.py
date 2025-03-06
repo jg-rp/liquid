@@ -11,7 +11,7 @@ class MockEnv(Environment):
     keyword_assignment = True
 
 
-ENV = MockEnv()
+ENV = MockEnv(extra=True)
 
 
 def test_define_a_macro() -> None:
@@ -157,7 +157,7 @@ def test_missing_argument_is_undefined() -> None:
     source = "{% macro 'func', foo %}{{ foo }}{% endmacro %}{% call 'func' %}"
     want = "UNDEFINED"
 
-    env = MockEnv(undefined=MockUndefined)
+    env = MockEnv(extra=True, undefined=MockUndefined)
 
     async def coro() -> str:
         return await env.from_string(source).render_async()
@@ -170,7 +170,7 @@ def test_undefined_macro() -> None:
     source = "{% call 'func' %}"
     want = "UNDEFINED"
 
-    env = MockEnv(undefined=MockUndefined)
+    env = MockEnv(extra=True, undefined=MockUndefined)
 
     async def coro() -> str:
         return await env.from_string(source).render_async()

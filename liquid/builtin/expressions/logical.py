@@ -188,6 +188,11 @@ class LogicalNotExpression(Expression):
     @staticmethod
     def parse(env: Environment, tokens: TokenStream) -> LogicalNotExpression:
         """Parse a not expression from _tokens_."""
+        if not env.logical_not_operator:
+            raise LiquidSyntaxError(
+                "disallowed not operator in logical expression", token=tokens.current
+            )
+
         tokens.eat(TOKEN_NOT)
         expr = parse_boolean_primitive(env, tokens)
         return LogicalNotExpression(expr.token, expr)
@@ -459,10 +464,8 @@ def parse_boolean_primitive(  # noqa: PLR0912
     elif kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:
-        # TODO: raise for no grouped expressions
         left = parse_grouped_expression(env, tokens)
     elif kind == TOKEN_NOT:
-        # TODO: raise for no not operator
         left = LogicalNotExpression.parse(env, tokens)
     else:
         raise LiquidSyntaxError(

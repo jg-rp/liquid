@@ -95,6 +95,7 @@ TEST_CASES: list[Case] = [
 
 class MockEnv(Environment):
     ternary_expressions = True
+    logical_not_operator = True
 
 
 ENV = MockEnv()

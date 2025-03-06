@@ -22,7 +22,7 @@ def test_missing_required_block() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(RequiredBlockError):
@@ -43,7 +43,7 @@ def test_missing_required_block_long_stack() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(RequiredBlockError):
@@ -62,7 +62,7 @@ def test_immediate_override_required_block() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -82,7 +82,7 @@ def test_override_required_block_in_leaf() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -102,7 +102,7 @@ def test_override_required_block_in_stack() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -122,7 +122,7 @@ def test_override_required_block_not_in_base() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -141,7 +141,7 @@ def test_missing_required_block_not_in_base() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(RequiredBlockError):
@@ -158,7 +158,9 @@ def test_override_required_block_directly() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment()
+    env = Environment(
+        extra=True,
+    )
     template = env.from_string(source)
 
     with pytest.raises(RequiredBlockError):
@@ -175,7 +177,9 @@ def test_too_many_extends() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment()
+    env = Environment(
+        extra=True,
+    )
     template = env.from_string(source)
 
     with pytest.raises(TemplateInheritanceError):
@@ -195,7 +199,7 @@ def test_invalid_block_name() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(LiquidSyntaxError):
@@ -216,7 +220,9 @@ def test_block_drop_properties() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials), undefined=StrictUndefined)
+    env = Environment(
+        extra=True, loader=DictLoader(partials), undefined=StrictUndefined
+    )
     template = env.from_string(source)
 
     with pytest.raises(UndefinedError):
@@ -233,7 +239,7 @@ def test_block_no_super_block() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(undefined=StrictUndefined)
+    env = Environment(extra=True, undefined=StrictUndefined)
     template = env.from_string(source)
 
     with pytest.raises(UndefinedError):
@@ -253,7 +259,7 @@ def test_duplicate_block_names() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(TemplateInheritanceError):
@@ -272,7 +278,7 @@ def test_endblock_name() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -288,7 +294,7 @@ def test_mismatched_endblock_name() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     with pytest.raises(TemplateInheritanceError):
@@ -320,7 +326,7 @@ def test_override_nested_block_and_outer_block() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=DictLoader(partials))
+    env = Environment(extra=True, loader=DictLoader(partials))
     template = env.from_string(source)
 
     result = template.render()
@@ -340,7 +346,7 @@ def test_recursive_extends() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=loader)
+    env = Environment(extra=True, loader=loader)
     template = env.get_template("some")
 
     with pytest.raises(TemplateInheritanceError):
@@ -375,7 +381,7 @@ def test_overridden_block_to_many_blocks() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    env = Environment(loader=loader)
+    env = Environment(extra=True, loader=loader)
     template = env.get_template("some")
 
     result = template.render()

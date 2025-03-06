@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "add_filters",
-    "add_macro_tags",
+    "add_tags",
     "add_tags_and_filters",
     "BlockTag",
     "CallTag",
@@ -33,7 +33,14 @@ __all__ = (
     "WithTag",
 )
 
-# TODO:
+
+def add_tags(env: Environment) -> None:
+    """Register all extra tags with the given environment."""
+    env.add_tag(ExtendsTag)
+    env.add_tag(BlockTag)
+    env.add_tag(MacroTag)
+    env.add_tag(CallTag)
+    env.add_tag(WithTag)
 
 
 def add_filters(env: Environment) -> None:
@@ -47,4 +54,5 @@ def add_filters(env: Environment) -> None:
 
 def add_tags_and_filters(env: Environment) -> None:  # pragma: no cover
     """Register all extra tags and filters with an environment."""
+    add_tags(env)
     add_filters(env)

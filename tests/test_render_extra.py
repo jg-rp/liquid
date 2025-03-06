@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 class MockEnv(Environment):
     logical_parentheses = True
     ternary_expressions = True
+    logical_not_operator = True
 
 
 class BaseRenderTestCase(unittest.TestCase):

@@ -64,6 +64,7 @@ TEST_CASES: list[Case] = [
 
 class MockEnv(Environment):
     logical_parentheses = True
+    logical_not_operator = True
 
 
 ENV = MockEnv()

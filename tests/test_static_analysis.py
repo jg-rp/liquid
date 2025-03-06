@@ -25,7 +25,7 @@ class MockEnv(Environment):
 
 @pytest.fixture
 def env() -> Environment:  # noqa: D103
-    return MockEnv()
+    return MockEnv(extra=True)
 
 
 def _assert(
@@ -754,7 +754,7 @@ def test_analyze_inheritance_chain() -> None:
         }
     )
 
-    env = Environment(loader=loader)
+    env = Environment(extra=True, loader=loader)
 
     _assert(
         env.get_template("some"),
@@ -805,7 +805,7 @@ def test_analyze_recursive_extends() -> None:
             "other": "{% extends 'some' %}",
         }
     )
-    env = Environment(loader=loader)
+    env = Environment(extra=True, loader=loader)
     template = env.get_template("some")
 
     _assert(
@@ -832,7 +832,7 @@ def test_analyze_super() -> None:
         }
     )
 
-    env = Environment(loader=loader)
+    env = Environment(extra=True, loader=loader)
 
     _assert(
         env.get_template("some"),

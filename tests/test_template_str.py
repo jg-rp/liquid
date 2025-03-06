@@ -5,6 +5,7 @@ from liquid import parse
 
 
 class MockEnv(Environment):
+    logical_not_operator = True
     logical_parentheses = True
     ternary_expressions = True
 

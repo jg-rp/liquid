@@ -96,7 +96,6 @@ _rules = (
     (TOKEN_COMMA, r","),
     (TOKEN_DPIPE, r"\|\|"),
     (TOKEN_PIPE, r"\|"),
-    # XXX (TOKEN_EQUALS, r"=")
     ("OP", r"[!=<>]{1,2}"),
     (TOKEN_SKIP, r"[ \n\t\r]+"),
     (TOKEN_ILLEGAL, r"."),
@@ -145,7 +144,6 @@ def tokenize(source: str, parent_token: Token) -> Iterator[Token]:
 
         value = match.group()
 
-        # TODO: extra, user-defined keywords?
         if kind == TOKEN_WORD and value in _keywords:
             kind = value
         elif kind == TOKEN_IDENTINDEX:

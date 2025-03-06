@@ -38,6 +38,22 @@ def test_enable_string_first_and_last() -> None:
     assert template.render(y="hello") == "ho"
 
 
+def test_default_logical_not_operator() -> None:
+    """Test that logical _not_ is not allowed by default."""
+    env = Environment()
+
+    with pytest.raises(LiquidSyntaxError):
+        env.parse("{% if not false %}TRUE{% else %}FALSE{% endif %}")
+
+
+def test_enable_logical_not_operator() -> None:
+    class MockEnv(Environment):
+        logical_not_operator = True
+
+    env = MockEnv()
+    assert env.render("{% if not false %}TRUE{% else %}FALSE{% endif %}") == "TRUE"
+
+
 def test_default_logical_parentheses() -> None:
     """Test that parentheses are not allowed in logical expressions by default."""
     env = Environment()
@@ -52,9 +68,7 @@ def test_default_logical_parentheses() -> None:
 
     with pytest.raises(LiquidSyntaxError):
         # With parens
-        env.parse(
-            "{% if (false and true) or true %}TRUE{% else %}FALSE{% endif %}"
-        ).render()
+        env.parse("{% if (false and true) or true %}TRUE{% else %}FALSE{% endif %}")
 
 
 def test_enable_logical_parentheses() -> None:
@@ -146,8 +160,3 @@ def test_enable_assign_argument_separator() -> None:
         env.parse("{% for x in y limit=2 %}{{x}}{% endfor %}").render(y=[1, 2, 3, 4, 5])
         == "12"
     )
-
-
-# TODO: test `with` is disabled by default
-# TODO: test template inheritance is disabled by default
-# TODO: test macros are disabled by default

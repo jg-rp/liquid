@@ -22,11 +22,7 @@ from .exceptions import Error
 from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
 from .exceptions import lookup_warning
-from .extra import BlockTag
-from .extra import CallTag
-from .extra import ExtendsTag
-from .extra import MacroTag
-from .extra import WithTag
+from .extra import add_tags_and_filters as register_extra_tags_and_filters
 from .lex import get_lexer
 from .mode import Mode
 from .parse import get_parser
@@ -51,6 +47,7 @@ class Environment:
     global context variables that should be included with every template.
 
     Args:
+        extra: If `True`, register all extra tags and filters. Defaults to `False`.
         tag_start_string: The sequence of characters indicating the start of a
             liquid tag.
         tag_end_string: The sequence of characters indicating the end of a liquid
@@ -80,74 +77,51 @@ class Environment:
             output unless they've been explicitly marked as "safe".
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
-
-    Attributes:
-        context_depth_limit: Class attribute. The maximum number of times a render
-            context can be extended or wrapped before a `ContextDepthError` is raised.
-        local_namespace_limit: Class attribute. The maximum number of bytes (according
-            to sys.getsizeof) allowed in a template's local namespace, per render,
-            before a `LocalNamespaceLimitError` exception is raised. Note that we only
-            count the size of the local namespace values, not its keys.
-        loop_iteration_limit: Class attribute. The maximum number of loop iterations
-            allowed before a  `liquid.exceptions.LoopIterationLimitError` is raised.
-        output_stream_limit: Class attribute. The maximum number of bytes that can be
-            written to a template's output stream, per render, before an
-            `OutputStreamLimitError` exception is raised.
-        render_whitespace_only_blocks: Class attribute. Indicates if block tags that,
-            when rendered, contain whitespace only should be output. Defaults to
-            `False`, meaning empty blocks are suppressed.
-        undefined: The undefined type. When an identifier can not be resolved, an
-            instance of `undefined` is returned.
-        strict_filters: Indicates if an undefined filter should raise an exception or be
-            ignored.
-        autoescape: Indicates if auto-escape is enabled.
-        tags: A dictionary mapping tag names to `liquid.tag.Tag` instances.
-        filters: A dictionary mapping filter names to callable objects implementing a
-            filter's behavior.
-        mode: The current tolerance mode.
-        template_class: `Environment.get_template` and `Environment.from_string`
-            return an instance of `Environment.template_class`.
-        globals: A dictionary of variables that will be added to the context of every
-            template rendered from the environment.
     """
 
-    # Maximum number of times a context can be extended or wrapped before raising
-    # a ContextDepthError.
     context_depth_limit: ClassVar[int] = 30
+    """The maximum number of times a render context can be extended or wrapped before
+    raising a `ContextDepthError`."""
 
-    # Maximum number of loop iterations allowed before a LoopIterationLimitError is
-    # raised.
     loop_iteration_limit: ClassVar[Optional[int]] = None
+    """The maximum number of loop iterations allowed before a LoopIterationLimitError is
+    raised."""
 
-    # Maximum number of bytes (according to sys.getsizeof) allowed in a template's
-    # local namespace before a LocalNamespaceLimitError is raised. We only count the
-    # size of the namespaces values, not the size of keys/names.
     local_namespace_limit: ClassVar[Optional[int]] = None
+    """The maximum number of bytes (according to `sys.getsizeof`) allowed in a
+    template's local namespace before a LocalNamespaceLimitError is raised. We only
+    count the size of the namespaces values, not the size of keys/names."""
 
-    # Maximum number of bytes that can be written to a template's output stream before
-    # raising an OutputStreamLimitError.
     output_stream_limit: ClassVar[Optional[int]] = None
+    """The maximum number of bytes that can be written to a template's output stream
+    before raising an OutputStreamLimitError."""
 
-    # Instances of `template_class` are returned from `from_string`,
-    # `get_template` and `get_template_async`. It should be the `BoundTemplate`
-    # class or a subclass of it.
     template_class: Type[BoundTemplate] = BoundTemplate
+    """Instances of `template_class` are returned from `from_string`, `get_template`
+    and `get_template_async`. It should be the `BoundTemplate` class or a subclass of
+    it."""
 
-    # Whether to output blocks that only contain only whitespace when rendered.
     suppress_blank_control_flow_blocks: bool = True
+    """When `True`, don't render control flow blocks that contain only whitespace."""
 
-    # When `True`, accept indexes without enclosing square brackets in paths to
-    # variables. Defaults to `False`.
     shorthand_indexes: bool = False
+    """When `True`, accept indexes without enclosing square brackets in paths to
+    variables. Defaults to `False`."""
 
-    # When `True`, strings are treated as sequences. That is, characters (Unicode code
-    # points) in a string can be looped over and selected by index. Defaults to `False`.
     string_sequences: bool = False
+    """When `True`, strings are treated as sequences. That is, characters (Unicode code
+    points) in a string can be looped over and selected by index. Defaults to `False`.
+    """
 
-    # When `True`, the special `first` and `last` properties will return the first and
-    # last charters of a string. Otherwise `first` and `last` will resolve to Undefined
-    # when applied to a string. Defaults to `False`.
     string_first_and_last: bool = False
+    """When `True`, the special `first` and `last` properties will return the first and
+    last charters of a string. Otherwise `first` and `last` will resolve to Undefined
+    when applied to a string. Defaults to `False`."""
+
+    logical_not_operator: bool = False
+    """When `True`, allow the use of the logical `not` operator in logical expressions.
+    Defaults to `False`.
+    """
 
     logical_parentheses: bool = False
     """When `True`, allow the use of parentheses in logical expressions to group terms.
@@ -163,11 +137,12 @@ class Environment:
 
     def __init__(
         self,
+        *,
+        extra: bool = False,
         tag_start_string: str = r"{%",
         tag_end_string: str = r"%}",
         statement_start_string: str = r"{{",
         statement_end_string: str = r"}}",
-        strip_tags: bool = False,
         tolerance: Mode = Mode.STRICT,
         loader: Optional[BaseLoader] = None,
         undefined: Type[Undefined] = Undefined,
@@ -182,9 +157,6 @@ class Environment:
         self.tag_end_string = tag_end_string
         self.statement_start_string = statement_start_string
         self.statement_end_string = statement_end_string
-
-        # Automatic tag stripping is not yet implemented. Changing this has no effect.
-        self.strip_tags = strip_tags
 
         # An instance of a template loader implementing `liquid.loaders.BaseLoader`.
         # `get_template()` will delegate to this loader.
@@ -222,7 +194,7 @@ class Environment:
         # tolerance mode
         self.mode: Mode = tolerance
 
-        self.setup_tags_and_filters()
+        self.setup_tags_and_filters(extra=extra)
 
     def __hash__(self) -> int:
         return hash(
@@ -234,9 +206,6 @@ class Environment:
                 self.comment_start_string,
                 self.comment_end_string,
                 self.mode,
-                self.strip_tags,
-                # Necessary when replacing the standard output statement implementation.
-                self.tags.get("statement"),
             )
         )
 
@@ -275,15 +244,14 @@ class Environment:
         """
         self.filters[name] = func
 
-    def setup_tags_and_filters(self) -> None:
-        """Add default tags and filters to this environment."""
+    def setup_tags_and_filters(self, *, extra: bool = False) -> None:
+        """Add default tags and filters to this environment.
+
+        If _extra_ is `True`, register all extra, non-standard tags and filters too.
+        """
         builtin.register(self)
-        # TODO:
-        self.add_tag(ExtendsTag)
-        self.add_tag(BlockTag)
-        self.add_tag(MacroTag)
-        self.add_tag(CallTag)
-        self.add_tag(WithTag)
+        if extra:
+            register_extra_tags_and_filters(self)
 
     def _parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.
@@ -511,11 +479,12 @@ class Environment:
 
 @lru_cache(maxsize=10)
 def get_implicit_environment(
+    *,
+    extra: bool = False,
     tag_start_string: str,
     tag_end_string: str,
     statement_start_string: str,
     statement_end_string: str,
-    strip_tags: bool,
     tolerance: Mode,
     loader: Optional[BaseLoader],
     undefined: Type[Undefined],
@@ -528,11 +497,11 @@ def get_implicit_environment(
 ) -> Environment:
     """Return an `Environment` initialized with the given arguments."""
     return Environment(
+        extra=extra,
         tag_start_string=tag_start_string,
         tag_end_string=tag_end_string,
         statement_start_string=statement_start_string,
         statement_end_string=statement_end_string,
-        strip_tags=strip_tags,
         tolerance=tolerance,
         loader=loader,
         undefined=undefined,
@@ -552,11 +521,12 @@ def get_implicit_environment(
 
 def Template(  # noqa: N802, D417
     source: str,
+    *,
+    extra: bool = False,
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
-    strip_tags: bool = False,
     tolerance: Mode = Mode.STRICT,
     undefined: Type[Undefined] = Undefined,
     strict_filters: bool = True,
@@ -572,6 +542,7 @@ def Template(  # noqa: N802, D417
     which might have been cached from previous calls to `Template`.
 
     Args:
+        extra: If `True`, register all extra tags and filters. Defaults to `False`.
         tag_start_string: The sequence of characters indicating the start of a
             liquid tag.
         tag_end_string: The sequence of characters indicating the end of a liquid
@@ -580,7 +551,6 @@ def Template(  # noqa: N802, D417
             an output statement.
         statement_end_string: The sequence of characters indicating the end of an
             output statement.
-        strip_tags: Has no effect. We don't support automatic whitespace stripping.
         template_comments: If `True`, enable template comments, where, by default,
             anything between `{#` and `#}` is considered a comment.
         comment_start_string: The sequence of characters indicating the start of a
@@ -604,11 +574,11 @@ def Template(  # noqa: N802, D417
     # Resorting to named arguments (repeated 3 times) as I've twice missed a bug
     # because of positional arguments.
     env = get_implicit_environment(
+        extra=extra,
         tag_start_string=tag_start_string,
         tag_end_string=tag_end_string,
         statement_start_string=statement_start_string,
         statement_end_string=statement_end_string,
-        strip_tags=strip_tags,
         tolerance=tolerance,
         loader=None,
         undefined=undefined,

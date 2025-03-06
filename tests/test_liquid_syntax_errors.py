@@ -235,7 +235,7 @@ class MockEnv(Environment):
     keyword_assignment = True
 
 
-ENV = MockEnv()
+ENV = MockEnv(extra=True)
 
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
