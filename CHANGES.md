@@ -15,6 +15,7 @@ This major release:
 - Removes the `expression_cache_size` argument to `liquid.Environment` and `liquid.Template`. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
 - Makes markupsafe>=3 a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
 - Adds new filters `reject`, `has`, `find` and `find_index`.
+- Adds the new `doc` tag.
 
 ### API changes
 

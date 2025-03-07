@@ -14,6 +14,7 @@ TOKEN_EXPRESSION = sys.intern("expression")
 TOKEN_OUTPUT = sys.intern("output")
 TOKEN_CONTENT = sys.intern("content")
 TOKEN_COMMENT = sys.intern("comment")
+TOKEN_DOC = sys.intern("doc")
 
 TOKEN_WORD = sys.intern("word")
 TOKEN_IDENTINDEX = sys.intern("identindex")

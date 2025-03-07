@@ -79,6 +79,7 @@ from .tags import case_tag
 from .tags import comment_tag
 from .tags import cycle_tag
 from .tags import decrement_tag
+from .tags import doc_tag
 from .tags import echo_tag
 from .tags import for_tag
 from .tags import if_tag
@@ -130,6 +131,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_tag(render_tag.RenderTag)
     env.add_tag(ifchanged_tag.IfChangedTag)
     env.add_tag(inline_comment_tag.InlineCommentTag)
+    env.add_tag(doc_tag.DocTag)
 
     env.add_filter("abs", abs_)
     env.add_filter("at_most", at_most)

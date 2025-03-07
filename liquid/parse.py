@@ -12,6 +12,7 @@ from .ast import Node
 from .exceptions import Error
 from .exceptions import LiquidSyntaxError
 from .token import TOKEN_CONTENT
+from .token import TOKEN_DOC
 from .token import TOKEN_EOF
 from .token import TOKEN_ILLEGAL
 from .token import TOKEN_OUTPUT
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 class Parser:
     """A Liquid template parser. Create a parse tree from a stream of tokens."""
 
-    __slots__ = ("tags", "illegal", "content", "statement", "env")
+    __slots__ = ("tags", "illegal", "content", "output", "env", "doc")
 
     def __init__(self, env: Environment):
         self.tags = env.tags
@@ -33,7 +34,7 @@ class Parser:
 
         self.illegal = self.tags[TOKEN_ILLEGAL]
         self.content = self.tags[TOKEN_CONTENT]
-        self.statement = self.tags[TOKEN_OUTPUT]
+        self.output = self.tags[TOKEN_OUTPUT]
 
     def parse(self, stream: TokenStream) -> list[Node]:
         """Parse the given stream of tokens into a tree."""
@@ -54,7 +55,10 @@ class Parser:
     def parse_statement(self, stream: TokenStream) -> Node:
         """Parse a node from a stream of tokens."""
         if stream.current.kind == TOKEN_OUTPUT:
-            node = self.statement.get_node(stream)
+            node = self.output.get_node(stream)
+        elif stream.current.kind == TOKEN_DOC:
+            # TODO: refactor
+            node = self.tags.get(TOKEN_DOC, self.illegal).get_node(stream)
         elif stream.current.kind == TOKEN_TAG:
             tag = self.tags.get(stream.current.value, self.illegal)
             node = tag.get_node(stream)

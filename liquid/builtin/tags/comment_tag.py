@@ -58,10 +58,9 @@ class CommentTag(Tag):
         token = stream.eat(TOKEN_TAG)
         text = []
 
-        if stream.current.kind == TOKEN_EOF:
-            raise LiquidSyntaxError("comment tag was never closed", token=token)
-
-        while stream.current.kind != TOKEN_EOF:
+        while True:
+            if stream.current.kind == TOKEN_EOF:
+                raise LiquidSyntaxError("comment tag was never closed", token=token)
             if (
                 stream.current.kind == TOKEN_TAG
                 and stream.current.value == TAG_ENDCOMMENT

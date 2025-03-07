@@ -18,6 +18,7 @@ from typing import Pattern
 from liquid.exceptions import LiquidSyntaxError
 from liquid.token import TOKEN_COMMENT
 from liquid.token import TOKEN_CONTENT
+from liquid.token import TOKEN_DOC
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_OUTPUT
@@ -46,7 +47,14 @@ def compile_liquid_rules(
         r"(?P<raw>.*?)"
         rf"{tag_s}-?\s*endraw\s*(?P<rsr_e>-?){tag_e}"
     )
-    statement_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
+
+    doc_pattern = (
+        rf"{tag_s}-?\s*doc\s*(?P<lsd>-?){tag_e}"
+        r"(?P<doc>.*?)"
+        rf"{tag_s}-?\s*enddoc\s*(?P<rsd>-?){tag_e}"
+    )
+
+    output_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
 
     # The "name" group is zero or more characters so that a malformed tag (one
     # with no name) does not get treated as a literal.
@@ -62,7 +70,8 @@ def compile_liquid_rules(
 
         liquid_rules = [
             ("RAW", raw_pattern),
-            (TOKEN_OUTPUT, statement_pattern),
+            ("DOC", doc_pattern),
+            (TOKEN_OUTPUT, output_pattern),
             ("TAG", tag_pattern),
             (TOKEN_CONTENT, content_pattern),
         ]
@@ -72,8 +81,9 @@ def compile_liquid_rules(
 
         liquid_rules = [
             ("RAW", raw_pattern),
+            ("DOC", doc_pattern),
             ("COMMENT", comment_pattern),
-            (TOKEN_OUTPUT, statement_pattern),
+            (TOKEN_OUTPUT, output_pattern),
             ("TAG", tag_pattern),
             (TOKEN_CONTENT, content_pattern),
         ]
@@ -181,7 +191,12 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # 
         elif kind == "RAW":
             kind = TOKEN_CONTENT
             value = match.group("raw")
-            lstrip = bool(match.group("rsr_e"))
+            lstrip = bool(match.group("rsr"))
+
+        elif kind == "DOC":
+            kind = TOKEN_DOC
+            value = match.group("doc")
+            lstrip = bool(match.group("rsd"))
 
         elif kind == TOKEN_CONTENT:
             if lstrip:
