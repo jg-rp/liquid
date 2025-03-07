@@ -1,9 +1,7 @@
-"""A wrapper for token iterators that lets us step through and peek ahead."""
+"""Step through a sequence of tokens."""
 
 from __future__ import annotations
 
-from collections import deque
-from typing import Deque
 from typing import Iterator
 from typing import Optional
 
@@ -11,73 +9,58 @@ from .builtin.expressions import tokenize
 from .exceptions import LiquidSyntaxError
 from .token import TOKEN_EOF
 from .token import TOKEN_EXPRESSION
-from .token import TOKEN_INITIAL
 from .token import Token
 from .token import reverse_operators
 
-# TODO: optimize for short expressions
-
 
 class TokenStream:
-    """Step through or iterate a stream of tokens."""
+    """Step through a sequence of tokens."""
 
     eof = Token(TOKEN_EOF, "", -1, "")
 
     def __init__(
         self,
-        tokeniter: Iterator[Token],
-        *,
-        shorthand_indexes: bool = False,
+        tokens: Iterator[Token],
     ):
-        self.iter = tokeniter
-
-        # Queue of peeked tokens
-        self._pushed: Deque[Token] = deque()
-
-        self.current: Token = Token(TOKEN_INITIAL, "", 0, "")
-        next(self)
-
-        self.shorthand_indexes = shorthand_indexes  # TODO:
+        self.tokens = list(tokens)
+        self.pos = 0
 
     def __next__(self) -> Token:
-        tok = self.current
-        if self._pushed:
-            self.current = self._pushed.popleft()
-        elif self.current.kind is not TOKEN_EOF:
-            try:
-                self.current = next(self.iter)
-            except StopIteration:
-                self.close()
-        return tok
+        return self.next_token()
 
-    def __str__(self) -> str:  # pragma: no cover
-        buf = [
-            f"current: {self.current}",
-            f"next: {self.peek}",
-        ]
-        return "\n".join(buf)
+    def next(self) -> Token:
+        """Return the next token and advance the iterator."""
+        try:
+            token = self.tokens[self.pos]
+            self.pos += 1
+            return token
+        except IndexError:
+            return self.eof
 
     def next_token(self) -> Token:
-        """Return the next token from the stream."""
-        return next(self)
+        """Return the next token and advance the iterator."""
+        try:
+            token = self.tokens[self.pos]
+            self.pos += 1
+            return token
+        except IndexError:
+            return self.eof
+
+    @property
+    def current(self) -> Token:
+        """Return the token at the head of the stream without advancing."""
+        try:
+            return self.tokens[self.pos]
+        except IndexError:
+            return self.eof
 
     @property
     def peek(self) -> Token:
         """Look at the next token."""
-        current = next(self)
-        result = self.current
-        self.push(current)
-        return result
-
-    def push(self, tok: Token) -> None:
-        """Push a token back to the stream."""
-        self._pushed.append(self.current)
-        self.current = tok
-
-    def close(self) -> None:
-        """Close the stream."""
-        # TODO: lose close
-        self.current = self.eof
+        try:
+            return self.tokens[self.pos + 1]
+        except IndexError:
+            return self.eof
 
     def _expect(self, tok: Token, typ: str, value: Optional[str] = None) -> Token:
         if tok.kind != typ or (value is not None and tok.value != value):
@@ -111,7 +94,7 @@ class TokenStream:
 
         If the type of the next token is equal to _typ_, raise an exceptions.
 
-        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
+        This is equivalent to `stream.expect(typ)` followed by `stream.next()`.
         """
         tok = self.current
         if tok.kind != typ:
@@ -124,7 +107,7 @@ class TokenStream:
 
         If the type of the next token is equal to _typ_, raise an exceptions.
 
-        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
+        This is equivalent to `stream.expect(typ)` followed by `stream.next()`.
         """
         tok = self.current
         if tok.kind not in typ:

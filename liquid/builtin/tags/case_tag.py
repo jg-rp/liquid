@@ -148,17 +148,17 @@ class CaseTag(Tag):
             stream.current.kind != TOKEN_TAG
             and stream.current.value not in ENDWHENBLOCK
         ):
-            stream.next_token()
+            stream.next()
 
         parse_block = get_parser(self.env).parse_block
         blocks: list[Union[MultiExpressionBlockNode, BlockNode]] = []
 
         while not stream.current.is_tag(TAG_ENDCASE):
             if stream.current.is_tag(TAG_ELSE):
-                next(stream)
+                stream.next()
                 blocks.append(parse_block(stream, ENDWHENBLOCK))
             elif stream.current.is_tag(TAG_WHEN):
-                alternative_token = next(stream)
+                alternative_token = stream.next()
                 expressions = self._parse_when_expression(
                     stream.into_inner(tag=alternative_token)
                 )
@@ -187,7 +187,7 @@ class CaseTag(Tag):
     def _parse_when_expression(self, stream: TokenStream) -> list[Expression]:
         expressions: list[Expression] = [parse_primitive(self.env, stream)]
         while stream.current.kind in (TOKEN_COMMA, TOKEN_OR):
-            next(stream)
+            stream.next()
             try:
                 expressions.append(parse_primitive(self.env, stream))
             except LiquidSyntaxError:

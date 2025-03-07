@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from typing import Union
 
 from liquid import Mode
+from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import NoSuchFilterFunc
@@ -219,7 +220,7 @@ class TernaryFilteredExpression(Expression):
         tail_filters: list[Filter] | None = None
 
         if tokens.current.kind == TOKEN_ELSE:
-            next(tokens)  # else
+            tokens.next()  # else
             alternative = parse_primitive(env, tokens)
 
             if tokens.current.kind == TOKEN_PIPE:
@@ -269,8 +270,8 @@ class Filter:
         try:
             return func(left, *positional_args, **keyword_args)
         except TypeError as err:
-            raise LiquidTypeError(str(err), token=self.token) from err
-        except LiquidTypeError as err:
+            raise LiquidTypeError(f"{self.name}: {err}", token=self.token) from err
+        except (LiquidTypeError, FilterArgumentError) as err:
             err.token = self.token
             raise err
 
@@ -284,7 +285,7 @@ class Filter:
             return func(left, *positional_args, **keyword_args)
         except TypeError as err:
             raise LiquidTypeError(f"{self.name}: {err}", token=self.token) from err
-        except LiquidTypeError as err:
+        except (LiquidTypeError, FilterArgumentError) as err:
             err.token = self.token
             raise err
 
@@ -330,7 +331,7 @@ class Filter:
         )
 
         while tokens.current.kind in delim:
-            next(tokens)
+            tokens.next()
             token = tokens.eat(TOKEN_WORD)
             args: list[Union[KeywordArgument, PositionalArgument]] = []
 
@@ -344,8 +345,8 @@ class Filter:
                 tok = tokens.current
                 if tok.kind == TOKEN_WORD:
                     if tokens.peek.kind in argument_separators:
-                        next(tokens)  # word
-                        next(tokens)  # : or =
+                        tokens.next()  # word
+                        tokens.next()  # : or =
                         args.append(
                             KeywordArgument(
                                 tok, tok.value, parse_primitive(env, tokens)
@@ -377,7 +378,7 @@ class Filter:
                             f"found {tokens.peek.kind}",
                             token=tokens.peek,
                         )
-                    next(tokens)
+                    tokens.next()
                 else:
                     break
 

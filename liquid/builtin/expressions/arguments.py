@@ -52,13 +52,13 @@ class KeywordArgument:
 
         # Leading commas are OK
         if tokens.current.kind == TOKEN_COMMA:
-            next(tokens)
+            tokens.next()
 
         while True:
-            token = next(tokens)
+            token = tokens.next()
 
             if token.kind == TOKEN_COMMA:
-                token = next(tokens)
+                token = tokens.next()
 
             if token.kind == TOKEN_EOF:
                 break
@@ -109,7 +109,7 @@ class PositionalArgument:
 
         while True:
             if tokens.current.kind == TOKEN_COMMA:
-                next(tokens)
+                tokens.next()
 
             if tokens.current.kind == TOKEN_EOF:
                 break
@@ -141,11 +141,11 @@ class Parameter:
         )
 
         while True:
-            token = next(tokens)
+            token = tokens.next()
 
             if token.kind == TOKEN_COMMA:
                 # Leading and/or trailing commas are OK.
-                token = next(tokens)
+                token = tokens.next()
 
             if token.kind == TOKEN_EOF:
                 break
@@ -153,7 +153,7 @@ class Parameter:
             if token.kind == TOKEN_WORD:
                 if tokens.current.kind in argument_separators:
                     # A parameter with a default value
-                    next(tokens)  # Move past ":" or "="
+                    tokens.next()  # Move past ":" or "="
                     value = parse_primitive(env, tokens)
                     params[token.value] = Parameter(token, token.value, value)
                 else:
@@ -179,7 +179,7 @@ def parse_arguments(
 
     # Leading commas are OK
     if tokens.current.kind == TOKEN_COMMA:
-        next(tokens)
+        tokens.next()
 
     while True:
         token = tokens.current
@@ -189,8 +189,8 @@ def parse_arguments(
 
         if token.kind == TOKEN_WORD:
             if tokens.peek.kind in argument_separators:
-                name_token = next(tokens)
-                next(tokens)  # = or :
+                name_token = tokens.next()
+                tokens.next()  # = or :
                 value = parse_primitive(env, tokens)
                 kwargs.append(KeywordArgument(name_token, token.value, value))
             else:

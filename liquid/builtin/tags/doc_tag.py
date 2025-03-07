@@ -63,6 +63,6 @@ class DocTag(Tag):
             if stream.current.kind == TOKEN_EOF:
                 raise LiquidSyntaxError("doc tag wad never closed", token=token)
             text.append(stream.current.value)
-            next(stream)
+            stream.next()
 
         return self.node_class(token, text="".join(text))

@@ -168,7 +168,7 @@ class UnlessTag(Tag):
             # continue to parse more "elsif" expression, if any.
             try:
                 expr = BooleanExpression.parse(
-                    self.env, stream.into_inner(tag=stream.next_token())
+                    self.env, stream.into_inner(tag=stream.next())
                 )
             except LiquidSyntaxError as err:
                 self.env.error(err)
@@ -185,11 +185,11 @@ class UnlessTag(Tag):
         alternative: Optional[BlockNode] = None
 
         if stream.current.is_tag(TAG_ELSE):
-            stream.next_token()
+            stream.next()
             if stream.current.kind == TOKEN_EXPRESSION:
                 if self.mode == Mode.LAX:
                     # Superfluous expressions inside an `else` tag are ignored.
-                    stream.next_token()
+                    stream.next()
                 else:
                     raise LiquidSyntaxError(
                         "found an 'else' tag expression, did you mean 'elsif'?",
@@ -205,7 +205,7 @@ class UnlessTag(Tag):
                     and stream.current.value == TAG_ENDUNLESS
                 ):
                     break
-                stream.next_token()
+                stream.next()
 
         stream.expect(TOKEN_TAG, value=TAG_ENDUNLESS)
 

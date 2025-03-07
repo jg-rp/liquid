@@ -1,4 +1,4 @@
-"""Tokenize Liquid templates and expressions.
+"""Tokenize Liquid templates.
 
 The template lexer generates a stream of template literals, tags, output statements and
 expressions, where each expression token is an unscanned string. Lexing of expression

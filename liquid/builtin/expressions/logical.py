@@ -437,30 +437,30 @@ def parse_boolean_primitive(  # noqa: PLR0912
 
     if kind == TOKEN_TRUE:
         left = TrueLiteral(token)
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_FALSE:
         left = FalseLiteral(token)
-        next(tokens)
+        tokens.next()
     elif kind in (TOKEN_NIL, TOKEN_NULL):
         left = Nil(token)
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_INTEGER:
         left = IntegerLiteral(token, to_int(token.value))
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_FLOAT:
         left = FloatLiteral(token, float(token.value))
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_STRING:
         left = StringLiteral(token, token.value)
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_RANGE_LITERAL:
         left = RangeLiteral.parse(env, tokens)
     elif kind == TOKEN_BLANK:
         left = Blank(token)
-        next(tokens)
+        tokens.next()
     elif kind == TOKEN_EMPTY:
         left = Empty(token)
-        next(tokens)
+        tokens.next()
     elif kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:
@@ -493,7 +493,7 @@ def parse_infix_expression(  # noqa: PLR0911
     env: Environment, stream: TokenStream, left: Expression
 ) -> Expression:  # noqa: PLR0911
     """Return a logical, comparison, or membership expression parsed from _stream_."""
-    token = next(stream)
+    token = stream.next()
     assert token is not None
     precedence = PRECEDENCES.get(token.kind, PRECEDENCE_LOWEST)
 
@@ -553,7 +553,7 @@ def parse_grouped_expression(env: Environment, tokens: TokenStream) -> Expressio
 
     tokens.eat(TOKEN_LPAREN)
     expr = parse_boolean_primitive(env, tokens)
-    token = next(tokens)
+    token = tokens.next()
 
     while token.kind != TOKEN_RPAREN:
         if token is None:

@@ -67,6 +67,6 @@ class CommentTag(Tag):
             ):
                 break
             text.append(stream.current.value)
-            next(stream)
+            stream.next()
 
         return self.node_class(token, text="".join(text))

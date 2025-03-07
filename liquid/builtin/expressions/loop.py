@@ -229,10 +229,10 @@ class LoopExpression(Expression):
 
         # Leading commas are OK
         if tokens.current.kind == TOKEN_COMMA:
-            next(tokens)
+            tokens.next()
 
         while True:
-            arg_token = next(tokens)
+            arg_token = tokens.next()
             kind = arg_token.kind
 
             if kind == TOKEN_LIMIT:
@@ -244,7 +244,7 @@ class LoopExpression(Expression):
                 tokens.eat_one_of(*argument_separators)
                 offset_token = tokens.current
                 if offset_token.kind == TOKEN_CONTINUE:
-                    next(tokens)
+                    tokens.next()
                     offset = StringLiteral(token=offset_token, value="continue")
                 else:
                     offset = parse_primitive(env, tokens)
