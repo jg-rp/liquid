@@ -127,8 +127,7 @@ cases = [
     ),
     Case(
         description=(
-            "render a default given a literal false "
-            "with 'allow false' equal to false"
+            "render a default given a literal false with 'allow false' equal to false"
         ),
         template=r"{{ false | default: 'bar', allow_false: false }}",
         expect="bar",
@@ -181,12 +180,22 @@ cases = [
         template=r"{{ products[0]title }}",
         expect="shoe",
         globals={"products": [{"title": "shoe"}, {"title": "hat"}]},
+        strict=True,
+        error=True,
     ),
     Case(
         description="chained identifier dot separated index",
         template=r"{{ products.0.title }}",
         expect="",
         globals={"products": [{"title": "shoe"}, {"title": "hat"}]},
+        strict=True,
+        error=True,
+    ),
+    Case(
+        description="dot followed by bracket",
+        template=r"{{ product.['title'] }}",
+        expect="shoe",
+        globals={"product": {"title": "shoe"}},
         strict=True,
         error=True,
     ),
@@ -236,5 +245,51 @@ cases = [
         template=r"{{ ['bar baz'].qux }}",
         expect="42",
         globals={"bar baz": {"qux": 42}},
+    ),
+    Case(
+        description="whitespace between word and dot",
+        template="{{ foo \n\t.bar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between dot and word",
+        template="{{ foo. \n\tbar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between bracket notation",
+        template="{{ ['foo'] \n\t['bar'] }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+    ),
+    Case(
+        description="whitespace between words",
+        template="{{ foo \n\tbar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+        strict=True,
+        error=True,
+    ),
+    Case(
+        description="double dot",
+        template="{{ foo..bar }}",
+        expect="42",
+        globals={"foo": {"bar": 42}},
+        strict=True,
+        error=True,
+    ),
+    Case(
+        description="array index out of bounds",
+        template="{{ a[3] }}",
+        expect="",
+        globals={"a": [1, 2, 3]},
+    ),
+    Case(
+        description="negative array index out of bounds",
+        template="{{ a[-4] }}",
+        expect="",
+        globals={"a": [1, 2, 3]},
     ),
 ]

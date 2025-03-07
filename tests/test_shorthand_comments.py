@@ -1,12 +1,13 @@
 """Test cases for shorthand comment syntax."""
 
+import operator
 from dataclasses import dataclass
 from typing import Type
 from typing import Union
-from unittest import TestCase
+
+import pytest
 
 from liquid import Environment
-from liquid import Mode
 from liquid import Template
 
 
@@ -17,142 +18,110 @@ class Case:
     expect: Union[str, Type[Exception]]
 
 
-class ShorthandCommentTestCase(TestCase):
-    def _test(
-        self,
-        test_cases: list[Case],
-        template_comments=False,
-        comment_start_string="{#",
-        comment_end_string="#}",
-    ) -> None:
-        """Table driven test runner."""
-        for case in test_cases:
-            with self.subTest(msg=case.description, env=True):
-                env = Environment(
-                    tolerance=Mode.STRICT,
-                    template_comments=template_comments,
-                    comment_start_string=comment_start_string,
-                    comment_end_string=comment_end_string,
-                )
+def test_shorthand_comments_are_disabled_by_default() -> None:
+    env = Environment()
+    source = "Hello, {# this is a comment #} World!"
+    assert env.from_string(source).render() == source
+    assert Template(source).render() == source
 
-                template = env.from_string(case.template)
-                result = template.render()
-                self.assertEqual(result, case.expect)
 
-            # Test using the Template API too.
-            with self.subTest(msg=case.description, Template=True):
-                template = Template(
-                    case.template,
-                    tolerance=Mode.STRICT,
-                    template_comments=template_comments,
-                    comment_start_string=comment_start_string,
-                    comment_end_string=comment_end_string,
-                )
-                result = template.render()
-                self.assertEqual(result, case.expect)
+TEST_CASES = [
+    Case(
+        description="shorthand comments are ignored",
+        template=r"Hello, {# this is a comment #} World!",
+        expect="Hello,  World!",
+    ),
+    Case(
+        description="shorthand comments must have a trailing hash.",
+        template=r"Hello, {# this is not a comment } World!",
+        expect="Hello, {# this is not a comment } World!",
+    ),
+    Case(
+        description="shorthand comments can contain tags and statements",
+        template=r"Hello, {# this is {% if %} a {{ comment }} #} World!",
+        expect="Hello,  World!",
+    ),
+    Case(
+        description="liquid expression line comments are ignored",
+        template="\n".join(
+            (
+                r"{% liquid ",
+                r"if true",
+                r"echo 'foo'",
+                r"endif",
+                r"# this is a comment",
+                r"%}",
+            )
+        ),
+        expect="foo",
+    ),
+    Case(
+        description="shorthand comments can remove trailing whitespace",
+        template=r"Hello, {# this is a comment -#} World!",
+        expect="Hello, World!",
+    ),
+    Case(
+        description="shorthand comments can remove leading whitespace",
+        template=r"Hello, {#- this is a comment #} World!",
+        expect="Hello, World!",
+    ),
+]
 
-    def test_no_shorthand_comment_syntax(self):
-        """Test that a default environment does not support shorthand comment syntax."""
-        test_cases = [
-            Case(
-                description="shorthand comments are disbled",
-                template=r"Hello, {# this is a comment #} World!",
-                expect="Hello, {# this is a comment #} World!",
-            ),
-        ]
+MOCK_ENV = Environment(template_comments=True)
 
-        self._test(test_cases)
 
-    def test_shorthand_comment_syntax(self):
-        """Test that shorthand comments are ignored."""
-        test_cases = [
-            Case(
-                description="shorthand comments are ignored",
-                template=r"Hello, {# this is a comment #} World!",
-                expect="Hello,  World!",
-            ),
-            Case(
-                description="shorthand comments must have a trailing hash.",
-                template=r"Hello, {# this is not a comment } World!",
-                expect="Hello, {# this is not a comment } World!",
-            ),
-            Case(
-                description="shorthand comments can contain tags and statements",
-                template=r"Hello, {# this is {% if %} a {{ comment }} #} World!",
-                expect="Hello,  World!",
-            ),
-            Case(
-                description="liquid expression line comments are ignored",
-                template="\n".join(
-                    (
-                        r"{% liquid ",
-                        r"if true",
-                        r"echo 'foo'",
-                        r"endif",
-                        r"# this is a comment",
-                        r"%}",
-                    )
-                ),
-                expect="foo",
-            ),
-        ]
+@pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
+def test_shorthand_comments(case: Case) -> None:
+    assert MOCK_ENV.from_string(case.template).render() == case.expect
+    assert Template(case.template, template_comments=True).render() == case.expect
 
-        self._test(test_cases, template_comments=True)
 
-    def test_shorthand_comment_whitespace_control(self):
-        """Test that shorthand comments can use whitespace control."""
-        test_cases = [
-            Case(
-                description="shorthand comments can remove trailing whitespace",
-                template=r"Hello, {# this is a comment -#} World!",
-                expect="Hello, World!",
-            ),
-            Case(
-                description="shorthand comments can remove leading whitespace",
-                template=r"Hello, {#- this is a comment #} World!",
-                expect="Hello, World!",
-            ),
-        ]
+ALT_TEST_CASES = [
+    Case(
+        description="shorthand comments are ignored",
+        template="Hello, {// this is a comment //} World!",
+        expect="Hello,  World!",
+    ),
+    Case(
+        description="shorthand comments must have a valid end sequence.",
+        template=r"Hello, {// this is not a comment } World!",
+        expect="Hello, {// this is not a comment } World!",
+    ),
+    Case(
+        description="shorthand comments can contain tags and statements",
+        template=r"Hello, {// this is {% if %} a {{ comment }} //} World!",
+        expect="Hello,  World!",
+    ),
+    Case(
+        description="liquid expression line comments are ignored",
+        template="\n".join(
+            (
+                r"{% liquid ",
+                r"if true",
+                r"echo 'foo'",
+                r"endif",
+                r"// this is a comment",
+                r"%}",
+            )
+        ),
+        expect="foo",
+    ),
+]
 
-        self._test(test_cases, template_comments=True)
+ALT_MOCK_ENV = Environment(
+    template_comments=True, comment_start_string="{//", comment_end_string="//}"
+)
 
-    def test_different_start_and_end_sequence(self):
-        """Test that we can change the comment start and end sequence."""
-        test_cases = [
-            Case(
-                description="shorthand comments are ignored",
-                template="Hello, {// this is a comment //} World!",
-                expect="Hello,  World!",
-            ),
-            Case(
-                description="shorthand comments must have a valid end sequence.",
-                template=r"Hello, {// this is not a comment } World!",
-                expect="Hello, {// this is not a comment } World!",
-            ),
-            Case(
-                description="shorthand comments can contain tags and statements",
-                template=r"Hello, {// this is {% if %} a {{ comment }} //} World!",
-                expect="Hello,  World!",
-            ),
-            Case(
-                description="liquid expression line comments are ignored",
-                template="\n".join(
-                    (
-                        r"{% liquid ",
-                        r"if true",
-                        r"echo 'foo'",
-                        r"endif",
-                        r"// this is a comment",
-                        r"%}",
-                    )
-                ),
-                expect="foo",
-            ),
-        ]
 
-        self._test(
-            test_cases,
+@pytest.mark.parametrize("case", ALT_TEST_CASES, ids=operator.attrgetter("description"))
+def test_alternate_shorthand_comments(case: Case) -> None:
+    assert ALT_MOCK_ENV.from_string(case.template).render() == case.expect
+    assert (
+        Template(
+            case.template,
             template_comments=True,
             comment_start_string="{//",
             comment_end_string="//}",
-        )
+        ).render()
+        == case.expect
+    )

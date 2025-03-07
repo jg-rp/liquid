@@ -1,26 +1,29 @@
 """Parse tree node and tag definition for the built-in "capture" tag."""
 
-import re
+from __future__ import annotations
+
 import sys
-from io import StringIO
-from typing import Optional
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import TextIO
 
 from liquid import Markup
-from liquid import ast
-from liquid.context import RenderContext
-from liquid.exceptions import LiquidSyntaxError
+from liquid.ast import BlockNode
+from liquid.ast import Node
+from liquid.builtin.expressions import parse_identifier
 from liquid.parse import get_parser
-from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
 
-# ruff: noqa: D102
+if TYPE_CHECKING:
+    from io import StringIO
 
-RE_CAPTURE = re.compile(r"^\w[a-zA-Z0-9_\-]*$")
+    from liquid.builtin.expressions import Identifier
+    from liquid.context import RenderContext
+    from liquid.stream import TokenStream
+
 
 TAG_CAPTURE = sys.intern("capture")
 TAG_ENDCAPTURE = sys.intern("endcapture")
@@ -28,21 +31,18 @@ TAG_ENDCAPTURE = sys.intern("endcapture")
 ENDCAPTUREBLOCK = frozenset((TAG_ENDCAPTURE, TOKEN_EOF))
 
 
-class CaptureNode(ast.Node):
+class CaptureNode(Node):
     """Parse tree node for the built-in "capture" tag."""
 
-    __slots__ = ("tok", "name", "block")
+    __slots__ = ("name", "block")
 
-    def __init__(self, tok: Token, name: str, block: ast.BlockNode):
-        self.tok = tok
+    def __init__(self, token: Token, name: Identifier, block: BlockNode):
+        super().__init__(token)
         self.name = name
         self.block = block
 
     def __str__(self) -> str:
-        return f"var {self.name} = {{ {self.block} }}"
-
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"CaptureNode(tok={self.tok}, name={self.name}, block='{self.block}')"
+        return f"{{% capture {self.name} %}}{self.block}{{% endcapture %}}"
 
     def _assign(self, context: RenderContext, buf: StringIO) -> None:
         if context.autoescape:
@@ -50,9 +50,8 @@ class CaptureNode(ast.Node):
         else:
             context.assign(self.name, buf.getvalue())
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
         buf = context.get_buffer(buffer)
         self.block.render(context, buf)
         self._assign(context, buf)
@@ -60,20 +59,25 @@ class CaptureNode(ast.Node):
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    ) -> int:
+        """Render the node to the output buffer."""
         buf = context.get_buffer(buffer)
         await self.block.render_async(context, buf)
         self._assign(context, buf)
         return False
 
-    def children(self) -> list[ast.ChildNode]:
-        return [
-            ast.ChildNode(
-                linenum=self.tok.linenum,
-                node=self.block,
-                template_scope=[self.name],
-            )
-        ]
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield self.block
+
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        yield self.name
 
 
 class CaptureTag(Tag):
@@ -84,25 +88,11 @@ class CaptureTag(Tag):
     node_class = CaptureNode
 
     def parse(self, stream: TokenStream) -> CaptureNode:
-        parser = get_parser(self.env)
-
-        stream.expect(TOKEN_TAG, value=TAG_CAPTURE)
-        tok = stream.current
-        stream.next_token()
-
-        stream.expect(TOKEN_EXPRESSION)
-
-        match = RE_CAPTURE.match(stream.current.value)
-        if match:
-            name = match.group()
-        else:
-            raise LiquidSyntaxError(
-                f'invalid capture identifier "{stream.current.value}"',
-                linenum=stream.current.linenum,
-            )
-
-        stream.next_token()
-        block = parser.parse_block(stream, ENDCAPTUREBLOCK)
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner(tag=token)
+        name = parse_identifier(self.env, tokens)
+        tokens.expect_eos()
+        block = get_parser(self.env).parse_block(stream, ENDCAPTUREBLOCK)
         stream.expect(TOKEN_TAG, value=TAG_ENDCAPTURE)
-
-        return self.node_class(tok, name, block=block)
+        return self.node_class(token, name, block)

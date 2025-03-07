@@ -1,14 +1,12 @@
 import operator
 from dataclasses import dataclass
 from dataclasses import field
-from inspect import isclass
 from typing import Any
 
 import pytest
 
 from liquid import Environment
 from liquid.builtin.filters.array import reject
-from liquid.exceptions import Error
 
 
 @dataclass
@@ -37,8 +35,4 @@ TEST_CASES = [
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_reject_filter(case: Case) -> None:
-    if isclass(case.expect) and issubclass(case.expect, Error):
-        with pytest.raises(case.expect):
-            reject(case.val, *case.args, **case.kwargs)
-    else:
-        assert reject(case.val, *case.args, **case.kwargs) == case.expect
+    assert reject(case.val, *case.args, **case.kwargs) == case.expect

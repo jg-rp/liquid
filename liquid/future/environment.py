@@ -11,11 +11,6 @@ from typing import Type
 
 from ..environment import Environment as DefaultEnvironment
 from ..template import FutureBoundTemplate
-from .filters import split
-from .tags import InterruptingTablerowTag
-from .tags import LaxCaseTag
-from .tags import LaxIfTag
-from .tags import LaxUnlessTag
 
 if TYPE_CHECKING:
     from ..template import BoundTemplate
@@ -33,12 +28,3 @@ class Environment(DefaultEnvironment):
     """
 
     template_class: Type[BoundTemplate] = FutureBoundTemplate
-
-    def setup_tags_and_filters(self) -> None:
-        """Add future tags and filters to this environment."""
-        super().setup_tags_and_filters()
-        self.add_filter("split", split)
-        self.add_tag(LaxCaseTag)
-        self.add_tag(LaxIfTag)
-        self.add_tag(LaxUnlessTag)
-        self.add_tag(InterruptingTablerowTag)

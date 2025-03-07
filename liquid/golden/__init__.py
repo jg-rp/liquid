@@ -19,6 +19,7 @@ from . import date_filter
 from . import decrement_tag
 from . import default_filter
 from . import divided_by_filter
+from . import doc_tag
 from . import downcase_filter
 from . import echo_tag
 from . import escape_filter
@@ -105,6 +106,7 @@ test_cases = [
     decrement_tag,
     default_filter,
     divided_by_filter,
+    doc_tag,
     downcase_filter,
     echo_tag,
     escape_filter,

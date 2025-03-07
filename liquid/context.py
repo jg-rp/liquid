@@ -2,168 +2,46 @@
 
 from __future__ import annotations
 
-import collections.abc
 import datetime
 import itertools
 import re
 import sys
 import warnings
+from collections import defaultdict
 from contextlib import contextmanager
 from functools import partial
 from functools import reduce
 from io import StringIO
-from itertools import cycle
-from operator import getitem
 from operator import mul
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Awaitable
 from typing import Callable
 from typing import Iterator
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
 from typing import Sequence
+from typing import Sized
 from typing import TextIO
 from typing import Union
 
-from liquid import Mode
-from liquid.chain_map import ReadOnlyChainMap
-from liquid.exceptions import ContextDepthError
-from liquid.exceptions import Error
-from liquid.exceptions import LocalNamespaceLimitError
-from liquid.exceptions import LoopIterationLimitError
-from liquid.exceptions import NoSuchFilterFunc
-from liquid.exceptions import lookup_warning
-from liquid.output import LimitedStringIO
-from liquid.undefined import UNDEFINED
-from liquid.undefined import DebugUndefined
-from liquid.undefined import StrictDefaultUndefined
-from liquid.undefined import StrictUndefined
-from liquid.undefined import Undefined
-from liquid.undefined import is_undefined
+from .exceptions import ContextDepthError
+from .exceptions import Error
+from .exceptions import LocalNamespaceLimitError
+from .exceptions import LoopIterationLimitError
+from .exceptions import NoSuchFilterFunc
+from .exceptions import lookup_warning
+from .mode import Mode
+from .output import LimitedStringIO
+from .undefined import UNDEFINED
+from .undefined import Undefined
+from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
-    from liquid.builtin.tags.for_tag import ForLoop
-    from liquid.template import BoundTemplate
-
-# ruff: noqa: D102
-
-__all__ = (
-    "RenderContext",
-    "DebugUndefined",
-    "get_item",
-    "is_undefined",
-    "ReadOnlyChainMap",
-    "StrictDefaultUndefined",
-    "StrictUndefined",
-    "CaptureRenderContext",
-    "Undefined",
-)
-
-ContextPath = Union[str, Sequence[Union[str, int]]]
-Namespace = Mapping[str, object]
-
-
-class BuiltIn(Mapping[str, object]):
-    """Mapping-like object for resolving built-in, dynamic objects."""
-
-    def __contains__(self, item: object) -> bool:
-        return item in ("now", "today")
-
-    def __getitem__(self, key: str) -> object:
-        if key == "now":
-            return datetime.datetime.now()
-        if key == "today":
-            return datetime.date.today()
-        raise KeyError(str(key))
-
-    def __len__(self) -> int:
-        return 2
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(["now", "today"])
-
-
-builtin = BuiltIn()
-
-
-def _liquid_size(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "size")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, collections.abc.Sized):
-            return len(obj)
-        raise
-
-
-def _liquid_first(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "first")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Mapping) and obj:
-            return list(itertools.islice(obj.items(), 1))[0]
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[0]
-        raise
-
-
-def _liquid_last(
-    obj: Any, item_getter: Callable[[Any, str], object] = getitem
-) -> object:
-    try:
-        return item_getter(obj, "last")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[-1]
-        raise
-
-
-async def _liquid_size_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "size")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, collections.abc.Sized):
-            return len(obj)
-        raise
-
-
-async def _liquid_first_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "first")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Mapping) and obj:
-            return list(itertools.islice(obj.items(), 1))[0]
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[0]
-        raise
-
-
-async def _liquid_last_async(
-    obj: Any, item_getter: Callable[[Any, str], Awaitable[object]]
-) -> object:
-    try:
-        return await item_getter(obj, "last")
-    except (KeyError, IndexError, TypeError):
-        if isinstance(obj, str):
-            raise
-        if isinstance(obj, collections.abc.Sequence):
-            return obj[-1]
-        raise
+    from .builtin.tags.for_tag import ForLoop
+    from .environment import Environment
+    from .template import BoundTemplate
+    from .token import Token
 
 
 class RenderContext:
@@ -195,14 +73,14 @@ class RenderContext:
         self,
         template: BoundTemplate,
         *,
-        globals: Optional[Namespace] = None,  # noqa: A002
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         disabled_tags: Optional[list[str]] = None,
         copy_depth: int = 0,
         parent_context: Optional[RenderContext] = None,
         loop_iteration_carry: int = 1,
         local_namespace_size_carry: int = 0,
     ):
-        self.env = template.env
+        self.env: Environment = template.env
         self.template = template
 
         # A namespace for template local variables. Those that are bound with
@@ -211,7 +89,7 @@ class RenderContext:
 
         # A read-only namespace containing globally available variables. Usually
         # passed down from the environment.
-        self.globals = globals or {}
+        self.globals: Mapping[str, object] = globals or {}
 
         # A namespace for `increment` and `decrement` counters.
         self.counters: dict[str, int] = {}
@@ -226,6 +104,8 @@ class RenderContext:
             "cycles": {},
             "ifchanged": "",
             "stopindex": {},
+            "extends": defaultdict(list),
+            "macros": {},
         }
 
         # As stack of forloop objects. Used for populating forloop.parentloop.
@@ -234,7 +114,7 @@ class RenderContext:
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
         # use "include" tags.
-        self.disabled_tags = disabled_tags or []
+        self.disabled_tags: list[str] = disabled_tags or []
 
         # Indicates if HTML auto-escaping is enabled.
         self.autoescape = self.env.autoescape
@@ -257,13 +137,13 @@ class RenderContext:
         self.local_namespace_size_carry = local_namespace_size_carry
 
     def assign(self, key: str, val: Any) -> None:
-        """Add `val` to the context with key `key`."""
+        """Add or replace the context variable named _key_ with the value _val_."""
         self.locals[key] = val
         if (
             self.env.local_namespace_limit
             and self.get_size_of_locals() > self.env.local_namespace_limit
         ):
-            raise LocalNamespaceLimitError("local namespace limit reached")
+            raise LocalNamespaceLimitError("local namespace limit reached", token=None)
 
     def get_size_of_locals(self) -> int:
         """Return the "size" or a "score" for the current local namespace.
@@ -283,80 +163,114 @@ class RenderContext:
             + self.local_namespace_size_carry
         )
 
-    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        """Return the value at path `path` if it is in scope, else default."""
-        if isinstance(path, str):
-            return self._resolve(path, default)
+    def get(  # noqa: PLR0911
+        self, path: list[object], *, token: Optional[Token], default: object = UNDEFINED
+    ) -> object:
+        """Resolve and return _path_ in the current scope.
 
-        name, items = path[0], path[1:]
-        assert isinstance(name, str)
-        obj = self._resolve(name, default)
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
 
-        if items:
+        Returns _default_ is the path is not in scope.
+        """
+        it = iter(path)
+        root = next(it)
+        assert isinstance(root, str)
+
+        try:
+            obj = self.scope[root]
+        except (KeyError, TypeError, IndexError):
+            if default == UNDEFINED:
+                hint = f"{root!r} is undefined"
+                return self.env.undefined(root, hint=hint, token=token)
+            return default
+
+        for i, segment in enumerate(it):
             try:
-                return reduce(self.getitem, items, obj)
-            except (KeyError, IndexError, TypeError) as err:
-                if isinstance(err, KeyError):
-                    hint = (
-                        f"key error: {err}, {name}{''.join([f'[{i}]' for i in items])}"
-                    )
-                else:
-                    hint = f"{err}: {name}{''.join([f'[{i}]' for i in items])}"
-
+                obj = self.get_item(obj, segment)
+            except (KeyError, TypeError):
                 if default == UNDEFINED:
-                    return self.env.undefined(
-                        name=name,
-                        hint=hint,
-                    )
+                    hint = f"{_segments_str(path[: i + 2])} is undefined"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
+            except IndexError:
+                if default == UNDEFINED:
+                    hint = "index out of range"
+                    return self.env.undefined(root, hint=hint, token=token)
                 return default
 
         return obj
 
-    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        """Return the value at path `path` if it is in scope, else default."""
-        if isinstance(path, str):
-            return self._resolve(path, default)
+    async def get_async(  # noqa: PLR0911
+        self,
+        path: list[object],
+        *,
+        token: Optional[Token],
+        default: object = UNDEFINED,
+    ) -> object:
+        """Resolve and return _path_ in the current scope.
 
-        name, items = path[0], path[1:]
-        assert isinstance(name, str)
-        obj = self._resolve(name, default)
+        If _token_ is not None, it will be used to give error messages extra contextual
+        information.
 
-        if items:
-            _gi = self.getitem_async
+        Returns _default_ is the path is not in scope.
+        """
+        it = iter(path)
+        root = next(it)
+        assert isinstance(root, str)
+
+        try:
+            obj = self.scope[root]
+        except (KeyError, TypeError, IndexError):
+            if default == UNDEFINED:
+                hint = f"{root!r} is undefined"
+                return self.env.undefined(root, hint=hint, token=token)
+            return default
+
+        for i, segment in enumerate(it):
             try:
-                for item in items:
-                    obj = await _gi(obj, item)
-            except (KeyError, IndexError, TypeError) as err:
+                obj = await self.get_item_async(obj, segment)
+            except (KeyError, TypeError):
                 if default == UNDEFINED:
-                    return self.env.undefined(
-                        name=name,
-                        hint=f"{err}: {name}{''.join([f'[{i}]' for i in items])}",
-                    )
+                    hint = f"{_segments_str(path[: i + 2])} is undefined"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
+            except IndexError:
+                if default == UNDEFINED:
+                    hint = "index out of range"
+                    return self.env.undefined(root, hint=hint, token=token)
+                return default
 
         return obj
 
-    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
+    def resolve(
+        self, name: str, *, token: Optional[Token] = None, default: object = UNDEFINED
+    ) -> Any:
         """Return the object/value at `name` in the current scope.
 
         This is like `get`, but does a single, top-level lookup rather than a
         chained lookup from a sequence of keys.
         """
-        return self._resolve(name, default)
+        return self._resolve(name, token=token, default=default)
 
-    def _resolve(self, name: str, default: object = UNDEFINED) -> Any:
+    def _resolve(
+        self, name: str, *, token: Optional[Token], default: object = UNDEFINED
+    ) -> Any:
         try:
             return self.scope[name]
         except KeyError:
             if default == UNDEFINED:
-                return self.env.undefined(name)
+                return self.env.undefined(name, token=token)
             return default
 
-    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
+    def filter(self, name: str, token: Optional[Token]) -> Callable[..., object]:  # noqa: A003
         """Return the filter function with given name."""
         try:
             filter_func = self.env.filters[name]
         except KeyError as err:
-            raise NoSuchFilterFunc(f"unknown filter '{name}'") from err
+            if not self.env.strict_filters:
+                return _no_op_filter
+            raise NoSuchFilterFunc(f"unknown filter '{name}'", token=token) from err
 
         kwargs: dict[str, Any] = {}
 
@@ -386,18 +300,6 @@ class RenderContext:
         """Load a template from the environment asynchronously."""
         return await self.env.get_template_async(name)
 
-    def get_template_with_context(self, name: str, **kwargs: str) -> BoundTemplate:
-        """Load a template referencing the current render context."""
-        return self.env.get_template_with_context(self, name, **kwargs)
-
-    async def get_template_with_context_async(
-        self,
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_context`."""
-        return await self.env.get_template_with_context_async(self, name, **kwargs)
-
     def increment(self, name: str) -> int:
         """Increment the named counter and return its value."""
         val: int = self.counters.get(name, 0)
@@ -410,13 +312,12 @@ class RenderContext:
         self.counters[name] = val
         return val
 
-    def cycle(self, group_name: str, args: Sequence[object]) -> object:
-        """Return the next item in the cycle of the given arguments."""
-        key = (group_name, tuple(args))
-        namespace = self.tag_namespace["cycles"]
-        if key not in namespace:
-            namespace[key] = cycle(range(len(args)))
-        return args[next(namespace[key])]
+    def cycle(self, key: object, length: int) -> int:
+        """Return the index of the next item in the cycle."""
+        namespace: dict[object, int] = self.tag_namespace["cycles"]
+        idx = namespace.setdefault(key, 0)
+        namespace[key] = (idx + 1) % length
+        return idx
 
     def ifchanged(self, val: str) -> bool:
         """Return True if the `ifchanged` value has changed."""
@@ -437,12 +338,12 @@ class RenderContext:
 
     @contextmanager
     def extend(
-        self, namespace: Namespace, template: Optional[BoundTemplate] = None
+        self, namespace: Mapping[str, object], template: Optional[BoundTemplate] = None
     ) -> Iterator[RenderContext]:
         """Extend this context with the given read-only namespace."""
         if self.scope.size() > self.env.context_depth_limit:
             raise ContextDepthError(
-                "maximum context depth reached, possible recursive include"
+                "maximum context depth reached, possible recursive include", token=None
             )
 
         # Remember the current template so we can restore it upon exiting the
@@ -461,7 +362,9 @@ class RenderContext:
             self.scope.pop()
 
     @contextmanager
-    def loop(self, namespace: Namespace, forloop: ForLoop) -> Iterator[RenderContext]:
+    def loop(
+        self, namespace: Mapping[str, object], forloop: ForLoop
+    ) -> Iterator[RenderContext]:
         """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
         self.loops.append(forloop)
@@ -476,7 +379,7 @@ class RenderContext:
         try:
             return self.loops[-1]
         except IndexError:
-            return self.env.undefined("parentloop")
+            return self.env.undefined("parentloop", token=None)
 
     def raise_for_loop_limit(self, length: int = 1) -> None:
         """Raise a `LoopIterationLimitError` if loop stack is bigger than the limit."""
@@ -489,11 +392,11 @@ class RenderContext:
             )
             > self.env.loop_iteration_limit
         ):
-            raise LoopIterationLimitError("loop iteration limit reached")
+            raise LoopIterationLimitError("loop iteration limit reached", token=None)
 
     def copy(
         self,
-        namespace: Namespace,
+        namespace: Mapping[str, object],
         disabled_tags: Optional[list[str]] = None,
         carry_loop_iterations: bool = False,
         template: Optional[BoundTemplate] = None,
@@ -505,7 +408,7 @@ class RenderContext:
         """
         if self._copy_depth > self.env.context_depth_limit:
             raise ContextDepthError(
-                "maximum context depth reached, possible recursive render"
+                "maximum context depth reached, possible recursive render", token=None
             )
 
         if carry_loop_iterations:
@@ -560,194 +463,144 @@ class RenderContext:
         carry = buf.size if isinstance(buf, LimitedStringIO) else 0
         return LimitedStringIO(limit=self.env.output_stream_limit - carry)
 
-    @classmethod
-    def getitem(cls, obj: Any, key: Any) -> Any:
-        """Item getter with special methods for arrays/lists and hashes/dicts."""
+    def get_item(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911, PLR0912
+        """An item getter used when resolving a Liquid path.
+
+        Override this to change the behavior of `.first`, `.last` and `.size`.
+        """
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            return _liquid_size(obj)
+            try:
+                return obj["size"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sized):
+                    return len(obj)
+                raise
+
         if key == "first":
-            return _liquid_first(obj)
+            try:
+                return obj["first"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Mapping) and obj:
+                    return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'first'") from None
+                if isinstance(obj, Sequence):
+                    return obj[0]
+                raise
+
         if key == "last":
-            return _liquid_last(obj)
+            try:
+                return obj["last"]
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'last'") from None
+                if isinstance(obj, Sequence):
+                    return obj[-1]
+                raise
 
-        return getitem(obj, key)
+        if (
+            not self.env.string_sequences
+            and isinstance(key, int)
+            and isinstance(obj, str)
+        ):
+            raise TypeError("string object is not subscriptable")
 
-    @classmethod
-    async def getitem_async(cls, obj: Any, key: Any) -> object:
-        """Item getter with special methods for arrays/lists and hashes/dicts."""
+        return obj[key]
+
+    async def get_item_async(self, obj: Any, key: Any) -> Any:  # noqa: PLR0911, PLR0912
+        """An async item getter for resolving paths."""
 
         async def _get_item(obj: Any, key: Any) -> object:
             if hasattr(obj, "__getitem_async__"):
                 return await obj.__getitem_async__(key)
-            return getitem(obj, key)
+            return obj[key]
 
         if hasattr(key, "__liquid__"):
             key = key.__liquid__()
 
         if key == "size":
-            return await _liquid_size_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "size")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Sized):
+                    return len(obj)
+                raise
+
         if key == "first":
-            return await _liquid_first_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "first")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, Mapping) and obj:
+                    return next(itertools.islice(obj.items(), 1))
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'first'") from None
+                if isinstance(obj, Sequence):
+                    return obj[0]
+                raise
+
         if key == "last":
-            return await _liquid_last_async(obj, _get_item)
+            try:
+                return await _get_item(obj, "last")
+            except (KeyError, IndexError, TypeError):
+                if isinstance(obj, str) and not self.env.string_first_and_last:
+                    raise TypeError("string object has no method 'last'") from None
+                if isinstance(obj, Sequence):
+                    return obj[-1]
+                raise
+
+        if (
+            not self.env.string_sequences
+            and isinstance(key, int)
+            and isinstance(obj, str)
+        ):
+            raise TypeError("string object is not subscriptable")
 
         return await _get_item(obj, key)
 
 
-class CaptureRenderContext(RenderContext):
-    """A render context that captures template variable and filter names."""
-
-    __slots__ = (
-        "local_references",
-        "all_references",
-        "undefined_references",
-        "root_context",
-        "filters",
-    )
-
-    # Used for formatting context path strings.
-    re_ident = re.compile(r"^[\w_][\w_\-]*$")
-
-    def __init__(
-        self,
-        template: BoundTemplate,
-        *,
-        globals: Optional[Namespace] = None,  # noqa: A002
-        disabled_tags: Optional[list[str]] = None,
-        copy_depth: int = 0,
-        parent_context: Optional[CaptureRenderContext] = None,
-        loop_iteration_carry: int = 1,
-        local_namespace_size_carry: int = 0,
-    ):
-        super().__init__(
-            template,
-            globals=globals,
-            disabled_tags=disabled_tags,
-            copy_depth=copy_depth,
-            parent_context=parent_context,
-            loop_iteration_carry=loop_iteration_carry,
-            local_namespace_size_carry=local_namespace_size_carry,
-        )
-        self.local_references: list[str] = []
-        self.all_references: list[str] = []
-        self.undefined_references: list[str] = []
-        self.filters: list[str] = []
-
-        root_context: CaptureRenderContext = self
-        while root_context.parent_context and isinstance(
-            root_context.parent_context, CaptureRenderContext
-        ):
-            root_context = root_context.parent_context
-        self.root_context = root_context
-
-    def assign(self, key: str, val: Any) -> None:
-        self.root_context.local_references.append(key)
-        return super().assign(key, val)
-
-    def get(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        result = super().get(path, default)
-        self._count_reference(path, result)
-        return result
-
-    async def get_async(self, path: ContextPath, default: object = UNDEFINED) -> object:
-        result = await super().get_async(path, default)
-        self._count_reference(path, result)
-        return result
-
-    def resolve(self, name: str, default: object = UNDEFINED) -> Any:
-        result = super().resolve(name, default)
-        self._count_reference(name, result)
-        return result
-
-    def increment(self, name: str) -> int:
-        self.root_context.local_references.append(name)
-        return super().increment(name)
-
-    def decrement(self, name: str) -> int:
-        self.root_context.local_references.append(name)
-        return super().decrement(name)
-
-    def filter(self, name: str) -> Callable[..., object]:  # noqa: A003
-        self.root_context.filters.append(name)
-        return super().filter(name)
-
-    def _count_reference(self, path: ContextPath, result: object) -> None:
-        if isinstance(path, str):
-            ref = path
-        else:
-            _path = []
-            for elem in path:
-                if isinstance(elem, int):
-                    _path.append(f"[{elem}]")
-                elif self.re_ident.match(elem):  # noqa: PLR5501
-                    if _path:
-                        _path.append(f".{elem}")
-                    else:
-                        _path.append(f"{elem}")
-                else:
-                    _path.append(f'["{elem}"]')
-            ref = "".join(_path)
-
-        if is_undefined(result):
-            self.root_context.undefined_references.append(ref)
-        self.root_context.all_references.append(ref)
-
-
 class FutureContext(RenderContext):
-    """A render context configured for maximum compatibility with the Ruby liquid.
-
-    These "fixes" have not been implemented in the default `Context` for the benefit of
-    existing Python Liquid users that rely on past behavior.
-
-    This render context currently fixes https://github.com/jg-rp/liquid/issues/43 and
-    https://github.com/jg-rp/liquid/issues/90.
-
-    """
-
-    @classmethod
-    def getitem(cls, obj: Any, key: Any) -> Any:
-        if isinstance(obj, str) and isinstance(key, int):
-            raise IndexError("string indices are not allowed")
-        return super().getitem(obj, key)
-
-    @classmethod
-    async def getitem_async(cls, obj: Any, key: Any) -> object:
-        if isinstance(obj, str) and isinstance(key, int):
-            raise IndexError("string indices are not allowed")
-        return await super().getitem_async(obj, key)
-
-    def cycle(self, group_name: str, args: Sequence[object]) -> object:
-        key = group_name if group_name else str(args)
-        namespace: dict[str, int] = self.tag_namespace["cycles"]
-        index = namespace.setdefault(key, 0)
-        try:
-            rv = args[index]
-        except IndexError:
-            rv = None
-
-        index += 1
-        if index >= len(args):
-            index = 0
-
-        namespace[key] = index
-        return rv
+    """A render context configured for maximum compatibility with the Ruby liquid."""
 
 
-class FutureVariableCaptureContext(CaptureRenderContext, FutureContext):
-    """A context that captures information about template variables and filters."""
+class BuiltIn(Mapping[str, object]):
+    """Mapping-like object for resolving built-in, dynamic objects."""
+
+    def __contains__(self, item: object) -> bool:
+        return item in ("now", "today")
+
+    def __getitem__(self, key: str) -> object:
+        if key == "now":
+            return datetime.datetime.now()
+        if key == "today":
+            return datetime.date.today()
+        raise KeyError(str(key))
+
+    def __len__(self) -> int:
+        return 2
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(["now", "today"])
 
 
-def get_item(
-    obj: Sequence[Any],
-    *items: Any,
-    default: Optional[object] = UNDEFINED,
-) -> Any:
-    """Chained item getter."""
-    try:
-        itm: Any = reduce(RenderContext.getitem, items, obj)
-    except (KeyError, IndexError, TypeError):
-        itm = default
-    return itm
+builtin = BuiltIn()
+
+RE_PROPERTY = re.compile(r"[\u0080-\uFFFFa-zA-Z_][\u0080-\uFFFFa-zA-Z0-9_-]*")
+
+
+def _segments_str(segments: list[object]) -> str:
+    it = iter(segments)
+    buf = [str(next(it))]
+    for segment in it:
+        if isinstance(segment, str):
+            if RE_PROPERTY.fullmatch(segment):
+                buf.append(f".{segment}")
+            else:
+                buf.append(f"[{segment!r}]")
+    return "".join(buf)
+
+
+def _no_op_filter(left: object, *_args: object, **_kwargs: object) -> object:
+    return left

@@ -22,7 +22,7 @@ cases = [
     ),
     Case(
         description="array containing an int, default value",
-        template=r"{{} a | reject: 'c' }}",
+        template=r"{{ a | reject: 'c' }}",
         expect="",
         error=True,
         globals={"a": ["x", "y", "cat", 1]},

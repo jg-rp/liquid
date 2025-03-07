@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from typing import Optional
+
 from liquid import DictLoader
 from liquid import Environment
 from liquid.exceptions import TemplateNotFound
-from liquid.loaders import TemplateSource
+from liquid.loader import TemplateSource
+
+if TYPE_CHECKING:
+    from liquid import RenderContext
 
 
 class MatterDictLoader(DictLoader):
@@ -13,15 +21,22 @@ class MatterDictLoader(DictLoader):
         super().__init__(templates)
         self.matter = matter
 
-    def get_source(self, _: Environment, template_name: str) -> TemplateSource:
+    def get_source(
+        self,
+        env: Environment,  # noqa: ARG002
+        template_name: str,
+        *,
+        context: Optional[RenderContext] = None,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
+    ) -> TemplateSource:
         try:
             source = self.templates[template_name]
         except KeyError as err:
             raise TemplateNotFound(template_name) from err
 
         return TemplateSource(
-            source=source,
-            filename=template_name,
+            text=source,
+            name=template_name,
             uptodate=None,
             matter=self.matter.get(template_name),
         )

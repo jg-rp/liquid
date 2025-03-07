@@ -1,89 +1,86 @@
-"""Parse tree node and tag definition for the built in "include" tag."""
+"""The built-in _include_ tag."""
+
+from __future__ import annotations
 
 import sys
+from typing import TYPE_CHECKING
+from typing import Iterable
 from typing import Optional
 from typing import TextIO
 
-from liquid.ast import ChildNode
 from liquid.ast import Node
+from liquid.ast import Partial
+from liquid.ast import PartialScope
 from liquid.builtin.drops import IterableDrop
-from liquid.context import RenderContext
-from liquid.exceptions import LiquidSyntaxError
-from liquid.expression import Expression
-from liquid.expression import Identifier
-from liquid.expression import Literal
-from liquid.expressions.common import parse_identifier
-from liquid.expressions.common import parse_string_or_identifier
-from liquid.expressions.common import parse_unchained_identifier
-from liquid.expressions.filtered.parse import parse_obj
-from liquid.expressions.include.lex import tokenize
-from liquid.stream import TokenStream
+from liquid.builtin.expressions import Identifier
+from liquid.builtin.expressions import KeywordArgument
+from liquid.builtin.expressions import Literal
+from liquid.builtin.expressions import Path
+from liquid.builtin.expressions import parse_identifier
+from liquid.builtin.expressions import parse_string_or_path
+from liquid.exceptions import TemplateNotFound
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
-from liquid.token import TOKEN_COLON
-from liquid.token import TOKEN_COMMA
-from liquid.token import TOKEN_EOF
-from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_IDENTIFIER
+from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_WITH
+from liquid.token import TOKEN_WORD
 from liquid.token import Token
 
-# ruff: noqa: D102
+if TYPE_CHECKING:
+    from liquid.context import RenderContext
+    from liquid.expression import Expression
+    from liquid.stream import TokenStream
 
 TAG_INCLUDE = sys.intern("include")
 
 
 class IncludeNode(Node):
-    """Parse tree node for the built-in "include" tag."""
+    """The built-in _include_ tag."""
 
-    __slots__ = ("tok", "name", "var", "alias", "args")
+    __slots__ = ("name", "var", "alias", "args")
     tag = TAG_INCLUDE
 
     def __init__(
         self,
-        tok: Token,
+        token: Token,
         name: Expression,
-        var: Optional[Identifier] = None,
-        alias: Optional[str] = None,
-        args: Optional[dict[str, Expression]] = None,
+        var: Optional[Expression] = None,
+        alias: Optional[Identifier] = None,
+        args: Optional[list[KeywordArgument]] = None,
     ):
-        self.tok = tok
+        super().__init__(token)
         self.name = name
         self.var = var
         self.alias = alias
-        self.args = args or {}
+        self.args = args or []
+        self.blank = False
 
     def __str__(self) -> str:
-        buf = [f"{self.name}"]
-
-        if self.var:
-            buf.append(f" with {self.var}")
-
+        var = f" with {self.var}" if self.var else ""
         if self.alias:
-            buf.append(f" as {self.alias}")
-
+            var += f" as {self.alias}"
         if self.args:
-            buf.append(", ")
+            var += ","
+        args = " " + ", ".join(str(arg) for arg in self.args) if self.args else ""
+        return f"{{% include {self.name}{var}{args} %}}"
 
-        args = (f"{key}={val}" for key, val in self.args.items())
-        buf.append(", ".join(args))
-
-        return f"{self.tag}({''.join(buf)})"
-
-    def __repr__(self) -> str:
-        return f"IncludeNode(tok={self.tok!r}, name={self.name})"  # pragma: no cover
-
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
         name = self.name.evaluate(context)
-        template = context.get_template_with_context(str(name), tag=self.tag)
-        namespace: dict[str, object] = {}
 
-        # Add any keyword arguments to the new template context.
-        for _key, _val in self.args.items():
-            namespace[_key] = _val.evaluate(context)
+        try:
+            template = context.env.get_template(
+                str(name), context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
+
+        namespace: dict[str, object] = {
+            arg.name: arg.value.evaluate(context) for arg in self.args
+        }
 
         with context.extend(namespace, template=template):
             # Bind a variable to the included template.
@@ -117,15 +114,22 @@ class IncludeNode(Node):
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    ) -> int:
+        """Render the node to the output buffer."""
         name = await self.name.evaluate_async(context)
-        template = await context.get_template_with_context_async(
-            str(name), tag=self.tag
-        )
-        namespace: dict[str, object] = {}
 
-        for _key, _val in self.args.items():
-            namespace[_key] = await _val.evaluate_async(context)
+        try:
+            template = await context.env.get_template_async(
+                str(name), context=context, tag=self.tag
+            )
+        except TemplateNotFound as err:
+            err.token = self.name.token
+            err.template_name = context.template.full_name()
+            raise
+
+        namespace: dict[str, object] = {
+            arg.name: await arg.value.evaluate_async(context) for arg in self.args
+        }
 
         with context.extend(namespace, template=template):
             if self.var is not None:
@@ -149,39 +153,70 @@ class IncludeNode(Node):
 
         return True
 
-    def children(self) -> list[ChildNode]:
-        block_scope: list[str] = list(self.args.keys())
-        _children = [
-            ChildNode(
-                linenum=self.tok.linenum,
-                node=None,
-                expression=self.name,
-                block_scope=block_scope,
-                load_mode="include",
-                load_context={"tag": "include"},
-            )
+    def children(
+        self, static_context: RenderContext, *, include_partials: bool = True
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        if include_partials:
+            name = self.name.evaluate(static_context)
+            try:
+                template = static_context.env.get_template(
+                    str(name), context=static_context, tag=self.tag
+                )
+                yield from template.nodes
+            except TemplateNotFound as err:
+                err.token = self.name.token
+                err.template_name = static_context.template.full_name()
+                raise
+
+    async def children_async(
+        self, static_context: RenderContext, *, include_partials: bool = True
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        if include_partials:
+            name = await self.name.evaluate_async(static_context)
+            try:
+                template = await static_context.env.get_template_async(
+                    str(name), context=static_context, tag=self.tag
+                )
+                return template.nodes
+            except TemplateNotFound as err:
+                err.token = self.name.token
+                err.template_name = static_context.template.full_name()
+                raise
+        return []
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.name
+        if self.var:
+            yield self.var
+        yield from (arg.value for arg in self.args)
+
+    def partial_scope(self) -> Partial | None:
+        """Return information about a partial template loaded by this node."""
+        scope: list[Identifier] = [
+            Identifier(arg.name, token=arg.token) for arg in self.args
         ]
+
         if self.var:
             if self.alias:
-                block_scope.append(self.alias)
+                scope.append(self.alias)
             elif isinstance(self.name, Literal):
-                block_scope.append(str(self.name.value).split(".", 1)[0])
-            _children.append(
-                ChildNode(
-                    linenum=self.tok.linenum,
-                    expression=self.var,
+                scope.append(
+                    Identifier(
+                        str(self.name.value).split(".", 1)[0], token=self.name.token
+                    )
                 )
-            )
-        for expr in self.args.values():
-            _children.append(ChildNode(linenum=self.tok.linenum, expression=expr))
-        return _children
+
+        return Partial(name=self.name, scope=PartialScope.SHARED, in_scope=scope)
 
 
 BIND_TOKENS = frozenset((TOKEN_WITH, TOKEN_FOR))
 
 
 class IncludeTag(Tag):
-    """The built-in "include" tag."""
+    """The built-in _include_ tag."""
 
     name = TAG_INCLUDE
     block = False
@@ -189,66 +224,28 @@ class IncludeTag(Tag):
 
     def parse(self, stream: TokenStream) -> Node:
         """Read an IncludeNode from the given stream of tokens."""
-        tok = next(stream)
-        stream.expect(TOKEN_EXPRESSION)
-        expr_stream = TokenStream(
-            tokenize(
-                stream.current.value,
-                linenum=tok.linenum,
-            )
-        )
+        token = stream.eat(TOKEN_TAG)
+        tokens = stream.into_inner(tag=token, eat=False)
 
         # Need a string or identifier that resolves to a string. This is the name
         # of the template to be included.
-        name = parse_string_or_identifier(expr_stream)
-        next(expr_stream)
-
-        identifier: Optional[Identifier] = None
-        alias: Optional[str] = None
+        name = parse_string_or_path(self.env, tokens)
+        var: Optional[Path] = None
+        alias: Optional[Identifier] = None
 
         # Optionally bind a variable to the included template context
-        if expr_stream.current[1] in BIND_TOKENS:
-            next(expr_stream)  # Eat 'with' or 'for'
-            expr_stream.expect(TOKEN_IDENTIFIER)
-            identifier = parse_identifier(expr_stream)
-            next(expr_stream)
+        if tokens.current.kind in BIND_TOKENS:
+            next(tokens)  # Eat 'with' or 'for'
+            tokens.expect(TOKEN_WORD)
+            var = Path.parse(self.env, tokens)
 
             # The bound variable will take the name of the template by default,
             # or an alias if an identifier follows the "as" keyword.
-            if expr_stream.current[1] == TOKEN_AS:
-                next(expr_stream)  # Eat 'as'
-                expr_stream.expect(TOKEN_IDENTIFIER)
-                alias = str(parse_unchained_identifier(expr_stream))
-                next(expr_stream)
+            if tokens.current.kind == TOKEN_AS:
+                next(tokens)  # Eat 'as'
+                tokens.expect(TOKEN_WORD)
+                alias = parse_identifier(self.env, tokens)
 
         # Zero or more keyword arguments
-        args: dict[str, Expression] = {}
-
-        # The first keyword argument might follow immediately or after a comma.
-        if expr_stream.current[1] == TOKEN_IDENTIFIER:
-            key, val = _parse_argument(expr_stream)
-            args[key] = val
-
-        while expr_stream.current[1] != TOKEN_EOF:
-            if expr_stream.current[1] == TOKEN_COMMA:
-                next(expr_stream)  # Eat comma
-                key, val = _parse_argument(expr_stream)
-                args[key] = val
-            else:
-                typ = expr_stream.current[1]
-                raise LiquidSyntaxError(
-                    f"expected a comma separated list of arguments, found {typ}",
-                    linenum=tok.linenum,
-                )
-
-        return self.node_class(tok, name=name, var=identifier, alias=alias, args=args)
-
-
-def _parse_argument(stream: TokenStream) -> tuple[str, Expression]:
-    key = str(parse_unchained_identifier(stream))
-    stream.next_token()
-    stream.expect(TOKEN_COLON)
-    stream.next_token()  # Eat colon
-    val = parse_obj(stream)
-    stream.next_token()
-    return key, val
+        args = KeywordArgument.parse(self.env, tokens)
+        return self.node_class(token, name, var, alias, args)

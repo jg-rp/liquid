@@ -11,7 +11,6 @@ from liquid.builtin.filters.array import map_
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import FilterError
-from liquid.expression import NIL
 
 
 @dataclass
@@ -54,7 +53,7 @@ TEST_CASES = [
         val=[{"title": "foo"}, {"title": "bar"}, {"heading": "baz"}],
         args=["title"],
         kwargs={},
-        expect=["foo", "bar", NIL],
+        expect=["foo", "bar", None],
     ),
     Case(
         description="value not an array",
@@ -82,7 +81,7 @@ TEST_CASES = [
         val=[{"title": "foo"}, {"title": "bar"}, {"title": "baz"}],
         args=[ENV.undefined("test")],
         kwargs={},
-        expect=[NIL, NIL, NIL],
+        expect=[None, None, None],
     ),
 ]
 

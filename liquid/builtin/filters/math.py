@@ -5,10 +5,10 @@ import math
 from typing import Optional
 from typing import Union
 
-from liquid.context import is_undefined
 from liquid.exceptions import FilterArgumentError
 from liquid.filter import math_filter
 from liquid.filter import num_arg
+from liquid.undefined import is_undefined
 
 # TODO: Version 2 - Either handle all filter function argument type
 # conversions in a decorator or all in the function itself. Having these type
@@ -57,7 +57,9 @@ def divided_by(num: Union[float, int], other: object) -> Union[float, int]:
     except ZeroDivisionError as err:
         # TODO: [VERSION_2] move inclusion of filter name in error messages to
         # FilteredExpression, where the filter is applied.
-        raise FilterArgumentError(f"divided_by: can't divide by {other}") from err
+        raise FilterArgumentError(
+            f"divided_by: can't divide by {other}", token=None
+        ) from err
 
 
 @math_filter
@@ -131,4 +133,6 @@ def modulo(num: Union[float, int], other: Union[float, int]) -> Union[float, int
     except ZeroDivisionError as err:
         # TODO: [VERSION_2] move inclusion of filter name in error messages to
         # FilteredExpression, where the filter is applied.
-        raise FilterArgumentError(f"modulo: can't divide by {other}") from err
+        raise FilterArgumentError(
+            f"modulo: can't divide by {other}", token=None
+        ) from err

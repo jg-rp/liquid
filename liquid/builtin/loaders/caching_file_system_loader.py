@@ -4,22 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from typing import Iterable
+from typing import Optional
 from typing import Union
 
-from .file_system_loader import FileExtensionLoader
+from .file_system_loader import FileSystemLoader
 from .mixins import CachingLoaderMixin
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from liquid import RenderContext
 
-    from .base_loader import TemplateSource
-
-# ruff: noqa: D102
-
-
-class CachingFileSystemLoader(CachingLoaderMixin, FileExtensionLoader):
+class CachingFileSystemLoader(CachingLoaderMixin, FileSystemLoader):
     """A file system loader that caches parsed templates in memory.
 
     Args:
@@ -34,7 +29,7 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileExtensionLoader):
             If you're developing a multi-user application, a good namespace might be
             `uid`, where `uid` is a unique identifier for a user and templates are
             arranged in folders named for each `uid` inside the search path.
-        cache_size: The maximum number of templates to hold in the cache before removing
+        capacity: The maximum number of templates to hold in the cache before removing
             the least recently used template.
     """
 
@@ -42,35 +37,21 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileExtensionLoader):
         self,
         search_path: Union[str, Path, Iterable[Union[str, Path]]],
         encoding: str = "utf-8",
-        ext: str = ".liquid",
+        ext: Optional[str] = None,
         *,
         auto_reload: bool = True,
         namespace_key: str = "",
-        cache_size: int = 300,
+        capacity: int = 300,
     ):
         super().__init__(
             auto_reload=auto_reload,
             namespace_key=namespace_key,
-            cache_size=cache_size,
+            capacity=capacity,
         )
 
-        FileExtensionLoader.__init__(
+        FileSystemLoader.__init__(
             self,
             search_path=search_path,
             encoding=encoding,
             ext=ext,
         )
-
-    def get_source_with_context(
-        self, context: RenderContext, template_name: str, **kwargs: str
-    ) -> TemplateSource:
-        # In this case, our cache key and real file name are the same.
-        name = self.cache_key_with_context(template_name, context, **kwargs)
-        return self.get_source(context.env, name)
-
-    async def get_source_with_context_async(
-        self, context: RenderContext, template_name: str, **kwargs: str
-    ) -> TemplateSource:
-        # In this case, our cache key and real file name are the same.
-        name = self.cache_key_with_context(template_name, context, **kwargs)
-        return await self.get_source_async(context.env, name)

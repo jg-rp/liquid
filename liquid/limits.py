@@ -60,6 +60,7 @@ def to_int(val: Any) -> int:
     ):
         raise LiquidValueError(
             f"integer string conversion limit ({MAX_STR_INT}) reached: "
-            f"value has {len(val)} digits"
+            f"value has {len(val)} digits",
+            token=None,
         )
     return int(val)

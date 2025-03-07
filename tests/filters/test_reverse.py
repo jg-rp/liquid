@@ -10,7 +10,6 @@ from liquid import Environment
 from liquid.builtin.filters.array import reverse
 from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
-from liquid.exceptions import FilterValueError
 
 
 @dataclass
@@ -39,7 +38,7 @@ TEST_CASES = [
         val=["a", "b", 1, [], {}],
         args=[],
         kwargs={},
-        expect=[{}, [], 1, "b", "a"],
+        expect=[{}, 1, "b", "a"],
     ),
     Case(
         description="empty list",
@@ -60,7 +59,7 @@ TEST_CASES = [
         val=123,
         args=[],
         kwargs={},
-        expect=FilterValueError,
+        expect=[123],
     ),
     Case(
         description="undefined left value",

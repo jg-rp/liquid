@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from collections import Counter
-from collections import abc
 from io import StringIO
+from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Any
@@ -16,39 +15,32 @@ from typing import TextIO
 from typing import Type
 from typing import Union
 
-from liquid.context import CaptureRenderContext
-from liquid.context import FutureContext
-from liquid.context import FutureVariableCaptureContext
-from liquid.context import ReadOnlyChainMap
-from liquid.context import RenderContext
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidInterrupt
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import StopRender
-from liquid.output import LimitedStringIO
-from liquid.static_analysis import ContextualTemplateAnalysis
-from liquid.static_analysis import NameRefs
-from liquid.static_analysis import ReferencedVariable
-from liquid.static_analysis import Refs
-from liquid.static_analysis import TemplateAnalysis
-from liquid.static_analysis import _TemplateCounter
+from .context import FutureContext
+from .context import RenderContext
+from .exceptions import Error
+from .exceptions import LiquidInterrupt
+from .exceptions import LiquidSyntaxError
+from .exceptions import StopRender
+from .output import LimitedStringIO
+from .static_analysis import _analyze
+from .static_analysis import _analyze_async
+from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
-    from liquid import Environment
-    from liquid.ast import ParseTree
-    from liquid.loaders import UpToDate
+    from collections import abc
+
+    from .ast import Node
+    from .environment import Environment
+    from .loader import UpToDate
+    from .static_analysis import Segments
+    from .static_analysis import TemplateAnalysis
 
 
 __all__ = (
     "AwareBoundTemplate",
     "BoundTemplate",
-    "ContextualTemplateAnalysis",
     "FutureAwareBoundTemplate",
     "FutureBoundTemplate",
-    "NameRefs",
-    "Refs",
-    "ReferencedVariable",
-    "TemplateAnalysis",
     "TemplateDrop",
 )
 
@@ -62,7 +54,7 @@ class BoundTemplate:
 
     Args:
         env: The environment this template is bound to.
-        parse_tree: The parse tree representing this template.
+        nodes: The parse tree representing this template.
         name: Optional name of the template. Defaults to an empty string.
         path: Optional origin path or identifier for the template.
         globals: An optional mapping of context variables made available every
@@ -76,25 +68,34 @@ class BoundTemplate:
     # Subclass `BoundTemplate` and override `context_class` to use a subclass of
     # `Context` when rendering templates.
     context_class: Type[RenderContext] = RenderContext
-    capture_context_class: Type[CaptureRenderContext] = CaptureRenderContext
 
     def __init__(
         self,
         env: Environment,
-        parse_tree: ParseTree,
+        nodes: list[Node],
         name: str = "",
         path: Optional[Union[str, Path]] = None,
-        globals: Optional[dict[str, object]] = None,  # noqa: A002
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         matter: Optional[Mapping[str, object]] = None,
         uptodate: UpToDate = None,
     ):
         self.env = env
-        self.tree = parse_tree
+        self.nodes = nodes
         self.globals = globals or {}
         self.matter = matter or {}
         self.name = name
         self.path = path
         self.uptodate = uptodate
+
+    def __str__(self) -> str:
+        return "".join(str(node) for node in self.nodes)
+
+    def full_name(self) -> str:
+        """Return this template's path, if available, joined with its name."""
+        if self.path:
+            path = Path(self.path)
+            return str(path / self.name if not path.name else path)
+        return self.name
 
     def render(self, *args: Any, **kwargs: Any) -> str:
         """Render the template with `args` and `kwargs` included in the render context.
@@ -152,7 +153,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.statements:
+            for node in self.nodes:
                 try:
                     node.render(context, buffer)
                 except LiquidInterrupt as err:
@@ -163,9 +164,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().linenum
-                            )
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token)
                         )
                     else:
                         raise
@@ -173,7 +172,7 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().linenum)
+                    self.env.error(err, token=node.token)
 
     async def render_with_context_async(
         self,
@@ -189,7 +188,7 @@ class BoundTemplate:
         namespace = self.make_partial_namespace(partial, dict(*args, **kwargs))
 
         with context.extend(namespace=namespace):
-            for node in self.tree.statements:
+            for node in self.nodes:
                 try:
                     await node.render_async(context, buffer)
                 except LiquidInterrupt as err:
@@ -200,9 +199,7 @@ class BoundTemplate:
                     # Convert the interrupt to a syntax error if there is no parent.
                     if not partial or block_scope:
                         self.env.error(
-                            LiquidSyntaxError(
-                                f"unexpected '{err}'", linenum=node.token().linenum
-                            )
+                            LiquidSyntaxError(f"unexpected '{err}'", token=node.token)
                         )
                     else:
                         raise
@@ -210,9 +207,8 @@ class BoundTemplate:
                     break
                 except Error as err:
                     # Raise or warn according to the current mode.
-                    self.env.error(err, linenum=node.token().linenum)
+                    self.env.error(err, token=node.token)
 
-    @property
     def is_up_to_date(self) -> bool:
         """`False` if the template has bee modified, `True` otherwise."""
         if not self.uptodate:
@@ -221,7 +217,8 @@ class BoundTemplate:
         uptodate = self.uptodate()
         if not isinstance(uptodate, bool):
             raise Error(
-                f"expected a boolean from uptodate, found {type(uptodate).__name__}"
+                f"expected a boolean from uptodate, found {type(uptodate).__name__}",
+                token=None,
             )
         return uptodate
 
@@ -258,114 +255,270 @@ class BoundTemplate:
         """
         return {**render_args, "partial": partial}
 
-    def __repr__(self) -> str:
-        return f"Template(name='{self.name}', path='{self.path}')"  # pragma: no cover
-
-    def analyze(
-        self, follow_partials: bool = True, raise_for_failures: bool = True
-    ) -> TemplateAnalysis:
+    def analyze(self, *, include_partials: bool = True) -> TemplateAnalysis:
         """Statically analyze this template and any included/rendered templates.
 
         Args:
-            follow_partials: If `True`, we will try to load partial templates and
+            include_partials: If `True`, we will try to load partial templates and
                 analyze those templates too.
-            raise_for_failures: If `True`, will raise an exception if an
-                `ast.Node` or `expression.Expression` does not define a `children()`
-                method, or if a partial template can not be loaded. When `False`, no
-                exception is raised and a mapping of failed nodes and expressions is
-                available as the `failed_visits` property. A mapping of unloadable
-                partial templates is stored in the `unloadable_partials` property.
         """
-        refs = _TemplateCounter(
-            self,
-            follow_partials=follow_partials,
-            raise_for_failures=raise_for_failures,
-        ).analyze()
+        return _analyze(self, include_partials=include_partials)
 
-        return TemplateAnalysis(
-            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
-            local_variables={
-                ReferencedVariable(k): v for k, v in refs.template_locals.items()
-            },
-            global_variables={
-                ReferencedVariable(k): v for k, v in refs.template_globals.items()
-            },
-            failed_visits=dict(refs.failed_visits),
-            unloadable_partials=dict(refs.unloadable_partials),
-            filters=dict(refs.filters),
-            tags=dict(refs.tags),
-        )
-
-    async def analyze_async(
-        self, follow_partials: bool = True, raise_for_failures: bool = True
-    ) -> TemplateAnalysis:
+    async def analyze_async(self, *, include_partials: bool = True) -> TemplateAnalysis:
         """An async version of `analyze`."""
-        refs = await _TemplateCounter(
-            self,
-            follow_partials=follow_partials,
-            raise_for_failures=raise_for_failures,
-        ).analyze_async()
+        return await _analyze_async(self, include_partials=include_partials)
 
-        return TemplateAnalysis(
-            variables={ReferencedVariable(k): v for k, v in refs.variables.items()},
-            local_variables={
-                ReferencedVariable(k): v for k, v in refs.template_locals.items()
-            },
-            global_variables={
-                ReferencedVariable(k): v for k, v in refs.template_globals.items()
-            },
-            failed_visits=dict(refs.failed_visits),
-            unloadable_partials=dict(refs.unloadable_partials),
-            filters=dict(refs.filters),
-            tags=dict(refs.tags),
-        )
+    def variables(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template without path segments.
 
-    def analyze_with_context(
-        self, *args: Any, **kwargs: Any
-    ) -> ContextualTemplateAnalysis:
-        """Analyze a path through this template's syntax tree given some context data.
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
 
-        Unlike `analyze`, this form of template analysis does perform a render,
-        capturing template variables as we go.
+        See also [global_variables][liquid2.Template.global_variables].
 
-        Python Liquid does not currently support template introspection from within a
-        render context or `Expression` object. Meaning line numbers and template names
-        are not available. Only variable names are reported along with the number of
-        times they were referenced.
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
 
-        It's also, using this method, not currently possible to detect names added to a
-        block's scope. For example, `forloop.index` will be included in the results
-        object if referenced within a `for` loop block.
-
-        Accepts the same arguments as `render`.
+        Returns:
+            A list of distinct _root segments_ for variables in this template.
         """
-        context = self.capture_context_class(
-            self, globals=self.make_globals(dict(*args, **kwargs))
-        )
-        buf = self._get_buffer()
-        self.render_with_context(context, buf)
-        return ContextualTemplateAnalysis(
-            all_variables=dict(Counter(context.all_references)),
-            local_variables=dict(Counter(context.local_references)),
-            undefined_variables=dict(Counter(context.undefined_references)),
-            filters=dict(Counter(context.filters)),
+        return list(self.analyze(include_partials=include_partials).variables)
+
+    async def variables_async(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template without path segments.
+
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        See also [global_variables][liquid2.Template.global_variables].
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct _root segments_ for variables in this template.
+        """
+        return list(
+            (await self.analyze_async(include_partials=include_partials)).variables
         )
 
-    async def analyze_with_context_async(
-        self, *args: Any, **kwargs: Any
-    ) -> ContextualTemplateAnalysis:
-        """An async version of `analyze_with_context`."""
-        context = self.capture_context_class(
-            self, globals=self.make_globals(dict(*args, **kwargs))
+    def variable_paths(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template including all path segments.
+
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        See also [global_variable_paths][liquid2.Template.global_variable_paths].
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = self.analyze(include_partials=include_partials)
+        return list(
+            {str(v) for v in chain.from_iterable(list(analysis.variables.values()))}
         )
-        buf = self._get_buffer()
-        await self.render_with_context_async(context, buf)
-        return ContextualTemplateAnalysis(
-            all_variables=dict(Counter(context.all_references)),
-            local_variables=dict(Counter(context.local_references)),
-            undefined_variables=dict(Counter(context.undefined_references)),
-            filters=dict(Counter(context.filters)),
+
+    async def variable_paths_async(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template including all path segments.
+
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        See also [global_variable_paths][liquid2.Template.global_variable_paths].
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = await self.analyze_async(include_partials=include_partials)
+        return list(
+            {str(v) for v in chain.from_iterable(list(analysis.variables.values()))}
         )
+
+    def variable_segments(self, *, include_partials: bool = True) -> list[Segments]:
+        """Return a list of variables used in this template, each as a list of segments.
+
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        See also [global_variable_segments][liquid2.Template.global_variable_segments].
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = self.analyze(include_partials=include_partials)
+        return [
+            v.segments
+            for v in set(chain.from_iterable(list(analysis.variables.values())))
+        ]
+
+    async def variable_segments_async(
+        self, *, include_partials: bool = True
+    ) -> list[Segments]:
+        """Return a list of variables used in this template, each as a list of segments.
+
+        Includes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        See also [global_variable_segments][liquid2.Template.global_variable_segments].
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = await self.analyze_async(include_partials=include_partials)
+        return [
+            v.segments
+            for v in set(chain.from_iterable(list(analysis.variables.values())))
+        ]
+
+    def global_variables(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template without path segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct _root segments_ for variables in this template.
+        """
+        return list(self.analyze(include_partials=include_partials).globals)
+
+    async def global_variables_async(
+        self, *, include_partials: bool = True
+    ) -> list[str]:
+        """Return a list of variables used in this template without path segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct _root segments_ for variables in this template.
+        """
+        return list(
+            (await self.analyze_async(include_partials=include_partials)).globals
+        )
+
+    def global_variable_paths(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of variables used in this template including all path segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = self.analyze(include_partials=include_partials)
+        return list(
+            {str(v) for v in chain.from_iterable(list(analysis.globals.values()))}
+        )
+
+    async def global_variable_paths_async(
+        self, *, include_partials: bool = True
+    ) -> list[str]:
+        """Return a list of variables used in this template including all path segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = await self.analyze_async(include_partials=include_partials)
+        return list(
+            {str(v) for v in chain.from_iterable(list(analysis.globals.values()))}
+        )
+
+    def global_variable_segments(
+        self, *, include_partials: bool = True
+    ) -> list[Segments]:
+        """Return a list of variables used in this template, each as a list of segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = self.analyze(include_partials=include_partials)
+        return [
+            v.segments
+            for v in set(chain.from_iterable(list(analysis.globals.values())))
+        ]
+
+    async def global_variable_segments_async(
+        self, *, include_partials: bool = True
+    ) -> list[Segments]:
+        """Return a list of variables used in this template, each as a list of segments.
+
+        Excludes variables that are _local_ to the template, like those crated with
+        `{% assign %}` and `{% capture %}`.
+
+        Args:
+            include_partials: If `True`, will try to load and find variables in
+                included/rendered templates too.
+
+        Returns:
+            A list of distinct paths for variables in this template.
+        """
+        analysis = await self.analyze_async(include_partials=include_partials)
+        return [
+            v.segments
+            for v in set(chain.from_iterable(list(analysis.globals.values())))
+        ]
+
+    def filter_names(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of filter names used in this template."""
+        return list(self.analyze(include_partials=include_partials).filters)
+
+    async def filter_names_async(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of filter names used in this template."""
+        return list(
+            (await self.analyze_async(include_partials=include_partials)).filters
+        )
+
+    def tag_names(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of tag names used in this template."""
+        return list(self.analyze(include_partials=include_partials).tags)
+
+    async def tag_names_async(self, *, include_partials: bool = True) -> list[str]:
+        """Return a list of tag names used in this template."""
+        return list((await self.analyze_async(include_partials=include_partials)).tags)
 
 
 class AwareBoundTemplate(BoundTemplate):
@@ -393,7 +546,6 @@ class FutureBoundTemplate(BoundTemplate):
     """
 
     context_class = FutureContext
-    capture_context_class = FutureVariableCaptureContext
 
 
 class FutureAwareBoundTemplate(AwareBoundTemplate):
@@ -405,7 +557,6 @@ class FutureAwareBoundTemplate(AwareBoundTemplate):
     """
 
     context_class = FutureContext
-    capture_context_class = FutureVariableCaptureContext
 
 
 class TemplateDrop(Mapping[str, Optional[str]]):

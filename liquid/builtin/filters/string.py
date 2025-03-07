@@ -21,6 +21,7 @@ from liquid.filter import liquid_filter
 from liquid.filter import string_filter
 from liquid.filter import with_environment
 from liquid.limits import to_int
+from liquid.undefined import Undefined
 from liquid.undefined import is_undefined
 from liquid.utils.html import strip_tags
 from liquid.utils.text import truncate_chars
@@ -165,14 +166,14 @@ def _slice_arg(val: Any) -> int:
     # The reference implementation does not cast floats to int.
     if isinstance(val, float):
         raise FilterArgumentError(
-            f"slice expected an integer start, found {type(val).__name__}"
+            f"slice expected an integer start, found {type(val).__name__}", token=None
         )
 
     try:
         rv = to_int(val)
     except (ValueError, TypeError) as err:
         raise FilterArgumentError(
-            f"slice expected an integer start, found {type(val).__name__}"
+            f"slice expected an integer start, found {type(val).__name__}", token=None
         ) from err
 
     rv = min(rv, MAX_SLICE_ARG)
@@ -190,7 +191,9 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
         val = str(val)
 
     if is_undefined(start):
-        raise FilterArgumentError("slice expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "slice expected an integer, found Undefined", token=None
+        )
 
     if is_undefined(length):
         length = 1
@@ -210,12 +213,25 @@ def slice_(val: Any, start: Any, length: Any = 1) -> Union[str, list[object]]:
 
 
 @string_filter
-def split(val: str, seq: str) -> list[str]:
-    """Return a list of strings from splitting _value_ on _seq_."""
-    if not seq:
+def split(val: str, sep: Any) -> list[str]:
+    """Split string _val_ on delimiter _sep_.
+
+    If _sep_ is empty or _undefined_, _val_ is split into a list of single
+    characters. If _val_ is empty or equal to _sep_, an empty list is returned.
+    """
+    if isinstance(sep, Undefined):
+        sep.poke()
         return list(val)
 
-    return val.split(soft_str(seq))
+    if sep is None or sep == "":
+        return list(val)
+
+    sep = soft_str(sep)
+
+    if not val or val == sep:
+        return []
+
+    return val.split(None if sep == " " else sep)
 
 
 @string_filter
@@ -254,13 +270,15 @@ def strip_newlines(val: str, *, environment: Environment) -> str:
 def truncate(val: str, num: Any = 50, end: str = "...") -> str:
     """Return a copy of _val_ truncated to _num_ characters."""
     if is_undefined(num):
-        raise FilterArgumentError("truncate expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "truncate expected an integer, found Undefined", token=None
+        )
 
     try:
         num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
-            f"truncate expected an integer, found {type(num).__name__}"
+            f"truncate expected an integer, found {type(num).__name__}", token=None
         ) from err
 
     end = str(end)
@@ -275,13 +293,15 @@ MAX_TRUNC_WORDS = (1 << 31) - 1
 def truncatewords(val: str, num: Any = 15, end: str = "...") -> str:
     """Return a copy of _val_ truncated to at most _num_ words."""
     if is_undefined(num):
-        raise FilterArgumentError("truncate expected an integer, found Undefined")
+        raise FilterArgumentError(
+            "truncate expected an integer, found Undefined", token=None
+        )
 
     try:
         num = to_int(num)
     except ValueError as err:
         raise FilterArgumentError(
-            f"truncate expected an integer, found {type(num).__name__}"
+            f"truncate expected an integer, found {type(num).__name__}", token=None
         ) from err
 
     end = str(end)
@@ -334,7 +354,7 @@ def base64_decode(val: str) -> str:
     try:
         return base64.b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("invalid base64-encoded string") from err
+        raise FilterError("invalid base64-encoded string", token=None) from err
 
 
 @string_filter
@@ -352,4 +372,4 @@ def base64_url_safe_decode(val: str) -> str:
     try:
         return base64.urlsafe_b64decode(val).decode()
     except binascii.Error as err:
-        raise FilterError("invalid base64-encoded string") from err
+        raise FilterError("invalid base64-encoded string", token=None) from err

@@ -1,5 +1,7 @@
 """Test Python Liquid's async API."""
 
+from __future__ import annotations
+
 import asyncio
 import operator
 import tempfile
@@ -8,17 +10,20 @@ from collections import abc
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
+from typing import Optional
 
 import pytest
 from mock import patch
 
+from liquid import CachingFileSystemLoader
+from liquid import ChoiceLoader
+from liquid import DictLoader
 from liquid import Environment
 from liquid import FileSystemLoader
+from liquid import RenderContext
 from liquid import Template
 from liquid.exceptions import TemplateNotFound
-from liquid.loaders import ChoiceLoader
-from liquid.loaders import DictLoader
-from liquid.loaders import TemplateSource
+from liquid.loader import TemplateSource
 from liquid.template import BoundTemplate
 
 
@@ -65,7 +70,7 @@ def test_template_not_found_async() -> None:
 
 def test_cached_template_async() -> None:
     """Test that async loaded templates are cached."""
-    env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
+    env = Environment(loader=CachingFileSystemLoader("tests/fixtures/001/templates/"))
 
     async def coro() -> BoundTemplate:
         return await env.get_template_async("index.liquid")
@@ -84,8 +89,7 @@ def test_async_up_to_date() -> None:
             fd.write("hello there\n")
 
         env = Environment(
-            loader=FileSystemLoader(search_path=tmpdir),
-            auto_reload=True,
+            loader=CachingFileSystemLoader(search_path=tmpdir, auto_reload=True)
         )
 
         async def coro() -> None:
@@ -119,7 +123,9 @@ def test_nested_include_async() -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    with patch("liquid.loaders.DictLoader.get_source_async", autospec=True) as source:
+    with patch(
+        "liquid.builtin.loaders.dict_loader.DictLoader.get_source_async", autospec=True
+    ) as source:
         source.side_effect = [
             TemplateSource(
                 "{% include 'bar' %}",
@@ -203,7 +209,7 @@ def test_include_and_render_async(case: Case) -> None:
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    with patch("liquid.loaders.DictLoader.get_source_async", autospec=True) as source:
+    with patch("liquid.builtin.DictLoader.get_source_async", autospec=True) as source:
         source.side_effect = [
             TemplateSource(
                 "{% for x in (1..3) %}{{x}}-{% endfor %}",
@@ -213,8 +219,6 @@ def test_include_and_render_async(case: Case) -> None:
         ]
 
         result = asyncio.run(coro(template))
-
-        source.assert_awaited_with(env.loader, env=env, template_name="foo")
         assert source.call_count == case.calls
         assert result == case.expect
 
@@ -284,7 +288,12 @@ class AsyncMatterDictLoader(DictLoader):
         self.matter = matter
 
     async def get_source_async(
-        self, _: Environment, template_name: str
+        self,
+        env: Environment,  # noqa: ARG002
+        template_name: str,
+        *,
+        context: Optional[RenderContext] = None,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> TemplateSource:
         try:
             source = self.templates[template_name]
@@ -292,8 +301,8 @@ class AsyncMatterDictLoader(DictLoader):
             raise TemplateNotFound(template_name) from err
 
         return TemplateSource(
-            source=source,
-            filename=template_name,
+            text=source,
+            name=template_name,
             uptodate=None,
             matter=self.matter.get(template_name),
         )

@@ -1,58 +1,63 @@
-"""Common parse tree nodes."""
+"""Base class for all template nodes."""
+
+from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
+from enum import Enum
+from enum import auto
+from typing import TYPE_CHECKING
 from typing import Collection
-from typing import Literal
-from typing import NamedTuple
-from typing import Optional
+from typing import Iterable
 from typing import TextIO
 
-from liquid.context import RenderContext
-from liquid.exceptions import DisabledTagError
-from liquid.exceptions import Error
-from liquid.expression import Expression
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_TAG
-from liquid.token import Token
+from .exceptions import DisabledTagError
+from .output import NullIO
+from .token import TOKEN_ILLEGAL
+from .token import TOKEN_TAG
+from .token import Token
 
-# ruff: noqa: D102
+if TYPE_CHECKING:
+    from .builtin.expressions import Identifier
+    from .context import RenderContext
+    from .expression import Expression
 
-IllegalToken = Token(-1, TOKEN_ILLEGAL, "")
+
+IllegalToken = Token(TOKEN_ILLEGAL, "", -1, "")  # XXX
 
 
 class Node(ABC):
     """Base class for all nodes in a parse tree."""
 
-    __slots__ = ()
+    __slots__ = ("token", "blank")
 
-    # Indicates that nodes that do automatic whitespace suppression should output this
-    # node regardless of its contents.
-    force_output = False
+    def __init__(self, token: Token) -> None:
+        self.token = token
 
-    def token(self) -> Token:
-        """The token that started this node."""
-        token: Token = getattr(self, "tok", IllegalToken)
-        return token
+        self.blank = True
+        """If True, indicates that the node, when rendered, produces no output text
+        or only whitespace.
+        
+        The output node (`{{ something }}`) and echo tag are exception. Even if they
+        evaluate to an empty or blank string, they are not considered "blank".
+        """
 
     def raise_for_disabled(self, disabled_tags: Collection[str]) -> None:
         """Raise a DisabledTagError if this node's type is in the given list."""
-        tok = self.token()
-        if tok.type == TOKEN_TAG and tok.value in disabled_tags:
+        # TODO: benchmark local `token`
+        if self.token.kind == TOKEN_TAG and self.token.value in disabled_tags:
             raise DisabledTagError(
-                f"{tok.value} usage is not allowed in this context",
-                linenum=tok.linenum,
+                f"{self.token.value} usage is not allowed in this context",
+                token=self.token,
             )
 
-    def render(self, context: RenderContext, buffer: TextIO) -> Optional[bool]:
+    def render(self, context: RenderContext, buffer: TextIO) -> int:
         """Check disabled tags before delegating to `render_to_output`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
         return self.render_to_output(context, buffer)
 
-    async def render_async(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
+    async def render_async(self, context: RenderContext, buffer: TextIO) -> int:
         """An async version of `liquid.ast.Node.render`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
@@ -65,75 +70,77 @@ class Node(ABC):
         self,
         context: RenderContext,
         buffer: TextIO,
-    ) -> Optional[bool]:
+    ) -> int:
         """Render this node to the output buffer."""
 
     async def render_to_output_async(
         self,
         context: RenderContext,
         buffer: TextIO,
-    ) -> Optional[bool]:
+    ) -> int:
         """An async version of `liquid.ast.Node.render_to_output`."""
         return self.render_to_output(context, buffer)
 
-    def children(self) -> list["ChildNode"]:
-        """Return a list of child nodes and/or expressions associated with this node."""
-        raise NotImplementedError(f"{self.__class__.__name__}.children")
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        return []
+
+    async def children_async(
+        self,
+        static_context: RenderContext,
+        *,
+        include_partials: bool = True,
+    ) -> Iterable[Node]:
+        """An async version of `children()`."""
+        return self.children(static_context, include_partials=include_partials)
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        return []
+
+    def template_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the template local scope."""
+        return []
+
+    def block_scope(self) -> Iterable[Identifier]:
+        """Return variables this node adds to the node's block scope."""
+        return []
+
+    def partial_scope(self) -> Partial | None:
+        """Return information about a partial template loaded by this node."""
+        return None
 
 
-class ChildNode(NamedTuple):
-    """An AST node and expression pair with optional scope and load data.
+class PartialScope(Enum):
+    """The kind of scope a partial template should have when loaded."""
+
+    SHARED = auto()
+    ISOLATED = auto()
+    INHERITED = auto()
+
+
+class Partial:
+    """Partial template meta data.
 
     Args:
-        linenum: The line number of the child's first token in the template source text.
-        expression: An `liquid.expression.Expression`. If not `None`, this expression is
-            expected to be related to the given `liquid.ast.Node`.
-        node: A `liquid.ast.Node`. Typically a `BlockNode` or `ConditionalBlockNode`.
-        template_scope: A list of names the parent node adds to the template "local"
-            scope. For example, the built-in `assign`, `capture`, `increment` and
-            `decrement` tags all add names to the template scope. This helps us
-            identify, through static analysis, names that are assumed to be "global".
-        block_scope: A list of names available to the given child node. For example,
-            the `for` tag adds the name "forloop" for the duration of its block.
-        load_mode: If not `None`, indicates that the given expression should be used to
-            load a partial template. In "render" mode, the partial will be analyzed in
-            an isolated namespace, without access to the parent's template local scope.
-            In "include" mode, the partial will have access to the parents template
-            local scope and the parent's scope can be updated by the partial template
-            too.
-        load_context: Meta data a template `Loader` might need to find the source
-            of a partial template.
+        name: An expression resolving to the name associated with the partial template.
+        scope: The kind of scope the partial template should have when loaded.
+        in_scope: Names that will be added to the partial template scope.
     """
 
-    linenum: int
-    expression: Optional[Expression] = None
-    node: Optional[Node] = None
-    template_scope: Optional[list[str]] = None
-    block_scope: Optional[list[str]] = None
-    load_mode: Optional[Literal["render", "include", "extends"]] = None
-    load_context: Optional[dict[str, str]] = None
+    __slots__ = ("name", "scope", "in_scope")
 
-
-class ParseTree(Node):
-    """The root node of all syntax trees."""
-
-    __slots__ = ("statements", "version")
-
-    def __init__(self) -> None:
-        self.statements: list[Node] = []
-
-    def __str__(self) -> str:  # pragma: no cover
-        return "".join(str(s) for s in self.statements)
-
-    def __repr__(self) -> str:
-        return f"ParseTree({self.statements})"
-
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        for stmt in self.statements:
-            stmt.render(context, buffer)
-        return None
+    def __init__(
+        self, name: Expression, scope: PartialScope, in_scope: Iterable[Identifier]
+    ) -> None:
+        self.name = name
+        self.scope = scope
+        self.in_scope = in_scope
 
 
 class IllegalNode(Node):
@@ -144,103 +151,97 @@ class IllegalNode(Node):
     is found.
     """
 
-    __slots__ = ("tok",)
-
-    def __init__(self, tok: Token):
-        self.tok = tok
+    __slots__ = ()
 
     def __str__(self) -> str:
         return ""
 
-    def __repr__(self) -> str:  # pragma: no cover
-        return f"IllegalNode(tok={self.tok})"
-
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        pass
+    def render_to_output(self, _context: RenderContext, _buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        return 0
 
 
 class BlockNode(Node):
     """A parse tree node representing a sequence of statements."""
 
-    __slots__ = ("tok", "statements", "forced_output")
+    __slots__ = ("nodes", "blank")
 
-    def __init__(self, tok: Token, statements: Optional[list[Node]] = None):
-        self.tok = tok
-        self.statements = statements or []
-        self.forced_output = False
+    def __init__(self, token: Token, nodes: list[Node]):
+        super().__init__(token)
+        self.nodes = nodes
+        self.blank = all(node.blank for node in nodes)
 
     def __str__(self) -> str:
-        return "".join(str(s) for s in self.statements)
+        return "".join(str(s) for s in self.nodes)
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        for stmt in self.statements:
-            try:
-                stmt.render(context, buffer)
-            except Error as err:
-                # Maybe resume rendering the block after an error.
-                context.error(err)
-        return True
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        if context.env.suppress_blank_control_flow_blocks and self.blank:
+            buf = NullIO()
+            for node in self.nodes:
+                node.render(context, buf)
+            return 0
+        # TODO: resume rendering node if mode.lax
+        return sum(node.render(context, buffer) for node in self.nodes)
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        for stmt in self.statements:
-            try:
-                await stmt.render_async(context, buffer)
-            except Error as err:
-                # Maybe resume rendering the block after an error.
-                context.error(err)
-        return True
+    ) -> int:
+        """Render the node to the output buffer."""
+        if context.env.suppress_blank_control_flow_blocks and self.blank:
+            buf = NullIO()
+            for node in self.nodes:
+                await node.render_async(context, buf)
+            return 0
+        return sum([await node.render_async(context, buffer) for node in self.nodes])
 
-    def children(self) -> list["ChildNode"]:
-        return [
-            ChildNode(
-                linenum=self.tok.linenum,
-                node=stmt,
-            )
-            for stmt in self.statements
-        ]
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        return self.nodes
 
 
 class ConditionalBlockNode(Node):
     """A node containing a sequence of statements and a conditional expression."""
 
-    __slots__ = ("tok", "condition", "block", "forced_output")
+    __slots__ = ("expression", "block")
 
-    def __init__(self, tok: Token, condition: Expression, block: BlockNode):
-        self.tok = tok
-        self.condition = condition
+    def __init__(self, token: Token, expression: Expression, block: BlockNode):
+        super().__init__(token)
+        self.expression = expression
         self.block = block
-        self.forced_output = block.forced_output
+        self.blank = block.blank
 
     def __str__(self) -> str:
-        return f"{self.condition} {{ {self.block} }}"
+        return f"{{% elsif {self.expression} %}}{self.block}"
 
-    def render_to_output(
-        self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        if self.condition.evaluate(context):
-            self.block.render(context, buffer)
-            return True
-        return False
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
+        """Render the node to the output buffer."""
+        if self.expression.evaluate(context):
+            return self.block.render(context, buffer)
+        return 0
 
     async def render_to_output_async(
         self, context: RenderContext, buffer: TextIO
-    ) -> Optional[bool]:
-        if await self.condition.evaluate_async(context):
-            await self.block.render_async(context, buffer)
-            return True
-        return False
+    ) -> int:
+        """Render the node to the output buffer."""
+        if await self.expression.evaluate_async(context):
+            return await self.block.render_async(context, buffer)
+        return 0
 
-    def children(self) -> list["ChildNode"]:
-        return [
-            ChildNode(
-                linenum=self.tok.linenum,
-                node=self.block,
-                expression=self.condition,
-            )
-        ]
+    def children(
+        self,
+        static_context: RenderContext,  # noqa: ARG002
+        *,
+        include_partials: bool = True,  # noqa: ARG002
+    ) -> Iterable[Node]:
+        """Return this node's children."""
+        yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield self.expression

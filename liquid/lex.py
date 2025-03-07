@@ -16,17 +16,14 @@ from typing import Iterator
 from typing import Pattern
 
 from liquid.exceptions import LiquidSyntaxError
+from liquid.token import TOKEN_COMMENT
+from liquid.token import TOKEN_CONTENT
+from liquid.token import TOKEN_DOC
+from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
-from liquid.token import TOKEN_ILLEGAL
-from liquid.token import TOKEN_LITERAL
-from liquid.token import TOKEN_STATEMENT
+from liquid.token import TOKEN_OUTPUT
 from liquid.token import TOKEN_TAG
 from liquid.token import Token
-
-__all__ = (
-    "get_lexer",
-    "get_liquid_expression_lexer",
-)
 
 
 def compile_liquid_rules(
@@ -50,7 +47,14 @@ def compile_liquid_rules(
         r"(?P<raw>.*?)"
         rf"{tag_s}-?\s*endraw\s*(?P<rsr_e>-?){tag_e}"
     )
-    statement_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
+
+    doc_pattern = (
+        rf"{tag_s}-?\s*doc\s*(?P<lsd>-?){tag_e}"
+        r"(?P<doc>.*?)"
+        rf"{tag_s}-?\s*enddoc\s*(?P<rsd>-?){tag_e}"
+    )
+
+    output_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
 
     # The "name" group is zero or more characters so that a malformed tag (one
     # with no name) does not get treated as a literal.
@@ -62,24 +66,26 @@ def compile_liquid_rules(
 
     if not comment_start_string:
         # Do not support shorthand comment syntax
-        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"
+        content_pattern = rf".+?(?=(({tag_s}|{stmt_s})(?P<rstrip>-?))|$)"
 
         liquid_rules = [
             ("RAW", raw_pattern),
-            (TOKEN_STATEMENT, statement_pattern),
+            ("DOC", doc_pattern),
+            (TOKEN_OUTPUT, output_pattern),
             ("TAG", tag_pattern),
-            (TOKEN_LITERAL, literal_pattern),
+            (TOKEN_CONTENT, content_pattern),
         ]
     else:
-        literal_pattern = rf".+?(?=(({tag_s}|{stmt_s}|{comment_s})(?P<rstrip>-?))|$)"
+        content_pattern = rf".+?(?=(({tag_s}|{stmt_s}|{comment_s})(?P<rstrip>-?))|$)"
         comment_pattern = rf"{comment_s}(?P<comment>.*?)(?P<rsc>-?){comment_e}"
 
         liquid_rules = [
             ("RAW", raw_pattern),
+            ("DOC", doc_pattern),
             ("COMMENT", comment_pattern),
-            (TOKEN_STATEMENT, statement_pattern),
+            (TOKEN_OUTPUT, output_pattern),
             ("TAG", tag_pattern),
-            (TOKEN_LITERAL, literal_pattern),
+            (TOKEN_CONTENT, content_pattern),
         ]
 
     return _compile_rules(liquid_rules)
@@ -91,119 +97,108 @@ def _compile_rules(rules: Iterable[tuple[str, str]]) -> Pattern[str]:
     return re.compile(pattern, re.DOTALL)
 
 
-# NOTE: Here we're talking about expressions found in "liquid" tags only. Each line
-# starts with a tag name, optionally followed by zero or more space or tab characters
-# and an expression, which is terminated by a newline.
+def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # noqa: PLR0912, PLR0915
+    lstrip = False
+    comment_index = 0
+    comment_text: list[str] = []
+    comment_depth = 0
 
-
-def _tokenize_liquid_expression(
-    source: str,
-    rules: Pattern[str],
-    line_count: int = 1,
-    comment_start_string: str = "",
-) -> Iterator[Token]:
-    """Tokenize a "liquid" tag expression."""
     for match in rules.finditer(source):
         kind = match.lastgroup
         assert kind is not None
 
-        line_num = line_count
         value = match.group()
-        line_count += value.count("\n")
 
-        if kind == "LIQUID_EXPR":
-            name = match.group("name")
-            if name == comment_start_string:
-                continue
+        if comment_depth:
+            if kind == "TAG":
+                name = match.group("name")
+                if name == "endcomment":
+                    comment_depth -= 1
+                    if not comment_depth:
+                        yield Token(
+                            kind=TOKEN_COMMENT,
+                            value="".join(comment_text),
+                            start_index=comment_index,
+                            source=source,
+                        )
 
-            yield Token(line_num, TOKEN_TAG, name)
+                        comment_index = 0
+                        comment_text.clear()
 
-            if match.group("expr"):
-                yield Token(line_num, TOKEN_EXPRESSION, match.group("expr"))
-        elif kind == "SKIP":
+                        yield Token(
+                            kind=TOKEN_TAG,
+                            value=name,
+                            start_index=match.start("name"),
+                            source=source,
+                        )
+
+                        lstrip = bool(match.group("rst"))
+                        continue
+                elif name == "comment":
+                    comment_depth += 1
+
+            comment_text.append(value)
             continue
-        else:
-            raise LiquidSyntaxError(
-                f"expected newline delimited tag expressions, found {value!r}"
+
+        if kind == TOKEN_OUTPUT:
+            yield Token(
+                kind=TOKEN_OUTPUT,
+                value=match.group(),
+                start_index=match.start(),
+                source=source,
             )
 
+            yield Token(
+                TOKEN_EXPRESSION,
+                match.group("stmt"),
+                start_index=match.start("stmt"),
+                source=source,
+            )
 
-@lru_cache(maxsize=128)
-def get_liquid_expression_lexer(
-    comment_start_string: str = "",
-) -> Callable[..., Iterator[Token]]:
-    """Return a tokenizer that yields tokens from a `liquid` tag's expression."""
-    # Dubious assumption here.
-    comment_start_string = comment_start_string.replace("{", "")
-    if comment_start_string:
-        comment = re.escape(comment_start_string)
-        rules = (
-            (
-                "LIQUID_EXPR",
-                rf"[ \t]*(?P<name>(\w+|{comment}))[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
-            ),
-            ("SKIP", r"[\r\n]+"),
-            (TOKEN_ILLEGAL, r"."),
-        )
-    else:
-        rules = (
-            (
-                "LIQUID_EXPR",
-                r"[ \t]*(?P<name>#|\w+)[ \t]*(?P<expr>.*?)[ \t\r]*?(\n+|$)",
-            ),
-            ("SKIP", r"[\r\n]+"),
-            (TOKEN_ILLEGAL, r"."),
-        )
-    return partial(
-        _tokenize_liquid_expression,
-        rules=_compile_rules(rules),
-        comment_start_string=comment_start_string,
-    )
-
-
-# TODO: move me
-tokenize_liquid_expression = get_liquid_expression_lexer(comment_start_string="")
-
-
-def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
-    line_count = 1
-    lstrip = False
-
-    for match in rules.finditer(source):
-        kind = match.lastgroup
-        assert kind is not None
-
-        line_num = line_count
-        value = match.group()
-        line_count += value.count("\n")
-
-        if kind == TOKEN_STATEMENT:
-            value = match.group("stmt")
             lstrip = bool(match.group("rss"))
-
+            continue
         elif kind == "TAG":
             name = match.group("name")
-            yield Token(line_num, TOKEN_TAG, name)
+            yield Token(
+                kind=TOKEN_TAG,
+                value=name,
+                start_index=match.start("name"),
+                source=source,
+            )
 
-            kind = TOKEN_EXPRESSION
             value = match.group("expr")
-            # Need to count newlines before and after the tag name.
-            line_num += match.group("pre").count("\n")
             lstrip = bool(match.group("rst"))
 
-            if not value:
-                continue
+            if value:
+                yield Token(
+                    kind=TOKEN_EXPRESSION,
+                    value=value,
+                    start_index=match.start("expr"),
+                    source=source,
+                )
+
+            if name == "comment":
+                if not comment_depth:
+                    comment_index = match.end()
+                comment_depth += 1
+
+            continue
 
         elif kind == "COMMENT":
             lstrip = bool(match.group("rsc"))
             continue
 
         elif kind == "RAW":
-            kind = TOKEN_LITERAL
+            kind = TOKEN_CONTENT
             value = match.group("raw")
-            lstrip = bool(match.group("rsr_e"))
+            lstrip = bool(match.group("rsr"))
 
-        elif kind == TOKEN_LITERAL:
+        elif kind == "DOC":
+            kind = TOKEN_DOC
+            value = match.group("doc")
+            lstrip = bool(match.group("rsd"))
+
+        elif kind == TOKEN_CONTENT:
             if lstrip:
                 value = value.lstrip()
             if match.group("rstrip"):
@@ -214,14 +209,26 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:
 
             if value.startswith(r"{{"):
                 raise LiquidSyntaxError(
-                    "expected '}}', found 'eof'", linenum=line_count
+                    "expected '}}', found end of file",
+                    token=Token(
+                        TOKEN_EOF,
+                        value=match.group(),
+                        start_index=match.start(),
+                        source=source,
+                    ),
                 )
             if value.startswith(r"{%"):
                 raise LiquidSyntaxError(
-                    "expected '%}', found 'eof'", linenum=line_count
+                    "expected '%}', found end of file",
+                    token=Token(
+                        TOKEN_EOF,
+                        value=match.group(),
+                        start_index=match.start(),
+                        source=source,
+                    ),
                 )
 
-        yield Token(line_num, kind, value)
+        yield Token(kind, value, start_index=match.start(), source=source)
 
 
 @lru_cache(maxsize=128)

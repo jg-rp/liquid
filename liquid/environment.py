@@ -4,50 +4,40 @@ from __future__ import annotations
 
 import warnings
 from functools import lru_cache
-from functools import partial
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Iterator
 from typing import Mapping
-from typing import MutableMapping
 from typing import Optional
 from typing import Type
 from typing import Union
 
-from liquid import ast
-from liquid import builtin
-from liquid import loaders
-from liquid.analyze_tags import InnerTagMap
-from liquid.analyze_tags import TagAnalysis
-from liquid.context import Undefined
-from liquid.exceptions import Error
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import TemplateInheritanceError
-from liquid.exceptions import lookup_warning
-from liquid.expressions import parse_boolean_expression
-from liquid.expressions import parse_boolean_expression_with_parens
-from liquid.expressions import parse_conditional_expression
-from liquid.expressions import parse_conditional_expression_with_parens
-from liquid.expressions import parse_filtered_expression
-from liquid.expressions import parse_loop_expression
-from liquid.lex import get_lexer
-from liquid.mode import Mode
-from liquid.parse import get_parser
-from liquid.stream import TokenStream
-from liquid.template import BoundTemplate
-from liquid.utils import LRUCache
+from . import builtin
+from .analyze_tags import InnerTagMap
+from .analyze_tags import TagAnalysis
+from .builtin import DictLoader
+from .exceptions import Error
+from .exceptions import LiquidSyntaxError
+from .exceptions import TemplateInheritanceError
+from .exceptions import lookup_warning
+from .extra import add_tags_and_filters as register_extra_tags_and_filters
+from .lex import get_lexer
+from .mode import Mode
+from .parse import get_parser
+from .stream import TokenStream
+from .template import BoundTemplate
+from .undefined import Undefined
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from liquid.context import RenderContext
-    from liquid.expression import BooleanExpression
-    from liquid.expression import FilteredExpression
-    from liquid.expression import LoopExpression
-    from liquid.tag import Tag
-    from liquid.token import Token
+    from .ast import Node
+    from .context import RenderContext
+    from .loader import BaseLoader
+    from .tag import Tag
+    from .token import Token
 
 
 class Environment:
@@ -57,6 +47,7 @@ class Environment:
     global context variables that should be included with every template.
 
     Args:
+        extra: If `True`, register all extra tags and filters. Defaults to `False`.
         tag_start_string: The sequence of characters indicating the start of a
             liquid tag.
         tag_end_string: The sequence of characters indicating the end of a liquid
@@ -84,110 +75,92 @@ class Environment:
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
             output unless they've been explicitly marked as "safe".
-        auto_reload: If `True`, loaders that have an `uptodate` callable will
-            reload template source data automatically. For deployments where template
-            sources don't change between service reloads, setting auto_reload to `False`
-            can yield an increase in performance by avoiding calls to `uptodate`.
-        cache_size: The capacity of the template cache in number of templates.
-            If `cache_size` is `None` or less than `1`, it has the effect of setting
-            `auto_reload` to `False`.
-        expression_cache_size: The capacity of each of the common expression caches.
-            A `cache_size` of `0` will disabling expression caching.
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
-
-    Attributes:
-        context_depth_limit: Class attribute. The maximum number of times a render
-            context can be extended or wrapped before a `ContextDepthError` is raised.
-        local_namespace_limit: Class attribute. The maximum number of bytes (according
-            to sys.getsizeof) allowed in a template's local namespace, per render,
-            before a `LocalNamespaceLimitError` exception is raised. Note that we only
-            count the size of the local namespace values, not its keys.
-        loop_iteration_limit: Class attribute. The maximum number of loop iterations
-            allowed before a  `liquid.exceptions.LoopIterationLimitError` is raised.
-        output_stream_limit: Class attribute. The maximum number of bytes that can be
-            written to a template's output stream, per render, before an
-            `OutputStreamLimitError` exception is raised.
-        render_whitespace_only_blocks: Class attribute. Indicates if block tags that,
-            when rendered, contain whitespace only should be output. Defaults to
-            `False`, meaning empty blocks are suppressed.
-        undefined: The undefined type. When an identifier can not be resolved, an
-            instance of `undefined` is returned.
-        strict_filters: Indicates if an undefined filter should raise an exception or be
-            ignored.
-        autoescape: Indicates if auto-escape is enabled.
-        tags: A dictionary mapping tag names to `liquid.tag.Tag` instances.
-        filters: A dictionary mapping filter names to callable objects implementing a
-            filter's behavior.
-        mode: The current tolerance mode.
-        cache: The template cache.
-        auto_reload: Indicates if automatic reloading of templates is enabled.
-        template_class: `Environment.get_template` and `Environment.from_string`
-            return an instance of `Environment.template_class`.
-        globals: A dictionary of variables that will be added to the context of every
-            template rendered from the environment.
     """
 
-    # Maximum number of times a context can be extended or wrapped before raising
-    # a ContextDepthError.
     context_depth_limit: ClassVar[int] = 30
+    """The maximum number of times a render context can be extended or wrapped before
+    raising a `ContextDepthError`."""
 
-    # Maximum number of loop iterations allowed before a LoopIterationLimitError is
-    # raised.
     loop_iteration_limit: ClassVar[Optional[int]] = None
+    """The maximum number of loop iterations allowed before a LoopIterationLimitError is
+    raised."""
 
-    # Maximum number of bytes (according to sys.getsizeof) allowed in a template's
-    # local namespace before a LocalNamespaceLimitError is raised. We only count the
-    # size of the namespaces values, not the size of keys/names.
     local_namespace_limit: ClassVar[Optional[int]] = None
+    """The maximum number of bytes (according to `sys.getsizeof`) allowed in a
+    template's local namespace before a LocalNamespaceLimitError is raised. We only
+    count the size of the namespaces values, not the size of keys/names."""
 
-    # Maximum number of bytes that can be written to a template's output stream before
-    # raising an OutputStreamLimitError.
     output_stream_limit: ClassVar[Optional[int]] = None
+    """The maximum number of bytes that can be written to a template's output stream
+    before raising an OutputStreamLimitError."""
 
-    # Instances of `template_class` are returned from `from_string`,
-    # `get_template` and `get_template_async`. It should be the `BoundTemplate`
-    # class or a subclass of it.
     template_class: Type[BoundTemplate] = BoundTemplate
+    """Instances of `template_class` are returned from `from_string`, `get_template`
+    and `get_template_async`. It should be the `BoundTemplate` class or a subclass of
+    it."""
 
-    # Whether to output blocks that only contain only whitespace when rendered.
-    render_whitespace_only_blocks: bool = False
+    suppress_blank_control_flow_blocks: bool = True
+    """When `True`, don't render control flow blocks that contain only whitespace."""
 
-    # When `True`, accept indexes without enclosing square brackets in paths to
-    # variables. Defaults to `False`.
     shorthand_indexes: bool = False
+    """When `True`, accept indexes without enclosing square brackets in paths to
+    variables. Defaults to `False`."""
+
+    string_sequences: bool = False
+    """When `True`, strings are treated as sequences. That is, characters (Unicode code
+    points) in a string can be looped over and selected by index. Defaults to `False`.
+    """
+
+    string_first_and_last: bool = False
+    """When `True`, the special `first` and `last` properties will return the first and
+    last charters of a string. Otherwise `first` and `last` will resolve to Undefined
+    when applied to a string. Defaults to `False`."""
+
+    logical_not_operator: bool = False
+    """When `True`, allow the use of the logical `not` operator in logical expressions.
+    Defaults to `False`.
+    """
+
+    logical_parentheses: bool = False
+    """When `True`, allow the use of parentheses in logical expressions to group terms.
+    Defaults to `False.`"""
+
+    ternary_expressions: bool = False
+    """When `True`, allow the use of ternary expression in output statements, assign
+    tags and echo tags. Defaults to `False`."""
+
+    keyword_assignment: bool = False
+    """When `True` accept `=` or `:` as the separator token between argument names
+    and argument values. By default only `:` is allowed."""
 
     def __init__(
         self,
+        *,
+        extra: bool = False,
         tag_start_string: str = r"{%",
         tag_end_string: str = r"%}",
         statement_start_string: str = r"{{",
         statement_end_string: str = r"}}",
-        strip_tags: bool = False,
         tolerance: Mode = Mode.STRICT,
-        loader: Optional[loaders.BaseLoader] = None,
+        loader: Optional[BaseLoader] = None,
         undefined: Type[Undefined] = Undefined,
         strict_filters: bool = True,
         autoescape: bool = False,
-        auto_reload: bool = True,
-        cache_size: int = 300,
         globals: Optional[Mapping[str, object]] = None,  # noqa: A002
         template_comments: bool = False,
         comment_start_string: str = "{#",
         comment_end_string: str = "#}",
-        expression_cache_size: int = 0,
     ):
         self.tag_start_string = tag_start_string
         self.tag_end_string = tag_end_string
         self.statement_start_string = statement_start_string
         self.statement_end_string = statement_end_string
 
-        # Automatic tag stripping is not yet implemented. Changing this has no effect.
-        self.strip_tags = strip_tags
-
         # An instance of a template loader implementing `liquid.loaders.BaseLoader`.
         # `get_template()` will delegate to this loader.
-        self.loader = loader or loaders.DictLoader({})
+        self.loader = loader or DictLoader({})
 
         # A mapping of template variable names to python objects. These variables will
         # be added to the global namespace of any template rendered from this
@@ -221,26 +194,7 @@ class Environment:
         # tolerance mode
         self.mode: Mode = tolerance
 
-        # Template cache
-        if cache_size and cache_size > 0 and not self.loader.caching_loader:
-            self.cache: Optional[MutableMapping[Any, Any]] = LRUCache(cache_size)
-            self.auto_reload: bool = auto_reload
-        else:
-            self.cache = None
-            self.auto_reload = False
-
-        # Common expression parsing functions that might be cached.
-        self.expression_cache_size = expression_cache_size
-        (
-            self.parse_boolean_expression_value,
-            self.parse_boolean_expression_value_with_parens,
-            self.parse_conditional_expression_value,
-            self.parse_conditional_expression_value_with_parens,
-            self.parse_filtered_expression_value,
-            self.parse_loop_expression_value,
-        ) = self._get_expression_parsers(self.expression_cache_size)
-
-        self.setup_tags_and_filters()
+        self.setup_tags_and_filters(extra=extra)
 
     def __hash__(self) -> int:
         return hash(
@@ -252,9 +206,6 @@ class Environment:
                 self.comment_start_string,
                 self.comment_end_string,
                 self.mode,
-                self.strip_tags,
-                # Necessary when replacing the standard output statement implementation.
-                self.tags.get("statement"),
             )
         )
 
@@ -293,11 +244,16 @@ class Environment:
         """
         self.filters[name] = func
 
-    def setup_tags_and_filters(self) -> None:
-        """Add default tags and filters to this environment."""
-        builtin.register(self)
+    def setup_tags_and_filters(self, *, extra: bool = False) -> None:
+        """Add default tags and filters to this environment.
 
-    def parse(self, source: str) -> ast.ParseTree:
+        If _extra_ is `True`, register all extra, non-standard tags and filters too.
+        """
+        builtin.register(self)
+        if extra:
+            register_extra_tags_and_filters(self)
+
+    def _parse(self, source: str) -> list[Node]:
         """Parse _source_ as a Liquid template.
 
         More often than not you'll want to use `Environment.from_string` instead.
@@ -326,26 +282,38 @@ class Environment:
                 with the template. Could be "front matter" or other meta data.
         """
         try:
-            parse_tree = self.parse(source)
+            nodes = self._parse(source)
         except (LiquidSyntaxError, TemplateInheritanceError) as err:
-            err.filename = path
-            err.source = source
+            err.template_name = path
             raise err
         except Exception as err:  # noqa: BLE001
-            raise Error("unexpected liquid parsing error") from err
+            raise Error("unexpected liquid parsing error", token=None) from err
         return self.template_class(
             env=self,
             name=name,
             path=path,
-            parse_tree=parse_tree,
+            nodes=nodes,
             globals=self.make_globals(globals),
             matter=matter,
         )
 
+    parse = from_string
+
+    def render(self, source: str, **data: object) -> str:
+        """Parse and render source text."""
+        return self.parse(source).render(**data)
+
+    async def render_async(self, source: str, **data: object) -> str:
+        """Parse and render source text."""
+        return await self.parse(source).render_async(**data)
+
     def get_template(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        *,
+        globals: Mapping[str, object] | None = None,  # noqa: A002
+        context: RenderContext | None = None,
+        **kwargs: object,
     ) -> BoundTemplate:
         """Load and parse a template using the configured loader.
 
@@ -354,92 +322,48 @@ class Environment:
                 the name. It could be the name of a file or some other identifier.
             globals: A mapping of render context variables attached to the
                 resulting template.
+            context: An optional render context that can be used to narrow the template
+                source search space.
+            kwargs: Arbitrary arguments that can be used to narrow the template source
+                search space.
 
         Raises:
             TemplateNotFound: If a template with the given name can not be found.
         """
-        if self.cache is not None:
-            cached = self.cache.get(name)
-            if isinstance(cached, BoundTemplate) and (
-                not self.auto_reload or cached.is_up_to_date
-            ):
-                cached.globals.update(self.make_globals(globals))
-                return cached
-
-        template = self.loader.load(self, name, globals=self.make_globals(globals))
-        if self.cache is not None:
-            self.cache[name] = template
-        return template
+        try:
+            return self.loader.load(
+                env=self,
+                name=name,
+                globals=self.make_globals(globals),
+                context=context,
+                **kwargs,
+            )
+        except Error as err:
+            if not err.template_name:
+                err.template_name = name
+            raise
 
     async def get_template_async(
         self,
         name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-    ) -> BoundTemplate:
-        """An async version of `get_template`."""
-        if self.cache is not None:
-            cached = self.cache.get(name)
-            if isinstance(cached, BoundTemplate) and (
-                not self.auto_reload or await cached.is_up_to_date_async()
-            ):
-                cached.globals.update(self.make_globals(globals))
-                return cached
-
-        template = await self.loader.load_async(
-            self, name, globals=self.make_globals(globals)
-        )
-        if self.cache is not None:
-            self.cache[name] = template
-        return template
-
-    def get_template_with_args(
-        self,
-        name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        *,
+        globals: Mapping[str, object] | None = None,  # noqa: A002
+        context: RenderContext | None = None,
         **kwargs: object,
     ) -> BoundTemplate:
-        """Load and parse a template with arbitrary loader arguments.
-
-        This method bypasses the environment's template cache. You should use a caching
-        loader instead when the loader requires extra keyword arguments.
-
-        _New in version 1.9.0._
-        """
-        return self.loader.load_with_args(self, name, globals, **kwargs)
-
-    async def get_template_with_args_async(
-        self,
-        name: str,
-        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
-        **kwargs: object,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_args`.
-
-        _New in version 1.9.0._
-        """
-        return await self.loader.load_with_args_async(self, name, globals, **kwargs)
-
-    def get_template_with_context(
-        self,
-        context: "RenderContext",
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """Load and parse a template with reference to a render context.
-
-        This method bypasses the environment's template cache. You should consider using
-        a caching loader.
-        """
-        return self.loader.load_with_context(context, name, **kwargs)
-
-    async def get_template_with_context_async(
-        self,
-        context: "RenderContext",
-        name: str,
-        **kwargs: str,
-    ) -> BoundTemplate:
-        """An async version of `get_template_with_context`."""
-        return await self.loader.load_with_context_async(context, name, **kwargs)
+        """An async version of `get_template()`."""
+        try:
+            return await self.loader.load_async(
+                env=self,
+                name=name,
+                globals=self.make_globals(globals),
+                context=context,
+                **kwargs,
+            )
+        except Error as err:
+            if not err.template_name:
+                err.template_name = name
+            raise
 
     def analyze_tags_from_string(
         self,
@@ -494,16 +418,13 @@ class Environment:
                 `{% elsif %}` and `{% else %}` tags.
             kwargs: Loader context.
         """
-        if context:
-            template_source = self.loader.get_source_with_context(
-                context=context, template_name=name, **kwargs
-            )
-        else:
-            template_source = self.loader.get_source(self, template_name=name)
+        template_source = self.loader.get_source(
+            self, template_name=name, context=context, **kwargs
+        )
 
         return self.analyze_tags_from_string(
-            template_source.source,
-            name=template_source.filename,
+            template_source.text,
+            name=template_source.name,
             inner_tags=inner_tags,
         )
 
@@ -516,18 +437,13 @@ class Environment:
         **kwargs: str,
     ) -> TagAnalysis:
         """An async version of `Environment.analyze_tags`."""
-        if context:
-            template_source = await self.loader.get_source_with_context_async(
-                context=context, template_name=name, **kwargs
-            )
-        else:
-            template_source = await self.loader.get_source_async(
-                env=self, template_name=name
-            )
+        template_source = await self.loader.get_source_async(
+            env=self, template_name=name, context=context, **kwargs
+        )
 
         return self.analyze_tags_from_string(
-            template_source.source,
-            name=template_source.filename,
+            template_source.text,
+            name=template_source.name,
             inner_tags=inner_tags,
         )
 
@@ -545,13 +461,13 @@ class Environment:
         self,
         exc: Union[Type[Error], Error],
         msg: Optional[str] = None,
-        linenum: Optional[int] = None,
+        token: Optional[Token] = None,
     ) -> None:
         """Raise, warn or ignore the given exception according to the current mode."""
         if not isinstance(exc, Error):
-            exc = exc(msg, linenum=linenum)
-        elif not exc.linenum:
-            exc.linenum = linenum
+            exc = exc(msg, token=token)
+        elif not exc.token:
+            exc.token = token
 
         if self.mode == Mode.STRICT:
             raise exc
@@ -560,140 +476,41 @@ class Environment:
                 str(exc), category=lookup_warning(exc.__class__), stacklevel=2
             )
 
-    def set_expression_cache_size(self, maxsize: int = 0) -> None:
-        """Create or replace cached versions of the common expression parsers.
-
-        If `maxsize` is less than `1`, no expression caching will happen.
-
-        Args:
-            maxsize: The maximum size of each expression cache.
-        """
-        self.expression_cache_size = maxsize
-        (
-            self.parse_boolean_expression_value,
-            self.parse_boolean_expression_value_with_parens,
-            self.parse_conditional_expression_value,
-            self.parse_conditional_expression_value_with_parens,
-            self.parse_filtered_expression_value,
-            self.parse_loop_expression_value,
-        ) = self._get_expression_parsers(self.expression_cache_size)
-
-    def _get_expression_parsers(
-        self, cache_size: int = 0
-    ) -> tuple[
-        Callable[[str, int], BooleanExpression],
-        Callable[[str, int], BooleanExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], FilteredExpression],
-        Callable[[str, int], LoopExpression],
-    ]:
-        if cache_size >= 1:
-            return (
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_boolean_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_boolean_expression_with_parens,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_conditional_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_conditional_expression_with_parens,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_filtered_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-                lru_cache(maxsize=cache_size)(
-                    partial(
-                        parse_loop_expression,
-                        shorthand_indexes=self.shorthand_indexes,
-                    )
-                ),
-            )
-        return (
-            partial(
-                parse_boolean_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_boolean_expression_with_parens,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_conditional_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_conditional_expression_with_parens,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_filtered_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-            partial(
-                parse_loop_expression,
-                shorthand_indexes=self.shorthand_indexes,
-            ),
-        )
-
 
 @lru_cache(maxsize=10)
 def get_implicit_environment(
+    *,
+    extra: bool = False,
     tag_start_string: str,
     tag_end_string: str,
     statement_start_string: str,
     statement_end_string: str,
-    strip_tags: bool,
     tolerance: Mode,
-    loader: Optional[loaders.BaseLoader],
+    loader: Optional[BaseLoader],
     undefined: Type[Undefined],
     strict_filters: bool,
     autoescape: bool,
-    auto_reload: bool,
-    cache_size: int,
     globals: Optional[Mapping[str, object]],  # noqa: A002
     template_comments: bool,
     comment_start_string: str,
     comment_end_string: str,
-    expression_cache_size: int,
 ) -> Environment:
     """Return an `Environment` initialized with the given arguments."""
     return Environment(
+        extra=extra,
         tag_start_string=tag_start_string,
         tag_end_string=tag_end_string,
         statement_start_string=statement_start_string,
         statement_end_string=statement_end_string,
-        strip_tags=strip_tags,
         tolerance=tolerance,
         loader=loader,
         undefined=undefined,
         strict_filters=strict_filters,
         autoescape=autoescape,
-        auto_reload=auto_reload,
-        cache_size=cache_size,
         globals=globals,
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
-        expression_cache_size=expression_cache_size,
     )
 
 
@@ -704,22 +521,20 @@ def get_implicit_environment(
 
 def Template(  # noqa: N802, D417
     source: str,
+    *,
+    extra: bool = False,
     tag_start_string: str = r"{%",
     tag_end_string: str = r"%}",
     statement_start_string: str = r"{{",
     statement_end_string: str = r"}}",
-    strip_tags: bool = False,
     tolerance: Mode = Mode.STRICT,
     undefined: Type[Undefined] = Undefined,
     strict_filters: bool = True,
     autoescape: bool = False,
-    auto_reload: bool = True,
-    cache_size: int = 300,
     globals: Optional[Mapping[str, object]] = None,  # noqa: A002
     template_comments: bool = False,
     comment_start_string: str = "{#",
     comment_end_string: str = "#}",
-    expression_cache_size: int = 0,
 ) -> BoundTemplate:
     """Parse a template, automatically creating an `Environment` to bind it to.
 
@@ -727,6 +542,7 @@ def Template(  # noqa: N802, D417
     which might have been cached from previous calls to `Template`.
 
     Args:
+        extra: If `True`, register all extra tags and filters. Defaults to `False`.
         tag_start_string: The sequence of characters indicating the start of a
             liquid tag.
         tag_end_string: The sequence of characters indicating the end of a liquid
@@ -735,7 +551,6 @@ def Template(  # noqa: N802, D417
             an output statement.
         statement_end_string: The sequence of characters indicating the end of an
             output statement.
-        strip_tags: Has no effect. We don't support automatic whitespace stripping.
         template_comments: If `True`, enable template comments, where, by default,
             anything between `{#` and `#}` is considered a comment.
         comment_start_string: The sequence of characters indicating the start of a
@@ -753,38 +568,26 @@ def Template(  # noqa: N802, D417
             undefined filter. Otherwise undefined filters are silently ignored.
         autoescape: If `True`, all render context values will be HTML-escaped before
             output unless they've been explicitly marked as "safe".
-        auto_reload: If `True`, loaders that have an `uptodate` callable will
-            reload template source data automatically. For deployments where template
-            sources don't change between service reloads, setting auto_reload to `False`
-            can yield an increase in performance by avoiding calls to `uptodate`.
-        cache_size: The capacity of the template cache in number of templates.
-            If `cache_size` is `None` or less than `1`, it has the effect of setting
-            `auto_reload` to `False`.
-        expression_cache_size: The capacity of each of the common expression caches.
-            A `cache_size` of `0` will disabling expression caching.
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
     """
     # Resorting to named arguments (repeated 3 times) as I've twice missed a bug
     # because of positional arguments.
     env = get_implicit_environment(
+        extra=extra,
         tag_start_string=tag_start_string,
         tag_end_string=tag_end_string,
         statement_start_string=statement_start_string,
         statement_end_string=statement_end_string,
-        strip_tags=strip_tags,
         tolerance=tolerance,
         loader=None,
         undefined=undefined,
         strict_filters=strict_filters,
         autoescape=autoescape,
-        auto_reload=auto_reload,
-        cache_size=cache_size,
         globals=None,
         template_comments=template_comments,
         comment_start_string=comment_start_string,
         comment_end_string=comment_end_string,
-        expression_cache_size=expression_cache_size,
     )
 
     return env.from_string(source, globals=globals)

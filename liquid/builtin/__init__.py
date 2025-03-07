@@ -2,9 +2,9 @@ from __future__ import annotations  # noqa: D104
 
 from typing import TYPE_CHECKING
 
+from . import content
 from . import illegal
-from . import literal
-from . import statement
+from . import output
 from .filters.array import compact
 from .filters.array import concat
 from .filters.array import find
@@ -65,12 +65,21 @@ from .filters.string import truncatewords
 from .filters.string import upcase
 from .filters.string import url_decode
 from .filters.string import url_encode
+from .loaders.caching_file_system_loader import CachingFileSystemLoader
+from .loaders.choice_loader import CachingChoiceLoader
+from .loaders.choice_loader import ChoiceLoader
+from .loaders.dict_loader import CachingDictLoader
+from .loaders.dict_loader import DictLoader
+from .loaders.file_system_loader import FileSystemLoader
+from .loaders.mixins import CachingLoaderMixin
+from .loaders.package_loader import PackageLoader
 from .tags import assign_tag
 from .tags import capture_tag
 from .tags import case_tag
 from .tags import comment_tag
 from .tags import cycle_tag
 from .tags import decrement_tag
+from .tags import doc_tag
 from .tags import echo_tag
 from .tags import for_tag
 from .tags import if_tag
@@ -86,14 +95,25 @@ from .tags import unless_tag
 if TYPE_CHECKING:
     from liquid import Environment
 
+__all__ = (
+    "CachingFileSystemLoader",
+    "CachingChoiceLoader",
+    "ChoiceLoader",
+    "CachingDictLoader",
+    "DictLoader",
+    "FileSystemLoader",
+    "CachingLoaderMixin",
+    "PackageLoader",
+)
+
 
 def register(env: Environment) -> None:  # noqa: PLR0915
     """Register all built-in tags and filters with an environment."""
-    env.add_tag(literal.Literal)
-    env.add_tag(statement.Statement)
+    env.add_tag(content.Literal)
+    env.add_tag(output.Output)
     env.add_tag(illegal.Illegal)
     env.add_tag(if_tag.IfTag)
-    env.add_tag(comment_tag.CommentTextTag)
+    env.add_tag(comment_tag.CommentTag)
     env.add_tag(unless_tag.UnlessTag)
     env.add_tag(case_tag.CaseTag)
     env.add_tag(for_tag.ForTag)
@@ -111,6 +131,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_tag(render_tag.RenderTag)
     env.add_tag(ifchanged_tag.IfChangedTag)
     env.add_tag(inline_comment_tag.InlineCommentTag)
+    env.add_tag(doc_tag.DocTag)
 
     env.add_filter("abs", abs_)
     env.add_filter("at_most", at_most)

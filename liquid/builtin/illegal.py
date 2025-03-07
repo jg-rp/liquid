@@ -6,6 +6,7 @@ from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EXPRESSION
 from liquid.token import TOKEN_ILLEGAL
+from liquid.token import TOKEN_TAG
 
 
 class Illegal(Tag):
@@ -14,11 +15,14 @@ class Illegal(Tag):
     name = TOKEN_ILLEGAL
     block = False
 
-    def parse(self, stream: TokenStream) -> IllegalNode:  # noqa: D102
-        tok = stream.current
-        stream.next_token()
+    def parse(self, stream: TokenStream) -> IllegalNode:
+        """Parse tokens from _stream_ into an AST node."""
+        token = stream.expect(TOKEN_TAG)
 
-        if stream.current.type == TOKEN_EXPRESSION:
+        if stream.peek.kind == TOKEN_EXPRESSION:
             stream.next_token()
 
-        raise LiquidSyntaxError(f"unexpected tag '{tok.value}'", linenum=tok.linenum)
+        msg = (
+            "missing tag name" if not token.value else f"unexpected tag '{token.value}'"
+        )
+        raise LiquidSyntaxError(msg, token=token)

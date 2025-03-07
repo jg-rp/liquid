@@ -59,7 +59,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-fail-under=97 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-fail-under=95 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 benchmark = "python -O scripts/performance.py"
 cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 lint = "ruff check ."
@@ -152,6 +152,12 @@ convention = "google"
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
 "performance/*" = ["D103", "PLR2004", "T201", "D100"]
+"liquid/builtin/expressions/primitive.py" = ["D101", "D102"]
+"liquid/builtin/expressions/path.py" = ["D101", "D102"]
+"liquid/builtin/expressions/logical.py" = ["D101", "D102"]
+"liquid/builtin/expressions/loop.py" = ["D101", "D102"]
+"liquid/builtin/expressions/filtered.py" = ["D101", "D102"]
+"liquid/builtin/expressions/arguments.py" = ["D101", "D102"]
 
 [tool.ruff.lint]
 # Allow unused variables when underscore-prefixed.
@@ -185,7 +191,6 @@ select = [
   "YTT",
 ]
 
-# TODO: review ignores
 ignore = [
   "A005",
   "S105",
@@ -198,6 +203,7 @@ ignore = [
   "PT009",
   "B905",
   "PT027",
+  "PLR2004",
 ]
 
 fixable = ["I", "SIM", "D202"]

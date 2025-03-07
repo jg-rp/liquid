@@ -8,18 +8,19 @@ from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Iterable
+from typing import Optional
 from typing import Union
 
 from liquid.exceptions import TemplateNotFound
-
-from .base_loader import BaseLoader
-from .base_loader import TemplateSource
+from liquid.loader import BaseLoader
+from liquid.loader import TemplateSource
 
 if TYPE_CHECKING:
     from importlib.abc import Traversable
     from types import ModuleType
 
     from liquid import Environment
+    from liquid import RenderContext
 
 
 class PackageLoader(BaseLoader):
@@ -32,8 +33,6 @@ class PackageLoader(BaseLoader):
         encoding: Encoding of template files.
         ext: A default file extension to use if one is not provided. Should
             include a leading period.
-
-    _New in version 1.11.0._
     """
 
     def __init__(
@@ -66,28 +65,38 @@ class PackageLoader(BaseLoader):
             template_path = template_path.with_suffix(self.ext)
 
         for path in self.paths:
-            source_path = path.joinpath(template_path)  # type: ignore
+            source_path = path.joinpath(str(template_path))
             if source_path.is_file():
                 # MyPy seems to think source_path has `Any` type :(
                 return source_path  # type: ignore
 
         raise TemplateNotFound(template_name)
 
-    def get_source(  # noqa: D102
+    def get_source(
         self,
-        _: Environment,
+        env: Environment,  # noqa: ARG002
         template_name: str,
+        *,
+        context: Optional[RenderContext] = None,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> TemplateSource:
+        """Get source information for a template."""
         source_path = self._resolve_path(template_name)
         return TemplateSource(
-            source=source_path.read_text(self.encoding),
-            filename=str(source_path),
+            text=source_path.read_text(self.encoding),
+            name=str(source_path),
             uptodate=None,
         )
 
-    async def get_source_async(  # noqa: D102
-        self, _: Environment, template_name: str
+    async def get_source_async(
+        self,
+        env: Environment,  # noqa: ARG002
+        template_name: str,
+        *,
+        context: Optional[RenderContext] = None,  # noqa: ARG002
+        **kwargs: object,  # noqa: ARG002
     ) -> TemplateSource:
+        """Get source information for a template."""
         loop = asyncio.get_running_loop()
 
         source_path = await loop.run_in_executor(
@@ -103,5 +112,7 @@ class PackageLoader(BaseLoader):
         )
 
         return TemplateSource(
-            source=source_text, filename=str(source_path), uptodate=None
+            text=source_text,
+            name=str(source_path),
+            uptodate=None,
         )

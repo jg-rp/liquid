@@ -1,4 +1,5 @@
 """Liquid tag base class."""
+
 from __future__ import annotations
 
 from abc import ABC
@@ -27,19 +28,19 @@ class Tag(ABC):
 
     def get_node(self, stream: TokenStream) -> Node:
         """Wraps `Tag.parse`, possibly returning an `IllegalNode`."""
-        tok = stream.current
+        token = stream.current
         try:
             return self.parse(stream)
         except Error as err:
-            if not err.linenum:
-                err.linenum = tok.linenum
+            if not err.token:
+                err.token = token
 
             self.env.error(err)
 
             if self.block and hasattr(self, "end"):
                 eat_block(stream, (self.end,))
 
-            return IllegalNode(tok)
+            return IllegalNode(token)
 
     @abstractmethod
     def parse(self, stream: TokenStream) -> Node:
