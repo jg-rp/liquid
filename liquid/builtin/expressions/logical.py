@@ -210,14 +210,12 @@ class LogicalAndExpression(Expression):
         return f"{self.left} and {self.right}"
 
     def evaluate(self, context: RenderContext) -> object:
-        return is_truthy(self.left.evaluate(context)) and is_truthy(
-            self.right.evaluate(context)
-        )
+        left = self.left.evaluate(context)
+        return self.right.evaluate(context) if is_truthy(left) else left
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return is_truthy(await self.left.evaluate_async(context)) and is_truthy(
-            await self.right.evaluate_async(context)
-        )
+        left = await self.left.evaluate_async(context)
+        return await self.right.evaluate_async(context) if is_truthy(left) else left
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
@@ -235,14 +233,12 @@ class LogicalOrExpression(Expression):
         return f"{self.left} or {self.right}"
 
     def evaluate(self, context: RenderContext) -> object:
-        return is_truthy(self.left.evaluate(context)) or is_truthy(
-            self.right.evaluate(context)
-        )
+        left = self.left.evaluate(context)
+        return left if is_truthy(left) else self.right.evaluate(context)
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return is_truthy(await self.left.evaluate_async(context)) or is_truthy(
-            await self.right.evaluate_async(context)
-        )
+        left = await self.left.evaluate_async(context)
+        return left if is_truthy(left) else await self.right.evaluate_async(context)
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
