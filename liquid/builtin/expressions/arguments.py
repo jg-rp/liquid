@@ -12,7 +12,7 @@ from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_WORD
 
-from .primitive import parse_primitive
+from .primary import parse_primary
 
 if TYPE_CHECKING:
     from liquid import Environment
@@ -65,7 +65,7 @@ class KeywordArgument:
 
             if token.kind == TOKEN_WORD:
                 tokens.eat_one_of(*argument_separators)
-                value = parse_primitive(env, tokens)
+                value = parse_primary(env, tokens)
                 args.append(KeywordArgument(token, token.value, value))
                 if env.mode == Mode.STRICT and tokens.current.kind == TOKEN_WORD:
                     raise LiquidSyntaxError(
@@ -114,7 +114,7 @@ class PositionalArgument:
             if tokens.current.kind == TOKEN_EOF:
                 break
 
-            args.append(PositionalArgument(parse_primitive(env, tokens)))
+            args.append(PositionalArgument(parse_primary(env, tokens)))
 
         return args
 
@@ -154,7 +154,7 @@ class Parameter:
                 if tokens.current.kind in argument_separators:
                     # A parameter with a default value
                     next(tokens)  # Move past ":" or "="
-                    value = parse_primitive(env, tokens)
+                    value = parse_primary(env, tokens)
                     params[token.value] = Parameter(token, token.value, value)
                 else:
                     params[token.value] = Parameter(token, token.value, None)
@@ -191,13 +191,13 @@ def parse_arguments(
             if tokens.peek.kind in argument_separators:
                 name_token = next(tokens)
                 next(tokens)  # = or :
-                value = parse_primitive(env, tokens)
+                value = parse_primary(env, tokens)
                 kwargs.append(KeywordArgument(name_token, token.value, value))
             else:
-                args.append(PositionalArgument(parse_primitive(env, tokens)))
+                args.append(PositionalArgument(parse_primary(env, tokens)))
         else:
             # A primitive as a positional argument
-            args.append(PositionalArgument(parse_primitive(env, tokens)))
+            args.append(PositionalArgument(parse_primary(env, tokens)))
 
         if tokens.current.kind != TOKEN_COMMA:
             break

@@ -432,31 +432,24 @@ def parse_boolean_primitive(  # noqa: PLR0912
     kind = token.kind
 
     if kind == TOKEN_TRUE:
-        left = TrueLiteral(token)
-        next(tokens)
+        left = TrueLiteral(next(tokens))
     elif kind == TOKEN_FALSE:
-        left = FalseLiteral(token)
-        next(tokens)
+        left = FalseLiteral(next(tokens))
+
     elif kind in (TOKEN_NIL, TOKEN_NULL):
-        left = Nil(token)
-        next(tokens)
+        left = Nil(next(tokens))
     elif kind == TOKEN_INTEGER:
-        left = IntegerLiteral(token, to_int(token.value))
-        next(tokens)
+        left = IntegerLiteral(next(tokens), to_int(token.value))
     elif kind == TOKEN_FLOAT:
-        left = FloatLiteral(token, float(token.value))
-        next(tokens)
+        left = FloatLiteral(next(tokens), float(token.value))
     elif kind == TOKEN_STRING:
-        left = StringLiteral(token, token.value)
-        next(tokens)
+        left = StringLiteral(next(tokens), token.value)
     elif kind == TOKEN_RANGE_LITERAL:
         left = RangeLiteral.parse(env, tokens)
     elif kind == TOKEN_BLANK:
-        left = Blank(token)
-        next(tokens)
+        left = Blank(next(tokens))
     elif kind == TOKEN_EMPTY:
-        left = Empty(token)
-        next(tokens)
+        left = Empty(next(tokens))
     elif kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:

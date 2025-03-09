@@ -132,6 +132,17 @@ cases = [
         globals={"title": "Hello"},
     ),
     Case(
+        description="or separated when expression, duplicated",
+        template=(
+            r"{% case title %}"
+            r"{% when 'foo' %}foo"
+            r"{% when title or 'Hello' %}bar"
+            r"{% endcase %}"
+        ),
+        expect="barbar",
+        globals={"title": "Hello"},
+    ),
+    Case(
         description="mix or and comma separated when expression",
         template=(
             r"{% case title %}"
