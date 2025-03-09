@@ -28,10 +28,10 @@ class Tag(ABC):
 
     def get_node(self, stream: TokenStream) -> Node:
         """Wraps `Tag.parse`, possibly returning an `IllegalNode`."""
-        token = stream.current
         try:
             return self.parse(stream)
         except Error as err:
+            token = stream.current
             if not err.token:
                 err.token = token
 

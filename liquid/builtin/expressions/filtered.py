@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from typing import Union
 
 from liquid import Mode
+from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
 from liquid.exceptions import NoSuchFilterFunc
@@ -269,8 +270,8 @@ class Filter:
         try:
             return func(left, *positional_args, **keyword_args)
         except TypeError as err:
-            raise LiquidTypeError(str(err), token=self.token) from err
-        except LiquidTypeError as err:
+            raise LiquidTypeError(f"{self.name}: {err}", token=self.token) from err
+        except (LiquidTypeError, FilterArgumentError) as err:
             err.token = self.token
             raise err
 
@@ -284,7 +285,7 @@ class Filter:
             return func(left, *positional_args, **keyword_args)
         except TypeError as err:
             raise LiquidTypeError(f"{self.name}: {err}", token=self.token) from err
-        except LiquidTypeError as err:
+        except (LiquidTypeError, FilterArgumentError) as err:
             err.token = self.token
             raise err
 

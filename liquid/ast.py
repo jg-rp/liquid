@@ -13,7 +13,6 @@ from typing import TextIO
 
 from .exceptions import DisabledTagError
 from .output import NullIO
-from .token import TOKEN_ILLEGAL
 from .token import TOKEN_TAG
 from .token import Token
 
@@ -21,9 +20,6 @@ if TYPE_CHECKING:
     from .builtin.expressions import Identifier
     from .context import RenderContext
     from .expression import Expression
-
-
-IllegalToken = Token(TOKEN_ILLEGAL, "", -1, "")  # XXX
 
 
 class Node(ABC):
@@ -44,7 +40,6 @@ class Node(ABC):
 
     def raise_for_disabled(self, disabled_tags: Collection[str]) -> None:
         """Raise a DisabledTagError if this node's type is in the given list."""
-        # TODO: benchmark local `token`
         if self.token.kind == TOKEN_TAG and self.token.value in disabled_tags:
             raise DisabledTagError(
                 f"{self.token.value} usage is not allowed in this context",
@@ -61,9 +56,7 @@ class Node(ABC):
         """An async version of `liquid.ast.Node.render`."""
         if context.disabled_tags:
             self.raise_for_disabled(context.disabled_tags)
-        if hasattr(self, "render_to_output_async"):
-            return await self.render_to_output_async(context, buffer)
-        return self.render_to_output(context, buffer)
+        return await self.render_to_output_async(context, buffer)
 
     @abstractmethod
     def render_to_output(
@@ -181,7 +174,6 @@ class BlockNode(Node):
             for node in self.nodes:
                 node.render(context, buf)
             return 0
-        # TODO: resume rendering node if mode.lax
         return sum(node.render(context, buffer) for node in self.nodes)
 
     async def render_to_output_async(

@@ -148,7 +148,7 @@ class CaseTag(Tag):
             stream.current.kind != TOKEN_TAG
             and stream.current.value not in ENDWHENBLOCK
         ):
-            stream.next_token()
+            next(stream)
 
         parse_block = get_parser(self.env).parse_block
         blocks: list[Union[MultiExpressionBlockNode, BlockNode]] = []

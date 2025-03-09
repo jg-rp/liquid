@@ -159,7 +159,7 @@ class IfTag(Tag):
             # continue to parse more "elsif" expression, if any.
             try:
                 expr = BooleanExpression.parse(
-                    self.env, stream.into_inner(tag=stream.next_token())
+                    self.env, stream.into_inner(tag=next(stream))
                 )
             except LiquidSyntaxError as err:
                 self.env.error(err)
@@ -176,11 +176,11 @@ class IfTag(Tag):
         default: Optional[BlockNode] = None
 
         if stream.current.is_tag(TAG_ELSE):
-            stream.next_token()
+            next(stream)
             if stream.current.kind == TOKEN_EXPRESSION:
                 if self.mode == Mode.LAX:
                     # Superfluous expressions inside an `else` tag are ignored.
-                    stream.next_token()
+                    next(stream)
                 else:
                     raise LiquidSyntaxError(
                         "found an 'else' tag expression, did you mean 'elsif'?",
@@ -196,7 +196,7 @@ class IfTag(Tag):
                     and stream.current.value == TAG_ENDIF
                 ):
                     break
-                stream.next_token()
+                next(stream)
 
         stream.expect(TOKEN_TAG, value=TAG_ENDIF)
 
