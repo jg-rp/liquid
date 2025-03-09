@@ -281,23 +281,23 @@ def parse_primitive(env: Environment, tokens: TokenStream) -> Expression:  # noq
     kind = token.kind
 
     if kind == TOKEN_TRUE:
-        return TrueLiteral(tokens.next())
+        return TrueLiteral(next(tokens))
     if kind == TOKEN_FALSE:
-        return FalseLiteral(tokens.next())
+        return FalseLiteral(next(tokens))
     if kind in (TOKEN_NIL, TOKEN_NULL):
-        return Nil(tokens.next())
+        return Nil(next(tokens))
     if kind == TOKEN_INTEGER:
-        return IntegerLiteral(tokens.next(), to_int(token.value))
+        return IntegerLiteral(next(tokens), to_int(token.value))
     if kind == TOKEN_FLOAT:
-        return FloatLiteral(tokens.next(), float(token.value))
+        return FloatLiteral(next(tokens), float(token.value))
     if kind == TOKEN_STRING:
-        return StringLiteral(tokens.next(), token.value)
+        return StringLiteral(next(tokens), token.value)
     if kind == TOKEN_RANGE_LITERAL:
         return RangeLiteral.parse(env, tokens)
     if kind == TOKEN_EMPTY:
-        return Empty(tokens.next())
+        return Empty(next(tokens))
     if kind == TOKEN_BLANK:
-        return Blank(tokens.next())
+        return Blank(next(tokens))
     if kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         return Path.parse(env, tokens)
 

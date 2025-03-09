@@ -107,7 +107,7 @@ class Path(Expression):
                 segments.append(value)
                 if tokens.peek.kind == TOKEN_WORD:
                     # Two consecutive words indicate end of path.
-                    tokens.next()
+                    next(tokens)
                     break
             elif kind == TOKEN_IDENTSTRING:
                 segments.append(value)
@@ -124,7 +124,7 @@ class Path(Expression):
                         token=tokens.peek,
                     )
             elif kind == TOKEN_LBRACKET:
-                tokens.next()
+                next(tokens)
                 segments.append(Path.parse(env, tokens))
                 tokens.expect(TOKEN_RBRACKET)
                 if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_WORD:
@@ -149,7 +149,7 @@ class Path(Expression):
             else:
                 break
 
-            tokens.next()
+            next(tokens)
 
         if not segments:
             raise LiquidSyntaxError(

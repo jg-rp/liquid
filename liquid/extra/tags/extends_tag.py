@@ -290,7 +290,7 @@ class BlockTag(Tag):
 
         if tokens.current.kind == TOKEN_REQUIRED:
             required = True
-            tokens.next()
+            next(tokens)
         else:
             required = False
 
@@ -303,7 +303,7 @@ class BlockTag(Tag):
         end_block_token = stream.current
 
         if stream.peek.kind == TOKEN_EXPRESSION:
-            stream.next()
+            next(stream)
             tokens = stream.into_inner(tag=token, eat=False)
             if tokens.current.kind != TOKEN_EOF:
                 end_block_name = parse_name(self.env, tokens)
@@ -313,7 +313,7 @@ class BlockTag(Tag):
                         f"found '{end_block_name}'",
                         token=end_block_token,
                     )
-                tokens.next()
+                next(tokens)
             tokens.expect_eos()
 
         return self.node_class(

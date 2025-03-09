@@ -220,7 +220,7 @@ class TernaryFilteredExpression(Expression):
         tail_filters: list[Filter] | None = None
 
         if tokens.current.kind == TOKEN_ELSE:
-            tokens.next()  # else
+            next(tokens)  # else
             alternative = parse_primitive(env, tokens)
 
             if tokens.current.kind == TOKEN_PIPE:
@@ -331,7 +331,7 @@ class Filter:
         )
 
         while tokens.current.kind in delim:
-            tokens.next()
+            next(tokens)
             token = tokens.eat(TOKEN_WORD)
             args: list[Union[KeywordArgument, PositionalArgument]] = []
 
@@ -345,8 +345,8 @@ class Filter:
                 tok = tokens.current
                 if tok.kind == TOKEN_WORD:
                     if tokens.peek.kind in argument_separators:
-                        tokens.next()  # word
-                        tokens.next()  # : or =
+                        next(tokens)  # word
+                        next(tokens)  # : or =
                         args.append(
                             KeywordArgument(
                                 tok, tok.value, parse_primitive(env, tokens)
@@ -378,7 +378,7 @@ class Filter:
                             f"found {tokens.peek.kind}",
                             token=tokens.peek,
                         )
-                    tokens.next()
+                    next(tokens)
                 else:
                     break
 

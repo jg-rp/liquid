@@ -38,7 +38,7 @@ class InlineCommentTag(Tag):
         token = stream.expect(TOKEN_TAG)
         # Empty comment tag?
         if stream.peek.kind == TOKEN_EXPRESSION:
-            stream.next()
+            next(stream)
             if RE_INVALID_INLINE_COMMENT.search(stream.current.value):
                 raise LiquidSyntaxError(
                     "every line of an inline comment must start with a '#' character",

@@ -56,7 +56,7 @@ class Parser:
             except Error as err:
                 self.env.error(err, token=stream.current)
 
-            stream.next()
+            next(stream)
 
     def parse_block(self, stream: TokenStream, end: Container[str]) -> BlockNode:
         """Parse tokens from _stream_ until we reach a token in _end_."""
@@ -85,7 +85,7 @@ class Parser:
             except Error as err:
                 self.env.error(err, token=stream.current)
 
-            stream.next()
+            next(stream)
 
         return BlockNode(stream.current, nodes)
 
@@ -99,7 +99,7 @@ def eat_block(stream: TokenStream, end: Container[str]) -> None:
     while stream.current.kind != TOKEN_EOF:
         if stream.current.kind == TOKEN_TAG and stream.current.value in end:
             break
-        stream.next()
+        next(stream)
 
 
 @lru_cache(maxsize=128)

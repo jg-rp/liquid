@@ -209,7 +209,7 @@ class ForTag(Tag):
         default: Optional[BlockNode] = None
 
         if stream.current.is_tag(TAG_ELSE):
-            stream.next()
+            next(stream)
             default = parse_block(stream, ENDFORELSEBLOCK)
 
         stream.expect(TOKEN_TAG, value=TAG_ENDFOR)

@@ -94,7 +94,7 @@ class TokenStream:
 
         If the type of the next token is equal to _typ_, raise an exceptions.
 
-        This is equivalent to `stream.expect(typ)` followed by `stream.next()`.
+        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
         """
         tok = self.current
         if tok.kind != typ:
@@ -107,7 +107,7 @@ class TokenStream:
 
         If the type of the next token is equal to _typ_, raise an exceptions.
 
-        This is equivalent to `stream.expect(typ)` followed by `stream.next()`.
+        This is equivalent to `stream.expect(typ)` followed by `next(stream)`.
         """
         tok = self.current
         if tok.kind not in typ:

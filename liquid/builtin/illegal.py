@@ -20,7 +20,7 @@ class Illegal(Tag):
         token = stream.expect(TOKEN_TAG)
 
         if stream.peek.kind == TOKEN_EXPRESSION:
-            stream.next()
+            next(stream)
 
         msg = (
             "missing tag name" if not token.value else f"unexpected tag '{token.value}'"

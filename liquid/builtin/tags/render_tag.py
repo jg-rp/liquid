@@ -298,14 +298,14 @@ class RenderTag(Tag):
         # Optionally bind a variable to the included template context
         if tokens.current.kind in BIND_TAGS:
             loop = tokens.current.kind == TOKEN_FOR
-            tokens.next()  # Eat 'with' or 'for'
+            next(tokens)  # Eat 'with' or 'for'
             tokens.expect(TOKEN_WORD)
             var = Path.parse(self.env, tokens)
 
             # The bound variable will take the name of the template by default,
             # or an alias if an identifier follows the "as" keyword.
             if tokens.current.kind == TOKEN_AS:
-                tokens.next()  # Eat 'as'
+                next(tokens)  # Eat 'as'
                 tokens.expect(TOKEN_WORD)
                 alias = parse_identifier(self.env, tokens)
 
