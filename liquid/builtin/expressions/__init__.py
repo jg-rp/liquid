@@ -10,6 +10,7 @@ from .loop import LoopExpression
 from .path import Location
 from .path import Path
 from .path import Segments
+from .primary import parse_primary
 from .primitive import Identifier
 from .primitive import Literal
 from .primitive import Nil
@@ -32,6 +33,7 @@ __all__ = (
     "Nil",
     "parse_arguments",
     "parse_identifier",
+    "parse_primary",
     "parse_primitive",
     "parse_string_or_path",
     "Path",

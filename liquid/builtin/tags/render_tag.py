@@ -289,7 +289,7 @@ class RenderTag(Tag):
         # This is the name of the template to be included.
         tokens.expect(TOKEN_STRING)
         name = parse_primitive(self.env, tokens)
-        assert isinstance(name, StringLiteral)
+        assert isinstance(name, StringLiteral)  # TODO: better error
 
         alias: Optional[Identifier] = None
         var: Optional[Path] = None

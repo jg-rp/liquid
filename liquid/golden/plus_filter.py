@@ -60,4 +60,16 @@ cases = [
         template=r"{{ 10 | plus: -2 }}",
         expect="8",
     ),
+    Case(
+        description="argument is a logical expression",
+        template=r"{{ 10 | plus: a or 1 }}",
+        expect="11",
+        globals={"a": None},
+    ),
+    Case(
+        description="argument is a logical expression",
+        template=r"{{ a or 10 | plus: b or 1 }}",
+        expect="47",
+        globals={"a": 42, "b": 5},
+    ),
 ]

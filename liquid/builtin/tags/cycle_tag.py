@@ -10,7 +10,7 @@ from typing import TextIO
 
 from liquid.ast import Node
 from liquid.builtin.expressions import PositionalArgument
-from liquid.builtin.expressions import parse_primitive
+from liquid.builtin.expressions import parse_primary
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
 from liquid.token import TOKEN_COLON
@@ -120,7 +120,7 @@ class CycleTag(Tag):
 
         group_name: Optional[Expression] = None
         if tokens.peek.kind == TOKEN_COLON:
-            group_name = parse_primitive(self.env, tokens)
+            group_name = parse_primary(self.env, tokens)
             tokens.eat(TOKEN_COLON)
 
         args = PositionalArgument.parse(self.env, tokens)
