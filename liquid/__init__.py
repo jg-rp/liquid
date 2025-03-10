@@ -14,6 +14,7 @@ from .context import RenderContext
 from .context import FutureContext
 from .undefined import DebugUndefined
 from .undefined import is_undefined
+from .undefined import FalsyStrictUndefined
 from .undefined import StrictDefaultUndefined
 from .undefined import StrictUndefined
 from .undefined import Undefined
@@ -92,6 +93,7 @@ __all__ = (
     "BlockNode",
     "ConditionalBlockNode",
     "Tag",
+    "FalsyStrictUndefined",
 )
 
 DEFAULT_ENVIRONMENT = Environment()

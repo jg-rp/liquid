@@ -175,24 +175,16 @@ class Environment:
             self.comment_start_string = ""
             self.comment_end_string = ""
 
-        # The undefined type. When an identifier can not be resolved, the returned value
-        # is `Undefined` or a subclass of `Undefined`.
         self.undefined: Type[Undefined] = undefined
-
-        # Indicates if an undefined filter should raise an exception or be ignored.
         self.strict_filters: bool = strict_filters
-
-        # Indicates if autoescape is enabled.
         self.autoescape: bool = autoescape
-
-        # Tag register.
-        self.tags: dict[str, Tag] = {}
-
-        # Filter register.
-        self.filters: dict[str, Callable[..., Any]] = {}
-
-        # tolerance mode
         self.mode: Mode = tolerance
+
+        self.tags: dict[str, Tag] = {}
+        """The environment's tag register, mapping tag names to instances of `Tag`."""
+
+        self.filters: dict[str, Callable[..., Any]] = {}
+        """The environment's filter register, mapping filter names to callables."""
 
         self.setup_tags_and_filters(extra=extra)
 

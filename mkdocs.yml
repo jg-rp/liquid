@@ -8,8 +8,8 @@ theme:
     primary: black
   features:
     - content.code.copy
+    - navigation.top
     - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.tracking
     - navigation.expand
   logo: img/droplet_white_liquid.svg
@@ -43,10 +43,10 @@ nav:
       - Loading templates: "loading_templates.md"
       - Render context data: "render_context.md"
       - Variables, types and drops: "variables_and_drops.md"
-      - Whitespace control: "whitespace_control.md"
       - Static template analysis: "static_analysis.md"
       - Custom filters: "custom_filters.md"
       - Custom tags: "custom_tags.md"
+      - Known issues: "known_issues.md"
   - Tag reference:
       - Default tags: "tag_reference.md"
       - Optional tags: "optional_tags.md"

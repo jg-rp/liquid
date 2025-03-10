@@ -1,1 +1,2 @@
 ::: liquid.Token
+::: liquid.TokenStream
