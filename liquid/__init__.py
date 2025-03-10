@@ -36,11 +36,16 @@ from .builtin import PackageLoader
 from .builtin import CachingLoaderMixin
 from .loader import BaseLoader
 
+from .ast import Node
+from .ast import BlockNode
+from .ast import ConditionalBlockNode
+
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
 
 from .stream import TokenStream
+from .tag import Tag
 
 from . import future
 
@@ -83,6 +88,10 @@ __all__ = (
     "parse",
     "render",
     "render_async",
+    "Node",
+    "BlockNode",
+    "ConditionalBlockNode",
+    "Tag",
 )
 
 DEFAULT_ENVIRONMENT = Environment()

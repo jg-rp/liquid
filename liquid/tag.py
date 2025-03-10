@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from liquid.ast import IllegalNode
 from liquid.ast import Node
 from liquid.exceptions import Error
-from liquid.parse import eat_block
+from liquid.parser import eat_block
 
 if TYPE_CHECKING:
     from liquid import Environment

@@ -25,7 +25,7 @@ from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
 from liquid.exceptions import TemplateNotFound
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION

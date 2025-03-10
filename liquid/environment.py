@@ -25,7 +25,7 @@ from .exceptions import lookup_warning
 from .extra import add_tags_and_filters as register_extra_tags_and_filters
 from .lex import get_lexer
 from .mode import Mode
-from .parse import get_parser
+from .parser import get_parser
 from .stream import TokenStream
 from .template import BoundTemplate
 from .undefined import Undefined

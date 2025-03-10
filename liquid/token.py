@@ -117,12 +117,24 @@ reverse_operators = {v: k for k, v in operators.items()}
 
 
 class Token(NamedTuple):
-    """A token. Could be a tag/output token or an expression token."""
+    """A substring into Liquid template source text along with its type."""
 
     kind: str
+    """The type of the token.
+    
+    Could be one of `TOKEN_TAG`, `TOKEN_OUTPUT`, `TOKEN_EXPRESSION` or `TOKEN_CONTENT`
+    indicating that it is a "top-level" token. All other tokens kinds are for tag and
+    output expressions.
+    """
+
     value: str
+    """The substring associated with this token."""
+
     start_index: int
+    """The index into _source_ where this token starts."""
+
     source: str
+    """A reference to the template source text from which this token came."""
 
     def test(self, typ: str) -> bool:
         """Return `True` if this token's type matches the `typ` argument."""
