@@ -1,65 +1,89 @@
 # Python Liquid
 
-A Python implementation of [Liquid](https://shopify.github.io/liquid/), the safe customer-facing template language for flexible web apps.
+Liquid is a template language, where source text (the template) contains placeholders for variables, conditional expressions for including or excluding blocks of text, and loops for repeating blocks of text. Plus other syntax for manipulating variables and combining multiple templates into a single output.
 
-!!! info
-    See [https://jg-rp.github.io/liquid/](https://jg-rp.github.io/liquid/) for guides, [tag and filter references](https://jg-rp.github.io/liquid/language/tags) and extra, non-standard plugins.
+Python Liquid is a Python engine for te Liquid template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
 
 ## Install
 
-Install Python Liquid using [Pipenv](https://pipenv.pypa.io/en/latest/):
+Install Python Liquid from [PyPi](https://pypi.org/project/python-liquid/) using [pip](https://pip.pypa.io/en/stable/getting-started/):
 
-```shell
-$ pipenv install -u python-liquid
+```console
+python -m pip install python-liquid
 ```
 
-Or [pip](https://pip.pypa.io/en/stable/getting-started/):
+Or [Pipenv](https://pipenv.pypa.io/en/latest/):
 
-```shell
-$ pip install python-liquid
+```console
+pipenv install -u python-liquid
+```
+
+Or [poetry](https://python-poetry.org/docs/)
+
+```console
+poetry add python-liquid
 ```
 
 Or from [conda-forge](https://anaconda.org/conda-forge/python-liquid):
 
-```shell
-$ conda install -c conda-forge python-liquid
+```console
+conda install -c conda-forge python-liquid
 ```
 
 ## Quick Start
 
-Render a template string by creating a `Template` and calling its `render()` method.
+## `render()`
+
+Here's a very simple example that renders a template from a string of text with the package-level [`render()`](api/convenience.md#liquid.render) function. The template has just one placeholder variable `you`, which we've given the value `"World"`.
 
 ```python
-from liquid import Template
+from liquid import render
 
-template = Template("Hello, {{ you }}!")
+print(render("Hello, {{ you }}!", you="World"))
+# Hello, World!
+```
+
+## `parse()`
+
+Often you'll want to render the same template several times with different variables. We can parse source text without immediately rendering it using the [`parse()`](api/convenience.md#liquid.parse) function. `parse()` returns a [`Template`](api/template.md) instance with a `render()` method.
+
+```python
+from liquid import parse
+
+template = parse("Hello, {{ you }}!")
 print(template.render(you="World"))  # Hello, World!
 print(template.render(you="Liquid"))  # Hello, Liquid!
 ```
 
-Keyword arguments passed to render() are available as variables for templates to use in Liquid expressions.
+## Configure
+
+Both [`parse()`](api/convenience.md#liquid.parse) and [`render()`](api/convenience.md#liquid.render) are convenience functions that use the [default Liquid environment](environment.md). For all but the simplest cases you'll want to configure an instance of [`Environment`](api/environment.md), then load and render templates from that.
 
 ```python
-from liquid import Template
+from liquid import CachingFileSystemLoader
+from liquid import Environment
 
-template = Template(
-    "{% for person in people %}"
-    "Hello, {{ person.name }}!\n"
-    "{% endfor %}"
+env = Environment(
+    autoescape=True,
+    loader=CachingFileSystemLoader("./templates"),
 )
-
-data = {
-    "people": [
-        {"name": "John"},
-        {"name": "Sally"},
-    ]
-}
-
-print(template.render(**data))
-# Hello, John!
-# Hello, Sally!
 ```
+
+Then, using `env.parse()` or `env.get_template()`, we can create a [`Template`](api/template.md) from a string or read from the file system, respectively.
+
+```python
+# ... continued from above
+template = env.parse("Hello, {{ you }}!")
+print(template.render(you="World"))  # Hello, World!
+
+# Try to load "./templates/index.html"
+another_template = env.get_template("index.html")
+data = {"some": {"thing": [1, 2, 3]}}
+result = another_template.render(**data)
+```
+
+Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFoundError` to be raised when running the example above.
 
 ## What's next?
 
-Learn how to [configure a Liquid environment](https://jg-rp.github.io/liquid/introduction/getting-started#configure) and [load templates](https://jg-rp.github.io/liquid/introduction/loading-templates) from a file system or database.
+Read more about [configuring Liquid environments](environment.md), [template loaders](loading_templates.md) and [managing render context data](render_context.md).

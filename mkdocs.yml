@@ -9,6 +9,7 @@ theme:
   features:
     - content.code.copy
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.tracking
     - navigation.expand
   logo: img/droplet_white_liquid.svg
@@ -36,9 +37,7 @@ plugins:
 nav:
   - Home:
       - Introduction: "index.md"
-      - Quick start: "quick_start.md"
       - Liquid Syntax: "syntax.md"
-  - User guide:
       - Rendering templates: "rendering_templates.md"
       - Liquid environments: "environment.md"
       - Loading templates: "loading_templates.md"

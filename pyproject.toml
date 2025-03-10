@@ -75,7 +75,13 @@ python = ["39", "310", "311", "312", "pypy39"]
 test = "pytest {args}"
 
 [tool.hatch.envs.docs]
-dependencies = ["black", "mkdocs", "mkdocstrings[python]", "mkdocs-material"]
+dependencies = [
+  "black",
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material",
+  "pygments-liquid2",
+]
 
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"
