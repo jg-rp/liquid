@@ -19,6 +19,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid.context import RenderContext
+    from liquid.expression import Expression
     from liquid.stream import TokenStream
 
 TAG_WITH = sys.intern("with")
@@ -55,6 +56,10 @@ class WithNode(Node):
     ) -> Iterable[Node]:
         """Return this node's children."""
         yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield from (arg.value for arg in self.args)
 
     def block_scope(self) -> Iterable[Identifier]:
         """Return variables this node adds to the node's block scope."""

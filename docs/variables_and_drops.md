@@ -389,7 +389,7 @@ Hello
 
 ### Strict undefined
 
-When [`StrictUndefined`](api/undefined.md#liquid.undefined.StrictUndefined) is passed as the `undefined` argument to an [`Environment`](api/environment.md), any operation on an undefined variable will raise an `UndefinedError`.
+When [`StrictUndefined`](api/undefined.md#liquid.StrictUndefined) is passed as the `undefined` argument to an [`Environment`](api/environment.md), any operation on an undefined variable will raise an `UndefinedError`.
 
 ```python
 from liquid import Environment, StrictUndefined
@@ -406,7 +406,7 @@ template.render()
 
 ### Falsy strict undefined
 
-[`FalsyStrictUndefined`](api/undefined.md#liquid.undefined.FalsyStrictUndefined) is the same as [`StrictUndefined`](#strict-undefined), but can be tested for truthiness and equality without raising an exception.
+[`FalsyStrictUndefined`](api/undefined.md#liquid.FalsyStrictUndefined) is the same as [`StrictUndefined`](#strict-undefined), but can be tested for truthiness and equality without raising an exception.
 
 ```python
 from liquid import Environment

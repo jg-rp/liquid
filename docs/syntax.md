@@ -65,4 +65,53 @@ Together `{% if site_description %}` and `{% endif %}` form a _block tag_. Block
 
 ## Content
 
-`<main>` and `\n    <h3>About Us</h3>` are examples of template content. That's anything not inside `{%` and `%}` or `{{` and `}}`. With the exception of [whitespace control](whitespace_control.md), template content is output unchanged.
+`<main>` and `\n    <h3>About Us</h3>` are examples of template content. That's anything not inside `{%` and `%}` or `{{` and `}}`. With the exception of whitespace control, template content is output unchanged.
+
+## Whitespace control
+
+By default, all whitespace immediately before and after a tag is preserved. This can result in a lot of unwanted whitespace.
+
+```liquid2
+<ul>
+{% for x in (1..4) %}
+  <li>{{ x }}</li>
+{% endfor %}
+</ul>
+```
+
+```plain title="output"
+<ul>
+
+  <li>1</li>
+
+  <li>2</li>
+
+  <li>3</li>
+
+  <li>4</li>
+
+</ul>
+```
+
+We can include a `-` at the start or end of a tag or output markup to strip preceding or trailing whitespace.
+
+```liquid2
+<ul>
+{% for x in (1..4) -%}
+  <li>{{ x }}</li>
+{% endfor -%}
+</ul>
+```
+
+```plain title="output"
+<ul>
+<li>1</li>
+<li>2</li>
+<li>3</li>
+<li>4</li>
+</ul>
+```
+
+!!! note
+
+    Fine grained control over when to remove newlines vs indentation is not a standard feature of Liquid templates.
