@@ -90,7 +90,20 @@ class MyLiquidEnvironment(Environment):
 
 ## Tolerance
 
-TODO:
+Templates are parsed and rendered in strict mode by default. Where syntax and render-time type errors raise an exception as soon as possible. You can change the error tolerance mode with the `tolerance` argument to [`Environment`](api/environment.md).
+
+Available modes are `Mode.STRICT`, `Mode.WARN` and `Mode.LAX`.
+
+```python
+from liquid import Environment
+from liquid import FileSystemLoader
+from liquid import Mode
+
+env = Environment(
+    loader=FileSystemLoader("templates/"),
+    tolerance=Mode.LAX,
+)
+```
 
 ## HTML auto escape
 
@@ -243,23 +256,27 @@ template.render(you="something longer that exceeds our limit")
 # liquid.exceptions.OutputStreamLimitError: output stream limit reached
 ```
 
-### String sequences
+## String sequences
 
-TODO
+By default, strings in Liquid can not be looped over with the `{% for %}` tag and characters in a string can not be selected by index.
 
-### String first and last
+Setting the `string_sequences` class attribute to `True` tells Python Liquid to treat strings as sequences, meaning we can loop over Unicode characters in a string for retrieve a Unicode "character" by its index.
 
-TODO:
+## String first and last
 
-### Logical not operator
+Strings don't respond to the special `.first` and `.last` properties by default. Set `string_first_and_last` to `True` to enable `.first` and `.last` for strings.
 
-TODO:
+## Logical not operator
 
-### Logical parentheses
+The logical `not` operator is disabled by default. Set the `logical_not_operator` class attribute to `True` to enable `not` inside `{% if %}`, `{% unless %}` and ternary expressions.
 
-TODO:
+## Logical parentheses
 
-### Ternary expressions
+By default, terms in `{% if %}` tag expressions can not be grouped to control precedence. Set the `logical_parentheses` class attribute to `True` to enable grouping terms with parentheses.
+
+## Ternary expressions
+
+Enable ternary expressions in output statements, assign tags and echo tags by setting the `ternary_expressions` class attribute to `True`.
 
 ```
 {{ <expression> if <expression> else <expression> }}
@@ -283,9 +300,9 @@ Or applied to the result of the conditional expression as a whole using _tail fi
 {{ "bar" if x else "baz" || upcase | append: "!" }}
 ```
 
-### Keyword assignment
+## Keyword assignment
 
-TODO:
+By default, named arguments must separated names from values with a colon (`:`). Set the `keyword_assignment` class attribute to `True` to allow equals (`=`) or a colon between names and their values.
 
 ## What's next?
 

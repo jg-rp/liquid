@@ -1,3 +1,5 @@
+TODO: examples of registering these filters
+
 ## currency
 
 ```

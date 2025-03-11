@@ -1,3 +1,5 @@
+TODO: examples of registering these tags
+
 ## extends
 
 ```
@@ -90,7 +92,7 @@ In this example we use `{{ block.super }}` in the `footer` block to output the b
 
 The `macro` tag defines a parameterized block that can later be called using the `call` tag.
 
-A macro is like defining a function. You define a parameter list, possibly with default values, that are expected to be provided by a `call` tag. A macro tag's block has its own scope including its arguments and template global variables, just like the [`render`](#render) tag.
+A macro is like defining a function. You define a parameter list, possibly with default values, that are expected to be provided by a `call` tag. A macro tag's block has its own scope including its arguments and template global variables, just like the [`render`](tag_reference.md#render) tag.
 
 Note that argument defaults are bound late. They are evaluated when a call expression is evaluated, not when the macro is defined.
 
