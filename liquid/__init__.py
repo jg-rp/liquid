@@ -1,5 +1,8 @@
 from pathlib import Path
 from typing import Iterable
+from typing import Iterator
+from typing import Optional
+from typing import TextIO
 from typing import Union
 
 from markupsafe import Markup
@@ -44,6 +47,9 @@ from .ast import ConditionalBlockNode
 from .analyze_tags import TagAnalysis
 from .analyze_tags import DEFAULT_INNER_TAG_MAP
 
+from .messages import MessageTuple
+from .messages import Translations
+from .messages import extract_from_template
 
 from .stream import TokenStream
 from .tag import Tag
@@ -54,18 +60,22 @@ __version__ = "2.0.0"
 
 __all__ = (
     "AwareBoundTemplate",
+    "BlockNode",
     "BoundTemplate",
     "CachingChoiceLoader",
+    "CachingDictLoader",
     "CachingFileSystemLoader",
+    "CachingLoaderMixin",
     "ChoiceLoader",
-    "RenderContext",
+    "ConditionalBlockNode",
     "DebugUndefined",
     "DEFAULT_INNER_TAG_MAP",
     "DictLoader",
     "Environment",
     "escape",
     "Expression",
-    "CachingDictLoader",
+    "extract_from_template",
+    "FalsyStrictUndefined",
     "FileSystemLoader",
     "future",
     "FutureAwareBoundTemplate",
@@ -74,26 +84,25 @@ __all__ = (
     "is_undefined",
     "make_choice_loader",
     "make_file_system_loader",
-    "CachingLoaderMixin",
     "Markup",
+    "MessageTuple",
     "Mode",
+    "Node",
     "PackageLoader",
+    "parse",
+    "render_async",
+    "render",
+    "RenderContext",
     "soft_str",
     "StrictDefaultUndefined",
     "StrictUndefined",
+    "Tag",
     "TagAnalysis",
     "Template",
     "Token",
-    "Undefined",
     "TokenStream",
-    "parse",
-    "render",
-    "render_async",
-    "Node",
-    "BlockNode",
-    "ConditionalBlockNode",
-    "Tag",
-    "FalsyStrictUndefined",
+    "Translations",
+    "Undefined",
 )
 
 DEFAULT_ENVIRONMENT = Environment()
@@ -202,3 +211,36 @@ def make_choice_loader(
         )
 
     return ChoiceLoader(loaders=loaders)
+
+
+def extract_liquid(
+    fileobj: TextIO,
+    keywords: list[str],
+    comment_tags: Optional[list[str]] = None,
+    options: Optional[dict[object, object]] = None,  # noqa: ARG001
+) -> Iterator[MessageTuple]:
+    """A babel compatible translation message extraction method for Liquid templates.
+
+    See https://babel.pocoo.org/en/latest/messages.html
+
+    Keywords are the names of Liquid filters or tags operating on translatable
+    strings. For a filter to contribute to message extraction, it must also
+    appear as a child of a `FilteredExpression` and be a `TranslatableFilter`.
+    Similarly, tags must produce a node that is a `TranslatableTag`.
+
+    Where a Liquid comment contains a prefix in `comment_tags`, the comment
+    will be attached to the translatable filter or tag immediately following
+    the comment. Python Liquid's non-standard shorthand comments are not
+    supported.
+
+    Options are arguments passed to the `liquid.Template` constructor with the
+    contents of `fileobj` as the template's source. Use `extract_from_template`
+    to extract messages from an existing template bound to an existing
+    environment.
+    """
+    template = Environment(extra=True).parse(fileobj.read())
+    return extract_from_template(
+        template=template,
+        keywords=keywords,
+        comment_tags=comment_tags,
+    )

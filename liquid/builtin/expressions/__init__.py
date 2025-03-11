@@ -3,6 +3,7 @@ from .arguments import KeywordArgument  # noqa: D104
 from .arguments import Parameter
 from .arguments import PositionalArgument
 from .arguments import parse_arguments
+from .filtered import Filter
 from .filtered import FilteredExpression
 from .filtered import TernaryFilteredExpression
 from .logical import BooleanExpression
@@ -42,4 +43,5 @@ __all__ = (
     "tokenize",
     "parse_name",
     "Parameter",
+    "Filter",
 )

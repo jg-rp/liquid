@@ -209,6 +209,22 @@ class LocalNamespaceLimitError(ResourceLimitError):
     """Exception raised when a local namespace limit has been exceeded."""
 
 
+class TranslationError(Error):
+    """Base exception for translation errors."""
+
+
+class TranslationSyntaxError(LiquidSyntaxError):
+    """Exception raised when a syntax error is found within a translation block."""
+
+
+class TranslationValueError(TranslationError):
+    """Exception raised when message interpolation fails with a ValueError."""
+
+
+class TranslationKeyError(TranslationError):
+    """Exception raised when message interpolation fails with a KeyError."""
+
+
 # LiquidValueError inheriting from LiquidSyntaxError does not make complete sense.
 # The alternative is to have multiple to_int functions that raise more appropriate
 # exceptions depending on whether we are parsing or rendering when attempting to

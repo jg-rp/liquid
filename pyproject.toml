@@ -17,7 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
-dependencies = ["MarkupSafe>=3", "python-dateutil>=2.8.1"]
+dependencies = ["MarkupSafe>=3", "python-dateutil>=2.8.1", "Babel>=2", "pytz"]
 description = "A Python engine for the Liquid template language."
 dynamic = ["version"]
 license = "MIT"
@@ -56,6 +56,8 @@ dependencies = [
   "mock",
   "types-python-dateutil",
   "types-mock",
+  "types-pytz",
+  "types-babel",
 ]
 
 [tool.hatch.envs.default.scripts]

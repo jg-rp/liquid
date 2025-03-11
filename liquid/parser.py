@@ -10,6 +10,7 @@ from typing import Iterator
 from .ast import BlockNode
 from .ast import Node
 from .exceptions import Error
+from .token import TOKEN_COMMENT
 from .token import TOKEN_CONTENT
 from .token import TOKEN_DOC
 from .token import TOKEN_EOF
@@ -51,6 +52,8 @@ class Parser:
                     yield tags.get(TOKEN_DOC, illegal).get_node(stream)
                 elif stream.current.kind == TOKEN_TAG:
                     yield tags.get(token.value, illegal).get_node(stream)
+                elif kind == "COMMENT":
+                    yield tags.get(TOKEN_COMMENT, illegal).get_node(stream)
                 else:
                     yield content.get_node(stream)
             except Error as err:
@@ -80,6 +83,8 @@ class Parser:
                     nodes.append(tags.get(TOKEN_DOC, illegal).get_node(stream))
                 elif stream.current.kind == TOKEN_TAG:
                     nodes.append(tags.get(token.value, illegal).get_node(stream))
+                elif kind == "COMMENT":
+                    nodes.append(tags.get(TOKEN_COMMENT, illegal).get_node(stream))
                 else:
                     nodes.append(content.get_node(stream))
             except Error as err:

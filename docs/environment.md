@@ -88,6 +88,10 @@ class MyLiquidEnvironment(Environment):
         return dict(self.globals)
 ```
 
+## Extra tags and filters
+
+TODO:
+
 ## Tolerance
 
 Templates are parsed and rendered in strict mode by default. Where syntax and render-time type errors raise an exception as soon as possible. You can change the error tolerance mode with the `tolerance` argument to [`Environment`](api/environment.md).
