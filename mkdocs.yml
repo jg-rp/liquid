@@ -48,6 +48,7 @@ nav:
       - Custom filters: "custom_filters.md"
       - Custom tags: "custom_tags.md"
       - Known issues: "known_issues.md"
+      - Migration guide: "migration.md"
   - Tag reference:
       - Default tags: "tag_reference.md"
       - Extra tags: "optional_tags.md"

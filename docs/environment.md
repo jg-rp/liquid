@@ -54,7 +54,7 @@ env = MyLiquidEnvironment(
 
 ## Managing tags and filters
 
-[`builtin.register()`](api/builtin.md#liquid.builtin.register) registers all the default tags and filters with the environment. You are encouraged to override `setup_tags_and_filters()` in your `Environment` subclasses to add optional or custom tags and filters, remove unwanted default tags and filters, and possibly replace default implementation with your own.
+[`liquid.builtin.register()`](api/builtin.md#liquid.builtin.register) registers all the default tags and filters with the environment. You are encouraged to override `setup_tags_and_filters()` in your `Environment` subclasses to add optional or custom tags and filters, remove unwanted default tags and filters, and possibly replace default implementation with your own.
 
 It's also OK to manipulate [`Environment.tags`](api/environment.md#liquid.Environment.tags) and [`Environment.filters`](api/environment.md#liquid.Environment.filters) directly after an `Environment` instance has been created. They are just dictionaries mapping tag names to instances of [`Tag`](api/tag.md) and filter names to callables, respectively.
 
@@ -79,7 +79,7 @@ print(env.render("{{ 100457.99 | money }}"))
 
 ## Managing global variables
 
-By default, global template variables attached to instances of [`Template`](api/template.md) take priority over global template variables attached to an `Environment`. You can change this priority or otherwise manipulate the `globals` dictionary for a `Template` by overriding [`Environment.make_globals()`](api/environment.md#liquid.Environment.make_globals).
+By default, global template variables attached to instances of [`BoundTemplate`](api/template.md) take priority over global template variables attached to an `Environment`. You can change this priority or otherwise manipulate the `globals` dictionary for a `BoundTemplate` by overriding [`Environment.make_globals()`](api/environment.md#liquid.Environment.make_globals).
 
 Also see [Render context data](render_context.md).
 

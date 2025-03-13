@@ -1,8 +1,6 @@
 # Python Liquid
 
-Liquid is a template language, where source text (the template) contains placeholders for variables, conditional expressions for including or excluding blocks of text, and loops for repeating blocks of text. Plus other syntax for manipulating variables and combining multiple templates into a single output.
-
-Python Liquid is a Python engine for the Liquid template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
+Python Liquid is a Python engine for the Liquid, the safe, customer-facing template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
 
 ## Install
 
@@ -45,7 +43,7 @@ print(render("Hello, {{ you }}!", you="World"))
 
 ## `parse()`
 
-Often you'll want to render the same template several times with different variables. We can parse source text without immediately rendering it using the [`parse()`](api/convenience.md#liquid.parse) function. `parse()` returns a [`Template`](api/template.md) instance with a `render()` method.
+Often you'll want to render the same template several times with different variables. We can parse source text without immediately rendering it using the [`parse()`](api/convenience.md#liquid.parse) function. `parse()` returns a [`BoundTemplate`](api/template.md) instance with a `render()` method.
 
 ```python
 from liquid import parse
@@ -69,7 +67,7 @@ env = Environment(
 )
 ```
 
-Then, using `env.parse()` or `env.get_template()`, we can create a [`Template`](api/template.md) from a string or read from the file system, respectively.
+Then, using `env.parse()` or `env.get_template()`, we can create a [`BoundTemplate`](api/template.md) from a string or read from the file system, respectively.
 
 ```python
 # ... continued from above
