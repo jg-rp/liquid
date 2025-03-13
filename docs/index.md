@@ -2,7 +2,7 @@
 
 Liquid is a template language, where source text (the template) contains placeholders for variables, conditional expressions for including or excluding blocks of text, and loops for repeating blocks of text. Plus other syntax for manipulating variables and combining multiple templates into a single output.
 
-Python Liquid is a Python engine for te Liquid template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
+Python Liquid is a Python engine for the Liquid template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
 
 ## Install
 

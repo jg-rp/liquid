@@ -1,4 +1,47 @@
-TODO: examples of registering these filters
+The filters described on this page are **not** enabled by default. You can enable [all extra tags and filters](environment.md#extra-tags-and-filters), or import and register just the filters you need individually by updating [`Environment.filters`](api/environment.md#liquid.Environment.filters).
+
+If we were to import and register all extra filters manually, it would look like this.
+
+```python
+from liquid import Environment
+from liquid.extra import JSON
+from liquid.extra import Currency
+from liquid.extra import DateTime
+from liquid.extra import GetText
+from liquid.extra import NGetText
+from liquid.extra import NPGetText
+from liquid.extra import Number
+from liquid.extra import PGetText
+from liquid.extra import Translate
+from liquid.extra import Unit
+from liquid.extra import index
+from liquid.extra import script_tag
+from liquid.extra import sort_numeric
+from liquid.extra import stylesheet_tag
+
+env = Environment()
+env.filters["index"] = index
+env.filters["json"] = JSON()
+env.filters["script_tag"] = script_tag
+env.filters["sort_numeric"] = sort_numeric
+env.filters["stylesheet_tag"] = stylesheet_tag
+env.filters[GetText.name] = GetText()
+env.filters[NGetText.name] = NGetText()
+env.filters[NPGetText.name] = NPGetText()
+env.filters[PGetText.name] = PGetText()
+env.filters[Translate.name] = Translate()
+env.filters["currency"] = Currency()
+env.filters["money"] = Currency()
+env.filters["money_with_currency"] = Currency(default_format="¤#,##0.00 ¤¤")
+env.filters["money_without_currency"] = Currency(default_format="#,##0.00")
+env.filters["money_without_trailing_zeros"] = Currency(
+    default_format="¤#,###",
+    currency_digits=False,
+)
+env.filters["datetime"] = DateTime()
+env.filters["decimal"] = Number()
+env.filters["unit"] = Unit()
+```
 
 ## currency
 

@@ -43,16 +43,17 @@ nav:
       - Loading templates: "loading_templates.md"
       - Render context data: "render_context.md"
       - Variables, types and drops: "variables_and_drops.md"
+      - Internationalization and localization: "babel.md"
       - Static template analysis: "static_analysis.md"
       - Custom filters: "custom_filters.md"
       - Custom tags: "custom_tags.md"
       - Known issues: "known_issues.md"
   - Tag reference:
       - Default tags: "tag_reference.md"
-      - Optional tags: "optional_tags.md"
+      - Extra tags: "optional_tags.md"
   - Filter reference:
       - Default filters: "filter_reference.md"
-      - Optional filters: "optional_filters.md"
+      - Extra filters: "optional_filters.md"
   - API reference:
       - Convenience functions: "api/convenience.md"
       - Environment: "api/environment.md"
@@ -60,6 +61,8 @@ nav:
       - Loaders: "api/loaders.md"
       - Exceptions: "api/exceptions.md"
       - Builtin: "api/builtin.md"
+      - Extra: "api/extra.md"
+      - Messages: "api/messages.md"
       - AST: "api/ast.md"
       - Parser: "api/parser.md"
       - Expression: "api/expression.md"

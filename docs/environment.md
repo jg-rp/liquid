@@ -54,7 +54,7 @@ env = MyLiquidEnvironment(
 
 ## Managing tags and filters
 
-As you'd expect, [`builtin.register()`](api/builtin.md#liquid.builtin.register) registers all the default tags and filters with the environment. You are encouraged to override `setup_tags_and_filters()` in your `Environment` subclasses to add optional or custom tags and filters, remove unwanted default tags and filters, and possibly replace default implementation with your own.
+[`builtin.register()`](api/builtin.md#liquid.builtin.register) registers all the default tags and filters with the environment. You are encouraged to override `setup_tags_and_filters()` in your `Environment` subclasses to add optional or custom tags and filters, remove unwanted default tags and filters, and possibly replace default implementation with your own.
 
 It's also OK to manipulate [`Environment.tags`](api/environment.md#liquid.Environment.tags) and [`Environment.filters`](api/environment.md#liquid.Environment.filters) directly after an `Environment` instance has been created. They are just dictionaries mapping tag names to instances of [`Tag`](api/tag.md) and filter names to callables, respectively.
 
@@ -63,6 +63,18 @@ from liquid import Environment
 
 env = Environment()
 del env.tags["include"]
+```
+
+### Extra tags and filters
+
+Python Liquid includes some [extra tags](optional_tags.md) and [extra filters](optional_filters.md) that are not enabled by default. If you want to enable them all, pass `extra=True` when constructing a Liquid [`Environment`](api/environment.md).
+
+```python
+from liquid import Environment
+
+env = Environment(extra=True)
+print(env.render("{{ 100457.99 | money }}"))
+# $100,457.99
 ```
 
 ## Managing global variables
@@ -87,10 +99,6 @@ class MyLiquidEnvironment(Environment):
             return {**self.globals, **globals}
         return dict(self.globals)
 ```
-
-## Extra tags and filters
-
-TODO:
 
 ## Tolerance
 
@@ -264,7 +272,7 @@ template.render(you="something longer that exceeds our limit")
 
 By default, strings in Liquid can not be looped over with the `{% for %}` tag and characters in a string can not be selected by index.
 
-Setting the `string_sequences` class attribute to `True` tells Python Liquid to treat strings as sequences, meaning we can loop over Unicode characters in a string for retrieve a Unicode "character" by its index.
+Setting the `string_sequences` class attribute to `True` tells Python Liquid to treat strings as sequences, meaning we can loop over Unicode characters in a string or retrieve a Unicode "character" by its index.
 
 ## String first and last
 

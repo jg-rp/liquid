@@ -903,30 +903,29 @@ def test_span_line_and_col(env: Environment) -> None:
     assert analysis.variables["x"][0].span.line_col(source) == (2, 5)
 
 
-# TODO:
-# def test_analyze_translate(env: Environment) -> None:
-#     source = (
-#         "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
-#         "    Hello, {{ you }}!"
-#         "{%- plural -%}"
-#         "    Hello, {{ you }}s!"
-#         "{%- endtranslate -%}"
-#     )
+def test_analyze_translate(env: Environment) -> None:
+    source = (
+        "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
+        "    Hello, {{ you }}!"
+        "{%- plural -%}"
+        "    Hello, {{ you }}s!"
+        "{%- endtranslate -%}"
+    )
 
-#     someone = [Variable(["someone"], Span("", 41))]
+    someone = [Variable(["someone"], Span("", 41))]
 
-#     _assert(
-#         env.from_string(source),
-#         locals={},
-#         globals={"someone": someone},
-#         variables={
-#             "someone": someone,
-#             "you": [
-#                 Variable(["you"], Span("", 76)),
-#                 Variable(["you"], Span("", 111)),
-#             ],
-#         },
-#         tags={
-#             "translate": [Span("", 0)],
-#         },
-#     )
+    _assert(
+        env.from_string(source),
+        locals={},
+        globals={"someone": someone},
+        variables={
+            "someone": someone,
+            "you": [
+                Variable(["you"], Span("", 76)),
+                Variable(["you"], Span("", 111)),
+            ],
+        },
+        tags={
+            "translate": [Span("", 4)],
+        },
+    )

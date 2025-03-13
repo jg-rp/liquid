@@ -3,6 +3,7 @@ from __future__ import annotations  # noqa: D104
 from typing import TYPE_CHECKING
 
 from .filters import JSON
+from .filters import BaseTranslateFilter
 from .filters import Currency
 from .filters import DateTime
 from .filters import GetText
@@ -28,26 +29,29 @@ if TYPE_CHECKING:
 
 __all__ = (
     "add_filters",
-    "add_tags",
     "add_tags_and_filters",
+    "add_tags",
+    "BaseTranslateFilter",
     "BlockTag",
     "CallTag",
+    "Currency",
+    "DateTime",
     "ExtendsTag",
+    "GetText",
     "IfNotTag",
     "index",
     "JSON",
     "MacroTag",
+    "NGetText",
+    "NPGetText",
+    "Number",
+    "PGetText",
     "script_tag",
     "sort_numeric",
     "stylesheet_tag",
-    "WithTag",
+    "Translate",
     "Unit",
-    "Number",
-    "GetText",
-    "PGetText",
-    "PGetText",
-    "Currency",
-    "DateTime",
+    "WithTag",
 )
 
 

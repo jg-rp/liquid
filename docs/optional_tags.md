@@ -1,4 +1,24 @@
-TODO: examples of registering these tags
+The tags described on this page are **not** enabled by default. You can enable [all extra tags and filters](environment.md#extra-tags-and-filters), or import and register just the tags you need individually using [`Environment.add_tag()`](api/environment.md#liquid.Environment.add_tag).
+
+If we were to register all extra tags manually, it would look like this.
+
+```python
+from liquid import Environment
+from liquid.extra import BlockTag
+from liquid.extra import CallTag
+from liquid.extra import ExtendsTag
+from liquid.extra import MacroTag
+from liquid.extra import TranslateTag
+from liquid.extra import WithTag
+
+env = Environment()
+env.add_tag(BlockTag)
+env.add_tag(ExtendsTag)
+env.add_tag(MacroTag)
+env.add_tag(CallTag)
+env.add_tag(TranslateTag)
+env.add_tag(WithTag)
+```
 
 ## extends
 
