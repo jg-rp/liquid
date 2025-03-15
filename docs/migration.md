@@ -1,4 +1,4 @@
-This is the documentation for the latest version of Python Liquid. Python Liquid strives for 100% compatibility with [Shopify/liquid](https://github.com/Shopify/liquid), the reference implementation.
+This is the documentation for the latest version of Python Liquid ([GitHub](https://github.com/jg-rp/liquid)). Python Liquid strives for 100% compatibility with [Shopify/liquid](https://github.com/Shopify/liquid), the reference implementation.
 
 [Python Liquid2](https://github.com/jg-rp/python-liquid2), a Python implementation of Liquid2, is an alternative Liquid template engine that deliberately deviates from [Shopify/liquid](https://github.com/Shopify/liquid) in its syntax and rendering behavior.
 
@@ -6,7 +6,7 @@ Here we cover migrating from Python Liquid version 1.x to the latest version. Se
 
 ## New features
 
-Other than improved error messages and some new standard filters, there are no new features. Our goal with this release was to improve Python Liquid's API and improve compatibility with Shopify/liquid.
+Other than improved error messages and some new standard filters ([`has`](filter_reference.md#has), [`find`](filter_reference.md#find), [`find_index`](filter_reference.md#find_index) and [`reject`](filter_reference.md#reject)), there are no new features. Our goal with this release was to improve Python Liquid's API and improve compatibility with Shopify/liquid.
 
 If you're interested in new features, take a look at [Liquid2](https://jg-rp.github.io/python-liquid2/migration/#new-features).
 
@@ -58,19 +58,33 @@ env = Environment(extra=True)
 print(env.render("Hello, {{ you }}!", you="World"))
 ```
 
-### Render context
+### Template caching
 
-`liquid.Context` has been renamed to `liquid.RenderContext` and it's constructor arguments changed to require a instance of [`BoundTemplate`](api/template.md) as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
+The `cache_size` argument to `liquid.Environment` and `liquid.Template` has been removed. Template caching is now handled exclusively by template loaders. See [`CachingFileSystemLoader`](loading_templates.md/#caching-file-system-loader) and [`CachingLoaderMixin`](api/loaders.md#liquid.CachingLoaderMixin).
 
-### Caching
+### Expression caching
 
-TODO:
+The `expression_cache_size` argument to `liquid.Environment` and `liquid.Template` has been removed. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
 
 ### Template loaders
 
 [`BaseLoader.get_source`](api/loaders.md#liquid.loader.BaseLoader.get_source) and [`BaseLoader.get_source_async`](api/loaders.md#liquid.loader.BaseLoader.get_source_async) have been changed to accept an optional `context` argument and arbitrary keyword arguments as "load context". These new arguments replace methods `get_source_with_context` and `get_source_with_args`, which have been removed.
 
 The value returned from `get_source`, [`TemplateSource`](api/loaders.md#liquid.loader.TemplateSource), has also changed to be a named tuple of the form `(text, name, uptodate, matter)`. It used to be `(source, filename, uptodate, matter)`.
+
+### Template inheritance
+
+We've added methods `variables()`, `variable_paths()`, `variable_segments()`, `global_variables()`, `global_variable_paths()`, `global_variable_segments()`, `filter_names()`, `tag_names()` and their async equivalents to [`liquid.BoundTemplate`](api/template.md). These are convenience methods for reporting variables, tags and filters using static analysis.
+
+#### Custom tags
+
+We've Changed [`Node.children()`](api/ast.md#liquid.Node.children) to return a sequence of [`Node`](api/ast.md) instance only, and added [`expressions()`](api/ast.md#liquid.Node.expressions), [`template_scope()`](api/ast.md#liquid.Node.template_scope), [`block_scope()`](api/ast.md#liquid.Node.block_scope) and [`partial_scope()`](api/ast.md#liquid.Node.partial_scope) methods.
+
+See [liquid/builtin/tags](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/tags) for examples.
+
+### Render context
+
+`liquid.Context` has been renamed to `liquid.RenderContext` and it's constructor arguments changed to require a instance of [`BoundTemplate`](api/template.md) as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
 
 ### Tokens, streams and expressions
 
@@ -98,7 +112,3 @@ The `liquid.expressions` module has been removed in favour of a single [`TokenSt
 | `Environment.parse_boolean_expression`     | `liquid.builtin.expressions.BooleanExpression.parse(env, stream)`  |
 | `Environment.parse_filtered_expression`    | `liquid.builtin.expressions.FilteredExpression.parse(env, stream)` |
 | `Environment.parse_loop_expression`        | `liquid.builtin.expressions.LoopExpression.parse(env, stream)`     |
-
-### Template inheritance
-
-TODO:
