@@ -1,0 +1,12 @@
+::: liquid.extra.BaseTranslateFilter
+::: liquid.extra.Currency
+::: liquid.extra.DateTime
+::: liquid.extra.GetText
+::: liquid.extra.JSON
+::: liquid.extra.NGetText
+::: liquid.extra.NPGetText
+::: liquid.extra.Number
+::: liquid.extra.PGetText
+::: liquid.extra.Translate
+::: liquid.extra.TranslateTag
+::: liquid.extra.Unit

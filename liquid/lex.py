@@ -186,7 +186,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # 
 
         elif kind == "COMMENT":
             lstrip = bool(match.group("rsc"))
-            continue
+            value = match.group("comment")
 
         elif kind == "RAW":
             kind = TOKEN_CONTENT

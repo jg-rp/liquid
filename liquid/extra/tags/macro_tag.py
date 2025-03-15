@@ -17,7 +17,7 @@ from liquid.builtin.expressions import KeywordArgument
 from liquid.builtin.expressions import Parameter
 from liquid.builtin.expressions import parse_arguments
 from liquid.builtin.expressions import parse_name
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
 from liquid.undefined import Undefined

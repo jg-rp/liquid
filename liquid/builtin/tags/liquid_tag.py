@@ -15,7 +15,7 @@ from typing import TextIO
 from liquid.ast import BlockNode
 from liquid.ast import Node
 from liquid.exceptions import LiquidSyntaxError
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.stream import TokenStream
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF

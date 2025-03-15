@@ -55,6 +55,11 @@ class CommentTag(Tag):
 
     def parse(self, stream: TokenStream) -> CommentNode:
         """Parse tokens from _stream_ into an AST node."""
+        if stream.current.kind == "COMMENT":
+            # A `{#  #}` style comment
+            return self.node_class(stream.current, text=stream.current.value)
+
+        # A block `{% comment %}`
         token = stream.eat(TOKEN_TAG)
         text = []
 

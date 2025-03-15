@@ -9,7 +9,7 @@ from typing import TextIO
 
 from liquid.ast import BlockNode
 from liquid.ast import Node
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
 from liquid.token import Token

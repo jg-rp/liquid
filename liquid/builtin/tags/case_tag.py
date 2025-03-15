@@ -14,7 +14,7 @@ from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.expressions.logical import _eq
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_COMMA
 from liquid.token import TOKEN_EOF

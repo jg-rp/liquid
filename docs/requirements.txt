@@ -1,5 +1,6 @@
-black==24.8.0
-mkdocs-material==9.5.32
-mkdocstrings-python==1.10.8
-mkdocstrings==0.25.2
+black==25.1.0
+mkdocs-material==9.6.7
+mkdocstrings-python==1.16.2
+mkdocstrings==0.28.2
 python-dateutil==2.9.0.post0
+pygments-liquid2==0.2.0

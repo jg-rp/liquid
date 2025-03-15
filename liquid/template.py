@@ -274,7 +274,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variables][liquid2.Template.global_variables].
+        See also [global_variables][liquid.BoundTemplate.global_variables].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
@@ -291,7 +291,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variables][liquid2.Template.global_variables].
+        See also [global_variables][liquid.BoundTemplate.global_variables].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
@@ -310,7 +310,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variable_paths][liquid2.Template.global_variable_paths].
+        See also [global_variable_paths][liquid.BoundTemplate.global_variable_paths].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
@@ -330,7 +330,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variable_paths][liquid2.Template.global_variable_paths].
+        See also [global_variable_paths][liquid.BoundTemplate.global_variable_paths].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
@@ -350,7 +350,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variable_segments][liquid2.Template.global_variable_segments].
+        See [global_variable_segments][liquid.BoundTemplate.global_variable_segments].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
@@ -373,7 +373,7 @@ class BoundTemplate:
         Includes variables that are _local_ to the template, like those crated with
         `{% assign %}` and `{% capture %}`.
 
-        See also [global_variable_segments][liquid2.Template.global_variable_segments].
+        See [global_variable_segments][liquid.BoundTemplate.global_variable_segments].
 
         Args:
             include_partials: If `True`, will try to load and find variables in
