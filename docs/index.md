@@ -80,7 +80,7 @@ data = {"some": {"thing": [1, 2, 3]}}
 result = another_template.render(**data)
 ```
 
-Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFound` to be raised when running the example above.
+Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFoundError` to be raised when running the example above.
 
 ## What's next?
 

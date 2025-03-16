@@ -5,7 +5,7 @@ import pytest
 
 from liquid import Environment
 from liquid import PackageLoader
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 
 
 def test_load_from_package_root(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -13,7 +13,7 @@ def test_load_from_package_root(monkeypatch: pytest.MonkeyPatch) -> None:
     loader = PackageLoader("mock_package", package_path="")
     env = Environment(loader=loader)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("some.liquid")
 
     template = env.get_template("other.liquid")
@@ -35,7 +35,7 @@ def test_load_from_package_root_async(monkeypatch: pytest.MonkeyPatch) -> None:
     env = Environment(loader=loader)
 
     async def coro() -> None:
-        with pytest.raises(TemplateNotFound):
+        with pytest.raises(TemplateNotFoundError):
             await env.get_template_async("some.liquid")
 
         template = await env.get_template_async("other.liquid")
@@ -54,5 +54,5 @@ def test_dont_escape_package_root(monkeypatch: pytest.MonkeyPatch) -> None:
     loader = PackageLoader("mock_package", package_path="")
     env = Environment(loader=loader)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("../secret.liquid")

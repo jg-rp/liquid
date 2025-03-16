@@ -8,8 +8,8 @@ import pytest
 
 from liquid import Environment
 from liquid.builtin.filters.string import base64_encode
-from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import LiquidError
 
 
 @dataclass
@@ -73,7 +73,7 @@ TEST_CASES = [
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_base64_encode_filter(case: Case) -> None:
-    if isclass(case.expect) and issubclass(case.expect, Error):
+    if isclass(case.expect) and issubclass(case.expect, LiquidError):
         with pytest.raises(case.expect):
             base64_encode(case.val, *case.args, **case.kwargs)
     else:

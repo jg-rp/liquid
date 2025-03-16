@@ -5,7 +5,7 @@ from typing import Optional
 
 from liquid import DictLoader
 from liquid import Environment
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.loader import TemplateSource
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class MatterDictLoader(DictLoader):
         try:
             source = self.templates[template_name]
         except KeyError as err:
-            raise TemplateNotFound(template_name) from err
+            raise TemplateNotFoundError(template_name) from err
 
         return TemplateSource(
             text=source,

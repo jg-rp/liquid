@@ -82,6 +82,14 @@ We've Changed [`Node.children()`](api/ast.md#liquid.Node.children) to return a s
 
 See [liquid/builtin/tags](https://github.com/jg-rp/liquid/tree/main/liquid/builtin/tags) for examples.
 
+### Exceptions
+
+`liquid.exceptions.Error` has been renamed to `liquid.exceptions.LiquidError`.
+
+`liquid.exceptions.TemplateNotFound` has been renamed to `liquid.exceptions.TemplateNotFoundError`.
+
+`liquid.exceptions.NoSuchFilterFunc` has been renamed to `liquid.exceptions.UnknownFilterError`.
+
 ### Render context
 
 `liquid.Context` has been renamed to `liquid.RenderContext` and it's constructor arguments changed to require a instance of [`BoundTemplate`](api/template.md) as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.

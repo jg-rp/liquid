@@ -22,7 +22,7 @@ from liquid import Environment
 from liquid import FileSystemLoader
 from liquid import RenderContext
 from liquid import Template
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.loader import TemplateSource
 from liquid.template import BoundTemplate
 
@@ -64,7 +64,7 @@ def test_template_not_found_async() -> None:
     async def coro() -> BoundTemplate:
         return await env.get_template_async("nosuchthing.liquid")
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         asyncio.run(coro())
 
 
@@ -298,7 +298,7 @@ class AsyncMatterDictLoader(DictLoader):
         try:
             source = self.templates[template_name]
         except KeyError as err:
-            raise TemplateNotFound(template_name) from err
+            raise TemplateNotFoundError(template_name) from err
 
         return TemplateSource(
             text=source,
@@ -392,7 +392,7 @@ def test_choose_between_loaders() -> None:
         template = await env.get_template_async("b")
         assert await template.render_async() == "the quick brown fox"
 
-        with pytest.raises(TemplateNotFound):
+        with pytest.raises(TemplateNotFoundError):
             await env.get_template_async("c")
 
     asyncio.run(coro())

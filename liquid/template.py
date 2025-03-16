@@ -17,7 +17,7 @@ from typing import Union
 
 from .context import FutureContext
 from .context import RenderContext
-from .exceptions import Error
+from .exceptions import LiquidError
 from .exceptions import LiquidInterrupt
 from .exceptions import LiquidSyntaxError
 from .exceptions import StopRender
@@ -170,7 +170,7 @@ class BoundTemplate:
                         raise
                 except StopRender:
                     break
-                except Error as err:
+                except LiquidError as err:
                     # Raise or warn according to the current mode.
                     self.env.error(err, token=node.token)
 
@@ -205,7 +205,7 @@ class BoundTemplate:
                         raise
                 except StopRender:
                     break
-                except Error as err:
+                except LiquidError as err:
                     # Raise or warn according to the current mode.
                     self.env.error(err, token=node.token)
 
@@ -216,7 +216,7 @@ class BoundTemplate:
 
         uptodate = self.uptodate()
         if not isinstance(uptodate, bool):
-            raise Error(
+            raise LiquidError(
                 f"expected a boolean from uptodate, found {type(uptodate).__name__}",
                 token=None,
             )

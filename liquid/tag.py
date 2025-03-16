@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from .ast import IllegalNode
 from .ast import Node
-from .exceptions import Error
+from .exceptions import LiquidError
 from .parser import eat_block
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class Tag(ABC):
         """Wraps `Tag.parse`, possibly returning an `IllegalNode`."""
         try:
             return self.parse(stream)
-        except Error as err:
+        except LiquidError as err:
             token = stream.current
             if not err.token:
                 err.token = token

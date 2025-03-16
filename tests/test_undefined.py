@@ -13,8 +13,8 @@ from liquid import Environment
 from liquid import StrictDefaultUndefined
 from liquid import StrictUndefined
 from liquid import Undefined
-from liquid.exceptions import NoSuchFilterFunc
 from liquid.exceptions import UndefinedError
+from liquid.exceptions import UnknownFilterError
 
 
 @dataclass
@@ -428,14 +428,14 @@ def test_strict_filters(case: Case) -> None:
     env = Environment(strict_filters=True)
     template = env.from_string(case.template)
 
-    with pytest.raises(NoSuchFilterFunc, match=case.expect):
+    with pytest.raises(UnknownFilterError, match=case.expect):
         template.render()
 
     # And render async
     async def coro(template: BoundTemplate) -> str:
         return await template.render_async()
 
-    with pytest.raises(NoSuchFilterFunc):
+    with pytest.raises(UnknownFilterError):
         asyncio.run(coro(template))
 
 

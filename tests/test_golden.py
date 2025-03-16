@@ -6,7 +6,7 @@ from liquid import DictLoader
 from liquid import Environment
 from liquid import Mode
 from liquid import golden
-from liquid.exceptions import Error
+from liquid.exceptions import LiquidError
 from liquid.golden.case import Case
 from liquid.template import AwareBoundTemplate
 
@@ -28,7 +28,7 @@ def test_golden_liquid(case: tuple[str, Case]) -> None:
     env.template_class = AwareBoundTemplate
 
     if case_.error:
-        with pytest.raises(Error):
+        with pytest.raises(LiquidError):
             env.from_string(case_.template).render()
     else:
         assert env.from_string(case_.template).render() == case_.expect
@@ -49,7 +49,7 @@ def test_golden_liquid_async(case: tuple[str, Case]) -> None:
         return await template.render_async()
 
     if case_.error:
-        with pytest.raises(Error):
+        with pytest.raises(LiquidError):
             asyncio.run(coro())
     else:
         assert asyncio.run(coro()) == case_.expect

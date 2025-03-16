@@ -18,7 +18,7 @@ from . import builtin
 from .analyze_tags import InnerTagMap
 from .analyze_tags import TagAnalysis
 from .builtin import DictLoader
-from .exceptions import Error
+from .exceptions import LiquidError
 from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
 from .exceptions import lookup_warning
@@ -279,7 +279,7 @@ class Environment:
             err.template_name = path
             raise err
         except Exception as err:  # noqa: BLE001
-            raise Error("unexpected liquid parsing error", token=None) from err
+            raise LiquidError("unexpected liquid parsing error", token=None) from err
         return self.template_class(
             env=self,
             name=name,
@@ -351,7 +351,7 @@ class Environment:
                 context=context,
                 **kwargs,
             )
-        except Error as err:
+        except LiquidError as err:
             if not err.template_name:
                 err.template_name = name
             raise
@@ -373,7 +373,7 @@ class Environment:
                 context=context,
                 **kwargs,
             )
-        except Error as err:
+        except LiquidError as err:
             if not err.template_name:
                 err.template_name = name
             raise
@@ -472,12 +472,12 @@ class Environment:
 
     def error(
         self,
-        exc: Union[Type[Error], Error],
+        exc: Union[Type[LiquidError], LiquidError],
         msg: Optional[str] = None,
         token: Optional[Token] = None,
     ) -> None:
         """Raise, warn or ignore the given exception according to the current mode."""
-        if not isinstance(exc, Error):
+        if not isinstance(exc, LiquidError):
             exc = exc(msg, token=token)
         elif not exc.token:
             exc.token = token

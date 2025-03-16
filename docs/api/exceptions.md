@@ -1,4 +1,4 @@
-::: liquid.exceptions.Error
+::: liquid.exceptions.LiquidError
 ::: liquid.exceptions.BreakLoop
 ::: liquid.exceptions.ContextDepthError
 ::: liquid.exceptions.ContinueLoop
@@ -15,6 +15,6 @@
 ::: liquid.exceptions.ResourceLimitError
 ::: liquid.exceptions.StopRender
 ::: liquid.exceptions.TemplateInheritanceError
-::: liquid.exceptions.TemplateNotFound
+::: liquid.exceptions.TemplateNotFoundError
 ::: liquid.exceptions.UndefinedError
-::: liquid.exceptions.NoSuchFilterFunc
+::: liquid.exceptions.UnknownFilterError

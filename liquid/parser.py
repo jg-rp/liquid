@@ -9,7 +9,7 @@ from typing import Iterator
 
 from .ast import BlockNode
 from .ast import Node
-from .exceptions import Error
+from .exceptions import LiquidError
 from .token import TOKEN_COMMENT
 from .token import TOKEN_CONTENT
 from .token import TOKEN_DOC
@@ -56,7 +56,7 @@ class Parser:
                     yield tags.get(TOKEN_COMMENT, illegal).get_node(stream)
                 else:
                     yield content.get_node(stream)
-            except Error as err:
+            except LiquidError as err:
                 self.env.error(err, token=stream.current)
 
             next(stream)
@@ -87,7 +87,7 @@ class Parser:
                     nodes.append(tags.get(TOKEN_COMMENT, illegal).get_node(stream))
                 else:
                     nodes.append(content.get_node(stream))
-            except Error as err:
+            except LiquidError as err:
                 self.env.error(err, token=stream.current)
 
             next(stream)

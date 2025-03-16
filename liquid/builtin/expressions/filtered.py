@@ -9,7 +9,7 @@ from liquid import Mode
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
-from liquid.exceptions import NoSuchFilterFunc
+from liquid.exceptions import UnknownFilterError
 from liquid.expression import Expression
 from liquid.token import TOKEN_ASSIGN
 from liquid.token import TOKEN_COLON
@@ -257,7 +257,7 @@ class Filter:
         try:
             func = env.filters[self.name]
         except KeyError as err:
-            raise NoSuchFilterFunc(
+            raise UnknownFilterError(
                 f"unknown filter '{self.name}'", token=self.token
             ) from err
 

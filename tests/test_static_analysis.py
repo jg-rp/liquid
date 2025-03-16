@@ -10,7 +10,7 @@ import pytest
 
 from liquid import Environment
 from liquid.builtin import DictLoader
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.span import Span
 from liquid.static_analysis import Variable
 
@@ -555,7 +555,7 @@ def test_analyze_include_with_variable_name(env: Environment) -> None:
     source = "{% include b %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
@@ -563,7 +563,7 @@ def test_analyze_include_string_template_not_found(env: Environment) -> None:
     source = "{% include 'nosuchthing' %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
@@ -707,7 +707,7 @@ def test_analyze_render_template_not_found(env: Environment) -> None:
     source = "{% render 'nosuchthing' %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
