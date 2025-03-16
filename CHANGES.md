@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 2.0.0 (unreleased)
+## Version 2.0.0
 
 This is a major release with several breaking changes. As well as API changes listed below, we:
 
