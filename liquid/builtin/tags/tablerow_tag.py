@@ -17,7 +17,7 @@ from liquid.builtin.expressions import LoopExpression
 from liquid.exceptions import BreakLoop
 from liquid.exceptions import ContinueLoop
 from liquid.limits import to_int
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_TAG
 from liquid.token import Token

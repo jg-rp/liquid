@@ -10,8 +10,8 @@ import pytest
 
 from liquid import Environment
 from liquid.builtin.filters.misc import date
-from liquid.exceptions import Error
 from liquid.exceptions import FilterArgumentError
+from liquid.exceptions import LiquidError
 
 
 @dataclass
@@ -97,7 +97,7 @@ TEST_CASES = [
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_date_filter(case: Case) -> None:
     date_ = partial(date, environment=ENV)
-    if isclass(case.expect) and issubclass(case.expect, Error):
+    if isclass(case.expect) and issubclass(case.expect, LiquidError):
         with pytest.raises(case.expect):
             date_(case.val, *case.args, **case.kwargs)
     else:

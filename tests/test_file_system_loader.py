@@ -9,7 +9,7 @@ from liquid import BoundTemplate
 from liquid import CachingFileSystemLoader
 from liquid import Environment
 from liquid import FileSystemLoader
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 
 
 def test_load_template() -> None:
@@ -40,7 +40,7 @@ def test_load_template_async() -> None:
 
 def test_template_not_found() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("nosuchthing.liquid")
 
 
@@ -50,13 +50,13 @@ def test_template_not_found_async() -> None:
     async def coro() -> BoundTemplate:
         return await env.get_template_async("nosuchthing.liquid")
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         asyncio.run(coro())
 
 
 def test_no_such_search_path() -> None:
     env = Environment(loader=FileSystemLoader("no/such/thing/"))
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("index.liquid")
 
 
@@ -97,7 +97,7 @@ def test_default_file_extension() -> None:
         == "tests/fixtures/001/templates/index.liquid"
     )
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("main")
 
 
@@ -124,7 +124,7 @@ def test_set_default_file_extension() -> None:
 
 def test_stay_in_search_path() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/snippets"))
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         env.get_template("../index.liquid")
 
 

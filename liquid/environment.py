@@ -18,14 +18,14 @@ from . import builtin
 from .analyze_tags import InnerTagMap
 from .analyze_tags import TagAnalysis
 from .builtin import DictLoader
-from .exceptions import Error
+from .exceptions import LiquidError
 from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
 from .exceptions import lookup_warning
 from .extra import add_tags_and_filters as register_extra_tags_and_filters
 from .lex import get_lexer
 from .mode import Mode
-from .parse import get_parser
+from .parser import get_parser
 from .stream import TokenStream
 from .template import BoundTemplate
 from .undefined import Undefined
@@ -175,24 +175,16 @@ class Environment:
             self.comment_start_string = ""
             self.comment_end_string = ""
 
-        # The undefined type. When an identifier can not be resolved, the returned value
-        # is `Undefined` or a subclass of `Undefined`.
         self.undefined: Type[Undefined] = undefined
-
-        # Indicates if an undefined filter should raise an exception or be ignored.
         self.strict_filters: bool = strict_filters
-
-        # Indicates if autoescape is enabled.
         self.autoescape: bool = autoescape
-
-        # Tag register.
-        self.tags: dict[str, Tag] = {}
-
-        # Filter register.
-        self.filters: dict[str, Callable[..., Any]] = {}
-
-        # tolerance mode
         self.mode: Mode = tolerance
+
+        self.tags: dict[str, Tag] = {}
+        """The environment's tag register, mapping tag names to instances of `Tag`."""
+
+        self.filters: dict[str, Callable[..., Any]] = {}
+        """The environment's filter register, mapping filter names to callables."""
 
         self.setup_tags_and_filters(extra=extra)
 
@@ -287,7 +279,7 @@ class Environment:
             err.template_name = path
             raise err
         except Exception as err:  # noqa: BLE001
-            raise Error("unexpected liquid parsing error", token=None) from err
+            raise LiquidError("unexpected liquid parsing error", token=None) from err
         return self.template_class(
             env=self,
             name=name,
@@ -297,7 +289,28 @@ class Environment:
             matter=matter,
         )
 
-    parse = from_string
+    def parse(
+        self,
+        source: str,
+        name: str = "",
+        path: Optional[Union[str, Path]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        matter: Optional[Mapping[str, object]] = None,
+    ) -> BoundTemplate:
+        """Parse the given string as a liquid template.
+
+        Args:
+            source: The liquid template source code.
+            name: Optional name of the template. Available as `Template.name`.
+            path: Optional path or identifier to the origin of the template.
+            globals: An optional mapping of render context variables attached
+                to the resulting template.
+            matter: Optional mapping of render context variables associated
+                with the template. Could be "front matter" or other meta data.
+        """
+        return self.from_string(
+            source, name=name, path=path, globals=globals, matter=matter
+        )
 
     def render(self, source: str, **data: object) -> str:
         """Parse and render source text."""
@@ -338,7 +351,7 @@ class Environment:
                 context=context,
                 **kwargs,
             )
-        except Error as err:
+        except LiquidError as err:
             if not err.template_name:
                 err.template_name = name
             raise
@@ -360,7 +373,7 @@ class Environment:
                 context=context,
                 **kwargs,
             )
-        except Error as err:
+        except LiquidError as err:
             if not err.template_name:
                 err.template_name = name
             raise
@@ -459,12 +472,12 @@ class Environment:
 
     def error(
         self,
-        exc: Union[Type[Error], Error],
+        exc: Union[Type[LiquidError], LiquidError],
         msg: Optional[str] = None,
         token: Optional[Token] = None,
     ) -> None:
         """Raise, warn or ignore the given exception according to the current mode."""
-        if not isinstance(exc, Error):
+        if not isinstance(exc, LiquidError):
             exc = exc(msg, token=token)
         elif not exc.token:
             exc.token = token

@@ -8,7 +8,7 @@ from typing import Union
 from .token import Token
 
 
-class Error(Exception):
+class LiquidError(Exception):
     """Base class for all Liquid exceptions."""
 
     def __init__(
@@ -116,15 +116,15 @@ class StopRender(Exception):
     """
 
 
-class LiquidEnvironmentError(Error):
+class LiquidEnvironmentError(LiquidError):
     """An exception raised due to a misconfigured environment."""
 
 
-class LiquidSyntaxError(Error):
+class LiquidSyntaxError(LiquidError):
     """Exception raised when there is a parser error."""
 
 
-class TemplateInheritanceError(Error):
+class TemplateInheritanceError(LiquidError):
     """An exceptions raised when template inheritance tags are used incorrectly.
 
     This could occur when parsing a template or at render time.
@@ -135,35 +135,35 @@ class RequiredBlockError(TemplateInheritanceError):
     """An exception raised when a required block has not been overridden."""
 
 
-class LiquidTypeError(Error):
+class LiquidTypeError(LiquidError):
     """Exception raised when an error occurs at render time."""
 
 
-class DisabledTagError(Error):
+class DisabledTagError(LiquidError):
     """Exception raised when an attempt is made to render a disabled tag."""
 
 
-class NoSuchFilterFunc(Error):
+class UnknownFilterError(LiquidError):
     """Exception raised when a filter lookup fails."""
 
 
-class FilterError(Error):
+class FilterError(LiquidError):
     """Exception raised when a filter fails."""
 
 
-class FilterArgumentError(Error):
+class FilterArgumentError(LiquidError):
     """Exception raised when a filter's arguments are invalid."""
 
 
-class FilterValueError(Error):
+class FilterValueError(LiquidError):
     """Exception raised when a filters value is invalid."""
 
 
-class FilterItemTypeError(Error):
+class FilterItemTypeError(LiquidError):
     """Exception raised when an array item causes a type error when filtered."""
 
 
-class TemplateNotFound(Error):
+class TemplateNotFoundError(LiquidError):
     """Exception raised when a template could not be found."""
 
     def __init__(
@@ -186,7 +186,7 @@ class TemplateNotFound(Error):
         return None
 
 
-class ResourceLimitError(Error):
+class ResourceLimitError(LiquidError):
     """Base class for exceptions relating to resource limits."""
 
 
@@ -209,6 +209,22 @@ class LocalNamespaceLimitError(ResourceLimitError):
     """Exception raised when a local namespace limit has been exceeded."""
 
 
+class TranslationError(LiquidError):
+    """Base exception for translation errors."""
+
+
+class TranslationSyntaxError(LiquidSyntaxError):
+    """Exception raised when a syntax error is found within a translation block."""
+
+
+class TranslationValueError(TranslationError):
+    """Exception raised when message interpolation fails with a ValueError."""
+
+
+class TranslationKeyError(TranslationError):
+    """Exception raised when message interpolation fails with a KeyError."""
+
+
 # LiquidValueError inheriting from LiquidSyntaxError does not make complete sense.
 # The alternative is to have multiple to_int functions that raise more appropriate
 # exceptions depending on whether we are parsing or rendering when attempting to
@@ -219,7 +235,7 @@ class LiquidValueError(LiquidSyntaxError):
     """Exception raised when a cast from str to int exceeds the length limit."""
 
 
-class UndefinedError(Error):
+class UndefinedError(LiquidError):
     """Exception raised by the StrictUndefined type."""
 
 
@@ -231,7 +247,7 @@ class ContinueLoop(LiquidInterrupt):
     """Exception raised when a ContinueNode is rendered."""
 
 
-class TemplateTraversalError(Error):
+class TemplateTraversalError(LiquidError):
     """Exception raised when an AST node or expression can not be visited."""
 
 
@@ -251,15 +267,15 @@ class FilterWarning(LiquidWarning):
     """Replaces filter exceptions when in WARN mode."""
 
 
-WARNINGS: dict[Type[Error], Type[LiquidWarning]] = {
+WARNINGS: dict[Type[LiquidError], Type[LiquidWarning]] = {
     LiquidSyntaxError: LiquidSyntaxWarning,
     LiquidTypeError: LiquidTypeWarning,
     FilterArgumentError: FilterWarning,
-    NoSuchFilterFunc: FilterWarning,
+    UnknownFilterError: FilterWarning,
 }
 
 
-def lookup_warning(exc: Type[Error]) -> Type[LiquidWarning]:
+def lookup_warning(exc: Type[LiquidError]) -> Type[LiquidWarning]:
     """Return a warning equivalent of the given exception."""
     return WARNINGS.get(exc, LiquidWarning)
 

@@ -1,4 +1,5 @@
 """A JSON filter."""
+
 import json
 from typing import Any
 from typing import Callable
@@ -15,8 +16,6 @@ class JSON:
         default: A function passed to `json.dumps`. This function is called
             in the event that the JSONEncoder does not know how to serialize an
             object. Defaults to `None`.
-        strip_tags: If `True`, HTML tags will be removed from the resulting
-            JSON formatted string. Defaults to `True`.
     """
 
     name = "json"

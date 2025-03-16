@@ -11,7 +11,7 @@ from liquid.ast import BlockNode
 from liquid.ast import Node
 from liquid.builtin.expressions import Identifier
 from liquid.builtin.expressions import KeywordArgument
-from liquid.parse import get_parser
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_TAG
@@ -19,6 +19,7 @@ from liquid.token import Token
 
 if TYPE_CHECKING:
     from liquid.context import RenderContext
+    from liquid.expression import Expression
     from liquid.stream import TokenStream
 
 TAG_WITH = sys.intern("with")
@@ -55,6 +56,10 @@ class WithNode(Node):
     ) -> Iterable[Node]:
         """Return this node's children."""
         yield self.block
+
+    def expressions(self) -> Iterable[Expression]:
+        """Return this node's expressions."""
+        yield from (arg.value for arg in self.args)
 
     def block_scope(self) -> Iterable[Identifier]:
         """Return variables this node adds to the node's block scope."""

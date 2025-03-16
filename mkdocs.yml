@@ -4,20 +4,14 @@ site_description: A Python engine for the Liquid template language.
 theme:
   name: "material"
   palette:
-    - scheme: "default"
-      media: "(prefers-color-scheme: light)"
-      toggle:
-        icon: "material/weather-sunny"
-        name: "Switch to dark mode"
-    - scheme: "slate"
-      media: "(prefers-color-scheme: dark)"
-      primary: "blue"
-      toggle:
-        icon: "material/weather-night"
-        name: "Switch to light mode"
+    scheme: default
+    primary: black
   features:
-    - navigation.sections
     - content.code.copy
+    - navigation.top
+    - navigation.tabs
+    - navigation.tracking
+    - navigation.expand
   logo: img/droplet_white_liquid.svg
   favicon: img/favicon.ico
   custom_dir: docs/.overrides
@@ -33,24 +27,51 @@ plugins:
       handlers:
         python:
           options:
-            heading_level: 2
             show_source: false
             show_signature_annotations: true
             show_root_heading: true
             separate_signature: true
             docstring_section_style: "spacy"
-            merge_init_into_class: true
-            show_root_full_path: false
   - autorefs
 
 nav:
-  - Introduction: "index.md"
-  - API Reference:
-      - Rendering Templates: "api.md"
-      - Template Analysis: "analysis.md"
-      - Template Loaders: "loaders.md"
-      - Undefined Types: "undefined.md"
-      - Exceptions: "exceptions.md"
+  - Home:
+      - Introduction: "index.md"
+      - Liquid Syntax: "syntax.md"
+      - Rendering templates: "rendering_templates.md"
+      - Liquid environments: "environment.md"
+      - Loading templates: "loading_templates.md"
+      - Render context data: "render_context.md"
+      - Variables, types and drops: "variables_and_drops.md"
+      - Internationalization and localization: "babel.md"
+      - Static template analysis: "static_analysis.md"
+      - Custom filters: "custom_filters.md"
+      - Custom tags: "custom_tags.md"
+      - Known issues: "known_issues.md"
+      - Migration guide: "migration.md"
+  - Tag reference:
+      - Default tags: "tag_reference.md"
+      - Extra tags: "optional_tags.md"
+  - Filter reference:
+      - Default filters: "filter_reference.md"
+      - Extra filters: "optional_filters.md"
+  - API reference:
+      - Convenience functions: "api/convenience.md"
+      - Environment: "api/environment.md"
+      - Template: "api/template.md"
+      - Loaders: "api/loaders.md"
+      - Exceptions: "api/exceptions.md"
+      - Builtin: "api/builtin.md"
+      - Extra: "api/extra.md"
+      - Messages: "api/messages.md"
+      - AST: "api/ast.md"
+      - Parser: "api/parser.md"
+      - Expression: "api/expression.md"
+      - Render context: "api/render_context.md"
+      - Filter helpers: "api/filter.md"
+      - Tag: "api/tag.md"
+      - Undefined: "api/undefined.md"
+      - Tokens: "api/tokens.md"
 
 markdown_extensions:
   - admonition

@@ -2,22 +2,23 @@
 
 ## Version 2.0.0 (unreleased)
 
-This major release:
+This is a major release with several breaking changes. As well as API changes listed below, we:
 
-- Drops support for Python version 3.7 and 3.8.
-- Introduces API changes [discussed here](https://github.com/jg-rp/liquid/discussions/137).
+- Drop support for Python version 3.7 and 3.8.
 - Promotes rendering behavior from `liquid.future.Environment` to be the default, so as to improve Shopify/liquid compatibility by default.
-- Fixes variable/identifier/path parsing described in [issue #39](https://github.com/jg-rp/liquid/issues/39).
-- Improves Liquid syntax error messages and exposes source index, line numbers and column numbers through methods on Liquid exceptions. See [#53](https://github.com/jg-rp/liquid/issues/53).
-- Changes comment tag parsing to better match Shopify/Liquid. See [#133](https://github.com/jg-rp/liquid/issues/133).
-- Removes `BoundTemplate.analyze_with_context()`. Shout if you need contextual analysis and we'll restore this feature.
-- Removes the `cache_size` argument to `liquid.Environment` and `liquid.Template`. Template caching is now handled by template loaders.
-- Removes the `expression_cache_size` argument to `liquid.Environment` and `liquid.Template`. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
-- Makes markupsafe>=3 a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
-- Adds new filters `reject`, `has`, `find` and `find_index`.
-- Adds the new `doc` tag.
+- Fixe variable/identifier/path parsing described in [issue #39](https://github.com/jg-rp/liquid/issues/39).
+- Improve Liquid syntax error messages and exposes source index, line numbers and column numbers through methods on Liquid exceptions. See [#53](https://github.com/jg-rp/liquid/issues/53).
+- Change comment tag parsing to better match Shopify/Liquid. See [#133](https://github.com/jg-rp/liquid/issues/133).
+- Remove `BoundTemplate.analyze_with_context()`. Shout if you need contextual analysis and we'll restore this feature.
+- Remove the `cache_size` argument to `liquid.Environment` and `liquid.Template`. Template caching is now handled by template loaders.
+- Remove the `expression_cache_size` argument to `liquid.Environment` and `liquid.Template`. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
+- Make markupsafe>=3 a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
+- Add new filters `reject`, `has`, `find` and `find_index`.
+- Add the new `doc` tag.
 
 ### API changes
+
+Also see the [migration guide].
 
 #### Miscellaneous
 
@@ -27,6 +28,9 @@ This major release:
 - Added `liquid.Environment.render(source, **data)` and `liquid.Environment.render_async(source, **data)`. These are convenience methods equivalent to `liquid.Environment.from_string(source).render(**data)`.
 - Renamed `liquid.Context` to `liquid.RenderContext`.
 - Change the `liquid.RenderContext` constructor (previously `liquid.Context`) to require an instance of `BoundTemplate` as its only positional argument instead of an instance of `Environment`. All other arguments are now keyword only.
+- Renamed `liquid.exceptions.Error` to `liquid.exceptions.LiquidError`.
+- Renamed `liquid.exceptions.TemplateNotFound` to `liquid.exceptions.TemplateNotFoundError`.
+- Renamed `liquid.exceptions.NoSuchFilterFunc` to `liquid.exceptions.UnknownFilterError`.
 
 #### Template loaders
 

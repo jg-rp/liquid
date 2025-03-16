@@ -1,6 +1,6 @@
 # Contributing to Python Liquid
 
-Hi. Your contributions and questions are always welcome. Feel free to ask questions, report bugs or request features on the [issue tracker](https://github.com/jg-rp/liquid/issues) or on [Github Discussions](https://github.com/jg-rp/liquid/discussions).
+Your contributions and questions are always welcome. Feel free to ask questions, report bugs or request features on the [issue tracker](https://github.com/jg-rp/liquid/issues) or on [Github Discussions](https://github.com/jg-rp/liquid/discussions).
 
 **Table of contents**
 
@@ -52,9 +52,7 @@ Then open `htmlcov/index.html` in your browser.
 
 ## Documentation
 
-[Documentation](https://jg-rp.github.io/liquid/) is built using [Docusaurus](https://docusaurus.io/). Find the source in the [docs branch](https://github.com/jg-rp/liquid/tree/docs) of this repository.
-
-The `docs` folder in the root of this repository contains docs generated from Python docstrings, hosted on [Read the Docs](https://liquid.readthedocs.io/en/latest/). The plan is to mirror this API documentation to the Docusaurus site with the help of [Griffe](https://mkdocstrings.github.io/griffe/).
+[Documentation](https://jg-rp.github.io/liquid/) is built using [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/getting-started/). Find the source in the `docs` folder of this repository.
 
 ## Style Guides
 
@@ -64,6 +62,6 @@ There are no hard rules for git commit messages, although you might like to indi
 
 ### Python Style
 
-All Python files are formatted using [Black](https://github.com/psf/black), with its default configuration.
+All Python files are formatted using [Ruff](https://github.com/astral-sh/ruff), configured in `pyproject.toml`
 
 Docstrings must use [Google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).

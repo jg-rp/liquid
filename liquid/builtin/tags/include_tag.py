@@ -18,7 +18,7 @@ from liquid.builtin.expressions import Literal
 from liquid.builtin.expressions import Path
 from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_string_or_path
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_FOR
@@ -73,7 +73,7 @@ class IncludeNode(Node):
             template = context.env.get_template(
                 str(name), context=context, tag=self.tag
             )
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = self.name.token
             err.template_name = context.template.full_name()
             raise
@@ -122,7 +122,7 @@ class IncludeNode(Node):
             template = await context.env.get_template_async(
                 str(name), context=context, tag=self.tag
             )
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = self.name.token
             err.template_name = context.template.full_name()
             raise
@@ -164,7 +164,7 @@ class IncludeNode(Node):
                     str(name), context=static_context, tag=self.tag
                 )
                 yield from template.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise
@@ -180,7 +180,7 @@ class IncludeNode(Node):
                     str(name), context=static_context, tag=self.tag
                 )
                 return template.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise

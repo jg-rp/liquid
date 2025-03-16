@@ -21,7 +21,7 @@ from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.tag import Tag
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_FOR
@@ -81,7 +81,7 @@ class RenderNode(Node):
             template = context.env.get_template(
                 self.name.value, context=context, tag=self.tag
             )
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = self.name.token
             err.template_name = context.template.full_name()
             raise
@@ -149,7 +149,7 @@ class RenderNode(Node):
             template = await context.env.get_template_async(
                 self.name.value, context=context, tag=self.tag
             )
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = self.name.token
             err.template_name = context.template.full_name()
             raise
@@ -222,7 +222,7 @@ class RenderNode(Node):
                     str(name), context=static_context, tag=self.tag
                 )
                 yield from template.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise
@@ -238,7 +238,7 @@ class RenderNode(Node):
                     str(name), context=static_context, tag=self.tag
                 )
                 return template.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise

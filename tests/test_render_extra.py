@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from liquid import DictLoader
 from liquid import golden
 from liquid.environment import Environment
-from liquid.exceptions import Error
+from liquid.exceptions import LiquidError
 from liquid.extra import WithTag
 from liquid.golden.case import Case
 
@@ -35,7 +35,7 @@ class BaseRenderTestCase(unittest.TestCase):
 
             with self.subTest(msg=case.description):
                 if case.error:
-                    with self.assertRaises(Error):
+                    with self.assertRaises(LiquidError):
                         template = self.env.from_string(
                             case.template, globals=case.globals
                         )
@@ -53,7 +53,7 @@ class BaseRenderTestCase(unittest.TestCase):
 
             with self.subTest(msg=case.description, asynchronous=True):
                 if case.error:
-                    with self.assertRaises(Error):
+                    with self.assertRaises(LiquidError):
                         template = self.env.from_string(
                             case.template, globals=case.globals
                         )

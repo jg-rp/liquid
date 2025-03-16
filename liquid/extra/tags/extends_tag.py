@@ -24,8 +24,8 @@ from liquid.builtin.expressions import parse_name
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
 from liquid.exceptions import TemplateInheritanceError
-from liquid.exceptions import TemplateNotFound
-from liquid.parse import get_parser
+from liquid.exceptions import TemplateNotFoundError
+from liquid.parser import get_parser
 from liquid.tag import Tag
 from liquid.token import TOKEN_EOF
 from liquid.token import TOKEN_EXPRESSION
@@ -83,7 +83,7 @@ class ExtendsNode(Node):
                     self.name, context=static_context, tag=self.tag
                 )
                 yield from parent.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise
@@ -98,7 +98,7 @@ class ExtendsNode(Node):
                     self.name, context=static_context, tag=self.tag
                 )
                 return parent.nodes
-            except TemplateNotFound as err:
+            except TemplateNotFoundError as err:
                 err.token = self.name.token
                 err.template_name = static_context.template.full_name()
                 raise
@@ -425,7 +425,7 @@ def _build_block_stacks(
 
         try:
             return context.env.get_template(extends_node.name, context=context, tag=tag)
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = extends_node.name.token
             err.template_name = template.full_name()
             raise
@@ -480,7 +480,7 @@ async def _build_block_stacks_async(
             return await context.env.get_template_async(
                 extends_node.name, context=context, tag=tag
             )
-        except TemplateNotFound as err:
+        except TemplateNotFoundError as err:
             err.token = extends_node.name.token
             err.template_name = template.full_name()
             raise

@@ -26,10 +26,10 @@ from typing import TextIO
 from typing import Union
 
 from .exceptions import ContextDepthError
-from .exceptions import Error
+from .exceptions import LiquidError
 from .exceptions import LocalNamespaceLimitError
 from .exceptions import LoopIterationLimitError
-from .exceptions import NoSuchFilterFunc
+from .exceptions import UnknownFilterError
 from .exceptions import lookup_warning
 from .mode import Mode
 from .output import LimitedStringIO
@@ -270,7 +270,7 @@ class RenderContext:
         except KeyError as err:
             if not self.env.strict_filters:
                 return _no_op_filter
-            raise NoSuchFilterFunc(f"unknown filter '{name}'", token=token) from err
+            raise UnknownFilterError(f"unknown filter '{name}'", token=token) from err
 
         kwargs: dict[str, Any] = {}
 
@@ -446,7 +446,7 @@ class RenderContext:
 
         return ctx
 
-    def error(self, exc: Error) -> None:
+    def error(self, exc: LiquidError) -> None:
         """Ignore, raise or convert the given exception to a warning."""
         if self.env.mode == Mode.STRICT:
             raise exc

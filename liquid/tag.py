@@ -6,14 +6,14 @@ from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from liquid.ast import IllegalNode
-from liquid.ast import Node
-from liquid.exceptions import Error
-from liquid.parse import eat_block
+from .ast import IllegalNode
+from .ast import Node
+from .exceptions import LiquidError
+from .parser import eat_block
 
 if TYPE_CHECKING:
-    from liquid import Environment
-    from liquid.stream import TokenStream
+    from .environment import Environment
+    from .stream import TokenStream
 
 
 class Tag(ABC):
@@ -30,7 +30,7 @@ class Tag(ABC):
         """Wraps `Tag.parse`, possibly returning an `IllegalNode`."""
         try:
             return self.parse(stream)
-        except Error as err:
+        except LiquidError as err:
             token = stream.current
             if not err.token:
                 err.token = token

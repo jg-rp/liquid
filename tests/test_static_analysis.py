@@ -10,7 +10,7 @@ import pytest
 
 from liquid import Environment
 from liquid.builtin import DictLoader
-from liquid.exceptions import TemplateNotFound
+from liquid.exceptions import TemplateNotFoundError
 from liquid.span import Span
 from liquid.static_analysis import Variable
 
@@ -555,7 +555,7 @@ def test_analyze_include_with_variable_name(env: Environment) -> None:
     source = "{% include b %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
@@ -563,7 +563,7 @@ def test_analyze_include_string_template_not_found(env: Environment) -> None:
     source = "{% include 'nosuchthing' %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
@@ -707,7 +707,7 @@ def test_analyze_render_template_not_found(env: Environment) -> None:
     source = "{% render 'nosuchthing' %}{{ x }}"
     template = env.from_string(source)
 
-    with pytest.raises(TemplateNotFound):
+    with pytest.raises(TemplateNotFoundError):
         template.analyze()
 
 
@@ -903,30 +903,29 @@ def test_span_line_and_col(env: Environment) -> None:
     assert analysis.variables["x"][0].span.line_col(source) == (2, 5)
 
 
-# TODO:
-# def test_analyze_translate(env: Environment) -> None:
-#     source = (
-#         "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
-#         "    Hello, {{ you }}!"
-#         "{%- plural -%}"
-#         "    Hello, {{ you }}s!"
-#         "{%- endtranslate -%}"
-#     )
+def test_analyze_translate(env: Environment) -> None:
+    source = (
+        "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
+        "    Hello, {{ you }}!"
+        "{%- plural -%}"
+        "    Hello, {{ you }}s!"
+        "{%- endtranslate -%}"
+    )
 
-#     someone = [Variable(["someone"], Span("", 41))]
+    someone = [Variable(["someone"], Span("", 41))]
 
-#     _assert(
-#         env.from_string(source),
-#         locals={},
-#         globals={"someone": someone},
-#         variables={
-#             "someone": someone,
-#             "you": [
-#                 Variable(["you"], Span("", 76)),
-#                 Variable(["you"], Span("", 111)),
-#             ],
-#         },
-#         tags={
-#             "translate": [Span("", 0)],
-#         },
-#     )
+    _assert(
+        env.from_string(source),
+        locals={},
+        globals={"someone": someone},
+        variables={
+            "someone": someone,
+            "you": [
+                Variable(["you"], Span("", 76)),
+                Variable(["you"], Span("", 111)),
+            ],
+        },
+        tags={
+            "translate": [Span("", 4)],
+        },
+    )

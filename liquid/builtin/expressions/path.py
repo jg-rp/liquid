@@ -77,6 +77,9 @@ class Path(Expression):
         """
         return tuple([s.location() if isinstance(s, Path) else s for s in self.path])
 
+    def head(self) -> int | str | Path:
+        return self.path[0]
+
     def evaluate(self, context: RenderContext) -> object:
         return context.get(
             [p.evaluate(context) if isinstance(p, Path) else p for p in self.path],
