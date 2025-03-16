@@ -69,6 +69,7 @@ $ conda install -c conda-forge python-liquid
 ## Links
 
 - Documentation: https://jg-rp.github.io/liquid/
+- Documentation for Python Liquid version 1.x: https://jg-rp.github.io/python-liquid-docs-archive/
 - Change Log: https://github.com/jg-rp/liquid/blob/main/CHANGES.md
 - PyPi: https://pypi.org/project/python-liquid/
 - Source Code: https://github.com/jg-rp/liquid

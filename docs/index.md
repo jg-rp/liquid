@@ -2,6 +2,8 @@
 
 Python Liquid is a Python engine for the Liquid, the safe, customer-facing template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
 
+This is the documentation for the latest version of Python Liquid ([GitHub](https://github.com/jg-rp/liquid)). Find archived documentation for Python Liquid version 1.x [here](https://jg-rp.github.io/python-liquid-docs-archive/).
+
 ## Install
 
 Install Python Liquid from [PyPi](https://pypi.org/project/python-liquid/) using [pip](https://pip.pypa.io/en/stable/getting-started/):
