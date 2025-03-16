@@ -289,7 +289,28 @@ class Environment:
             matter=matter,
         )
 
-    parse = from_string
+    def parse(
+        self,
+        source: str,
+        name: str = "",
+        path: Optional[Union[str, Path]] = None,
+        globals: Optional[Mapping[str, object]] = None,  # noqa: A002
+        matter: Optional[Mapping[str, object]] = None,
+    ) -> BoundTemplate:
+        """Parse the given string as a liquid template.
+
+        Args:
+            source: The liquid template source code.
+            name: Optional name of the template. Available as `Template.name`.
+            path: Optional path or identifier to the origin of the template.
+            globals: An optional mapping of render context variables attached
+                to the resulting template.
+            matter: Optional mapping of render context variables associated
+                with the template. Could be "front matter" or other meta data.
+        """
+        return self.from_string(
+            source, name=name, path=path, globals=globals, matter=matter
+        )
 
     def render(self, source: str, **data: object) -> str:
         """Parse and render source text."""

@@ -38,7 +38,7 @@ print(render("Hello, {{ you }}!", you="World"))
 
 ### Environment.parse
 
-[`Environment.from_string`](api/environment.md#liquid.Environment.from_string) is now aliased as [`Environment.parse`](api/environment.md#liquid.parse). The old `parse` method, which returned a list of nodes instead of a template, is now private.
+[`Environment.from_string`](api/environment.md#liquid.Environment.from_string) is now aliased as [`Environment.parse`](api/environment.md#liquid.Environment.parse). The old `parse` method, which returned a list of nodes instead of a template, is now private.
 
 ```python
 from liquid import Environment

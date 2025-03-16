@@ -30,7 +30,7 @@ conda install -c conda-forge python-liquid
 
 ## Quick Start
 
-## `render()`
+### `render()`
 
 Here's a very simple example that renders a template from a string of text with the package-level [`render()`](api/convenience.md#liquid.render) function. The template has just one placeholder variable `you`, which we've given the value `"World"`.
 
@@ -41,7 +41,7 @@ print(render("Hello, {{ you }}!", you="World"))
 # Hello, World!
 ```
 
-## `parse()`
+### `parse()`
 
 Often you'll want to render the same template several times with different variables. We can parse source text without immediately rendering it using the [`parse()`](api/convenience.md#liquid.parse) function. `parse()` returns a [`BoundTemplate`](api/template.md) instance with a `render()` method.
 
@@ -53,7 +53,7 @@ print(template.render(you="World"))  # Hello, World!
 print(template.render(you="Liquid"))  # Hello, Liquid!
 ```
 
-## Configure
+### Configure
 
 Both [`parse()`](api/convenience.md#liquid.parse) and [`render()`](api/convenience.md#liquid.render) are convenience functions that use the [default Liquid environment](environment.md). For all but the simplest cases you'll want to configure an instance of [`Environment`](api/environment.md), then load and render templates from that.
 
@@ -80,7 +80,7 @@ data = {"some": {"thing": [1, 2, 3]}}
 result = another_template.render(**data)
 ```
 
-Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFoundError` to be raised when running the example above.
+Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFound` to be raised when running the example above.
 
 ## What's next?
 
