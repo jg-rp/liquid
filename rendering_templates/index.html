@@ -11,21 +11,25 @@
       
       
       
+        <link rel="prev" href="../syntax/">
       
       
-      <link rel="icon" href="/img/favicon.ico">
+        <link rel="next" href="../environment/">
+      
+      
+      <link rel="icon" href="../img/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.8">
     
     
       
-        <title>Python Liquid</title>
+        <title>Rendering templates - Python Liquid</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -44,11 +48,11 @@
       
     
     
-      <link rel="stylesheet" href="/assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="/css/style.css">
+      <link rel="stylesheet" href="../css/style.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#as-simple-as-possible" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -81,9 +90,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="Python Liquid" class="md-header__button md-logo" aria-label="Python Liquid" data-md-component="logo">
+    <a href=".." title="Python Liquid" class="md-header__button md-logo" aria-label="Python Liquid" data-md-component="logo">
       
-  <img src="/img/droplet_white_liquid.svg" alt="logo">
+  <img src="../img/droplet_white_liquid.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -100,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Rendering templates
             
           </span>
         </div>
@@ -179,11 +188,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="/." class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href=".." class="md-tabs__link">
           
   
   Home
@@ -201,7 +212,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/tag_reference/" class="md-tabs__link">
+        <a href="../tag_reference/" class="md-tabs__link">
           
   
   Tag reference
@@ -219,7 +230,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/filter_reference/" class="md-tabs__link">
+        <a href="../filter_reference/" class="md-tabs__link">
           
   
   Filter reference
@@ -237,7 +248,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/api/convenience/" class="md-tabs__link">
+        <a href="../api/convenience/" class="md-tabs__link">
           
   
   API reference
@@ -270,9 +281,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="Python Liquid" class="md-nav__button md-logo" aria-label="Python Liquid" data-md-component="logo">
+    <a href=".." title="Python Liquid" class="md-nav__button md-logo" aria-label="Python Liquid" data-md-component="logo">
       
-  <img src="/img/droplet_white_liquid.svg" alt="logo">
+  <img src="../img/droplet_white_liquid.svg" alt="logo">
 
     </a>
     Python Liquid
@@ -296,25 +307,28 @@
       
   
   
+    
   
   
+  
     
     
     
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
       
         
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -326,7 +340,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Home
@@ -340,7 +354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -362,7 +376,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/syntax/" class="md-nav__link">
+      <a href="../syntax/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -381,10 +395,29 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/rendering_templates/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Rendering templates
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -394,6 +427,42 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#as-simple-as-possible" class="md-nav__link">
+    <span class="md-ellipsis">
+      As simple as possible
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common configuration
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -406,7 +475,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/environment/" class="md-nav__link">
+      <a href="../environment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -428,7 +497,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/loading_templates/" class="md-nav__link">
+      <a href="../loading_templates/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -450,7 +519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/render_context/" class="md-nav__link">
+      <a href="../render_context/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -472,7 +541,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/variables_and_drops/" class="md-nav__link">
+      <a href="../variables_and_drops/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -494,7 +563,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/babel/" class="md-nav__link">
+      <a href="../babel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -516,7 +585,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/static_analysis/" class="md-nav__link">
+      <a href="../static_analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -538,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/custom_filters/" class="md-nav__link">
+      <a href="../custom_filters/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -560,7 +629,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/custom_tags/" class="md-nav__link">
+      <a href="../custom_tags/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -582,7 +651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/known_issues/" class="md-nav__link">
+      <a href="../known_issues/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -604,7 +673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/migration/" class="md-nav__link">
+      <a href="../migration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -674,7 +743,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tag_reference/" class="md-nav__link">
+      <a href="../tag_reference/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -696,7 +765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/optional_tags/" class="md-nav__link">
+      <a href="../optional_tags/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -766,7 +835,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/filter_reference/" class="md-nav__link">
+      <a href="../filter_reference/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -788,7 +857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/optional_filters/" class="md-nav__link">
+      <a href="../optional_filters/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -858,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/convenience/" class="md-nav__link">
+      <a href="../api/convenience/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -880,7 +949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/environment/" class="md-nav__link">
+      <a href="../api/environment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -902,7 +971,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/template/" class="md-nav__link">
+      <a href="../api/template/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -924,7 +993,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/loaders/" class="md-nav__link">
+      <a href="../api/loaders/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -946,7 +1015,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/exceptions/" class="md-nav__link">
+      <a href="../api/exceptions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -968,7 +1037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/builtin/" class="md-nav__link">
+      <a href="../api/builtin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -990,7 +1059,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/extra/" class="md-nav__link">
+      <a href="../api/extra/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1012,7 +1081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/messages/" class="md-nav__link">
+      <a href="../api/messages/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1034,7 +1103,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/ast/" class="md-nav__link">
+      <a href="../api/ast/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1056,7 +1125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/parser/" class="md-nav__link">
+      <a href="../api/parser/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1078,7 +1147,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/expression/" class="md-nav__link">
+      <a href="../api/expression/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1100,7 +1169,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/render_context/" class="md-nav__link">
+      <a href="../api/render_context/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1122,7 +1191,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/filter/" class="md-nav__link">
+      <a href="../api/filter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1144,7 +1213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/tag/" class="md-nav__link">
+      <a href="../api/tag/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1166,7 +1235,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/undefined/" class="md-nav__link">
+      <a href="../api/undefined/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1188,7 +1257,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/tokens/" class="md-nav__link">
+      <a href="../api/tokens/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1228,6 +1297,32 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#as-simple-as-possible" class="md-nav__link">
+    <span class="md-ellipsis">
+      As simple as possible
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common configuration
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1238,8 +1333,55 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+  <h1>Rendering templates</h1>
+
+<h2 id="as-simple-as-possible">As simple as possible</h2>
+<p>For one-off templates using nothing but the default <a href="../tag_reference/">tags</a> and <a href="../filter_reference/">filters</a>, and without the possibility of <a href="../tag_reference/#include">including</a>, <a href="../tag_reference/#render">rendering</a> or <a href="../optional_tags/#extends">extending</a> other templates, use the package-level <a href="../api/convenience/#liquid.render"><code>render()</code></a> function.</p>
+<p>It takes template source text as a string and any number of keyword arguments that will be available to templates as variables. <code>render()</code> returns a string.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="s2">&quot;Hello, {{ you }}!&quot;</span><span class="p">,</span> <span class="n">you</span><span class="o">=</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p>If you want to render the same template multiple times with different data, use the package-level <a href="../api/convenience/#liquid.parse"><code>parse()</code></a> function. It takes template source text as a string, an optional name for the template and an optional dictionary of variables to attach to the template. An instance of <a href="../api/template/"><code>BoundTemplate</code></a> with a <a href="../api/template/#liquid.BoundTemplate.render"><code>render()</code></a> method is returned.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;Hello, {{ you }}!&quot;</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">another_result</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;Liquid&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="common-configuration">Common configuration</h2>
+<p>Often, at a minimum, you'll want to configure a <a href="../loading_templates/">template loader</a> that reads template source text from a file system. Doing this will tell the template engine where to look for templates when <a href="../tag_reference/#include">including</a>, <a href="../tag_reference/#render">rendering</a> or <a href="../optional_tags/#extends">extending</a> other templates.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">CachingFileSystemLoader</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">loader</span><span class="o">=</span><span class="n">CachingFileSystemLoader</span><span class="p">(</span><span class="s2">&quot;path/to/templates&quot;</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.html&quot;</span><span class="p">),</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Now, if there's a file called "main.html" in "/path/to/templates/", we can use <a href="../api/environment/#liquid.Environment.get_template"><code>env.get_template()</code></a> to load and parse it, along with any templates it <a href="../tag_reference/#include">includes</a>, <a href="../tag_reference/#render">renders</a> or <a href="../optional_tags/#extends">extends</a>.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># ... continued from above</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s2">&quot;main.html&quot;</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span> <span class="s2">&quot;bar&quot;</span><span class="p">:</span> <span class="s2">&quot;hello&quot;</span><span class="p">}</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</span></code></pre></div>
+<p>See <a href="../environment/">Liquid environments</a> for more information about configuring an <a href="../api/environment/"><code>Environment</code></a> and <a href="../loading_templates/">loading templates</a> for details of the built-in template loaders.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1279,10 +1421,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["content.code.copy", "navigation.top", "navigation.tabs", "navigation.tracking", "navigation.expand"], "search": "/assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.top", "navigation.tabs", "navigation.tracking", "navigation.expand"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
       
     
   </body>

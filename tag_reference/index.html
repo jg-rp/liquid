@@ -1,0 +1,2818 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Python engine for the Liquid template language.">
+      
+      
+      
+      
+        <link rel="prev" href="../migration/">
+      
+      
+        <link rel="next" href="../optional_tags/">
+      
+      
+      <link rel="icon" href="../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.8">
+    
+    
+      
+        <title>Default tags - Python Liquid</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/style.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#comments" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Python Liquid" class="md-header__button md-logo" aria-label="Python Liquid" data-md-component="logo">
+      
+  <img src="../img/droplet_white_liquid.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Python Liquid
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Default tags
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jg-rp/liquid" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jg-rp/liquid
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href=".." class="md-tabs__link">
+          
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  Tag reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../filter_reference/" class="md-tabs__link">
+          
+  
+  Filter reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/convenience/" class="md-tabs__link">
+          
+  
+  API reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Python Liquid" class="md-nav__button md-logo" aria-label="Python Liquid" data-md-component="logo">
+      
+  <img src="../img/droplet_white_liquid.svg" alt="logo">
+
+    </a>
+    Python Liquid
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jg-rp/liquid" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jg-rp/liquid
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../syntax/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Liquid Syntax
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rendering_templates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rendering templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Liquid environments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loading_templates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loading templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../render_context/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Render context data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variables_and_drops/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Variables, types and drops
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../babel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Internationalization and localization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../static_analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Static template analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_filters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom filters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_tags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom tags
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../known_issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Known issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Tag reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tag reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Default tags
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Default tags
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#block-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Block comments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inline-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inline comments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primitive-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primitive expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assign" class="md-nav__link">
+    <span class="md-ellipsis">
+      assign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      capture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#case" class="md-nav__link">
+    <span class="md-ellipsis">
+      case
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      cycle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decrement" class="md-nav__link">
+    <span class="md-ellipsis">
+      decrement
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#echo" class="md-nav__link">
+    <span class="md-ellipsis">
+      echo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#for" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="for">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      limit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reversed" class="md-nav__link">
+    <span class="md-ellipsis">
+      reversed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#break" class="md-nav__link">
+    <span class="md-ellipsis">
+      break
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continue" class="md-nav__link">
+    <span class="md-ellipsis">
+      continue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forloop" class="md-nav__link">
+    <span class="md-ellipsis">
+      forloop
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if" class="md-nav__link">
+    <span class="md-ellipsis">
+      if
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="if">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditional-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operator-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operator precedence
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#include" class="md-nav__link">
+    <span class="md-ellipsis">
+      include
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="include">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with" class="md-nav__link">
+    <span class="md-ellipsis">
+      with
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyword arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      increment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#liquid" class="md-nav__link">
+    <span class="md-ellipsis">
+      liquid
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      render
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="render">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      with
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-arguments_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyword arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tablerow" class="md-nav__link">
+    <span class="md-ellipsis">
+      tablerow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tablerow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cols" class="md-nav__link">
+    <span class="md-ellipsis">
+      cols
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limit_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      limit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offset_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tablerowloop" class="md-nav__link">
+    <span class="md-ellipsis">
+      tablerowloop
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unless" class="md-nav__link">
+    <span class="md-ellipsis">
+      unless
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optional_tags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extra tags
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Filter reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Filter reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filter_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Default filters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../optional_filters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extra filters
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            API reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/convenience/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Convenience functions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/environment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Template
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/loaders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loaders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Exceptions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/builtin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Builtin
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/extra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extra
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/messages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Messages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/ast/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AST
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/parser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/expression/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Expression
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/render_context/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Render context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/filter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filter helpers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/tag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tag
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/undefined/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Undefined
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/tokens/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tokens
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#block-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Block comments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inline-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inline comments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primitive-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primitive expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assign" class="md-nav__link">
+    <span class="md-ellipsis">
+      assign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      capture
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#case" class="md-nav__link">
+    <span class="md-ellipsis">
+      case
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      cycle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decrement" class="md-nav__link">
+    <span class="md-ellipsis">
+      decrement
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#echo" class="md-nav__link">
+    <span class="md-ellipsis">
+      echo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#for" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="for">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      limit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reversed" class="md-nav__link">
+    <span class="md-ellipsis">
+      reversed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#break" class="md-nav__link">
+    <span class="md-ellipsis">
+      break
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continue" class="md-nav__link">
+    <span class="md-ellipsis">
+      continue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forloop" class="md-nav__link">
+    <span class="md-ellipsis">
+      forloop
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#if" class="md-nav__link">
+    <span class="md-ellipsis">
+      if
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="if">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditional-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional expressions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operator-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operator precedence
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#include" class="md-nav__link">
+    <span class="md-ellipsis">
+      include
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="include">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with" class="md-nav__link">
+    <span class="md-ellipsis">
+      with
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyword arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#increment" class="md-nav__link">
+    <span class="md-ellipsis">
+      increment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#liquid" class="md-nav__link">
+    <span class="md-ellipsis">
+      liquid
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raw" class="md-nav__link">
+    <span class="md-ellipsis">
+      raw
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      render
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="render">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      with
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      for
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keyword-arguments_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Keyword arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tablerow" class="md-nav__link">
+    <span class="md-ellipsis">
+      tablerow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tablerow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cols" class="md-nav__link">
+    <span class="md-ellipsis">
+      cols
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limit_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      limit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#offset_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tablerowloop" class="md-nav__link">
+    <span class="md-ellipsis">
+      tablerowloop
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unless" class="md-nav__link">
+    <span class="md-ellipsis">
+      unless
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+  <h1>Default tags</h1>
+
+<p>All the tags described here are enabled by default in Python Liquid.</p>
+<h2 id="comments">Comments</h2>
+<p>Comments can be used to add documentation to your templates or "comment out" chunks of Liquid markup and text so that it wont be rendered.</p>
+<h3 id="block-comments">Block comments</h3>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span><span class="c"> ... </span><span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<p>Block comments start with the <code>comment</code> tag and end with the <code>endcomment</code> tag. It is OK for comment text to contain matching <code>comment</code>/<code>endcomment</code> or <code>raw</code>/<code>endraw</code> pairs, but is a syntax error if <code>comment</code> or <code>raw</code> tags are unbalanced.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span><span class="c">This is a comment</span><span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c">    Comments can</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c">    span</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c">    multiple lines</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="inline-comments">Inline comments</h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>{% # ... %}
+</span></code></pre></div>
+<p>An inline comment is a tag called <code>#</code>. Everything after the hash up to the end tag delimiter (<code>%}</code>) is comment text. Text can span multiple lines, but each line must start with a <code>#</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{%</span><span class="w"> </span><span class="c"># This is a comment </span><span class="p">%}</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">{%-</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="c"># Comments can span multiple lines,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c">  # but every line must start with a hash.</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">-%}</span>
+</span></code></pre></div>
+<p>Inside <a href="#liquid">liquid tags</a>, any line starting with a hash will be considered a comment.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="c"># This is a comment</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">echo</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="output">Output</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>{{ &lt;expression&gt; }}
+</span></code></pre></div>
+<p>An expression surrounded by double curly braces, <code>{{</code> and <code>}}</code>, is an <em>output statement</em>. When rendered, the expression will be evaluated and the result inserted into the output text.</p>
+<p>In this example the expression is a variable, which will be resolved to a value and the value's string representation will output, but output statements can contain any primitive expression.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+</span></code></pre></div>
+<h3 id="primitive-expressions">Primitive expressions</h3>
+<table>
+<thead>
+<tr>
+<th>Primitive expression</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boolean literal</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td>Null literal</td>
+<td><code>null</code> or <code>nil</code></td>
+</tr>
+<tr>
+<td>Integer literal</td>
+<td><code>123</code></td>
+</tr>
+<tr>
+<td>Float literal</td>
+<td><code>1.23</code></td>
+</tr>
+<tr>
+<td>String literal</td>
+<td><code>"Hello"</code> or <code>'Hello'</code></td>
+</tr>
+<tr>
+<td>Range</td>
+<td><code>(1..5)</code> or <code>(x..y)</code></td>
+</tr>
+<tr>
+<td>A path to a variable</td>
+<td><code>foo</code> or <code>foo.bar</code> or <code>foo.bar[0]</code> or <code>foo["some thing"].bar</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="filters">Filters</h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>{{ &lt;expression&gt; | &lt;filter&gt; [| &lt;filter&gt; ...] }}
+</span></code></pre></div>
+<p>Values can be modified prior to output using filters. Filters are applied to an expression using the pipe symbol (<code>|</code>), followed by the filter's name and, possibly, some filter arguments. Filter arguments appear after a colon (<code>:</code>) and are separated by commas (<code>,</code>).</p>
+<p>Multiple filters can be chained together, effectively piping the output of one filter into the input of another. See the <a href="../filter_reference/">filter reference</a> for details of all built in filters.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{{</span><span class="w"> </span><span class="nx">user_name</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p">{{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">modulo</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}}</span>
+</span></code></pre></div>
+<h2 id="assign">assign</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>{% assign &lt;identifier&gt; = &lt;expression&gt; %}
+</span></code></pre></div>
+<p>The <code>assign</code> tag is used to define and initialize new variables or reassign existing variables.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>foo is equal to <span class="p">{{</span><span class="w"> </span><span class="nx">foo</span><span class="w"> </span><span class="p">}}</span>.
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>foo is now equal to <span class="p">{{</span><span class="w"> </span><span class="nx">foo</span><span class="w"> </span><span class="p">}}</span>.
+</span></code></pre></div>
+<p>The <em>expression</em> on the right-hand side of the assignment operator (<code>=</code>) follows the syntax described in <a href="#output">Output</a> above. It can be any <a href="#primitive-expressions">primitive expression</a> and it can include <a href="#filters">filters</a>.</p>
+<h2 id="capture">capture</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>{% capture &lt;identifier&gt; %} &lt;liquid markup&gt; {% endcapture %}
+</span></code></pre></div>
+<p>The <code>capture</code> tag evaluates the contents of its block and saves the resulting string as a new variable, or reassigns an existing variable, without immediately rendering it.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">capture</span><span class="w"> </span><span class="nx">welcome_message</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">customer</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="p">}}</span>! Welcome to our store.
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endcapture</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">{{</span><span class="w"> </span><span class="nx">welcome_message</span><span class="w"> </span><span class="p">}}</span>
+</span></code></pre></div>
+<p>In some cases, it can be easier to use a template string.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">welcome_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello, </span><span class="si">${</span><span class="w"> </span><span class="nx">customer</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="si">}</span><span class="s2">! Welcome to our store.&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="case">case</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>{% case &lt;expression&gt; %}
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  [ {% when &lt;expression&gt; %} &lt;liquid markup&gt; ] ...
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  [ {% else %} &lt;liquid markup&gt; ]
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>{% endcase %}
+</span></code></pre></div>
+<p>The <code>case</code> tag evaluates an expression, matching the result against one or more <code>when</code> clauses. In the event of a match, the <code>when</code> block is rendered. The <code>else</code> clause is rendered if no <code>when</code> clauses match the <code>case</code> expression.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Monday&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="nx">day</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>  <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">&quot;Monday&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    Start of the work week!
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>  <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">&quot;Friday&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    It&#39;s almost the weekend!
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>  <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">&quot;Saturday&quot;</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">&quot;Sunday&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>    Enjoy your weekend!
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>  <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    Just another weekday.
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endcase</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="cycle">cycle</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>{% cycle [ &lt;string or identifier&gt;: ] &lt;expression&gt; [, &lt;expression&gt; ... ] %}
+</span></code></pre></div>
+<p>Render the next item in an iterator, initializing it and rendering the first value if it does not yet exist. When the items are exhausted, the iterator starts again from the beginning.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<p>You can give <code>cycle</code> a name to further distinguish multiple iterators with the same items.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="na">inner</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;odd&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;even&#39;</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="decrement">decrement</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>{% decrement &lt;identifier&gt; %}
+</span></code></pre></div>
+<p>The <code>decrement</code> tag renders the next value in a named counter, reducing the count by one each time. If a counter with the given name does not already exist, it is created automatically and initialized to zero, before subtracting 1 and outputting <code>-1</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">some</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="echo">echo</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>{% echo &lt;expression&gt; %}
+</span></code></pre></div>
+<p>The <code>echo</code> tag is equivalent to output statements, an expression surrounded by <code>{{</code> and <code>}}</code>, just in tag form. It is mostly used inside <a href="#liquid"><code>{% liquid %}</code></a> tags where plain output statements are not allowed.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Hello, <span class="p">{%</span><span class="w"> </span><span class="nt">echo</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">%}</span>!
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">  </span><span class="kr">endfor</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="p">%}</span>
+</span></code></pre></div>
+<p>Just like output statements and the <a href="#assign"><code>assign</code></a> tag, the expression can be any <a href="#primitive-expressions">primitive expression</a> and it can include <a href="#filters">filters</a>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">echo</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="kc">if</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="kc">else</span><span class="w"> </span><span class="s2">&quot;baz&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">  </span><span class="kr">endfor</span>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="for">for</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>{% for &lt;identifier&gt; in &lt;expression&gt;
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>    [ limit: &lt;expression&gt; ] [ offset: &lt;expression&gt; ] [ reversed ] %}
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  &lt;liquid markup&gt;
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  [ {% else %} &lt;liquid markup&gt; ]
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>{% endfor %}
+</span></code></pre></div>
+<p>The <code>for</code> tag renders its block once for each item in an iterable object, like an array/list or mapping/dict/hash. If the iterable is empty and an <code>else</code> block given, it will be rendered instead.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>    No products available
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<p>Range expression are often used with the <code>for</code> tag to loop over increasing integers.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">..</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>    <span class="p">{{</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="limit">limit</h3>
+<p>If a <code>limit</code> argument is given, the loop will stop after the specified number of iterations.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="offset">offset</h3>
+<p>If an <code>offset</code> argument is given, it should be an integer specifying how many items to skip before starting the loop.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<p><code>offset</code> can also be given the special value <code>"continue"</code>, in which case the loop will start from where a previous loop with the same iterable left off.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">offset</span><span class="p">:</span><span class="w"> </span><span class="nx">continue</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>!
+</span><span id="__span-29-7"><a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="reversed">reversed</h3>
+<p>If the reversed flag is given, the target iterable will be iterated in reverse order.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="kc">reversed</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="break">break</h3>
+<p>You can exit a loop early using the <code>break</code> tag.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;Shirt&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>        <span class="p">{%</span><span class="w"> </span><span class="nt">break</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="continue">continue</h3>
+<p>You can skip all or part of a loop iteration with the <code>continue</code> tag.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;Shirt&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>        <span class="p">{%</span><span class="w"> </span><span class="nt">continue</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="forloop">forloop</h3>
+<p>A <code>forloop</code> object is available inside every <code>for</code> tag block.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The loop variable name and target identifier, separated by a hyphen.</td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>The length of the sequence being iterated.</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>index</code></td>
+<td>The 1-base index of the current iteration.</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>index0</code></td>
+<td>The 0-base index of the current iteration.</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>rindex</code></td>
+<td>The 1-base index of the current iteration counting from the end.</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>rindex0</code></td>
+<td>The 0-base index of the current iteration counting from the end.</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>first</code></td>
+<td><code>true</code> if the current iteration is the first, <code>false</code> otherwise.</td>
+<td>bool</td>
+</tr>
+<tr>
+<td><code>last</code></td>
+<td><code>true</code> is the current iteration is the last, <code>false</code> otherwise.</td>
+<td>bool</td>
+</tr>
+<tr>
+<td><code>parentloop</code></td>
+<td>the <code>forloop</code> object of an enclosing <code>for</code> loop.</td>
+<td>forloop</td>
+</tr>
+</tbody>
+</table>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>      &lt;b&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>&lt;/b&gt; - <span class="p">{{</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">index0</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-33-5"><a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>      <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span> - <span class="p">{{</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">index0</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-33-6"><a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-33-7"><a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="if">if</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>{% if &lt;expression&gt; %}
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>  &lt;liquid markup&gt;
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>  [ {% elsif &lt;expression&gt; %} &lt;liquid markup&gt; [ {% elsif &lt;expression&gt; %} ... ]]
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>  [ {% else %} &lt;liquid markup&gt; ... ]
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>{% endif %}
+</span></code></pre></div>
+<p>The <code>if</code> tag conditionally renders its block if its expression evaluates to be truthy. Any number of <code>elsif</code> blocks can be given to add alternative conditions, and an <code>else</code> block is used as a default if no preceding conditions were truthy.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;OK Hat&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>  This hat is OK.
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;Rubbish Tie&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>  This tie is rubbish.
+</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-35-6"><a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>  Not sure what this is.
+</span><span id="__span-35-7"><a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="conditional-expressions">Conditional expressions</h3>
+<p>Any primitive expression can be tested for truthiness, like <code>{% if some_variable %}</code>, or you can use a combination of the following operators. Only <code>false</code>, <code>nil</code>/<code>null</code> and the special <em>undefined</em> object are falsy in Liquid.</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>==</code></td>
+<td>Equals</td>
+<td><code>product.title == "Nice Shoes"</code></td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>Not equals</td>
+<td><code>user.name != "anonymous"</code></td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>Greater than</td>
+<td><code>product.was_price &gt; product.price</code></td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>Less than</td>
+<td><code>collection.products.size &lt; 10</code></td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>Greater than or equal to</td>
+<td><code>user.age &gt;= 18</code></td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>Less than or equal to</td>
+<td><code>basket.size &lt;= 0</code></td>
+</tr>
+<tr>
+<td><code>and</code></td>
+<td>Logical and</td>
+<td><code>x and y</code></td>
+</tr>
+<tr>
+<td><code>or</code></td>
+<td>Logical or</td>
+<td><code>x or y</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator-precedence">Operator precedence</h3>
+<p>In Liquid, <code>and</code> and <code>or</code> operators are right associative. Where <code>true and false and false or true</code> is equivalent to <code>(true and (false and (false or true)))</code>, evaluating to <code>false</code>. Python, on the other hand, would parse the same expression as <code>(((true and false) and false) or true)</code>, evaluating to <code>true</code>.</p>
+<h2 id="include">include</h2>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">template</span><span class="w"> </span><span class="nx">name</span><span class="o">&gt;</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">for</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="err">]]</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">    </span><span class="p">[[,</span><span class="err">]</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">[,</span><span class="w"> </span><span class="p">[</span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">..</span><span class="err">.</span><span class="w"> </span><span class="err">]]]</span>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="p">%}</span>
+</span></code></pre></div>
+<p>The <code>include</code> tag loads and renders a named template, inserting the resulting text in its place. The name of the template to include can be a string literal or a variable resolving to a string. When rendered, the included template will share the same scope as the current template.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">&quot;snippets/header.html&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="with">with</h3>
+<p>Using the optional <code>with</code> syntax, we can bind a value to a variable that will be in scope for the included template. By default, that variable will be the name of the included template. Alternatively we can specify the variable to use with the <code>as</code> keyword followed by an identifier.</p>
+<p>Here, the template named <code>greeting</code> will have access to a variable called <code>greeting</code> with the value <code>"Hello"</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello,Goodbye&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;,&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">&quot;greeting&quot;</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="nx">greetings</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="for_1">for</h3>
+<p>If an array-like object it given following the <code>for</code> keyword, the named template will be rendered once for each item in the sequence and, like <code>with</code> above, the item value will be bound to a variable named after the included template.</p>
+<p>In this example the template named <code>greeting</code> will be rendered once with the variable <code>greeting</code> set to <code>"Hello"</code> and once with the variable <code>greeting</code> set to <code>"Goodbye"</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello, Goodbye&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;, &quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">&quot;greeting&quot;</span><span class="w"> </span><span class="kc">for</span><span class="w"> </span><span class="nx">greetings</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="keyword-arguments">Keyword arguments</h3>
+<p>Additional keyword arguments given to the <code>include</code> tag will be added to the included template's scope, then go out of scope after the included template has been rendered.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">&quot;partial_template&quot;</span><span class="w"> </span><span class="na">greeting</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="na">num</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="na">skip</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="increment">increment</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>{% increment &lt;identifier&gt; %}
+</span></code></pre></div>
+<p>The <code>increment</code> tag renders the next value in a named counter, increasing the count by one each time. If a counter with the given name does not already exist, it is created automatically and initialized to zero, which is output <strong>before</strong> adding <code>1</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">some</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="liquid">liquid</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>{% liquid
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>  &lt;tag name&gt; [&lt;expression&gt;]
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>  [ &lt;tag name&gt; [&lt;expression&gt;]]
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>  ...
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>%}
+</span></code></pre></div>
+<p>The <code>liquid</code> tag encloses <em>line statements</em>, where each line starts with a tag name and is followed by the tag's expression. Expressions inside <code>liquid</code> tags <strong>must</strong> fit on one line as we use <code>\n</code> as a delimiter indicating the end of the expression.</p>
+<p>Note that output statement syntax (<code>{{ &lt;expression&gt; }}</code>) is not allowed inside <code>liquid</code> tags, so you must use the <a href="#echo"><code>echo</code></a> tag instead.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="w">  </span><span class="nt">assign</span><span class="w"> </span><span class="na">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Brian&quot;</span>
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nx">username</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="s2">&quot;Hello, &quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="nx">username</span>
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a><span class="w">  </span><span class="kr">else</span>
+</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a><span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="s2">&quot;Hello, user&quot;</span>
+</span><span id="__span-44-8"><a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="w">  </span><span class="kr">endif</span>
+</span><span id="__span-44-9"><a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>
+</span><span id="__span-44-10"><a id="__codelineno-44-10" name="__codelineno-44-10" href="#__codelineno-44-10"></a><span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">..</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-44-11"><a id="__codelineno-44-11" name="__codelineno-44-11" href="#__codelineno-44-11"></a><span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">i</span>
+</span><span id="__span-44-12"><a id="__codelineno-44-12" name="__codelineno-44-12" href="#__codelineno-44-12"></a><span class="w">  </span><span class="kr">endfor</span>
+</span><span id="__span-44-13"><a id="__codelineno-44-13" name="__codelineno-44-13" href="#__codelineno-44-13"></a><span class="p">%}</span>
+</span></code></pre></div>
+<p>Also, inside <code>liquid</code> tags, any line starting with a hash will be considered a comment.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="w">  </span><span class="c"># This is a comment</span>
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="w">  </span><span class="nt">echo</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="raw">raw</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>{% raw %} &lt;text&gt; {% endraw %}
+</span></code></pre></div>
+<p>Any text between <code>{% raw %}</code> and <code>{% endraw %}</code> will not be interpreted as Liquid markup, but output as plain text instead.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">raw</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>  This will be rendered {{verbatim}}, with the curly brackets.
+</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endraw</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="render">render</h2>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">string</span><span class="o">&gt;</span>
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">for</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="err">]]</span>
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="w">    </span><span class="p">[[,</span><span class="err">]</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">[,</span><span class="w"> </span><span class="p">[</span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="p">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">..</span><span class="err">.</span><span class="w"> </span><span class="err">]]]</span>
+</span><span id="__span-48-4"><a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="p">%}</span>
+</span></code></pre></div>
+<p>The <code>render</code> tag loads and renders a named template, inserting the resulting text in its place. The name of the template to include <strong>must</strong> be a string literal. When rendered, the included template will have its onw scope, without variables define in the calling template.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">&quot;snippets/header.html&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="with_1">with</h3>
+<p>Using the optional <code>with</code> syntax, we can bind a value to a variable that will be in scope for the rendered template. By default, that variable will be the name of the rendered template. Alternatively we can specify the variable to use with the <code>as</code> keyword followed by an identifier.</p>
+<p>Here, the template named <code>greeting</code> will have access to a variable called <code>greeting</code> with the value <code>"Hello"</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello,Goodbye&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;,&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-50-2"><a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">&quot;greeting&quot;</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="nx">greetings</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="for_2">for</h3>
+<p>If an array-like object it given following the <code>for</code> keyword, the named template will be rendered once for each item in the sequence and, like <code>with</code> above, the item value will be bound to a variable named after the rendered template.</p>
+<p>In this example the template named <code>greeting</code> will be rendered once with the variable <code>greeting</code> set to <code>"Hello"</code> and once with the variable <code>greeting</code> set to <code>"Goodbye"</code>.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello, Goodbye&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;, &quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-51-2"><a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">&quot;greeting&quot;</span><span class="w"> </span><span class="kc">for</span><span class="w"> </span><span class="nx">greetings</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h3 id="keyword-arguments_1">Keyword arguments</h3>
+<p>Additional keyword arguments given to the <code>render</code> tag will be added to the rendered template's scope, then go out of scope after the it has been rendered.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">&quot;partial_template&quot;</span><span class="w"> </span><span class="na">greeting</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span><span class="w"> </span><span class="na">num</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="na">skip</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<h2 id="tablerow">tablerow</h2>
+<!-- md:version 0.1.0 -->
+<!-- md:shopify -->
+
+<div class="language-text highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>{% tablerow &lt;identifier&gt; in &lt;expression&gt;
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>    [ cols: &lt;expression&gt; ] [ limit: &lt;expression&gt; ] [ offset: &lt;expression&gt; ] %}
+</span><span id="__span-53-3"><a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a>  &lt;liquid markup&gt;
+</span><span id="__span-53-4"><a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>{% endtablerow %}
+</span></code></pre></div>
+<p>The <code>tablerow</code> tag renders HTML <code>&lt;tr&gt;</code> and <code>&lt;td&gt;</code> elements for each item in an iterable. Text inside <code>&lt;td&gt;</code> elements will be the result of rendering the tag's block.</p>
+<div class="language-json highlight"><span class="filename">data</span><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="p">{</span>
+</span><span id="__span-54-2"><a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a><span class="w">  </span><span class="nt">&quot;collection&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-54-3"><a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="w">    </span><span class="nt">&quot;products&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-54-4"><a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cool Shirt&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-54-5"><a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alien Poster&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-54-6"><a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Batman Poster&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-54-7"><a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bullseye Shirt&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-54-8"><a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Another Classic Vinyl&quot;</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-54-9"><a id="__codelineno-54-9" name="__codelineno-54-9" href="#__codelineno-54-9"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Awesome Jeans&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-54-10"><a id="__codelineno-54-10" name="__codelineno-54-10" href="#__codelineno-54-10"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-54-11"><a id="__codelineno-54-11" name="__codelineno-54-11" href="#__codelineno-54-11"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-54-12"><a id="__codelineno-54-12" name="__codelineno-54-12" href="#__codelineno-54-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="language-liquid2 highlight"><span class="filename">template</span><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>&lt;table&gt;
+</span><span id="__span-55-2"><a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-55-3"><a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-55-4"><a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-55-5"><a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>&lt;/table&gt;
+</span></code></pre></div>
+<div class="language-html highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row1&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col3&quot;</span><span class="p">&gt;</span>Batman Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col4&quot;</span><span class="p">&gt;</span>Bullseye Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col5&quot;</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-8"><a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col6&quot;</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-56-9"><a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-56-10"><a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a><span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</span></code></pre></div>
+<h3 id="cols">cols</h3>
+<p>By default, <code>tablerow</code> will output one row with one column for each item in the sequence. Use the <code>cols</code> parameter to set the number of columns.</p>
+<div class="language-liquid2 highlight"><span class="filename">template</span><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">cols</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a>  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<div class="language-html highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+</span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row1&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-58-3"><a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-4"><a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-5"><a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-58-6"><a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row2&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-58-7"><a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Batman Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-8"><a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Bullseye Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-9"><a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-58-10"><a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row3&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-58-11"><a id="__codelineno-58-11" name="__codelineno-58-11" href="#__codelineno-58-11"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-12"><a id="__codelineno-58-12" name="__codelineno-58-12" href="#__codelineno-58-12"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-58-13"><a id="__codelineno-58-13" name="__codelineno-58-13" href="#__codelineno-58-13"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-58-14"><a id="__codelineno-58-14" name="__codelineno-58-14" href="#__codelineno-58-14"></a><span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</span></code></pre></div>
+<h3 id="limit_1">limit</h3>
+<p>If <code>limit</code> is specified, the <code>tablerow</code> loop will stop after the given number of iterations.</p>
+<div class="language-liquid2 highlight"><span class="filename">template</span><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a>&lt;table&gt;
+</span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-59-3"><a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-59-4"><a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-59-5"><a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a>&lt;/table&gt;
+</span></code></pre></div>
+<div class="language-html highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+</span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row1&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-60-3"><a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-60-4"><a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-60-5"><a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-60-6"><a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a><span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</span></code></pre></div>
+<h3 id="offset_1">offset</h3>
+<p>If <code>offset</code> is specified, the <code>tablerow</code> loop will start at the given index in the sequence.</p>
+<div class="language-liquid2 highlight"><span class="filename">template</span><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a>&lt;table&gt;
+</span><span id="__span-61-2"><a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">offset</span><span class="p">:</span><span class="mi">4</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-61-3"><a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a>  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-61-4"><a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-61-5"><a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a>&lt;/table&gt;
+</span></code></pre></div>
+<div class="language-html highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+</span><span id="__span-62-2"><a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row1&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-62-3"><a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-62-4"><a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-62-5"><a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-62-6"><a id="__codelineno-62-6" name="__codelineno-62-6" href="#__codelineno-62-6"></a><span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</span></code></pre></div>
+<h3 id="tablerowloop">tablerowloop</h3>
+<p>A <code>tablerowloop</code> object is available inside every <code>tablerow</code> block.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>length</code></td>
+<td>The length of the sequence being iterated</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>index</code></td>
+<td>The 1-base index of the current iteration</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>index0</code></td>
+<td>The 0-base index of the current iteration</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>rindex</code></td>
+<td>The 1-base index of the current iteration counting from the end</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>rindex0</code></td>
+<td>The 0-base index of the current iteration counting from the end</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>first</code></td>
+<td><code>true</code> if the current iteration is the first, <code>false</code> otherwise</td>
+<td>bool</td>
+</tr>
+<tr>
+<td><code>last</code></td>
+<td><code>true</code> is the current iteration is the last, <code>false</code> otherwise</td>
+<td>bool</td>
+</tr>
+<tr>
+<td><code>col</code></td>
+<td>The 1-based column number</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>col0</code></td>
+<td>The 0-based column number</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>col_first</code></td>
+<td><code>true</code> if the current column is the first column, <code>false</code> otherwise</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>col_last</code></td>
+<td><code>true</code> if the current column is the last column, <code>false</code> otherwise</td>
+<td>integer</td>
+</tr>
+<tr>
+<td><code>row</code></td>
+<td>The current row number of the table</td>
+<td>integer</td>
+</tr>
+</tbody>
+</table>
+<div class="language-liquid2 highlight"><span class="filename">template</span><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">cols</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-63-2"><a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a>  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span> - <span class="p">{{</span><span class="w"> </span><span class="nx">tablerowloop</span><span class="p">.</span><span class="nx">col0</span><span class="w"> </span><span class="p">}}</span>
+</span><span id="__span-63-3"><a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a><span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<div class="language-html highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+</span><span id="__span-64-2"><a id="__codelineno-64-2" name="__codelineno-64-2" href="#__codelineno-64-2"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row1&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-64-3"><a id="__codelineno-64-3" name="__codelineno-64-3" href="#__codelineno-64-3"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Cool Shirt - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-4"><a id="__codelineno-64-4" name="__codelineno-64-4" href="#__codelineno-64-4"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Alien Poster - 1<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-5"><a id="__codelineno-64-5" name="__codelineno-64-5" href="#__codelineno-64-5"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-64-6"><a id="__codelineno-64-6" name="__codelineno-64-6" href="#__codelineno-64-6"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row2&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-64-7"><a id="__codelineno-64-7" name="__codelineno-64-7" href="#__codelineno-64-7"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Batman Poster - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-8"><a id="__codelineno-64-8" name="__codelineno-64-8" href="#__codelineno-64-8"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Bullseye Shirt<span class="p">&lt;</span> <span class="nt">-</span> <span class="na">1</span><span class="err">/</span><span class="na">td</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-9"><a id="__codelineno-64-9" name="__codelineno-64-9" href="#__codelineno-64-9"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-64-10"><a id="__codelineno-64-10" name="__codelineno-64-10" href="#__codelineno-64-10"></a>  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row3&quot;</span><span class="p">&gt;</span>
+</span><span id="__span-64-11"><a id="__codelineno-64-11" name="__codelineno-64-11" href="#__codelineno-64-11"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col1&quot;</span><span class="p">&gt;</span>Another Classic Vinyl - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-12"><a id="__codelineno-64-12" name="__codelineno-64-12" href="#__codelineno-64-12"></a>    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col2&quot;</span><span class="p">&gt;</span>Awesome Jeans - 1<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+</span><span id="__span-64-13"><a id="__codelineno-64-13" name="__codelineno-64-13" href="#__codelineno-64-13"></a>  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+</span><span id="__span-64-14"><a id="__codelineno-64-14" name="__codelineno-64-14" href="#__codelineno-64-14"></a><span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</span></code></pre></div>
+<h2 id="unless">unless</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-65-1"><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>{% unless &lt;expression&gt; %}
+</span><span id="__span-65-2"><a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>  &lt;liquid markup&gt;
+</span><span id="__span-65-3"><a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a>  [ {% elsif &lt;expression&gt; %} &lt;liquid markup&gt; [ {% elsif &lt;expression&gt; %} ... ]]
+</span><span id="__span-65-4"><a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a>  [ {% else %} &lt;liquid markup&gt; ... ]
+</span><span id="__span-65-5"><a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a>{% endif %}
+</span></code></pre></div>
+<p>The <code>unless</code> tag conditionally renders its block if its expression evaluates to be falsy. Any number of elsif blocks can be given to add alternative conditions, and an else block is used as a default if none of preceding conditions were met.</p>
+<div class="language-liquid2 highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="p">{%</span><span class="w"> </span><span class="kr">unless</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;OK Hat&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-66-2"><a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>  This hat is OK.
+</span><span id="__span-66-3"><a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a><span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;Rubbish Tie&quot;</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-66-4"><a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>  This tie is rubbish.
+</span><span id="__span-66-5"><a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a><span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+</span><span id="__span-66-6"><a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>  Not sure what this is.
+</span><span id="__span-66-7"><a id="__codelineno-66-7" name="__codelineno-66-7" href="#__codelineno-66-7"></a><span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</span></code></pre></div>
+<p>Otherwise <code>unless</code> behaves the same as <a href="#if"><code>if</code></a>. See <a href="#conditional-expressions">Conditional expressions</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.top", "navigation.tabs", "navigation.tracking", "navigation.expand"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
