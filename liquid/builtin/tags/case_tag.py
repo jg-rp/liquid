@@ -10,6 +10,7 @@ from typing import Union
 
 from liquid.ast import BlockNode
 from liquid.ast import Node
+from liquid.builtin.expressions import parse_primary
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.expressions.logical import _eq
 from liquid.exceptions import LiquidSyntaxError
@@ -140,7 +141,7 @@ class CaseTag(Tag):
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         tokens = stream.into_inner(tag=token)
-        left = parse_primitive(self.env, tokens)
+        left = parse_primary(self.env, tokens)
         tokens.expect_eos()
 
         # Eat whitespace or junk between `case` and when/else/endcase

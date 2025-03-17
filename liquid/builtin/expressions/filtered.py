@@ -34,7 +34,7 @@ from liquid.token import TOKEN_WORD
 from .arguments import KeywordArgument
 from .arguments import PositionalArgument
 from .logical import BooleanExpression
-from .primitive import parse_primitive
+from .primary import parse_primary
 
 if TYPE_CHECKING:
     from liquid import Environment
@@ -107,7 +107,7 @@ class FilteredExpression(Expression):
         env: Environment, tokens: TokenStream
     ) -> Union[FilteredExpression, TernaryFilteredExpression]:
         """Parse a filtered expression from _tokens_."""
-        left = parse_primitive(env, tokens)
+        left = parse_primary(env, tokens)
         filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE,))
 
         if tokens.current.kind == TOKEN_IF:
@@ -221,7 +221,7 @@ class TernaryFilteredExpression(Expression):
 
         if tokens.current.kind == TOKEN_ELSE:
             next(tokens)  # else
-            alternative = parse_primitive(env, tokens)
+            alternative = parse_primary(env, tokens)
 
             if tokens.current.kind == TOKEN_PIPE:
                 filters = Filter.parse(env, tokens, delim=(TOKEN_PIPE,))
@@ -348,12 +348,10 @@ class Filter:
                         next(tokens)  # word
                         next(tokens)  # : or =
                         args.append(
-                            KeywordArgument(
-                                tok, tok.value, parse_primitive(env, tokens)
-                            )
+                            KeywordArgument(tok, tok.value, parse_primary(env, tokens))
                         )
                     else:
-                        args.append(PositionalArgument(parse_primitive(env, tokens)))
+                        args.append(PositionalArgument(parse_primary(env, tokens)))
 
                     if tokens.current.kind in FILTER_TOKENS:
                         raise LiquidSyntaxError(
@@ -362,7 +360,7 @@ class Filter:
                             token=tokens.current,
                         )
                 elif tok.kind in FILTER_TOKENS:
-                    args.append(PositionalArgument(parse_primitive(env, tokens)))
+                    args.append(PositionalArgument(parse_primary(env, tokens)))
 
                     # There should be a comma between filter tokens.
                     if tokens.current.kind in FILTER_TOKENS:

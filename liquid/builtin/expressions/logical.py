@@ -210,14 +210,12 @@ class LogicalAndExpression(Expression):
         return f"{self.left} and {self.right}"
 
     def evaluate(self, context: RenderContext) -> object:
-        return is_truthy(self.left.evaluate(context)) and is_truthy(
-            self.right.evaluate(context)
-        )
+        left = self.left.evaluate(context)
+        return self.right.evaluate(context) if is_truthy(left) else left
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return is_truthy(await self.left.evaluate_async(context)) and is_truthy(
-            await self.right.evaluate_async(context)
-        )
+        left = await self.left.evaluate_async(context)
+        return await self.right.evaluate_async(context) if is_truthy(left) else left
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
@@ -235,14 +233,12 @@ class LogicalOrExpression(Expression):
         return f"{self.left} or {self.right}"
 
     def evaluate(self, context: RenderContext) -> object:
-        return is_truthy(self.left.evaluate(context)) or is_truthy(
-            self.right.evaluate(context)
-        )
+        left = self.left.evaluate(context)
+        return left if is_truthy(left) else self.right.evaluate(context)
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return is_truthy(await self.left.evaluate_async(context)) or is_truthy(
-            await self.right.evaluate_async(context)
-        )
+        left = await self.left.evaluate_async(context)
+        return left if is_truthy(left) else await self.right.evaluate_async(context)
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
@@ -436,31 +432,24 @@ def parse_boolean_primitive(  # noqa: PLR0912
     kind = token.kind
 
     if kind == TOKEN_TRUE:
-        left = TrueLiteral(token)
-        next(tokens)
+        left = TrueLiteral(next(tokens))
     elif kind == TOKEN_FALSE:
-        left = FalseLiteral(token)
-        next(tokens)
+        left = FalseLiteral(next(tokens))
+
     elif kind in (TOKEN_NIL, TOKEN_NULL):
-        left = Nil(token)
-        next(tokens)
+        left = Nil(next(tokens))
     elif kind == TOKEN_INTEGER:
-        left = IntegerLiteral(token, to_int(token.value))
-        next(tokens)
+        left = IntegerLiteral(next(tokens), to_int(token.value))
     elif kind == TOKEN_FLOAT:
-        left = FloatLiteral(token, float(token.value))
-        next(tokens)
+        left = FloatLiteral(next(tokens), float(token.value))
     elif kind == TOKEN_STRING:
-        left = StringLiteral(token, token.value)
-        next(tokens)
+        left = StringLiteral(next(tokens), token.value)
     elif kind == TOKEN_RANGE_LITERAL:
         left = RangeLiteral.parse(env, tokens)
     elif kind == TOKEN_BLANK:
-        left = Blank(token)
-        next(tokens)
+        left = Blank(next(tokens))
     elif kind == TOKEN_EMPTY:
-        left = Empty(token)
-        next(tokens)
+        left = Empty(next(tokens))
     elif kind in (TOKEN_WORD, TOKEN_IDENTSTRING, TOKEN_LBRACKET):
         left = Path.parse(env, tokens)
     elif kind == TOKEN_LPAREN:

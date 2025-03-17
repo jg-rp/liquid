@@ -26,9 +26,9 @@ from liquid.token import TOKEN_LIMIT
 from liquid.token import TOKEN_OFFSET
 from liquid.token import TOKEN_REVERSED
 
+from .primary import parse_primary
 from .primitive import StringLiteral
 from .primitive import parse_identifier
-from .primitive import parse_primitive
 
 if TYPE_CHECKING:
     from liquid import Environment
@@ -216,7 +216,7 @@ class LoopExpression(Expression):
         token = tokens.current
         identifier = parse_identifier(env, tokens)
         tokens.eat(TOKEN_IN)
-        iterable = parse_primitive(env, tokens)
+        iterable = parse_primary(env, tokens)
 
         reversed_ = False
         offset: Expression | None = None
@@ -237,7 +237,7 @@ class LoopExpression(Expression):
 
             if kind == TOKEN_LIMIT:
                 tokens.eat_one_of(*argument_separators)
-                limit = parse_primitive(env, tokens)
+                limit = parse_primary(env, tokens)
             elif kind == TOKEN_REVERSED:
                 reversed_ = True
             elif kind == TOKEN_OFFSET:
@@ -247,10 +247,10 @@ class LoopExpression(Expression):
                     next(tokens)
                     offset = StringLiteral(token=offset_token, value="continue")
                 else:
-                    offset = parse_primitive(env, tokens)
+                    offset = parse_primary(env, tokens)
             elif kind == TOKEN_COLS:
                 tokens.eat_one_of(*argument_separators)
-                cols = parse_primitive(env, tokens)
+                cols = parse_primary(env, tokens)
             elif kind == TOKEN_COMMA:
                 if env.mode == Mode.STRICT and tokens.peek.kind == TOKEN_COMMA:
                     raise LiquidSyntaxError(
