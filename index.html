@@ -1427,7 +1427,10 @@
 
 <h1 id="python-liquid">Python Liquid</h1>
 <p>Python Liquid is a Python engine for the Liquid, the safe, customer-facing template language. We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely and test against the <a href="https://github.com/jg-rp/golden-liquid">Golden Liquid test suite</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>This is the documentation for the latest version of Python Liquid (<a href="https://github.com/jg-rp/liquid">GitHub</a>). Find archived documentation for Python Liquid version 1.x <a href="https://jg-rp.github.io/python-liquid-docs-archive/">here</a>.</p>
+</div>
 <h2 id="install">Install</h2>
 <p>Install Python Liquid from <a href="https://pypi.org/project/python-liquid/">PyPi</a> using <a href="https://pip.pypa.io/en/stable/getting-started/">pip</a>:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">python -m pip install python-liquid</span>
@@ -1443,7 +1446,7 @@
 </span></code></pre></div>
 <h2 id="quick-start">Quick Start</h2>
 <h3 id="render"><code>render()</code></h3>
-<p>Here's a very simple example that renders a template from a string of text with the package-level <a href="api/convenience/#liquid.render"><code>render()</code></a> function. The template has just one placeholder variable <code>you</code>, which we've given the value <code>"World"</code>.</p>
+<p>This example renders a template from a string of text with the package-level <a href="api/convenience/#liquid.render"><code>render()</code></a> function. The template has just one placeholder variable <code>you</code>, which we've given the value <code>"World"</code>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">render</span><span class="p">(</span><span class="s2">&quot;Hello, {{ you }}!&quot;</span><span class="p">,</span> <span class="n">you</span><span class="o">=</span><span class="s2">&quot;World&quot;</span><span class="p">))</span>
