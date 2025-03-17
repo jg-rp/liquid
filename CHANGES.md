@@ -5,20 +5,20 @@
 This is a major release with several breaking changes. As well as API changes listed below, we:
 
 - Drop support for Python version 3.7 and 3.8.
-- Promotes rendering behavior from `liquid.future.Environment` to be the default, so as to improve Shopify/liquid compatibility by default.
-- Fixe variable/identifier/path parsing described in [issue #39](https://github.com/jg-rp/liquid/issues/39).
+- Promote rendering behavior from `liquid.future.Environment` to be the default, so as to improve Shopify/liquid compatibility by default.
+- Fix variable/identifier/path parsing described in [issue #39](https://github.com/jg-rp/liquid/issues/39).
 - Improve Liquid syntax error messages and exposes source index, line numbers and column numbers through methods on Liquid exceptions. See [#53](https://github.com/jg-rp/liquid/issues/53).
 - Change comment tag parsing to better match Shopify/Liquid. See [#133](https://github.com/jg-rp/liquid/issues/133).
 - Remove `BoundTemplate.analyze_with_context()`. Shout if you need contextual analysis and we'll restore this feature.
 - Remove the `cache_size` argument to `liquid.Environment` and `liquid.Template`. Template caching is now handled by template loaders.
 - Remove the `expression_cache_size` argument to `liquid.Environment` and `liquid.Template`. Environment-level expression caching is no longer available as it does not play nicely with detailed error messages. If you need to cache parsing of Liquid expressions, it is now recommended to implement a cache per tag, where it makes sense to do so for your use case.
-- Make markupsafe>=3 a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
-- Add new filters `reject`, `has`, `find` and `find_index`.
-- Add the new `doc` tag.
+- Make [markupsafe](https://pypi.org/project/MarkupSafe/) a dependency. Previously markupsafe was an optional dependency. Version 3 of markupsafe brings some subtle changes to the `replace`, `replace_first` and `replace_last` filters when they receive a "safe" string wrapped in `Markup()`.
+- Add new filters `reject`, `has`, `find` and `find_index`. See [Shopify/liquid #1869](https://github.com/Shopify/liquid/pull/1869).
+- Add the new `doc` tag. See [Shopify/liquid #1895](https://github.com/Shopify/liquid/pull/1895).
 
 ### API changes
 
-Also see the [migration guide].
+Also see the [migration guide](https://jg-rp.github.io/liquid/migration/).
 
 #### Miscellaneous
 
