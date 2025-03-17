@@ -12,10 +12,10 @@ from typing import Callable
 from typing import Iterable
 from typing import Iterator
 from typing import NamedTuple
+from typing import Protocol
 from typing import Union
 
 from babel.messages import Catalog
-from typing_extensions import Protocol
 
 from .builtin.expressions import Filter
 from .builtin.expressions import FilteredExpression

@@ -10,8 +10,7 @@ from typing import Awaitable
 from typing import Callable
 from typing import Mapping
 from typing import Optional
-
-from typing_extensions import Protocol
+from typing import Protocol
 
 from liquid.utils import LRUCache
 from liquid.utils import ThreadSafeLRUCache
