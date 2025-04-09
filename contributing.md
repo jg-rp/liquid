@@ -10,6 +10,14 @@ Your contributions and questions are always welcome. Feel free to ask questions,
 
 ## Development
 
+The [Golden Liquid Test Suite](https://github.com/jg-rp/golden-liquid) is included as a Git [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules). Clone the Python Liquid Git repository and initialize the Golden Liquid submodule like this.
+
+```shell
+$ git@github.com:jg-rp/liquid.git
+$ cd liquid
+$ git submodule update --init
+```
+
 We use [hatch](https://hatch.pypa.io/latest/) to manage project dependencies and development environments.
 
 Run tests with the _test_ script.

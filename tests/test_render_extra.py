@@ -2,17 +2,33 @@
 
 import asyncio
 import unittest
+from dataclasses import dataclass
+from dataclasses import field
 from typing import TYPE_CHECKING
+from typing import Any
 
 from liquid import DictLoader
-from liquid import golden
 from liquid.environment import Environment
 from liquid.exceptions import LiquidError
 from liquid.extra import WithTag
-from liquid.golden.case import Case
 
 if TYPE_CHECKING:
     from liquid.template import BoundTemplate
+
+
+@dataclass
+class Case:
+    """Test case dataclass to help with table driven tests."""
+
+    description: str
+    template: str
+    expect: str
+    globals: dict[str, Any] = field(default_factory=dict)  # noqa: A003
+    partials: dict[str, Any] = field(default_factory=dict)
+    standard: bool = True
+    error: bool = False
+    strict: bool = False
+    future: bool = False
 
 
 class MockEnv(Environment):
@@ -66,10 +82,6 @@ class BaseRenderTestCase(unittest.TestCase):
 
 class RenderIfNotTagTestCase(BaseRenderTestCase):
     """Test cases for non-standard `if` tag."""
-
-    def test_render_standard_if_tag(self) -> None:
-        """Test that the `if (not)` tag renders standard `if` tags."""
-        self._test([case for case in golden.if_tag.cases if not case.future])
 
     def test_render_non_standard_if_tag(self) -> None:
         """Test that we can render `if` tags with logical `not` and grouping
