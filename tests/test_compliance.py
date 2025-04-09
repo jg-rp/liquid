@@ -1,6 +1,7 @@
 import asyncio
 import json
 import operator
+import sys
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
@@ -35,8 +36,14 @@ SKIP = {
 
 
 def cases() -> list[Case]:
-    with open(FILENAME, encoding="utf8") as fd:
-        data = json.load(fd)
+    try:
+        with open(FILENAME, encoding="utf8") as fd:
+            data = json.load(fd)
+    except FileNotFoundError:
+        sys.stderr.write(
+            "Did you forget to initialize the submodule? `git submodule update --init`"
+        )
+        raise
     return [Case(**case) for case in data["tests"]]
 
 
