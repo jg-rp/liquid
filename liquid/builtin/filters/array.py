@@ -107,8 +107,11 @@ def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
 
 
 @sequence_filter
-def map_(sequence: ArrayT, key: object) -> list[object]:
+def map_(sequence: ArrayT, key: object) -> Union[list[object], tuple[object]]:
     """Return an array/list of items in _sequence_ selected by _key_."""
+    if key is None or is_undefined(key):
+        return sequence
+
     try:
         return [_getitem(itm, str(key), default=_NULL) for itm in sequence]
     except TypeError as err:

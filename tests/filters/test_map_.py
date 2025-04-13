@@ -81,7 +81,7 @@ TEST_CASES = [
         val=[{"title": "foo"}, {"title": "bar"}, {"title": "baz"}],
         args=[ENV.undefined("test")],
         kwargs={},
-        expect=[None, None, None],
+        expect=[{"title": "foo"}, {"title": "bar"}, {"title": "baz"}],
     ),
 ]
 

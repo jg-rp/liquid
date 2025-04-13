@@ -1,5 +1,9 @@
 # Python Liquid Change Log
 
+## Version 2.0.2
+
+- Fixed the `map` filter when it's given a `nil`/`null` or undefined argument. The input sequence is now returned in such cases. This change was introduced in [Shopify/liquid #1944](https://github.com/Shopify/liquid/pull/1944).
+
 ## Version 2.0.1
 
 - Fixed bad imports from `typing_extensions`.
