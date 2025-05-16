@@ -864,6 +864,7 @@ def test_analyze_macro_and_call(env: Environment) -> None:
     source = (
         r"{% macro 'foo', you: 'World', arg: n %}"
         r"Hello, {{ you }}!"
+        r"{{ args.size }}"
         r"{% endmacro %}"
         r"{% call 'foo' %}"
         r"{% assign x = 'you' %}"
@@ -875,13 +876,18 @@ def test_analyze_macro_and_call(env: Environment) -> None:
 
     _assert(
         env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 96))]},
+        locals={"x": [Variable(["x"], Span("", 111))]},
         globals={"n": n},
-        variables={"n": n, "you": you, "x": [Variable(["x"], Span("", 128))]},
+        variables={
+            "n": n,
+            "you": you,
+            "args": [Variable(["args", "size"], Span("", 59))],
+            "x": [Variable(["x"], Span("", 143))],
+        },
         tags={
             "macro": [Span("", 3)],
-            "call": [Span("", 73), Span("", 111)],
-            "assign": [Span("", 89)],
+            "call": [Span("", 88), Span("", 126)],
+            "assign": [Span("", 104)],
         },
     )
 
