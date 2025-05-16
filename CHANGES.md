@@ -1,5 +1,9 @@
 # Python Liquid Change Log
 
+## Version 2.0.2 (unreleased)
+
+- Fixed static analysis of filters in ternary expressions. See [#180](https://github.com/jg-rp/liquid/issues/180).
+
 ## Version 2.0.1
 
 - Fixed bad imports from `typing_extensions`.
