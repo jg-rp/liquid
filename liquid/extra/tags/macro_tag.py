@@ -94,6 +94,8 @@ class MacroNode(Node):
 
     def block_scope(self) -> Iterable[Identifier]:
         """Return variables this node adds to the node's block scope."""
+        yield Identifier("args", token=self.token)
+        yield Identifier("kwargs", token=self.token)
         yield from (Identifier(p.name, token=p.token) for p in self.args.values())
 
 
