@@ -301,19 +301,25 @@ async def _analyze_async(
 def _extract_filters(
     expression: Expression, template_name: str
 ) -> Iterable[tuple[str, Span]]:
-    if (
-        isinstance(expression, (FilteredExpression, TernaryFilteredExpression))
-        and expression.filters
-    ):
+    if isinstance(expression, TernaryFilteredExpression):
+        yield from _extract_filters(expression.left, template_name)
+
+        if expression.filters:
+            yield from (
+                (f.name, Span(template_name, f.token.start_index))
+                for f in expression.filters
+            )
+
+        if expression.tail_filters:
+            yield from (
+                (f.name, Span(template_name, f.token.start_index))
+                for f in expression.tail_filters
+            )
+
+    if isinstance(expression, FilteredExpression) and expression.filters:
         yield from (
             (f.name, Span(template_name, f.token.start_index))
             for f in expression.filters
-        )
-
-    if isinstance(expression, TernaryFilteredExpression) and expression.tail_filters:
-        yield from (
-            (f.name, Span(template_name, f.token.start_index))
-            for f in expression.tail_filters
         )
 
     for expr in expression.children():

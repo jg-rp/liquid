@@ -151,6 +151,7 @@ def test_analyze_ternary_filters(env: Environment) -> None:
             "y": [Variable(["y"], Span("", 54))],
         },
         filters={
+            "upcase": [Span("", 7)],
             "default": [Span("", 30)],
             "append": [Span("", 46)],
         },
