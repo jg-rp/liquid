@@ -4,6 +4,7 @@
 
 - Fixed static analysis of filters in ternary expressions. See [#180](https://github.com/jg-rp/liquid/issues/180).
 - Fixed static analysis of macro blocks. Previously `args` and `kwargs` were considered "global". See [#181](https://github.com/jg-rp/liquid/issues/181).
+- Fixed looping over non-iterable objects with the `{% for %}` tag. We were raising a `LiquidTypeError` when we should have been defaulting to an empty iterable, as Shopify/Liquid does.
 
 ## Version 2.0.1
 

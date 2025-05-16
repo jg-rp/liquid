@@ -97,14 +97,11 @@ class LoopExpression(Expression):
         if isinstance(obj, range):
             return iter(obj), len(obj)
         if isinstance(obj, str) and not context.env.string_sequences:
-            return iter([obj]), 1
+            return (iter([]), 0) if not obj else (iter([obj]), 1)
         if isinstance(obj, Sequence):
             return iter(obj), len(obj)
 
-        raise LiquidTypeError(
-            f"expected an iterable at '{self.iterable}', found '{obj}'",
-            token=self.token,
-        )
+        return iter([]), 0
 
     def _to_int(self, obj: object, *, token: Token) -> int:
         try:
