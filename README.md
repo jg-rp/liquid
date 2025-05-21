@@ -74,6 +74,7 @@ $ conda install -c conda-forge python-liquid
 ## Related Projects
 
 - [Python Liquid2](https://github.com/jg-rp/python-liquid2): A new Python engine for Liquid with [extra features](https://jg-rp.github.io/python-liquid2/migration/#new-features).
+- [Ruby Liquid2](https://github.com/jg-rp/ruby-liquid2): Liquid2 templates for Ruby.
 - [LiquidScript](https://github.com/jg-rp/liquidscript): A JavaScript engine for Liquid with a similar high-level API to Python Liquid.
 
 ## Quick Start

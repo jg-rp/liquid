@@ -1,6 +1,6 @@
 # Python Liquid
 
-Python Liquid is a Python engine for the Liquid, the safe, customer-facing template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
+Python Liquid is a Python engine for Liquid, the safe, customer-facing template language. We follow [Shopify/Liquid](https://github.com/Shopify/liquid) closely and test against the [Golden Liquid test suite](https://github.com/jg-rp/golden-liquid).
 
 !!! note
 
