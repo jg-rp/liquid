@@ -1,4 +1,4 @@
-All the filters described here are enabled by default in Python Liquid2.
+All the filters described here are enabled by default in Python Liquid.
 
 ## abs
 
