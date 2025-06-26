@@ -75,6 +75,7 @@ $ conda install -c conda-forge python-liquid
 
 - [Python Liquid2](https://github.com/jg-rp/python-liquid2): A new Python engine for Liquid with [extra features](https://jg-rp.github.io/python-liquid2/migration/#new-features).
 - [Ruby Liquid2](https://github.com/jg-rp/ruby-liquid2): Liquid2 templates for Ruby.
+- [Micro Liquid](https://github.com/jg-rp/micro-liquid): A stripped-down Liquid-like template engine for Python. You can think of it as a non-evaluating alternative to Python's [f-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals) or [t-strings](https://docs.python.org/3.14/whatsnew/3.14.html#whatsnew314-pep750).
 - [LiquidScript](https://github.com/jg-rp/liquidscript): A JavaScript engine for Liquid with a similar high-level API to Python Liquid.
 
 ## Quick Start
