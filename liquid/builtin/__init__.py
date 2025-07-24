@@ -21,6 +21,7 @@ from .filters.array import sort_natural
 from .filters.array import sum_
 from .filters.array import uniq
 from .filters.array import where
+from .filters.extra import escapejs
 from .filters.extra import safe
 from .filters.math import abs_
 from .filters.math import at_least
@@ -197,3 +198,4 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_filter("date", date)
 
     env.add_filter("safe", safe)
+    env.add_filter("escapejs", escapejs)
