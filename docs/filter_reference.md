@@ -520,7 +520,7 @@ This filter replaces the characters `&`, `<`, `>`, `'`, and `"` with their corre
 - `'` -> `&#39;`
 - `"` -> `&#34;`
 
-This helps prevent HTML injection (XSS) when rendering untrusted content in HTML element bodies or attributes.
+This helps prevent HTML injection when rendering untrusted content in HTML element bodies or attributes.
 
 !!! warning
 
@@ -553,14 +553,19 @@ Escaped characters include:
 
     This filter does **not** make strings safe for use in JavaScript template literals (backtick strings), or in raw JavaScript expressions. Use it only when placing data inside quoted JS strings within inline `<script>` blocks or event handlers.
 
-    TODO: point to JSON filter
-
     **Recommended alternatives:**
 
     - Pass data using HTML `data-*` attributes and read them in JS via `element.dataset`.
-    - For structured data, prefer a JSON-serialization approach....
+    - For structured data, prefer a JSON-serialization approach using the [JSON filter](./optional_filters.md#json).
 
-TODO: example
+```liquid2
+{% assign some_string = "<script>alert('x')</script>" %}
+<img src="" onerror="{{ some_string | escapejs }}" />
+```
+
+```plain title="output"
+<img src="" onerror="\u003Cscript\u003Ealert(\u0027x\u0027)\u003C/script\u003E" />
+```
 
 ## escape_once
 

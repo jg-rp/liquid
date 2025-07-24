@@ -61,16 +61,13 @@ def escapejs(val: str) -> str:
     **Recommended alternatives:**
         - Pass data using HTML `data-*` attributes and read them in JS via
           `element.dataset`.
-        - For structured data, prefer a JSON-serialization approach XXX.
+        - For structured data, prefer a JSON-serialization approach using the
+          JSON filter.
 
     Escaped characters include:
         - ASCII control characters (U+0000 to U+001F)
         - Characters like quotes, angle brackets, ampersands, equals signs
         - Line/paragraph separators (U+2028, U+2029)
-
-    Inspired by:
-        - Django's `escapejs` filter
-        - Salesforce's `secure-filters` project
 
     Args:
         val: The input string to escape.
@@ -79,6 +76,3 @@ def escapejs(val: str) -> str:
         A JavaScript-safe string, with problematic characters escaped as Unicode.
     """
     return _ESCAPE_RE.sub(lambda m: _ESCAPE_MAP[m.group()], val)
-
-
-# TODO: escapejs_once
