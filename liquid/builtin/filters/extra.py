@@ -23,7 +23,7 @@ def safe(val: str, *, environment: Environment) -> str:
 
 
 # `escapejs` is inspired by https://github.com/salesforce/secure-filters and Django's
-# escapejs, https://github.com/django/django/blob/485f483d49144a2ea5401442bc3b937a370b3ca6/django/utils/html.py#L63
+# escapejs filter, https://github.com/django/django/blob/485f483d49144a2ea5401442bc3b937a370b3ca6/django/utils/html.py#L63
 
 _ESCAPE_MAP = {
     "\\": "\\u005C",
@@ -44,8 +44,9 @@ _ESCAPE_MAP.update({chr(c): f"\\u{c:04X}" for c in range(32)})
 _ESCAPE_RE = re.compile("[" + re.escape("".join(_ESCAPE_MAP.keys())) + "]")
 
 
+@with_environment
 @string_filter
-def escapejs(val: str) -> str:
+def escapejs(val: str, *, environment: Environment) -> str:
     """Escape characters for safe use in JavaScript string literals.
 
     This filter escapes a string for embedding inside **JavaScript string
@@ -71,8 +72,12 @@ def escapejs(val: str) -> str:
 
     Args:
         val: The input string to escape.
+        environment: The active Liquid environment
 
     Returns:
         A JavaScript-safe string, with problematic characters escaped as Unicode.
     """
-    return _ESCAPE_RE.sub(lambda m: _ESCAPE_MAP[m.group()], val)
+    escaped = _ESCAPE_RE.sub(lambda m: _ESCAPE_MAP[m.group()], val)
+    if environment.autoescape:
+        return Markup(escaped)
+    return escaped

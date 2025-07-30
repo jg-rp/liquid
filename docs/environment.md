@@ -148,6 +148,15 @@ template = env.from_string("<p>Hello, {{ you }}</p>")
 print(template.render(you=Markup("<em>World!</em>")))
 ```
 
+There's also the [`safe`](./filter_reference.md#safe) filter which allows template authors to mark a string as safe to use in HTML. If that sounds like a bad idea, you can remove the `safe` filter from your Liquid environment.
+
+```python
+from liquid import Environment
+
+env = Environment()
+del env.tags["safe"]
+```
+
 ## Resource limits
 
 For deployments where template authors are untrusted, you can set limits on some resources to avoid malicious templates from consuming too much memory or too many CPU cycles. Limits are set by subclassing [`Environment`](api/environment.md) and setting some class attributes.
