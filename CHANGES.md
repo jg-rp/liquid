@@ -1,5 +1,15 @@
 # Python Liquid Change Log
 
+## Version 2.1.0 (unreleased)
+
+**Features**
+
+- Added the `escapejs` filter for escaping characters for use in JavaScript string literals. Whereas the standard `escape` filter replaces `&`, `<`, `>`, `'` and `"` with their equivalent HTML escape sequence, `escapejs` replaces control characters and potentially dangerous symbols with their corresponding Unicode escape sequences.
+
+**Docs**
+
+- Improved documentation for HTML auto escaping and the `escape` filter.
+
 ## Version 2.0.2
 
 - Fixed static analysis of filters in ternary expressions. See [#180](https://github.com/jg-rp/liquid/issues/180).

@@ -56,7 +56,35 @@ def downcase(val: str) -> str:
 @with_environment
 @string_filter
 def escape(val: str, *, environment: Environment) -> str:
-    """Return _val_ with the characters &, < and > converted to HTML-safe sequences."""
+    """Escape special characters in a string for safe use in HTML.
+
+    This filter replaces the characters `&`, `<`, `>`, `'`, and `"` with their
+    corresponding HTML-safe sequences:
+
+        - `&` -> `&amp;`
+        - `<` -> `&lt;`
+        - `>` -> `&gt;`
+        - `'` -> `&#39;`
+        - `"` -> `&#34;`
+
+    This helps prevent HTML injection (XSS) when rendering untrusted content in
+    HTML element bodies or attributes.
+
+    Important: This filter does **not** make strings safe for use in JavaScript,
+    including in `<script>` blocks, inline event handler attributes (e.g. `onerror`),
+    or other JavaScript contexts. For those cases, use the `escapejs` filter instead.
+
+    When `autoescape` is enabled in the environment, this filter uses the same
+    escaping logic as the environment (via `markupsafe.escape()`). Otherwise, it
+    falls back to Python's standard `html.escape()`.
+
+    Args:
+        val: The input string to escape.
+        environment: The current rendering environment.
+
+    Returns:
+        A string with HTML-special characters replaced by safe escape sequences.
+    """
     if environment.autoescape:
         return markupsafe_escape(str(val))
     return html.escape(val)
@@ -65,10 +93,14 @@ def escape(val: str, *, environment: Environment) -> str:
 @with_environment
 @string_filter
 def escape_once(val: str, *, environment: Environment) -> str:
-    """Return _val_ with the characters &, < and > converted to HTML-safe sequences.
+    """Escape a string for HTML, but avoid double-escaping existing entities.
 
-    It is safe to use `escape_one` on string values that already contain HTML escape
-    sequences.
+    Converts characters like `&`, `<`, and `>` to their HTML-safe sequences,
+    but leaves existing HTML entities untouched (e.g., `&amp;` stays `&amp;`).
+
+    This is useful when escaping content that may already be partially escaped.
+
+    See the `escape` filter for details and limitations.
     """
     if environment.autoescape:
         return Markup(val).unescape()

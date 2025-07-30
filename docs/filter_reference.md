@@ -510,7 +510,21 @@ If the input is undefined, an empty string is returned.
 <string> | escape
 ```
 
-Return the input string with characters `&`, `<` and `>` converted to HTML-safe sequences.
+Escape special characters in a string for safe use in HTML.
+
+This filter replaces the characters `&`, `<`, `>`, `'`, and `"` with their corresponding HTML-safe sequences:
+
+- `&` -> `&amp;`
+- `<` -> `&lt;`
+- `>` -> `&gt;`
+- `'` -> `&#39;`
+- `"` -> `&#34;`
+
+This helps prevent HTML injection when rendering untrusted content in HTML element bodies or attributes.
+
+!!! warning
+
+    This filter does **not** make strings safe for use in JavaScript, including in `<script>` blocks, inline event handler attributes (e.g. `onerror`), or other JavaScript contexts. For those cases, use the [`escapejs`](#escapejs) filter instead.
 
 ```liquid2
 {{ "Have you read 'James & the Giant Peach'?" | escape }}
@@ -520,13 +534,54 @@ Return the input string with characters `&`, `<` and `>` converted to HTML-safe 
 Have you read &#39;James &amp; the Giant Peach&#39;?
 ```
 
+## escapejs
+
+**_New in version 2.1.0_**
+
+```
+<string> | escapejs
+```
+
+Escape characters for safe use in JavaScript string literals.
+
+This filter escapes a string for embedding inside **JavaScript string literals**, using either single or double quotes (e.g. `'...'` or `"..."`). It replaces control characters and potentially dangerous symbols with their corresponding Unicode escape sequences.
+
+Escaped characters include:
+
+- ASCII control characters (U+0000 to U+001F)
+- Characters like quotes, angle brackets, ampersands, equals signs - Line/paragraph separators (U+2028, U+2029)
+
+!!! warning
+
+    This filter does **not** make strings safe for use in JavaScript template literals (backtick strings), or in raw JavaScript expressions. Use it only when placing data inside quoted JS strings within inline `<script>` blocks or event handlers.
+
+    **Recommended alternatives:**
+
+    - Pass data using HTML `data-*` attributes and read them in JS via `element.dataset`.
+    - For structured data, prefer a JSON-serialization approach using the [JSON filter](./optional_filters.md#json).
+
+```liquid2
+{% assign some_string = "<script>alert('x')</script>" %}
+<img src="" onerror="{{ some_string | escapejs }}" />
+```
+
+```plain title="output"
+<img src="" onerror="\u003Cscript\u003Ealert(\u0027x\u0027)\u003C/script\u003E" />
+```
+
 ## escape_once
 
 ```
 <string> | escape_once
 ```
 
-Return the input string with characters `&`, `<` and `>` converted to HTML-safe sequences while preserving existing HTML escape sequences.
+Escape a string for HTML, but avoid double-escaping existing entities.
+
+Converts characters like `&`, `<`, and `>` to their HTML-safe sequences, but leaves existing HTML entities untouched (e.g., `&amp;` stays `&amp;`).
+
+This is useful when escaping content that may already be partially escaped.
+
+See the [`escape`](#escape) filter for details and limitations.
 
 ```liquid2
 {{ "Have you read 'James &amp; the Giant Peach'?" | escape_once }}

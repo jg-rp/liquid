@@ -119,9 +119,25 @@ env = Environment(
 
 ## HTML auto escape
 
-When `autoescape` is `True`, [render context variables](render_context.md) will be automatically escaped to produce HTML-safe strings on output.
+When `autoescape=True`, all rendered context variables are automatically escaped to produce HTML-safe output. This protects against injection attacks by escaping characters that could be interpreted as HTML when inserted into a page.
 
-You can be explicitly mark strings as _safe_ by wrapping them in `Markup()` and [drops](variables_and_drops.md) can implement the [special `__html__()` method](variables_and_drops.md#__html__).
+Autoescaping replaces the following characters with their HTML-safe equivalents:
+
+- `&` -> `&amp;`
+- `<` -> `&lt;`
+- `>` -> `&gt;`
+- `'` -> `&#39;`
+- `"` -> `&#34;`
+
+This escaping is equivalent to applying the [`escape` filter](./filter_reference.md#escape) to every variable, unless the variable is explicitly marked as safe.
+
+!!! warning
+
+    Auto escape and the [`escape`](./filter_reference.md#escape) filter do **not** make strings safe for use in JavaScript, including in `<script>` blocks, inline event handler attributes (e.g. `onerror`), or other JavaScript contexts. For those cases, see the [`escapejs`](./filter_reference.md#escapejs) filter instead.
+
+### Safe strings
+
+You can explicitly mark a strings as _safe_ by wrapping it in `Markup()`, and [drops](variables_and_drops.md) can implement the [special `__html__()` method](variables_and_drops.md#__html__).
 
 ```python
 from markupsafe import Markup
@@ -130,6 +146,15 @@ from liquid import Environment
 env = Environment(autoescape=True)
 template = env.from_string("<p>Hello, {{ you }}</p>")
 print(template.render(you=Markup("<em>World!</em>")))
+```
+
+There's also the [`safe`](./filter_reference.md#safe) filter which allows template authors to mark a string as safe to use in HTML. If that sounds like a bad idea, you can remove the `safe` filter from your Liquid environment.
+
+```python
+from liquid import Environment
+
+env = Environment()
+del env.tags["safe"]
 ```
 
 ## Resource limits
