@@ -536,6 +536,8 @@ Have you read &#39;James &amp; the Giant Peach&#39;?
 
 ## escapejs
 
+**_New in version 2.1.0_**
+
 ```
 <string> | escapejs
 ```
