@@ -16,6 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = ["MarkupSafe>=3", "python-dateutil>=2.8.1", "Babel>=2", "pytz"]
 description = "A Python engine for the Liquid template language."
@@ -23,7 +24,7 @@ dynamic = ["version"]
 license = "MIT"
 name = "python-liquid"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 
 [project.urls]
 "Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
@@ -71,7 +72,7 @@ test = "pytest {args}"
 typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["39", "310", "311", "312", "pypy39"]
+python = ["39", "310", "311", "312", "313", "314", "pypy39"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
