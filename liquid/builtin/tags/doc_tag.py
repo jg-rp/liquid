@@ -50,7 +50,7 @@ class DocTag(Tag):
 
         # This only happens if the doc tag is malformed
         token = stream.eat(TOKEN_TAG)
-        text = []
+        text: list[str] = []
 
         if stream.current.kind == TOKEN_EXPRESSION:
             raise LiquidSyntaxError("unexpected expression", token=stream.current)

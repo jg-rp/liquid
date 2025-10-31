@@ -21,11 +21,12 @@ from liquid.builtin.expressions import parse_identifier
 from liquid.builtin.expressions import parse_primitive
 from liquid.builtin.tags.for_tag import ForLoop
 from liquid.builtin.tags.include_tag import TAG_INCLUDE
+from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import TemplateNotFoundError
 from liquid.tag import Tag
+from liquid.template import BoundTemplate
 from liquid.token import TOKEN_AS
 from liquid.token import TOKEN_FOR
-from liquid.token import TOKEN_STRING
 from liquid.token import TOKEN_TAG
 from liquid.token import TOKEN_WITH
 from liquid.token import TOKEN_WORD
@@ -50,7 +51,8 @@ class RenderNode(Node):
     def __init__(
         self,
         token: Token,
-        name: StringLiteral,
+        name: StringLiteral | Identifier,
+        *,
         var: Optional[Expression] = None,
         loop: bool = False,
         alias: Optional[Identifier] = None,
@@ -77,14 +79,26 @@ class RenderNode(Node):
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
         """Render the node to the output buffer."""
-        try:
-            template = context.env.get_template(
-                self.name.value, context=context, tag=self.tag
+        if isinstance(self.name, Identifier):
+            # We're expecting an inline snippet.
+            template: BoundTemplate | None = context.resolve(
+                self.name, token=self.token, default=None
             )
-        except TemplateNotFoundError as err:
-            err.token = self.name.token
-            err.template_name = context.template.full_name()
-            raise
+            if not isinstance(template, BoundTemplate):
+                raise TemplateNotFoundError(
+                    self.name,
+                    filename=context.template.full_name(),
+                    token=self.name.token,
+                )
+        else:
+            try:
+                template = context.env.get_template(
+                    self.name.value, context=context, tag=self.tag
+                )
+            except TemplateNotFoundError as err:
+                err.token = self.name.token
+                err.template_name = context.template.full_name()
+                raise
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -145,14 +159,26 @@ class RenderNode(Node):
         self, context: RenderContext, buffer: TextIO
     ) -> int:
         """Render the node to the output buffer."""
-        try:
-            template = await context.env.get_template_async(
-                self.name.value, context=context, tag=self.tag
+        if isinstance(self.name, Identifier):
+            # We're expecting an inline snippet.
+            template: BoundTemplate | None = context.resolve(
+                self.name, token=self.token, default=None
             )
-        except TemplateNotFoundError as err:
-            err.token = self.name.token
-            err.template_name = context.template.full_name()
-            raise
+            if not isinstance(template, BoundTemplate):
+                raise TemplateNotFoundError(
+                    self.name,
+                    filename=context.template.full_name(),
+                    token=self.name.token,
+                )
+        else:
+            try:
+                template = await context.env.get_template_async(
+                    self.name.value, context=context, tag=self.tag
+                )
+            except TemplateNotFoundError as err:
+                err.token = self.name.token
+                err.template_name = context.template.full_name()
+                raise
 
         # Evaluate keyword arguments once. Unlike 'include', 'render' can not
         # mutate variables in the outer scope, so there's no need to re-evaluate
@@ -215,7 +241,14 @@ class RenderNode(Node):
         self, static_context: RenderContext, *, include_partials: bool = True
     ) -> Iterable[Node]:
         """Return this node's children."""
-        if include_partials:
+        if isinstance(self.name, Identifier):
+            # We're expecting an inline snippet.
+            template: BoundTemplate | None = static_context.resolve(
+                self.name, token=self.token, default=None
+            )
+            if template:
+                yield from template.nodes
+        elif include_partials:
             name = self.name.evaluate(static_context)
             try:
                 template = static_context.env.get_template(
@@ -231,7 +264,14 @@ class RenderNode(Node):
         self, static_context: RenderContext, *, include_partials: bool = True
     ) -> Iterable[Node]:
         """Return this node's children."""
-        if include_partials:
+        if isinstance(self.name, Identifier):
+            # We're expecting an inline snippet.
+            template: BoundTemplate | None = static_context.resolve(
+                self.name, token=self.token, default=None
+            )
+            if template:
+                return template.nodes
+        elif include_partials:
             name = await self.name.evaluate_async(static_context)
             try:
                 template = await static_context.env.get_template_async(
@@ -246,7 +286,6 @@ class RenderNode(Node):
 
     def expressions(self) -> Iterable[Expression]:
         """Return this node's expressions."""
-        yield self.name
         if self.var:
             yield self.var
         yield from (arg.value for arg in self.args)
@@ -284,12 +323,18 @@ class RenderTag(Tag):
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         tokens = stream.into_inner(tag=token, eat=False)
+        name: Expression | Identifier = parse_primitive(self.env, tokens)
 
-        # Need a string. 'render' does not accept identifiers that resolve to a string.
-        # This is the name of the template to be included.
-        tokens.expect(TOKEN_STRING)
-        name = parse_primitive(self.env, tokens)
-        assert isinstance(name, StringLiteral)
+        if isinstance(name, Path):
+            head = name.head()
+            if len(name.path) != 1 or not isinstance(head, str):
+                raise LiquidSyntaxError(
+                    "expected an identifier, found a path",
+                    token=name.token,
+                )
+            name = Identifier(head, token=name.token)
+        elif not isinstance(name, StringLiteral):
+            raise LiquidSyntaxError("expected a string or identifier", token=name.token)
 
         alias: Optional[Identifier] = None
         var: Optional[Path] = None
@@ -311,4 +356,4 @@ class RenderTag(Tag):
 
         # Zero or more keyword arguments
         args = KeywordArgument.parse(self.env, tokens)
-        return self.node_class(token, name, var, loop, alias, args)
+        return self.node_class(token, name, var=var, loop=loop, alias=alias, args=args)

@@ -121,7 +121,8 @@ class Partial:
     """Partial template meta data.
 
     Args:
-        name: An expression resolving to the name associated with the partial template.
+        name: The name of the partial or an expression resolving to the name
+            associated with the partial template.
         scope: The kind of scope the partial template should have when loaded.
         in_scope: Names that will be added to the partial template scope.
     """
@@ -129,7 +130,10 @@ class Partial:
     __slots__ = ("name", "scope", "in_scope")
 
     def __init__(
-        self, name: Expression, scope: PartialScope, in_scope: Iterable[Identifier]
+        self,
+        name: Expression | str,
+        scope: PartialScope,
+        in_scope: Iterable[Identifier],
     ) -> None:
         self.name = name
         self.scope = scope

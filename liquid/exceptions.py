@@ -170,8 +170,9 @@ class TemplateNotFoundError(LiquidError):
         self,
         *args: object,
         filename: Union[str, None] = None,
+        token: Token | None = None,
     ):
-        super().__init__(*args, token=None, template_name=filename)
+        super().__init__(*args, token=token, template_name=filename)
 
     def __str__(self) -> str:
         if not self.token:

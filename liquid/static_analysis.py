@@ -173,7 +173,11 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
             )
 
         if partial := node.partial_scope():
-            partial_name = str(partial.name.evaluate(static_context))
+            partial_name = (
+                partial.name
+                if isinstance(partial.name, str)
+                else str(partial.name.evaluate(static_context))
+            )
 
             if partial_name in seen:
                 return
@@ -260,7 +264,11 @@ async def _analyze_async(
             )
 
         if partial := node.partial_scope():
-            partial_name = str(partial.name.evaluate(static_context))
+            partial_name = (
+                partial.name
+                if isinstance(partial.name, str)
+                else str(partial.name.evaluate(static_context))
+            )
 
             if partial_name in seen:
                 return
