@@ -9,7 +9,9 @@ from enum import auto
 from typing import TYPE_CHECKING
 from typing import Collection
 from typing import Iterable
+from typing import Optional
 from typing import TextIO
+from typing import Union
 
 from .exceptions import DisabledTagError
 from .output import NullIO
@@ -104,7 +106,7 @@ class Node(ABC):
         """Return variables this node adds to the node's block scope."""
         return []
 
-    def partial_scope(self) -> Partial | None:
+    def partial_scope(self) -> Optional[Partial]:
         """Return information about a partial template loaded by this node."""
         return None
 
@@ -131,7 +133,7 @@ class Partial:
 
     def __init__(
         self,
-        name: Expression | str,
+        name: Union[Expression, str],
         scope: PartialScope,
         in_scope: Iterable[Identifier],
     ) -> None:

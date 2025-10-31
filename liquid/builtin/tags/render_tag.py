@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
 from typing import TextIO
+from typing import Union
 
 from liquid.ast import Node
 from liquid.ast import Partial
@@ -51,7 +52,7 @@ class RenderNode(Node):
     def __init__(
         self,
         token: Token,
-        name: StringLiteral | Identifier,
+        name: Union[StringLiteral, Identifier],
         *,
         var: Optional[Expression] = None,
         loop: bool = False,
@@ -81,7 +82,7 @@ class RenderNode(Node):
         """Render the node to the output buffer."""
         if isinstance(self.name, Identifier):
             # We're expecting an inline snippet.
-            template: BoundTemplate | None = context.resolve(
+            template: Optional[BoundTemplate] = context.resolve(
                 self.name, token=self.token, default=None
             )
             if not isinstance(template, BoundTemplate):
@@ -161,7 +162,7 @@ class RenderNode(Node):
         """Render the node to the output buffer."""
         if isinstance(self.name, Identifier):
             # We're expecting an inline snippet.
-            template: BoundTemplate | None = context.resolve(
+            template: Optional[BoundTemplate] = context.resolve(
                 self.name, token=self.token, default=None
             )
             if not isinstance(template, BoundTemplate):
@@ -243,7 +244,7 @@ class RenderNode(Node):
         """Return this node's children."""
         if isinstance(self.name, Identifier):
             # We're expecting an inline snippet.
-            template: BoundTemplate | None = static_context.resolve(
+            template: Optional[BoundTemplate] = static_context.resolve(
                 self.name, token=self.token, default=None
             )
             if template:
@@ -266,7 +267,7 @@ class RenderNode(Node):
         """Return this node's children."""
         if isinstance(self.name, Identifier):
             # We're expecting an inline snippet.
-            template: BoundTemplate | None = static_context.resolve(
+            template: Optional[BoundTemplate] = static_context.resolve(
                 self.name, token=self.token, default=None
             )
             if template:
@@ -290,7 +291,7 @@ class RenderNode(Node):
             yield self.var
         yield from (arg.value for arg in self.args)
 
-    def partial_scope(self) -> Partial | None:
+    def partial_scope(self) -> Optional[Partial]:
         """Return information about a partial template loaded by this node."""
         scope: list[Identifier] = [
             Identifier(arg.name, token=arg.token) for arg in self.args
@@ -323,7 +324,7 @@ class RenderTag(Tag):
         """Parse tokens from _stream_ into an AST node."""
         token = stream.eat(TOKEN_TAG)
         tokens = stream.into_inner(tag=token, eat=False)
-        name: Expression | Identifier = parse_primitive(self.env, tokens)
+        name: Union[Expression, Identifier] = parse_primitive(self.env, tokens)
 
         if isinstance(name, Path):
             head = name.head()
