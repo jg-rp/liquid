@@ -61,7 +61,18 @@ class SnippetNode(Node):
         include_partials: bool = True,  # noqa: ARG002
     ) -> Iterable[Node]:
         """Return this node's children."""
-        yield self.block
+        # Snippets are only visited when rendered so we get accurate variable
+        # scope analysis.
+        static_context.assign(
+            self.name,
+            BoundTemplate(
+                static_context.env,
+                self.block.nodes,
+                static_context.template.name,
+                static_context.template.path,
+            ),
+        )
+        return []
 
     def template_scope(self) -> Iterable[Identifier]:
         """Return variables this node adds to the template local scope."""

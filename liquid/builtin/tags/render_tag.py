@@ -244,6 +244,7 @@ class RenderNode(Node):
         """Return this node's children."""
         if isinstance(self.name, Identifier):
             # We're expecting an inline snippet.
+            # Always visit inline snippets, even if include_partials is False.
             template: Optional[BoundTemplate] = static_context.resolve(
                 self.name, token=self.token, default=None
             )
@@ -307,7 +308,13 @@ class RenderNode(Node):
                     )
                 )
 
-        return Partial(name=self.name, scope=PartialScope.ISOLATED, in_scope=scope)
+        # Static analysis will use the parent template name if Partial.name is
+        # empty. Which is what we want for inline snippets.
+        return Partial(
+            name=self.name if isinstance(self.name, StringLiteral) else "",
+            scope=PartialScope.ISOLATED,
+            in_scope=scope,
+        )
 
 
 BIND_TAGS = frozenset((TOKEN_WITH, TOKEN_FOR))

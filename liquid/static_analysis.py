@@ -179,8 +179,14 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
                 else str(partial.name.evaluate(static_context))
             )
 
-            if partial_name in seen:
+            # XXX: what about rendering the same partial with different arguments?
+            # TODO: to avoid double counting, we'll only want to count globals if we've
+            # seen a partial before, and only if the arguments differ.
+            # TODO: protect against recursive include/render!
+            if partial_name and partial_name in seen:
                 return
+
+            partial_name = partial_name or template_name
 
             partial_scope = (
                 _StaticScope(set(partial.in_scope))
