@@ -1,5 +1,10 @@
 # Python Liquid Change Log
 
+## Version 2.2.0 (unreleased)
+
+- Added the `{% snippet %}` tag.
+- Improved static analysis of partial templates. Previously we would visit a partial template only once, regardless of how many times it is rendered with `{% render %}`. Now we visit partial templates once for each distinct set of arguments passed to `{% render %}`, potentially reporting "global" variables that we'd previously missed.
+
 ## Version 2.1.0
 
 **Features**

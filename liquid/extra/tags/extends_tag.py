@@ -19,7 +19,6 @@ from liquid.ast import Node
 from liquid.ast import Partial
 from liquid.ast import PartialScope
 from liquid.builtin.expressions import Identifier
-from liquid.builtin.expressions import StringLiteral
 from liquid.builtin.expressions import parse_name
 from liquid.exceptions import RequiredBlockError
 from liquid.exceptions import StopRender
@@ -107,7 +106,7 @@ class ExtendsNode(Node):
     def partial_scope(self) -> Optional[Partial]:
         """Return information about a partial template loaded by this node."""
         return Partial(
-            name=StringLiteral(self.name.token, self.name),
+            name=self.name,
             scope=PartialScope.INHERITED,
             in_scope=[],
         )

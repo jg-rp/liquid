@@ -308,12 +308,16 @@ class RenderNode(Node):
                     )
                 )
 
+        partial_name = self.name.value if isinstance(self.name, StringLiteral) else ""
+        partial_key = hash((partial_name, *[arg.name for arg in self.args]))
+
         # Static analysis will use the parent template name if Partial.name is
         # empty. Which is what we want for inline snippets.
         return Partial(
-            name=self.name if isinstance(self.name, StringLiteral) else "",
+            name=partial_name,
             scope=PartialScope.ISOLATED,
             in_scope=scope,
+            key=partial_key,
         )
 
 
