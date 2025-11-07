@@ -45,7 +45,7 @@ class SnippetNode(Node):
         # Don't render anything, just bind the block to its name.
         context.assign(
             self.name,
-            BoundTemplate(
+            SnippetDrop(
                 context.env,
                 self.block.nodes,
                 context.template.name,
@@ -65,7 +65,7 @@ class SnippetNode(Node):
         # scope analysis.
         static_context.assign(
             self.name,
-            BoundTemplate(
+            SnippetDrop(
                 static_context.env,
                 self.block.nodes,
                 static_context.template.name,
@@ -98,3 +98,10 @@ class SnippetTag(Tag):
         block = get_parser(self.env).parse_block(stream, self.ENDSNIPPETBLOCK)
         stream.expect(TOKEN_TAG, value=self.end)
         return self.node_class(token, name, block)
+
+
+class SnippetDrop(BoundTemplate):
+    """An template suitable for storing in a render context."""
+
+    def __str__(self) -> str:
+        return "SnippetDrop"
