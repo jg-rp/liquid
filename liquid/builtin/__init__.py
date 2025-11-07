@@ -90,6 +90,7 @@ from .tags import increment_tag
 from .tags import inline_comment_tag
 from .tags import liquid_tag
 from .tags import render_tag
+from .tags import snippet
 from .tags import tablerow_tag
 from .tags import unless_tag
 
@@ -133,6 +134,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_tag(ifchanged_tag.IfChangedTag)
     env.add_tag(inline_comment_tag.InlineCommentTag)
     env.add_tag(doc_tag.DocTag)
+    env.add_tag(snippet.SnippetTag)
 
     env.add_filter("abs", abs_)
     env.add_filter("at_most", at_most)

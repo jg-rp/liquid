@@ -66,7 +66,7 @@ class Currency:
             can not be resolved. Defaults to `"USD"`.
         locale_var: The name of a render context variable that resolves to the
             current locale. Defaults to `"locale"`.
-        default_locale : A fallback locale to use if `locale_var` can not be
+        default_locale: A fallback locale to use if `locale_var` can not be
             resolved. Defaults to `"en_US"`.
         format_var: The name of a render context variable that resolves to the
             current currency format string. Defaults to `"currency_format"`.

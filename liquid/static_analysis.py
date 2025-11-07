@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import TYPE_CHECKING
 from typing import Iterable
+from typing import Optional
 from typing import Union
 
 from .ast import BlockNode
@@ -139,15 +140,26 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
-    seen: set[str] = set()
+    # Keys are hashes of partial template name and its arguments. If we've
+    # visited a template before but ith different arguments, later visits
+    # only record global variables so as not to double count locals, filters
+    # and tags.
+    seen: defaultdict[str, set[Optional[int]]] = defaultdict(set)
 
-    def _visit(node: Node, template_name: str, scope: _StaticScope) -> None:
-        if template_name:
-            seen.add(template_name)
+    def _visit(
+        node: Node,
+        template_name: str,
+        scope: _StaticScope,
+        *,
+        just_globals: bool = False,
+    ) -> None:
+        if template_name and not just_globals:
+            seen[template_name].add(None)
 
         # Update tags from node.token
         if (
-            not isinstance(
+            not just_globals
+            and not isinstance(
                 node, (BlockNode, ConditionalBlockNode, MultiExpressionBlockNode)
             )
             and node.token.kind == TOKEN_TAG
@@ -156,11 +168,18 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
 
         # Update variables from node.expressions()
         for expr in node.expressions():
-            _analyze_variables(expr, template_name, scope, globals, variables)
+            _analyze_variables(
+                expr,
+                template_name,
+                scope,
+                globals,
+                _VariableMap() if just_globals else variables,
+            )
 
-            # Update filters from expr
-            for name, span in _extract_filters(expr, template_name):
-                filters[name].append(span)
+            if not just_globals:
+                # Update filters from expr
+                for name, span in _extract_filters(expr, template_name):
+                    filters[name].append(span)
 
         # Update the template scope from node.template_scope()
         for ident in node.template_scope():
@@ -173,10 +192,22 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
             )
 
         if partial := node.partial_scope():
-            partial_name = str(partial.name.evaluate(static_context))
+            partial_name = (
+                partial.name
+                if isinstance(partial.name, str)
+                else str(partial.name.evaluate(static_context))
+            )
 
-            if partial_name in seen:
+            # If we've seen this partial before but with different arguments,
+            # we might want to visit it again but only capture globals.
+            _just_globals = partial_name in seen
+            if partial.key in seen[partial_name]:
+                # We've visited this partial template before with the same
+                # arguments.
                 return
+
+            seen[partial_name].add(partial.key)
+            partial_name = partial_name or template_name
 
             partial_scope = (
                 _StaticScope(set(partial.in_scope))
@@ -187,8 +218,12 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
             for child in node.children(
                 static_context, include_partials=include_partials
             ):
-                seen.add(partial_name)
-                _visit(child, partial_name, partial_scope)
+                _visit(
+                    child,
+                    partial_name,
+                    partial_scope,
+                    just_globals=just_globals or _just_globals,
+                )
 
             partial_scope.pop()
         else:
@@ -196,7 +231,7 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
             for child in node.children(
                 static_context, include_partials=include_partials
             ):
-                _visit(child, template_name, scope)
+                _visit(child, template_name, scope, just_globals=just_globals)
             scope.pop()
 
     for node in template.nodes:
@@ -226,15 +261,22 @@ async def _analyze_async(
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
-    seen: set[str] = set()
+    seen: defaultdict[str, set[Optional[int]]] = defaultdict(set)
 
-    async def _visit(node: Node, template_name: str, scope: _StaticScope) -> None:
-        if template_name:
-            seen.add(template_name)
+    async def _visit(
+        node: Node,
+        template_name: str,
+        scope: _StaticScope,
+        *,
+        just_globals: bool = False,
+    ) -> None:
+        if template_name and not just_globals:
+            seen[template_name].add(None)
 
         # Update tags from node.token
         if (
-            not isinstance(
+            not just_globals
+            and not isinstance(
                 node, (BlockNode, ConditionalBlockNode, MultiExpressionBlockNode)
             )
             and node.token.kind == TOKEN_TAG
@@ -243,11 +285,18 @@ async def _analyze_async(
 
         # Update variables from node.expressions()
         for expr in node.expressions():
-            _analyze_variables(expr, template_name, scope, globals, variables)
+            _analyze_variables(
+                expr,
+                template_name,
+                scope,
+                globals,
+                _VariableMap() if just_globals else variables,
+            )
 
-            # Update filters from expr
-            for name, span in _extract_filters(expr, template_name):
-                filters[name].append(span)
+            if not just_globals:
+                # Update filters from expr
+                for name, span in _extract_filters(expr, template_name):
+                    filters[name].append(span)
 
         # Update the template scope from node.template_scope()
         for ident in node.template_scope():
@@ -260,10 +309,22 @@ async def _analyze_async(
             )
 
         if partial := node.partial_scope():
-            partial_name = str(partial.name.evaluate(static_context))
+            partial_name = (
+                partial.name
+                if isinstance(partial.name, str)
+                else str(partial.name.evaluate(static_context))
+            )
 
-            if partial_name in seen:
+            # If we've seen this partial before but with different arguments,
+            # we might want to visit it again but only capture globals.
+            _just_globals = partial_name in seen
+            if partial.key in seen[partial_name]:
+                # We've visited this partial template before with the same
+                # arguments.
                 return
+
+            seen[partial_name].add(partial.key)
+            partial_name = partial_name or template_name
 
             partial_scope = (
                 _StaticScope(set(partial.in_scope))
@@ -274,8 +335,12 @@ async def _analyze_async(
             for child in await node.children_async(
                 static_context, include_partials=include_partials
             ):
-                seen.add(partial_name)
-                await _visit(child, partial_name, partial_scope)
+                await _visit(
+                    child,
+                    partial_name,
+                    partial_scope,
+                    just_globals=just_globals or _just_globals,
+                )
 
             partial_scope.pop()
         else:
@@ -283,7 +348,7 @@ async def _analyze_async(
             for child in await node.children_async(
                 static_context, include_partials=include_partials
             ):
-                await _visit(child, template_name, scope)
+                await _visit(child, template_name, scope, just_globals=just_globals)
             scope.pop()
 
     for node in template.nodes:

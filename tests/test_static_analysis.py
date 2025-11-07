@@ -936,3 +936,74 @@ def test_analyze_translate(env: Environment) -> None:
             "translate": [Span("", 4)],
         },
     )
+
+
+def test_analyze_snippet(env: Environment) -> None:
+    source = "\n".join(
+        [
+            "{% snippet foo %}",
+            "  Hi!",
+            "  {{ bar }}",
+            "  {{ baz }}",
+            "{% endsnippet %}",
+            "",
+            "{% render foo, bar: '42' %}",
+        ]
+    )
+
+    _assert(
+        env.from_string(source, name="x"),
+        locals={"foo": [Variable(["foo"], Span("x", 11))]},
+        globals={
+            "baz": [Variable(["baz"], Span("x", 41))],
+        },
+        variables={
+            "baz": [Variable(["baz"], Span("x", 41))],
+            "bar": [Variable(["bar"], Span("x", 29))],
+        },
+        tags={
+            "snippet": [Span("x", 3)],
+            "render": [Span("x", 69)],
+        },
+    )
+
+
+def test_analyze_snippet_rendered_twice(env: Environment) -> None:
+    # `baz` is out of scope the first time we render `foo` but in scope
+    # the second time.
+    source = "\n".join(
+        [
+            "{% snippet foo %}",
+            "  Hi!",
+            "  {{ bar }}",
+            "  {{ baz }}",
+            "{% endsnippet %}",
+            "",
+            "{% render foo, bar: '42' %}",
+            "{% render foo, baz: 99 %}",
+        ]
+    )
+
+    _assert(
+        env.from_string(source, name="x"),
+        locals={
+            "foo": [
+                Variable(["foo"], Span("x", 11)),
+            ]
+        },
+        globals={
+            "baz": [Variable(["baz"], Span("x", 41))],
+            "bar": [Variable(["bar"], Span("x", 29))],
+        },
+        variables={
+            "baz": [Variable(["baz"], Span("x", 41))],
+            "bar": [Variable(["bar"], Span("x", 29))],
+        },
+        tags={
+            "snippet": [Span("x", 3)],
+            "render": [
+                Span("x", 69),
+                Span("x", 97),
+            ],
+        },
+    )

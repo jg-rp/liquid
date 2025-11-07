@@ -9,7 +9,9 @@ from enum import auto
 from typing import TYPE_CHECKING
 from typing import Collection
 from typing import Iterable
+from typing import Optional
 from typing import TextIO
+from typing import Union
 
 from .exceptions import DisabledTagError
 from .output import NullIO
@@ -104,7 +106,7 @@ class Node(ABC):
         """Return variables this node adds to the node's block scope."""
         return []
 
-    def partial_scope(self) -> Partial | None:
+    def partial_scope(self) -> Optional[Partial]:
         """Return information about a partial template loaded by this node."""
         return None
 
@@ -121,19 +123,30 @@ class Partial:
     """Partial template meta data.
 
     Args:
-        name: An expression resolving to the name associated with the partial template.
+        name: The name of the partial or an expression resolving to the name
+            associated with the partial template.
         scope: The kind of scope the partial template should have when loaded.
         in_scope: Names that will be added to the partial template scope.
+        key: A hash of the partial template name and any arguments the partial
+            template will be rendered with that might affect its scope. If a
+            key is provided, static analysis helpers will visit a partial
+            template once for each distinct key.
     """
 
-    __slots__ = ("name", "scope", "in_scope")
+    __slots__ = ("name", "scope", "in_scope", "key")
 
     def __init__(
-        self, name: Expression, scope: PartialScope, in_scope: Iterable[Identifier]
+        self,
+        name: Union[Expression, str],
+        scope: PartialScope,
+        in_scope: Iterable[Identifier],
+        *,
+        key: Optional[int] = None,
     ) -> None:
         self.name = name
         self.scope = scope
         self.in_scope = in_scope
+        self.key = key
 
 
 class IllegalNode(Node):
