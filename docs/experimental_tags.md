@@ -1,4 +1,4 @@
-The tags described on this page are considered experimental and might change without warning and following semantic versioning.
+The tags described on this page are considered experimental and might change without warning and not follow semantic versioning.
 
 ## snippet
 
