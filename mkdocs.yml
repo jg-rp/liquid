@@ -51,6 +51,7 @@ nav:
   - Tag reference:
       - Default tags: "tag_reference.md"
       - Extra tags: "optional_tags.md"
+      - Experimental tags: "experimental_tags.md"
   - Filter reference:
       - Default filters: "filter_reference.md"
       - Extra filters: "optional_filters.md"
