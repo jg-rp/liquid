@@ -11,7 +11,7 @@ from typing import Union
 from liquid.ast import BlockNode
 from liquid.ast import Node
 from liquid.builtin.expressions import parse_primitive
-from liquid.builtin.expressions.logical import _eq
+from liquid.builtin.expressions.logical import _eq  # type: ignore
 from liquid.exceptions import LiquidSyntaxError
 from liquid.expression import Expression
 from liquid.parser import get_parser
@@ -85,7 +85,7 @@ class CaseNode(Node):
                     count += count_
             # Only render `else` blocks if all preceding `when` blocks are falsy.
             # Multiple `else` blocks are OK.
-            elif isinstance(block, BlockNode) and default:
+            elif default:
                 count += block.render(context, buffer)
 
         return count
@@ -106,7 +106,7 @@ class CaseNode(Node):
                     count += count_
             # Only render `else` blocks if all preceding `when` blocks are falsy.
             # Multiple `else` blocks are OK.
-            elif isinstance(block, BlockNode) and default:
+            elif default:
                 count += await block.render_async(context, buffer)
 
         return count

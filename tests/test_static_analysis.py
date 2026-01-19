@@ -11,6 +11,7 @@ import pytest
 from liquid import Environment
 from liquid.builtin import DictLoader
 from liquid.exceptions import TemplateNotFoundError
+from liquid.extra import SnippetTag
 from liquid.span import Span
 from liquid.static_analysis import Variable
 
@@ -25,7 +26,9 @@ class MockEnv(Environment):
 
 @pytest.fixture
 def env() -> Environment:  # noqa: D103
-    return MockEnv(extra=True)
+    _env = MockEnv(extra=True)
+    _env.add_tag(SnippetTag)  # Experimental tag
+    return _env
 
 
 def _assert(

@@ -20,19 +20,19 @@ class Case:
 
     name: str
     template: str
-    data: dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)  # type: ignore
     templates: Optional[dict[str, str]] = None
     result: Optional[str] = None
     results: Optional[list[str]] = None
     invalid: Optional[bool] = None
-    tags: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)  # type: ignore
 
 
 FILENAME = "tests/golden-liquid/golden_liquid.json"
 
 SKIP = {
     "filters, has, array of ints, default value": "Ruby behavioral quirk",
-    "tags, case, unexpected when token, rigid": "TODO",
+    "tags, case, unexpected when token, strict2": "TODO",
 }
 
 

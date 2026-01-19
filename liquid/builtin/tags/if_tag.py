@@ -152,7 +152,7 @@ class IfTag(Tag):
         condition = BooleanExpression.parse(self.env, tokens)
         parse_block = get_parser(self.env).parse_block
         consequence = parse_block(stream, ENDIFBLOCK)
-        alternatives = []
+        alternatives: list[ConditionalBlockNode] = []
 
         while stream.current.is_tag(TAG_ELSIF):
             # If the expression can't be parsed, eat the "elsif" block and

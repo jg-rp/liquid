@@ -21,6 +21,7 @@ from .tags import BlockTag
 from .tags import CallTag
 from .tags import ExtendsTag
 from .tags import MacroTag
+from .tags import SnippetTag
 from .tags import TranslateTag
 from .tags import WithTag
 
@@ -38,7 +39,6 @@ __all__ = (
     "DateTime",
     "ExtendsTag",
     "GetText",
-    "IfNotTag",
     "index",
     "JSON",
     "MacroTag",
@@ -49,6 +49,7 @@ __all__ = (
     "script_tag",
     "sort_numeric",
     "stylesheet_tag",
+    "SnippetTag",
     "Translate",
     "Unit",
     "WithTag",
