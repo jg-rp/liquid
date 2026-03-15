@@ -58,6 +58,7 @@ from .filters.string import replace_last
 from .filters.string import rstrip
 from .filters.string import slice_
 from .filters.string import split
+from .filters.string import squish
 from .filters.string import strip
 from .filters.string import strip_html
 from .filters.string import strip_newlines
@@ -175,6 +176,7 @@ def register(env: Environment) -> None:  # noqa: PLR0915
     env.add_filter("base64_decode", base64_decode)
     env.add_filter("base64_url_safe_encode", base64_url_safe_encode)
     env.add_filter("base64_url_safe_decode", base64_url_safe_decode)
+    env.add_filter("squish", squish)
 
     env.add_filter("find", find)
     env.add_filter("find_index", find_index)
