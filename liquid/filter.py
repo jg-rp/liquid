@@ -54,8 +54,11 @@ def string_filter(_filter: FilterT) -> FilterT:
 
     @wraps(_filter)
     def wrapper(val: object, *args: Any, **kwargs: Any) -> Any:
-        if not isinstance(val, str):
+        if val is None:
+            val = ""
+        elif not isinstance(val, str):
             val = str(val)
+
         try:
             return _filter(val, *args, **kwargs)
         except TypeError as err:

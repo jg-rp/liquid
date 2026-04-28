@@ -1415,6 +1415,24 @@ If the argument is undefined or an empty string, the input will be split at ever
 H#e#l#l#o# #t#h#e#r#e
 ```
 
+## squish
+
+**_New in version 2.2.0_**
+
+```
+<string> | squish
+```
+
+Return the input string with all leading and trailing whitespace removed, and any other runs of whitespace replaced with a single space.
+
+```liquid2
+{{ "    Hello, \n\t World! \r\n" | squish }}
+```
+
+```plain title="output"
+Hello, World!
+```
+
 ## strip
 
 ```

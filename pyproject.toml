@@ -144,8 +144,7 @@ exclude = [
 # Same as Black.
 line-length = 88
 
-# Assume Python 3.12.
-target-version = "py312"
+target-version = "py39"
 
 [tool.ruff.lint.isort]
 force-single-line = true

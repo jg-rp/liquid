@@ -405,3 +405,12 @@ def base64_url_safe_decode(val: str) -> str:
         return base64.urlsafe_b64decode(val).decode()
     except binascii.Error as err:
         raise FilterError("invalid base64-encoded string", token=None) from err
+
+
+RE_WHITESPACE = re.compile(r"\s+")
+
+
+@string_filter
+def squish(val: str) -> str:
+    """Strip whitespace and replace whitespace with a single space."""
+    return RE_WHITESPACE.sub(" ", val.strip())
