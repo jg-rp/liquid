@@ -46,6 +46,16 @@ Inside [liquid tags](#liquid), any line starting with a hash will be considered 
 %}
 ```
 
+### Doc comments
+
+**_New in version 2.0.0_**
+
+```liquid2
+{% doc %} ... {% enddoc %}
+```
+
+Like [block comments](#block-comments), doc comments are not rendered. Doc comments are designed to be read by tooling to improve Liquid template development.
+
 ## Output
 
 ```

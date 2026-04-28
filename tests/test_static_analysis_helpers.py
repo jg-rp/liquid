@@ -148,3 +148,36 @@ def test_get_tag_names_async() -> None:
         return await TEMPLATE.tag_names_async()
 
     assert sorted(asyncio.run(coro())) == sorted(["assign", "for"])
+
+
+def test_get_comment_nodes() -> None:
+    source = """\
+A template with comments.
+{% comment %}a{% endcomment %}
+{% comment %}b{% endcomment %}
+{% # c %}
+{% if false %}
+    {% comment %}d{% endcomment %}
+    {% # e %}
+{% endif %}
+"""
+
+    template = parse(source)
+    nodes = template.comments()
+    comment_strings = [node.text for node in nodes]
+    assert comment_strings == ["a", "b", "c", "d", "e"]
+
+
+def test_get_doc_nodes() -> None:
+    source = """\
+{% doc %}
+    Some docs
+{% enddoc %}
+
+{% doc %}More docs{% enddoc %}
+"""
+
+    template = parse(source)
+    nodes = template.docs()
+    doc_strings = [node.text for node in nodes]
+    assert doc_strings == ["\n    Some docs\n", "More docs"]
