@@ -28,6 +28,12 @@ This does not apply to parsing of integer literals, only converting strings to i
 
 The built-in [`date`](filter_reference.md#date) filter uses [dateutil](https://dateutil.readthedocs.io/en/stable/) for parsing strings to `datetime`s, and `strftime` for formatting. There are likely to be some inconsistencies between this and the reference implementation's equivalent parsing and formatting of dates and times.
 
+## Error Handling
+
+Python Liquid might not handle syntax or type errors in the same way as the reference implementation. We might fail earlier or later, and will almost certainly produce a different error message.
+
+Python Liquid does not have a "lax" parser, like Ruby Liquid. If the lexer encounters unknown symbols, a `LiquidSyntaxError` is raised. Upon finding an error in [lax mode](/introduction/strictness), the parser simply discards the current block and continues to to the next block, if one is available. Also, Python Liquid will never inject error messages into an output document.
+
 ## Orphaned `{% break %}` and `{% continue %}`
 
 **_See issue [#76](https://github.com/jg-rp/liquid/issues/76)_**
