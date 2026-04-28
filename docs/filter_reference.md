@@ -1417,6 +1417,8 @@ H#e#l#l#o# #t#h#e#r#e
 
 ## squish
 
+**_New in version 2.2.0_**
+
 ```
 <string> | squish
 ```

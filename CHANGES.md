@@ -2,8 +2,8 @@
 
 ## Version 2.2.0 (unreleased)
 
-- Added an **experimental** `{% snippet %}` tag. Shopify/liquid released then quickly removed `{% snippet %}`. We're calling it "experimental" and keeping it disabled by default, pending more activity from Shopify/liquid.
-- Added the `squish` filter. `{{ x | squish }}` is equivalent to `{{ x | strip | split | join}}`.
+- Added the `squish` filter. `{{ x | squish }}` is equivalent to `{{ x | strip | split | join }}`. See [#195](https://github.com/jg-rp/liquid/pull/195).
+- Added an **experimental** `{% snippet %}` tag. Shopify/liquid released then quickly removed `{% snippet %}`. We're calling it "experimental" and keeping it disabled by default, pending more activity from Shopify/liquid. See [#191](https://github.com/jg-rp/liquid/pull/191) and [#193](https://github.com/jg-rp/liquid/pull/193).
 - Improved static analysis of partial templates. Previously we would visit a partial template only once, regardless of how many times it is rendered with `{% render %}`. Now we visit partial templates once for each distinct set of arguments passed to `{% render %}`, potentially reporting "global" variables that we'd previously missed.
 - Changed the `string_filter` decorator to coerce `None` to an empty string instead of `"None"`. This is what Shopify/liquid does with `nil.to_s`.
 
