@@ -127,7 +127,11 @@ class TemplateAnalysis:
     tags: dict[str, list[Span]]
 
 
-def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnalysis:
+def analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnalysis:
+    """Report variable, filters and tags used in the given template.
+
+    This is used by `BoundTemplate.analyze`.
+    """
     variables = _VariableMap()
     globals = _VariableMap()  # noqa: A001
     locals = _VariableMap()  # noqa: A001
@@ -246,9 +250,13 @@ def _analyze(template: BoundTemplate, *, include_partials: bool) -> TemplateAnal
     )
 
 
-async def _analyze_async(
+async def analyze_async(
     template: BoundTemplate, *, include_partials: bool
 ) -> TemplateAnalysis:
+    """Report variable, filters and tags used in the given template.
+
+    This is used by `BoundTemplate.analyze_async`.
+    """
     variables = _VariableMap()
     globals = _VariableMap()  # noqa: A001
     locals = _VariableMap()  # noqa: A001

@@ -140,3 +140,38 @@ print(template.tag_names())
 ## Variable, tag and filter locations
 
 [`analyze()`](api/template.md#liquid.BoundTemplate.analyze) and [`analyze_async()`](api/template.md#liquid.BoundTemplate.analyze_async) return an instance of [`TemplateAnalysis`](api/template.md#liquid.static_analysis.TemplateAnalysis). It contains all of the information provided by the methods described above, but includes the location of each variable, tag and filter, each of which can appear many times across many templates.
+
+## Comment and doc nodes
+
+**_New in version 2.2.0_**
+
+[`comments()`](api/template.md#liquid.BoundTemplate.comments) and [`docs()`](api/template.md#liquid.BoundTemplate.docs) return a list of `CommentNode` and `DocNode` instances, respectively. Both have `token` and `text` properties.
+
+```python
+from liquid import parse
+
+source = """\
+{% doc %}
+    some doc comment
+{% enddoc %}
+
+Hello!
+
+{% comment %}
+    some comment
+{% endcomment %}
+
+{% if false %}
+    {% # an inline comment %}
+{% endif %}
+"""
+
+template = parse(source)
+print([node.text for node in template.comments()])
+print([node.text for node in template.docs()])
+```
+
+```plain title="output"
+['\n    some comment\n', 'an inline comment']
+['\n    some doc comment\n']
+```

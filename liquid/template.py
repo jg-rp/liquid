@@ -13,8 +13,11 @@ from typing import Mapping
 from typing import Optional
 from typing import TextIO
 from typing import Type
+from typing import TypedDict
 from typing import Union
 
+from .builtin.tags.comment_tag import CommentNode
+from .builtin.tags.doc_tag import DocNode
 from .context import FutureContext
 from .context import RenderContext
 from .exceptions import LiquidError
@@ -22,8 +25,8 @@ from .exceptions import LiquidInterrupt
 from .exceptions import LiquidSyntaxError
 from .exceptions import StopRender
 from .output import LimitedStringIO
-from .static_analysis import _analyze
-from .static_analysis import _analyze_async
+from .static_analysis import analyze
+from .static_analysis import analyze_async
 from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
@@ -262,11 +265,11 @@ class BoundTemplate:
             include_partials: If `True`, we will try to load partial templates and
                 analyze those templates too.
         """
-        return _analyze(self, include_partials=include_partials)
+        return analyze(self, include_partials=include_partials)
 
     async def analyze_async(self, *, include_partials: bool = True) -> TemplateAnalysis:
         """An async version of `analyze`."""
-        return await _analyze_async(self, include_partials=include_partials)
+        return await analyze_async(self, include_partials=include_partials)
 
     def variables(self, *, include_partials: bool = True) -> list[str]:
         """Return a list of variables used in this template without path segments.
@@ -520,6 +523,52 @@ class BoundTemplate:
         """Return a list of tag names used in this template."""
         return list((await self.analyze_async(include_partials=include_partials)).tags)
 
+    def comments(self) -> list[CommentNode]:
+        """Return a list of comment tag nodes found in this template.
+
+        Instances of `CommentNode` and `InlineCommentNode` have `token` and
+        `text` properties. Use `[node.text for node in template.comments()]` to
+        get a list of comment strings.
+
+        Note that this method does not try to load included or rendered
+        templates.
+        """
+        context = RenderContext(self)
+        nodes: list[CommentNode] = []
+
+        def visit(node: Node) -> None:
+            if isinstance(node, CommentNode):
+                nodes.append(node)
+
+            for child in node.children(context, include_partials=False):
+                visit(child)
+
+        for child in self.nodes:
+            visit(child)
+
+        return nodes
+
+    def docs(self) -> list[DocNode]:
+        """Return a list of doc tag nodes found in this template.
+
+        Instances of `DocNode` have `token` and `text` properties. Use
+        `[node.text for node in template.docs()]` to get a list of doc strings.
+        """
+        context = RenderContext(self)
+        nodes: list[DocNode] = []
+
+        def visit(node: Node) -> None:
+            if isinstance(node, DocNode):
+                nodes.append(node)
+
+            for child in node.children(context, include_partials=False):
+                visit(child)
+
+        for child in self.nodes:
+            visit(child)
+
+        return nodes
+
 
 class AwareBoundTemplate(BoundTemplate):
     """A `BoundTemplate` subclass with a `TemplateDrop` in the global namespace."""
@@ -559,6 +608,12 @@ class FutureAwareBoundTemplate(AwareBoundTemplate):
     context_class = FutureContext
 
 
+class _TemplateDropItems(TypedDict):
+    directory: str
+    name: str
+    suffix: str | None
+
+
 class TemplateDrop(Mapping[str, Optional[str]]):
     """Template meta data mapping."""
 
@@ -575,7 +630,7 @@ class TemplateDrop(Mapping[str, Optional[str]]):
         if "." in self.stem:
             self.suffix = self.stem.split(".")[-1]
 
-        self._items = {
+        self._items: _TemplateDropItems = {
             "directory": self.path.parent.name,
             "name": self.path.name.split(".")[0],
             "suffix": self.suffix,
@@ -594,7 +649,7 @@ class TemplateDrop(Mapping[str, Optional[str]]):
         return item in self._items
 
     def __getitem__(self, key: object) -> Optional[str]:
-        return self._items[str(key)]
+        return self._items[str(key)]  # type: ignore
 
     def __len__(self) -> int:
         return len(self._items)

@@ -32,7 +32,7 @@ The built-in [`date`](filter_reference.md#date) filter uses [dateutil](https://d
 
 Python Liquid might not handle syntax or type errors in the same way as the reference implementation. We might fail earlier or later, and will almost certainly produce a different error message.
 
-Python Liquid does not have a "lax" parser, like Ruby Liquid. If the lexer encounters unknown symbols, a `LiquidSyntaxError` is raised. Upon finding an error in [lax mode](/introduction/strictness), the parser simply discards the current block and continues to to the next block, if one is available. Also, Python Liquid will never inject error messages into an output document.
+Python Liquid does not have a "lax" parser, like Ruby Liquid. If the lexer encounters unknown symbols, a `LiquidSyntaxError` is raised. Upon finding an error in [lax mode](environment.md#tolerance), the parser simply discards the current block and continues to to the next block, if one is available. Also, Python Liquid will never inject error messages into an output document.
 
 ## Orphaned `{% break %}` and `{% continue %}`
 

@@ -37,7 +37,7 @@ class CommentNode(ast.Node):
     def __str__(self) -> str:
         return f"{{% comment %}}{self.text}{{% endcomment %}}"
 
-    def render_to_output(self, _: RenderContext, __: TextIO) -> int:
+    def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:  # noqa: ARG002
         """Render the node to the output buffer."""
         return 0
 
@@ -61,7 +61,7 @@ class CommentTag(Tag):
 
         # A block `{% comment %}`
         token = stream.eat(TOKEN_TAG)
-        text = []
+        text: list[str] = []
 
         while True:
             if stream.current.kind == TOKEN_EOF:
