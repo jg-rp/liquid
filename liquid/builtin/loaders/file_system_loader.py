@@ -35,6 +35,7 @@ class FileSystemLoader(BaseLoader):
         *,
         encoding: str = "utf-8",
         ext: Optional[str] = None,
+        reject_symlinks: bool = False,
     ):
         super().__init__()
         if not isinstance(search_path, Iterable) or isinstance(search_path, str):
@@ -43,6 +44,7 @@ class FileSystemLoader(BaseLoader):
         self.search_path = [Path(path) for path in search_path]
         self.encoding = encoding
         self.ext = ext
+        self.reject_symlinks = reject_symlinks
 
     def resolve_path(self, template_name: str) -> Path:
         """Return a path to the template identified by _template_name_.
@@ -59,11 +61,24 @@ class FileSystemLoader(BaseLoader):
         if os.path.pardir in template_path.parts or template_path.is_absolute():
             raise TemplateNotFoundError(template_name)
 
-        for path in self.search_path:
-            source_path = path.joinpath(template_path)
-            if not source_path.exists():
+        for base in self.search_path:
+            source_path = base.joinpath(template_path)
+
+            if not source_path.exists() or not source_path.is_file():
                 continue
+
+            if self.reject_symlinks:
+                try:
+                    resolved = source_path.resolve(strict=False)
+                    base_resolved = base.resolve(strict=False)
+                except OSError:
+                    continue
+
+                if not resolved.is_relative_to(base_resolved):
+                    continue
+
             return source_path
+
         raise TemplateNotFoundError(template_name)
 
     def _read(self, source_path: Path) -> tuple[str, float]:
