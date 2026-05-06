@@ -128,6 +128,23 @@ def test_stay_in_search_path() -> None:
         env.get_template("../index.liquid")
 
 
+def test_reject_absolute_paths() -> None:
+    with (
+        tempfile.TemporaryDirectory() as root,
+        tempfile.TemporaryDirectory() as private,
+    ):
+        private_file = Path(private) / "secret.liquid"
+        private_file.write_text("SECRET")
+
+        env = Environment(loader=FileSystemLoader(root))
+
+        with pytest.raises(TemplateNotFoundError):
+            env.get_template(str(private_file))
+
+        with pytest.raises(TemplateNotFoundError):
+            env.render(f"{{% render '{private_file}' %}}")
+
+
 def test_dont_cache_templates() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
     template = env.get_template("index.liquid")

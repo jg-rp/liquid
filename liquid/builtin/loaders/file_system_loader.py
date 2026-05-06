@@ -56,7 +56,7 @@ class FileSystemLoader(BaseLoader):
         if self.ext and not template_path.suffix:
             template_path = template_path.with_suffix(self.ext)
 
-        if os.path.pardir in template_path.parts:
+        if os.path.pardir in template_path.parts or template_path.is_absolute():
             raise TemplateNotFoundError(template_name)
 
         for path in self.search_path:
