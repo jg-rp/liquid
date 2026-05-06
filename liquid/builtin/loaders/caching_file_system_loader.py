@@ -21,6 +21,8 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileSystemLoader):
         search_path: One or more paths to search.
         encoding: Open template files with the given encoding.
         ext: A default file extension. Should include a leading period.
+        reject_symlinks: When `True`, reject paths to symlinks that resolve to files
+            outside the search path. Defaults to `False`.
         auto_reload: If `True`, automatically reload a cached template if it has been
             updated.
         namespace_key: The name of a global render context variable or loader keyword
@@ -39,6 +41,7 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileSystemLoader):
         encoding: str = "utf-8",
         ext: Optional[str] = None,
         *,
+        reject_symlinks: bool = False,
         auto_reload: bool = True,
         namespace_key: str = "",
         capacity: int = 300,
@@ -54,4 +57,5 @@ class CachingFileSystemLoader(CachingLoaderMixin, FileSystemLoader):
             search_path=search_path,
             encoding=encoding,
             ext=ext,
+            reject_symlinks=reject_symlinks,
         )

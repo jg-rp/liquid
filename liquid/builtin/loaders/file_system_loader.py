@@ -27,6 +27,8 @@ class FileSystemLoader(BaseLoader):
         search_path: One or more paths to search.
         encoding: Encoding to use when opening files.
         ext: A default file extension. Should include a leading period.
+        reject_symlinks: When `True`, reject paths to symlinks that resolve to files
+            outside the search path. Defaults to `False`.
     """
 
     def __init__(
