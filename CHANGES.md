@@ -2,6 +2,8 @@
 
 ## Version 2.2.0 (unreleased)
 
+- Fixed `FileSystemLoader` and `CachingFileSystemLoader` to reject absolute paths.
+- Added the `reject_symlinks` keyword argument to `FileSystemLoader` and `CachingFileSystemLoader`. When `True`, symlinks pointing to files outside the search path will be rejected. `reject_symlinks` defaults to `False`.
 - Added the `squish` filter. `{{ x | squish }}` is equivalent to `{{ x | strip | split | join }}`. See [#195](https://github.com/jg-rp/liquid/pull/195).
 - Added `BoundTemplate.comments()` and `BoundTemplate.docs()` for statically retrieving `{% comment %}`, `{% # inline comment %}` and `{% doc %}` nodes.
 - Added an **experimental** `{% snippet %}` tag. Shopify/liquid released then quickly removed `{% snippet %}`. We're calling it "experimental" and keeping it disabled by default, pending more activity from Shopify/liquid. See [#191](https://github.com/jg-rp/liquid/pull/191) and [#193](https://github.com/jg-rp/liquid/pull/193).

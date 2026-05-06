@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -126,6 +127,54 @@ def test_stay_in_search_path() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/snippets"))
     with pytest.raises(TemplateNotFoundError):
         env.get_template("../index.liquid")
+
+
+def test_reject_absolute_paths() -> None:
+    with (
+        tempfile.TemporaryDirectory() as root,
+        tempfile.TemporaryDirectory() as private,
+    ):
+        private_file = Path(private) / "secret.liquid"
+        private_file.write_text("SECRET")
+
+        env = Environment(loader=FileSystemLoader(root))
+
+        with pytest.raises(TemplateNotFoundError):
+            env.get_template(str(private_file))
+
+        with pytest.raises(TemplateNotFoundError):
+            env.render(f"{{% render '{private_file}' %}}")
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Symlinks require special permissions on Windows",
+)
+def test_reject_symlink_outside_search_path() -> None:
+    with (
+        tempfile.TemporaryDirectory() as root,
+        tempfile.TemporaryDirectory() as private,
+    ):
+        root_path = Path(root)
+        private_path = Path(private)
+
+        # Create a "secret" file outside the search path
+        private_file = private_path / "secret.liquid"
+        private_file.write_text("SECRET")
+
+        # Create a symlink inside the search path pointing to the private file
+        symlink_path = root_path / "link.liquid"
+        symlink_path.symlink_to(private_file)
+
+        env = Environment(loader=FileSystemLoader(root_path, reject_symlinks=True))
+
+        # Attempt to load the symlink directly
+        with pytest.raises(TemplateNotFoundError):
+            env.get_template("link.liquid")
+
+        # Attempt to render via the render tag
+        with pytest.raises(TemplateNotFoundError):
+            env.render("{% render 'link.liquid' %}")
 
 
 def test_dont_cache_templates() -> None:
