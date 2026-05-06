@@ -756,6 +756,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#comment-and-doc-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comment and doc nodes
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1772,6 +1783,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#comment-and-doc-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comment and doc nodes
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1882,6 +1904,34 @@
 </span></code></pre></div>
 <h2 id="variable-tag-and-filter-locations">Variable, tag and filter locations</h2>
 <p><a href="../api/template/#liquid.BoundTemplate.analyze"><code>analyze()</code></a> and <a href="../api/template/#liquid.BoundTemplate.analyze_async"><code>analyze_async()</code></a> return an instance of <a href="../api/template/#liquid.static_analysis.TemplateAnalysis"><code>TemplateAnalysis</code></a>. It contains all of the information provided by the methods described above, but includes the location of each variable, tag and filter, each of which can appear many times across many templates.</p>
+<h2 id="comment-and-doc-nodes">Comment and doc nodes</h2>
+<p><strong><em>New in version 2.2.0</em></strong></p>
+<p><a href="../api/template/#liquid.BoundTemplate.comments"><code>comments()</code></a> and <a href="../api/template/#liquid.BoundTemplate.docs"><code>docs()</code></a> return a list of <code>CommentNode</code> and <code>DocNode</code> instances, respectively. Both have <code>token</code> and <code>text</code> properties.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="s2">{</span><span class="si">% d</span><span class="s2">oc %}</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="s2">    some doc comment</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">nddoc %}</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="s2">Hello!</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="s2">{</span><span class="si">% c</span><span class="s2">omment %}</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="s2">    some comment</span>
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndcomment %}</span>
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="s2">{</span><span class="si">% i</span><span class="s2">f false %}</span>
+</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="s2">    {</span><span class="si">% # a</span><span class="s2">n inline comment %}</span>
+</span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndif %}</span>
+</span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>
+</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="nb">print</span><span class="p">([</span><span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">template</span><span class="o">.</span><span class="n">comments</span><span class="p">()])</span>
+</span><span id="__span-16-21"><a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="nb">print</span><span class="p">([</span><span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">template</span><span class="o">.</span><span class="n">docs</span><span class="p">()])</span>
+</span></code></pre></div>
+<div class="language-text highlight"><span class="filename">output</span><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[&#39;\n    some comment\n&#39;, &#39;an inline comment&#39;]
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>[&#39;\n    some doc comment\n&#39;]
+</span></code></pre></div>
 
 
 

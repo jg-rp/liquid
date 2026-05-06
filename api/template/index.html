@@ -1205,6 +1205,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#liquid.BoundTemplate.comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        comments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#liquid.BoundTemplate.docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#liquid.BoundTemplate.filter_names" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2023,6 +2045,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#liquid.BoundTemplate.comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        comments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#liquid.BoundTemplate.docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#liquid.BoundTemplate.filter_names" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2684,6 +2728,53 @@ analyze those templates too.</p>
     <div class="doc doc-contents ">
 
         <p>An async version of <code>analyze</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="liquid.BoundTemplate.comments" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">comments</span>
+
+
+</h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">comments</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">CommentNode</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return a list of comment tag nodes found in this template.</p>
+<p>Instances of <code>CommentNode</code> and <code>InlineCommentNode</code> have <code>token</code> and
+<code>text</code> properties. Use <code>[node.text for node in template.comments()]</code> to
+get a list of comment strings.</p>
+<p>Note that this method does not try to load included or rendered
+templates.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="liquid.BoundTemplate.docs" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">docs</span>
+
+
+</h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">docs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocNode</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return a list of doc tag nodes found in this template.</p>
+<p>Instances of <code>DocNode</code> have <code>token</code> and <code>text</code> properties. Use
+<code>[node.text for node in template.docs()]</code> to get a list of doc strings.</p>
 
 
     </div>
