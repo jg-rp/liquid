@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 2.2.0 (unreleased)
+## Version 2.2.0
 
 - Fixed `FileSystemLoader` and `CachingFileSystemLoader` to reject absolute paths.
 - Added the `reject_symlinks` keyword argument to `FileSystemLoader` and `CachingFileSystemLoader`. When `True`, symlinks pointing to files outside the search path will be rejected. `reject_symlinks` defaults to `False`.
