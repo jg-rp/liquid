@@ -1,5 +1,9 @@
 # Python Liquid Change Log
 
+## Version 2.2.1 (unreleased)
+
+Fixed `{% case %}` tags with no associated `{% when %}` or `{% else %}` tags, and no closing `{% endcase %}` tag. Previously a template such as `{% case x %}` would cause the parser to hang in an infinite loop.
+
 ## Version 2.2.0
 
 - Fixed `FileSystemLoader` and `CachingFileSystemLoader` to reject absolute paths.
