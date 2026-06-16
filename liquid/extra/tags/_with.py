@@ -36,15 +36,17 @@ class WithNode(Node):
         self.blank = self.block.blank
 
     def render_to_output(self, context: RenderContext, buffer: TextIO) -> int:
-        namespace = dict(arg.evaluate(context) for arg in self.args)
+        namespace = {p.name: p.value.evaluate(context) for p in self.args}
 
         with context.extend(namespace):
             return self.block.render(context, buffer)
 
     async def render_to_output_async(
-        self, context: RenderContext, buffer: TextIO
+        self,
+        context: RenderContext,
+        buffer: TextIO,
     ) -> int:
-        namespace = dict([await arg.evaluate_async(context) for arg in self.args])
+        namespace = {p.name: await p.value.evaluate_async(context) for p in self.args}
         with context.extend(namespace):
             return await self.block.render_async(context, buffer)
 
