@@ -145,7 +145,7 @@ class CaseTag(Tag):
 
         # Eat whitespace or junk between `case` and when/else/endcase
         while (
-            stream.current.kind != TOKEN_TAG
+            stream.current.kind not in (TOKEN_TAG, TOKEN_EOF)
             and stream.current.value not in ENDWHENBLOCK
         ):
             next(stream)

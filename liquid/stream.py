@@ -16,7 +16,7 @@ from .token import reverse_operators
 class TokenStream:
     """Step through a sequence of tokens."""
 
-    eof = Token(TOKEN_EOF, "", -1, "")
+    eof = Token(TOKEN_EOF, TOKEN_EOF, -1, "")
 
     def __init__(
         self,
