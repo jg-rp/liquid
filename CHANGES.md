@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 2.2.1 (unreleased)
+## Version 2.2.1
 
 Fixed `{% case %}` tags with no associated `{% when %}` or `{% else %}` tags, and no closing `{% endcase %}` tag. Previously a template such as `{% case x %}` would cause the parser to hang in an infinite loop.
 
