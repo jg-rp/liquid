@@ -1,5 +1,12 @@
 # Python Liquid Change Log
 
+## Version 2.2.2 (unreleased)
+
+**Fixes**
+
+- Fixed a bug in the built-in `FileSystemLoader` where a `ValueError` would be raised at render time if the target file name is empty or, in some cases, contains only path punctuation **and** the loader is configured with a default file extension. Now a `TemplateNotFoundError` is raised instead. See [#203](https://github.com/jg-rp/liquid/issues/203).
+- Fixed an issue with the built-in `FileSystemLoader` where a `ValueError` would be raised at render time if the configured default file extension is not a valid suffix. Now we raise a `ValueError` at `FileSystemLoader` construction time if the `ext` argument is not a valid suffix.
+
 ## Version 2.2.1
 
 Fixed `{% case %}` tags with no associated `{% when %}` or `{% else %}` tags, and no closing `{% endcase %}` tag. Previously a template such as `{% case x %}` would cause the parser to hang in an infinite loop.
