@@ -46,6 +46,7 @@ packages = ["liquid"]
 
 [tool.hatch.envs.default]
 dependencies = [
+  "hypothesis",
   "pytest",
   "pytest-cov",
   "pytest-mock",

@@ -23,8 +23,8 @@ class Case:
     description: str
     template: str
     expect: str
-    globals: dict[str, Any] = field(default_factory=dict)  # noqa: A003
-    partials: dict[str, Any] = field(default_factory=dict)
+    globals: dict[str, Any] = field(default_factory=dict[str, Any])
+    partials: dict[str, Any] = field(default_factory=dict[str, Any])
     standard: bool = True
     error: bool = False
     strict: bool = False

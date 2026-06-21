@@ -29,6 +29,9 @@ class FileSystemLoader(BaseLoader):
         ext: A default file extension. Should include a leading period.
         reject_symlinks: When `True`, reject paths to symlinks that resolve to files
             outside the search path. Defaults to `False`.
+
+    Raise:
+        ValueError if `ext` is not a valid suffix.
     """
 
     def __init__(
@@ -48,6 +51,10 @@ class FileSystemLoader(BaseLoader):
         self.ext = ext
         self.reject_symlinks = reject_symlinks
 
+        # Raise a ValueError early if `ext` is invalid.
+        if ext:
+            Path("x").with_suffix(ext)
+
     def resolve_path(self, template_name: str) -> Path:
         """Return a path to the template identified by _template_name_.
 
@@ -56,6 +63,9 @@ class FileSystemLoader(BaseLoader):
         _TemplateNotFound_ exception is raised.
         """
         template_path = Path(template_name)
+
+        if not template_path.name:
+            raise TemplateNotFoundError(template_name)
 
         if self.ext and not template_path.suffix:
             template_path = template_path.with_suffix(self.ext)
