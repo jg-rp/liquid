@@ -316,7 +316,7 @@ class RenderContext:
         """Return the index of the next item in the cycle."""
         namespace: dict[object, int] = self.tag_namespace["cycles"]
         idx = namespace.setdefault(key, 0)
-        namespace[key] = (idx + 1) % length
+        namespace[key] = (idx + 1) % (length or 1)  # Just in case.
         return idx
 
     def ifchanged(self, val: str) -> bool:
