@@ -11,6 +11,7 @@ from typing import TextIO
 from liquid.ast import Node
 from liquid.builtin.expressions import PositionalArgument
 from liquid.builtin.expressions import parse_primitive
+from liquid.exceptions import LiquidSyntaxError
 from liquid.stringify import to_liquid_string
 from liquid.tag import Tag
 from liquid.token import TOKEN_COLON
@@ -124,4 +125,8 @@ class CycleTag(Tag):
             tokens.eat(TOKEN_COLON)
 
         args = PositionalArgument.parse(self.env, tokens)
+
+        if not args:
+            raise LiquidSyntaxError("expected at least one argument", token=token)
+
         return self.node_class(token, group_name, [arg.value for arg in args])
