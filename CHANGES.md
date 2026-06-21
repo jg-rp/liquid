@@ -7,6 +7,7 @@
 - Fixed a bug in the built-in `FileSystemLoader` where a `ValueError` would be raised at render time if the target file name is empty or, in some cases, contains only path punctuation **and** the loader is configured with a default file extension. Now a `TemplateNotFoundError` is raised instead. See [#203](https://github.com/jg-rp/liquid/issues/203).
 - Fixed an issue with the built-in `FileSystemLoader` where a `ValueError` would be raised at render time if the configured default file extension is not a valid suffix. Now we raise a `ValueError` at `FileSystemLoader` construction time if the `ext` argument is not a valid suffix.
 - Fixed a bug with the `{% cycle %}` tag. Previously, if given a cycle group name without any other arguments, a `ZeroDivisionError` exception would be raised at render time. Now we raise a `LiquidSyntaxError` (we don't have a `TagArgumentError`) at parse time. See [#202](https://github.com/jg-rp/liquid/issues/202).
+- Fixed a bug where we'd get an `AssertionError` at render time when resolving variables using bracket syntax for the root segment and that segment evaluates to a non-string value. Now such uses of bracketed path syntax will be resolved to the configured `Undefined` type. See [#206](https://github.com/jg-rp/liquid/issues/206).
 
 ## Version 2.2.1
 
