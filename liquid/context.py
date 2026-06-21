@@ -175,7 +175,12 @@ class RenderContext:
         """
         it = iter(path)
         root = next(it)
-        assert isinstance(root, str)
+
+        if not isinstance(root, str):
+            if default == UNDEFINED:
+                hint = f"{root} is undefined"
+                return self.env.undefined(str(root), hint=hint, token=token)
+            return default
 
         try:
             obj = self.scope[root]
