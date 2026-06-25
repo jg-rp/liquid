@@ -191,6 +191,10 @@ class ResourceLimitError(LiquidError):
     """Base class for exceptions relating to resource limits."""
 
 
+class BlockNestingError(ResourceLimitError):
+    """The exception raised when block nesting limit is reached."""
+
+
 class ContextDepthError(ResourceLimitError):
     """Exception raised when the maximum context depth is reached.
 
