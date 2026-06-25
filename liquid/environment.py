@@ -18,6 +18,7 @@ from . import builtin
 from .analyze_tags import InnerTagMap
 from .analyze_tags import TagAnalysis
 from .builtin import DictLoader
+from .exceptions import BlockNestingError
 from .exceptions import LiquidError
 from .exceptions import LiquidSyntaxError
 from .exceptions import TemplateInheritanceError
@@ -78,6 +79,10 @@ class Environment:
         globals: An optional mapping that will be added to the render context of any
             template loaded from this environment.
     """
+
+    block_nesting_limit: ClassVar[int] = 30
+    """The maximum markup block nesting depth allowed before a `BlockNestingError`
+    exception is raised."""
 
     context_depth_limit: ClassVar[int] = 30
     """The maximum number of times a render context can be extended or wrapped before
@@ -275,7 +280,7 @@ class Environment:
         """
         try:
             nodes = self._parse(source)
-        except (LiquidSyntaxError, TemplateInheritanceError) as err:
+        except (LiquidSyntaxError, TemplateInheritanceError, BlockNestingError) as err:
             err.template_name = path
             raise err
         except Exception as err:  # noqa: BLE001

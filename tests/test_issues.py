@@ -5,6 +5,7 @@ from liquid import FileSystemLoader
 from liquid import StrictUndefined
 from liquid import parse
 from liquid import render
+from liquid.exceptions import BlockNestingError
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import TemplateNotFoundError
 from liquid.exceptions import UndefinedError
@@ -71,3 +72,10 @@ def test_issue_206() -> None:
 
     # Variables that resolve to non-strings too.
     assert render("{{ [x] }}", x=False) == ""
+
+
+def test_issue_208() -> None:
+    parse(f"{{% {'liquid ' * 30} echo 1 %}}")
+
+    with pytest.raises(BlockNestingError):
+        render(f"{{% {'liquid ' * 31} echo 1 %}}")

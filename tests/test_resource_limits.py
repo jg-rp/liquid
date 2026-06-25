@@ -6,6 +6,7 @@ import pytest
 
 from liquid import DictLoader
 from liquid import Environment
+from liquid.exceptions import BlockNestingError
 from liquid.exceptions import ContextDepthError
 from liquid.exceptions import LocalNamespaceLimitError
 from liquid.exceptions import LoopIterationLimitError
@@ -307,3 +308,50 @@ def test_set_output_stream_limit() -> None:
 
     with pytest.raises(OutputStreamLimitError):
         template.render()
+
+
+def test_block_nesting_limit() -> None:
+    """Test that we handle excessive block nesting before hitting the recursion
+    limit."""
+
+    class MockEnv(Environment):
+        block_nesting_limit = 3
+
+    env = MockEnv()
+
+    env.from_string("{% if true %}{% endif %}")
+    env.from_string("{% if true %}{% if true %}{% endif %}{% endif %}")
+    env.from_string(
+        "{% if true %}{% if true %}{% if true %}{% endif %}{% endif %}{% endif %}"
+    )
+
+    with pytest.raises(BlockNestingError):
+        env.from_string(
+            (
+                "{% if true %}"
+                "  {% if true %}"
+                "    {% if true %}"
+                "      {% if true %}"
+                "      {% endif %}"
+                "    {% endif %}"
+                "  {% endif %}"
+                "{% endif %}"
+            )
+        )
+
+
+def test_block_nesting_limit_with_liquid_tag() -> None:
+    class MockEnv(Environment):
+        block_nesting_limit = 3
+
+    env = MockEnv()
+
+    env.from_string("{% if true %}{% endif %}")
+    env.from_string("{% if true %}{% liquid liquid echo 1 %}{% endif %}")
+    env.from_string("{% liquid liquid liquid echo 1 %}")
+
+    with pytest.raises(BlockNestingError):
+        env.from_string("{% if true %}{% liquid liquid liquid echo 1 %}{% endif %}")
+
+    with pytest.raises(BlockNestingError):
+        env.from_string("{% liquid liquid liquid liquid echo 1 %}")

@@ -18,12 +18,10 @@ class TokenStream:
 
     eof = Token(TOKEN_EOF, TOKEN_EOF, -1, "")
 
-    def __init__(
-        self,
-        tokens: Iterator[Token],
-    ):
+    def __init__(self, tokens: Iterator[Token], block_depth_carry: int = 0):
         self.tokens = list(tokens)
         self.pos = 0
+        self.block_depth = block_depth_carry
 
     def __next__(self) -> Token:
         return self.next_token()

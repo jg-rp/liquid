@@ -127,7 +127,8 @@ class LiquidTag(Tag):
                     self._tokenize(
                         token_.value,
                         token=token_,
-                    )
+                    ),
+                    block_depth_carry=stream.block_depth,
                 ),
                 end=(),
             )

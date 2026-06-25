@@ -9,6 +9,7 @@ from typing import Iterator
 
 from .ast import BlockNode
 from .ast import Node
+from .exceptions import BlockNestingError
 from .exceptions import LiquidError
 from .token import TOKEN_COMMENT
 from .token import TOKEN_CONTENT
@@ -69,6 +70,10 @@ class Parser:
         output = tags[TOKEN_OUTPUT]
 
         nodes: list[Node] = []
+        stream.block_depth += 1
+
+        if stream.block_depth > self.env.block_nesting_limit:
+            raise BlockNestingError("block nesting limit reached", token=None)
 
         while stream.current.kind != TOKEN_EOF:
             if stream.current.kind == TOKEN_TAG and stream.current.value in end:
@@ -92,6 +97,7 @@ class Parser:
 
             next(stream)
 
+        stream.block_depth -= 1
         return BlockNode(stream.current, nodes)
 
 

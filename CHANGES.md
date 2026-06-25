@@ -1,5 +1,13 @@
 # Python Liquid Change Log
 
+## Version 2.3.0 (unreleased)
+
+Added the `block_nesting_limit` class variable to `liquid.Environment` for handling excessive markup block nesting in Liquid templates. Previously we would get a `RecursionError` at render time if Python's recursion limit was reached. Now we raise a `BlockNestingError` (a subclass of `ResourceLimitError`) at parse time if `block_nesting_limit` is reached.
+
+The default `block_nesting_limit` is `30`. That's a maximum depth of 30 blocks per template source string or file.
+
+See [#208](https://github.com/jg-rp/liquid/issues/208).
+
 ## Version 2.2.2
 
 **Fixes**
