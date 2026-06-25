@@ -185,6 +185,42 @@ template.render()
 # liquid.exceptions.LoopIterationLimitError: loop iteration limit reached
 ```
 
+### Block nesting limit
+
+**_New in version 2.3.0_**
+
+[`block_nesting_limit`](api/environment.md#liquid.Environment.block_nesting_limit) is the maximum number of nested blocks allowed before a `BlockNestingError` is raised. This helps us guard against templates that could otherwise exceed Python's recursion limit.
+
+The default `block_nesting_limit` is 30. That's per template source string or file, not the combined nesting of parent and included/rendered partial templates.
+
+!!! note
+
+    `BlockNestingError` inherits from `ResourceLimitError` and is raised at parse time, not render time.
+
+```python
+from liquid import Environment
+
+class MyEnvironment(Environment):
+    block_nesting_limit = 3  # Very low, for demonstration purposes.
+
+env = MyEnvironment()
+
+template = env.from_string(
+    (
+        "{% if true %}"
+        "  {% if true %}"
+        "    {% if true %}"
+        "      {% if true %}"
+        "      {% endif %}"
+        "    {% endif %}"
+        "  {% endif %}"
+        "{% endif %}"
+    )
+)
+
+# liquid.exceptions.BlockNestingError: block nesting limit reached
+```
+
 ### Context depth limit
 
 [`context_depth_limit`](api/environment.md#liquid.Environment.context_depth_limit) is the maximum number of times a render context can be extended or wrapped before a `ContextDepthError` is raised. This helps us guard against recursive use of the `include` and `render` tags. The default context depth limit is 30.
