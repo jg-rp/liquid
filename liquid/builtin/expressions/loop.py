@@ -123,29 +123,23 @@ class LoopExpression(Expression):
     ) -> tuple[Iterator[object], int]:
         offset_key = f"{self.identifier}-{self.iterable}"
 
-        if limit is None and offset is None:
-            context.stopindex(key=offset_key, index=length)
-            if self.reversed:
-                return reversed(list(it)), length
-            return it, length
-
         if offset == "continue":
-            offset = context.stopindex(key=offset_key)
-            length = max(length - offset, 0)
-        elif offset is not None:
-            assert isinstance(offset, int), f"found {offset!r}"
-            length = max(length - offset, 0)
+            start = context.stopindex(offset_key)
+        else:
+            start = int(offset or 0)
 
-        if limit is not None:
-            length = min(length, limit)
+        stop = None if limit is None else limit + start
 
-        stop = offset + length if offset else length
-        context.stopindex(key=offset_key, index=stop)
-        it = islice(it, offset, stop)
+        start_ = min(max(start, 0), length)
+        stop_ = min(stop or length, length)
+        length_ = max(stop_ - start_, 0)
+
+        context.stopindex(key=offset_key, index=stop_)
+        it = islice(it, start_, stop_)
 
         if self.reversed:
-            return reversed(list(it)), length
-        return it, length
+            return reversed(list(it)), length_
+        return it, length_
 
     def evaluate(self, context: RenderContext) -> tuple[Iterator[object], int]:
         it, length = self._to_iter(self.iterable.evaluate(context), context)

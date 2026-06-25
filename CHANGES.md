@@ -2,11 +2,17 @@
 
 ## Version 2.3.0 (unreleased)
 
-Added the `block_nesting_limit` class variable to `liquid.Environment` for handling excessive markup block nesting in Liquid templates. Previously we would get a `RecursionError` at render time if Python's recursion limit was reached. Now we raise a `BlockNestingError` (a subclass of `ResourceLimitError`) at parse time if `block_nesting_limit` is reached.
+**Fixes**
 
-The default `block_nesting_limit` is `30`. That's a maximum depth of 30 blocks per template source string or file.
+- Added the `block_nesting_limit` class variable to `liquid.Environment` for handling excessive markup block nesting in Liquid templates. Previously we would get a `RecursionError` at render time if Python's recursion limit was reached. Now we raise a `BlockNestingError` (a subclass of `ResourceLimitError`) at parse time if `block_nesting_limit` is reached.
 
-See [#208](https://github.com/jg-rp/liquid/issues/208).
+  The default `block_nesting_limit` is `30`. That's a maximum depth of 30 blocks per template source string or file.
+
+  See [#208](https://github.com/jg-rp/liquid/issues/208).
+
+- Fixed an issue with excessively large integer values given to `offset` in `{% for %}` and `{% tablerow %}` tags. Previously we would get a `ValueError` in somme cases. Now we clamp `offset` to the length of the target iterable. See [#209](https://github.com/jg-rp/liquid/issues/209).
+
+- Fixed an issue with excessively large range literals (`(1..10)`). We now limit the minimum and maximum values allowed in range literal expressions to between `-1024` and `1024`.
 
 ## Version 2.2.2
 

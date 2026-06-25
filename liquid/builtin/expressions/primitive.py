@@ -39,6 +39,12 @@ if TYPE_CHECKING:
     from liquid import TokenStream
 
 
+# MAX_RANGE = (2**53) - 1
+# MIN_RANGE = -(2**53) + 1
+MAX_RANGE = 1024
+MIN_RANGE = -1024
+
+
 class Nil(Expression):
     __slots__ = ()
 
@@ -249,7 +255,9 @@ class RangeLiteral(Expression):
         if start > stop:
             return range(0)
 
-        return range(start, stop + 1)
+        return range(
+            clamp(start, MIN_RANGE, MAX_RANGE), clamp(stop + 1, MIN_RANGE, MAX_RANGE)
+        )
 
     def evaluate(self, context: RenderContext) -> range:
         return self._make_range(
@@ -415,3 +423,8 @@ def parse_string_or_path(
 def is_empty(obj: object) -> bool:
     """Return True if _obj_ is considered empty."""
     return isinstance(obj, (list, dict, str)) and not obj
+
+
+def clamp(n: int, min_value: int, max_value: int) -> int:
+    """Clamp _n_ between _min_value_ and _max_value_."""
+    return max(min_value, min(n, max_value))

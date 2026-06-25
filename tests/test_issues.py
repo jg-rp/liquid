@@ -79,3 +79,13 @@ def test_issue_208() -> None:
 
     with pytest.raises(BlockNestingError):
         render(f"{{% {'liquid ' * 31} echo 1 %}}")
+
+
+def test_issue_209() -> None:
+    # Before version 2.3.0 these examples would raise a ValueError.
+    render("{% tablerow x in y offset:9223372036854775808 cols:1 %}{% endtablerow %}")
+    render("{% for x in y offset:9223372036854775808 %}{% endfor %}")
+    render(
+        "{% tablerow x in (0..9223372036854775808) offset:9223372036854775808 cols:1 %}"
+        "{% endtablerow %}"
+    )
