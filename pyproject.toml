@@ -160,6 +160,7 @@ convention = "google"
 "liquid/builtin/loaders/__init__.py" = ["D104", "I001"]
 "liquid/builtin/tags/__init__.py" = ["D104", "I001"]
 "tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
+"tests/test_compliance.py" = ["E501"]
 "performance/*" = ["D103", "PLR2004", "T201", "D100"]
 "liquid/builtin/expressions/primitive.py" = ["D101", "D102"]
 "liquid/builtin/expressions/path.py" = ["D101", "D102"]
