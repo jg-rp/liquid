@@ -76,7 +76,11 @@ class FileSystemLoader(BaseLoader):
         for base in self.search_path:
             source_path = base.joinpath(template_path)
 
-            if not source_path.exists() or not source_path.is_file():
+            try:
+                if not source_path.exists() or not source_path.is_file():
+                    continue
+            except OSError:
+                # "File name too long", for example
                 continue
 
             if self.reject_symlinks:

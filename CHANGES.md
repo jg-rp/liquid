@@ -14,6 +14,8 @@
 
 - Fixed an issue with excessively large range literals (`(1..10)`). We now limit the minimum and maximum values allowed in range literal expressions to between `-1024` and `1024`.
 
+- Fixed an issue with `FileSystemLoader` where it would raise an `OSError` if given a very long file name when testing a path for existence.
+
 ## Version 2.2.2
 
 **Fixes**
