@@ -623,6 +623,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#block-nesting-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Block nesting limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#context-depth-limit" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1909,6 +1920,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#block-nesting-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Block nesting limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#context-depth-limit" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2199,44 +2221,74 @@
 </span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
 </span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="c1"># liquid.exceptions.LoopIterationLimitError: loop iteration limit reached</span>
 </span></code></pre></div>
+<h3 id="block-nesting-limit">Block nesting limit</h3>
+<p><strong><em>New in version 2.3.0</em></strong></p>
+<p><a href="../api/environment/#liquid.Environment.block_nesting_limit"><code>block_nesting_limit</code></a> is the maximum number of nested blocks allowed before a <code>BlockNestingError</code> is raised. This helps us guard against templates that could otherwise exceed Python's recursion limit.</p>
+<p>The default <code>block_nesting_limit</code> is 30. That's per template source string or file, not the combined nesting of parent and included/rendered partial templates.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>BlockNestingError</code> inherits from <code>ResourceLimitError</code> and is raised at parse time, not render time.</p>
+</div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">block_nesting_limit</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Very low, for demonstration purposes.</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="p">(</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="s2">&quot;{</span><span class="si">% i</span><span class="s2">f true %}&quot;</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="s2">&quot;  {</span><span class="si">% i</span><span class="s2">f true %}&quot;</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>        <span class="s2">&quot;    {</span><span class="si">% i</span><span class="s2">f true %}&quot;</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>        <span class="s2">&quot;      {</span><span class="si">% i</span><span class="s2">f true %}&quot;</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>        <span class="s2">&quot;      {</span><span class="si">% e</span><span class="s2">ndif %}&quot;</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>        <span class="s2">&quot;    {</span><span class="si">% e</span><span class="s2">ndif %}&quot;</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>        <span class="s2">&quot;  {</span><span class="si">% e</span><span class="s2">ndif %}&quot;</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>        <span class="s2">&quot;{</span><span class="si">% e</span><span class="s2">ndif %}&quot;</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="p">)</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">)</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="c1"># liquid.exceptions.BlockNestingError: block nesting limit reached</span>
+</span></code></pre></div>
 <h3 id="context-depth-limit">Context depth limit</h3>
 <p><a href="../api/environment/#liquid.Environment.context_depth_limit"><code>context_depth_limit</code></a> is the maximum number of times a render context can be extended or wrapped before a <code>ContextDepthError</code> is raised. This helps us guard against recursive use of the <code>include</code> and <code>render</code> tags. The default context depth limit is 30.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictLoader</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">loader</span><span class="o">=</span><span class="n">DictLoader</span><span class="p">(</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="p">{</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;bar&#39; %}&quot;</span><span class="p">,</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>            <span class="s2">&quot;bar&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;foo&#39; %}&quot;</span><span class="p">,</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>        <span class="p">}</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="p">)</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="p">)</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
-</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;foo&#39; %}&quot;</span><span class="p">)</span>
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="c1"># liquid.exceptions.ContextDepthError: maximum context depth reached, possible recursive render</span>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="c1">#   -&gt; &#39;{% render &#39;bar&#39; %}&#39; 1:3</span>
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="c1">#   |</span>
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="c1"># 1 | {% render &#39;bar&#39; %}</span>
-</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="c1">#   |    ^^^^^^ maximum context depth reached, possible recursive render</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictLoader</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">loader</span><span class="o">=</span><span class="n">DictLoader</span><span class="p">(</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="p">{</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>            <span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;bar&#39; %}&quot;</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>            <span class="s2">&quot;bar&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;foo&#39; %}&quot;</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="p">}</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>    <span class="p">)</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="p">)</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;{</span><span class="si">% r</span><span class="s2">ender &#39;foo&#39; %}&quot;</span><span class="p">)</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="c1"># liquid.exceptions.ContextDepthError: maximum context depth reached, possible recursive render</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="c1">#   -&gt; &#39;{% render &#39;bar&#39; %}&#39; 1:3</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="c1">#   |</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="c1"># 1 | {% render &#39;bar&#39; %}</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="c1">#   |    ^^^^^^ maximum context depth reached, possible recursive render</span>
 </span></code></pre></div>
 <h3 id="local-namespace-limit">Local Namespace Limit</h3>
 <p><a href="../api/environment/#liquid.Environment.local_namespace_limit"><code>local_namespace_limit</code></a> is the maximum number of bytes (according to <code>sys.getsizeof()</code>) allowed in a template's local namespace, per render, before a <code>LocalNamespaceLimitError</code> exception is raised. Note that we only count the size of the local namespace values, not its keys.</p>
 <p>The default <code>local_namespace_limit</code> is <code>None</code>, meaning there is no limit.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">local_namespace_limit</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Very low, for demonstration purposes.</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="s2">{</span><span class="si">% a</span><span class="s2">ssign x = &quot;Nunc est nulla, pellentesque ac dui id erat curae.&quot; %}</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="c1"># liquid.exceptions.LocalNamespaceLimitError: local namespace limit reached</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">local_namespace_limit</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Very low, for demonstration purposes.</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="s2">{</span><span class="si">% a</span><span class="s2">ssign x = &quot;Nunc est nulla, pellentesque ac dui id erat curae.&quot; %}</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="c1"># liquid.exceptions.LocalNamespaceLimitError: local namespace limit reached</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -2245,48 +2297,48 @@
 <h3 id="loop-iteration-limit">Loop Iteration Limit</h3>
 <p><a href="../api/environment/#liquid.Environment.loop_iteration_limit"><code>loop_iteration_limit</code></a> is the maximum number of loop iterations allowed before a <code>LoopIterationLimitError</code> is raised.</p>
 <p>The default <code>loop_iteration_limit</code> is <code>None</code>, meaning there is no limit.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">loop_iteration_limit</span> <span class="o">=</span> <span class="mi">999</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="s2">{</span><span class="si">% f</span><span class="s2">or x in (1..100) %}</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="s2">{</span><span class="si">% f</span><span class="s2">or y in (1..100) %}</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="s2">    {{ x }},{{ y }}</span>
-</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndfor %}</span>
-</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>
-</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
-</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="c1"># liquid.exceptions.LoopIterationLimitError: loop iteration limit reached</span>
-</span></code></pre></div>
-<p>Other built in tags that contribute to the loop iteration counter are <code>render</code>, <code>include</code> (when using their <code>{% render 'thing' for some.thing %}</code> syntax) and <code>tablerow</code>. If a partial template is rendered within a <code>for</code> loop, the loop counter is carried over to the render context of the partial template.</p>
-<h3 id="output-stream-limit">Output Stream Limit</h3>
-<p>The maximum number of bytes that can be written to a template's output stream, per render, before an <code>OutputStreamLimitError</code> exception is raised. The default <code>output_stream_limit</code> is <code>None</code>, meaning there is no limit.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">output_stream_limit</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># Very low, for demonstration purposes.</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">loop_iteration_limit</span> <span class="o">=</span> <span class="mi">999</span>
 </span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
 </span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
 </span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
 </span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
 </span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="s2">{</span><span class="si">% i</span><span class="s2">f false %}</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="s2">this is never rendered, so will not contribute the the output byte counter</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndif %}</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="s2">Hello, {{ you }}!</span>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>
-</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
-</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="c1"># &#39;\nHello, World!\n&#39;</span>
-</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
-</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;something longer that exceeds our limit&quot;</span><span class="p">)</span>
-</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="c1"># liquid.exceptions.OutputStreamLimitError: output stream limit reached</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="s2">{</span><span class="si">% f</span><span class="s2">or x in (1..100) %}</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="s2">{</span><span class="si">% f</span><span class="s2">or y in (1..100) %}</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="s2">    {{ x }},{{ y }}</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndfor %}</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndfor %}</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="c1"># liquid.exceptions.LoopIterationLimitError: loop iteration limit reached</span>
+</span></code></pre></div>
+<p>Other built in tags that contribute to the loop iteration counter are <code>render</code>, <code>include</code> (when using their <code>{% render 'thing' for some.thing %}</code> syntax) and <code>tablerow</code>. If a partial template is rendered within a <code>for</code> loop, the loop counter is carried over to the render context of the partial template.</p>
+<h3 id="output-stream-limit">Output Stream Limit</h3>
+<p>The maximum number of bytes that can be written to a template's output stream, per render, before an <code>OutputStreamLimitError</code> exception is raised. The default <code>output_stream_limit</code> is <code>None</code>, meaning there is no limit.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">MyEnvironment</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">output_stream_limit</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># Very low, for demonstration purposes.</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MyEnvironment</span><span class="p">()</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="s2">{</span><span class="si">% i</span><span class="s2">f false %}</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="s2">this is never rendered, so will not contribute the the output byte counter</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="s2">{</span><span class="si">% e</span><span class="s2">ndif %}</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="s2">Hello, {{ you }}!</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;World&quot;</span><span class="p">)</span>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="c1"># &#39;\nHello, World!\n&#39;</span>
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">you</span><span class="o">=</span><span class="s2">&quot;something longer that exceeds our limit&quot;</span><span class="p">)</span>
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="c1"># liquid.exceptions.OutputStreamLimitError: output stream limit reached</span>
 </span></code></pre></div>
 <h2 id="string-sequences">String sequences</h2>
 <p>By default, strings in Liquid can not be looped over with the <code>{% for %}</code> tag and characters in a string can not be selected by index.</p>
@@ -2299,16 +2351,16 @@
 <p>By default, terms in <code>{% if %}</code> tag expressions can not be grouped to control precedence. Set the <code>logical_parentheses</code> class attribute to <code>True</code> to enable grouping terms with parentheses.</p>
 <h2 id="ternary-expressions">Ternary expressions</h2>
 <p>Enable ternary expressions in output statements, assign tags and echo tags by setting the <code>ternary_expressions</code> class attribute to <code>True</code>.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>{{ &lt;expression&gt; if &lt;expression&gt; else &lt;expression&gt; }}
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>{{ &lt;expression&gt; if &lt;expression&gt; else &lt;expression&gt; }}
 </span></code></pre></div>
 <p>Inline conditional expressions can be used as an alternative to the longer form <a href="../tag_reference/#if"><code>{% if %}</code> tag</a>.</p>
-<div class="language-liquid highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">x.y</span><span class="w"> </span><span class="err">==</span><span class="w"> </span><span class="err">z</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">&quot;baz&quot;</span><span class="w"> </span><span class="p">}}</span>
+<div class="language-liquid highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">x.y</span><span class="w"> </span><span class="err">==</span><span class="w"> </span><span class="err">z</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">&quot;baz&quot;</span><span class="w"> </span><span class="p">}}</span>
 </span></code></pre></div>
 <p>Filters can be applied to either branch.</p>
-<div class="language-liquid highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span>if<span class="w"> </span>x<span class="w"> </span>else<span class="w"> </span><span class="s2">&quot;baz&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">}}</span>
+<div class="language-liquid highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span>if<span class="w"> </span>x<span class="w"> </span>else<span class="w"> </span><span class="s2">&quot;baz&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">}}</span>
 </span></code></pre></div>
 <p>Or applied to the result of the conditional expression as a whole using <em>tail filters</em>. Notice the double pipe symbol (<code>||</code>).</p>
-<div class="language-liquid highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">x</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">&quot;baz&quot;</span><span class="w"> </span><span class="p">|</span><span class="err">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;!&quot;</span><span class="w"> </span><span class="p">}}</span>
+<div class="language-liquid highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{{</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">x</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">&quot;baz&quot;</span><span class="w"> </span><span class="p">|</span><span class="err">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;!&quot;</span><span class="w"> </span><span class="p">}}</span>
 </span></code></pre></div>
 <h2 id="keyword-assignment">Keyword assignment</h2>
 <p>By default, named arguments must separated names from values with a colon (<code>:</code>). Set the <code>keyword_assignment</code> class attribute to <code>True</code> to allow equals (<code>=</code>) or a colon between names and their values.</p>
