@@ -59,13 +59,17 @@ def join(
     return separator.join(_str_if_not(item) for item in left)
 
 
+@with_environment
 @liquid_filter
-def first(left: Any) -> object:
+def first(left: Any, *, environment: Environment) -> object:
     """Return the first item in collection _left_.
 
     If _left_ is not a collection or it is empty, `None` is returned.
     """
     if isinstance(left, str):
+        # Honor the opt-in Ruby-compat flag, matching the `.first` property path.
+        if environment.string_first_and_last:
+            return left[0] if left else None
         return None
 
     if isinstance(left, dict):
@@ -77,13 +81,17 @@ def first(left: Any) -> object:
         return None
 
 
+@with_environment
 @liquid_filter
-def last(obj: Sequence[Any]) -> object:
+def last(obj: Sequence[Any], *, environment: Environment) -> object:
     """Return the last item in collection _left_.
 
     If _left_ is not a collection or it is empty, `None` is returned.
     """
     if isinstance(obj, str):
+        # Honor the opt-in Ruby-compat flag, matching the `.last` property path.
+        if environment.string_first_and_last:
+            return obj[-1] if obj else None
         return None
 
     try:
