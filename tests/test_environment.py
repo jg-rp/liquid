@@ -56,21 +56,23 @@ def test_enable_string_first_and_last_filters() -> None:
     assert template.render(y="hello") == "ho"
 
 
-# The filters and the `.first`/`.last` property path must agree for every input.
-PARITY_INPUTS = ["hello", "", ["a", "b"], [], 5]
-
-
-@pytest.mark.parametrize("flag", [False, True])
-@pytest.mark.parametrize("value", PARITY_INPUTS)
-def test_first_last_filter_property_parity(flag: bool, value: object) -> None:  # noqa: FBT001
+@pytest.mark.parametrize("obj", ["hello", "", ["a", "b"], [], 5])
+def test_first_last_filter_property_parity(obj: object) -> None:
     class MockEnv(Environment):
-        string_first_and_last = flag
+        pass
 
-    env = MockEnv()
-    for op in ("first", "last"):
-        prop = env.from_string("{{ y.%s }}" % op).render(y=value)
-        filt = env.from_string("{{ y | %s }}" % op).render(y=value)
-        assert prop == filt
+    env = MockEnv(globals={"x": obj})
+
+    def render(source: str) -> str:
+        return env.from_string(source).render()
+
+    env.string_first_and_last = False
+    assert render("{{ x.first }}") == render("{{  x | first }}")
+    assert render("{{ x.last }}") == render("{{  x | last }}")
+
+    env.string_first_and_last = True
+    assert render("{{ x.first }}") == render("{{  x | first }}")
+    assert render("{{ x.last }}") == render("{{  x | last }}")
 
 
 def test_string_first_and_last_filter_empty_string() -> None:
