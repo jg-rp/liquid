@@ -67,12 +67,12 @@ def test_first_last_filter_property_parity(obj: object) -> None:
         return env.from_string(source).render()
 
     env.string_first_and_last = False
-    assert render("{{ x.first }}") == render("{{  x | first }}")
-    assert render("{{ x.last }}") == render("{{  x | last }}")
+    assert render("{{ x.first }}") == render("{{ x | first }}")
+    assert render("{{ x.last }}") == render("{{ x | last }}")
 
     env.string_first_and_last = True
-    assert render("{{ x.first }}") == render("{{  x | first }}")
-    assert render("{{ x.last }}") == render("{{  x | last }}")
+    assert render("{{ x.first }}") == render("{{ x | first }}")
+    assert render("{{ x.last }}") == render("{{ x | last }}")
 
 
 def test_string_first_and_last_filter_empty_string() -> None:
