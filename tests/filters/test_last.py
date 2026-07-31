@@ -1,6 +1,7 @@
 import operator
 from dataclasses import dataclass
 from dataclasses import field
+from functools import partial
 from inspect import isclass
 from typing import Any
 
@@ -73,8 +74,9 @@ TEST_CASES = [
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_last_filter(case: Case) -> None:
+    last_ = partial(last, environment=ENV)
     if isclass(case.expect) and issubclass(case.expect, LiquidError):
         with pytest.raises(case.expect):
-            last(case.val, *case.args, **case.kwargs)
+            last_(case.val, *case.args, **case.kwargs)
     else:
-        assert last(case.val, *case.args, **case.kwargs) == case.expect
+        assert last_(case.val, *case.args, **case.kwargs) == case.expect

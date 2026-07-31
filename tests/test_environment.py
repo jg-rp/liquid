@@ -38,6 +38,50 @@ def test_enable_string_first_and_last() -> None:
     assert template.render(y="hello") == "ho"
 
 
+class FirstAndLastEnv(Environment):
+    string_first_and_last = True
+
+
+def test_default_string_first_and_last_filters() -> None:
+    """The `first`/`last` filters ignore strings by default."""
+    env = Environment()
+    template = env.from_string("{{ y | first }}{{ y | last }}")
+    assert template.render(y="hello") == ""
+
+
+def test_enable_string_first_and_last_filters() -> None:
+    """With the flag on, the filters return the first/last character."""
+    env = FirstAndLastEnv()
+    template = env.from_string("{{ y | first }}{{ y | last }}")
+    assert template.render(y="hello") == "ho"
+
+
+@pytest.mark.parametrize("obj", ["hello", "", ["a", "b"], [], 5])
+def test_first_last_filter_property_parity(obj: object) -> None:
+    class MockEnv(Environment):
+        pass
+
+    env = MockEnv(globals={"x": obj})
+
+    def render(source: str) -> str:
+        return env.from_string(source).render()
+
+    env.string_first_and_last = False
+    assert render("{{ x.first }}") == render("{{ x | first }}")
+    assert render("{{ x.last }}") == render("{{ x | last }}")
+
+    env.string_first_and_last = True
+    assert render("{{ x.first }}") == render("{{ x | first }}")
+    assert render("{{ x.last }}") == render("{{ x | last }}")
+
+
+def test_string_first_and_last_filter_empty_string() -> None:
+    """An empty string yields nothing, matching the property path."""
+    env = FirstAndLastEnv()
+    template = env.from_string("{{ y | first }}{{ y | last }}")
+    assert template.render(y="") == ""
+
+
 def test_default_logical_not_operator() -> None:
     """Test that logical _not_ is not allowed by default."""
     env = Environment()
