@@ -4,19 +4,19 @@ from __future__ import annotations
 
 import asyncio
 import os
-from importlib.resources import files
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
 from typing import Union
 
+import importlib_resources
+
 from liquid.exceptions import TemplateNotFoundError
 from liquid.loader import BaseLoader
 from liquid.loader import TemplateSource
 
 if TYPE_CHECKING:
-    from importlib.abc import Traversable
     from types import ModuleType
 
     from liquid import Environment
@@ -44,31 +44,45 @@ class PackageLoader(BaseLoader):
         ext: str = ".liquid",
     ) -> None:
         if isinstance(package_path, str):
-            self.paths = [files(package).joinpath(package_path)]
+            self.paths = [importlib_resources.files(package).joinpath(package_path)]
         else:
-            _package = files(package)
+            _package = importlib_resources.files(package)
             self.paths = [_package.joinpath(path) for path in package_path]
 
         self.encoding = encoding
         self.ext = ext
 
-    def _resolve_path(self, template_name: str) -> Traversable:
+    def _resolve_path(self, template_name: str) -> Path:
         template_path = Path(template_name)
 
-        # Don't build a path that escapes package/package_path.
-        # Does ".." appear in template_name?
-        if os.path.pardir in template_path.parts:
+        if not template_path.name:
             raise TemplateNotFoundError(template_name)
 
         # Add suffix self.ext if template name does not have a suffix.
         if not template_path.suffix:
             template_path = template_path.with_suffix(self.ext)
 
+        if os.path.pardir in template_path.parts or template_path.is_absolute():
+            raise TemplateNotFoundError(template_name)
+
         for path in self.paths:
-            source_path = path.joinpath(str(template_path))
-            if source_path.is_file():
-                # MyPy seems to think source_path has `Any` type :(
-                return source_path  # type: ignore
+            with importlib_resources.as_file(path) as base:
+                source_path: Path = base.joinpath(template_path)
+
+                try:
+                    if not source_path.exists() or not source_path.is_file():
+                        continue
+                except OSError:
+                    # "File name too long", for example
+                    continue
+
+                resolved = source_path.resolve(strict=False)
+                base_resolved = base.resolve(strict=False)
+
+                if not resolved.is_relative_to(base_resolved):
+                    continue
+
+                return source_path
 
         raise TemplateNotFoundError(template_name)
 
