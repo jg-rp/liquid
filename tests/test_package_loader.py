@@ -1,4 +1,5 @@
 import asyncio
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -56,3 +57,19 @@ def test_dont_escape_package_root(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(TemplateNotFoundError):
         env.get_template("../secret.liquid")
+
+
+def test_reject_absolute_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+    with tempfile.TemporaryDirectory() as private:
+        private_file = Path(private) / "secret.liquid"
+        private_file.write_text("SECRET")
+
+        monkeypatch.syspath_prepend(str(Path(__file__).parent / "fixtures"))
+        loader = PackageLoader("mock_package", package_path="")
+        env = Environment(loader=loader)
+
+        with pytest.raises(TemplateNotFoundError):
+            env.get_template(str(private_file))
+
+        with pytest.raises(TemplateNotFoundError):
+            env.render(f"{{% render '{private_file}' %}}")

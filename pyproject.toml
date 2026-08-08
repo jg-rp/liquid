@@ -18,7 +18,14 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
-dependencies = ["MarkupSafe>=3", "python-dateutil>=2.8.1", "Babel>=2", "pytz"]
+dependencies = [
+  "MarkupSafe>=3",
+  "python-dateutil>=2.8.1",
+  "Babel>=2",
+  "pytz",
+  "importlib-resources>=5.12",
+]
+
 description = "A Python engine for the Liquid template language."
 dynamic = ["version"]
 license = "MIT"

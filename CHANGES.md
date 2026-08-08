@@ -4,6 +4,7 @@
 
 **Fixes**
 
+- Fixed `PackageLoader`. It now rejects fully qualified template names that could escape the package directory.
 - Fixed the `first` and `last` filters when the `Liquid.Environment` class variable `string_first_and_last` is `True`. Setting the `string_first_and_last` option to `True` would correctly tell the `.first` and `.last` special properties to treat strings as sequences, but the same behavior was not implemented for equivalent filters. Now `| first` and `| last` behave the same as `.first` and `.last`. See [#213](https://github.com/jg-rp/liquid/pull/213).
 
 ## Version 2.3.0
