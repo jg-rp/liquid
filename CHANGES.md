@@ -1,10 +1,10 @@
 # Python Liquid Change Log
 
-## Version 2.3.2 (unreleased)
+## Version 2.3.2
 
 **Fixes**
 
-- Fixed overly conservative range literal (`(x..y)`) clamping introduced in version 2.3.0. Now any range with a maximum effective length of `sys.maxsize` is allowed.
+- Fixed overly conservative range literal (`(x..y)`) clamping introduced in version 2.3.0. Now any range with a maximum effective length of `sys.maxsize` is allowed. See [#216](https://github.com/jg-rp/liquid/pull/216).
 
 ## Version 2.3.1
 
