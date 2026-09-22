@@ -13,6 +13,7 @@ from typing import Union
 from liquid import Mode
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import LiquidValueError
 from liquid.expression import Expression
 from liquid.limits import to_int
 from liquid.token import TOKEN_ASSIGN
@@ -95,7 +96,12 @@ class LoopExpression(Expression):
         if isinstance(obj, Mapping):
             return iter(obj.items()), len(obj)
         if isinstance(obj, range):
-            return iter(obj), len(obj)
+            try:
+                return iter(obj), len(obj)
+            except OverflowError as err:
+                raise LiquidValueError(
+                    "range literal length limit reached", token=None
+                ) from err
         if isinstance(obj, str) and not context.env.string_sequences:
             return (iter([]), 0) if not obj else (iter([obj]), 1)
         if isinstance(obj, Sequence):
