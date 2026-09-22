@@ -86,6 +86,11 @@ def test_issue_209() -> None:
     render("{% tablerow x in y offset:9223372036854775808 cols:1 %}{% endtablerow %}")
     render("{% for x in y offset:9223372036854775808 %}{% endfor %}")
     render(
-        "{% tablerow x in (0..9223372036854775808) offset:9223372036854775808 cols:1 %}"
-        "{% endtablerow %}"
+        "{% for x in (0..9223372036854775808) offset:9223372036854775808 %}{% endfor %}"
+    )
+
+
+def test_issue_215() -> None:
+    assert (
+        render("{% for i in (1023..1025) %}{{ i }},{% endfor %}") == "1023,1024,1025,"
     )

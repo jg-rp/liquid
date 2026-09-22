@@ -56,7 +56,7 @@ from .tag import Tag
 
 from . import future
 
-__version__ = "2.3.1"
+__version__ = "2.3.2"
 
 __all__ = (
     "AwareBoundTemplate",
