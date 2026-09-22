@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from itertools import islice
 from typing import TYPE_CHECKING
 from typing import Any
@@ -14,6 +13,7 @@ from typing import Union
 from liquid import Mode
 from liquid.exceptions import LiquidSyntaxError
 from liquid.exceptions import LiquidTypeError
+from liquid.exceptions import LiquidValueError
 from liquid.expression import Expression
 from liquid.limits import to_int
 from liquid.token import TOKEN_ASSIGN
@@ -98,9 +98,10 @@ class LoopExpression(Expression):
         if isinstance(obj, range):
             try:
                 return iter(obj), len(obj)
-            except OverflowError:
-                # XXX: Silently clamping length to maxsize.
-                return iter(obj), sys.maxsize
+            except OverflowError as err:
+                raise LiquidValueError(
+                    "range literal length limit reached", token=None
+                ) from err
         if isinstance(obj, str) and not context.env.string_sequences:
             return (iter([]), 0) if not obj else (iter([obj]), 1)
         if isinstance(obj, Sequence):

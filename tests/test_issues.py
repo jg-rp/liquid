@@ -7,6 +7,7 @@ from liquid import parse
 from liquid import render
 from liquid.exceptions import BlockNestingError
 from liquid.exceptions import LiquidSyntaxError
+from liquid.exceptions import LiquidValueError
 from liquid.exceptions import TemplateNotFoundError
 from liquid.exceptions import UndefinedError
 
@@ -85,9 +86,12 @@ def test_issue_209() -> None:
     # Before version 2.3.0 these examples would raise a ValueError.
     render("{% tablerow x in y offset:9223372036854775808 cols:1 %}{% endtablerow %}")
     render("{% for x in y offset:9223372036854775808 %}{% endfor %}")
-    render(
-        "{% for x in (0..9223372036854775808) offset:9223372036854775808 %}{% endfor %}"
-    )
+
+    with pytest.raises(LiquidValueError):
+        render(
+            "{% for x in (0..9223372036854775808) offset:9223372036854775808 %}"
+            "{% endfor %}"
+        )
 
 
 def test_issue_215() -> None:
