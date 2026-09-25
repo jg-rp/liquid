@@ -189,6 +189,10 @@ class TablerowNode(Node):
         name = self.expression.identifier
         loop_iter, length = self.expression.evaluate(context)
 
+        if not length:
+            # An empty iterable renders no rows.
+            return True
+
         if self.expression.cols:
             cols = self._int_or_zero(self.expression.cols.evaluate(context))
         else:
