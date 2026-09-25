@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+# Version 2.3.3 (unreleased)
+
+**Fixes**
+
+- Fixed the `tablerow` tag. Previously it would render a blank `<tr>` given an empty iterable. Now it renders nothing when the target is empty or not iterable. See [#217](https://github.com/jg-rp/liquid/issues/217).
+
 ## Version 2.3.2
 
 **Fixes**

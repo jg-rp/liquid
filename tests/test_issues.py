@@ -98,3 +98,7 @@ def test_issue_215() -> None:
     assert (
         render("{% for i in (1023..1025) %}{{ i }},{% endfor %}") == "1023,1024,1025,"
     )
+
+
+def test_issue_217() -> None:
+    assert render("{% tablerow _ in _ cols:8 %}{% endtablerow %}") == ""
