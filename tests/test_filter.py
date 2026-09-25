@@ -42,15 +42,14 @@ def test_int_arg_with_default() -> None:
     assert int_arg("foo", 99) == 99
 
 
-def test_num_arg_fail_string() -> None:
-    """Test that a suitable exception is raised if we can't cast to a number."""
-    with pytest.raises(FilterArgumentError):
-        num_arg("foo")
+def test_num_arg_coerce_string() -> None:
+    """Non-numeric strings coerce to 0 like Ruby's String#to_i (#49)."""
+    assert num_arg("foo") == 0
 
 
 def test_num_arg_with_default() -> None:
-    """Test that a default is returned if we can't cast to a number."""
-    assert num_arg("foo", 99.8) == 99.8
+    """Test that a default is returned for non-numeric, non-string values."""
+    assert num_arg(object(), 99.8) == 99.8
 
 
 def test_num_arg_no_default() -> None:
