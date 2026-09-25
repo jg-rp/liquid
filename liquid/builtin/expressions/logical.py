@@ -310,12 +310,12 @@ class LeExpression(Expression):
     def evaluate(self, context: RenderContext) -> object:
         left = self.left.evaluate(context)
         right = self.right.evaluate(context)
-        return _eq(left, right) or _lt(self.token, left, right)
+        return _le(left, right)
 
     async def evaluate_async(self, context: RenderContext) -> object:
         left = await self.left.evaluate_async(context)
         right = await self.right.evaluate_async(context)
-        return _eq(left, right) or _lt(self.token, left, right)
+        return _le(left, right)
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
@@ -335,12 +335,12 @@ class GeExpression(Expression):
     def evaluate(self, context: RenderContext) -> object:
         left = self.left.evaluate(context)
         right = self.right.evaluate(context)
-        return _eq(left, right) or _lt(self.token, right, left)
+        return _le(right, left)
 
     async def evaluate_async(self, context: RenderContext) -> object:
         left = await self.left.evaluate_async(context)
         right = await self.right.evaluate_async(context)
-        return _eq(left, right) or _lt(self.token, right, left)
+        return _le(right, left)
 
     def children(self) -> list[Expression]:
         return [self.left, self.right]
@@ -583,6 +583,12 @@ def is_truthy(obj: object) -> bool:
 
 
 def _eq(left: object, right: object) -> bool:
+    if is_undefined(left):
+        return right is None or is_undefined(right)
+
+    if is_undefined(right):
+        return left is None or is_undefined(left)
+
     if hasattr(left, "__liquid__"):
         left = left.__liquid__()
 
@@ -612,6 +618,31 @@ def _lt(token: Token, left: object, right: object) -> bool:
     if isinstance(left, str) and isinstance(right, str):
         return left < right
 
+    if isinstance(left, (int, float, Decimal)) and isinstance(
+        right, (int, float, Decimal)
+    ):
+        return left < right
+
+    if left is None or right is None:
+        return False
+
+    raise LiquidTypeError(
+        f"'<' and '>' are not supported between '{left.__class__.__name__}' "
+        f"and '{right.__class__.__name__}'",
+        token=token,
+    )
+
+
+def _le(left: object, right: object) -> bool:
+    if hasattr(left, "__liquid__"):
+        left = left.__liquid__()
+
+    if hasattr(right, "__liquid__"):
+        right = right.__liquid__()
+
+    if isinstance(left, str) and isinstance(right, str):
+        return left < right
+
     if isinstance(left, bool) or isinstance(right, bool):
         return False
 
@@ -620,11 +651,10 @@ def _lt(token: Token, left: object, right: object) -> bool:
     ):
         return left < right
 
-    raise LiquidTypeError(
-        f"'<' and '>' are not supported between '{left.__class__.__name__}' "
-        f"and '{right.__class__.__name__}'",
-        token=token,
-    )
+    if left is None or right is None:
+        return False
+
+    return _eq(left, right)
 
 
 def _contains(token: Token, left: object, right: object) -> bool:
