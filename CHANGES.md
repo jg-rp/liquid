@@ -5,6 +5,7 @@
 **Fixes**
 
 - Fixed the `tablerow` tag. Previously it would render a blank `<tr>` given an empty iterable. Now it renders nothing when the target is empty or not iterable. See [#217](https://github.com/jg-rp/liquid/issues/217).
+- Fixed `<=` and `>=` operators. Previously we would evaluate some expressions to `True` when given non-orderable operands, and raise a `TypeError` in some cases. Now we follow Shopify/liquid behavior. See [#219](https://github.com/jg-rp/liquid/issues/219).
 
 ## Version 2.3.2
 

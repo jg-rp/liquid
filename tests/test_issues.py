@@ -102,3 +102,9 @@ def test_issue_215() -> None:
 
 def test_issue_217() -> None:
     assert render("{% tablerow _ in _ cols:8 %}{% endtablerow %}") == ""
+
+
+def test_issue_219() -> None:
+    assert render("{% unless x >= y %}A{% endunless %}") == "A"
+    assert render("{% unless x <= y %}A{% endunless %}") == "A"
+    assert render("{% unless x > y %}A{% endunless %}") == "A"
