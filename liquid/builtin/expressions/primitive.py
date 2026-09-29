@@ -237,12 +237,12 @@ class RangeLiteral(Expression):
     def _make_range(self, start: Any, stop: Any) -> range:
         try:
             start = to_int(start)
-        except ValueError:
+        except (ValueError, TypeError):
             start = 0
 
         try:
             stop = to_int(stop)
-        except ValueError:
+        except (ValueError, TypeError):
             stop = 0
 
         # Descending ranges don't work

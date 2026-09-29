@@ -108,3 +108,21 @@ def test_issue_219() -> None:
     assert render("{% unless x >= y %}A{% endunless %}") == "A"
     assert render("{% unless x <= y %}A{% endunless %}") == "A"
     assert render("{% unless x > y %}A{% endunless %}") == "A"
+
+
+# TODO: version 3.0
+# def test_issue_220() -> None:
+#     source = "\n".join(
+#         [
+#             "{{ (3..1) }}",
+#             "{{ (1..0) }}",
+#             "{{ (5..5) }}",
+#             "{{ (0..3) }}",
+#         ]
+#     )
+
+#     assert render(source) == "(3..1)\n(1..0)\n(5..5)\n(0..3)"
+
+
+def test_issue_223() -> None:
+    assert render("{{ (empty..3) }}") == "0..3"
