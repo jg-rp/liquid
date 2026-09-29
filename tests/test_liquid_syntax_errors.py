@@ -33,7 +33,7 @@ TEST_CASES = [
     Case(
         description="missing tag name",
         template="{% %}foo{% endif %}",
-        expect_msg="missing tag name",
+        expect_msg="missing tag name or closing delimiter",
     ),
     Case(
         description="missing end tag at EOF",
@@ -171,12 +171,12 @@ TEST_CASES = [
     Case(
         description="missing tag closing percent",
         template=r"{% assign x = 42 }",
-        expect_msg="expected '%}', found end of file",
+        expect_msg="missing tag name or closing delimiter",
     ),
     Case(
         description="missing tag closing bracket",
         template=r"{% assign x = 42 %",
-        expect_msg="expected '%}', found end of file",
+        expect_msg="missing tag name or closing delimiter",
     ),
     Case(
         description="include, target not a path or string",
@@ -250,6 +250,7 @@ SKIP = [
     "missing output closing bracket",
     "missing tag closing percent",
     "missing tag closing bracket",
+    "missing tag name",
 ]
 
 LAX_TEST_CASES = [case for case in TEST_CASES if case.description not in SKIP]

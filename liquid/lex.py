@@ -54,14 +54,21 @@ def compile_liquid_rules(
         rf"{tag_s}-?\s*enddoc\s*(?P<rsd>-?){tag_e}"
     )
 
-    output_pattern = rf"{stmt_s}-?\s*(?P<stmt>.*?)\s*(?P<rss>-?){stmt_e}"
+    output_pattern = (
+        rf"{stmt_s}-?\s*"
+        rf"(?P<stmt>(?:(?!-?{stmt_e})[\s\S])*(?<!\s))\s*"
+        rf"(?P<rss>-?){stmt_e}"
+    )
 
     # The "name" group is zero or more characters so that a malformed tag (one
     # with no name) does not get treated as a literal.
     #
     # The `#` in the `name` group is specifically for the inline comment tag.
     tag_pattern = (
-        rf"{tag_s}-?(?P<pre>\s*(?P<name>#|\w*)\s*)(?P<expr>.*?)\s*(?P<rst>-?){tag_e}"
+        rf"{tag_s}-?\s*"
+        rf"(?P<name>#|\w+)\s*"
+        rf"(?P<expr>(?:(?!-?{tag_e})[\s\S])*(?<!\s))\s*"
+        rf"(?P<rst>-?){tag_e}"
     )
 
     if not comment_start_string:
@@ -157,6 +164,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # 
 
             lstrip = bool(match.group("rss"))
             continue
+
         elif kind == "TAG":
             name = match.group("name")
             yield Token(
@@ -219,7 +227,7 @@ def _tokenize_template(source: str, rules: Pattern[str]) -> Iterator[Token]:  # 
                 )
             if value.startswith(r"{%"):
                 raise LiquidSyntaxError(
-                    "expected '%}', found end of file",
+                    "missing tag name or closing delimiter",
                     token=Token(
                         TOKEN_EOF,
                         value=match.group(),
