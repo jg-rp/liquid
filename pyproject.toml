@@ -57,6 +57,7 @@ dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-mock",
+  "pytest-timeout",
   "mypy",
   "pyyaml",
   "types-pyyaml",

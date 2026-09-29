@@ -126,3 +126,12 @@ def test_issue_219() -> None:
 
 def test_issue_223() -> None:
     assert render("{{ (empty..3) }}") == "0..3"
+
+
+@pytest.mark.timeout(2)
+def test_issue_224() -> None:
+    with pytest.raises(LiquidSyntaxError):
+        render("{{" + " " * 3000)
+
+    with pytest.raises(LiquidSyntaxError):
+        render("{%" + " " * 3000)
