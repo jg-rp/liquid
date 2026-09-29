@@ -217,6 +217,46 @@ def test_tablerow_contributes_to_count() -> None:
         template.render()
 
 
+@pytest.mark.timeout(2)
+def test_nested_tablerow_loop_limit() -> None:
+    source = "".join(
+        "{% tablerow _ in(1..45) %}"
+        "{% tablerow _ in (1..45) %}"
+        "{% tablerow _ in (1..45) %}"
+        "{% tablerow _ in (1..45) %}"
+        "{% tablerow _ in(1..45) %}"
+        "x"
+        "{% endtablerow %}"
+        "{% endtablerow %}"
+        "{% endtablerow %}"
+        "{% endtablerow %}"
+        "{% endtablerow %}"
+    )
+
+    class MockEnv(Environment):
+        loop_iteration_limit = 1000
+
+    env = MockEnv()
+
+    with pytest.raises(LoopIterationLimitError):
+        env.render(source)
+
+
+@pytest.mark.timeout(2)
+def test_mixed_loop_limit() -> None:
+    source = (
+        "{% for _ in(1..45) %}{% tablerow _ in (1..45) %}x{% endtablerow %}{% endfor %}"
+    )
+
+    class MockEnv(Environment):
+        loop_iteration_limit = 1000
+
+    env = MockEnv()
+
+    with pytest.raises(LoopIterationLimitError):
+        env.render(source)
+
+
 @pytest.mark.skipif(
     platform.python_implementation() == "PyPy", reason="no sys.getsizeof"
 )

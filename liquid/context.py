@@ -39,6 +39,7 @@ from .utils import ReadOnlyChainMap
 
 if TYPE_CHECKING:
     from .builtin.tags.for_tag import ForLoop
+    from .builtin.tags.tablerow_tag import TableRow
     from .environment import Environment
     from .template import BoundTemplate
     from .token import Token
@@ -108,8 +109,10 @@ class RenderContext:
             "macros": {},
         }
 
-        # As stack of forloop objects. Used for populating forloop.parentloop.
-        self.loops: list[ForLoop] = []
+        # As stack of loop objects. Used for populating forloop.parentloop and
+        # calculating the effective loop count for the loop iteration resource
+        # limit.
+        self.loops: list[Union[ForLoop, TableRow]] = []
 
         # A list of tags names that are disallowed in this context. For example,
         # partial templates rendered using the "render" tag are not allowed to
@@ -368,7 +371,7 @@ class RenderContext:
 
     @contextmanager
     def loop(
-        self, namespace: Mapping[str, object], forloop: ForLoop
+        self, namespace: Mapping[str, object], forloop: ForLoop | TableRow
     ) -> Iterator[RenderContext]:
         """Just like `Context.extend`, but keeps track of ForLoop objects too."""
         self.raise_for_loop_limit(forloop.length)
@@ -381,10 +384,11 @@ class RenderContext:
 
     def parentloop(self) -> Union[Undefined, object]:
         """Return the last ForLoop object from the loop stack."""
-        try:
-            return self.loops[-1]
-        except IndexError:
-            return self.env.undefined("parentloop", token=None)
+        for loop in reversed(self.loops):
+            if hasattr(loop, "parentloop"):
+                return loop
+
+        return self.env.undefined("parentloop", token=None)
 
     def raise_for_loop_limit(self, length: int = 1) -> None:
         """Raise a `LoopIterationLimitError` if loop stack is bigger than the limit."""
