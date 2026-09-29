@@ -208,7 +208,7 @@ class TablerowNode(Node):
         buffer.write('<tr class="row1">\n')
         _break = False
 
-        with context.extend(namespace):
+        with context.loop(namespace, tablerow):
             for item in tablerow:
                 namespace[name] = item
                 buffer.write(f'<td class="col{tablerow.col}">')

@@ -8,6 +8,7 @@
 - Fixed `<=` and `>=` operators. Previously we would evaluate some expressions to `True` when given non-orderable operands, and raise a `TypeError` in some cases. Now we follow Shopify/liquid behavior. See [#219](https://github.com/jg-rp/liquid/issues/219).
 - Fixed an issue with range expressions where a `TypeError` would be raised if either the start or stop value's type can not be coerced to an integer. Now we default to `0`. See [#223](https://github.com/jg-rp/liquid/issues/223).
 - Fixed an issue withe the template tokenizer where some malformed templates could cause excessive backtracking in our regular expressions. See [#224](https://github.com/jg-rp/liquid/issues/224).
+- Fixed an issue with the `loop_iteration_limit` resource limit. Previously we would fail to count nested `{% forloop %}` tags when calculating the effective loop count.
 
 ## Version 2.3.2
 
