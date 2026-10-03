@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -10,6 +11,7 @@ from typing import Callable
 from typing import Iterable
 from typing import Iterator
 from typing import Optional
+from typing import TypeVar
 from typing import Union
 
 from .exceptions import FilterArgumentError
@@ -124,6 +126,22 @@ def liquid_filter(_filter: FilterT) -> FilterT:
     return wrapper
 
 
+_N = TypeVar("_N", float, Decimal)
+
+# Ruby's String#to_i and float regime accept ASCII digits only.
+_RE_FLOAT = re.compile(r"-?\d+\.\d+", re.ASCII)
+_RE_INT = re.compile(r"[-+]?\d+(?:_\d+)*", re.ASCII)
+
+
+def _str_to_number(val: str, make_float: Callable[[str], _N]) -> Union[int, _N]:
+    """Coerce a string to a number, mimicking Ruby Liquid's `Utils.to_number`."""
+    stripped = val.strip()
+    if _RE_FLOAT.fullmatch(stripped):
+        return make_float(stripped)
+    match = _RE_INT.match(stripped)
+    return to_int(match.group()) if match else 0
+
+
 def int_arg(val: Any, default: Optional[int] = None) -> int:
     """Return `val` as an int or `default` if `val` can't be cast to an int."""
     try:
@@ -139,27 +157,16 @@ def int_arg(val: Any, default: Optional[int] = None) -> int:
 def num_arg(val: Any, default: Optional[NumberT] = None) -> NumberT:
     """Return `val` as an int or float.
 
-    If `val` can't be cast to an int or float, return `default`.
+    Strings are coerced like Ruby Liquid's `Utils.to_number`. Otherwise, if
+    `val` is not a number, return `default`.
     """
     if isinstance(val, (int, float)):
         return val
 
     if isinstance(val, str):
-        try:
-            return to_int(val)
-        except ValueError:
-            pass
+        return _str_to_number(val, float)
 
-        try:
-            return float(val)
-        except ValueError as err:
-            if default is not None:
-                return default
-            raise FilterArgumentError(
-                f"could not cast string '{val}' to a number", token=None
-            ) from err
-
-    elif default is not None:
+    if default is not None:
         return default
 
     raise FilterArgumentError(
@@ -172,7 +179,8 @@ def decimal_arg(
 ) -> Union[int, Decimal]:
     """Return `val` as an int or decimal.
 
-    If `val` can't be cast to an int or decimal, return `default`.
+    Strings are coerced like Ruby Liquid's `Utils.to_number`. Otherwise, if
+    `val` is not a number, return `default`.
     """
     if isinstance(val, int):
         return val
@@ -180,21 +188,9 @@ def decimal_arg(
         return Decimal(str(val))
 
     if isinstance(val, str):
-        try:
-            return to_int(val)
-        except ValueError:
-            pass
+        return _str_to_number(val, Decimal)
 
-        try:
-            return Decimal(val)
-        except ValueError as err:
-            if default is not None:
-                return default
-            raise FilterArgumentError(
-                f"could not cast string '{val}' to a number", token=None
-            ) from err
-
-    elif default is not None:
+    if default is not None:
         return default
 
     raise FilterArgumentError(
