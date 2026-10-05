@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 2.3.4 (unreleased)
+## Version 2.3.4
 
 Fixed a bug introduced in version 2.3.3 where we would fail to compare values for equality when using `<=` and `>=` operators in some cases. See [#228](https://github.com/jg-rp/liquid/issues/228).
 
