@@ -3,35 +3,32 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [project]
+name = "python-liquid"
+description = "A Python engine for the Liquid template language."
+dynamic = ["version"]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.12"
+
 authors = [{ name = "James Prior", email = "jamesgr.prior@gmail.com" }]
+
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
 ]
+
 dependencies = [
   "MarkupSafe>=3",
   "python-dateutil>=2.8.1",
   "Babel>=2",
   "pytz",
-  "importlib-resources>=5.12",
 ]
-
-description = "A Python engine for the Liquid template language."
-dynamic = ["version"]
-license = "MIT"
-name = "python-liquid"
-readme = "README.md"
-requires-python = ">=3.9"
 
 [project.urls]
 "Change Log" = "https://github.com/jg-rp/liquid/blob/main/CHANGES.md"
@@ -41,29 +38,27 @@ Homepage = "https://jg-rp.github.io/liquid/"
 "Source Code" = "https://github.com/jg-rp/liquid"
 
 [tool.hatch.version]
-path = "liquid/__init__.py"
-
-[tool.hatch.build.targets.sdist]
-exclude = ["/**/.mypy_cache/"]
-packages = ["liquid"]
-
-[tool.hatch.build.targets.wheel]
-exclude = ["/**/.mypy_cache/"]
-packages = ["liquid"]
+path = "src/python_liquid/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
+  "furo",
+  "ghp-import",
   "hypothesis",
+  "pygments-liquid2",
   "pytest",
   "pytest-cov",
   "pytest-mock",
   "pytest-timeout",
+  "pyperf>=2.10.0",
   "mypy",
   "pyyaml",
   "types-pyyaml",
   "twine",
   "ruff",
   "mock",
+  "sphinx>=9.1.0",
+  "sphinx_copybutton",
   "types-python-dateutil",
   "types-mock",
   "types-pytz",
@@ -71,7 +66,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-fail-under=95 --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-fail-under=95 --cov-config=pyproject.toml --cov=src --cov=tests {args}"
 benchmark = "python -O scripts/performance.py"
 cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
 lint = "ruff check ."
@@ -81,152 +76,16 @@ test = "pytest {args}"
 typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["39", "310", "311", "312", "313", "314", "pypy39"]
-
-[tool.hatch.envs.test.scripts]
-test = "pytest {args}"
-
-[tool.hatch.envs.docs]
-dependencies = [
-  "black",
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-material",
-  "pygments-liquid2",
-]
-
-[tool.hatch.envs.docs.scripts]
-build = "mkdocs build --clean --strict"
-serve = "mkdocs serve --dev-addr localhost:8000"
+python = ["312", "313", "314"]
 
 [tool.coverage.run]
 branch = true
-omit = ["tests/mocks/**/*", "liquid/__about__.py"]
+omit = ["tests/mocks/**/*", "src/python_liquid/__about__.py"]
 parallel = true
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.mypy]
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-files = "liquid"
-local_partial_types = true
-no_implicit_optional = true
-no_implicit_reexport = true
 python_version = "3.12"
 strict = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unreachable = true
-warn_unused_configs = true
-warn_unused_ignores = false
-
-[tool.ruff]
-
-# Exclude a variety of commonly ignored directories.
-exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".hg",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
-]
-
-# Same as Black.
-line-length = 88
-
-target-version = "py39"
-
-[tool.ruff.lint.isort]
-force-single-line = true
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.ruff.lint.per-file-ignores]
-"liquid/__about__.py" = ["D100"]
-"liquid/__init__.py" = ["D104", "I001"]
-"liquid/builtin/filters/__init__.py" = ["D104", "I001"]
-"liquid/builtin/loaders/__init__.py" = ["D104", "I001"]
-"liquid/builtin/tags/__init__.py" = ["D104", "I001"]
-"tests/*" = ["D100", "D101", "D104", "D103", "D102", "D209", "D205", "SIM117"]
-"tests/test_compliance.py" = ["E501"]
-"performance/*" = ["D103", "PLR2004", "T201", "D100"]
-"liquid/builtin/expressions/primitive.py" = ["D101", "D102"]
-"liquid/builtin/expressions/path.py" = ["D101", "D102"]
-"liquid/builtin/expressions/logical.py" = ["D101", "D102"]
-"liquid/builtin/expressions/loop.py" = ["D101", "D102"]
-"liquid/builtin/expressions/filtered.py" = ["D101", "D102"]
-"liquid/builtin/expressions/arguments.py" = ["D101", "D102"]
-
-[tool.ruff.lint]
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-select = [
-  "A",
-  "ARG",
-  "B",
-  "BLE",
-  "C4",
-  "D",
-  "E",
-  "F",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PIE",
-  "PL",
-  "PT",
-  "Q",
-  "RET",
-  "RSE",
-  "S",
-  "SIM",
-  "SLF",
-  "T10",
-  "T20",
-  "TCH",
-  "YTT",
-]
-
-ignore = [
-  "A005",
-  "S105",
-  "S101",
-  "D107",
-  "D105",
-  "PLR0913",
-  "D401",
-  "N818",
-  "PT009",
-  "B905",
-  "PT027",
-  "PLR2004",
-  "S704",
-  "TC006",
-  "PLW1641",
-  "PLR0917",
-]
-
-fixable = ["I", "SIM", "D202"]
-unfixable = []
