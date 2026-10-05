@@ -641,7 +641,7 @@ def _le(left: object, right: object) -> bool:
         right = right.__liquid__()
 
     if isinstance(left, str) and isinstance(right, str):
-        return left < right
+        return left <= right
 
     if isinstance(left, bool) or isinstance(right, bool):
         return False
@@ -649,7 +649,7 @@ def _le(left: object, right: object) -> bool:
     if isinstance(left, (int, float, Decimal)) and isinstance(
         right, (int, float, Decimal)
     ):
-        return left < right
+        return left <= right
 
     if left is None or right is None:
         return False

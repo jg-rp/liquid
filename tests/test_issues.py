@@ -135,3 +135,15 @@ def test_issue_224() -> None:
 
     with pytest.raises(LiquidSyntaxError):
         render("{%" + " " * 3000)
+
+
+def test_issue_228() -> None:
+    assert render("{% if 1 >= 1 %}true{% else %}false{% endif %}") == "true"
+    assert render("{% if 1 <= 1 %}true{% else %}false{% endif %}") == "true"
+    assert render("{% if 1.5 >= 1.5 %}true{% else %}false{% endif %}") == "true"
+    assert render("{% if 'a' >= 'a' %}true{% else %}false{% endif %}") == "true"
+    assert render("{% if 2 >= 1 %}true{% else %}false{% endif %}") == "true"
+
+    assert render("{% if true >= false %}true{% else %}false{% endif %}") == "false"
+    assert render("{% if true <= false %}true{% else %}false{% endif %}") == "false"
+    assert render("{% if true <= true %}true{% else %}false{% endif %}") == "false"
