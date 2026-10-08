@@ -4,11 +4,11 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from ._tokens import TOKEN_WC
+from .tokens import TOKEN_WC
 
 if TYPE_CHECKING:
-    from ._tokens import Token, TokenKind
     from .environment import LiquidEnvironment
+    from .tokens import Token, TokenKind
 
 
 type State = Callable[[], State | None]

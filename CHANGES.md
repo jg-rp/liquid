@@ -2,6 +2,10 @@
 
 ## Version 3.0.0 (unreleased)
 
+**Breaking API changes**
+
+- Renamed `UnknownFilterError` to `LiquidNameError`.
+
 ## Version 2.3.3
 
 **Fixes**

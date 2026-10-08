@@ -1,8 +1,8 @@
 import re
 
 from ._lexer import Lexer, State
-from ._tokens import *
-from ._tokens import TokenKind
+from .tokens import *
+from .tokens import TokenKind
 
 RE_COMMENT_SEGMENT = re.compile(
     r"\{%-?\s*(comment|raw|endcomment|endraw)(?:(?!-?%\})[\s\S])*-?%\}"
@@ -20,14 +20,11 @@ RE_TRIVIA = re.compile(r"[ \n\r\t\f]+")
 RE_LINE_TRIVIA = re.compile(r"[ \r\t\f]+")
 RE_LINE_COMMENT_SEGMENT = re.compile(r"\n\s*(comment|endcomment).*")
 
-# TODO: benchmark without emit
-
 
 class LegacyLexer(Lexer):
     """A Shopify/liquid v5.12.0 compatible tokenizer with hard coded delimiters."""
 
     def scan_markup(self) -> State | None:
-        # TODO: Benchmark with a local pos and source
 
         while 1:
             if self.source.startswith("{{", self.pos):
@@ -95,7 +92,6 @@ class LegacyLexer(Lexer):
     def accept_expression(
         self, limit: int, trivia: re.Pattern[str] = RE_TRIVIA
     ) -> None:
-        # TODO: Benchmark with a local pos and source
         while self.pos < limit:
             ch = self.source[self.pos]
 
