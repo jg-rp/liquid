@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TextIO
 
-from ..tokens import TOKEN_TAG_END
+from ..tokens import TOKEN_TAG_END, TOKEN_TEXT, token_value
 
 if TYPE_CHECKING:
     from .._context import RenderContext
@@ -12,28 +12,29 @@ if TYPE_CHECKING:
     from ..tokens import Token
 
 
-class DecrementTag:
+class RawTag:
     blank = False
-    tag = "decrement"
+    tag = "raw"
 
-    __slots__ = ("name", "token")
+    __slots__ = ("text", "token")
 
-    def __init__(self, token: Token, name: Name) -> None:
+    def __init__(self, token: Token, text: str) -> None:
         self.token = token
-        self.name = name
+        self.text = text
 
     @staticmethod
     def parse(token: Token, parser: Parser) -> Markup:
-        name = parser.parse_identifier()
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
-        return DecrementTag(token, name)
+        text = parser.eat(TOKEN_TEXT)
+        parser.eat_empty_tag("endraw")
+        return RawTag(token, token_value(text, parser.source))
 
     def render(self, context: RenderContext, buffer: TextIO) -> None:
-        buffer.write(str(context.decrement(self.name.value)))
+        buffer.write(self.text)
 
     async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
-        buffer.write(str(context.decrement(self.name.value)))
+        buffer.write(self.text)
 
     def children(self) -> list[Markup]:
         return []
@@ -45,7 +46,7 @@ class DecrementTag:
         return []
 
     def template_scope(self) -> list[Name]:
-        return [self.name]
+        return []
 
     def partials(self, context: RenderContext) -> list[Partial]:
         return []

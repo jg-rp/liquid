@@ -9,7 +9,15 @@ from .echo import EchoTag
 from .else_ import ElseBlock
 from .for_ import BreakTag, ContinueTag, ForTag
 from .if_ import IfTag
+from .ifchanged import IfChangedTag
+from .include import IncludeTag
 from .increment import IncrementTag
+from .inline_comment import InlineCommentTag
+from .liquid import LiquidTag
+from .raw import RawTag
+from .render import RenderTag
+from .tablerow import TableRowTag
+from .unless import UnlessTag
 
 __all__ = (
     "AssignTag",
@@ -24,6 +32,14 @@ __all__ = (
     "EchoTag",
     "ElseBlock",
     "ForTag",
+    "IfChangedTag",
     "IfTag",
+    "IncludeTag",
     "IncrementTag",
+    "InlineCommentTag",
+    "LiquidTag",
+    "RawTag",
+    "RenderTag",
+    "TableRowTag",
+    "UnlessTag",
 )

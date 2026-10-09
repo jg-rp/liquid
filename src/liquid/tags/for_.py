@@ -166,7 +166,7 @@ class ForTag:
         length: int
 
         if is_iterable_drop(target):
-            it = IterableDrop[object], target.__liquid_iter__(start, end, self.reversed)
+            it = target.__liquid_iter__(start, end, self.reversed)
             length = len(it)
 
         else:
@@ -230,7 +230,7 @@ class ForTag:
 
         # TODO: __liquid_aiter__
         if is_iterable_drop(target):
-            it = IterableDrop[object], target.__liquid_iter__(start, end, self.reversed)
+            it = target.__liquid_iter__(start, end, self.reversed)
             length = len(it)
 
         else:
@@ -281,9 +281,6 @@ class ForTag:
 
         return result
 
-    async def children_async(self) -> list[Markup]:
-        return self.children()
-
     def expressions(self) -> list[Expression]:
         result = [self.expression]
 
@@ -332,9 +329,6 @@ class BreakTag:
     def children(self) -> list[Markup]:
         return []
 
-    async def children_async(self) -> list[Markup]:
-        return self.children()
-
     def expressions(self) -> list[Expression]:
         return []
 
@@ -374,9 +368,6 @@ class ContinueTag:
 
     def children(self) -> list[Markup]:
         return []
-
-    async def children_async(self) -> list[Markup]:
-        return self.children()
 
     def expressions(self) -> list[Expression]:
         return []

@@ -32,9 +32,6 @@ class ElseBlock:
     def children(self) -> list[Markup]:
         return [node for node in self.block if not isinstance(node, str)]
 
-    async def children_async(self) -> list[Markup]:
-        return self.children()
-
     def expressions(self) -> list[Expression]:
         return []
 

@@ -47,6 +47,8 @@ class ForLoop(Mapping[str, object]):
         if key == "rindex0":
             return self.length - self.index - 1
 
+        raise KeyError(key)
+
     def __iter__(self) -> Iterator[str]:
         return iter(
             (

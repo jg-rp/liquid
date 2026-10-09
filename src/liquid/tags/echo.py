@@ -48,9 +48,6 @@ class EchoTag:
     def children(self) -> list[Markup]:
         return []
 
-    async def children_async(self) -> list[Markup]:
-        return []
-
     def expressions(self) -> list[Expression]:
         return [self.expression]
 

@@ -105,9 +105,6 @@ class CycleTag:
     def children(self) -> list[Markup]:
         return []
 
-    async def children_async(self) -> list[Markup]:
-        return []
-
     def expressions(self) -> list[Expression]:
         return [self.group, *self.items] if self.group else self.items
 

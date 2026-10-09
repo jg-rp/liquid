@@ -71,3 +71,11 @@ class LiquidSyntaxError(DetailedLiquidError):
 
 class LiquidNameError(DetailedLiquidError):
     pass
+
+
+class TemplateNotFoundError(LiquidError):
+    pass
+
+
+class NoSuchTemplateError(DetailedLiquidError):
+    pass

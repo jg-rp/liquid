@@ -61,13 +61,6 @@ class Markup(Protocol):
         """
         ...
 
-    async def children_async(self) -> list[Markup]:
-        """Returns markup nodes that are direct children of this node in the syntax tree.
-
-        This is used to traverse template syntax trees during static analysis.
-        """
-        ...
-
     def expressions(self) -> list[Expression]:
         """Return expression owned by this node."""
         ...

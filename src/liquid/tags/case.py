@@ -140,9 +140,6 @@ class CaseTag:
     def children(self) -> list[Markup]:
         return list(self.blocks)
 
-    async def children_async(self) -> list[Markup]:
-        return self.children()
-
     def expressions(self) -> list[Expression]:
         return [self.expression]
 
