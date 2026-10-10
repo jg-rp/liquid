@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from decimal import Decimal
 from io import StringIO
 from typing import TYPE_CHECKING
 
-from . import tags
+from . import filters, tags
 from ._nothing import Nothing
 from .drops import Undefined
 
@@ -28,6 +29,9 @@ class LiquidEnvironment:
 
     def __init__(self) -> None:
         self.strict_filters = True
+        self.autoescape = False
+        self.string_first_and_last = False
+
         self.tags: dict[str, Tag] = {}
         self.filters: dict[str, Filter] = {}
 
@@ -58,6 +62,32 @@ class LiquidEnvironment:
         self.tags["render"] = tags.RenderTag
         self.tags["tablerow"] = tags.TableRowTag
         self.tags["unless"] = tags.UnlessTag
+
+        self.filters["abs"] = filters.abs_
+        self.filters["append"] = filters.append
+        self.filters["at_least"] = filters.at_least
+        self.filters["at_most"] = filters.at_most
+        self.filters["base64_decode"] = filters.base64_decode
+        self.filters["base64_encode"] = filters.base64_encode
+        self.filters["base64_url_safe_decode"] = filters.base64_url_safe_decode
+        self.filters["base64_url_safe_encode"] = filters.base64_url_safe_encode
+        self.filters["capitalize"] = filters.capitalize
+        self.filters["compact"] = filters.compact
+        self.filters["concat"] = filters.concat
+        self.filters["date"] = filters.date
+        self.filters["default"] = filters.default
+        self.filters["divided_by"] = filters.divided_by
+        self.filters["downcase"] = filters.downcase
+        self.filters["escape"] = filters.escape
+        self.filters["escape_once"] = filters.escape_once
+        self.filters["find"] = filters.find
+        self.filters["find_index"] = filters.find_index
+        self.filters["first"] = filters.first
+        self.filters["floor"] = filters.floor
+        self.filters["has"] = filters.has
+        self.filters["join"] = filters.join
+        self.filters["last"] = filters.last
+        self.filters["lstrip"] = filters.lstrip
 
     def get_template(
         self,
@@ -128,6 +158,12 @@ class LiquidEnvironment:
         raise NotImplementedError
 
     def to_int(self, obj: object, context: RenderContext, span: Token) -> int:
+        # TODO:
+        raise NotImplementedError
+
+    def to_numeric[T](
+        self, obj: object, context: RenderContext, default: T
+    ) -> float | int | Decimal | T:
         # TODO:
         raise NotImplementedError
 

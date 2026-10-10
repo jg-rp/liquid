@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from itertools import islice
-from typing import TYPE_CHECKING, Protocol, TextIO, TypeGuard
+from typing import TYPE_CHECKING, TextIO
 
+from .._drop import is_iterable_drop
 from .._markup import render_block, render_block_async
-from ..drops import IterableDrop, TableRowLoop
+from ..drops import TableRowLoop
 from ..exceptions import LiquidSyntaxError
 from ..expressions import Name
 from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
@@ -233,16 +234,6 @@ class TableRowTag:
 
     async def partials_async(self, context: RenderContext) -> list[Partial]:
         return []
-
-
-class LiquidIterable(Protocol):
-    def __liquid_iter__(
-        self, start: int, end: int | None, reversed_: bool
-    ) -> IterableDrop[int]: ...
-
-
-def is_iterable_drop(obj: object) -> TypeGuard[LiquidIterable]:
-    return hasattr(obj, "__liquid_iter__")
 
 
 def _to_int[T](

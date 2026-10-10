@@ -73,6 +73,14 @@ class LiquidNameError(DetailedLiquidError):
     pass
 
 
+class LiquidTypeError(DetailedLiquidError):
+    pass
+
+
+class LiquidFilterError(DetailedLiquidError):
+    pass
+
+
 class TemplateNotFoundError(LiquidError):
     pass
 

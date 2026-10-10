@@ -8,7 +8,7 @@ from collections import deque
 from collections.abc import Iterator, Mapping
 from itertools import chain
 
-MISSING = object()
+from ._missing import MISSING
 
 
 class ReadOnlyChainMap(Mapping[str, object]):

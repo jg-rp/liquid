@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from ._filter import FilterContext
 from ._nothing import NOTHING
 from .drops import BLANK, EMPTY, Range
-from .exceptions import LiquidNameError
+from .exceptions import LiquidNameError, LiquidTypeError
 from .tokens import span
 
 if TYPE_CHECKING:
@@ -51,7 +51,15 @@ class Filtered:
         left = self.left.evaluate(context)
 
         if not self.args:
-            return func(FilterContext(context, self.span), left)
+            try:
+                return func(FilterContext(context, self.span), left)
+            except (TypeError, ValueError) as err:
+                raise LiquidTypeError(
+                    f"{self.name}: {err}",
+                    token=self.span,
+                    source=context.template.source,
+                    name=context.template.name,
+                ) from err
 
         args: list[object] = []
         kwargs: dict[str, object] = {}
@@ -62,7 +70,15 @@ class Filtered:
             else:
                 args.append(arg.evaluate(context))
 
-        return func(FilterContext(context, self.span), left, *args, **kwargs)
+        try:
+            return func(FilterContext(context, self.span), left, *args, **kwargs)
+        except (TypeError, ValueError) as err:
+            raise LiquidTypeError(
+                f"{self.name}: {err}",
+                token=self.span,
+                source=context.template.source,
+                name=context.template.name,
+            ) from err
 
     async def evaluate_async(self, context: RenderContext) -> object:
         func = context.env.filters.get(self.name.value)

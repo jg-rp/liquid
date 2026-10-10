@@ -3,10 +3,11 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from itertools import islice
-from typing import TYPE_CHECKING, Protocol, TextIO, TypeGuard
+from typing import TYPE_CHECKING, TextIO
 
+from .._drop import is_iterable_drop
 from .._markup import is_blank_block, render_block, render_block_async
-from ..drops import ForLoop, IterableDrop, Undefined
+from ..drops import ForLoop, Undefined
 from ..exceptions import LiquidSyntaxError
 from ..expressions import KeywordArgument, Name, Variable
 from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
@@ -392,13 +393,3 @@ def register_factory() -> defaultdict[str, int]:
 def reverse_slice[T](seq: Sequence[T], start: int, end: int) -> Iterable[T]:
     for i in range(end - 1, start - 1, -1):
         yield seq[i]
-
-
-class LiquidIterable(Protocol):
-    def __liquid_iter__(
-        self, start: int, end: int | None, reversed_: bool
-    ) -> IterableDrop[int]: ...
-
-
-def is_iterable_drop(obj: object) -> TypeGuard[LiquidIterable]:
-    return hasattr(obj, "__liquid_iter__")
