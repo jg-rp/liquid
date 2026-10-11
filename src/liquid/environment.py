@@ -63,6 +63,8 @@ class LiquidEnvironment:
         self.tags["tablerow"] = tags.TableRowTag
         self.tags["unless"] = tags.UnlessTag
 
+        # TODO: make this a self.filters.update({...})
+
         self.filters["abs"] = filters.abs_
         self.filters["append"] = filters.append
         self.filters["at_least"] = filters.at_least
@@ -88,6 +90,34 @@ class LiquidEnvironment:
         self.filters["join"] = filters.join
         self.filters["last"] = filters.last
         self.filters["lstrip"] = filters.lstrip
+        self.filters["map"] = filters.map_
+        self.filters["minus"] = filters.minus
+        self.filters["modulo"] = filters.modulo
+        self.filters["newline_to_br"] = filters.newline_to_br
+        self.filters["plus"] = filters.plus
+        self.filters["prepend"] = filters.prepend
+        self.filters["reject"] = filters.reject
+        self.filters["remove"] = filters.remove
+        self.filters["remove_first"] = filters.remove_first
+        self.filters["remove_last"] = filters.remove_last
+        self.filters["replace"] = filters.replace
+        self.filters["replace_first"] = filters.replace_first
+        self.filters["replace_last"] = filters.replace_last
+        self.filters["reverse"] = filters.reverse
+        self.filters["round"] = filters.round_
+        self.filters["rstrip"] = filters.rstrip
+        self.filters["slice"] = filters.slice_
+        self.filters["sort"] = filters.sort
+        self.filters["sort_natural"] = filters.sort_natural
+        self.filters["split"] = filters.split
+        self.filters["squish"] = filters.squish
+        self.filters["strip"] = filters.strip
+        self.filters["strip_html"] = filters.strip_html
+        self.filters["strip_newlines"] = filters.strip_newlines
+        self.filters["sum"] = filters.sum_
+        self.filters["times"] = filters.times
+        self.filters["truncate"] = filters.truncate
+        self.filters["truncate_words"] = filters.truncate_words
 
     def get_template(
         self,

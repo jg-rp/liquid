@@ -22,7 +22,29 @@ from .first import first
 from .floor import floor
 from .join import join
 from .last import last
-from .lstrip import lstrip
+from .map import map_
+from .minus import minus
+from .modulo import modulo
+from .newline_to_br import newline_to_br
+from .plus import plus
+from .prepend import prepend
+from .reject import reject
+from .remove import remove, remove_first, remove_last
+from .replace import replace, replace_first, replace_last
+from .reverse import reverse
+from .round import round_
+from .size import size
+from .slice import slice_
+from .sort import sort, sort_natural
+from .split import split
+from .squish import squish
+from .strip import lstrip, rstrip, strip
+from .strip_html import strip_html
+from .strip_newlines import strip_newlines
+from .sum import sum_
+from .times import times
+from .truncate import truncate
+from .truncate import truncate_words
 
 __all__ = (
     "abs_",
@@ -51,4 +73,33 @@ __all__ = (
     "join",
     "last",
     "lstrip",
+    "map_",
+    "minus",
+    "modulo",
+    "newline_to_br",
+    "plus",
+    "prepend",
+    "reject",
+    "remove",
+    "remove_first",
+    "remove_last",
+    "replace",
+    "replace_first",
+    "replace_last",
+    "reverse",
+    "round_",
+    "rstrip",
+    "size",
+    "slice_",
+    "sort",
+    "sort_natural",
+    "split",
+    "squish",
+    "strip",
+    "strip_html",
+    "strip_newlines",
+    "sum_",
+    "times",
+    "truncate",
+    "truncate_words",
 )
