@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._markup import SCOPE_ISOLATED, Partial
 from .._nothing import NOTHING
@@ -11,6 +11,7 @@ from ..tokens import TOKEN_COMMA, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup
     from .._parser import Parser
     from ..expressions import KeywordArgument
@@ -76,7 +77,7 @@ class RenderTag:
             args=args,
         )
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         template_name = self.name.value
 
         try:
@@ -122,7 +123,7 @@ class RenderTag:
             scope[bind_key] = bind_value
             template.render_with_context(ctx, buffer)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         template_name = self.name.value
 
         try:

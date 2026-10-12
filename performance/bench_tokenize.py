@@ -1,6 +1,6 @@
 import pyperf  # type: ignore
 
-from liquid import LiquidEnvironment
+from liquid import Environment
 from liquid._lexer_legacy import LegacyLexer
 
 SOURCE = """\
@@ -147,7 +147,7 @@ Wounu 11 moves slowly. Awejkaf 12 runs slowly. Hwltrixeg 10 moves awkwardly. Azf
 
 
 def tokenize() -> None:
-    LegacyLexer.tokenize(LiquidEnvironment(), SOURCE)
+    LegacyLexer.tokenize(Environment(), SOURCE)
 
 
 runner = pyperf.Runner()

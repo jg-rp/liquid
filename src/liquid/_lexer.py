@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from .tokens import TOKEN_WC
 
 if TYPE_CHECKING:
-    from .environment import LiquidEnvironment
+    from .environment import Environment
     from .tokens import Token, TokenKind
 
 
@@ -31,7 +31,7 @@ class Lexer:
         "tokens",
     )
 
-    def __init__(self, env: LiquidEnvironment, source: str) -> None:
+    def __init__(self, env: Environment, source: str) -> None:
         self.source = source
         self.length = len(source)
         self.start = 0
@@ -46,7 +46,7 @@ class Lexer:
         self.tag_start = env.tag_end_delimiter
 
     @classmethod
-    def tokenize(cls, env: LiquidEnvironment, source: str) -> list[Token]:
+    def tokenize(cls, env: Environment, source: str) -> list[Token]:
         lexer = cls(env, source)
         lexer.run()
         return lexer.tokens

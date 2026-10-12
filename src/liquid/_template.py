@@ -1,25 +1,87 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+import re
+from collections.abc import Awaitable, Callable, Mapping
+from typing import TYPE_CHECKING
 
+from ._chain_map import ReadOnlyChainMap
 from ._context import RenderContext
+from ._io import StringBuffer
+from ._markup import render_block, render_block_async
 
 if TYPE_CHECKING:
-    from .environment import LiquidEnvironment
+    from ._markup import Block
+    from .environment import Environment
 
 
 class Template:
-    def __init__(self, env: LiquidEnvironment, source: str, name: str) -> None:
+    def __init__(
+        self,
+        env: Environment,
+        source: str,
+        name: str,
+        nodes: Block,
+        globals: Mapping[str, object] | None,
+        matter: Mapping[str, object] | None,
+        up_to_date: Callable[[], bool | Awaitable[bool]] | None = None,
+    ) -> None:
         self.env = env
         self.source = source
         self.name = name
+        self.nodes = nodes
+        self.globals = globals
+        self.matter = matter
+        self.up_to_date = up_to_date
 
-    def render_with_context(self, context: RenderContext, buffer: TextIO) -> None:
-        # TODO:
-        raise NotImplementedError
+        self._lines: list[str] | None = None
+
+    @property
+    def lines(self) -> list[str]:
+        if self._lines is None:
+            lines = re.split(r"(?<=\n)", self.source)
+            if lines[-1] == "":
+                lines.pop()
+            self._lines = lines
+
+        return self._lines
+
+    def render(self, data: Mapping[str, object] | None = None) -> str:
+        buffer = StringBuffer()
+        context = RenderContext(self, globals=self.make_globals(data))
+        self.render_with_context(context, buffer)
+        return buffer.getvalue()
+
+    async def render_async(self, data: Mapping[str, object] | None = None) -> str:
+        buffer = StringBuffer()
+        context = RenderContext(self, globals=self.make_globals(data))
+        await self.render_with_context_async(context, buffer)
+        return buffer.getvalue()
+
+    def render_with_context(self, context: RenderContext, buffer: StringBuffer) -> None:
+        render_block(self.nodes, context, buffer)
 
     async def render_with_context_async(
-        self, context: RenderContext, buffer: TextIO
+        self, context: RenderContext, buffer: StringBuffer
     ) -> None:
-        # TODO:
-        raise NotImplementedError
+        await render_block_async(self.nodes, context, buffer)
+
+    def make_globals(
+        self, data: Mapping[str, object] | None
+    ) -> Mapping[str, object] | None:
+        if not (data or self.matter or self.globals):
+            return None
+
+        chain = ReadOnlyChainMap()
+
+        if data:
+            chain.push(data)
+
+        if self.matter:
+            chain.push(self.matter)
+
+        if self.globals:
+            chain.push(self.globals)
+
+        return chain
+
+    # TODO: static analysis methods

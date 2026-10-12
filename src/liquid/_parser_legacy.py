@@ -15,7 +15,7 @@ from ._parser import (
 from .exceptions import LiquidSyntaxError
 from .tags.output import OutputStatement
 from .tokens import *
-from .tokens import TOKEN_NAMES, TokenKind, token_value
+from .tokens import TOKEN_NAMES, TokenKind, span, token_value
 
 # TODO: limit expression depth
 # TODO: mark string literals as HTML safe
@@ -244,6 +244,19 @@ class LegacyParser(Parser):
         self.eat(TOKEN_RPAREN, message="missing bracket")
         return expressions.RangeLiteral(token, start, stop)
 
+    def parse_string_literal(self) -> expressions.StringLiteral:
+        token = self.next()
+
+        if self.kind() == token[0]:
+            # Empty string
+            return expressions.StringLiteral(token, "", span(token, self.next()))
+
+        return expressions.StringLiteral(
+            token,
+            token_value(self.eat_one_of(self.STRING_LITERAL_KINDS), self.source),
+            self.eat(token[0]),
+        )
+
     def parse_path(self) -> expressions.Variable:
         token = self.current()
         kind = token[0]
@@ -299,9 +312,9 @@ class LegacyParser(Parser):
         kind = token[0]
 
         if kind == TOKEN_INT:
-            return expressions.IndexSelector(
-                token, int(token_value(token, self.source))
-            )
+            selector = int(token_value(token, self.source))
+            self.eat(TOKEN_RBRACKET)
+            return expressions.IndexSelector(token, selector)
 
         if kind in (
             TOKEN_IDENT,
@@ -319,7 +332,9 @@ class LegacyParser(Parser):
 
         if kind in (TOKEN_SINGLE_QUOTE, TOKEN_DOUBLE_QUOTE):
             self.pos -= 1
-            return self.parse_string_literal()
+            selector = self.parse_string_literal()
+            self.eat(TOKEN_RBRACKET)
+            return selector
 
         if kind == TOKEN_RBRACKET:
             raise LiquidSyntaxError(
@@ -439,7 +454,29 @@ class LegacyParser(Parser):
             )
 
         self.eat(TOKEN_COLON, message="missing colon or pipe")
-        args = self.parse_arguments(require_commas=True)
+        args: list[Expression | expressions.KeywordArgument] = []
+
+        while 1:
+            kind = self.kind()
+
+            if kind in self.TERMINATE_FILTER:
+                break
+
+            if kind == TOKEN_IDENT and self.peek_kind() == TOKEN_COLON:
+                param = self.parse_identifier()
+                self.eat(TOKEN_COLON)
+                args.append(
+                    expressions.KeywordArgument(
+                        param.token, param, self.parse_expression()
+                    )
+                )
+            else:
+                args.append(self.parse_expression())
+
+            if self.kind() in self.TERMINATE_FILTER:
+                break
+
+            self.eat(TOKEN_COMMA, message="missing comma or pipe")
 
         return expressions.Filtered(
             token,

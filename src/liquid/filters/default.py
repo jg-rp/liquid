@@ -6,7 +6,10 @@ from ..drops import EMPTY, FalsyStrictUndefined
 
 
 def default(
-    context: FilterContext, left: object, right: object, allow_false: bool = False
+    context: FilterContext,
+    left: object,
+    right: object = None,
+    allow_false: bool = False,
 ) -> object:
     if isinstance(left, FalsyStrictUndefined):
         return right
@@ -18,7 +21,7 @@ def default(
         return left
 
     if allow_false and left is False:
-        return right
+        return left
 
     if not context.truthy(left) or left == EMPTY:
         return right

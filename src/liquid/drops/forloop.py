@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
+from .._drop import Drop
 from .._nothing import NOTHING
 
 if TYPE_CHECKING:
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     from .._drop import ContextHint
 
 
-class ForLoop(Mapping[str, object]):
+class ForLoop(Drop):
     __slots__ = ("index", "length", "name", "parent_loop")
 
     def __init__(self, name: str, length: int, parent_loop: ForLoop | None) -> None:
@@ -64,6 +65,19 @@ class ForLoop(Mapping[str, object]):
             )
         )
 
+    def __contains__(self, item: object) -> bool:
+        return item in (
+            "name",
+            "length",
+            "index",
+            "index0",
+            "rindex",
+            "rindex0",
+            "first",
+            "last",
+            "parentloop",
+        )
+
     def __len__(self) -> int:
         return 9
 
@@ -72,6 +86,9 @@ class ForLoop(Mapping[str, object]):
 
     def __str__(self) -> str:
         return "Liquid::ForLoopDrop"
+
+    def __bool__(self) -> bool:
+        return True
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:

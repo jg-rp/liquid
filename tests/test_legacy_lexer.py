@@ -1,11 +1,11 @@
 from liquid._lexer_legacy import LegacyLexer
-from liquid.environment import LiquidEnvironment
+from liquid.environment import Environment
 from liquid.tokens import *
 from liquid.tokens import TokenKind, token_value
 
 
 def tokenize(source: str) -> list[tuple[TokenKind, str]]:
-    env = LiquidEnvironment()
+    env = Environment()
     tokens = LegacyLexer.tokenize(env, source)
     return [(token[0], token_value(token, source)) for token in tokens]
 

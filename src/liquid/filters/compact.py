@@ -14,6 +14,6 @@ def compact(context: FilterContext, left: object, prop: object = None) -> list[o
             raise context.error(f"can't read property {prop!r}")
 
         if not context.is_nil(val):
-            result.append(val)
+            result.append(obj)
 
     return result

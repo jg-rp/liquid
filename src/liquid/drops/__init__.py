@@ -1,9 +1,8 @@
-from .blank import BLANK, EMPTY
 from .forloop import ForLoop
 from .iterable import IterableDrop
 from .range import Range
 from .tablerowloop import TableRowLoop
-from .undefined import FalsyStrictUndefined, StrictUndefined, Undefined
+from .undefined import BLANK, EMPTY, FalsyStrictUndefined, StrictUndefined, Undefined
 
 __all__ = (
     "BLANK",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from itertools import islice
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
 from .._markup import is_blank_block, render_block, render_block_async
@@ -14,6 +14,7 @@ from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from ..tokens import Token
@@ -143,7 +144,7 @@ class ForTag:
 
         return reversed_, offset, limit
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         target = self.expression.evaluate(context)
 
         offsets = context.get_register("loop_offset", default=register_factory)
@@ -206,7 +207,7 @@ class ForTag:
                     else:
                         context.interrupts.append(interrupt)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         target = await self.expression.evaluate_async(context)
 
         offsets = context.get_register("loop_offset", default=register_factory)
@@ -321,10 +322,10 @@ class BreakTag:
         parser.eat(TOKEN_TAG_END)
         return BreakTag(token)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.interrupts.append("break")
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.interrupts.append("break")
 
     def children(self) -> list[Markup]:
@@ -361,10 +362,10 @@ class ContinueTag:
         parser.eat(TOKEN_TAG_END)
         return BreakTag(token)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.interrupts.append("continue")
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.interrupts.append("continue")
 
     def children(self) -> list[Markup]:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._markup import SCOPE_SHARED, Partial
 from .._nothing import NOTHING
@@ -10,6 +10,7 @@ from ..tokens import TOKEN_COMMA, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup
     from .._parser import Parser
     from ..expressions import KeywordArgument
@@ -61,7 +62,7 @@ class IncludeTag:
         parser.eat(TOKEN_TAG_END)
         return IncludeTag(token, name_expr, variable, alias, args)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         template_name = context.env.to_str(
             self.name.evaluate(context), context, self.name.span
         )
@@ -93,6 +94,7 @@ class IncludeTag:
 
         with context.extend(scope, template=template):
             if isinstance(bind_value, list):
+                # TODO: raise for loop iterations
                 for item in bind_value:  # type: ignore
                     scope[bind_key] = item
                     template.render_with_context(context, buffer)
@@ -100,7 +102,7 @@ class IncludeTag:
                 scope[bind_key] = bind_value
                 template.render_with_context(context, buffer)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         template_name = context.env.to_str(
             await self.name.evaluate_async(context), context, self.name.span
         )
@@ -134,6 +136,7 @@ class IncludeTag:
 
         with context.extend(scope, template=template):
             if isinstance(bind_value, list):
+                # TODO: raise for loop iterations
                 for item in bind_value:  # type: ignore
                     scope[bind_key] = item
                     await template.render_with_context_async(context, buffer)

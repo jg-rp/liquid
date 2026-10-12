@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._markup import render_block, render_block_async
 from ..tokens import TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -31,7 +32,7 @@ class IfChangedTag:
         parser.eat_empty_tag("endifchanged")
         return IfChangedTag(token, block)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         render_block(self.block, context, buf)
         buffered = buf.getvalue()
@@ -40,7 +41,7 @@ class IfChangedTag:
             buffer.write(buffered)
             context.registers["ifchanged"] = buffered
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         await render_block_async(self.block, context, buf)
         buffered = buf.getvalue()

@@ -43,8 +43,11 @@ from .strip_html import strip_html
 from .strip_newlines import strip_newlines
 from .sum import sum_
 from .times import times
-from .truncate import truncate
-from .truncate import truncate_words
+from .truncate import truncate, truncate_words
+from .uniq import uniq
+from .upcase import upcase
+from .url import url_decode, url_encode
+from .where import where
 
 __all__ = (
     "abs_",
@@ -102,4 +105,9 @@ __all__ = (
     "times",
     "truncate",
     "truncate_words",
+    "uniq",
+    "upcase",
+    "url_decode",
+    "url_encode",
+    "where",
 )

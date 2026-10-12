@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._markup import is_blank_block, render_block, render_block_async
 from ..tokens import (
@@ -16,6 +16,7 @@ from .else_ import ElseBlock
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -99,7 +100,7 @@ class CaseTag:
         block = parser.parse_block(("endcase", "when", "else"))
         return WhenBlock(token, right, block)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         left = self.expression.evaluate(context)
         alt = True
 
@@ -117,7 +118,7 @@ class CaseTag:
                     alt = False
                     block.render(context, buffer)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         left = await self.expression.evaluate_async(context)
         alt = True
 
@@ -165,10 +166,10 @@ class WhenBlock:
         self.block = block
         self.blank = is_blank_block(block)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         render_block(self.block, context, buffer)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         await render_block_async(self.block, context, buffer)
 
     def children(self) -> list[Markup]:

@@ -12,7 +12,7 @@ from .exceptions import LiquidFilterError
 
 if TYPE_CHECKING:
     from ._context import RenderContext
-    from .environment import LiquidEnvironment
+    from .environment import Environment
     from .tokens import Token
 
 
@@ -25,7 +25,7 @@ class FilterContext:
     span: Token
 
     missing: object = field(init=False)
-    env: LiquidEnvironment = field(init=False)
+    env: Environment = field(init=False)
 
     def __post_init__(self) -> None:
         self.missing = MISSING
@@ -40,7 +40,7 @@ class FilterContext:
         ):
             return obj == key
 
-        if self.is_nil(obj) or not isinstance(obj, Mapping):
+        if not isinstance(obj, Mapping):
             raise LiquidFilterError(
                 f"can't read property {obj}[{key}]",
                 token=self.span,

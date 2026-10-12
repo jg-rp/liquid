@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
+from .._io import StringBuffer
 from .._markup import render_block, render_block_async
 from ..exceptions import LiquidSyntaxError
 from ..tokens import TOKEN_TAG_END
@@ -44,13 +45,13 @@ class CaptureTag:
         parser.eat_empty_tag("endcapture")
         return CaptureTag(token, name, block)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         render_block(self.block, context, buf)
         # TODO: HTML safe
         context.assign(self.name.value, buf.getvalue())
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         await render_block_async(self.block, context, buf)
         # TODO: HTML safe

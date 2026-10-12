@@ -15,4 +15,4 @@ def modulo(
     if isinstance(left, int) and isinstance(right, int):
         return left % right
 
-    return float(Decimal(left) / Decimal(right))
+    return float(Decimal(str(left)) % Decimal(str(right)))

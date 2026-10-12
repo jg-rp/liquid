@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..exceptions import LiquidSyntaxError
 from ..tokens import TOKEN_COMMENT, TOKEN_TAG_END, token_value
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -44,10 +45,10 @@ class InlineCommentTag:
 
         return InlineCommentTag(token, comment_text)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         return None
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         return None
 
     def children(self) -> list[Markup]:

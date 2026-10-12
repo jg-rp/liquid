@@ -87,3 +87,15 @@ class TemplateNotFoundError(LiquidError):
 
 class NoSuchTemplateError(DetailedLiquidError):
     pass
+
+
+class UndefinedVariableError(DetailedLiquidError):
+    pass
+
+
+class DisabledTagError(DetailedLiquidError):
+    pass
+
+
+class ResourceLimitError(LiquidError):
+    pass

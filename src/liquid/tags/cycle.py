@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..expressions import Variable
 from ..tokens import TOKEN_COLON, TOKEN_COMMA, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -56,7 +57,7 @@ class CycleTag:
 
         return CycleTag(token, group, items)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         cycles = context.get_register("cycle", default=register_factory)
         key = self.static_key
 
@@ -78,7 +79,7 @@ class CycleTag:
 
         cycles[key] = index
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         cycles = context.get_register("cycle", default=register_factory)
         key = self.static_key
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from itertools import islice
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
 from .._markup import render_block, render_block_async
@@ -13,6 +13,7 @@ from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from ..tokens import Token
@@ -100,7 +101,7 @@ class TableRowTag:
             limit=limit,
         )
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         start = _to_int(self.offset, context, 0, 0)
         limit = _to_int(self.limit, context, None, 0)
         end: int | None = None
@@ -151,7 +152,7 @@ class TableRowTag:
 
             buffer.write("</tr>\n")
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         start = await _to_int_async(self.offset, context, 0, 0)
         limit = await _to_int_async(self.limit, context, None, 0)
         end: int | None = None

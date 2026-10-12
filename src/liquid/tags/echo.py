@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..tokens import TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -29,14 +30,14 @@ class EchoTag:
         parser.eat(TOKEN_TAG_END)
         return EchoTag(token, expr)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         buffer.write(
             context.env.serialize(
                 self.expression.evaluate(context), context, self.expression.span
             )
         )
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         buffer.write(
             context.env.serialize(
                 await self.expression.evaluate_async(context),

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..exceptions import LiquidSyntaxError
 from ..tokens import TOKEN_ASSIGN, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -42,10 +43,10 @@ class AssignTag:
         parser.eat(TOKEN_TAG_END)
         return AssignTag(token, name, expression)
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.assign(self.name.value, self.expression.evaluate(context))
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.assign(self.name.value, await self.expression.evaluate_async(context))
 
     def children(self) -> list[Markup]:

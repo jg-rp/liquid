@@ -1,0 +1,3 @@
+[submodule "tests/golden_liquid"]
+	path = tests/golden_liquid
+	url = https://github.com/jg-rp/golden-liquid.git

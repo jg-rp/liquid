@@ -5,13 +5,13 @@ from collections.abc import Collection
 from typing import TYPE_CHECKING, Literal
 
 from .exceptions import LiquidSyntaxError
-from .expressions import Expression, KeywordArgument, Name, StringLiteral
+from .expressions import KeywordArgument, Name, StringLiteral
 from .tokens import *
 from .tokens import TOKEN_NAMES, token_value
 
 if TYPE_CHECKING:
-    from ._markup import Block
-    from .environment import LiquidEnvironment
+    from ._markup import Block, Expression
+    from .environment import Environment
     from .tokens import Token, TokenKind
 
 PRECEDENCE_LOWEST: Literal[1] = 1
@@ -62,7 +62,7 @@ class Parser(ABC):
 
     def __init__(
         self,
-        env: LiquidEnvironment,
+        env: Environment,
         source: str,
         template_name: str,
         tokens: list[Token],
@@ -77,7 +77,7 @@ class Parser(ABC):
         self.whitespace_control_carry: Literal["-"] | None = None
 
     @classmethod
-    def parse(cls, env: LiquidEnvironment, source: str, template_name: str) -> Block:
+    def parse(cls, env: Environment, source: str, template_name: str) -> Block:
         return cls(env, source, template_name, env.tokenize(source)).parse_block(())
 
     @abstractmethod
@@ -258,7 +258,7 @@ class Parser(ABC):
         self.pos += 1
         return token
 
-    def eat_one_of(self, kinds: set[TokenKind]) -> Token:
+    def eat_one_of(self, kinds: Collection[TokenKind]) -> Token:
         token = self.next()
         if token[0] not in kinds:
             raise LiquidSyntaxError(

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Protocol, TextIO
+from typing import TYPE_CHECKING, Literal, Protocol
+
+from ._io import StringBuffer
+from .exceptions import DisabledTagError, ResourceLimitError
 
 if TYPE_CHECKING:
     from ._context import RenderContext
@@ -46,11 +49,11 @@ class Markup(Protocol):
         """Return the name of this tag, or the empty string if this node is not a tag."""
         ...
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         """Render this node to `buffer` using data from `context`."""
         ...
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         """Render this node to `buffer` asynchronously using data from `context`."""
         ...
 
@@ -144,16 +147,84 @@ class Partial:
         self.key = key
 
 
-def render_block(block: Block, context: RenderContext, buffer: TextIO) -> None:
-    # TODO:
-    raise NotImplementedError
+def render_block(block: Block, context: RenderContext, buffer: StringBuffer) -> None:
+    if context.env.max_render_score or context.env.max_render_score_cumulative:
+        context.render_score += len(block)
+        context.render_score_cumulative += len(block)
+
+        if (
+            context.env.max_render_score
+            and context.render_score > context.env.max_render_score
+        ) or (
+            context.env.max_render_score_cumulative
+            and context.render_score_cumulative
+            > context.env.max_render_score_cumulative
+        ):
+            raise ResourceLimitError("memory limits reached")
+
+    for node in block:
+        if isinstance(node, str):
+            buffer.write(node)
+
+        else:
+            if context.disabled_tags and node.tag in context.disabled_tags:
+                raise DisabledTagError(
+                    f"{node.tag!r} is not allowed in this context",
+                    token=node.token,
+                    source=context.template.source,
+                    name=context.template.name,
+                )
+
+            node.render(context, buffer)
+
+        if context.interrupts:
+            if context.interrupts[-1] == "stop":
+                context.interrupts.pop()
+            break
+
+        if context.env.max_render_size and len(buffer) > context.env.max_render_size:
+            raise ResourceLimitError("memory limits exceeded")
 
 
 async def render_block_async(
-    block: Block, context: RenderContext, buffer: TextIO
+    block: Block, context: RenderContext, buffer: StringBuffer
 ) -> None:
-    # TODO:
-    raise NotImplementedError
+    if context.env.max_render_score or context.env.max_render_score_cumulative:
+        context.render_score += len(block)
+        context.render_score_cumulative += len(block)
+
+        if (
+            context.env.max_render_score
+            and context.render_score > context.env.max_render_score
+        ) or (
+            context.env.max_render_score_cumulative
+            and context.render_score_cumulative
+            > context.env.max_render_score_cumulative
+        ):
+            raise ResourceLimitError("memory limits reached")
+
+    for node in block:
+        if isinstance(node, str):
+            buffer.write(node)
+
+        else:
+            if context.disabled_tags and node.tag in context.disabled_tags:
+                raise DisabledTagError(
+                    f"{node.tag!r} is not allowed in this context",
+                    token=node.token,
+                    source=context.template.source,
+                    name=context.template.name,
+                )
+
+            await node.render_async(context, buffer)
+
+        if context.interrupts:
+            if context.interrupts[-1] == "stop":
+                context.interrupts.pop()
+            break
+
+        if context.env.max_render_size and len(buffer) > context.env.max_render_size:
+            raise ResourceLimitError("memory limits exceeded")
 
 
 def is_blank_block(block: Block) -> bool:

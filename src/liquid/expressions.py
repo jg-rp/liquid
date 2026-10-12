@@ -55,7 +55,7 @@ class Filtered:
                 return func(FilterContext(context, self.span), left)
             except (TypeError, ValueError) as err:
                 raise LiquidTypeError(
-                    f"{self.name}: {err}",
+                    f"{self.name.value}: {err}",
                     token=self.span,
                     source=context.template.source,
                     name=context.template.name,
@@ -74,7 +74,7 @@ class Filtered:
             return func(FilterContext(context, self.span), left, *args, **kwargs)
         except (TypeError, ValueError) as err:
             raise LiquidTypeError(
-                f"{self.name}: {err}",
+                str(err),
                 token=self.span,
                 source=context.template.source,
                 name=context.template.name,
@@ -112,7 +112,15 @@ class Filtered:
             else:
                 args.append(await arg.evaluate_async(context))
 
-        return func(FilterContext(context, self.span), left, *args, **kwargs)
+        try:
+            return func(FilterContext(context, self.span), left, *args, **kwargs)
+        except (TypeError, ValueError) as err:
+            raise LiquidTypeError(
+                str(err),
+                token=self.span,
+                source=context.template.source,
+                name=context.template.name,
+            ) from err
 
     def children(self) -> list[Expression]:
         return [
@@ -134,7 +142,7 @@ class Filtered:
         return f"{self.left} | {self.name.value}{args}"
 
 
-# TODO: prefix expressions
+# TODO: non-standard prefix expressions
 
 
 @dataclass(slots=True)
@@ -373,7 +381,7 @@ class Variable:
             obj, index = context.resolve_path(
                 obj,
                 [
-                    s.evaluate(context) if isinstance(s, Variable) else s.value
+                    s if isinstance(s, Name) else s.evaluate(context)
                     for s in self.selectors
                 ],
             )
@@ -402,9 +410,7 @@ class Variable:
             obj, index = await context.resolve_path_async(
                 obj,
                 [
-                    await s.evaluate_async(context)
-                    if isinstance(s, Variable)
-                    else s.value
+                    s if isinstance(s, Name) else await s.evaluate_async(context)
                     for s in self.selectors
                 ],
             )
@@ -635,9 +641,9 @@ class RangeLiteral:
         self.value = ""
 
     def evaluate(self, context: RenderContext) -> object:
-        start = context.env.to_int(self.start.evaluate(context), context, self.span)
-        stop = context.env.to_int(self.stop.evaluate(context), context, self.span)
-        return Range(start, stop)
+        start = context.env.to_numeric(self.start.evaluate(context), context)
+        stop = context.env.to_numeric(self.stop.evaluate(context), context)
+        return Range(int(start), int(stop))
 
     async def evaluate_async(self, context: RenderContext) -> object:
         start = context.env.to_int(

@@ -1,5 +1,6 @@
 class Nothing:
-    pass
+    def __str__(self) -> str:
+        return ""
 
 
 NOTHING = Nothing()

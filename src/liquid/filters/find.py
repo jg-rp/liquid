@@ -11,6 +11,7 @@ def find(
             val = context.get_item(obj, prop)
             if not context.is_nil(val) and not val is False:
                 return obj
+        return None
 
     for obj in left:
         if context.get_item(obj, prop) == value:
@@ -30,6 +31,8 @@ def find_index(
             if not context.is_nil(val) and not val is False:
                 return i
 
+        return None
+
     for i, obj in enumerate(left):
         if context.get_item(obj, prop) == value:
             return i
@@ -47,6 +50,8 @@ def has(
             val = context.get_item(obj, prop)
             if not context.is_nil(val) and not val is False:
                 return True
+
+        return False
 
     for obj in left:
         if context.get_item(obj, prop) == value:

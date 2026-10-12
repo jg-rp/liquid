@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Generator, Mapping, Sequence
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, TypeGuard, cast
 
 from ._chain_map import ReadOnlyChainMap
+from ._drop import Drop, is_async_map
 from ._nothing import NOTHING
+from .exceptions import ResourceLimitError
+from .expressions import Name
 
 if TYPE_CHECKING:
     from ._template import Template
@@ -22,21 +26,20 @@ class RenderContext:
         context_depth: int = 0,
         assign_score_carry: int = 0,
         render_score_carry: int = 0,
+        loop_iteration_carry: int = 0,
     ) -> None:
         self.template = template
         self.env = template.env
 
         self.globals = globals or {}
         self.locals: dict[str, object] = {}
-
         self.counters: dict[str, int] = {}
-        self.registers: dict[str, object] = {}
-
         self.scope = ReadOnlyChainMap(self.locals, self.counters, self.globals)
+
+        self.registers: dict[str, object] = {}
 
         self.loops: list[ForLoop | TableRowLoop] = []
         self.interrupts: list[str] = []
-
         self.disabled_tags = disabled_tags
 
         self.context_depth = context_depth
@@ -44,27 +47,130 @@ class RenderContext:
         self.render_score = 0
         self.assign_score_cumulative = assign_score_carry
         self.render_score_cumulative = render_score_carry
+        self.loop_iteration_carry = loop_iteration_carry
 
     def assign(self, name: str, value: object) -> None:
-        # TODO
-        raise NotImplementedError
+        if self.env.max_assign_score or self.env.max_assign_score_cumulative:
+            score = assign_score_of(value)
+            self.assign_score += score
+            self.assign_score_cumulative += score
 
-    def resolve(self, selector: object) -> object:
-        if not isinstance(selector, str):
+            if (
+                self.env.max_assign_score
+                and self.assign_score > self.env.max_assign_score
+            ) or (
+                self.env.max_assign_score_cumulative
+                and self.assign_score_cumulative > self.env.max_assign_score_cumulative
+            ):
+                raise ResourceLimitError("memory limit exceeded")
+
+        self.locals[name] = value
+
+    def resolve(self, name: object) -> object:
+        """Lookup `name` in the current scope.
+
+        Returns
+        -------
+        The special value `NOTHING` is `name` can not be resolved.
+        """
+        if not isinstance(name, str):
             return NOTHING
 
-        # TODO
-        raise NotImplementedError
+        return self.scope[name]
 
-    def resolve_path(self, root: object, selectors: list[object]) -> tuple[object, int]:
-        # TODO
-        raise NotImplementedError
+    def resolve_path(self, obj: object, selectors: list[object]) -> tuple[object, int]:
+        index: int = -1
+        dotted: bool
+
+        for selector in selectors:
+            index += 1
+
+            if isinstance(selector, Name):
+                selector = selector.value
+                dotted = True
+            else:
+                dotted = False
+
+            if isinstance(obj, Drop):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("string", self)
+
+                if selector in obj:
+                    obj = obj[selector]
+                else:
+                    obj = NOTHING
+
+            elif isinstance(obj, str):
+                obj = resolve_string_selector(obj, selector)
+
+            elif isinstance(obj, Sequence):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("numeric", self)
+                obj = resolve_sequence_selector(obj, selector, dotted)  # type: ignore
+
+            elif isinstance(obj, Mapping):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("data", self)
+                obj = resolve_mapping_selector(obj, selector, dotted)  # type: ignore
+
+            else:
+                obj = resolve_unknown_selector(obj, selector)
+
+            if obj is NOTHING:
+                return (NOTHING, index)
+
+        return (obj, index)
 
     async def resolve_path_async(
-        self, root: object, selectors: list[object]
+        self, obj: object, selectors: list[object]
     ) -> tuple[object, int]:
-        # TODO
-        raise NotImplementedError
+        index: int = -1
+        dotted: bool
+
+        for selector in selectors:
+            index += 1
+
+            if isinstance(selector, Name):
+                selector = selector.value
+                dotted = True
+            else:
+                dotted = False
+
+            if isinstance(obj, Drop):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("string", self)
+
+                if is_async_map(obj):
+                    try:
+                        obj = await obj.__getitem_async__(selector)
+                    except KeyError:
+                        obj = NOTHING
+                else:
+                    if selector in obj:
+                        obj = obj[selector]
+                    else:
+                        obj = NOTHING
+
+            elif isinstance(obj, str):
+                obj = resolve_string_selector(obj, selector)
+
+            elif isinstance(obj, Sequence):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("numeric", self)
+                obj = resolve_sequence_selector(obj, selector, dotted)  # type: ignore
+
+            elif isinstance(obj, Mapping):
+                if isinstance(selector, Drop):
+                    selector = selector.__liquid__("data", self)
+                obj = resolve_mapping_selector(obj, selector, dotted)  # type: ignore
+
+            else:
+                obj = resolve_unknown_selector(obj, selector)
+
+            if obj is NOTHING:
+                return (NOTHING, index)
+
+        return (obj, index)
 
     def get_register[T](self, key: str, default: Callable[[], T]) -> T:
         if key not in self.registers:
@@ -91,7 +197,8 @@ class RenderContext:
         disabled_tags: Sequence[str] | None = None,
         block_scope: bool = False,
     ) -> RenderContext:
-        # TODO: raise for context depth
+        self.raise_for_context_depth()
+
         globals_ = (
             ReadOnlyChainMap(namespace, self.scope)
             if block_scope
@@ -117,16 +224,37 @@ class RenderContext:
     def extend(
         self, namespace: Mapping[str, object], template: Template | None = None
     ) -> Generator[RenderContext]:
-        # TODO:
-        yield self
-        raise NotImplementedError
+        self.raise_for_context_depth()
+
+        restore_assign_score = self.assign_score
+        restore_render_score = self.render_score
+        restore_template = self.template
+
+        if template:
+            self.template = template
+
+        self.scope.push(namespace)
+        self.context_depth += 1
+        self.assign_score = 0
+        self.render_score = 0
+
+        try:
+            yield self
+        finally:
+            if template:
+                self.template = restore_template
+            self.scope.pop()
+            self.context_depth -= 1
+            self.assign_score = restore_assign_score
+            self.render_score = restore_render_score
 
     @contextmanager
     def loop(
         self, namespace: Mapping[str, object], loop: ForLoop | TableRowLoop
     ) -> Generator[RenderContext]:
-        # TODO: raise for loop limit
+        self.raise_for_loop_limit(loop.length)
         self.loops.append(loop)
+
         with self.extend(namespace) as context:
             try:
                 yield context
@@ -139,6 +267,106 @@ class RenderContext:
                 return loop
         return None
 
+    def raise_for_context_depth(self) -> None:
+        if self.context_depth + 1 > self.env.max_context_depth:
+            raise ResourceLimitError(
+                "maximum context depth reached, possible recursive render"
+            )
+
+    def raise_for_loop_limit(self, length: int) -> None:
+        if (
+            self.env.max_loop_iterations
+            and math.prod(loop.length for loop in self.loops)
+            + length * self.loop_iteration_carry
+            > self.env.max_loop_iterations
+        ):
+            raise ResourceLimitError("loop iteration limit reached")
+
 
 def is_forloop(loop: ForLoop | TableRowLoop) -> TypeGuard[ForLoop]:
     return hasattr(loop, "parent_loop")
+
+
+def assign_score_of(obj: object) -> int:
+    if isinstance(obj, str):
+        return len(obj)
+
+    # TODO: handle circular data
+
+    if isinstance(obj, Sequence):
+        return sum(assign_score_of(item) for item in obj)  # type: ignore
+
+    if isinstance(obj, Mapping):
+        return sum(assign_score_of(k) + assign_score_of(v) for k, v in obj.items())  # type: ignore
+
+    return 1
+
+
+def resolve_string_selector(obj: str, selector: object) -> object:
+    if selector == "size":
+        return len(obj)
+
+    if not obj:
+        return NOTHING
+
+    if selector == "first":
+        return obj[0]
+
+    if selector == "last":
+        return obj[-1]
+
+    return NOTHING
+
+
+def resolve_sequence_selector(
+    obj: Sequence[object], selector: object, dotted: bool
+) -> object:
+    if not obj:
+        return NOTHING
+
+    if isinstance(selector, int):
+        if selector < 0:
+            if len(obj) >= abs(selector):
+                return obj[selector]
+            return NOTHING
+
+        return obj[selector] if len(obj) > selector else NOTHING
+
+    # Only dotted path syntax "calls" "commands", like `.first` and `.size`.
+    if not dotted:
+        return NOTHING
+
+    if selector == "first":
+        return obj[0]
+
+    if selector == "last":
+        return obj[-1]
+
+    if selector == "size":
+        return len(obj)
+
+
+def resolve_mapping_selector(
+    obj: Mapping[object, object], selector: object, dotted: bool
+) -> object:
+    if selector in obj:
+        return obj[selector]
+
+    # Only dotted path syntax "calls" "commands", like `.first` and `.size`.
+    if not dotted:
+        return NOTHING
+
+    if selector == "first":
+        return next(iter(obj.items()), NOTHING)
+
+    if selector == "size":
+        return len(obj)
+
+    return NOTHING
+
+
+def resolve_unknown_selector(obj: object, selector: object) -> object:
+    if selector == "size":
+        # Close enough, most of the time.
+        return 8 if isinstance(obj, (int, float)) else NOTHING
+    return NOTHING

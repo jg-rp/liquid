@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..tokens import TOKEN_COMMENT, TOKEN_TAG_END, token_value
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -30,10 +31,10 @@ class CommentTag:
         parser.eat_empty_tag("endcomment")
         return CommentTag(token, token_value(comment, parser.source))
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         return None
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         return None
 
     def children(self) -> list[Markup]:

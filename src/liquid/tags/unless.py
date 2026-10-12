@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from ..tokens import (
     TOKEN_TAG_END,
@@ -12,6 +12,7 @@ from .if_ import ElsIfBlock, IfBlock
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import Name
@@ -77,7 +78,7 @@ class UnlessTag:
             token, expression, parser.parse_block(("else", "elsif", "endunless"))
         )
 
-    def render(self, context: RenderContext, buffer: TextIO) -> None:
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         for block in self.blocks:
             if isinstance(block, UnlessBlock):
                 if not context.env.truthy(block.expression.evaluate(context), context):
@@ -85,7 +86,7 @@ class UnlessTag:
             elif context.env.truthy(block.expression.evaluate(context), context):
                 return block.render(context, buffer)
 
-    async def render_async(self, context: RenderContext, buffer: TextIO) -> None:
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         for block in self.blocks:
             if isinstance(block, UnlessBlock):
                 if not context.env.truthy(

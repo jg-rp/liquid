@@ -16,6 +16,6 @@ def divided_by(
         return left // right
 
     if isinstance(left, Decimal) or isinstance(right, Decimal):
-        return Decimal(left) / Decimal(right)
+        return float(Decimal(str(left)) / Decimal(str(right)))
 
     return left / right

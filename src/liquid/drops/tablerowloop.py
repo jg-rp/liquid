@@ -1,7 +1,9 @@
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
+
+from .._drop import Drop
 
 
-class TableRowLoop(Mapping[str, int]):
+class TableRowLoop(Drop):
     """Table row helper variables."""
 
     __slots__ = (
@@ -79,6 +81,25 @@ class TableRowLoop(Mapping[str, int]):
                 "row",
             )
         )
+
+    def __contains__(self, item: object) -> bool:
+        return item in (
+            "length",
+            "index",
+            "index0",
+            "rindex",
+            "rindex0",
+            "first",
+            "last",
+            "col",
+            "col0",
+            "col_first",
+            "col_last",
+            "row",
+        )
+
+    def __bool__(self) -> bool:
+        return True
 
     def step(self) -> None:
         self.index += 1

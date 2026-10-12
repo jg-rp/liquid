@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
+from .._drop import Drop
 from .._nothing import NOTHING
 from .iterable import IterableDrop
 
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from .._drop import ContextHint
 
 
-class Range(Mapping[str | int, int]):
+class Range(Drop):
     __slots__ = ("start", "stop")
 
     def __init__(self, start: int, stop: int) -> None:
@@ -42,16 +43,24 @@ class Range(Mapping[str | int, int]):
     def __iter__(self) -> Iterator[int]:
         return iter(self.__liquid_iter__(0, None, False))
 
+    def __contains__(self, item: object) -> bool:
+        return isinstance(item, int) and item >= self.start and item <= self.stop
+
+    def __bool__(self) -> bool:
+        return len(self) > 0
+
     def __str__(self) -> str:
-        return f"({self.start}..{self.stop})"
+        return f"{self.start}..{self.stop}"
 
     def __liquid_iter__(
         self, start: int, end: int | None, reversed_: bool
     ) -> IterableDrop[int]:
         if end is not None:
-            end = min(end, end)
+            end = min(end, self.stop)
         else:
             end = self.stop
+
+        start = self.start + start
 
         if reversed_:
             it = range(0) if start > end else range(end, start - 1)
