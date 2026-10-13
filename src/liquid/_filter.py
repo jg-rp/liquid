@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Concatenate
 from ._drop import is_drop
 from ._missing import MISSING
 from ._nothing import NOTHING
-from .exceptions import LiquidFilterError
+from .exceptions import LiquidFilterError, LiquidFilterInterrupt
 
 if TYPE_CHECKING:
     from ._context import RenderContext
@@ -39,6 +39,14 @@ class FilterContext:
             key, (int, float, Decimal)
         ):
             return obj == key
+
+        if self.is_nil(obj):
+            raise LiquidFilterInterrupt(
+                f"can't read property {obj}[{key}]",
+                token=self.span,
+                source=self.context.template.source,
+                name=self.context.template.name,
+            )
 
         if not isinstance(obj, Mapping):
             raise LiquidFilterError(

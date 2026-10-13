@@ -1,5 +1,5 @@
 import math
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from .._filter import FilterContext
 
@@ -7,15 +7,26 @@ from .._filter import FilterContext
 def round_(
     context: FilterContext, left: object, decimal_places: object = None
 ) -> int | float | Decimal:
+    left = context.to_numeric(left, 0)
+
     if context.is_nil(decimal_places):
-        return round(context.to_numeric(left, 0))
+        return _round_up(left)
 
     to = context.to_numeric(decimal_places, 0)
 
     if to == 0:
-        return round(context.to_numeric(left, 0))
+        return _round_up(left)
 
     if to < 0:
         return 0
 
-    return round(context.to_numeric(left, 0), math.floor(to))
+    if left == 0:
+        return 0
+
+    return _round_up(context.to_numeric(left, 0), math.floor(to))
+
+
+def _round_up(x: float | Decimal, digits: int = 0) -> int | float:
+    quantum = Decimal(1).scaleb(-digits)
+    result = Decimal(str(x)).quantize(quantum, rounding=ROUND_HALF_UP)
+    return int(result) if digits == 0 else float(result)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from ._filter import FilterContext
 from ._nothing import NOTHING
 from .drops import BLANK, EMPTY, Range
-from .exceptions import LiquidNameError, LiquidTypeError
+from .exceptions import LiquidFilterInterrupt, LiquidNameError, LiquidTypeError
 from .tokens import span
 
 if TYPE_CHECKING:
@@ -53,6 +53,8 @@ class Filtered:
         if not self.args:
             try:
                 return func(FilterContext(context, self.span), left)
+            except LiquidFilterInterrupt:
+                return None
             except (TypeError, ValueError) as err:
                 raise LiquidTypeError(
                     str(err),
@@ -72,6 +74,8 @@ class Filtered:
 
         try:
             return func(FilterContext(context, self.span), left, *args, **kwargs)
+        except LiquidFilterInterrupt:
+            return None
         except (TypeError, ValueError) as err:
             raise LiquidTypeError(
                 str(err),
@@ -103,6 +107,8 @@ class Filtered:
         if not self.args:
             try:
                 return func(FilterContext(context, self.span), left)
+            except LiquidFilterInterrupt:
+                return None
             except (TypeError, ValueError) as err:
                 raise LiquidTypeError(
                     str(err),
@@ -122,6 +128,8 @@ class Filtered:
 
         try:
             return func(FilterContext(context, self.span), left, *args, **kwargs)
+        except LiquidFilterInterrupt:
+            return None
         except (TypeError, ValueError) as err:
             raise LiquidTypeError(
                 str(err),

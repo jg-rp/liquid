@@ -81,6 +81,10 @@ class LiquidFilterError(DetailedLiquidError):
     pass
 
 
+class LiquidFilterInterrupt(LiquidFilterError):
+    pass
+
+
 class TemplateNotFoundError(LiquidError):
     pass
 

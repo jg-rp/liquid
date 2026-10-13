@@ -14,13 +14,13 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
         return context.to_str(obj, "")
 
     if isinstance(obj, str):
-        if obj in ("now", "today"):
-            date_ = datetime.datetime.now()  # noqa: DTZ005
+        if obj in ("now", "today", "Today"):
+            date_ = datetime.datetime.now()
 
         elif obj.isdigit():
             # The reference implementation does not support string
             # representations of negative integers either.
-            date_ = datetime.datetime.fromtimestamp(int(obj))  # noqa: DTZ006
+            date_ = datetime.datetime.fromtimestamp(int(obj))
 
         else:
             try:
@@ -32,7 +32,7 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
 
     elif isinstance(obj, int):
         try:
-            date_ = datetime.datetime.fromtimestamp(obj)  # noqa: DTZ006
+            date_ = datetime.datetime.fromtimestamp(obj)
         except (OverflowError, OSError):
             # Testing on Windows shows that it can't handle some
             # negative integers.

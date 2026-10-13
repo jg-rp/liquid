@@ -90,9 +90,12 @@ class IncludeTag:
             if bind_value == NOTHING:
                 bind_value = None
 
-        scope = {arg.name.value: arg.expr.evaluate(context) for arg in self.args}
+        scope: dict[str, object] = {}
 
         with context.extend(scope, template=template):
+            for arg in self.args:
+                scope[arg.name.value] = arg.expr.evaluate(context)
+
             if isinstance(bind_value, list):
                 # TODO: raise for loop iterations
                 for item in bind_value:  # type: ignore
@@ -130,11 +133,12 @@ class IncludeTag:
             if bind_value == NOTHING:
                 bind_value = None
 
-        scope = {
-            arg.name.value: await arg.expr.evaluate_async(context) for arg in self.args
-        }
+        scope: dict[str, object] = {}
 
         with context.extend(scope, template=template):
+            for arg in self.args:
+                scope[arg.name.value] = await arg.expr.evaluate_async(context)
+
             if isinstance(bind_value, list):
                 # TODO: raise for loop iterations
                 for item in bind_value:  # type: ignore

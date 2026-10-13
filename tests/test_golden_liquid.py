@@ -38,13 +38,6 @@ SKIP = {
     "identifiers, only digits",
     "identifiers, repeated parens",
     # TODO: We're raising an exceptions for these, whereas Shopify/liquid silently returns nil.
-    "filters, find, array of hashes, with a nil",
-    "filters, find, mixed array, default value",
-    "filters, find index, array of hashes, with a nil",
-    "filters, find index, mixed array, default value",
-    "filters, has, array of hashes, with a nil",
-    "filters, has, mixed array, default value",
-    "filters, reject, array containing null, default value",
     "tags, case, unexpected when token",
     "tags, echo, nothing to echo",
     # TODO: These are invalid in Shopify/liquid.

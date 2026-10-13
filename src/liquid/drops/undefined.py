@@ -28,7 +28,7 @@ class Blank(Drop):
         if isinstance(other, (Blank, Empty)):
             return False
 
-        if other is None or other == False or isinstance(other, Undefined):
+        if other is None or other is False or isinstance(other, Undefined):
             return True
 
         if isinstance(other, str):

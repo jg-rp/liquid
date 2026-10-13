@@ -106,6 +106,7 @@ class RenderContext:
             elif isinstance(obj, Sequence):
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("numeric", self)
+
                 obj = resolve_sequence_selector(obj, selector, dotted)  # type: ignore
 
             elif isinstance(obj, Mapping):
@@ -322,7 +323,7 @@ def resolve_sequence_selector(
     obj: Sequence[object], selector: object, dotted: bool
 ) -> object:
     if not obj:
-        return NOTHING
+        return 0 if selector == "size" else NOTHING
 
     if isinstance(selector, int):
         if selector < 0:
@@ -349,8 +350,11 @@ def resolve_sequence_selector(
 def resolve_mapping_selector(
     obj: Mapping[object, object], selector: object, dotted: bool
 ) -> object:
-    if selector in obj:
-        return obj[selector]
+    try:
+        if selector in obj:
+            return obj[selector]
+    except TypeError:
+        return NOTHING
 
     # Only dotted path syntax "calls" "commands", like `.first` and `.size`.
     if not dotted:

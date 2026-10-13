@@ -13,7 +13,7 @@ def truncate(
     left = context.to_str(left, "")
     length = context.to_int(length)
 
-    if len(left) < length:
+    if len(left) <= length:
         return left
 
     end = context.to_str(end, "")

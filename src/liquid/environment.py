@@ -127,15 +127,17 @@ class Environment:
 
     def __init__(
         self,
+        *,
         globals: Mapping[str, object] | None = None,
         loader: Loader | None = None,
+        strict_filters: bool = True,
         undefined: type[Undefined] = Undefined,
     ) -> None:
         self.loader = loader or DictLoader({})
         self.globals = globals
         self.undefined_type = undefined
 
-        self.strict_filters = True
+        self.strict_filters = strict_filters
         self.autoescape = False
         self.string_first_and_last = False
 

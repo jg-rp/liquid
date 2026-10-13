@@ -7,7 +7,11 @@ from .._filter import FilterContext
 
 def escape(context: FilterContext, left: object) -> str:
     left = context.to_str(left, "")
-    return markupsafe.escape(left) if context.env.autoescape else html.escape(left)
+    return (
+        markupsafe.escape(left)
+        if context.env.autoescape
+        else html.escape(left).replace("&#x27;", "&#39;")
+    )
 
 
 def escape_once(context: FilterContext, left: object) -> str:
@@ -15,7 +19,7 @@ def escape_once(context: FilterContext, left: object) -> str:
     return (
         markupsafe.escape(left).unescape()
         if context.env.autoescape
-        else html.escape(html.unescape(left))
+        else html.escape(html.unescape(left)).replace("&#x27;", "&#39;")
     )
 
 
