@@ -19,14 +19,12 @@ def replace_first(
     return left.replace(sub, rep, 1)
 
 
-def replace_last(
-    context: FilterContext, left: object, sub: object, rep: object = None
-) -> str:
+def replace_last(context: FilterContext, left: object, sub: object, rep: object) -> str:
     left = context.to_str(left, "")
     sub = context.to_str(sub, "")
 
     if not sub:
-        return left
+        return left + context.to_str(rep, "")
 
     before, _, after = left.rpartition(sub)
 

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable, Sequence
-from itertools import islice
 from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
 from .._markup import is_blank_block, render_block, render_block_async
+from .._slice import slice_sequence
 from ..drops import ForLoop, Undefined
 from ..exceptions import LiquidSyntaxError
 from ..expressions import KeywordArgument, Name, Variable
@@ -31,6 +30,7 @@ class ForTag:
         "limit",
         "name",
         "offset",
+        "offset_key",
         "reversed",
         "token",
     )
@@ -66,6 +66,8 @@ class ForTag:
                 self.default = [
                     node for node in self.default if not isinstance(node, str)
                 ]
+
+        self.offset_key = f"{self.name.value}-{self.expression}"
 
     @staticmethod
     def parse(token: Token, parser: Parser) -> Markup:
@@ -147,39 +149,36 @@ class ForTag:
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         target = self.expression.evaluate(context)
 
+        # TODO: optimize for no offset or limit or reversed
+        # TODO: optimize for small ranges
+
         offsets = context.get_register("loop_offset", default=register_factory)
-        offset_key = f"{self.name.value}-{self.expression}"
 
-        offset = self.offset.evaluate(context) if self.offset else None
-        start: int = 0
+        if self.offset:
+            offset_ = self.offset.evaluate(context)
 
-        if isinstance(offset, Undefined) and offset.path == "continue":
-            start = offsets[offset_key]
-        elif offset is not None:
-            start = context.env.to_int(offset, context, self.expression.span)
+            if isinstance(offset_, Undefined) and offset_.path == "continue":
+                offset = offsets[self.offset_key]
+            else:
+                offset = context.env.to_int(offset_, context, self.expression.span)
+        else:
+            offset = 0
 
-        limit = self.limit.evaluate(context) if self.limit else None
-        end: int | None = None
-
-        if limit is not None:
-            end = start + context.env.to_int(limit, context, self.expression.span)
-
-        it: Iterable[object]
-        length: int
+        if self.limit:
+            limit = context.env.to_int(
+                self.limit.evaluate(context), context, self.expression.span
+            )
+        else:
+            limit = None
 
         if is_iterable_drop(target):
-            it = target.__liquid_iter__(start, end, self.reversed)
+            it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
-
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            start, end, _ = slice(start, end).indices(len(a))
-            length = max(0, end - start)
+            it, length = slice_sequence(a, offset, limit, self.reversed)
 
-            if self.reversed:
-                it = reverse_slice(a, start, end or len(a))
-            else:
-                it = islice(a, start, end)
+        offsets[self.offset_key] = offset + length
 
         if not length:
             if self.default:
@@ -211,39 +210,32 @@ class ForTag:
         target = await self.expression.evaluate_async(context)
 
         offsets = context.get_register("loop_offset", default=register_factory)
-        offset_key = f"{self.name.value}-{self.expression}"
 
-        offset = await self.offset.evaluate_async(context) if self.offset else None
-        start: int = 0
+        if self.offset:
+            offset_ = await self.offset.evaluate_async(context)
 
-        if isinstance(offset, Undefined) and offset.path == "continue":
-            start = offsets[offset_key]
-        elif offset is not None:
-            start = context.env.to_int(offset, context, self.expression.span)
+            if isinstance(offset_, Undefined) and offset_.path == "continue":
+                offset = offsets[self.offset_key]
+            else:
+                offset = context.env.to_int(offset_, context, self.expression.span)
+        else:
+            offset = 0
 
-        limit = await self.limit.evaluate_async(context) if self.limit else None
-        end: int | None = None
+        if self.limit:
+            limit = context.env.to_int(
+                await self.limit.evaluate_async(context), context, self.expression.span
+            )
+        else:
+            limit = None
 
-        if limit is not None:
-            end = start + context.env.to_int(limit, context, self.expression.span)
-
-        it: Iterable[object]
-        length: int
-
-        # TODO: __liquid_aiter__
         if is_iterable_drop(target):
-            it = target.__liquid_iter__(start, end, self.reversed)
+            it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
-
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            start, end, _ = slice(start, end).indices(len(a))
-            length = max(0, end - start)
+            it, length = slice_sequence(a, offset, limit, self.reversed)
 
-            if self.reversed:
-                it = reverse_slice(a, start, end or len(a))
-            else:
-                it = islice(a, start, end)
+        offsets[self.offset_key] = offset + length
 
         if not length:
             if self.default:
@@ -360,7 +352,7 @@ class ContinueTag:
     def parse(token: Token, parser: Parser) -> Markup:
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
-        return BreakTag(token)
+        return ContinueTag(token)
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         context.interrupts.append("continue")
@@ -389,8 +381,3 @@ class ContinueTag:
 
 def register_factory() -> defaultdict[str, int]:
     return defaultdict(int)
-
-
-def reverse_slice[T](seq: Sequence[T], start: int, end: int) -> Iterable[T]:
-    for i in range(end - 1, start - 1, -1):
-        yield seq[i]

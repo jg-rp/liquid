@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from itertools import islice
 from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
 from .._markup import render_block, render_block_async
+from .._slice import slice_sequence
 from ..drops import TableRowLoop
 from ..exceptions import LiquidSyntaxError
 from ..expressions import Name
@@ -102,26 +101,17 @@ class TableRowTag:
         )
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
-        start = _to_int(self.offset, context, 0, 0)
+        offset = _to_int(self.offset, context, 0, 0)
         limit = _to_int(self.limit, context, None, 0)
-        end: int | None = None
-
-        if limit is not None:
-            end = start + limit
-
-        it: Iterable[object]
-        length: int
 
         target = self.expression.evaluate(context)
 
         if is_iterable_drop(target):
-            it = target.__liquid_iter__(start, end, False)
+            it = target.__liquid_iter__(offset, limit, False)
             length = len(it)
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            start, end, _ = slice(start, end).indices(len(a))
-            it = islice(a, start, end)
-            length = max(0, end - start)
+            it, length = slice_sequence(a, offset, limit, False)
 
         if not length:
             # An empty iterable renders nothing.
@@ -142,7 +132,7 @@ class TableRowTag:
                 render_block(self.block, context, buffer)
                 buffer.write("</td>")
 
-                if context.interrupts.pop() == "break":
+                if context.interrupts and context.interrupts.pop() == "break":
                     break
 
                 if tablerowloop["col_last"] and not tablerowloop["last"]:
@@ -153,26 +143,17 @@ class TableRowTag:
             buffer.write("</tr>\n")
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
-        start = await _to_int_async(self.offset, context, 0, 0)
+        offset = await _to_int_async(self.offset, context, 0, 0)
         limit = await _to_int_async(self.limit, context, None, 0)
-        end: int | None = None
-
-        if limit is not None:
-            end = start + limit
-
-        it: Iterable[object]
-        length: int
 
         target = await self.expression.evaluate_async(context)
 
         if is_iterable_drop(target):
-            it = target.__liquid_iter__(start, end, False)
+            it = target.__liquid_iter__(offset, limit, False)
             length = len(it)
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            start, end, _ = slice(start, end).indices(len(a))
-            it = islice(a, start, end)
-            length = max(0, end - start)
+            it, length = slice_sequence(a, offset, limit, False)
 
         if not length:
             # An empty iterable renders nothing.
@@ -193,7 +174,7 @@ class TableRowTag:
                 await render_block_async(self.block, context, buffer)
                 buffer.write("</td>")
 
-                if context.interrupts.pop() == "break":
+                if context.interrupts and context.interrupts.pop() == "break":
                     break
 
                 if tablerowloop["col_last"] and not tablerowloop["last"]:

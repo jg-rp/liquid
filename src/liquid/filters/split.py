@@ -13,6 +13,12 @@ def split(context: FilterContext, left: object, sep: object) -> list[str]:
 
     sep = context.to_str(sep, "")
 
+    if not sep:
+        return list(left)
+
+    if left == sep:
+        return []
+
     result: list[str]
 
     if sep == " ":

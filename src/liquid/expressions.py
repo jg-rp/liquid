@@ -39,7 +39,7 @@ class Filtered:
         if func is None:
             if context.env.strict_filters:
                 raise LiquidNameError(
-                    repr(self.name.value),
+                    f"unknown filter {self.name.value!r}",
                     token=self.name.token,
                     source=context.template.source,
                     name=context.template.name,
@@ -55,7 +55,7 @@ class Filtered:
                 return func(FilterContext(context, self.span), left)
             except (TypeError, ValueError) as err:
                 raise LiquidTypeError(
-                    f"{self.name.value}: {err}",
+                    str(err),
                     token=self.span,
                     source=context.template.source,
                     name=context.template.name,
@@ -89,7 +89,7 @@ class Filtered:
         if func is None:
             if context.env.strict_filters:
                 raise LiquidNameError(
-                    repr(self.name.value),
+                    f"unknown filter {self.name.value!r}",
                     token=self.name.token,
                     source=context.template.source,
                     name=context.template.name,
@@ -101,7 +101,15 @@ class Filtered:
         left = await self.left.evaluate_async(context)
 
         if not self.args:
-            return func(FilterContext(context, self.span), left)
+            try:
+                return func(FilterContext(context, self.span), left)
+            except (TypeError, ValueError) as err:
+                raise LiquidTypeError(
+                    str(err),
+                    token=self.span,
+                    source=context.template.source,
+                    name=context.template.name,
+                ) from err
 
         args: list[object] = []
         kwargs: dict[str, object] = {}
@@ -646,13 +654,11 @@ class RangeLiteral:
         return Range(int(start), int(stop))
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        start = context.env.to_int(
-            await self.start.evaluate_async(context), context, self.span
+        start = context.env.to_numeric(
+            await self.start.evaluate_async(context), context
         )
-        stop = context.env.to_int(
-            await self.stop.evaluate_async(context), context, self.span
-        )
-        return Range(start, stop)
+        stop = context.env.to_numeric(await self.stop.evaluate_async(context), context)
+        return Range(int(start), int(stop))
 
     def children(self) -> list[Expression]:
         return [self.start, self.stop]

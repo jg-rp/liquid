@@ -29,10 +29,10 @@ class CycleTag:
         self.items = items
         self.static_key = ""
 
-        if group is not None:
+        if group is None:
             # This mimics Shopify/liquid by giving every Variable a unique ID.
             self.static_key = str(
-                [f"{i}:{id(i)}" if isinstance(i, Variable) else i for i in items]
+                [f"{i}:{id(i)}" if isinstance(i, Variable) else str(i) for i in items]
             )
 
     @staticmethod
@@ -69,9 +69,10 @@ class CycleTag:
             )
 
         index = cycles[key]
-        expr = self.items[index]
 
-        buffer.write(context.env.to_str(expr.evaluate(context), context, expr.span))
+        if index < len(self.items):
+            expr = self.items[index]
+            buffer.write(context.env.to_str(expr.evaluate(context), context, expr.span))
 
         index += 1
         if index >= len(self.items):
@@ -91,11 +92,15 @@ class CycleTag:
             )
 
         index = cycles[key]
-        expr = self.items[index]
 
-        buffer.write(
-            context.env.to_str(await expr.evaluate_async(context), context, expr.span)
-        )
+        if index < len(self.items):
+            expr = self.items[index]
+
+            buffer.write(
+                context.env.to_str(
+                    await expr.evaluate_async(context), context, expr.span
+                )
+            )
 
         index += 1
         if index >= len(self.items):

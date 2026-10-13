@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import TYPE_CHECKING, Concatenate
 
-from ._drop import is_iterable_drop
+from ._drop import is_drop
 from ._missing import MISSING
 from ._nothing import NOTHING
 from .exceptions import LiquidFilterError
@@ -56,8 +56,8 @@ class FilterContext:
         if isinstance(obj, (list, tuple)):
             return _flatten(obj)  # type: ignore
 
-        if is_iterable_drop(obj):
-            return list(obj.__liquid_iter__(0, None, False))
+        if is_drop(obj):
+            return list(obj)
 
         return [obj]
 

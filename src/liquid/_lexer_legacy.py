@@ -150,6 +150,9 @@ class LegacyLexer(Lexer):
                 if self.pos + 1 < limit and self.source[self.pos + 1] == "=":
                     self.pos += 2
                     self.emit(TOKEN_LE)
+                elif self.pos + 1 < limit and self.source[self.pos + 1] == ">":
+                    self.pos += 2
+                    self.emit(TOKEN_NE)
                 else:
                     self.pos += 1
                     self.emit(TOKEN_LT)
@@ -212,7 +215,8 @@ class LegacyLexer(Lexer):
                     self.emit(TOKEN_INT)
 
                 else:
-                    assert False  # unreachable
+                    self.pos += 1
+                    self.emit(TOKEN_UNKNOWN)
 
             else:
                 self.pos += 1
@@ -387,7 +391,8 @@ class LegacyLexer(Lexer):
 
         if self.source.startswith("%}", self.pos):
             self.pos += 2
-            self.emit(TOKEN_TAG_END)
+
+        self.emit(TOKEN_TAG_END)
 
     def accept_line_block_comment(self, limit: int) -> None:
         comment_depth = 1

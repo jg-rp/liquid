@@ -361,7 +361,7 @@ class LegacyParser(Parser):
         op_token = self.next()
         kind = op_token[0]
         right = self.parse_expression(
-            self.PRECEDENCES.get(kind, PRECEDENCE_LOWEST), infix=False
+            self.PRECEDENCES.get(kind, PRECEDENCE_LOWEST), infix=True
         )
 
         if kind == TOKEN_OR:

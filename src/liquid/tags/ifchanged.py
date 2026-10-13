@@ -28,7 +28,7 @@ class IfChangedTag:
     def parse(token: Token, parser: Parser) -> Markup:
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
-        block = parser.parse_block(end=("endcapture",))
+        block = parser.parse_block(end=("endifchanged",))
         parser.eat_empty_tag("endifchanged")
         return IfChangedTag(token, block)
 

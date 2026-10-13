@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from .._drop import Drop
 from .._nothing import NOTHING
+from .._slice import slice_range
 from .iterable import IterableDrop
 
 if TYPE_CHECKING:
@@ -41,7 +42,7 @@ class Range(Drop):
                 raise KeyError
 
     def __iter__(self) -> Iterator[int]:
-        return iter(self.__liquid_iter__(0, None, False))
+        return iter(range(self.start, self.stop + 1))
 
     def __contains__(self, item: object) -> bool:
         return isinstance(item, int) and item >= self.start and item <= self.stop
@@ -53,20 +54,9 @@ class Range(Drop):
         return f"{self.start}..{self.stop}"
 
     def __liquid_iter__(
-        self, start: int, end: int | None, reversed_: bool
+        self, offset: int, limit: int | None, reversed_: bool
     ) -> IterableDrop[int]:
-        if end is not None:
-            end = min(end, self.stop)
-        else:
-            end = self.stop
-
-        start = self.start + start
-
-        if reversed_:
-            it = range(0) if start > end else range(end, start - 1)
-        else:
-            it = range(0) if start > end else range(start, end + 1)
-
+        it = slice_range(range(self.start, self.stop), offset, limit, reversed_)
         return IterableDrop(it, len(it))
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
@@ -75,7 +65,7 @@ class Range(Drop):
                 return str(self)
             case "data":
                 # TODO: limit
-                return list(self.__liquid_iter__(0, None, False))
+                return list(self)
             case "boolean":
                 return len(self) > 0
             case _:

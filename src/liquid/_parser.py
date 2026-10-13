@@ -299,6 +299,10 @@ class Parser(ABC):
                 name=self.template_name,
             )
 
+        # Ignore everything between the tag name and the closing tag delimiter.
+        while self.kind() not in TERMINATE_EXPRESSION:
+            self.pos += 1
+
         self.carry_whitespace_control()
         self.eat(TOKEN_TAG_END, message="expected a closing tag delimiter")
         return token
@@ -318,10 +322,6 @@ class Parser(ABC):
                 source=self.source,
                 name=self.template_name,
             )
-
-        # Ignore everything between the tag name and the closing tag delimiter.
-        while self.kind() not in TERMINATE_EXPRESSION:
-            self.pos += 1
 
         self.carry_whitespace_control()
         self.eat(TOKEN_TAG_END, message="expected a closing tag delimiter")

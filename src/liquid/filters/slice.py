@@ -7,7 +7,7 @@ MIN_SLICE_ARG: int = -(2**53) + 1
 
 
 def slice_(
-    context: FilterContext, left: object, offset: object, length: object
+    context: FilterContext, left: object, offset: object, length: object = None
 ) -> str | list[object]:
     if not isinstance(left, (list, tuple, str)):
         left = context.to_str(left, "")

@@ -177,10 +177,10 @@ def render_block(block: Block, context: RenderContext, buffer: StringBuffer) -> 
 
             node.render(context, buffer)
 
-        if context.interrupts:
-            if context.interrupts[-1] == "stop":
-                context.interrupts.pop()
-            break
+            if context.interrupts:
+                if context.interrupts[-1] == "stop":
+                    context.interrupts.pop()
+                break
 
         if context.env.max_render_size and len(buffer) > context.env.max_render_size:
             raise ResourceLimitError("memory limits exceeded")

@@ -59,6 +59,7 @@ class Environment:
         "render": tags.RenderTag,
         "tablerow": tags.TableRowTag,
         "unless": tags.UnlessTag,
+        "#": tags.InlineCommentTag,
     }
 
     standard_filters: ClassVar[dict[str, Filter]] = {
@@ -104,6 +105,7 @@ class Environment:
         "reverse": filters.reverse,
         "round": filters.round_,
         "rstrip": filters.rstrip,
+        "size": filters.size,
         "slice": filters.slice_,
         "sort": filters.sort,
         "sort_natural": filters.sort_natural,
@@ -115,11 +117,11 @@ class Environment:
         "sum": filters.sum_,
         "times": filters.times,
         "truncate": filters.truncate,
-        "truncate_words": filters.truncate_words,
+        "truncatewords": filters.truncate_words,
         "uniq": filters.uniq,
         "upcase": filters.upcase,
-        "rul_decode": filters.url_decode,
-        "rul_encode": filters.url_encode,
+        "url_decode": filters.url_decode,
+        "url_encode": filters.url_encode,
         "where": filters.where,
     }
 
@@ -257,7 +259,10 @@ class Environment:
             # Make sure there's a drop on the left so its __eq__ method gets called.
             left, right = right, left
 
-        if type(left) is bool and type(right) is not bool:
+        if type(left) is bool and type(right) is int:
+            return False
+
+        if type(right) is bool and type(left) is int:
             return False
 
         return left == right
@@ -410,13 +415,16 @@ class Environment:
         if isinstance(obj, str):
             return [] if not obj else [obj]
 
+        if is_drop(obj):
+            return list(obj)
+
         if isinstance(obj, Sequence):
             return list(obj)  # pyright: ignore[reportUnknownArgumentType]
 
         if isinstance(obj, Mapping):
             return [(k, v) for k, v in obj.items()]  # pyright: ignore[reportUnknownVariableType]
 
-        if self.is_nil(obj):
+        if self.is_nil(obj) or type(obj) is bool:
             return []
 
         return [obj]

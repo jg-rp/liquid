@@ -36,4 +36,4 @@ def truncate_words(
     if len(words) <= word_count:
         return left
 
-    return "".join(words[:word_count]) + end
+    return " ".join(words[:word_count]) + end

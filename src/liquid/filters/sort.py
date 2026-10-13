@@ -4,7 +4,7 @@ from typing import Literal
 from .._filter import FilterContext
 
 
-def sort(context: FilterContext, left: object, key: object) -> list[object]:
+def sort(context: FilterContext, left: object, key: object = None) -> list[object]:
     left = context.input_array(left)
 
     def compare(a: object, b: object) -> Literal[-1, 0, 1]:
@@ -45,7 +45,9 @@ def sort(context: FilterContext, left: object, key: object) -> list[object]:
     )
 
 
-def sort_natural(context: FilterContext, left: object, key: object) -> list[object]:
+def sort_natural(
+    context: FilterContext, left: object, key: object = None
+) -> list[object]:
     left = context.input_array(left)
 
     def compare(a: object, b: object) -> Literal[-1, 0, 1]:
