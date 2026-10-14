@@ -95,4 +95,4 @@ class LiquidAsyncMap(Protocol):
 
 
 def is_async_map(obj: object) -> TypeGuard[LiquidAsyncMap]:
-    return hasattr(obj, "__getitem_async")
+    return hasattr(obj, "__getitem_async__")

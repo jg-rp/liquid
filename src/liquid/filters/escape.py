@@ -1,4 +1,5 @@
 import html
+import re
 
 import markupsafe
 
@@ -8,7 +9,7 @@ from .._filter import FilterContext
 def escape(context: FilterContext, left: object) -> str:
     left = context.to_str(left, "")
     return (
-        markupsafe.escape(left)
+        markupsafe.escape(str(left))
         if context.env.autoescape
         else html.escape(left).replace("&#x27;", "&#39;")
     )
@@ -17,10 +18,38 @@ def escape(context: FilterContext, left: object) -> str:
 def escape_once(context: FilterContext, left: object) -> str:
     left = context.to_str(left, "")
     return (
-        markupsafe.escape(left).unescape()
+        markupsafe.Markup(left).unescape()
         if context.env.autoescape
         else html.escape(html.unescape(left)).replace("&#x27;", "&#39;")
     )
 
 
-# TODO: escape_js
+_ESCAPE_MAP = {
+    "\\": "\\u005C",
+    "'": "\\u0027",
+    '"': "\\u0022",
+    ">": "\\u003E",
+    "<": "\\u003C",
+    "&": "\\u0026",
+    "=": "\\u003D",
+    "-": "\\u002D",
+    ";": "\\u003B",
+    "`": "\\u0060",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029",
+}
+
+_ESCAPE_MAP.update({chr(c): f"\\u{c:04X}" for c in range(32)})
+_ESCAPE_RE = re.compile("[" + re.escape("".join(_ESCAPE_MAP.keys())) + "]")
+
+
+def escapejs(context: FilterContext, left: object) -> str:
+    escaped = _ESCAPE_RE.sub(lambda m: _ESCAPE_MAP[m.group()], context.to_str(left, ""))
+    if context.env.autoescape:
+        return markupsafe.Markup(escaped)
+    return escaped
+
+
+def safe(context: FilterContext, left: object) -> str:
+    left = context.to_str(left, "")
+    return markupsafe.Markup(left) if context.env.autoescape else left

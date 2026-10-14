@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import markupsafe
+
 from .._io import StringBuffer
 from .._markup import render_block, render_block_async
 from ..exceptions import LiquidSyntaxError
@@ -48,14 +50,19 @@ class CaptureTag:
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         render_block(self.block, context, buf)
-        # TODO: HTML safe
-        context.assign(self.name.value, buf.getvalue())
+
+        if context.env.autoescape:
+            context.assign(self.name.value, markupsafe.Markup(buf.getvalue()))
+        else:
+            context.assign(self.name.value, buf.getvalue())
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         buf = context.env.buffer_factory()
         await render_block_async(self.block, context, buf)
-        # TODO: HTML safe
-        context.assign(self.name.value, buf.getvalue())
+        if context.env.autoescape:
+            context.assign(self.name.value, markupsafe.Markup(buf.getvalue()))
+        else:
+            context.assign(self.name.value, buf.getvalue())
 
     def children(self) -> list[Markup]:
         return [node for node in self.block if not isinstance(node, str)]

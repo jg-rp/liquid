@@ -8,6 +8,7 @@ from ._chain_map import ReadOnlyChainMap
 from ._context import RenderContext
 from ._io import StringBuffer
 from ._markup import render_block, render_block_async
+from .exceptions import LiquidError
 
 if TYPE_CHECKING:
     from ._markup import Block
@@ -73,15 +74,41 @@ class Template:
 
         chain = ReadOnlyChainMap()
 
-        if data:
-            chain.push(data)
+        if self.globals:
+            chain.push(self.globals)
 
         if self.matter:
             chain.push(self.matter)
 
-        if self.globals:
-            chain.push(self.globals)
+        if data:
+            chain.push(data)
 
         return chain
+
+    def is_up_to_date(self) -> bool:
+        """Return ``False`` if the template has bee modified, ``True`` otherwise."""
+        if not self.up_to_date:
+            return True
+
+        uptodate = self.up_to_date()
+        if not isinstance(uptodate, bool):
+            raise LiquidError(
+                f"expected a boolean from uptodate, found {type(uptodate).__name__}",
+            )
+        return uptodate
+
+    async def is_up_to_date_async(self) -> bool:
+        """An async version of `is_up_to_date`.
+
+        If `template.up_to_date` is a coroutine, it wil be awaited. Otherwise it will be
+        called just like `is_up_to_date`
+        """
+        if not self.up_to_date:
+            return True
+
+        uptodate = self.up_to_date()
+        if isinstance(uptodate, Awaitable):
+            return await uptodate
+        return uptodate
 
     # TODO: static analysis methods

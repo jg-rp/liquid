@@ -4,6 +4,9 @@
 
 **Breaking API changes**
 
+- Renamed `BoundTemplate` to `Template`.
+- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a mapping instead of keyword arguments.
+- Removed `Environment.from_string()`. Use `parse()` or `Environment.parse()` instead.
 - Renamed `UnknownFilterError` to `LiquidNameError`.
 
 ## Version 2.3.3

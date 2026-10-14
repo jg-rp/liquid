@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+import markupsafe
+
 from ._filter import FilterContext
 from ._nothing import NOTHING
 from .drops import BLANK, EMPTY, Range
@@ -503,10 +505,10 @@ class StringLiteral:
     span: Token
 
     def evaluate(self, context: RenderContext) -> object:
-        return self.value
+        return markupsafe.Markup(self.value) if context.env.autoescape else self.value
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return self.value
+        return markupsafe.Markup(self.value) if context.env.autoescape else self.value
 
     def children(self) -> list[Expression]:
         return []

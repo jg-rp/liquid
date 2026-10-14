@@ -16,7 +16,7 @@ from .date import date
 from .default import default
 from .divided_by import divided_by
 from .downcase import downcase
-from .escape import escape, escape_once
+from .escape import escape, escape_once, escapejs, safe
 from .find import find, find_index, has
 from .first import first
 from .floor import floor
@@ -68,6 +68,7 @@ __all__ = (
     "downcase",
     "escape",
     "escape_once",
+    "escapejs",
     "find",
     "find_index",
     "first",
@@ -92,6 +93,7 @@ __all__ = (
     "reverse",
     "round_",
     "rstrip",
+    "safe",
     "size",
     "slice_",
     "sort",

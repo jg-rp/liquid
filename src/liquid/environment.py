@@ -79,8 +79,9 @@ class Environment:
         "default": filters.default,
         "divided_by": filters.divided_by,
         "downcase": filters.downcase,
-        "escape": filters.escape,
         "escape_once": filters.escape_once,
+        "escape": filters.escape,
+        "escapejs": filters.escapejs,
         "find": filters.find,
         "find_index": filters.find_index,
         "first": filters.first,
@@ -105,6 +106,7 @@ class Environment:
         "reverse": filters.reverse,
         "round": filters.round_,
         "rstrip": filters.rstrip,
+        "safe": filters.safe,
         "size": filters.size,
         "slice": filters.slice_,
         "sort": filters.sort,
@@ -128,6 +130,7 @@ class Environment:
     def __init__(
         self,
         *,
+        autoescape: bool = False,
         globals: Mapping[str, object] | None = None,
         loader: Loader | None = None,
         strict_filters: bool = True,
@@ -138,7 +141,7 @@ class Environment:
         self.undefined_type = undefined
 
         self.strict_filters = strict_filters
-        self.autoescape = False
+        self.autoescape = autoescape
         self.string_first_and_last = False
 
         # TODO: arguments for class vars?
@@ -230,7 +233,10 @@ class Environment:
         if isinstance(obj, str):
             result = obj
         elif isinstance(obj, Sequence):
-            result = "".join(self.to_str(item, context, span) for item in _flatten(obj))  # type: ignore
+            result = (markupsafe.Markup("") if self.autoescape else "").join(
+                self.to_str(item, context, span)
+                for item in _flatten(obj)  # type: ignore
+            )
         else:
             result = self.to_str(obj, context, span)
 
