@@ -4,6 +4,7 @@ from typing import Any
 from ._context import RenderContext
 from ._loader import Loader, TemplateSource
 from ._template import Template
+from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
 from .environment import Environment
 from .loaders import DictLoader
 from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
@@ -12,12 +13,15 @@ __all__ = (
     "TOKEN_NAMES",
     "DictLoader",
     "Environment",
+    "FalsyStrictUndefined",
     "Loader",
     "RenderContext",
+    "StrictUndefined",
     "Template",
     "TemplateSource",
     "Token",
     "TokenKind",
+    "Undefined",
     "span",
     "token_value",
 )
