@@ -64,8 +64,7 @@ class Range(Drop):
             case "string":
                 return str(self)
             case "data":
-                # TODO: limit
-                return list(self)
+                return self
             case "boolean":
                 return len(self) > 0
             case _:

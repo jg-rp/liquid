@@ -9,6 +9,16 @@
 - Removed `Environment.from_string()`. Use `parse()` or `Environment.parse()` instead.
 - Renamed `UnknownFilterError` to `LiquidNameError`.
 
+- Replaced `Environment` options `logical_not_operator`, `logical_parentheses` and `ternary_expressions` with a single `logical_expressions` constructor argument. When `logical_expressions` is true, the `not` operator, grouping terms with parentheses and ternary expression are enabled.
+
+- Replaced `Environment` options `string_sequences` with a `iterable_strings` constructor argument.
+
+- Removed `Environment.string_first_and_last`. String always respond to `.first`, `.last`, `| first` and `| last`.
+
+- Removed `Environment.shorthand_indexes`. Index selectors must use bracket notation.
+
+- Changed the "drop protocol" so that drops appearing in equality and comparison expressions, and when tested for truthiness, make better use of Python's magic methods...
+
 ## Version 2.3.3
 
 **Fixes**

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Blank(Drop):
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string" | "data":
+            case "string":
                 return ""
             case "numeric":
                 return 0
@@ -42,6 +42,9 @@ class Blank(Drop):
     def __str__(self) -> str:
         return ""
 
+    def __bool__(self) -> bool:
+        return True
+
 
 BLANK = Blank()
 
@@ -49,7 +52,7 @@ BLANK = Blank()
 class Empty(Drop):
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string" | "data":
+            case "string":
                 return ""
             case "numeric":
                 return 0
@@ -70,6 +73,9 @@ class Empty(Drop):
 
     def __str__(self) -> str:
         return ""
+
+    def __bool__(self) -> bool:
+        return True
 
 
 EMPTY = Empty()

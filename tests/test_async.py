@@ -98,7 +98,7 @@ def test_async_up_to_date() -> None:
             assert up_to_date is True
 
             # Update template content.
-            time.sleep(0.01)  # Make sure some time has passed.
+            time.sleep(0.01)  # Make sure some time has passed.  # noqa: ASYNC251
             template_path.touch()
 
             # Template is not up to date.

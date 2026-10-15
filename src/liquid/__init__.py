@@ -2,13 +2,14 @@ from collections.abc import Mapping
 from typing import Any
 
 from ._context import RenderContext
-from ._drop import Drop
+from ._drop import ContextHint, Drop
 from ._loader import Loader, TemplateSource
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
 from .environment import Environment
 from .loaders import (
     CachingChoiceLoader,
+    CachingDictLoader,
     CachingFileSystemLoader,
     CachingLoaderMixin,
     ChoiceLoader,
@@ -21,9 +22,11 @@ from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 __all__ = (
     "TOKEN_NAMES",
     "CachingChoiceLoader",
+    "CachingDictLoader",
     "CachingFileSystemLoader",
     "CachingLoaderMixin",
     "ChoiceLoader",
+    "ContextHint",
     "DictLoader",
     "Drop",
     "Environment",

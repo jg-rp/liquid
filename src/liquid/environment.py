@@ -132,6 +132,7 @@ class Environment:
         *,
         autoescape: bool = False,
         globals: Mapping[str, object] | None = None,
+        iterable_strings: bool = False,
         loader: Loader | None = None,
         strict_filters: bool = True,
         undefined: type[Undefined] = Undefined,
@@ -142,9 +143,9 @@ class Environment:
 
         self.strict_filters = strict_filters
         self.autoescape = autoescape
-        self.string_first_and_last = False
+        self.iterable_strings = iterable_strings
 
-        # TODO: arguments for class vars?
+        # TODO: arguments or class vars?
         self.max_assign_score: int | None = None
         self.max_assign_score_cumulative: int | None = None
         self.max_render_score: int | None = None
@@ -256,7 +257,7 @@ class Environment:
 
     def truthy(self, obj: object, context: RenderContext) -> bool:
         if is_drop(obj):
-            obj = obj.__liquid__("boolean", context)
+            obj = bool(obj)
 
         return not (obj is False or obj is None)
 
@@ -264,8 +265,14 @@ class Environment:
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
         if is_drop(right):
-            # Make sure there's a drop on the left so its __eq__ method gets called.
-            left, right = right, left
+            if is_drop(left):
+                return right == left.__liquid__("data", context)
+            return right == left
+
+        if is_drop(left):
+            if is_drop(right):
+                return left == right.__liquid__("data", context)
+            return left == right
 
         if type(left) is bool and type(right) is int:
             return False
@@ -278,11 +285,30 @@ class Environment:
     def lt(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(right) and not is_drop(left):
-            return right > left  # type: ignore
-
+        print("**", repr(left), repr(right))
         if is_drop(left):
-            return left < right  # type: ignore
+            if is_drop(right):
+                try:
+                    return left < right.__liquid__("data", context)  # type: ignore
+                except TypeError:
+                    return False
+
+            try:
+                return left < right  # type: ignore
+            except TypeError:
+                return False
+
+        if is_drop(right):
+            if is_drop(left):
+                try:
+                    return right > left.__liquid__("data", context)  # type: ignore
+                except TypeError:
+                    return False
+
+            try:
+                return right > left  # type: ignore
+            except TypeError:
+                return False
 
         if isinstance(left, str) and isinstance(right, str):
             return left < right
@@ -308,11 +334,29 @@ class Environment:
     def le(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(right) and not is_drop(left):
-            return right >= left  # type: ignore
+        if is_drop(right):
+            if is_drop(left):
+                try:
+                    return right >= left.__liquid__("data", context)  # type: ignore
+                except TypeError:
+                    return False
+
+            try:
+                return right >= left  # type: ignore
+            except TypeError:
+                return False
 
         if is_drop(left):
-            return left <= right  # type: ignore
+            if is_drop(right):
+                try:
+                    return left <= right.__liquid__("data", context)  # type: ignore
+                except TypeError:
+                    return False
+
+            try:
+                return left <= right  # type: ignore
+            except TypeError:
+                return False
 
         if isinstance(left, str) and isinstance(right, str):
             return left <= right
@@ -407,7 +451,8 @@ class Environment:
             return obj
 
         if is_drop(obj):
-            return obj.__liquid__("string", context)  # type: ignore
+            return str(obj)
+            # return obj.__liquid__("string", context)  # type: ignore
 
         if isinstance(obj, Mapping | Sequence):
             return self._inspect(obj, context)  # type: ignore
@@ -420,7 +465,7 @@ class Environment:
     def to_array(
         self, obj: object, context: RenderContext, span: Token
     ) -> list[object]:
-        if isinstance(obj, str):
+        if isinstance(obj, str) and not self.iterable_strings:
             return [] if not obj else [obj]
 
         if is_drop(obj):

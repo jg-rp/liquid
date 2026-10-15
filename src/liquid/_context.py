@@ -101,7 +101,10 @@ class RenderContext:
                     obj = NOTHING
 
             elif isinstance(obj, str):
-                obj = resolve_string_selector(obj, selector)
+                if self.env.iterable_strings:
+                    obj = resolve_sequence_selector(obj, selector, dotted)
+                else:
+                    obj = resolve_string_selector(obj, selector)
 
             elif isinstance(obj, Sequence):
                 if isinstance(selector, Drop):
