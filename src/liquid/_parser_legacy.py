@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Collection
-from typing import ClassVar
+from typing import TYPE_CHECKING
 
 from . import expressions
 from ._markup import Block, Expression, Markup
@@ -17,24 +19,28 @@ from .tags.output import OutputStatement
 from .tokens import *
 from .tokens import TOKEN_NAMES, TokenKind, span, token_value
 
+if TYPE_CHECKING:
+    from .environment import Environment
+    from .tokens import Token
+
 # TODO: limit expression depth
 # TODO: mark string literals as HTML safe
+
+LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
+    TOKEN_AND: PRECEDENCE_LOGICAL_RIGHT,
+    TOKEN_OR: PRECEDENCE_LOGICAL_RIGHT,
+    TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
+    TOKEN_EQ: PRECEDENCE_COMPARISON,
+    TOKEN_NE: PRECEDENCE_COMPARISON,
+    TOKEN_LT: PRECEDENCE_COMPARISON,
+    TOKEN_LE: PRECEDENCE_COMPARISON,
+    TOKEN_GT: PRECEDENCE_COMPARISON,
+    TOKEN_GE: PRECEDENCE_COMPARISON,
+}
 
 
 class LegacyParser(Parser):
     """A single pass template parser compatible with Shopify/liquid v5.12.0."""
-
-    PRECEDENCES: ClassVar[dict[TokenKind, Precedence]] = {
-        TOKEN_AND: PRECEDENCE_LOGICAL_RIGHT,
-        TOKEN_OR: PRECEDENCE_LOGICAL_RIGHT,
-        TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
-        TOKEN_EQ: PRECEDENCE_COMPARISON,
-        TOKEN_NE: PRECEDENCE_COMPARISON,
-        TOKEN_LT: PRECEDENCE_COMPARISON,
-        TOKEN_LE: PRECEDENCE_COMPARISON,
-        TOKEN_GT: PRECEDENCE_COMPARISON,
-        TOKEN_GE: PRECEDENCE_COMPARISON,
-    }
 
     INFIX_OPERATORS: frozenset[TokenKind] = frozenset(
         [
@@ -75,6 +81,22 @@ class LegacyParser(Parser):
             TOKEN_DOUBLE_QUOTED,
         ]
     )
+
+    KEYWORD_ARGUMENT_DELIMITERS: frozenset[TokenKind] = frozenset(
+        [
+            TOKEN_COLON,
+        ]
+    )
+
+    def __init__(
+        self,
+        env: Environment,
+        source: str,
+        template_name: str,
+        tokens: list[Token],
+    ) -> None:
+        super().__init__(env, source, template_name, tokens)
+        self.precedences = LEGACY_PRECEDENCES
 
     def parse_block(self, end: Collection[str]) -> Block:
         nodes: Block = []
@@ -148,39 +170,12 @@ class LegacyParser(Parser):
     def parse_expression(
         self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
     ) -> Expression:
-        left: Expression
-        kind = self.kind()
+        return self.parse_primary_expression(precedence, infix=infix)
 
-        if kind == TOKEN_BLANK:
-            left = self.parse_blank()
-        elif kind in (TOKEN_DOUBLE_QUOTE, TOKEN_SINGLE_QUOTE):
-            left = self.parse_string_literal()
-        elif kind == TOKEN_EMPTY:
-            left = self.parse_empty()
-        elif kind == TOKEN_FALSE:
-            left = self.parse_false_literal()
-        elif kind == TOKEN_FLOAT:
-            left = self.parse_float_literal()
-        elif kind == TOKEN_IDENT:
-            left = self.parse_path()
-        elif kind == TOKEN_INT:
-            left = self.parse_int_literal()
-        elif kind == TOKEN_LBRACKET:
-            left = self.parse_path()
-        elif kind == TOKEN_LPAREN:
-            left = self.parse_range_literal()
-        elif kind in (TOKEN_NIL, TOKEN_NULL):
-            left = self.parse_null_literal()
-        elif kind == TOKEN_TRUE:
-            left = self.parse_true_literal()
-        else:
-            token = self.current()
-            raise LiquidSyntaxError(
-                f"unexpected {TOKEN_NAMES[token[0]]}",
-                token=token,
-                source=self.source,
-                name=self.template_name,
-            )
+    def parse_primary_expression(
+        self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
+    ) -> Expression:
+        left = self.parse_basic_expression()
 
         if not infix:
             return left
@@ -189,7 +184,7 @@ class LegacyParser(Parser):
             kind = self.kind()
 
             if (
-                self.PRECEDENCES.get(kind, PRECEDENCE_LOWEST) < precedence
+                self.precedences.get(kind, PRECEDENCE_LOWEST) < precedence
                 or kind not in self.INFIX_OPERATORS
             ):
                 break
@@ -197,6 +192,50 @@ class LegacyParser(Parser):
             left = self.parse_infix(left)
 
         return left
+
+    def parse_basic_expression(self) -> Expression:
+        kind = self.kind()
+
+        if kind == TOKEN_BLANK:
+            return self.parse_blank()
+
+        if kind in (TOKEN_DOUBLE_QUOTE, TOKEN_SINGLE_QUOTE):
+            return self.parse_string_literal()
+
+        if kind == TOKEN_EMPTY:
+            return self.parse_empty()
+
+        if kind == TOKEN_FALSE:
+            return self.parse_false_literal()
+
+        if kind == TOKEN_FLOAT:
+            return self.parse_float_literal()
+
+        if kind in (TOKEN_IDENT, TOKEN_IF, TOKEN_ELSE, TOKEN_NOT):
+            return self.parse_path()
+
+        if kind == TOKEN_INT:
+            return self.parse_int_literal()
+
+        if kind == TOKEN_LBRACKET:
+            return self.parse_path()
+
+        if kind == TOKEN_LPAREN:
+            return self.parse_range_literal()
+
+        if kind in (TOKEN_NIL, TOKEN_NULL):
+            return self.parse_null_literal()
+
+        if kind == TOKEN_TRUE:
+            return self.parse_true_literal()
+
+        token = self.current()
+        raise LiquidSyntaxError(
+            f"unexpected {TOKEN_NAMES[token[0]]}",
+            token=token,
+            source=self.source,
+            name=self.template_name,
+        )
 
     def parse_blank(self) -> Expression:
         # `blank` is a reserved word when it is not followed by segments.
@@ -271,6 +310,9 @@ class LegacyParser(Parser):
             TOKEN_TRUE,
             TOKEN_NULL,
             TOKEN_NIL,
+            TOKEN_IF,
+            TOKEN_ELSE,
+            TOKEN_NOT,
         ):
             self.pos += 1
             root = expressions.Name(token, token_value(token, self.source))
@@ -324,6 +366,9 @@ class LegacyParser(Parser):
             TOKEN_TRUE,
             TOKEN_NULL,
             TOKEN_NIL,
+            TOKEN_IF,
+            TOKEN_ELSE,
+            TOKEN_NOT,
         ):
             self.pos -= 1
             selector = self.parse_path()
@@ -361,7 +406,7 @@ class LegacyParser(Parser):
         op_token = self.next()
         kind = op_token[0]
         right = self.parse_expression(
-            self.PRECEDENCES.get(kind, PRECEDENCE_LOWEST), infix=True
+            self.precedences.get(kind, PRECEDENCE_LOWEST), infix=True
         )
 
         if kind == TOKEN_OR:
@@ -462,9 +507,12 @@ class LegacyParser(Parser):
             if kind in self.TERMINATE_FILTER:
                 break
 
-            if kind == TOKEN_IDENT and self.peek_kind() == TOKEN_COLON:
+            if (
+                kind == TOKEN_IDENT
+                and self.peek_kind() in self.KEYWORD_ARGUMENT_DELIMITERS
+            ):
                 param = self.parse_identifier()
-                self.eat(TOKEN_COLON)
+                self.next()
                 args.append(
                     expressions.KeywordArgument(
                         param.token, param, self.parse_expression()
@@ -526,10 +574,13 @@ class LegacyParser(Parser):
             if kind in TERMINATE_EXPRESSION:
                 break
 
-            if kind == TOKEN_IDENT and self.peek_kind() == TOKEN_COLON:
+            if (
+                kind == TOKEN_IDENT
+                and self.peek_kind() in self.KEYWORD_ARGUMENT_DELIMITERS
+            ):
                 # A named argument
                 name = self.parse_identifier()
-                self.eat(TOKEN_COLON)
+                self.next()
                 args.append(
                     expressions.KeywordArgument(
                         name.token,
@@ -562,7 +613,7 @@ class LegacyParser(Parser):
                 break
 
             name = self.parse_identifier()
-            self.eat(TOKEN_COLON)
+            self.eat_one_of(self.KEYWORD_ARGUMENT_DELIMITERS)
 
             args.append(
                 expressions.KeywordArgument(

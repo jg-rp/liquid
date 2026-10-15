@@ -14,6 +14,7 @@ from ._drop import has_html_safe_string, is_drop
 from ._io import StringBuffer
 from ._lexer_legacy import LegacyLexer
 from ._nothing import Nothing
+from ._parser_extended import ExtendedParser
 from ._parser_legacy import LegacyParser
 from ._template import Template
 from .drops import Undefined
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from ._filter import Filter
     from ._loader import Loader
     from ._markup import Tag
+    from ._parser import Parser
     from .tokens import Token
 
 
@@ -131,6 +133,8 @@ class Environment:
         self,
         *,
         autoescape: bool = False,
+        conventional_operator_precedence: bool = False,
+        extended_expressions: bool = False,
         globals: Mapping[str, object] | None = None,
         iterable_strings: bool = False,
         loader: Loader | None = None,
@@ -145,7 +149,13 @@ class Environment:
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
 
-        # TODO: arguments or class vars?
+        self.parser: type[Parser] = (
+            ExtendedParser if extended_expressions else LegacyParser
+        )
+
+        self.conventional_operator_precedence = conventional_operator_precedence
+
+        # TODO: Single dataclass argument
         self.max_assign_score: int | None = None
         self.max_assign_score_cumulative: int | None = None
         self.max_render_score: int | None = None
@@ -200,7 +210,7 @@ class Environment:
             self,
             source,
             name,
-            LegacyParser.parse(self, source, name),
+            self.parser.parse(self, source, name),
             globals=self.make_globals(globals),
             matter=matter,
             up_to_date=up_to_date,

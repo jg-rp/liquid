@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 from typing import TYPE_CHECKING
 
 import markupsafe
@@ -160,7 +160,138 @@ class Filtered:
         return f"{self.left} | {self.name.value}{args}"
 
 
-# TODO: non-standard prefix expressions
+@dataclass(slots=True)
+class Group:
+    token: Token
+    expr: Expression
+    segments: list[PathSegment] | None
+    end_token: InitVar[Token]
+    span: Token = field(init=False)
+
+    def __post_init__(self, end_token: Token):
+        if self.segments:
+            self.span = span(self.token, self.segments[-1].span)
+        else:
+            self.span = span(self.token, end_token)
+
+    def evaluate(self, context: RenderContext) -> object:
+        obj = self.expr.evaluate(context)
+
+        if not self.segments:
+            return obj
+
+        obj, index = context.resolve_path(
+            obj,
+            [s if isinstance(s, Name) else s.evaluate(context) for s in self.segments],
+        )
+
+        if obj is NOTHING:
+            return context.env.undefined(
+                self._path(self.segments[: index + 1]),
+                self.span,
+                context.template.source,
+                context.template.name,
+            )
+
+        return obj
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        obj = await self.expr.evaluate_async(context)
+
+        if not self.segments:
+            return obj
+
+        obj, index = context.resolve_path(
+            obj,
+            [
+                s if isinstance(s, Name) else await s.evaluate_async(context)
+                for s in self.segments
+            ],
+        )
+
+        if obj is NOTHING:
+            return context.env.undefined(
+                self._path(self.segments[: index + 1]),
+                self.span,
+                context.template.source,
+                context.template.name,
+            )
+
+        return obj
+
+    def __str__(self) -> str:
+        return f"({self.expr}){self._path(self.segments)}"
+
+    def children(self) -> list[Expression]:
+        if not self.segments:
+            return [self.expr]
+        return [self.expr, *(s for s in self.segments if isinstance(s, Variable))]
+
+    def _path(self, segments: list[PathSegment] | None) -> str:
+        if not segments:
+            return ""
+
+        return "".join(f".{s}" if isinstance(s, Name) else f"[{s}]" for s in segments)
+
+
+@dataclass(slots=True)
+class Ternary:
+    token: Token
+    consequence: Expression
+    condition: Expression
+    alternative: Expression | None
+    span: Token = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.span = span(self.token, (self.alternative or self.condition).span)
+
+    def evaluate(self, context: RenderContext) -> object:
+        if context.env.truthy(self.condition.evaluate(context), context):
+            return self.consequence.evaluate(context)
+
+        if self.alternative:
+            return self.alternative.evaluate(context)
+
+        return NOTHING
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        if context.env.truthy(await self.condition.evaluate_async(context), context):
+            return await self.consequence.evaluate_async(context)
+
+        if self.alternative:
+            return await self.alternative.evaluate_async(context)
+
+        return NOTHING
+
+    def __str__(self) -> str:
+        if self.alternative:
+            return f"{self.consequence} if {self.condition} else {self.alternative}"
+        return f"{self.consequence} if {self.condition}"
+
+    def children(self) -> list[Expression]:
+        result: list[Expression] = [self.consequence, self.condition]
+        if self.alternative:
+            result.append(self.alternative)
+        return result
+
+
+@dataclass(slots=True)
+class LogicalNot:
+    token: Token
+    right: Expression
+    span: Token = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.span = span(self.token, self.right.span)
+
+    def evaluate(self, context: RenderContext) -> object:
+        return not context.env.truthy(self.right.evaluate(context), context)
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return not context.env.truthy(await self.right.evaluate_async(context), context)
+
+    def children(self) -> list[Expression]:
+        return [self.right]
 
 
 @dataclass(slots=True)

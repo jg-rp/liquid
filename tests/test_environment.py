@@ -58,7 +58,7 @@ def test_default_logical_not_operator() -> None:
 
 
 def test_enable_logical_not_operator() -> None:
-    env = Environment(logical_expressions=True)
+    env = Environment(extended_expressions=True)
     assert env.render("{% if not false %}TRUE{% else %}FALSE{% endif %}", {}) == "TRUE"
 
 
@@ -80,7 +80,7 @@ def test_default_logical_parentheses() -> None:
 
 
 def test_enable_logical_parentheses() -> None:
-    env = Environment(logical_expressions=True)
+    env = Environment(extended_expressions=True)
 
     # Without parens
     assert (
@@ -108,7 +108,7 @@ def test_default_ternary_expressions() -> None:
 
 
 def test_enable_ternary_expressions() -> None:
-    env = Environment(logical_expressions=True)
+    env = Environment(extended_expressions=True)
     assert env.parse("{{ 'TRUE' if true else 'FALSE' }}").render() == "TRUE"
 
 
@@ -136,7 +136,7 @@ def test_default_argument_separator() -> None:
 
 
 def test_enable_assign_argument_separator() -> None:
-    env = Environment(keyword_assignment=True)
+    env = Environment(extended_expressions=True)
 
     # With a colon
     assert (

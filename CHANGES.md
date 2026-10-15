@@ -5,11 +5,19 @@
 **Breaking API changes**
 
 - Renamed `BoundTemplate` to `Template`.
+
+- `Template(source)` can no longer be used to parse a template from a string. Use package level `parse(source)` or `Environment.parse(source)` instead.
+
 - Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a mapping instead of keyword arguments.
-- Removed `Environment.from_string()`. Use `parse()` or `Environment.parse()` instead.
+
+- Removed `Environment.from_string()`. Use package level `parse()` or `Environment.parse()` instead.
+
 - Renamed `UnknownFilterError` to `LiquidNameError`.
 
-- Replaced `Environment` options `logical_not_operator`, `logical_parentheses` and `ternary_expressions` with a single `logical_expressions` constructor argument. When `logical_expressions` is true, the `not` operator, grouping terms with parentheses and ternary expression are enabled.
+- Replaced `Environment` options `logical_not_operator`, `logical_parentheses` and `ternary_expressions` with a single `extended_expressions` constructor argument. When `extended_expressions` is true, the `not` operator, grouping terms with parentheses and ternary expression are enabled in all contexts. Additionally:
+  - `and` and `or` are allowed in all contexts with short circuit, last value semantics.
+  - Filter application with `|` is available in all contexts and `|` plays nicely with parentheses.
+  - Grouped expressions can have trailing path segments. Like `{{ (a or b).c }}`.
 
 - Replaced `Environment` options `string_sequences` with a `iterable_strings` constructor argument.
 

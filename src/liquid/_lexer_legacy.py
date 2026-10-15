@@ -204,6 +204,12 @@ class LegacyLexer(Lexer):
                     self.emit(TOKEN_BLANK)
                 elif match == "empty":
                     self.emit(TOKEN_EMPTY)
+                elif match == "if":
+                    self.emit(TOKEN_IF)
+                elif match == "else":
+                    self.emit(TOKEN_ELSE)
+                elif match == "not":
+                    self.emit(TOKEN_NOT)
                 else:
                     self.emit(TOKEN_IDENT)
 
