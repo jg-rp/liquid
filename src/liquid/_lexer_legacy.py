@@ -220,9 +220,29 @@ class LegacyLexer(Lexer):
                 elif match := self.scan(RE_INT):
                     self.emit(TOKEN_INT)
 
+                elif ch == "-":
+                    self.pos += 1
+                    self.emit(TOKEN_SUB)
+
                 else:
                     self.pos += 1
                     self.emit(TOKEN_UNKNOWN)
+
+            elif ch == "+":
+                self.pos += 1
+                self.emit(TOKEN_ADD)
+
+            elif ch == "*":
+                self.pos += 1
+                self.emit(TOKEN_MUL)
+
+            elif ch == "/":
+                self.pos += 1
+                self.emit(TOKEN_DIV)
+
+            elif ch == "%":
+                self.pos += 1
+                self.emit(TOKEN_MOD)
 
             else:
                 self.pos += 1

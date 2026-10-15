@@ -1,0 +1,107 @@
+{
+  "tests": [
+    {
+      "name": "true",
+      "expression": "'a' if true else 'b'",
+      "result": "a"
+    },
+    {
+      "name": "false",
+      "expression": "'a' if false else 'b'",
+      "result": "b"
+    },
+    {
+      "name": "true, filter",
+      "expression": "'a' | upcase if true else 'b'",
+      "result": "A"
+    },
+    {
+      "name": "false, filter",
+      "expression": "'a' if false else 'b' | upcase",
+      "result": "B"
+    },
+    {
+      "name": "false, true filter",
+      "expression": "'a' | upcase if false else 'b'",
+      "result": "b"
+    },
+    {
+      "name": "false, grouped and filtered",
+      "expression": "('a' if false else 'b') | upcase",
+      "result": "B"
+    },
+    {
+      "name": "true, grouped and filtered",
+      "expression": "('a' if true else 'b') | upcase",
+      "result": "A"
+    },
+    {
+      "name": "true, logical",
+      "expression": "a or b if c and d else e or f",
+      "data": {
+        "a": null,
+        "b": 1,
+        "c": true,
+        "d": true,
+        "e": 2,
+        "f": 99
+      },
+      "result": "1"
+    },
+    {
+      "name": "false, logical",
+      "expression": "a or b if c and d else e or f",
+      "data": {
+        "a": null,
+        "b": 1,
+        "c": false,
+        "d": true,
+        "e": 2,
+        "f": 99
+      },
+      "result": "2"
+    },
+    {
+      "name": "false, filter argument",
+      "expression": "a | join: (b if c else d)",
+      "data": {
+        "a": [1, 2, 3],
+        "b": ",",
+        "c": false,
+        "d": "#"
+      },
+      "result": "1#2#3"
+    },
+    {
+      "name": "true, filter argument",
+      "expression": "a | join: (b if c else d)",
+      "data": {
+        "a": [1, 2, 3],
+        "b": ",",
+        "c": true,
+        "d": "#"
+      },
+      "result": "1,2,3"
+    },
+    {
+      "name": "chained, true, filter argument",
+      "expression": "a | plus: (23 if b else c) | append: 'x'",
+      "data": {
+        "a": 1,
+        "b": true,
+        "c": 99
+      },
+      "result": "24x"
+    },
+    {
+      "name": "chained, false, filter argument",
+      "expression": "a | plus: (23 if b else c) | append: 'x'",
+      "data": {
+        "a": 1,
+        "b": false,
+        "c": 99
+      },
+      "result": "100x"
+    }
+  ]
+}

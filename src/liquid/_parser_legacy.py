@@ -7,6 +7,7 @@ from . import expressions
 from ._markup import Block, Expression, Markup
 from ._parser import (
     PRECEDENCE_COMPARISON,
+    PRECEDENCE_FILTER_ARG,
     PRECEDENCE_LOGICAL_RIGHT,
     PRECEDENCE_LOWEST,
     PRECEDENCE_MEMBERSHIP,
@@ -87,6 +88,8 @@ class LegacyParser(Parser):
             TOKEN_COLON,
         ]
     )
+
+    __slots__ = ("precedences",)
 
     def __init__(
         self,
@@ -478,15 +481,15 @@ class LegacyParser(Parser):
         return expr
 
     def parse_filters(self, left: Expression) -> Expression:
-        filter_expr = self.parse_filter(left)
+        token = self.eat(TOKEN_PIPE)
+        filter_expr = self.parse_filter(token, left)
 
         while self.kind() == TOKEN_PIPE:
-            filter_expr = self.parse_filter(filter_expr)
+            filter_expr = self.parse_filter(self.next(), filter_expr)
 
         return filter_expr
 
-    def parse_filter(self, left: Expression) -> Expression:
-        token = self.eat(TOKEN_PIPE)
+    def parse_filter(self, token: Token, left: Expression) -> Expression:
         name_token = self.eat(TOKEN_IDENT, message="missing or malformed filter name")
 
         if self.kind() in self.TERMINATE_FILTER:
@@ -515,11 +518,11 @@ class LegacyParser(Parser):
                 self.next()
                 args.append(
                     expressions.KeywordArgument(
-                        param.token, param, self.parse_expression()
+                        param.token, param, self.parse_expression(PRECEDENCE_FILTER_ARG)
                     )
                 )
             else:
-                args.append(self.parse_expression())
+                args.append(self.parse_expression(PRECEDENCE_FILTER_ARG))
 
             if self.kind() in self.TERMINATE_FILTER:
                 break

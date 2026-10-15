@@ -1,0 +1,107 @@
+{
+  "tests": [
+    {
+      "name": "join, no argument",
+      "expression": "a | join",
+      "data": {
+        "a": [1, 2, 3]
+      },
+      "result": "1 2 3"
+    },
+    {
+      "name": "join, positional argument, string literal",
+      "expression": "a | join: ','",
+      "data": {
+        "a": [1, 2, 3]
+      },
+      "result": "1,2,3"
+    },
+    {
+      "name": "join, positional argument, variable",
+      "expression": "a | join: b",
+      "data": {
+        "a": [1, 2, 3],
+        "b": ","
+      },
+      "result": "1,2,3"
+    },
+    {
+      "name": "join, positional argument, variable with path",
+      "expression": "a | join: b.c",
+      "data": {
+        "a": [1, 2, 3],
+        "b": { "c": "," }
+      },
+      "result": "1,2,3"
+    },
+    {
+      "name": "join, positional argument, filtered",
+      "expression": "a | join: (b | upcase)",
+      "data": {
+        "a": [1, 2, 3],
+        "b": "a"
+      },
+      "result": "1A2A3"
+    },
+    {
+      "name": "join, positional argument, logical",
+      "expression": "a | join: (b or c)",
+      "data": {
+        "a": [1, 2, 3],
+        "b": null,
+        "c": ","
+      },
+      "result": "1,2,3"
+    },
+    {
+      "name": "Arithmetic vs Pipe: Math happens before transformation",
+      "expression": "2 + 3 | times: 2",
+      "result": "10"
+    },
+    {
+      "name": "Pipe vs Comparison: Result is compared after transformation",
+      "expression": "\"hello\" | upcase == \"HELLO\"",
+      "result": "true"
+    },
+    {
+      "name": "Pipe vs Comparison: RHS pipe evaluated before comparison",
+      "expression": "\"ADMIN\" == \"admin\" | upcase",
+      "result": "true"
+    },
+    {
+      "name": "Unary vs Pipe: Negation binds tighter than pipe",
+      "expression": "-5 | abs",
+      "result": "5"
+    },
+    {
+      "name": "Logical AND vs Pipe: Pipe creates value for logical check",
+      "expression": "true and \"a\" | upcase",
+      "result": "A"
+    },
+    {
+      "name": "Logical OR vs Pipe: Logical operator selects result of pipe",
+      "expression": "false or \"b\" | upcase",
+      "result": "B"
+    },
+    {
+      "name": "Ternary vs Pipe: Ternary evaluates whole pipeline",
+      "expression": "\"Success\" | upcase if true else \"fail\"",
+      "result": "SUCCESS"
+    },
+    {
+      "name": "Arithmetic vs Comparison: Sum compared to literal",
+      "expression": "10 + 5 > 10",
+      "result": "true"
+    },
+    {
+      "name": "Multi-operator complexity: Arithmetic > Pipe > Comparison > Logical",
+      "expression": "5 + 5 | times: 2 == 20 and true",
+      "result": "true"
+    },
+    {
+      "name": "Grouping overrides Pipe precedence",
+      "expression": "(10 > 5) | upcase",
+      "result": "TRUE"
+    }
+  ]
+}

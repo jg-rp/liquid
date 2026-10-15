@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from . import expressions
 from ._parser import (
+    PRECEDENCE_ADD,
     PRECEDENCE_COMPARISON,
     PRECEDENCE_LOGICAL_AND,
     PRECEDENCE_LOGICAL_NOT,
@@ -11,12 +12,15 @@ from ._parser import (
     PRECEDENCE_LOGICAL_RIGHT,
     PRECEDENCE_LOWEST,
     PRECEDENCE_MEMBERSHIP,
+    PRECEDENCE_MULL,
+    PRECEDENCE_NEG,
     PRECEDENCE_PIPE,
     Precedence,
 )
 from ._parser_legacy import LegacyParser
+from .exceptions import LiquidSyntaxError
 from .tokens import *
-from .tokens import TokenKind
+from .tokens import TokenKind, token_value
 
 if TYPE_CHECKING:
     from ._markup import Expression
@@ -35,6 +39,11 @@ CONVENTIONAL_PRECEDENCES: dict[TokenKind, Precedence] = {
     TOKEN_GT: PRECEDENCE_COMPARISON,
     TOKEN_GE: PRECEDENCE_COMPARISON,
     TOKEN_PIPE: PRECEDENCE_PIPE,
+    TOKEN_ADD: PRECEDENCE_ADD,
+    TOKEN_SUB: PRECEDENCE_ADD,
+    TOKEN_MUL: PRECEDENCE_MULL,
+    TOKEN_DIV: PRECEDENCE_MULL,
+    TOKEN_MOD: PRECEDENCE_MULL,
 }
 
 LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
@@ -49,6 +58,11 @@ LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
     TOKEN_GT: PRECEDENCE_COMPARISON,
     TOKEN_GE: PRECEDENCE_COMPARISON,
     TOKEN_PIPE: PRECEDENCE_PIPE,
+    TOKEN_ADD: PRECEDENCE_ADD,
+    TOKEN_SUB: PRECEDENCE_ADD,
+    TOKEN_MUL: PRECEDENCE_MULL,
+    TOKEN_DIV: PRECEDENCE_MULL,
+    TOKEN_MOD: PRECEDENCE_MULL,
 }
 
 
@@ -67,6 +81,11 @@ class ExtendedParser(LegacyParser):
             TOKEN_GT,
             TOKEN_GE,
             TOKEN_PIPE,
+            TOKEN_ADD,
+            TOKEN_SUB,
+            TOKEN_MUL,
+            TOKEN_DIV,
+            TOKEN_MOD,
         ]
     )
 
@@ -102,6 +121,8 @@ class ExtendedParser(LegacyParser):
         ]
     )
 
+    __slots__ = ()
+
     def __init__(
         self,
         env: Environment,
@@ -136,12 +157,12 @@ class ExtendedParser(LegacyParser):
     def parse_ternary_expression(self, consequence: Expression) -> Expression:
         self.eat(TOKEN_IF)
 
-        condition = self.parse_primary_expression()
+        condition = self.parse_primary_expression(infix=True)
         alternative: Expression | None = None
 
         if self.kind() == TOKEN_ELSE:
             self.pos += 1
-            alternative = self.parse_primary_expression()
+            alternative = self.parse_primary_expression(infix=True)
 
         return expressions.Ternary(
             consequence.token, consequence, condition, alternative
@@ -154,15 +175,20 @@ class ExtendedParser(LegacyParser):
             return self.parse_range_or_group()
 
         if kind == TOKEN_NOT:
-            return self.parse_not_expression()
+            token = self.next()
+            return expressions.LogicalNot(
+                token, self.parse_expression(PRECEDENCE_LOGICAL_NOT)
+            )
+
+        if kind == TOKEN_ADD:
+            token = self.next()
+            return expressions.Pos(token, self.parse_expression(PRECEDENCE_NEG))
+
+        if kind == TOKEN_SUB:
+            token = self.next()
+            return expressions.Neg(token, self.parse_expression(PRECEDENCE_NEG))
 
         return super().parse_basic_expression()
-
-    def parse_not_expression(self) -> Expression:
-        token = self.next()
-        return expressions.LogicalNot(
-            token, self.parse_expression(PRECEDENCE_LOGICAL_NOT)
-        )
 
     def parse_range_or_group(self) -> Expression:
         token = self.eat(TOKEN_LPAREN)
@@ -181,3 +207,63 @@ class ExtendedParser(LegacyParser):
             segments = self.parse_path_selectors()
 
         return expressions.Group(token, expr, segments, closing_token)
+
+    def parse_infix(self, left: Expression) -> Expression:
+        op_token = self.next()
+        kind = op_token[0]
+
+        if kind == TOKEN_PIPE:
+            return self.parse_filter(op_token, left)
+
+        right = self.parse_expression(
+            self.precedences.get(kind, PRECEDENCE_LOWEST), infix=True
+        )
+
+        if kind == TOKEN_OR:
+            return expressions.LogicalOr(op_token, left, right)
+
+        if kind == TOKEN_AND:
+            return expressions.LogicalAnd(op_token, left, right)
+
+        if kind == TOKEN_EQ:
+            return expressions.Eq(op_token, left, right)
+
+        if kind == TOKEN_NE:
+            return expressions.Ne(op_token, left, right)
+
+        if kind == TOKEN_LT:
+            return expressions.Lt(op_token, left, right)
+
+        if kind == TOKEN_LE:
+            return expressions.Le(op_token, left, right)
+
+        if kind == TOKEN_GT:
+            return expressions.Gt(op_token, left, right)
+
+        if kind == TOKEN_GE:
+            return expressions.Ge(op_token, left, right)
+
+        if kind == TOKEN_CONTAINS:
+            return expressions.Contains(op_token, left, right)
+
+        if kind == TOKEN_ADD:
+            return expressions.Add(op_token, left, right)
+
+        if kind == TOKEN_SUB:
+            return expressions.Sub(op_token, left, right)
+
+        if kind == TOKEN_MUL:
+            return expressions.Mul(op_token, left, right)
+
+        if kind == TOKEN_DIV:
+            return expressions.Div(op_token, left, right)
+
+        if kind == TOKEN_MOD:
+            return expressions.Mod(op_token, left, right)
+
+        raise LiquidSyntaxError(
+            f"unknown infix operator {token_value(op_token, self.source)!r}",
+            token=op_token,
+            source=self.source,
+            name=self.template_name,
+        )

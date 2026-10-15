@@ -524,9 +524,9 @@ def test_output_close_with_tag_delimiter() -> None:
 def test_output_percents() -> None:
     assert tokenize("{{%%%}}") == [
         (TOKEN_OUT_START, "{{"),
-        (TOKEN_UNKNOWN, "%"),
-        (TOKEN_UNKNOWN, "%"),
-        (TOKEN_UNKNOWN, "%"),
+        (TOKEN_MOD, "%"),
+        (TOKEN_MOD, "%"),
+        (TOKEN_MOD, "%"),
         (TOKEN_OUT_END, "}}"),
     ]
 

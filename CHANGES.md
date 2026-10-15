@@ -18,6 +18,7 @@
   - `and` and `or` are allowed in all contexts with short circuit, last value semantics.
   - Filter application with `|` is available in all contexts and `|` plays nicely with parentheses.
   - Grouped expressions can have trailing path segments. Like `{{ (a or b).c }}`.
+  - Arithmetic operators are enabled.
 
 - Replaced `Environment` options `string_sequences` with a `iterable_strings` constructor argument.
 

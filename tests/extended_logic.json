@@ -1,0 +1,80 @@
+{
+  "tests": [
+    {
+      "name": "logical and, last value, truthy left",
+      "expression": "true and 42",
+      "result": "42"
+    },
+    {
+      "name": "logical and, last value, falsy left",
+      "expression": "false and 42",
+      "result": "false"
+    },
+    {
+      "name": "logical or, last value, truthy left",
+      "expression": "99 or 42",
+      "result": "99"
+    },
+    {
+      "name": "logical or, last value, falsy left",
+      "expression": "false or 42",
+      "result": "42"
+    },
+    {
+      "name": "logical and, falsy left, or truthy",
+      "expression": "false and 42 or 99",
+      "result": "99"
+    },
+    {
+      "name": "arithmetic and relational, truthy",
+      "expression": "1 + 2 <= 3",
+      "result": "true"
+    },
+    {
+      "name": "arithmetic and relational, falsy",
+      "expression": "1 + 2 > 3",
+      "result": "false"
+    },
+    {
+      "name": "arithmetic, relational and logical, truthy",
+      "expression": "1 + 2 > 3 or 4 < 5",
+      "result": "true"
+    },
+    {
+      "name": "arithmetic, plus false",
+      "expression": "1 + (2 > 3)",
+      "result": "1"
+    },
+    {
+      "name": "arithmetic, plus true",
+      "expression": "1 + (2 < 3)",
+      "result": "2"
+    },
+    {
+      "name": "arithmetic operators bind more tightly than relational operators",
+      "expression": "1 + 2 == 3",
+      "result": "true"
+    },
+    {
+      "name": "not binds more tightly than or",
+      "expression": "not false or true ",
+      "result": "true"
+    },
+    {
+      "name": "filter arguments",
+      "expression": "a | split: (b or ',') | join: (c or '#')",
+      "data": {
+        "a": "1,2,3,4",
+        "b": null,
+        "c": "*"
+      },
+      "result": "1*2*3*4"
+    },
+    {
+      "name": "group terms with parentheses",
+      "expression": "(true) and (false and (false or true))",
+      "data": {},
+      "result": "false"
+    }
+  ]
+}

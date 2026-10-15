@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import InitVar, dataclass, field
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import markupsafe
@@ -8,7 +9,12 @@ import markupsafe
 from ._filter import FilterContext
 from ._nothing import NOTHING
 from .drops import BLANK, EMPTY, Range
-from .exceptions import LiquidFilterInterrupt, LiquidNameError, LiquidTypeError
+from .exceptions import (
+    LiquidFilterInterrupt,
+    LiquidNameError,
+    LiquidTypeError,
+    LiquidZeroDivisionError,
+)
 from .tokens import span
 
 if TYPE_CHECKING:
@@ -276,7 +282,7 @@ class Ternary:
 
 
 @dataclass(slots=True)
-class LogicalNot:
+class PrefixExpression:
     token: Token
     right: Expression
     span: Token = field(init=False)
@@ -284,14 +290,48 @@ class LogicalNot:
     def __post_init__(self) -> None:
         self.span = span(self.token, self.right.span)
 
+    def children(self) -> list[Expression]:
+        return [self.right]
+
+
+@dataclass(slots=True)
+class LogicalNot(PrefixExpression):
     def evaluate(self, context: RenderContext) -> object:
         return not context.env.truthy(self.right.evaluate(context), context)
 
     async def evaluate_async(self, context: RenderContext) -> object:
         return not context.env.truthy(await self.right.evaluate_async(context), context)
 
-    def children(self) -> list[Expression]:
-        return [self.right]
+    def __str__(self) -> str:
+        return f"not {self.right}"
+
+
+@dataclass(slots=True)
+class Pos(PrefixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        return context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+    def __str__(self) -> str:
+        return f"+{self.right}"
+
+
+@dataclass(slots=True)
+class Neg(PrefixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        return -context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return -context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+    def __str__(self) -> str:
+        return f"-{self.right}"
 
 
 @dataclass(slots=True)
@@ -332,6 +372,7 @@ class LogicalOr(InfixExpression):
 class LogicalAnd(InfixExpression):
     def evaluate(self, context: RenderContext) -> object:
         left = self.left.evaluate(context)
+        print("!!", self.left, self.right)
         return (
             self.right.evaluate(context) if context.env.truthy(left, context) else left
         )
@@ -500,6 +541,184 @@ class Contains(InfixExpression):
 
     def __str__(self) -> str:
         return f"{self.left} contains {self.right}"
+
+
+@dataclass(slots=True)
+class Add(InfixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(self.left.evaluate(context), context, 0)
+        right = context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left + right
+
+        return float(Decimal(str(left)) + Decimal(str(right)))
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(
+            await self.left.evaluate_async(context), context, 0
+        )
+        right = context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left + right
+
+        return float(Decimal(str(left)) + Decimal(str(right)))
+
+    def __str__(self) -> str:
+        return f"{self.left} + {self.right}"
+
+
+@dataclass(slots=True)
+class Sub(InfixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(self.left.evaluate(context), context, 0)
+        right = context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left - right
+
+        return float(Decimal(str(left)) - Decimal(str(right)))
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(
+            await self.left.evaluate_async(context), context, 0
+        )
+        right = context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left - right
+
+        return float(Decimal(str(left)) - Decimal(str(right)))
+
+    def __str__(self) -> str:
+        return f"{self.left} - {self.right}"
+
+
+@dataclass(slots=True)
+class Mul(InfixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(self.left.evaluate(context), context, 0)
+        right = context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left * right
+
+        return float(Decimal(str(left)) * Decimal(str(right)))
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(
+            await self.left.evaluate_async(context), context, 0
+        )
+        right = context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left * right
+
+        return float(Decimal(str(left)) * Decimal(str(right)))
+
+    def __str__(self) -> str:
+        return f"{self.left} * {self.right}"
+
+
+@dataclass(slots=True)
+class Div(InfixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(self.left.evaluate(context), context, 0)
+        right = context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+        if right == 0:
+            raise LiquidZeroDivisionError(
+                "divide by zero",
+                token=self.right.span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left // right
+
+        if isinstance(left, Decimal) or isinstance(right, Decimal):
+            return float(Decimal(str(left)) / Decimal(str(right)))
+
+        return left / right
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(
+            await self.left.evaluate_async(context), context, 0
+        )
+        right = context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+        if right == 0:
+            raise LiquidZeroDivisionError(
+                "divide by zero",
+                token=self.right.span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left // right
+
+        if isinstance(left, Decimal) or isinstance(right, Decimal):
+            return float(Decimal(str(left)) / Decimal(str(right)))
+
+        return left / right
+
+    def __str__(self) -> str:
+        return f"{self.left} / {self.right}"
+
+
+@dataclass(slots=True)
+class Mod(InfixExpression):
+    def evaluate(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(self.left.evaluate(context), context, 0)
+        right = context.env.to_numeric(self.right.evaluate(context), context, 0)
+
+        if right == 0:
+            raise LiquidZeroDivisionError(
+                "divide by zero",
+                token=self.right.span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left % right
+
+        return float(Decimal(str(left)) % Decimal(str(right)))
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        left = context.env.to_numeric(
+            await self.left.evaluate_async(context), context, 0
+        )
+        right = context.env.to_numeric(
+            await self.right.evaluate_async(context), context, 0
+        )
+
+        if right == 0:
+            raise LiquidZeroDivisionError(
+                "divide by zero",
+                token=self.right.span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        if isinstance(left, int) and isinstance(right, int):
+            return left % right
+
+        return float(Decimal(str(left)) % Decimal(str(right)))
+
+    def __str__(self) -> str:
+        return f"{self.left} / {self.right}"
 
 
 @dataclass(slots=True)
