@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import decimal
 import functools
 from typing import TYPE_CHECKING
@@ -62,9 +62,8 @@ def default(obj: Any, default_: object = "", *, allow_false: bool = False) -> An
 
 @with_environment
 @liquid_filter
-@functools.lru_cache(maxsize=10)
-def date(  # noqa: PLR0912 PLR0911
-    dat: Union[datetime.datetime, str, int],
+def date(
+    dat: Union[dt.datetime, str, int],
     fmt: str,
     *,
     environment: Environment,
@@ -76,44 +75,63 @@ def date(  # noqa: PLR0912 PLR0911
     if is_undefined(fmt):
         return str(dat)
 
-    if isinstance(dat, str):
-        if dat in ("now", "today"):
-            dat = datetime.datetime.now()
-        elif dat.isdigit():
-            # The reference implementation does not support string
-            # representations of negative integers either.
-            dat = datetime.datetime.fromtimestamp(int(dat))
-        else:
-            try:
-                dat = parser.parse(dat)
-            except parser.ParserError:
-                # Input is returned unchanged. This is consistent
-                # with the reference implementation.
-                return str(dat)
-    elif isinstance(dat, int):
-        try:
-            dat = datetime.datetime.fromtimestamp(dat)
-        except (OverflowError, OSError):
-            # Testing on Windows shows that it can't handle some
-            # negative integers.
-            return str(dat)
+    date_ = dt.datetime.now() if dat in ("now", "today") else _to_date(dat)
 
-    if not isinstance(dat, (datetime.datetime, datetime.date)):
+    if date_ is None:
+        if isinstance(dat, (str, int)):
+            # Input is returned unchanged. This is consistent
+            # with the reference implementation.
+            return str(dat)
         raise FilterArgumentError(
-            f"date expected datetime.datetime, found {type(dat).__name__}"
+            f"date expected datetime.datetime, found {type(dat).__name__}",
+            token=None,
         )
 
     try:
-        rv = dat.strftime(fmt)
+        rv = date_.strftime(fmt)
     except ValueError as err:
         # This is not uncommon on Windows when a format string contains
         # directives that are not officially supported by Python.
 
         # Handle "%s" as a special case.
         if fmt == r"%s":
-            return str(dat.timestamp()).split(".")[0]
+            return str(date_.timestamp()).split(".")[0]
         raise FilterArgumentError(str(err), token=None) from err
 
     if environment.autoescape and isinstance(fmt, Markup):
         return Markup(rv)
     return rv
+
+
+@functools.lru_cache(maxsize=10)
+def _to_date(  # noqa: PLR0911
+    d: object,
+) -> Union[dt.datetime, None]:
+    if isinstance(d, dt.datetime):
+        return d
+
+    if isinstance(d, dt.date):
+        return dt.datetime.combine(d, dt.time.min)
+
+    if isinstance(d, str):
+        if d.isdigit():
+            # The reference implementation does not support string
+            # representations of negative integers either.
+            return dt.datetime.fromtimestamp(int(d))
+
+        try:
+            return parser.parse(d)
+        except parser.ParserError:
+            # Input is returned unchanged. This is consistent
+            # with the reference implementation.
+            return None
+
+    if isinstance(d, int):
+        try:
+            return dt.datetime.fromtimestamp(d)
+        except (OverflowError, OSError):
+            # Testing on Windows shows that it can't handle some
+            # negative integers.
+            return None
+
+    return None
