@@ -17,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
   "MarkupSafe>=3",
@@ -81,7 +82,7 @@ test = "pytest {args}"
 typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["39", "310", "311", "312", "313", "314", "pypy39"]
+python = ["39", "310", "311", "312", "313", "314", "315", "pypy39"]
 
 [tool.hatch.envs.test.scripts]
 test = "pytest {args}"
