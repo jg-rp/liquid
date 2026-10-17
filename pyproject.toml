@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 
@@ -38,7 +39,15 @@ Homepage = "https://jg-rp.github.io/liquid/"
 "Source Code" = "https://github.com/jg-rp/liquid"
 
 [tool.hatch.version]
-path = "src/python_liquid/__about__.py"
+path = "src/liquid/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/**/.mypy_cache/"]
+packages = ["src/liquid"]
+
+[tool.hatch.build.targets.wheel]
+exclude = ["/**/.mypy_cache/"]
+packages = ["src/liquid"]
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -76,11 +85,11 @@ test = "pytest {args}"
 typing = "mypy"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["312", "313", "314"]
+python = ["312", "313", "314", "315"]
 
 [tool.coverage.run]
 branch = true
-omit = ["tests/mocks/**/*", "src/python_liquid/__about__.py"]
+omit = ["tests/mocks/**/*", "src/liquid/__about__.py"]
 parallel = true
 
 [tool.coverage.report]
