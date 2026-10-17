@@ -9,6 +9,7 @@ from typing import Any
 import pytest
 
 from liquid import Environment
+from liquid.builtin.filters.misc import _to_date
 from liquid.builtin.filters.misc import date
 from liquid.exceptions import FilterArgumentError
 from liquid.exceptions import LiquidError
@@ -102,3 +103,16 @@ def test_date_filter(case: Case) -> None:
             date_(case.val, *case.args, **case.kwargs)
     else:
         assert date_(case.val, *case.args, **case.kwargs) == case.expect
+
+def test_date_filter_does_not_cache_for_current_datetime() -> None:
+    env = Environment()
+    _to_date.cache_clear()
+    
+    date("now", "%Y-%m-%d %H:%M:%S", environment=env)
+    date("now", "%Y-%m-%d %H:%M:%S", environment=env)
+    date("today", "%Y-%m-%d", environment=env)
+    
+    info = _to_date.cache_info()
+    assert info.hits == 0
+    assert info.misses == 0
+    assert info.currsize == 0
