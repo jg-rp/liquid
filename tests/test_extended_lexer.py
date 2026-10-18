@@ -174,6 +174,49 @@ def test_tag_inline() -> None:
     ]
 
 
+def test_tag_delimiter_in_string_literal() -> None:
+    assert tokenize("{% assign x = '%}' %}") == [
+        (TOKEN_TAG_START, "{%"),
+        (TOKEN_TAG_NAME, "assign"),
+        (TOKEN_IDENT, "x"),
+        (TOKEN_ASSIGN, "="),
+        (TOKEN_SINGLE_QUOTE, "'"),
+        (TOKEN_SINGLE_QUOTED, "%}"),
+        (TOKEN_SINGLE_QUOTE, "'"),
+        (TOKEN_TAG_END, "%}"),
+    ]
+
+
+def test_out_delimiter_in_string_literal() -> None:
+    assert tokenize("{{ '}}' }}") == [
+        (TOKEN_OUT_START, "{{"),
+        (TOKEN_SINGLE_QUOTE, "'"),
+        (TOKEN_SINGLE_QUOTED, "}}"),
+        (TOKEN_SINGLE_QUOTE, "'"),
+        (TOKEN_OUT_END, "}}"),
+    ]
+
+
+def test_template_comment() -> None:
+    assert tokenize("foo {# }} #}bar") == [
+        (TOKEN_TEXT, "foo "),
+        (TOKEN_COMMENT_START, "{#"),
+        (TOKEN_COMMENT, " }} "),
+        (TOKEN_COMMENT_END, "#}"),
+        (TOKEN_TEXT, "bar"),
+    ]
+
+
+def test_template_comment_wc() -> None:
+    assert tokenize("{#- }} -#}") == [
+        (TOKEN_COMMENT_START, "{#"),
+        (TOKEN_WC, "-"),
+        (TOKEN_COMMENT, " }} "),
+        (TOKEN_WC, "-"),
+        (TOKEN_COMMENT_END, "#}"),
+    ]
+
+
 # These test cases are derived from:
 #
 # https://github.com/Shopify/liquid/blob/a9c85622ddd784078c2eed34b19a351fe57362cf/test/unit/tags/comment_tag_unit_test.rb
