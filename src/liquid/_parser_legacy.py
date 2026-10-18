@@ -150,7 +150,7 @@ class LegacyParser(Parser):
         self.skip_whitespace_control()
         expr = self.parse_filtered_expression(PRECEDENCE_LOWEST, infix=True)
         self.carry_whitespace_control()
-        self.eat(TOKEN_OUT_END, message="missing output delimiter")
+        self.eat(TOKEN_OUT_END, message="unknown operator or missing output delimiter")
         return OutputStatement(token, expr)
 
     def parse_tag(self) -> Markup:

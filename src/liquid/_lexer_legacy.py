@@ -24,6 +24,8 @@ RE_LINE_COMMENT_SEGMENT = re.compile(r"\n\s*(comment|endcomment).*")
 class LegacyLexer(Lexer):
     """A Shopify/liquid v5.12.0 compatible tokenizer with hard coded delimiters."""
 
+    __slots__ = ()
+
     def scan_markup(self) -> State | None:
 
         while 1:

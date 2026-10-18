@@ -20,7 +20,7 @@ class Case:
 SKIP: set[str] = set()
 
 ENV = Environment(
-    extended_expressions=True,
+    extended_syntax=True,
     conventional_operator_precedence=True,
 )
 

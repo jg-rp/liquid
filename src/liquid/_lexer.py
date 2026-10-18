@@ -18,16 +18,10 @@ class Lexer:
     """Template source tokenizer."""
 
     __slots__ = (
-        "comment_end",
-        "comment_start",
         "length",
-        "out_end",
-        "out_start",
         "pos",
         "source",
         "start",
-        "tag_start",
-        "tag_start",
         "tokens",
     )
 
@@ -37,13 +31,6 @@ class Lexer:
         self.start = 0
         self.pos = 0
         self.tokens: list[Token] = []
-
-        self.comment_start = env.comment_start_delimiter
-        self.comment_end = env.comment_end_delimiter
-        self.out_start = env.output_start_delimiter
-        self.out_end = env.output_end_delimiter
-        self.tag_start = env.tag_start_delimiter
-        self.tag_start = env.tag_end_delimiter
 
     @classmethod
     def tokenize(cls, env: Environment, source: str) -> list[Token]:

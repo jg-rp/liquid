@@ -134,7 +134,7 @@ class Environment:
         *,
         autoescape: bool = False,
         conventional_operator_precedence: bool = False,
-        extended_expressions: bool = False,
+        extended_syntax: bool = False,
         globals: Mapping[str, object] | None = None,
         iterable_strings: bool = False,
         loader: Loader | None = None,
@@ -149,9 +149,7 @@ class Environment:
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
 
-        self.parser: type[Parser] = (
-            ExtendedParser if extended_expressions else LegacyParser
-        )
+        self.parser: type[Parser] = ExtendedParser if extended_syntax else LegacyParser
 
         self.conventional_operator_precedence = conventional_operator_precedence
 
@@ -223,6 +221,7 @@ class Environment:
         return await self.parse(source).render_async(data)
 
     def tokenize(self, source: str) -> list[Token]:
+        # TODO: ExtendedLexer if self.extended_syntax
         return LegacyLexer.tokenize(self, source)
 
     def make_globals(
