@@ -85,7 +85,9 @@ class ExtendedLexer(Lexer):
                 self.skip(RE_TRIVIA)
                 self.accept_tag()
 
-            elif self.source.startswith(self.comment_start, self.pos):
+            elif self.comment_start and self.source.startswith(
+                self.comment_start, self.pos
+            ):
                 self.accept_template_comment()
 
             # TODO: try min(source.find)

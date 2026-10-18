@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from liquid import Environment
+from liquid import Environment, ExtendedParser
 
 
 @dataclass
@@ -20,7 +20,7 @@ class Case:
 SKIP: set[str] = set()
 
 ENV = Environment(
-    extended_syntax=True,
+    parser=ExtendedParser,
     conventional_operator_precedence=True,
 )
 

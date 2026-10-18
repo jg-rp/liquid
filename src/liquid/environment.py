@@ -15,7 +15,6 @@ from ._io import StringBuffer
 from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
 from ._nothing import Nothing
-from ._parser_extended import ExtendedParser
 from ._parser_legacy import LegacyParser
 from ._template import Template
 from .drops import Undefined
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
     from ._loader import Loader
     from ._markup import Tag
     from ._parser import Parser
+    from ._resource_limits import ResourceLimits
     from .tokens import Token
 
 
@@ -126,10 +126,11 @@ class Environment:
         *,
         autoescape: bool = False,
         conventional_operator_precedence: bool = False,
-        extended_syntax: bool = False,
         globals: Mapping[str, object] | None = None,
         iterable_strings: bool = False,
         loader: Loader | None = None,
+        parser: type[Parser] = LegacyParser,
+        resource_limits: ResourceLimits | None = None,
         strict_filters: bool = True,
         tokenizer: type[Lexer] = LegacyLexer,
         undefined: type[Undefined] = Undefined,
@@ -143,11 +144,11 @@ class Environment:
         self.iterable_strings = iterable_strings
 
         self.tokenizer = tokenizer
-        self.parser: type[Parser] = ExtendedParser if extended_syntax else LegacyParser
+        self.parser = parser
 
         self.conventional_operator_precedence = conventional_operator_precedence
 
-        # TODO: Single dataclass argument
+        # TODO: Update to use ResourceLimits
         self.max_assign_score: int | None = None
         self.max_assign_score_cumulative: int | None = None
         self.max_render_score: int | None = None

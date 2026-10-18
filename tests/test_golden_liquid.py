@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from liquid import DictLoader, Environment, ExtendedLexer
+from liquid import DictLoader, Environment, ExtendedLexer, ExtendedParser
 from liquid.exceptions import LiquidError
 
 
@@ -37,11 +37,17 @@ SKIP = {
     "identifiers, allowed symbols, parens",
     "identifiers, only digits",
     "identifiers, repeated parens",
-    # TODO: We're raising an exceptions for these, whereas Shopify/liquid silently returns nil.
+    # TODO: We're raising an exception for these, whereas Shopify/liquid silently returns nil.
     "tags, case, unexpected when token",
     "tags, echo, nothing to echo",
     # TODO: These are invalid in Shopify/liquid.
     "range, float from a variable is an error",
+}
+
+EXTENDED_SKIP = {
+    *SKIP,
+    "tags, case, mix or and comma separated when expression",
+    "tags, case, or separated when expression",
 }
 
 
@@ -102,6 +108,22 @@ def test_golden_extended_lexer(case: Case) -> None:
 
     env = Environment(
         tokenizer=ExtendedLexer,
+        loader=DictLoader(case.templates or {}),
+    )
+
+    if case.results is not None:
+        assert env.parse(case.template).render(case.data) in case.results
+    else:
+        assert env.parse(case.template).render(case.data) == case.result
+
+
+@pytest.mark.parametrize("case", VALID_TEST_CASES, ids=operator.attrgetter("name"))
+def test_golden_extended_parser(case: Case) -> None:
+    if case.name in EXTENDED_SKIP:
+        pytest.skip()
+
+    env = Environment(
+        parser=ExtendedParser,
         loader=DictLoader(case.templates or {}),
     )
 

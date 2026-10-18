@@ -8,6 +8,8 @@ from ._markup import Block, Expression, Markup
 from ._parser import (
     PRECEDENCE_COMPARISON,
     PRECEDENCE_FILTER_ARG,
+    PRECEDENCE_LOGICAL_AND,
+    PRECEDENCE_LOGICAL_OR,
     PRECEDENCE_LOGICAL_RIGHT,
     PRECEDENCE_LOWEST,
     PRECEDENCE_MEMBERSHIP,
@@ -16,7 +18,7 @@ from ._parser import (
     Precedence,
 )
 from .exceptions import LiquidSyntaxError
-from .tags.output import OutputStatement
+from .tags import OutputStatement, TemplateComment
 from .tokens import *
 from .tokens import TOKEN_NAMES, TokenKind, span, token_value
 
@@ -30,6 +32,18 @@ if TYPE_CHECKING:
 LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
     TOKEN_AND: PRECEDENCE_LOGICAL_RIGHT,
     TOKEN_OR: PRECEDENCE_LOGICAL_RIGHT,
+    TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
+    TOKEN_EQ: PRECEDENCE_COMPARISON,
+    TOKEN_NE: PRECEDENCE_COMPARISON,
+    TOKEN_LT: PRECEDENCE_COMPARISON,
+    TOKEN_LE: PRECEDENCE_COMPARISON,
+    TOKEN_GT: PRECEDENCE_COMPARISON,
+    TOKEN_GE: PRECEDENCE_COMPARISON,
+}
+
+CONVENTIONAL_PRECEDENCES: dict[TokenKind, Precedence] = {
+    TOKEN_AND: PRECEDENCE_LOGICAL_AND,
+    TOKEN_OR: PRECEDENCE_LOGICAL_OR,
     TOKEN_CONTAINS: PRECEDENCE_MEMBERSHIP,
     TOKEN_EQ: PRECEDENCE_COMPARISON,
     TOKEN_NE: PRECEDENCE_COMPARISON,
@@ -99,7 +113,10 @@ class LegacyParser(Parser):
         tokens: list[Token],
     ) -> None:
         super().__init__(env, source, template_name, tokens)
-        self.precedences = LEGACY_PRECEDENCES
+        if env.conventional_operator_precedence:
+            self.precedences = CONVENTIONAL_PRECEDENCES
+        else:
+            self.precedences = LEGACY_PRECEDENCES
 
     def parse_block(self, end: Collection[str]) -> Block:
         nodes: Block = []
@@ -129,6 +146,9 @@ class LegacyParser(Parser):
 
             elif kind == TOKEN_EOI:
                 return nodes
+
+            elif kind == TOKEN_COMMENT_START:
+                nodes.append(TemplateComment.parse(token, self))
 
             else:
                 raise LiquidSyntaxError(

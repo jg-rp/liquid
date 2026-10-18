@@ -14,9 +14,11 @@ from .include import IncludeTag
 from .increment import IncrementTag
 from .inline_comment import InlineCommentTag
 from .liquid import LiquidTag
+from .output import OutputStatement
 from .raw import RawTag
 from .render import RenderTag
 from .tablerow import TableRowTag
+from .template_comment import TemplateComment
 from .unless import UnlessTag
 
 __all__ = (
@@ -38,8 +40,10 @@ __all__ = (
     "IncrementTag",
     "InlineCommentTag",
     "LiquidTag",
+    "OutputStatement",
     "RawTag",
     "RenderTag",
     "TableRowTag",
+    "TemplateComment",
     "UnlessTag",
 )

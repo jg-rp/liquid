@@ -7,6 +7,7 @@ from ._lexer import Lexer
 from ._lexer_extended import ExtendedLexer
 from ._lexer_legacy import LegacyLexer
 from ._loader import Loader, TemplateSource
+from ._parser_extended import ExtendedParser
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
 from .environment import Environment
@@ -34,6 +35,7 @@ __all__ = (
     "Drop",
     "Environment",
     "ExtendedLexer",
+    "ExtendedParser",
     "FalsyStrictUndefined",
     "FileSystemLoader",
     "LegacyLexer",
