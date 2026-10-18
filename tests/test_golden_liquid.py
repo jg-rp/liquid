@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from liquid import DictLoader, Environment
+from liquid import DictLoader, Environment, ExtendedLexer
 from liquid.exceptions import LiquidError
 
 
@@ -93,6 +93,22 @@ def test_golden_async(case: Case) -> None:
         assert asyncio.run(coro()) in case.results
     else:
         assert asyncio.run(coro()) == case.result
+
+
+@pytest.mark.parametrize("case", VALID_TEST_CASES, ids=operator.attrgetter("name"))
+def test_golden_extended_lexer(case: Case) -> None:
+    if case.name in SKIP:
+        pytest.skip()
+
+    env = Environment(
+        tokenizer=ExtendedLexer,
+        loader=DictLoader(case.templates or {}),
+    )
+
+    if case.results is not None:
+        assert env.parse(case.template).render(case.data) in case.results
+    else:
+        assert env.parse(case.template).render(case.data) == case.result
 
 
 @pytest.mark.parametrize("case", INVALID_TEST_CASES, ids=operator.attrgetter("name"))

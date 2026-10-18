@@ -3,6 +3,9 @@ from typing import Any
 
 from ._context import RenderContext
 from ._drop import ContextHint, Drop
+from ._lexer import Lexer
+from ._lexer_extended import ExtendedLexer
+from ._lexer_legacy import LegacyLexer
 from ._loader import Loader, TemplateSource
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
@@ -30,8 +33,11 @@ __all__ = (
     "DictLoader",
     "Drop",
     "Environment",
+    "ExtendedLexer",
     "FalsyStrictUndefined",
     "FileSystemLoader",
+    "LegacyLexer",
+    "Lexer",
     "Loader",
     "PackageLoader",
     "RenderContext",

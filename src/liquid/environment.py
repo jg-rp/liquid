@@ -12,6 +12,7 @@ from . import filters, tags
 from ._chain_map import ReadOnlyChainMap
 from ._drop import has_html_safe_string, is_drop
 from ._io import StringBuffer
+from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
 from ._nothing import Nothing
 from ._parser_extended import ExtendedParser
@@ -31,15 +32,6 @@ if TYPE_CHECKING:
 
 
 class Environment:
-    comment_start_delimiter: str = "{#"
-    comment_end_delimiter: str = "#}"
-
-    output_start_delimiter: str = "{{"
-    output_end_delimiter: str = "}}"
-
-    tag_start_delimiter: str = "{%"
-    tag_end_delimiter: str = "%}"
-
     standard_tags: ClassVar[dict[str, Tag]] = {
         "assign": tags.AssignTag,
         "break": tags.BreakTag,
@@ -139,6 +131,7 @@ class Environment:
         iterable_strings: bool = False,
         loader: Loader | None = None,
         strict_filters: bool = True,
+        tokenizer: type[Lexer] = LegacyLexer,
         undefined: type[Undefined] = Undefined,
     ) -> None:
         self.loader = loader or DictLoader({})
@@ -149,6 +142,7 @@ class Environment:
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
 
+        self.tokenizer = tokenizer
         self.parser: type[Parser] = ExtendedParser if extended_syntax else LegacyParser
 
         self.conventional_operator_precedence = conventional_operator_precedence
@@ -221,8 +215,7 @@ class Environment:
         return await self.parse(source).render_async(data)
 
     def tokenize(self, source: str) -> list[Token]:
-        # TODO: ExtendedLexer if self.extended_syntax
-        return LegacyLexer.tokenize(self, source)
+        return self.tokenizer.tokenize(self, source)
 
     def make_globals(
         self, data: Mapping[str, object] | None

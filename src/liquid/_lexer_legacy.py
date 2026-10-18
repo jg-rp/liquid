@@ -98,7 +98,7 @@ class LegacyLexer(Lexer):
             ch = self.source[self.pos]
 
             if _is_trivia(ord(ch)):
-                self.skip(RE_TRIVIA)
+                self.skip(trivia)
 
             elif ch == ",":
                 self.pos += 1
