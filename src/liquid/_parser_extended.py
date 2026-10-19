@@ -196,6 +196,15 @@ class ExtendedParser(LegacyParser):
 
         if self.kind() == TOKEN_DOUBLE_DOT:
             self.pos += 1
+
+            if self.kind() == TOKEN_DOT:
+                raise LiquidSyntaxError(
+                    "too many dots",
+                    token=self.current(),
+                    source=self.source,
+                    name=self.template_name,
+                )
+
             stop = self.parse_expression(PRECEDENCE_LOWEST, infix=False)
             self.eat(TOKEN_RPAREN, message="missing bracket")
             return expressions.RangeLiteral(token, expr, stop)

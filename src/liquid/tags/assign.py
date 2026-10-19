@@ -37,7 +37,7 @@ class AssignTag:
                 name=parser.template_name,
             )
 
-        parser.eat(TOKEN_ASSIGN)
+        parser.eat(TOKEN_ASSIGN, "bad identifier or missing '='")
         expression = parser.parse_filtered_expression()
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)

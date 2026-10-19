@@ -28,6 +28,8 @@
 
 - Changed the "drop protocol" so that drops appearing in equality and comparison expressions, and when tested for truthiness, make better use of Python's magic methods...
 
+- Removed environment variable `LIQUIDINTMAXSTRDIGITS`. It was a workaround in the absence of `sys.get_int_max_str_digits()`, added in Python 3.11.
+
 ## Version 2.3.3
 
 **Fixes**

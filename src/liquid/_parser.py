@@ -332,7 +332,7 @@ class Parser(ABC):
     def expect_expression(self) -> None:
         if self.kind() in TERMINATE_EXPRESSION:
             raise LiquidSyntaxError(
-                "expected an expression",
+                "missing expression",
                 token=self.current(),
                 source=self.source,
                 name=self.template_name,

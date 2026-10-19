@@ -178,7 +178,9 @@ class LegacyParser(Parser):
         self.skip_whitespace_control()
         expr = self.parse_filtered_expression(PRECEDENCE_LOWEST, infix=True)
         self.carry_whitespace_control()
-        self.eat(TOKEN_OUT_END, message="unknown operator or missing output delimiter")
+        self.eat(
+            TOKEN_OUT_END, message="malformed expression or missing output delimiter"
+        )
         return OutputStatement(token, expr)
 
     def parse_tag(self) -> Markup:
@@ -309,7 +311,17 @@ class LegacyParser(Parser):
     def parse_range_literal(self) -> expressions.RangeLiteral:
         token = self.eat(TOKEN_LPAREN)
         start = self.parse_expression(PRECEDENCE_LOWEST, infix=False)
+
         self.eat(TOKEN_DOUBLE_DOT, message="expected a '..'")
+
+        if self.kind() == TOKEN_DOT:
+            raise LiquidSyntaxError(
+                "too many dots",
+                token=self.current(),
+                source=self.source,
+                name=self.template_name,
+            )
+
         stop = self.parse_expression(PRECEDENCE_LOWEST, infix=False)
         self.eat(TOKEN_RPAREN, message="missing bracket")
         return expressions.RangeLiteral(token, start, stop)
