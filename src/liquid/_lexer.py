@@ -4,6 +4,7 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from .exceptions import ResourceLimitError
 from .tokens import TOKEN_WC
 
 if TYPE_CHECKING:
@@ -35,7 +36,10 @@ class Lexer:
     @classmethod
     def tokenize(cls, env: Environment, source: str) -> list[Token]:
         lexer = cls(env, source)
-        lexer.run()
+        try:
+            lexer.run()
+        except RecursionError:
+            raise ResourceLimitError("maximum recursion depth exceeded")
         return lexer.tokens
 
     def run(self) -> None:

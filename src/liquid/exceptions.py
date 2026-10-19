@@ -77,6 +77,10 @@ class LiquidTypeError(DetailedLiquidError):
     pass
 
 
+class LiquidValueError(LiquidError):
+    pass
+
+
 class LiquidZeroDivisionError(DetailedLiquidError):
     pass
 

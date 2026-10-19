@@ -106,6 +106,9 @@ class TableRowTag:
 
         target = self.expression.evaluate(context)
 
+        if context.env.is_nil(target):
+            return
+
         if is_iterable_drop(target):
             it = target.__liquid_iter__(offset, limit, False)
             length = len(it)

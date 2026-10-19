@@ -17,7 +17,7 @@ from ._parser import (
     Parser,
     Precedence,
 )
-from .exceptions import LiquidSyntaxError
+from .exceptions import LiquidSyntaxError, ResourceLimitError
 from .tags import OutputStatement, TemplateComment
 from .tokens import *
 from .tokens import TOKEN_NAMES, TokenKind, span, token_value
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from .tokens import Token
 
 # TODO: limit expression depth
+# TODO: limit block depth
 # TODO: mark string literals as HTML safe
 
 LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
@@ -120,6 +121,10 @@ class LegacyParser(Parser):
 
     def parse_block(self, end: Collection[str]) -> Block:
         nodes: Block = []
+        self.block_depth += 1
+
+        if self.block_depth > self.env.max_block_depth:
+            raise ResourceLimitError("maximum recursion depth exceeded")
 
         while 1:
             token = self.next()
@@ -140,12 +145,12 @@ class LegacyParser(Parser):
             elif kind == TOKEN_TAG_START:
                 if self.peek_tag_name() in end:
                     self.pos -= 1
-                    return nodes
+                    break
 
                 nodes.append(self.parse_tag())
 
             elif kind == TOKEN_EOI:
-                return nodes
+                break
 
             elif kind == TOKEN_COMMENT_START:
                 nodes.append(TemplateComment.parse(token, self))
@@ -157,6 +162,9 @@ class LegacyParser(Parser):
                     source=self.source,
                     name=self.template_name,
                 )
+
+        self.block_depth -= 1
+        return nodes
 
     def parse_output(self) -> Markup:
         token = self.tokens[self.pos - 1]

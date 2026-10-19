@@ -156,6 +156,7 @@ class Environment:
         self.max_render_size: int | None = None
         self.max_context_depth: int = 30
         self.max_loop_iterations: int | None = None
+        self.max_block_depth: int = 30
 
         self.tags: dict[str, Tag] = {}
         self.filters: dict[str, Filter] = {}

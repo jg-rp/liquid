@@ -50,6 +50,7 @@ class Parser(ABC):
     """A base parser from which different parser behavior can be derived."""
 
     __slots__ = (
+        "block_depth",
         "env",
         "eoi",
         "length",
@@ -75,6 +76,7 @@ class Parser(ABC):
         self.pos: int = 0
         self.eoi: Token = (TOKEN_EOI, len(source), len(source))
         self.whitespace_control_carry: Literal["-"] | None = None
+        self.block_depth: int = 0
 
     @classmethod
     def parse(cls, env: Environment, source: str, template_name: str) -> Block:

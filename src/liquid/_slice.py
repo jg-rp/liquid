@@ -1,5 +1,7 @@
 from collections.abc import Iterator, Sequence
 
+from .exceptions import LiquidValueError
+
 
 def slice_sequence[T](
     seq: Sequence[T], offset: int, limit: int | None, reversed_: bool = False
@@ -32,7 +34,11 @@ def slice_range(
     full_range = range(it.start, stop_inclusive, it.step)
 
     start = max(0, offset)
-    end = len(full_range) if limit is None else max(0, offset + limit)
+
+    try:
+        end = len(full_range) if limit is None else max(0, offset + limit)
+    except OverflowError:
+        raise LiquidValueError("range literal length limit reached")
 
     sliced = full_range[start:end]
     return sliced[::-1] if reversed_ else sliced
