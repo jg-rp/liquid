@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import importlib.resources
-import os
 from collections.abc import Iterable
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 from .._loader import Loader, TemplateSource
@@ -51,36 +50,27 @@ class PackageLoader(Loader):
         self.ext = ext
 
     def _resolve_path(self, name: str) -> Path:
-        template_path = Path(name)
-
-        if not template_path.name:
-            raise TemplateNotFoundError(name)
+        template_path = PurePath(name)
+        if template_path.anchor:
+            template_path = PurePath(*template_path.parts[1:])
 
         # Add suffix self.ext if template name does not have a suffix.
         if not template_path.suffix:
             template_path = template_path.with_suffix(self.ext)
 
-        if os.path.pardir in template_path.parts or template_path.is_absolute():
-            raise TemplateNotFoundError(name)
-
         for path in self.paths:
             with importlib.resources.as_file(path) as base:
-                source_path: Path = base.joinpath(template_path)
+                base_resolved = base.resolve()
+                source_path: Path = (base_resolved / template_path).resolve()
 
-                try:
-                    if not source_path.exists() or not source_path.is_file():
-                        continue
-                except OSError:
-                    # "File name too long", for example
+                if not source_path.is_relative_to(base_resolved):
                     continue
 
-                resolved = source_path.resolve(strict=False)
-                base_resolved = base.resolve(strict=False)
-
-                if not resolved.is_relative_to(base_resolved):
+                if not source_path.is_file():
                     continue
 
-                return source_path
+                # We don't want to expose a fully qualified path in error messages.
+                return base / template_path
 
         raise TemplateNotFoundError(name)
 
@@ -94,7 +84,8 @@ class PackageLoader(Loader):
         source_path = self._resolve_path(name)
         return TemplateSource(
             text=source_path.read_text(self.encoding),
-            name=str(source_path),
+            name=source_path.name,
+            path=str(source_path),
         )
 
     async def get_source_async(
@@ -106,19 +97,14 @@ class PackageLoader(Loader):
     ) -> TemplateSource:
         loop = asyncio.get_running_loop()
 
-        source_path = await loop.run_in_executor(
-            None,
-            self._resolve_path,
-            name,
-        )
+        source_path = await loop.run_in_executor(None, self._resolve_path, name)
 
         source_text = await loop.run_in_executor(
-            None,
-            source_path.read_text,
-            self.encoding,
+            None, source_path.read_text, self.encoding
         )
 
         return TemplateSource(
             text=source_text,
-            name=str(source_path),
+            name=source_path.name,
+            path=str(source_path),
         )

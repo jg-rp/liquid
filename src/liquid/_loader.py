@@ -17,6 +17,7 @@ class TemplateSource:
 
     name: str
     text: str
+    path: str | None = None
     matter: Mapping[str, object] | None = None
     up_to_date: Callable[[], bool | Awaitable[bool]] | None = None
 
@@ -54,6 +55,7 @@ class Loader(ABC):
         return env.parse(
             source.text,
             name=source.name,
+            path=source.path,
             globals=globals,
             matter=source.matter,
             up_to_date=source.up_to_date,
@@ -71,6 +73,7 @@ class Loader(ABC):
         return env.parse(
             source.text,
             name=source.name,
+            path=source.path,
             globals=globals,
             matter=source.matter,
             up_to_date=source.up_to_date,

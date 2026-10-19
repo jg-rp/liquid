@@ -22,6 +22,8 @@ class Template:
         source: str,
         name: str,
         nodes: Block,
+        *,
+        path: str | None = None,
         globals: Mapping[str, object] | None,
         matter: Mapping[str, object] | None,
         up_to_date: Callable[[], bool | Awaitable[bool]] | None = None,
@@ -30,6 +32,7 @@ class Template:
         self.source = source
         self.name = name
         self.nodes = nodes
+        self.path = path
         self.globals = globals
         self.matter = matter
         self.up_to_date = up_to_date

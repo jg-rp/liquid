@@ -4,7 +4,7 @@ import asyncio
 import os
 from collections.abc import Iterable
 from functools import partial
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 from .._loader import Loader, TemplateSource
@@ -57,7 +57,9 @@ class FileSystemLoader(Loader):
             Path("x").with_suffix(ext)
 
     def resolve_path(self, name: str) -> Path:
-        template_path = Path(name)
+        template_path = PurePath(name)
+        if template_path.anchor:
+            template_path = PurePath(*template_path.parts[1:])
 
         if not template_path.name:
             raise TemplateNotFoundError(name)
@@ -69,26 +71,24 @@ class FileSystemLoader(Loader):
             raise TemplateNotFoundError(name)
 
         for base in self.search_path:
-            source_path = base.joinpath(template_path)
+            base_resolved = base.resolve()
+            source_path = (base_resolved / template_path).resolve()
 
-            try:
-                if not source_path.exists() or not source_path.is_file():
-                    continue
-            except OSError:
-                # "File name too long", for example
+            if not source_path.is_relative_to(base_resolved):
                 continue
 
             if self.reject_symlinks:
-                try:
-                    resolved = source_path.resolve(strict=False)
-                    base_resolved = base.resolve(strict=False)
-                except OSError:
-                    continue
+                current = base_resolved
+                for part in template_path.parts:
+                    current /= part
+                    if current.is_symlink():
+                        continue
 
-                if not resolved.is_relative_to(base_resolved):
-                    continue
+            if not source_path.is_file() or source_path.is_dir():
+                continue
 
-            return source_path
+            # We don't want to expose a fully qualified path in error messages.
+            return base / template_path
 
         raise TemplateNotFoundError(name)
 
@@ -109,7 +109,8 @@ class FileSystemLoader(Loader):
         source, mtime = self._read(source_path)
         return TemplateSource(
             text=source,
-            name=str(source_path),
+            name=source_path.name,
+            path=str(source_path),
             up_to_date=partial(self._uptodate, source_path, mtime),
         )
 
@@ -136,6 +137,7 @@ class FileSystemLoader(Loader):
         source, mtime = await loop.run_in_executor(None, self._read, source_path)
         return TemplateSource(
             text=source,
-            name=str(source_path),
+            name=source_path.name,
+            path=str(source_path),
             up_to_date=partial(self._uptodate_async, source_path, mtime),
         )
