@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class IfTag:
-    tag = "if"
+    tag = ""
 
     __slots__ = ("blank", "blocks", "token")
 

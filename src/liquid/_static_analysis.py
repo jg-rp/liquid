@@ -238,7 +238,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
                 ):
                     filters[filter_name].append(span)
 
-        # Udate template scope from `node.template_scope()`
+        # Update template scope from `node.template_scope()`
         for name in node.template_scope():
             scope.add(name.value)
             locals.add(
@@ -354,7 +354,7 @@ async def analyze_async(
                 ):
                     filters[filter_name].append(span)
 
-        # Udate template scope from `node.template_scope()`
+        # Update template scope from `node.template_scope()`
         for name in node.template_scope():
             scope.add(name.value)
             locals.add(

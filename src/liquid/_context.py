@@ -12,7 +12,7 @@ from ._chain_map import ReadOnlyChainMap
 from ._drop import Drop, is_async_map
 from ._nothing import NOTHING
 from .exceptions import ResourceLimitError
-from .expressions import Name, NameSegment
+from .expressions import Name
 
 if TYPE_CHECKING:
     from ._template import Template
@@ -88,7 +88,7 @@ class RenderContext:
         for selector in selectors:
             index += 1
 
-            if isinstance(selector, (Name, NameSegment)):
+            if isinstance(selector, Name):
                 selector = selector.value
                 dotted = True
             else:
@@ -137,7 +137,7 @@ class RenderContext:
         for selector in selectors:
             index += 1
 
-            if isinstance(selector, (Name, NameSegment)):
+            if isinstance(selector, Name):
                 selector = selector.value
                 dotted = True
             else:

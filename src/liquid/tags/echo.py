@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .._parser import TERMINATE_EXPRESSION
 from ..tokens import TOKEN_TAG_END
 
 if TYPE_CHECKING:

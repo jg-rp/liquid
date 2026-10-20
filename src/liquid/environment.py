@@ -293,7 +293,6 @@ class Environment:
     def lt(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        print("**", repr(left), repr(right))
         if is_drop(left):
             if is_drop(right):
                 try:

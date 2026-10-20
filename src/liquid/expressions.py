@@ -375,7 +375,6 @@ class LogicalOr(InfixExpression):
 class LogicalAnd(InfixExpression):
     def evaluate(self, context: RenderContext) -> object:
         left = self.left.evaluate(context)
-        print("!!", self.left, self.right)
         return (
             self.right.evaluate(context) if context.env.truthy(left, context) else left
         )
@@ -752,7 +751,7 @@ class Variable:
             obj, index = context.resolve_path(
                 obj,
                 [
-                    s if isinstance(s, (Name, NameSegment)) else s.evaluate(context)
+                    s if isinstance(s, Name) else s.evaluate(context)
                     for s in self.selectors
                 ],
             )
@@ -781,9 +780,7 @@ class Variable:
             obj, index = await context.resolve_path_async(
                 obj,
                 [
-                    s
-                    if isinstance(s, (Name, NameSegment))
-                    else await s.evaluate_async(context)
+                    s if isinstance(s, Name) else await s.evaluate_async(context)
                     for s in self.selectors
                 ],
             )
@@ -825,19 +822,12 @@ class Variable:
     def __str__(self) -> str:
         return self.path(self.selectors)
 
-    def with_end_token(self, end_token: Token) -> Variable:
-        self.span = span(self.root.span, end_token)
-        return self
-
 
 @dataclass(slots=True)
 class IndexSegment:
     token: Token
     value: int
-    span: Token = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.span = self.token
+    span: Token
 
     def evaluate(self, context: RenderContext) -> object:
         return self.value

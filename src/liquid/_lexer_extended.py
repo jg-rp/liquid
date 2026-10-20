@@ -235,7 +235,6 @@ class ExtendedLexer(Lexer):
             self.emit(TOKEN_TAG_END)
 
         if self.scan_until(self.re_end_raw):
-            print("***")
             self.emit(TOKEN_TEXT)
 
         # Leave `{% endraw%}` for scan_markup.

@@ -368,7 +368,7 @@ class LegacyParser(Parser):
                 # TODO: handle reserved words
                 var = self.parse_path()
                 root = expressions.VariableSegment(
-                    lbracket_token, var, self.eat(TOKEN_RBRACKET)
+                    lbracket_token, var, span(lbracket_token, self.eat(TOKEN_RBRACKET))
                 )
             else:
                 name = self.parse_string_literal()
@@ -410,8 +410,9 @@ class LegacyParser(Parser):
 
         if kind == TOKEN_INT:
             index = int(token_value(token, self.source))
-            self.eat(TOKEN_RBRACKET)
-            return expressions.IndexSegment(token, index)
+            return expressions.IndexSegment(
+                token, index, span(lbracket_token, self.eat(TOKEN_RBRACKET))
+            )
 
         if kind in (
             TOKEN_IDENT,
