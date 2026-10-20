@@ -819,6 +819,20 @@ class Variable:
 
         return root
 
+    def location(self) -> Location:
+        def serialize(s: PathSegment) -> int | str | Location:
+            if isinstance(s, (Name, NameSegment, IndexSegment)):
+                return s.value
+            if isinstance(s, VariableSegment):
+                return s.var.location()
+            return str(s)
+
+        segments: Location = [serialize(self.root)]
+        if self.selectors:
+            segments.extend(serialize(s) for s in self.selectors)
+
+        return segments
+
     def __str__(self) -> str:
         return self.path(self.selectors)
 
@@ -1084,6 +1098,8 @@ class KeywordArgument:
 
 
 type PathSegment = Name | NameSegment | IndexSegment | VariableSegment | RangeLiteral
+
+type Location = list[int | str | Location]
 
 
 def tree_view(expr: Expression) -> str:

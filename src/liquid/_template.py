@@ -444,3 +444,6 @@ class Template:
             visit(child)
 
         return nodes
+
+    def __str__(self) -> str:
+        return self.source
