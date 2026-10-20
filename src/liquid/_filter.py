@@ -56,13 +56,13 @@ class FilterContext:
                 name=self.context.template.name,
             )
 
-        result, _ = self.context.resolve_path(obj, [key])  # type: ignore
+        result, _ = self.context.resolve_path(obj, [key])  # pyright: ignore[reportUnknownArgumentType]
         return default if result == NOTHING else result
 
     def input_array(self, obj: object) -> list[object]:
         """Coerce `obj` to a list suitable for filters that expect an array input."""
         if isinstance(obj, (list, tuple)):
-            return _flatten(obj)  # type: ignore
+            return _flatten(obj)  # pyright: ignore[reportUnknownArgumentType]
 
         if is_drop(obj):
             return list(obj)
@@ -78,7 +78,7 @@ class FilterContext:
     def to_int(self, obj: object) -> int:
         return self.context.env.to_int(obj, self.context, self.span)
 
-    def to_numeric[T](self, obj: object, default: T) -> float | int | Decimal | T:
+    def to_numeric(self, obj: object, default: int | Decimal) -> float | int | Decimal:
         return self.context.env.to_numeric(obj, self.context, default)
 
     def to_str[T](self, obj: object, default: T) -> str | T:
@@ -104,6 +104,6 @@ def _flatten(it: Iterable[object], level: int = 5) -> list[object]:
             if level < 1 or not isinstance(obj, (list, tuple)):
                 yield obj
             else:
-                yield from flatten_(obj, level=level - 1)  # type: ignore
+                yield from flatten_(obj, level=level - 1)  # pyright: ignore[reportUnknownArgumentType]
 
     return list(flatten_(it, level))

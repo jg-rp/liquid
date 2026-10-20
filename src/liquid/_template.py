@@ -53,13 +53,13 @@ class Template:
         return self._lines
 
     def render(self, data: Mapping[str, object] | None = None) -> str:
-        buffer = StringBuffer()
+        buffer: StringBuffer = StringBuffer()
         context = RenderContext(self, globals=self.make_globals(data))
         self.render_with_context(context, buffer)
         return buffer.getvalue()
 
     async def render_async(self, data: Mapping[str, object] | None = None) -> str:
-        buffer = StringBuffer()
+        buffer: StringBuffer = StringBuffer()
         context = RenderContext(self, globals=self.make_globals(data))
         await self.render_with_context_async(context, buffer)
         return buffer.getvalue()

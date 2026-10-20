@@ -27,10 +27,10 @@ class Range(Drop):
             and self.stop == other.stop
         )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 0 if self.stop < self.start else self.stop - self.start + 1
 
-    def __getitem__(self, key: str | int) -> int:
+    def __getitem__(self, key: object) -> int:
         match key:
             case "first":
                 return self.start

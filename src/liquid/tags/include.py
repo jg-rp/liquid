@@ -98,7 +98,7 @@ class IncludeTag:
 
             if isinstance(bind_value, list):
                 # TODO: raise for loop iterations
-                for item in bind_value:  # type: ignore
+                for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                     scope[bind_key] = item
                     template.render_with_context(context, buffer)
             else:
@@ -141,7 +141,7 @@ class IncludeTag:
 
             if isinstance(bind_value, list):
                 # TODO: raise for loop iterations
-                for item in bind_value:  # type: ignore
+                for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                     scope[bind_key] = item
                     await template.render_with_context_async(context, buffer)
             else:

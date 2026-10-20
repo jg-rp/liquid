@@ -20,7 +20,7 @@ class ForLoop(Drop):
         self.parent_loop = parent_loop or NOTHING
         self.index = -1
 
-    def __getitem__(self, key: str) -> object:
+    def __getitem__(self, key: object) -> object:
         if key == "first":
             return self.index == 0
 

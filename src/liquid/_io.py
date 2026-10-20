@@ -1,5 +1,5 @@
 class StringBuffer:
-    def __init__(self):
+    def __init__(self) -> None:
         self._parts: list[str] = []
         self._length = 0
 

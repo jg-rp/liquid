@@ -57,4 +57,43 @@ def test_output() -> None:
     assert_locations(analysis.tags, tags)
 
 
-# TODO:
+def test_bracket_notation() -> None:
+    source = "{{ x['y'].title }}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(["x", "y", "title"], "x['y'].title")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_quoted_name_notation() -> None:
+    source = "{{ some['foo.bar'] }}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "some": [(["some", "foo.bar"], "some['foo.bar']")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)

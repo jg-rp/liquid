@@ -13,6 +13,6 @@ def size(context: FilterContext, left: object) -> int:
         return 0
 
     if isinstance(left, (Sequence, Mapping)):
-        return len(left)  # type: ignore
+        return len(left)  # pyright: ignore[reportUnknownArgumentType]
 
     return 0

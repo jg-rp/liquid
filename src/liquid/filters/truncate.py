@@ -10,30 +10,30 @@ RE_S = re.compile(r"\s+")
 def truncate(
     context: FilterContext, left: object, length: object = 50, end: object = "..."
 ) -> str:
-    left = context.to_str(left, "")
-    length = context.to_int(length)
+    left_ = context.to_str(left, "")
+    length_ = context.to_int(length)
 
-    if len(left) <= length:
-        return left
+    if len(left_) <= length_:
+        return left_
 
-    end = context.to_str(end, "")
-    stop = 0 if length < len(end) else length - len(end)
-    return left[0:stop] + end
+    end_ = context.to_str(end, "")
+    stop = 0 if length_ < len(end_) else length_ - len(end_)
+    return left_[0:stop] + end_
 
 
 def truncate_words(
     context: FilterContext, left: object, word_count: object = 15, end: object = "..."
 ) -> str:
-    left = context.to_str(left, "")
-    word_count = max(context.to_int(word_count), 1)
+    left_ = context.to_str(left, "")
+    word_count_ = max(context.to_int(word_count), 1)
 
-    if word_count >= MAX_TRUNC_WORDS:
-        return left
+    if word_count_ >= MAX_TRUNC_WORDS:
+        return left_
 
-    end = context.to_str(end, "")
-    words = RE_S.split(left.strip())
+    end_ = context.to_str(end, "")
+    words = RE_S.split(left_.strip())
 
-    if len(words) <= word_count:
-        return left
+    if len(words) <= word_count_:
+        return left_
 
-    return " ".join(words[:word_count]) + end
+    return " ".join(words[:word_count_]) + end_

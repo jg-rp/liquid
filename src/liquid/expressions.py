@@ -174,7 +174,7 @@ class Group:
     end_token: InitVar[Token]
     span: Token = field(init=False)
 
-    def __post_init__(self, end_token: Token):
+    def __post_init__(self, end_token: Token) -> None:
         if self.segments:
             self.span = span(self.token, self.segments[-1].span)
         else:
@@ -231,13 +231,16 @@ class Group:
     def children(self) -> list[Expression]:
         if not self.segments:
             return [self.expr]
-        return [self.expr, *(s for s in self.segments if isinstance(s, Variable))]
+        return [
+            self.expr,
+            *(s.var for s in self.segments if isinstance(s, VariableSegment)),
+        ]
 
     def _path(self, segments: list[PathSegment] | None) -> str:
         if not segments:
             return ""
 
-        return "".join(f".{s}" if isinstance(s, Name) else f"[{s}]" for s in segments)
+        return "".join(f".{s}" if isinstance(s, Name) else str(s) for s in segments)
 
 
 @dataclass(slots=True)
@@ -724,7 +727,7 @@ class Mod(InfixExpression):
 @dataclass(slots=True)
 class Variable:
     token: Token
-    root: Name | StringLiteral | Variable
+    root: Name | NameSegment | VariableSegment
     selectors: list[PathSegment] | None
     span: Token = field(init=False)
 
@@ -738,7 +741,7 @@ class Variable:
     def evaluate(self, context: RenderContext) -> object:
         selector = (
             self.root.evaluate(context)
-            if isinstance(self.root, Variable)
+            if isinstance(self.root, VariableSegment)
             else self.root.value
         )
 
@@ -749,7 +752,7 @@ class Variable:
             obj, index = context.resolve_path(
                 obj,
                 [
-                    s if isinstance(s, Name) else s.evaluate(context)
+                    s if isinstance(s, (Name, NameSegment)) else s.evaluate(context)
                     for s in self.selectors
                 ],
             )
@@ -767,7 +770,7 @@ class Variable:
     async def evaluate_async(self, context: RenderContext) -> object:
         selector = (
             await self.root.evaluate_async(context)
-            if isinstance(self.root, Variable)
+            if isinstance(self.root, VariableSegment)
             else self.root.value
         )
 
@@ -778,7 +781,9 @@ class Variable:
             obj, index = await context.resolve_path_async(
                 obj,
                 [
-                    s if isinstance(s, Name) else await s.evaluate_async(context)
+                    s
+                    if isinstance(s, (Name, NameSegment))
+                    else await s.evaluate_async(context)
                     for s in self.selectors
                 ],
             )
@@ -796,28 +801,23 @@ class Variable:
     def children(self) -> list[Expression]:
         exprs: list[Expression] = []
 
-        if isinstance(self.root, Variable):
-            exprs.append(self.root)
+        if isinstance(self.root, VariableSegment):
+            exprs.append(self.root.var)
 
         if self.selectors:
-            exprs.extend(s for s in self.selectors if isinstance(s, Variable))
+            exprs.extend(
+                s.var for s in self.selectors if isinstance(s, VariableSegment)
+            )
 
         return exprs
 
     def path(self, selectors: list[PathSegment] | None) -> str:
-        def serialize(selector: PathSegment, *, root: bool) -> str:
-            if isinstance(selector, Name):
-                return selector.value if root else f".{selector.value}"
-
-            if isinstance(selector, Variable):
-                return f"[{selector}]"
-
-            return f"[{selector.value}]"
-
-        root = serialize(self.root, root=True)
+        root = str(self.root)
 
         if selectors:
-            _selectors = "".join(serialize(s, root=False) for s in selectors)
+            _selectors = "".join(
+                f".{s}" if isinstance(s, Name) else str(s) for s in selectors
+            )
             return f"{root}{_selectors}"
 
         return root
@@ -825,9 +825,13 @@ class Variable:
     def __str__(self) -> str:
         return self.path(self.selectors)
 
+    def with_end_token(self, end_token: Token) -> Variable:
+        self.span = span(self.root.span, end_token)
+        return self
+
 
 @dataclass(slots=True)
-class IndexSelector:
+class IndexSegment:
     token: Token
     value: int
     span: Token = field(init=False)
@@ -845,7 +849,45 @@ class IndexSelector:
         return []
 
     def __str__(self) -> str:
-        return str(self.value)
+        return f"[{self.value}]"
+
+
+@dataclass(slots=True)
+class NameSegment:
+    token: Token
+    value: str
+    span: Token
+
+    def evaluate(self, context: RenderContext) -> object:
+        return self.value
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return self.value
+
+    def children(self) -> list[Expression]:
+        return []
+
+    def __str__(self) -> str:
+        return f"[{self.value!r}]"
+
+
+@dataclass(slots=True)
+class VariableSegment:
+    token: Token
+    var: Variable
+    span: Token
+
+    def evaluate(self, context: RenderContext) -> object:
+        return self.var.evaluate(context)
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return await self.var.evaluate_async(context)
+
+    def children(self) -> list[Expression]:
+        return [self.var]
+
+    def __str__(self) -> str:
+        return f"[{self.var}]"
 
 
 @dataclass(slots=True)
@@ -1036,6 +1078,9 @@ class Name:
     def __post_init__(self) -> None:
         self.span = self.token
 
+    def __str__(self) -> str:
+        return self.value
+
 
 @dataclass(slots=True)
 class KeywordArgument:
@@ -1048,7 +1093,7 @@ class KeywordArgument:
         self.span = span(self.token, self.expr.token)
 
 
-type PathSegment = Name | StringLiteral | IndexSelector | Variable | RangeLiteral
+type PathSegment = Name | NameSegment | IndexSegment | VariableSegment | RangeLiteral
 
 
 def tree_view(expr: Expression) -> str:

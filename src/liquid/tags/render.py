@@ -113,9 +113,9 @@ class RenderTag:
         )
 
         if self.loop and isinstance(bind_value, list):
-            forloop = ForLoop(bind_key, len(bind_value), None)  # type: ignore
+            forloop = ForLoop(bind_key, len(bind_value), None)  # pyright: ignore[reportUnknownArgumentType]
             scope["forloop"] = forloop
-            for item in bind_value:  # type: ignore
+            for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                 scope[bind_key] = item
                 forloop.step()
                 template.render_with_context(ctx, buffer)
@@ -161,9 +161,9 @@ class RenderTag:
         )
 
         if self.loop and isinstance(bind_value, list):
-            forloop = ForLoop(bind_key, len(bind_value), None)  # type: ignore
+            forloop = ForLoop(bind_key, len(bind_value), None)  # pyright: ignore[reportUnknownArgumentType]
             scope["forloop"] = forloop
-            for item in bind_value:  # type: ignore
+            for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                 scope[bind_key] = item
                 forloop.step()
                 await template.render_with_context_async(ctx, buffer)

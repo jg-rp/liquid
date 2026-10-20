@@ -343,7 +343,7 @@ class LegacyParser(Parser):
         token = self.current()
         kind = token[0]
 
-        root: expressions.Name | expressions.StringLiteral | expressions.Variable
+        root: expressions.Name | expressions.NameSegment | expressions.VariableSegment
 
         if kind in (
             TOKEN_IDENT,
@@ -361,16 +361,27 @@ class LegacyParser(Parser):
             root = expressions.Name(token, token_value(token, self.source))
 
         else:
-            self.eat(TOKEN_LBRACKET)
+            lbracket_token = self.eat(TOKEN_LBRACKET)
 
             if self.kind() == TOKEN_IDENT:
-                root = self.parse_path()
+                # TODO: limit recursion
+                # TODO: handle reserved words
+                var = self.parse_path()
+                root = expressions.VariableSegment(
+                    lbracket_token, var, self.eat(TOKEN_RBRACKET)
+                )
             else:
-                root = self.parse_string_literal()
+                name = self.parse_string_literal()
+                root = expressions.NameSegment(
+                    lbracket_token,
+                    name.value,
+                    span(lbracket_token, self.eat(TOKEN_RBRACKET)),
+                )
 
-            self.eat(TOKEN_RBRACKET)
+        if self.kind() in (TOKEN_LBRACKET, TOKEN_DOT):
+            return expressions.Variable(token, root, self.parse_path_selectors())
 
-        return expressions.Variable(token, root, self.parse_path_selectors())
+        return expressions.Variable(token, root, None)
 
     def parse_path_selectors(self) -> list[expressions.PathSegment]:
         selectors: list[expressions.PathSegment] = []
@@ -379,7 +390,7 @@ class LegacyParser(Parser):
             kind = self.kind()
 
             if kind == TOKEN_LBRACKET:
-                selectors.append(self.parse_bracketed_selector())
+                selectors.append(self.parse_bracketed_segment())
             elif kind == TOKEN_DOT:
                 self.pos += 1
                 token = self.eat(TOKEN_IDENT, message="expected a name selector")
@@ -391,15 +402,16 @@ class LegacyParser(Parser):
 
         return selectors
 
-    def parse_bracketed_selector(self) -> expressions.PathSegment:
-        self.eat(TOKEN_LBRACKET)
+    def parse_bracketed_segment(self) -> expressions.PathSegment:
+        lbracket_token = self.eat(TOKEN_LBRACKET)
         token = self.next()
         kind = token[0]
+        selector: expressions.PathSegment
 
         if kind == TOKEN_INT:
-            selector = int(token_value(token, self.source))
+            index = int(token_value(token, self.source))
             self.eat(TOKEN_RBRACKET)
-            return expressions.IndexSelector(token, selector)
+            return expressions.IndexSegment(token, index)
 
         if kind in (
             TOKEN_IDENT,
@@ -414,15 +426,18 @@ class LegacyParser(Parser):
             TOKEN_NOT,
         ):
             self.pos -= 1
-            selector = self.parse_path()
-            self.eat(TOKEN_RBRACKET)
-            return selector
+            var = self.parse_path()
+            return expressions.VariableSegment(
+                lbracket_token, var, span(lbracket_token, self.eat(TOKEN_RBRACKET))
+            )
 
         if kind in (TOKEN_SINGLE_QUOTE, TOKEN_DOUBLE_QUOTE):
             self.pos -= 1
-            selector = self.parse_string_literal()
-            self.eat(TOKEN_RBRACKET)
-            return selector
+            return expressions.NameSegment(
+                lbracket_token,
+                self.parse_string_literal().value,
+                span(lbracket_token, self.eat(TOKEN_RBRACKET)),
+            )
 
         if kind == TOKEN_RBRACKET:
             raise LiquidSyntaxError(

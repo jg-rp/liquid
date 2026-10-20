@@ -2,35 +2,35 @@ from .._filter import FilterContext
 
 
 def remove(context: FilterContext, left: object, right: object) -> str:
-    left = context.to_str(left, "")
-    right = context.to_str(right, "")
+    left_ = context.to_str(left, "")
+    right_ = context.to_str(right, "")
 
-    if not right:
-        return left
+    if not right_:
+        return left_
 
-    return left.replace(right, "")
+    return left_.replace(right_, "")
 
 
 def remove_first(context: FilterContext, left: object, right: object) -> str:
-    left = context.to_str(left, "")
-    right = context.to_str(right, "")
+    left_ = context.to_str(left, "")
+    right_ = context.to_str(right, "")
 
-    if not right:
-        return left
+    if not right_:
+        return left_
 
-    return left.replace(right, "", 1)
+    return left_.replace(right_, "", 1)
 
 
 def remove_last(context: FilterContext, left: object, right: object) -> str:
-    left = context.to_str(left, "")
-    right = context.to_str(right, "")
+    left_ = context.to_str(left, "")
+    right_ = context.to_str(right, "")
 
-    if not right:
-        return left
+    if not right_:
+        return left_
 
-    before, _, after = left.rpartition(right)
+    before, _, after = left_.rpartition(right_)
 
     if before:
         return before + after
 
-    return left
+    return left_

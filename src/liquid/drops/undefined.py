@@ -95,7 +95,7 @@ class Undefined(Drop):
     def poke(self) -> None:
         pass
 
-    def __getitem__(self, key: str) -> object:
+    def __getitem__(self, key: object) -> object:
         if key in ("first", "last", "size"):
             return self
         raise KeyError
@@ -138,7 +138,7 @@ class StrictUndefined(Undefined):
     def __len__(self) -> int:  # noqa: PLE0303
         self._error()
 
-    def __getitem__(self, key: str) -> object:
+    def __getitem__(self, key: object) -> object:
         self._error()
 
     def __eq__(self, other: object) -> bool:

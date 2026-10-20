@@ -8,9 +8,9 @@ RE_LINETERM = re.compile(r"\r?\n")
 
 
 def newline_to_br(context: FilterContext, left: object) -> str:
-    left = context.to_str(left, "")
-
     if context.env.autoescape:
-        return markupsafe.Markup(RE_LINETERM.sub("<br />\n", markupsafe.escape(left)))
+        return markupsafe.Markup(
+            RE_LINETERM.sub("<br />\n", markupsafe.escape(context.to_str(left, "")))
+        )
 
-    return RE_LINETERM.sub("<br />\n", left)
+    return RE_LINETERM.sub("<br />\n", context.to_str(left, ""))

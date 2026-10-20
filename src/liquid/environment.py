@@ -1,3 +1,6 @@
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
+# pyright: reportReturnType=false
 from __future__ import annotations
 
 import json
@@ -241,8 +244,7 @@ class Environment:
             result = obj
         elif isinstance(obj, Sequence):
             result = (markupsafe.Markup("") if self.autoescape else "").join(
-                self.to_str(item, context, span)
-                for item in _flatten(obj)  # type: ignore
+                self.to_str(item, context, span) for item in _flatten(obj)
             )
         else:
             result = self.to_str(obj, context, span)
@@ -295,24 +297,24 @@ class Environment:
         if is_drop(left):
             if is_drop(right):
                 try:
-                    return left < right.__liquid__("data", context)  # type: ignore
+                    return left < right.__liquid__("data", context)
                 except TypeError:
                     return False
 
             try:
-                return left < right  # type: ignore
+                return left < right
             except TypeError:
                 return False
 
         if is_drop(right):
             if is_drop(left):
                 try:
-                    return right > left.__liquid__("data", context)  # type: ignore
+                    return right > left.__liquid__("data", context)
                 except TypeError:
                     return False
 
             try:
-                return right > left  # type: ignore
+                return right > left
             except TypeError:
                 return False
 
@@ -343,24 +345,24 @@ class Environment:
         if is_drop(right):
             if is_drop(left):
                 try:
-                    return right >= left.__liquid__("data", context)  # type: ignore
+                    return right >= left.__liquid__("data", context)
                 except TypeError:
                     return False
 
             try:
-                return right >= left  # type: ignore
+                return right >= left
             except TypeError:
                 return False
 
         if is_drop(left):
             if is_drop(right):
                 try:
-                    return left <= right.__liquid__("data", context)  # type: ignore
+                    return left <= right.__liquid__("data", context)
                 except TypeError:
                     return False
 
             try:
-                return left <= right  # type: ignore
+                return left <= right
             except TypeError:
                 return False
 
@@ -384,7 +386,7 @@ class Environment:
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
         if is_drop(left):
-            return right in left  # type: ignore
+            return right in left
 
         if not (self.truthy(left, context) and self.truthy(right, context)):
             return False
@@ -427,9 +429,9 @@ class Environment:
                 name=context.template.name,
             )
 
-    def to_numeric[T](
-        self, obj: object, context: RenderContext, default: T = 0
-    ) -> float | int | Decimal | T:
+    def to_numeric(
+        self, obj: object, context: RenderContext, default: int | Decimal = 0
+    ) -> float | int | Decimal:
         if isinstance(obj, int | float | Decimal):
             return obj
 
@@ -458,10 +460,10 @@ class Environment:
 
         if is_drop(obj):
             return str(obj)
-            # return obj.__liquid__("string", context)  # type: ignore
+            # return obj.__liquid__("string", context)
 
         if isinstance(obj, Mapping | Sequence):
-            return self._inspect(obj, context)  # type: ignore
+            return self._inspect(obj, context)
 
         if type(obj) is bool:
             return str(obj).lower()
@@ -524,31 +526,31 @@ class Environment:
                 return json.dumps(val)
 
             if isinstance(val, Mapping):
-                val_id = id(val)  # type: ignore
+                val_id = id(val)
                 if val_id in seen:
                     return circular_placeholder
 
                 seen.add(val_id)
                 try:
                     entries: list[str] = []
-                    for k, v in val.items():  # type: ignore
+                    for k, v in val.items():
                         formatted_val = stringify(v)
                         if formatted_val is not None:
-                            formatted_key = json.dumps(str(k))  # type: ignore
+                            formatted_key = json.dumps(str(k))
                             entries.append(f"{formatted_key}=>{formatted_val}")
                     return "{" + ", ".join(entries) + "}"
                 finally:
                     seen.remove(val_id)
 
             if isinstance(val, Sequence):
-                val_id = id(val)  # type: ignore
+                val_id = id(val)
                 if val_id in seen:
                     return circular_placeholder
 
                 seen.add(val_id)
                 try:
                     items: list[str] = []
-                    for item in val:  # type: ignore
+                    for item in val:
                         formatted_val = stringify(item)
                         items.append("null" if formatted_val is None else formatted_val)
                     return "[" + ", ".join(items) + "]"
@@ -569,6 +571,6 @@ def _flatten(it: Sequence[object], level: int = 5) -> list[object]:
             if level < 1 or not isinstance(obj, (list, tuple)):
                 yield obj
             else:
-                yield from flatten_(obj, level=level - 1)  # type: ignore
+                yield from flatten_(obj, level=level - 1)
 
     return list(flatten_(it, level))

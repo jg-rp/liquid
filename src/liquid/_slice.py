@@ -14,11 +14,8 @@ def slice_sequence[T](
     indices = range(start, min(len(seq), end))
     length = len(indices)
 
-    if reversed_:
-        indices = reversed(indices)
-
     def it_() -> Iterator[T]:
-        for i in indices:
+        for i in reversed(indices) if reversed_ else indices:
             yield seq[i]
 
     return it_(), length

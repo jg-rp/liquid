@@ -22,7 +22,7 @@ class TableRowLoop(Drop):
         self.index = 0
         self.row = 1
 
-    def __getitem__(self, key: str) -> int:
+    def __getitem__(self, key: object) -> int:
         if key == "first":
             return self.index == 0
 

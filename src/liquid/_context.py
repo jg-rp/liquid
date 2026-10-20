@@ -1,3 +1,6 @@
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
+
 from __future__ import annotations
 
 import math
@@ -9,7 +12,7 @@ from ._chain_map import ReadOnlyChainMap
 from ._drop import Drop, is_async_map
 from ._nothing import NOTHING
 from .exceptions import ResourceLimitError
-from .expressions import Name
+from .expressions import Name, NameSegment
 
 if TYPE_CHECKING:
     from ._template import Template
@@ -85,7 +88,7 @@ class RenderContext:
         for selector in selectors:
             index += 1
 
-            if isinstance(selector, Name):
+            if isinstance(selector, (Name, NameSegment)):
                 selector = selector.value
                 dotted = True
             else:
@@ -110,12 +113,12 @@ class RenderContext:
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("numeric", self)
 
-                obj = resolve_sequence_selector(obj, selector, dotted)  # type: ignore
+                obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("data", self)
-                obj = resolve_mapping_selector(obj, selector, dotted)  # type: ignore
+                obj = resolve_mapping_selector(obj, selector, dotted)
 
             else:
                 obj = resolve_unknown_selector(obj, selector)
@@ -134,7 +137,7 @@ class RenderContext:
         for selector in selectors:
             index += 1
 
-            if isinstance(selector, Name):
+            if isinstance(selector, (Name, NameSegment)):
                 selector = selector.value
                 dotted = True
             else:
@@ -161,12 +164,12 @@ class RenderContext:
             elif isinstance(obj, Sequence):
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("numeric", self)
-                obj = resolve_sequence_selector(obj, selector, dotted)  # type: ignore
+                obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("data", self)
-                obj = resolve_mapping_selector(obj, selector, dotted)  # type: ignore
+                obj = resolve_mapping_selector(obj, selector, dotted)
 
             else:
                 obj = resolve_unknown_selector(obj, selector)
@@ -298,10 +301,10 @@ def assign_score_of(obj: object) -> int:
     # TODO: handle circular data
 
     if isinstance(obj, Sequence):
-        return sum(assign_score_of(item) for item in obj)  # type: ignore
+        return sum(assign_score_of(item) for item in obj)
 
     if isinstance(obj, Mapping):
-        return sum(assign_score_of(k) + assign_score_of(v) for k, v in obj.items())  # type: ignore
+        return sum(assign_score_of(k) + assign_score_of(v) for k, v in obj.items())
 
     return 1
 
@@ -348,6 +351,8 @@ def resolve_sequence_selector(
 
     if selector == "size":
         return len(obj)
+
+    return NOTHING
 
 
 def resolve_mapping_selector(

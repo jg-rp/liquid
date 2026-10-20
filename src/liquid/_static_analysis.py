@@ -233,8 +233,10 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
 
             if not just_globals:
                 # Update filters from expr
-                for name, span in extract_filters(expr, template, static_context):
-                    filters[name].append(span)
+                for filter_name, span in extract_filters(
+                    expr, template, static_context
+                ):
+                    filters[filter_name].append(span)
 
         # Udate template scope from `node.template_scope()`
         for name in node.template_scope():
@@ -260,14 +262,14 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
         # Descend into partial templates
         if include_partials:
             for partial in node.partials(static_context):
-                name = partial.template.name
+                template_name = partial.template.name
 
                 # If we've seen this partial before but with different arguments,
                 # we might want to visit it again but only capture globals.
-                just_globals_ = name in seen
+                just_globals_ = template_name in seen
 
-                if not partial.key in seen[name]:
-                    seen[name].add(partial.key)
+                if not partial.key in seen[template_name]:
+                    seen[template_name].add(partial.key)
                     partial_globals = {n.value for n in partial.in_scope}
 
                     partial_scope = (
@@ -347,8 +349,10 @@ async def analyze_async(
 
             if not just_globals:
                 # Update filters from expr
-                for name, span in extract_filters(expr, template, static_context):
-                    filters[name].append(span)
+                for filter_name, span in extract_filters(
+                    expr, template, static_context
+                ):
+                    filters[filter_name].append(span)
 
         # Udate template scope from `node.template_scope()`
         for name in node.template_scope():
@@ -374,14 +378,14 @@ async def analyze_async(
         # Descend into partial templates
         if include_partials:
             for partial in await node.partials_async(static_context):
-                name = partial.template.name
+                temlate_name = partial.template.name
 
                 # If we've seen this partial before but with different arguments,
                 # we might want to visit it again but only capture globals.
-                just_globals_ = name in seen
+                just_globals_ = temlate_name in seen
 
-                if not partial.key in seen[name]:
-                    seen[name].add(partial.key)
+                if not partial.key in seen[temlate_name]:
+                    seen[temlate_name].add(partial.key)
                     partial_globals = {n.value for n in partial.in_scope}
 
                     partial_scope = (
@@ -438,15 +442,15 @@ def analyze_variables(
 def segments(variable: expressions.Variable, template: Template) -> Segments:
     result: Segments = []
 
-    if isinstance(variable.root, expressions.Variable):
-        result.append(segments(variable.root, template))
+    if isinstance(variable.root, expressions.VariableSegment):
+        result.append(segments(variable.root.var, template))
     else:
         result.append(variable.root.value)
 
     if variable.selectors:
         for s in variable.selectors:
-            if isinstance(s, expressions.Variable):
-                result.append(segments(s, template))
+            if isinstance(s, expressions.VariableSegment):
+                result.append(segments(s.var, template))
             else:
                 result.append(s.value)
 

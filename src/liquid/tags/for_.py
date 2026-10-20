@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
@@ -160,16 +161,18 @@ class ForTag:
             if isinstance(offset_, Undefined) and offset_.path == "continue":
                 offset = offsets[self.offset_key]
             else:
-                offset = context.env.to_int(offset_, context, self.expression.span)
+                offset = context.env.to_int(offset_, context, self.offset.span)
         else:
             offset = 0
 
         if self.limit:
             limit = context.env.to_int(
-                self.limit.evaluate(context), context, self.expression.span
+                self.limit.evaluate(context), context, self.limit.span
             )
         else:
             limit = None
+
+        it: Iterable[object]
 
         if is_iterable_drop(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)
@@ -217,16 +220,18 @@ class ForTag:
             if isinstance(offset_, Undefined) and offset_.path == "continue":
                 offset = offsets[self.offset_key]
             else:
-                offset = context.env.to_int(offset_, context, self.expression.span)
+                offset = context.env.to_int(offset_, context, self.offset.span)
         else:
             offset = 0
 
         if self.limit:
             limit = context.env.to_int(
-                await self.limit.evaluate_async(context), context, self.expression.span
+                await self.limit.evaluate_async(context), context, self.limit.span
             )
         else:
             limit = None
+
+        it: Iterable[object]
 
         if is_iterable_drop(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)

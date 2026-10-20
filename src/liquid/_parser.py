@@ -357,6 +357,7 @@ class Parser(ABC):
         token = self.peek()
         if token[0] == TOKEN_WC:
             return token_value(token, self.source)
+        return None
 
     def skip_whitespace_control(self) -> None:
         if self.kind() == TOKEN_WC:

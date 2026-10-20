@@ -11,9 +11,9 @@ def first(context: FilterContext, left: object) -> object:
         return next(iter(it), None)
 
     if isinstance(left, Sequence):
-        return left[0] if left else None  # type: ignore
+        return left[0] if left else None  # pyright: ignore[reportUnknownVariableType]
 
     if isinstance(left, Mapping):
-        return next(islice(left.items(), 1), None)  # type: ignore
+        return next(islice(left.items(), 1), None)  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
 
     return None

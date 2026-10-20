@@ -9,7 +9,7 @@ def last(context: FilterContext, left: object) -> object:
         return left.stop
 
     if isinstance(left, Sequence):
-        return left[-1] if left else None  # type: ignore
+        return left[-1] if left else None  # pyright: ignore[reportUnknownVariableType]
 
     if isinstance(left, Undefined):
         left.poke()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from .._drop import is_iterable_drop
@@ -105,6 +106,7 @@ class TableRowTag:
         limit = _to_int(self.limit, context, None, 0)
 
         target = self.expression.evaluate(context)
+        it: Iterable[object]
 
         if context.env.is_nil(target):
             return
@@ -150,6 +152,7 @@ class TableRowTag:
         limit = await _to_int_async(self.limit, context, None, 0)
 
         target = await self.expression.evaluate_async(context)
+        it: Iterable[object]
 
         if is_iterable_drop(target):
             it = target.__liquid_iter__(offset, limit, False)

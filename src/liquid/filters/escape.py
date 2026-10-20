@@ -7,20 +7,20 @@ from .._filter import FilterContext
 
 
 def escape(context: FilterContext, left: object) -> str:
-    left = context.to_str(left, "")
+    left_ = context.to_str(left, "")
     return (
-        markupsafe.escape(str(left))
+        markupsafe.escape(str(left_))
         if context.env.autoescape
-        else html.escape(left).replace("&#x27;", "&#39;")
+        else html.escape(left_).replace("&#x27;", "&#39;")
     )
 
 
 def escape_once(context: FilterContext, left: object) -> str:
-    left = context.to_str(left, "")
+    left_ = context.to_str(left, "")
     return (
-        markupsafe.Markup(left).unescape()
+        markupsafe.Markup(left_).unescape()
         if context.env.autoescape
-        else html.escape(html.unescape(left)).replace("&#x27;", "&#39;")
+        else html.escape(html.unescape(left_)).replace("&#x27;", "&#39;")
     )
 
 
@@ -51,5 +51,6 @@ def escapejs(context: FilterContext, left: object) -> str:
 
 
 def safe(context: FilterContext, left: object) -> str:
-    left = context.to_str(left, "")
-    return markupsafe.Markup(left) if context.env.autoescape else left
+    return (
+        markupsafe.Markup(left) if context.env.autoescape else context.to_str(left, "")
+    )
