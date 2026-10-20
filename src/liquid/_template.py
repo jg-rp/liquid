@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import re
 from collections.abc import Awaitable, Callable, Mapping
+from itertools import chain
 from typing import TYPE_CHECKING
 
 from ._chain_map import ReadOnlyChainMap
 from ._context import RenderContext
 from ._io import StringBuffer
 from ._markup import render_block, render_block_async
+from ._static_analysis import Segments, TemplateAnalysis, analyze, analyze_async
 from .exceptions import LiquidError
 from .tags import CommentTag, DocTag
 
@@ -227,7 +229,7 @@ class Template:
         """
         analysis = self.analyze(include_partials=include_partials)
         return [
-            v.segments
+            v["segments"]
             for v in set(chain.from_iterable(list(analysis.variables.values())))
         ]
 
@@ -251,7 +253,7 @@ class Template:
         """
         analysis = await self.analyze_async(include_partials=include_partials)
         return [
-            v.segments
+            v["segments"]
             for v in set(chain.from_iterable(list(analysis.variables.values())))
         ]
 
@@ -349,7 +351,7 @@ class Template:
         """
         analysis = self.analyze(include_partials=include_partials)
         return [
-            v.segments
+            v["segments"]
             for v in set(chain.from_iterable(list(analysis.globals.values())))
         ]
 
@@ -371,7 +373,7 @@ class Template:
         """
         analysis = await self.analyze_async(include_partials=include_partials)
         return [
-            v.segments
+            v["segments"]
             for v in set(chain.from_iterable(list(analysis.globals.values())))
         ]
 

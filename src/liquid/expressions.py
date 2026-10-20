@@ -35,7 +35,7 @@ class Filtered:
         self.span = (
             span(self.left.token, self.name.token)
             if not self.args
-            else span(self.left.token, self.args[-1].token)
+            else span(self.left.token, self.args[-1].span)
         )
 
     def evaluate(self, context: RenderContext) -> object:
@@ -1042,6 +1042,10 @@ class KeywordArgument:
     token: Token
     name: Name
     expr: Expression
+    span: Token = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.span = span(self.token, self.expr.token)
 
 
 type PathSegment = Name | StringLiteral | IndexSelector | Variable | RangeLiteral

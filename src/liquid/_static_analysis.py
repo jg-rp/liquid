@@ -3,16 +3,18 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from collections.abc import Iterable
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional, Union
+from dataclasses import dataclass
+from itertools import chain
+from typing import TYPE_CHECKING, TypedDict
 
 from . import expressions
 from ._context import RenderContext
+from ._markup import SCOPE_ISOLATED
 from .exceptions import LiquidError
-from .tokens import token_value
+from .tokens import span, token_value
 
 if TYPE_CHECKING:
-    from ._markup import Expression, Node
+    from ._markup import Expression, Markup
     from ._template import Template
     from .tokens import Token
 
@@ -37,7 +39,7 @@ class Location:
 
         line_number = target_line_index + 1
         line = self.template.lines[target_line_index]
-        column_number = index - cumulative_length - len(line)
+        column_number = index - (cumulative_length - len(line))
         return line_number, column_number
 
     def span(self) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -47,8 +49,7 @@ class Location:
         return token_value(self.token, self.template.source)
 
 
-@dataclass(slots=True, kw_only=True)
-class Loc:
+class Loc(TypedDict):
     start_index: int
     end_index: int
     start_line: int
@@ -61,9 +62,9 @@ class Loc:
 
 
 type Segments = list[int | str | Segments]
+"""Names and indexes that make up a path to a variable."""
 
 
-@dataclass(slots=True, kw_only=True)
 class Var(Loc):
     segments: Segments
     path: str
@@ -101,7 +102,10 @@ class StaticVariable:
                 return f".{segment}"
             return f"[{segment}]"
 
-        return "".join(segment_str(s) for s in segments)
+        it = iter(segments)
+        head = next(it)
+
+        return "".join(chain(str(head), (segment_str(s) for s in it)))
 
 
 class StaticScope:
@@ -153,19 +157,19 @@ class VariableMap:
                 )
 
                 a.append(
-                    Var(
-                        segments=sv.segments,
-                        path=str(sv),
-                        start_index=sv.location.token[1],
-                        end_index=sv.location.token[2],
-                        start_line=start_line,
-                        start_column=start_column,
-                        end_line=end_line,
-                        end_column=end_column,
-                        value=sv.location.value(),
-                        template_name=sv.location.template.name,
-                        template_path=sv.location.template.path,
-                    )
+                    {
+                        "segments": sv.segments,
+                        "path": str(sv),
+                        "start_index": sv.location.token[1],
+                        "end_index": sv.location.token[2],
+                        "start_line": start_line,
+                        "start_column": start_column,
+                        "end_line": end_line,
+                        "end_column": end_column,
+                        "value": sv.location.value(),
+                        "template_name": sv.location.template.name,
+                        "template_path": sv.location.template.path,
+                    }
                 )
 
             obj[k] = a
@@ -180,3 +184,313 @@ class TemplateAnalysis:
     globals: Vars
     filters: Locations
     tags: Locations
+
+
+def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
+    variables = VariableMap()
+    globals = VariableMap()
+    locals = VariableMap()
+
+    filters: defaultdict[str, list[Location]] = defaultdict(list)
+    tags: defaultdict[str, list[Location]] = defaultdict(list)
+
+    template_Scope: set[str] = set()
+    root_scope = StaticScope(template_Scope)
+    static_context = RenderContext(template)
+
+    # Names of partial templates that have already been analyzed.
+    # Keys are hashes of partial template name and its arguments. If we've
+    # visited a template before but with different arguments, later visits
+    # only record global variables so as not to double count locals, filters
+    # and tags.
+    seen: defaultdict[str, set[int | None]] = defaultdict(set)
+
+    def visit(
+        node: Markup,
+        template: Template,
+        scope: StaticScope,
+        *,
+        just_globals: bool = False,
+    ) -> None:
+        if template.name and not just_globals:
+            seen[template.name].add(None)
+
+        # Update tags
+        # Markup with empty `node.tag` is silenced.
+        if not just_globals and node.tag:
+            tags[node.tag].append(Location(template=template, token=node.token))
+
+        # Update variables from `node.expressions()`
+        for expr in node.expressions():
+            analyze_variables(
+                expr,
+                template,
+                scope,
+                globals,
+                variables if not just_globals else VariableMap(),
+                static_context,
+            )
+
+            if not just_globals:
+                # Update filters from expr
+                for name, span in extract_filters(expr, template, static_context):
+                    filters[name].append(span)
+
+        # Udate template scope from `node.template_scope()`
+        for name in node.template_scope():
+            scope.add(name.value)
+            locals.add(
+                StaticVariable(
+                    segments=[name.value],
+                    location=Location(template=template, token=name.span),
+                )
+            )
+
+        # Set block scope before descending into child nodes.
+        block_scope = node.block_scope()
+        if block_scope:
+            scope.push({n.value for n in block_scope})
+
+        for child in node.children():
+            visit(child, template, scope, just_globals=just_globals)
+
+        if block_scope:
+            scope.pop()
+
+        # Descend into partial templates
+        if include_partials:
+            for partial in node.partials(static_context):
+                name = partial.template.name
+
+                # If we've seen this partial before but with different arguments,
+                # we might want to visit it again but only capture globals.
+                just_globals_ = name in seen
+
+                if not partial.key in seen[name]:
+                    seen[name].add(partial.key)
+                    partial_globals = {n.value for n in partial.in_scope}
+
+                    partial_scope = (
+                        StaticScope(partial_globals)
+                        if partial.scope == SCOPE_ISOLATED
+                        else root_scope.push(partial_globals)
+                    )
+
+                    for partial_node in partial.template.nodes:
+                        if not isinstance(partial_node, str):
+                            visit(
+                                partial_node,
+                                partial.template,
+                                partial_scope,
+                                just_globals=just_globals_,
+                            )
+
+    for node in template.nodes:
+        if not isinstance(node, str):
+            visit(node, template, root_scope)
+
+    return TemplateAnalysis(
+        variables=variables.to_dict(),
+        locals=locals.to_dict(),
+        globals=globals.to_dict(),
+        filters=to_locations(filters),
+        tags=to_locations(tags),
+    )
+
+
+async def analyze_async(
+    template: Template, *, include_partials: bool
+) -> TemplateAnalysis:
+    variables = VariableMap()
+    globals = VariableMap()
+    locals = VariableMap()
+
+    filters: defaultdict[str, list[Location]] = defaultdict(list)
+    tags: defaultdict[str, list[Location]] = defaultdict(list)
+
+    template_Scope: set[str] = set()
+    root_scope = StaticScope(template_Scope)
+    static_context = RenderContext(template)
+
+    # Names of partial templates that have already been analyzed.
+    # Keys are hashes of partial template name and its arguments. If we've
+    # visited a template before but with different arguments, later visits
+    # only record global variables so as not to double count locals, filters
+    # and tags.
+    seen: defaultdict[str, set[int | None]] = defaultdict(set)
+
+    async def visit(
+        node: Markup,
+        template: Template,
+        scope: StaticScope,
+        *,
+        just_globals: bool = False,
+    ) -> None:
+        if template.name and not just_globals:
+            seen[template.name].add(None)
+
+        # Update tags
+        # Markup with empty `node.tag` is silenced.
+        if not just_globals and node.tag:
+            tags[node.tag].append(Location(template=template, token=node.token))
+
+        # Update variables from `node.expressions()`
+        for expr in node.expressions():
+            analyze_variables(
+                expr,
+                template,
+                scope,
+                globals,
+                variables if not just_globals else VariableMap(),
+                static_context,
+            )
+
+            if not just_globals:
+                # Update filters from expr
+                for name, span in extract_filters(expr, template, static_context):
+                    filters[name].append(span)
+
+        # Udate template scope from `node.template_scope()`
+        for name in node.template_scope():
+            scope.add(name.value)
+            locals.add(
+                StaticVariable(
+                    segments=[name.value],
+                    location=Location(template=template, token=name.span),
+                )
+            )
+
+        # Set block scope before descending into child nodes.
+        block_scope = node.block_scope()
+        if block_scope:
+            scope.push({n.value for n in block_scope})
+
+        for child in node.children():
+            await visit(child, template, scope, just_globals=just_globals)
+
+        if block_scope:
+            scope.pop()
+
+        # Descend into partial templates
+        if include_partials:
+            for partial in await node.partials_async(static_context):
+                name = partial.template.name
+
+                # If we've seen this partial before but with different arguments,
+                # we might want to visit it again but only capture globals.
+                just_globals_ = name in seen
+
+                if not partial.key in seen[name]:
+                    seen[name].add(partial.key)
+                    partial_globals = {n.value for n in partial.in_scope}
+
+                    partial_scope = (
+                        StaticScope(partial_globals)
+                        if partial.scope == SCOPE_ISOLATED
+                        else root_scope.push(partial_globals)
+                    )
+
+                    for partial_node in partial.template.nodes:
+                        if not isinstance(partial_node, str):
+                            await visit(
+                                partial_node,
+                                partial.template,
+                                partial_scope,
+                                just_globals=just_globals_,
+                            )
+
+    for node in template.nodes:
+        if not isinstance(node, str):
+            await visit(node, template, root_scope)
+
+    return TemplateAnalysis(
+        variables=variables.to_dict(),
+        locals=locals.to_dict(),
+        globals=globals.to_dict(),
+        filters=to_locations(filters),
+        tags=to_locations(tags),
+    )
+
+
+def analyze_variables(
+    expression: Expression,
+    template: Template,
+    scope: StaticScope,
+    globals: VariableMap,
+    variables: VariableMap,
+    static_context: RenderContext,
+) -> None:
+    if isinstance(expression, expressions.Variable):
+        v = StaticVariable(
+            segments=segments(expression, template),
+            location=Location(template=template, token=expression.span),
+        )
+
+        variables.add(v)
+
+        if str(expression.root) not in scope:
+            globals.add(v)
+
+    for expr in expression.children():
+        analyze_variables(expr, template, scope, globals, variables, static_context)
+
+
+def segments(variable: expressions.Variable, template: Template) -> Segments:
+    result: Segments = []
+
+    if isinstance(variable.root, expressions.Variable):
+        result.append(segments(variable.root, template))
+    else:
+        result.append(variable.root.value)
+
+    if variable.selectors:
+        for s in variable.selectors:
+            if isinstance(s, expressions.Variable):
+                result.append(segments(s, template))
+            else:
+                result.append(s.value)
+
+    return result
+
+
+def extract_filters(
+    expression: Expression, template: Template, static_context: RenderContext
+) -> Iterable[tuple[str, Location]]:
+    if isinstance(expression, expressions.Filtered):
+        yield (
+            expression.name.value,
+            Location(
+                template=template, token=span(expression.name.token, expression.span)
+            ),
+        )
+
+    for expr in expression.children():
+        yield from extract_filters(expr, template, static_context)
+
+
+def to_locations(d: defaultdict[str, list[Location]]) -> Locations:
+    result: Locations = {}
+
+    for k, v in d.items():
+        a: list[Loc] = []
+
+        for l in v:
+            ((start_line, start_column), (end_line, end_column)) = l.span()
+
+            a.append(
+                {
+                    "start_index": l.token[1],
+                    "end_index": l.token[2],
+                    "start_line": start_line,
+                    "start_column": start_column,
+                    "end_line": end_line,
+                    "end_column": end_column,
+                    "value": l.value(),
+                    "template_name": l.template.name,
+                    "template_path": l.template.path,
+                }
+            )
+
+        result[k] = a
+
+    return result
