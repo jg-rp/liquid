@@ -104,6 +104,21 @@ class LegacyParser(Parser):
         ]
     )
 
+    PATH_NAME_KINDS: frozenset[TokenKind] = frozenset(
+        (
+            TOKEN_IDENT,
+            TOKEN_BLANK,
+            TOKEN_EMPTY,
+            TOKEN_FALSE,
+            TOKEN_TRUE,
+            TOKEN_NULL,
+            TOKEN_NIL,
+            TOKEN_IF,
+            TOKEN_ELSE,
+            TOKEN_NOT,
+        )
+    )
+
     __slots__ = ("precedences",)
 
     def __init__(
@@ -391,12 +406,38 @@ class LegacyParser(Parser):
 
             if kind == TOKEN_LBRACKET:
                 selectors.append(self.parse_bracketed_segment())
+
             elif kind == TOKEN_DOT:
                 self.pos += 1
-                token = self.eat(TOKEN_IDENT, message="expected a name selector")
-                selectors.append(
-                    expressions.Name(token, token_value(token, self.source))
-                )
+                token = self.next()
+                selector_kind = token[0]
+
+                if selector_kind in self.PATH_NAME_KINDS:
+                    selectors.append(
+                        expressions.Name(token, token_value(token, self.source))
+                    )
+
+                elif selector_kind == TOKEN_INT and self.env.shorthand_indexes:
+                    selectors.append(
+                        expressions.IntegerLiteral(
+                            token, int(token_value(token, self.source))
+                        )
+                    )
+
+                elif selector_kind == TOKEN_FLOAT and self.env.shorthand_indexes:
+                    # XXX: bit of a hack
+                    # Split a float token into two indexes
+                    a, b = token_value(token, self.source).split(".")
+                    selectors.append(expressions.IntegerLiteral(token, int(a)))
+                    selectors.append(expressions.IntegerLiteral(token, int(b)))
+
+                else:
+                    raise LiquidSyntaxError(
+                        f"expected a shorthand selector, found {TOKEN_NAMES[kind]}",
+                        token=token,
+                        source=self.source,
+                        name=self.template_name,
+                    )
             else:
                 break
 
@@ -414,18 +455,7 @@ class LegacyParser(Parser):
                 token, index, span(lbracket_token, self.eat(TOKEN_RBRACKET))
             )
 
-        if kind in (
-            TOKEN_IDENT,
-            TOKEN_BLANK,
-            TOKEN_EMPTY,
-            TOKEN_FALSE,
-            TOKEN_TRUE,
-            TOKEN_NULL,
-            TOKEN_NIL,
-            TOKEN_IF,
-            TOKEN_ELSE,
-            TOKEN_NOT,
-        ):
+        if kind in self.PATH_NAME_KINDS:
             self.pos -= 1
             var = self.parse_path()
             return expressions.VariableSegment(

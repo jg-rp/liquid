@@ -751,7 +751,7 @@ class Variable:
             obj, index = context.resolve_path(
                 obj,
                 [
-                    s if isinstance(s, Name) else s.evaluate(context)
+                    s if isinstance(s, (Name, IntegerLiteral)) else s.evaluate(context)
                     for s in self.selectors
                 ],
             )
@@ -780,7 +780,9 @@ class Variable:
             obj, index = await context.resolve_path_async(
                 obj,
                 [
-                    s if isinstance(s, Name) else await s.evaluate_async(context)
+                    s
+                    if isinstance(s, (Name, IntegerLiteral))
+                    else await s.evaluate_async(context)
                     for s in self.selectors
                 ],
             )
@@ -813,7 +815,8 @@ class Variable:
 
         if selectors:
             _selectors = "".join(
-                f".{s}" if isinstance(s, Name) else str(s) for s in selectors
+                f".{s}" if isinstance(s, (Name, IntegerLiteral)) else str(s)
+                for s in selectors
             )
             return f"{root}{_selectors}"
 
@@ -821,7 +824,7 @@ class Variable:
 
     def location(self) -> Location:
         def serialize(s: PathSegment) -> int | str | Location:
-            if isinstance(s, (Name, NameSegment, IndexSegment)):
+            if isinstance(s, (Name, NameSegment, IndexSegment, IntegerLiteral)):
                 return s.value
             if isinstance(s, VariableSegment):
                 return s.var.location()
@@ -1097,7 +1100,9 @@ class KeywordArgument:
         self.span = span(self.token, self.expr.token)
 
 
-type PathSegment = Name | NameSegment | IndexSegment | VariableSegment | RangeLiteral
+type PathSegment = (
+    Name | NameSegment | IndexSegment | IntegerLiteral | VariableSegment | RangeLiteral
+)
 
 type Location = list[int | str | Location]
 

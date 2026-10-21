@@ -1,12 +1,26 @@
 from collections.abc import Mapping
 from typing import Any
 
+from ._base_tag import AbstractTag
 from ._context import RenderContext
 from ._drop import ContextHint, Drop
+from ._io import StringBuffer
 from ._lexer import Lexer
 from ._lexer_extended import ExtendedLexer
 from ._lexer_legacy import LegacyLexer
 from ._loader import Loader, TemplateSource
+from ._markup import (
+    Block,
+    Expression,
+    Markup,
+    Node,
+    Partial,
+    Scope,
+    Tag,
+    render_block,
+    render_block_async,
+)
+from ._parser import Parser
 from ._parser_extended import ExtendedParser
 from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
@@ -26,6 +40,8 @@ from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 
 __all__ = (
     "TOKEN_NAMES",
+    "AbstractTag",
+    "Block",
     "CachingChoiceLoader",
     "CachingDictLoader",
     "CachingFileSystemLoader",
@@ -35,6 +51,7 @@ __all__ = (
     "DictLoader",
     "Drop",
     "Environment",
+    "Expression",
     "ExtendedLexer",
     "ExtendedParser",
     "FalsyStrictUndefined",
@@ -42,16 +59,25 @@ __all__ = (
     "LegacyLexer",
     "Lexer",
     "Loader",
+    "Markup",
+    "Node",
     "PackageLoader",
+    "Parser",
+    "Partial",
     "RenderContext",
+    "Scope",
     "Segments",
     "StrictUndefined",
+    "StringBuffer",
+    "Tag",
     "Template",
     "TemplateAnalysis",
     "TemplateSource",
     "Token",
     "TokenKind",
     "Undefined",
+    "render_block",
+    "render_block_async",
     "span",
     "token_value",
 )

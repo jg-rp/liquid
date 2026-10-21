@@ -134,6 +134,7 @@ class Environment:
         loader: Loader | None = None,
         parser: type[Parser] = LegacyParser,
         resource_limits: ResourceLimits | None = None,
+        shorthand_indexes: bool = False,
         strict_filters: bool = True,
         tokenizer: type[Lexer] = LegacyLexer,
         undefined: type[Undefined] = Undefined,
@@ -145,6 +146,7 @@ class Environment:
         self.strict_filters = strict_filters
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
+        self.shorthand_indexes = shorthand_indexes
 
         self.tokenizer = tokenizer
         self.parser = parser

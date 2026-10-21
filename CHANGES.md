@@ -8,13 +8,13 @@
 
 - `Template(source)` can no longer be used to parse a template from a string. Use package level `parse(source)` or `Environment.parse(source)` instead.
 
-- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a mapping instead of keyword arguments.
+- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a dict (or any mapping) instead of keyword arguments.
 
 - Removed `Environment.from_string()`. Use package level `parse()` or `Environment.parse()` instead.
 
 - Renamed `UnknownFilterError` to `LiquidNameError`.
 
-- Replaced `Environment` options `logical_not_operator`, `logical_parentheses` and `ternary_expressions` with a single `extended_expressions` constructor argument. When `extended_expressions` is true, the `not` operator, grouping terms with parentheses and ternary expression are enabled in all contexts. Additionally:
+- Replaced `Environment` options `logical_not_operator`, `logical_parentheses`, `ternary_expressions` and `keyword_assignment` with a single `parser` constructor argument. When `parser=ExtendedParser`, the `not` operator, grouping terms with parentheses and ternary expression are enabled in all contexts. Additionally:
   - `and` and `or` are allowed in all contexts with short circuit, last value semantics.
   - Filter application with `|` is available in all contexts and `|` plays nicely with parentheses.
   - Grouped expressions can have trailing path segments. Like `{{ (a or b).c }}`.
@@ -24,7 +24,9 @@
 
 - Removed `Environment.string_first_and_last`. String always respond to `.first`, `.last`, `| first` and `| last`.
 
-- Removed `Environment.shorthand_indexes`. Index selectors must use bracket notation.
+- Removed `Environment.suppress_blank_control_flow_blocks`. Blank control flow blocks are now always suppressed.
+
+- `shorthand_indexes` is now an `Environment` constructor argument instead of a class variable.
 
 - Changed the "drop protocol" so that drops appearing in equality and comparison expressions, and when tested for truthiness, make better use of Python's magic methods...
 

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 from .exceptions import LiquidSyntaxError
 from .expressions import KeywordArgument, Name, StringLiteral
 from .tokens import *
-from .tokens import TOKEN_NAMES, token_value
+from .tokens import TOKEN_NAMES, span, token_value
 
 if TYPE_CHECKING:
     from ._markup import Block, Expression
@@ -337,6 +337,27 @@ class Parser(ABC):
                 source=self.source,
                 name=self.template_name,
             )
+
+    def raw_expression(self) -> str:
+        """Return source text up to but not including the next closing tag delimiter.
+
+        Calls ``carry_whitespace_control()`` and consumes the closing tag delimiter,
+        leaving the parser ready to parse the next block.
+        """
+        start = self.current()
+
+        while self.kind() not in (TOKEN_WC, TOKEN_TAG_END, TOKEN_EOI):
+            self.pos += 1
+
+        end = self.tokens[self.pos - 1]
+
+        self.carry_whitespace_control()
+        self.eat(TOKEN_TAG_END)
+
+        if start == end:
+            return ""
+
+        return token_value(span(start, end), self.source)
 
     def peek_tag_name(self) -> str:
         token = self.current()
