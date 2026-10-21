@@ -57,6 +57,7 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
 
     def _check_cache(
         self,
+        *,
         env: Environment,
         cache_key: str,
         globals: Mapping[str, object] | None,
@@ -80,6 +81,7 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
 
     async def _check_cache_async(
         self,
+        *,
         env: Environment,
         cache_key: str,
         globals: Mapping[str, object] | None,
@@ -111,10 +113,10 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
     ) -> Template:
         cache_key = self.cache_key(name, context, kwargs)
         return self._check_cache(
-            env,
-            cache_key,
-            globals,
-            partial(
+            env=env,
+            cache_key=cache_key,
+            globals=globals,
+            load_func=partial(
                 super().load,  # type: ignore
                 env,
                 name,
@@ -134,13 +136,13 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
     ) -> Template:
         cache_key = self.cache_key(name, context, kwargs)
         return await self._check_cache_async(
-            env,
-            name,
-            globals,
-            partial(
+            env=env,
+            cache_key=cache_key,
+            globals=globals,
+            load_func=partial(
                 super().load_async,  # type: ignore
                 env,
-                cache_key,
+                name,
                 globals=globals,
                 context=context,
                 **kwargs,

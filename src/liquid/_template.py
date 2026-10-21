@@ -11,7 +11,7 @@ from ._io import StringBuffer
 from ._markup import render_block, render_block_async
 from ._static_analysis import Segments, TemplateAnalysis, analyze, analyze_async
 from .exceptions import LiquidError
-from .tags import CommentTag, DocTag
+from .tags import CommentTag, DocTag, InlineCommentTag, TemplateComment
 
 if TYPE_CHECKING:
     from ._markup import Block, Node
@@ -187,7 +187,7 @@ class Template:
         """
         analysis = self.analyze(include_partials=include_partials)
         return list(
-            {str(v) for v in chain.from_iterable(list(analysis.variables.values()))}
+            {v["path"] for v in chain.from_iterable(list(analysis.variables.values()))}
         )
 
     async def variable_paths_async(self, *, include_partials: bool = True) -> list[str]:
@@ -208,7 +208,7 @@ class Template:
         """
         analysis = await self.analyze_async(include_partials=include_partials)
         return list(
-            {str(v) for v in chain.from_iterable(list(analysis.variables.values()))}
+            {v["path"] for v in chain.from_iterable(list(analysis.variables.values()))}
         )
 
     def variable_segments(self, *, include_partials: bool = True) -> list[Segments]:
@@ -228,10 +228,9 @@ class Template:
             A list of distinct paths for variables in this template.
         """
         analysis = self.analyze(include_partials=include_partials)
-        return [
-            v["segments"]
-            for v in set(chain.from_iterable(list(analysis.variables.values())))
-        ]
+        return list(
+            {w["segments"] for w in chain.from_iterable(analysis.variables.values())}
+        )
 
     async def variable_segments_async(
         self, *, include_partials: bool = True
@@ -252,10 +251,9 @@ class Template:
             A list of distinct paths for variables in this template.
         """
         analysis = await self.analyze_async(include_partials=include_partials)
-        return [
-            v["segments"]
-            for v in set(chain.from_iterable(list(analysis.variables.values())))
-        ]
+        return list(
+            {w["segments"] for w in chain.from_iterable(analysis.variables.values())}
+        )
 
     def global_variables(self, *, include_partials: bool = True) -> list[str]:
         """Return a list of variables used in this template without path segments.
@@ -309,7 +307,7 @@ class Template:
         """
         analysis = self.analyze(include_partials=include_partials)
         return list(
-            {str(v) for v in chain.from_iterable(list(analysis.globals.values()))}
+            {v["path"] for v in chain.from_iterable(list(analysis.globals.values()))}
         )
 
     async def global_variable_paths_async(
@@ -330,7 +328,7 @@ class Template:
         """
         analysis = await self.analyze_async(include_partials=include_partials)
         return list(
-            {str(v) for v in chain.from_iterable(list(analysis.globals.values()))}
+            {v["path"] for v in chain.from_iterable(list(analysis.globals.values()))}
         )
 
     def global_variable_segments(
@@ -350,10 +348,9 @@ class Template:
             A list of distinct paths for variables in this template.
         """
         analysis = self.analyze(include_partials=include_partials)
-        return [
-            v["segments"]
-            for v in set(chain.from_iterable(list(analysis.globals.values())))
-        ]
+        return list(
+            {w["segments"] for w in chain.from_iterable(analysis.globals.values())}
+        )
 
     async def global_variable_segments_async(
         self, *, include_partials: bool = True
@@ -372,10 +369,9 @@ class Template:
             A list of distinct paths for variables in this template.
         """
         analysis = await self.analyze_async(include_partials=include_partials)
-        return [
-            v["segments"]
-            for v in set(chain.from_iterable(list(analysis.globals.values())))
-        ]
+        return list(
+            {w["segments"] for w in chain.from_iterable(analysis.globals.values())}
+        )
 
     def filter_names(self, *, include_partials: bool = True) -> list[str]:
         """Return a list of filter names used in this template."""
@@ -395,7 +391,7 @@ class Template:
         """Return a list of tag names used in this template."""
         return list((await self.analyze_async(include_partials=include_partials)).tags)
 
-    def comments(self) -> list[CommentTag]:
+    def comments(self) -> list[CommentTag | InlineCommentTag | TemplateComment]:
         """Return a list of comment tag nodes found in this template.
 
         Instances of `CommentNode` and `InlineCommentNode` have `token` and
@@ -405,13 +401,13 @@ class Template:
         Note that this method does not try to load included or rendered
         templates.
         """
-        nodes: list[CommentTag] = []
+        nodes: list[CommentTag | InlineCommentTag | TemplateComment] = []
 
         def visit(node: Node) -> None:
             if isinstance(node, str):
                 return
 
-            if isinstance(node, CommentTag):
+            if isinstance(node, (CommentTag, InlineCommentTag, TemplateComment)):
                 nodes.append(node)
 
             for child in node.children():

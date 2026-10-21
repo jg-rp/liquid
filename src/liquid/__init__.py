@@ -8,6 +8,7 @@ from ._lexer_extended import ExtendedLexer
 from ._lexer_legacy import LegacyLexer
 from ._loader import Loader, TemplateSource
 from ._parser_extended import ExtendedParser
+from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
 from .environment import Environment
@@ -43,8 +44,10 @@ __all__ = (
     "Loader",
     "PackageLoader",
     "RenderContext",
+    "Segments",
     "StrictUndefined",
     "Template",
+    "TemplateAnalysis",
     "TemplateSource",
     "Token",
     "TokenKind",

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(slots=True, kw_only=True)
-class Location:
+class _Location:
     template: Template
     token: Token
 
@@ -61,7 +61,7 @@ class Loc(TypedDict):
     template_path: str | None
 
 
-type Segments = list[int | str | Segments]
+type Segments = tuple[int | str | Segments, ...]
 """Names and indexes that make up a path to a variable."""
 
 
@@ -78,16 +78,16 @@ RE_PROPERTY = re.compile(r"[a-zA-Z_][a-zA-Z0-9_-]*\??")
 
 
 @dataclass(slots=True, kw_only=True)
-class StaticVariable:
+class _StaticVariable:
     segments: Segments
-    location: Location
+    location: _Location
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, StaticVariable) and self.segments == other.segments
+        return isinstance(other, _StaticVariable) and self.segments == other.segments
 
     def root(self) -> str:
         segment = self.segments[0] if self.segments else ""
-        if isinstance(segment, list):
+        if isinstance(segment, tuple):
             return self._to_str(segment)
         return str(segment)
 
@@ -96,7 +96,7 @@ class StaticVariable:
 
     def _to_str(self, segments: Segments) -> str:
         def segment_str(segment: int | str | Segments) -> str:
-            if isinstance(segment, list):
+            if isinstance(segment, tuple):
                 return f"[{self._to_str(segment)}]"
             if isinstance(segment, str) and RE_PROPERTY.match(segment):
                 return f".{segment}"
@@ -108,7 +108,7 @@ class StaticVariable:
         return "".join(chain(str(head), (segment_str(s) for s in it)))
 
 
-class StaticScope:
+class _StaticScope:
     def __init__(self, globals: set[str]) -> None:
         self.stack: list[set[str]] = [globals]
 
@@ -125,27 +125,27 @@ class StaticScope:
     def pop(self) -> set[str] | None:
         return self.stack.pop() if self.stack else None
 
-    def push(self, scope: set[str]) -> StaticScope:
+    def push(self, scope: set[str]) -> _StaticScope:
         self.stack.append(scope)
         return self
 
 
-class VariableMap:
+class _VariableMap:
     def __init__(self) -> None:
-        self.data: dict[str, list[StaticVariable]] = {}
+        self.data: dict[str, list[_StaticVariable]] = {}
 
-    def add(self, key: StaticVariable) -> None:
+    def add(self, key: _StaticVariable) -> None:
         v = self.get(key)
         if v is not None:
             v.append(key)
 
-    def get(self, key: StaticVariable) -> list[StaticVariable] | None:
+    def get(self, key: _StaticVariable) -> list[_StaticVariable] | None:
         k = key.root()
         if k not in self.data:
             self.data[k] = []
         return self.data[k]
 
-    def to_dict(self) -> Vars:
+    def asdict(self) -> Vars:
         obj: Vars = {}
 
         for k, v in self.data.items():
@@ -187,15 +187,15 @@ class TemplateAnalysis:
 
 
 def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
-    variables = VariableMap()
-    globals = VariableMap()
-    locals = VariableMap()
+    variables = _VariableMap()
+    globals = _VariableMap()
+    locals = _VariableMap()
 
-    filters: defaultdict[str, list[Location]] = defaultdict(list)
-    tags: defaultdict[str, list[Location]] = defaultdict(list)
+    filters: defaultdict[str, list[_Location]] = defaultdict(list)
+    tags: defaultdict[str, list[_Location]] = defaultdict(list)
 
     template_Scope: set[str] = set()
-    root_scope = StaticScope(template_Scope)
+    root_scope = _StaticScope(template_Scope)
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
@@ -208,7 +208,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
     def visit(
         node: Markup,
         template: Template,
-        scope: StaticScope,
+        scope: _StaticScope,
         *,
         just_globals: bool = False,
     ) -> None:
@@ -218,7 +218,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
         # Update tags
         # Markup with empty `node.tag` is silenced.
         if not just_globals and node.tag:
-            tags[node.tag].append(Location(template=template, token=node.token))
+            tags[node.tag].append(_Location(template=template, token=node.token))
 
         # Update variables from `node.expressions()`
         for expr in node.expressions():
@@ -227,7 +227,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
                 template,
                 scope,
                 globals,
-                variables if not just_globals else VariableMap(),
+                variables if not just_globals else _VariableMap(),
                 static_context,
             )
 
@@ -242,9 +242,9 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
         for name in node.template_scope():
             scope.add(name.value)
             locals.add(
-                StaticVariable(
-                    segments=[name.value],
-                    location=Location(template=template, token=name.span),
+                _StaticVariable(
+                    segments=(name.value,),
+                    location=_Location(template=template, token=name.span),
                 )
             )
 
@@ -273,7 +273,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
                     partial_globals = {n.value for n in partial.in_scope}
 
                     partial_scope = (
-                        StaticScope(partial_globals)
+                        _StaticScope(partial_globals)
                         if partial.scope == SCOPE_ISOLATED
                         else root_scope.push(partial_globals)
                     )
@@ -287,14 +287,17 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
                                 just_globals=just_globals_,
                             )
 
+                    if partial.scope != SCOPE_ISOLATED:
+                        partial_scope.pop()
+
     for node in template.nodes:
         if not isinstance(node, str):
             visit(node, template, root_scope)
 
     return TemplateAnalysis(
-        variables=variables.to_dict(),
-        locals=locals.to_dict(),
-        globals=globals.to_dict(),
+        variables=variables.asdict(),
+        locals=locals.asdict(),
+        globals=globals.asdict(),
         filters=to_locations(filters),
         tags=to_locations(tags),
     )
@@ -303,15 +306,15 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
 async def analyze_async(
     template: Template, *, include_partials: bool
 ) -> TemplateAnalysis:
-    variables = VariableMap()
-    globals = VariableMap()
-    locals = VariableMap()
+    variables = _VariableMap()
+    globals = _VariableMap()
+    locals = _VariableMap()
 
-    filters: defaultdict[str, list[Location]] = defaultdict(list)
-    tags: defaultdict[str, list[Location]] = defaultdict(list)
+    filters: defaultdict[str, list[_Location]] = defaultdict(list)
+    tags: defaultdict[str, list[_Location]] = defaultdict(list)
 
     template_Scope: set[str] = set()
-    root_scope = StaticScope(template_Scope)
+    root_scope = _StaticScope(template_Scope)
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
@@ -324,7 +327,7 @@ async def analyze_async(
     async def visit(
         node: Markup,
         template: Template,
-        scope: StaticScope,
+        scope: _StaticScope,
         *,
         just_globals: bool = False,
     ) -> None:
@@ -334,7 +337,7 @@ async def analyze_async(
         # Update tags
         # Markup with empty `node.tag` is silenced.
         if not just_globals and node.tag:
-            tags[node.tag].append(Location(template=template, token=node.token))
+            tags[node.tag].append(_Location(template=template, token=node.token))
 
         # Update variables from `node.expressions()`
         for expr in node.expressions():
@@ -343,7 +346,7 @@ async def analyze_async(
                 template,
                 scope,
                 globals,
-                variables if not just_globals else VariableMap(),
+                variables if not just_globals else _VariableMap(),
                 static_context,
             )
 
@@ -358,9 +361,9 @@ async def analyze_async(
         for name in node.template_scope():
             scope.add(name.value)
             locals.add(
-                StaticVariable(
-                    segments=[name.value],
-                    location=Location(template=template, token=name.span),
+                _StaticVariable(
+                    segments=(name.value,),
+                    location=_Location(template=template, token=name.span),
                 )
             )
 
@@ -389,7 +392,7 @@ async def analyze_async(
                     partial_globals = {n.value for n in partial.in_scope}
 
                     partial_scope = (
-                        StaticScope(partial_globals)
+                        _StaticScope(partial_globals)
                         if partial.scope == SCOPE_ISOLATED
                         else root_scope.push(partial_globals)
                     )
@@ -403,14 +406,17 @@ async def analyze_async(
                                 just_globals=just_globals_,
                             )
 
+                    if partial.scope != SCOPE_ISOLATED:
+                        partial_scope.pop()
+
     for node in template.nodes:
         if not isinstance(node, str):
             await visit(node, template, root_scope)
 
     return TemplateAnalysis(
-        variables=variables.to_dict(),
-        locals=locals.to_dict(),
-        globals=globals.to_dict(),
+        variables=variables.asdict(),
+        locals=locals.asdict(),
+        globals=globals.asdict(),
         filters=to_locations(filters),
         tags=to_locations(tags),
     )
@@ -419,15 +425,15 @@ async def analyze_async(
 def analyze_variables(
     expression: Expression,
     template: Template,
-    scope: StaticScope,
-    globals: VariableMap,
-    variables: VariableMap,
+    scope: _StaticScope,
+    globals: _VariableMap,
+    variables: _VariableMap,
     static_context: RenderContext,
 ) -> None:
     if isinstance(expression, expressions.Variable):
-        v = StaticVariable(
+        v = _StaticVariable(
             segments=segments(expression, template),
-            location=Location(template=template, token=expression.span),
+            location=_Location(template=template, token=expression.span),
         )
 
         variables.add(v)
@@ -440,30 +446,30 @@ def analyze_variables(
 
 
 def segments(variable: expressions.Variable, template: Template) -> Segments:
-    result: Segments = []
 
-    if isinstance(variable.root, expressions.VariableSegment):
-        result.append(segments(variable.root.var, template))
-    else:
-        result.append(variable.root.value)
+    def generate_segments() -> Iterable[int | str | Segments]:
+        if isinstance(variable.root, expressions.VariableSegment):
+            yield segments(variable.root.var, template)
+        else:
+            yield variable.root.value
 
-    if variable.selectors:
-        for s in variable.selectors:
-            if isinstance(s, expressions.VariableSegment):
-                result.append(segments(s.var, template))
-            else:
-                result.append(s.value)
+        if variable.selectors:
+            for s in variable.selectors:
+                if isinstance(s, expressions.VariableSegment):
+                    yield segments(s.var, template)
+                else:
+                    yield s.value
 
-    return result
+    return tuple(generate_segments())
 
 
 def extract_filters(
     expression: Expression, template: Template, static_context: RenderContext
-) -> Iterable[tuple[str, Location]]:
+) -> Iterable[tuple[str, _Location]]:
     if isinstance(expression, expressions.Filtered):
         yield (
             expression.name.value,
-            Location(
+            _Location(
                 template=template, token=span(expression.name.token, expression.span)
             ),
         )
@@ -472,7 +478,7 @@ def extract_filters(
         yield from extract_filters(expr, template, static_context)
 
 
-def to_locations(d: defaultdict[str, list[Location]]) -> Locations:
+def to_locations(d: defaultdict[str, list[_Location]]) -> Locations:
     result: Locations = {}
 
     for k, v in d.items():
