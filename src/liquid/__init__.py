@@ -5,6 +5,7 @@ from ._base_tag import AbstractTag
 from ._context import RenderContext
 from ._drop import ContextHint, Drop
 from ._io import StringBuffer
+from ._lax_parser_mixin import LaxParserMixin
 from ._lexer import Lexer
 from ._lexer_extended import ExtendedLexer
 from ._lexer_legacy import LegacyLexer
@@ -22,6 +23,7 @@ from ._markup import (
 )
 from ._parser import Parser
 from ._parser_extended import ExtendedParser
+from ._parser_legacy import LegacyParser
 from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
@@ -56,7 +58,11 @@ __all__ = (
     "ExtendedParser",
     "FalsyStrictUndefined",
     "FileSystemLoader",
+    "LaxExtendedParser",
+    "LaxLegacyParser",
+    "LaxParserMixin",
     "LegacyLexer",
+    "LegacyParser",
     "Lexer",
     "Loader",
     "Markup",
@@ -97,3 +103,11 @@ def parse(
     globals: Mapping[str, Any] | None = None,
 ) -> Template:
     return DEFAULT_ENVIRONMENT.parse(source, name=name, globals=globals)
+
+
+class LaxLegacyParser(LaxParserMixin, LegacyParser):
+    pass
+
+
+class LaxExtendedParser(LaxParserMixin, ExtendedParser):
+    pass

@@ -202,7 +202,6 @@ class LegacyParser(Parser):
         self.skip_whitespace_control()
         token = self.eat(TOKEN_TAG_NAME, message="missing tag name")
         name = token_value(token, self.source)
-
         tag = self.env.tags.get(name)
 
         if tag is None:
@@ -360,27 +359,15 @@ class LegacyParser(Parser):
 
         root: expressions.Name | expressions.NameSegment | expressions.VariableSegment
 
-        if kind in (
-            TOKEN_IDENT,
-            TOKEN_BLANK,
-            TOKEN_EMPTY,
-            TOKEN_FALSE,
-            TOKEN_TRUE,
-            TOKEN_NULL,
-            TOKEN_NIL,
-            TOKEN_IF,
-            TOKEN_ELSE,
-            TOKEN_NOT,
-        ):
+        if kind in self.PATH_NAME_KINDS:
             self.pos += 1
             root = expressions.Name(token, token_value(token, self.source))
 
         else:
             lbracket_token = self.eat(TOKEN_LBRACKET)
 
-            if self.kind() == TOKEN_IDENT:
+            if self.kind() in self.PATH_NAME_KINDS:
                 # TODO: limit recursion
-                # TODO: handle reserved words
                 var = self.parse_path()
                 root = expressions.VariableSegment(
                     lbracket_token, var, span(lbracket_token, self.eat(TOKEN_RBRACKET))

@@ -11,7 +11,7 @@ from ._io import StringBuffer
 from ._markup import render_block, render_block_async
 from ._static_analysis import Segments, TemplateAnalysis, analyze, analyze_async
 from .exceptions import LiquidError
-from .tags import CommentTag, DocTag, InlineCommentTag, TemplateComment
+from .tags import CommentTag, DocTag, ErrorNode, InlineCommentTag, TemplateComment
 
 if TYPE_CHECKING:
     from ._markup import Block, Node
@@ -431,6 +431,29 @@ class Template:
                 return
 
             if isinstance(node, DocTag):
+                nodes.append(node)
+
+            for child in node.children():
+                visit(child)
+
+        for child in self.nodes:
+            visit(child)
+
+        return nodes
+
+    def errors(self) -> list[ErrorNode]:
+        """Return a list of error nodes found in this template.
+
+        Error nodes are inserted by lax parsers via ``Environment.parser``. Strict
+        parsers raise errors before a template can be created.
+        """
+        nodes: list[ErrorNode] = []
+
+        def visit(node: Node) -> None:
+            if isinstance(node, str):
+                return
+
+            if isinstance(node, ErrorNode):
                 nodes.append(node)
 
             for child in node.children():
