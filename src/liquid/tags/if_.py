@@ -40,7 +40,7 @@ class IfTag:
         blocks: list[IfBlock | ElsIfBlock | ElseBlock] = []
 
         parser.expect_expression()
-        expression = parser.parse_expression(infix=True)
+        expression = parser.parse_expression(infix=True, expect_end_of_expression=True)
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
 
@@ -54,6 +54,7 @@ class IfTag:
                 blocks.append(cls.parse_else_if(parser))
             elif tag_name == "else":
                 name_token = parser.eat_tag("else")
+                print("**", name_token)
                 blocks.append(
                     ElseBlock(
                         name_token, parser.parse_block(("else", "elsif", "endif"))
@@ -71,7 +72,7 @@ class IfTag:
         parser.skip_whitespace_control()
         token = parser.eat(TOKEN_TAG_NAME)
         parser.expect_expression()
-        expression = parser.parse_expression(infix=True)
+        expression = parser.parse_expression(infix=True, expect_end_of_expression=True)
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
         return ElsIfBlock(

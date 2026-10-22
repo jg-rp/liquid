@@ -48,7 +48,7 @@ class CaseTag:
     @staticmethod
     def parse(token: Token, parser: Parser) -> Markup:
         parser.expect_expression()
-        expression = parser.parse_expression()
+        expression = parser.parse_expression(expect_end_of_expression=True)
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
 

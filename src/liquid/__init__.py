@@ -106,8 +106,14 @@ def parse(
 
 
 class LaxLegacyParser(LaxParserMixin, LegacyParser):
-    pass
+    """A legacy parser that suppresses Liquid syntax errors.
+
+    Use ``Template.errors()`` to get a list of available ``LiquidSyntaxError`` instances.
+    """
 
 
 class LaxExtendedParser(LaxParserMixin, ExtendedParser):
-    pass
+    """An extended parser that suppresses Liquid syntax errors.
+
+    Use ``Template.errors()`` to get a list of available ``LiquidSyntaxError`` instances.
+    """

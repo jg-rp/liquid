@@ -170,6 +170,24 @@ class LegacyParser(Parser):
             elif kind == TOKEN_COMMENT_START:
                 nodes.append(TemplateComment.parse(token, self))
 
+            elif kind == TOKEN_TAG_NAME:
+                tag_name = token_value(token, self.source)
+
+                if tag_name.startswith("end") and end:
+                    raise LiquidSyntaxError(
+                        f"expected {', '.join(repr(n) for n in end)}, found {tag_name!r}",
+                        token=token,
+                        source=self.source,
+                        name=self.template_name,
+                    )
+
+                else:
+                    raise LiquidSyntaxError(
+                        f"unexpected tag {tag_name!r}",
+                        token=token,
+                        source=self.source,
+                        name=self.template_name,
+                    )
             else:
                 raise LiquidSyntaxError(
                     f"unexpected {TOKEN_NAMES[kind]}",
@@ -199,12 +217,14 @@ class LegacyParser(Parser):
         return OutputStatement(token, expr)
 
     def parse_tag(self) -> Markup:
+        pos = self.pos
         self.skip_whitespace_control()
         token = self.eat(TOKEN_TAG_NAME, message="missing tag name")
         name = token_value(token, self.source)
         tag = self.env.tags.get(name)
 
         if tag is None:
+            self.pos = pos - 1
             raise LiquidSyntaxError(
                 f"unexpected tag {name!r}",
                 token=token,
@@ -215,9 +235,23 @@ class LegacyParser(Parser):
         return tag.parse(token, self)
 
     def parse_expression(
-        self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
+        self,
+        precedence: Precedence = PRECEDENCE_LOWEST,
+        *,
+        infix: bool = False,
+        expect_end_of_expression: bool = False,
     ) -> Expression:
-        return self.parse_primary_expression(precedence, infix=infix)
+        expr = self.parse_primary_expression(precedence, infix=infix)
+
+        if expect_end_of_expression and self.kind() not in TERMINATE_EXPRESSION:
+            raise LiquidSyntaxError(
+                "unknown or missing operator",
+                token=self.current(),
+                source=self.source,
+                name=self.template_name,
+            )
+
+        return expr
 
     def parse_primary_expression(
         self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
@@ -278,7 +312,7 @@ class LegacyParser(Parser):
 
         token = self.current()
         raise LiquidSyntaxError(
-            f"unexpected {TOKEN_NAMES[token[0]]}",
+            f"expected a basic expression, found {TOKEN_NAMES[token[0]]}",
             token=token,
             source=self.source,
             name=self.template_name,

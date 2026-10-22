@@ -82,32 +82,32 @@ TEST_CASES = [
     Case(
         description="float literal without a leading zero",
         template="{{ .1 }}",
-        expect_msg="unexpected '.'",
+        expect_msg="expected a basic expression, found '.'",
     ),
     Case(
         description="unknown infix operator",
         template="{% if 1 =! 2 %}ok{% endif %}",
-        expect_msg="unexpected '='",
+        expect_msg="unknown or missing operator",
     ),
     Case(
         description="bad 'unless' expression",
         template="{% unless 1 ~ 2 %}ok{% endunless %}",
-        expect_msg="unexpected '~'",
+        expect_msg="unknown or missing operator",
     ),
     Case(
         description="bad conditional expression in unless block",
         template="{% unless true %}ok{% elsif £$! %}{% endunless %}",
-        expect_msg="unexpected symbol",
+        expect_msg="expected a basic expression, found symbol",
     ),
     Case(
         description="unknown symbol",
         template="{% if 1 ~ 2 %}ok{% endif %}",
-        expect_msg="unexpected '~'",
+        expect_msg="unknown or missing operator",
     ),
     Case(
         description="bad alternative condition expression",
         template="{% if false %}ok{% elsif 1~=2 %}not ok{% endif %}",
-        expect_msg="unexpected '~'",
+        expect_msg="unknown or missing operator",
     ),
     Case(
         description="junk in `liquid` tag",

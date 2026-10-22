@@ -12,6 +12,7 @@ from .drops import BLANK, EMPTY, Range
 from .exceptions import (
     LiquidFilterInterrupt,
     LiquidNameError,
+    LiquidSyntaxError,
     LiquidTypeError,
     LiquidZeroDivisionError,
 )
@@ -1105,6 +1106,28 @@ type PathSegment = (
 )
 
 type Location = list[int | str | Location]
+
+
+@dataclass(slots=True)
+class ErrorExpr:
+    token: Token
+    error: LiquidSyntaxError
+    span: Token = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.span = self.token
+
+    def evaluate(self, context: RenderContext) -> object:
+        return None
+
+    async def evaluate_async(self, context: RenderContext) -> object:
+        return None
+
+    def children(self) -> list[Expression]:
+        return []
+
+    def __str__(self) -> str:
+        return self.error.detailed_message()
 
 
 def tree_view(expr: Expression) -> str:

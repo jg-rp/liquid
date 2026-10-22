@@ -40,7 +40,7 @@ class UnlessTag:
         blocks: list[UnlessBlock | ElsIfBlock | ElseBlock] = []
 
         parser.expect_expression()
-        expression = parser.parse_expression(infix=True)
+        expression = parser.parse_expression(infix=True, expect_end_of_expression=True)
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
 

@@ -99,7 +99,11 @@ class Parser(ABC):
 
     @abstractmethod
     def parse_expression(
-        self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
+        self,
+        precedence: Precedence = PRECEDENCE_LOWEST,
+        *,
+        infix: bool = False,
+        expect_end_of_expression: bool = False,
     ) -> Expression:
         """Parse a "common" expression from the token stream.
 
@@ -109,6 +113,9 @@ class Parser(ABC):
             The binding power of this sub expression.
         infix
             When true, accept infix operators when parsing the expression.
+        expect_end_of_expression
+            When ``True``, raise a syntax error if we don't finish on an expression
+            termination token.
         """
 
     @abstractmethod

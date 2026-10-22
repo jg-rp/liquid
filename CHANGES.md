@@ -32,6 +32,28 @@
 
 - Removed environment variable `LIQUIDINTMAXSTRDIGITS`. It was a workaround in the absence of `sys.get_int_max_str_digits()`, added in Python 3.11.
 
+**Custom tag API changes**
+
+Custom tags must now implement the `Tag` protocol with a static `parse(token, parser)` method producing instances of a class implementing the `Markup` protocol. It's usually convenient to implement both protocols with a single class.
+
+Python Liquid version 3 uses single-pass tokenizers that scan tag expressions as well as markup delimiters in on go (this is necessary to for proper parsing of string literals).
+
+This means that tags are not passed expressions as text to tokenize and parse themselves. Instead tags have access to already scanned tokens via an instance of `Parser`. Where possible, you are encouraged to use methods on `Parser` to parse the stream of recognized tokens. When predefined tokens wont do, `Parser.raw_expression()` returns source text up to the next closing delimiter.
+
+See built-in tag implementations for examples.
+
+**Custom filter API changes**
+
+We no longer use decorators to coerce filter inputs to acceptable types. Nor do we use decorators to indicate that a filter accepts the active render context or environment.
+
+Instead we define filters as `type Filter = Callable[Concatenate[FilterContext, object, ...], object]`. The first argument is always an instance of `FilterContext`, which has access to the render context and active environment.
+
+The second argument is the result of evaluating the left hand side of the filter expression, and remaining arguments are defined by the filter.
+
+Instances of `FilterContext` also have convenient methods for coercing objects to primitive types, and methods for testing objects for Liquid truthiness and nullish-ness.
+
+See built-in filter implementation for examples.
+
 ## Version 2.3.3
 
 **Fixes**

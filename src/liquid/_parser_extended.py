@@ -15,6 +15,7 @@ from ._parser import (
     PRECEDENCE_MULL,
     PRECEDENCE_NEG,
     PRECEDENCE_PIPE,
+    TERMINATE_EXPRESSION,
     Precedence,
 )
 from ._parser_legacy import LegacyParser
@@ -137,12 +138,26 @@ class ExtendedParser(LegacyParser):
             self.precedences = LEGACY_PRECEDENCES
 
     def parse_expression(
-        self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = True
+        self,
+        precedence: Precedence = PRECEDENCE_LOWEST,
+        *,
+        infix: bool = True,
+        expect_end_of_expression: bool = False,
     ) -> Expression:
         # Ignore `infix`. Infix operators are valid in all contexts in the extended
         # parser.
         expr = self.parse_primary_expression(precedence, infix=True)
-        return self.parse_ternary_expression(expr) if self.kind() == TOKEN_IF else expr
+        expr = self.parse_ternary_expression(expr) if self.kind() == TOKEN_IF else expr
+
+        if expect_end_of_expression and self.kind() not in TERMINATE_EXPRESSION:
+            raise LiquidSyntaxError(
+                "unknown or missing operator",
+                token=self.current(),
+                source=self.source,
+                name=self.template_name,
+            )
+
+        return expr
 
     def parse_filtered_expression(
         self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
