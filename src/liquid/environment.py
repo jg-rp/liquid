@@ -78,6 +78,7 @@ class Environment:
         "downcase": filters.downcase,
         "escape_once": filters.escape_once,
         "escape": filters.escape,
+        "h": filters.escape,
         "escapejs": filters.escapejs,
         "find": filters.find,
         "find_index": filters.find_index,
@@ -433,6 +434,9 @@ class Environment:
     def to_numeric(
         self, obj: object, context: RenderContext, default: int | Decimal = 0
     ) -> float | int | Decimal:
+        if type(obj) is bool:
+            return default
+
         if isinstance(obj, int | float | Decimal):
             return obj
 

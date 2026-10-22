@@ -45,7 +45,7 @@ class Range(Drop):
         return iter(range(self.start, self.stop + 1))
 
     def __contains__(self, item: object) -> bool:
-        return isinstance(item, int) and item >= self.start and item <= self.stop
+        return item in ("first", "last", "size")
 
     def __bool__(self) -> bool:
         return len(self) > 0

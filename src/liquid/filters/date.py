@@ -4,13 +4,14 @@ import markupsafe
 from dateutil import parser
 
 from .._filter import FilterContext
+from .._strftime import ruby_strftime
 
 
 def date(context: FilterContext, obj: object, fmt: str) -> str:
     if context.is_nil(obj):
         return ""
 
-    if context.is_nil(fmt):
+    if context.is_nil(fmt) or fmt == "":
         return context.to_str(obj, "")
 
     if isinstance(obj, str):
@@ -42,15 +43,8 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
         raise context.error(f"expected a data, found {type(obj).__name__!r}")
 
     try:
-        result = date_.strftime(fmt)
-    except ValueError as err:
-        # This is not uncommon on Windows when a format string contains
-        # directives that are not officially supported by Python.
-
-        # Handle "%s" as a special case.
-        if fmt == r"%s":
-            return str(date_.timestamp()).split(".")[0]
-
+        result = ruby_strftime(date_, fmt)
+    except (ValueError, TypeError) as err:
         raise context.error(str(err))
 
     if context.env.autoescape and isinstance(fmt, markupsafe.Markup):

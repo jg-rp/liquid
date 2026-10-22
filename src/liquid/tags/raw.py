@@ -27,9 +27,13 @@ class RawTag:
     def parse(token: Token, parser: Parser) -> Markup:
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
-        text = parser.eat(TOKEN_TEXT)
+        text = (
+            token_value(parser.eat(TOKEN_TEXT), parser.source)
+            if parser.kind() == TOKEN_TEXT
+            else ""
+        )
         parser.eat_empty_tag("endraw")
-        return RawTag(token, token_value(text, parser.source))
+        return RawTag(token, text)
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         buffer.write(self.text)

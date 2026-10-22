@@ -23,10 +23,13 @@ def round_(
     if left == 0:
         return 0
 
-    return _round_up(context.to_numeric(left, 0), math.floor(to))
+    return _round_up(left, math.floor(to))
 
 
 def _round_up(x: float | Decimal, digits: int = 0) -> int | float:
+    if isinstance(x, int):
+        return x
+
     quantum = Decimal(1).scaleb(-digits)
     result = Decimal(str(x)).quantize(quantum, rounding=ROUND_HALF_UP)
     return int(result) if digits == 0 else float(result)

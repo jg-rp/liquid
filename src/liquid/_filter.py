@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import decimal
+import re
 from collections.abc import Callable, Generator, Iterable, Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -17,6 +19,8 @@ if TYPE_CHECKING:
 
 
 type Filter = Callable[Concatenate[FilterContext, object, ...], object]
+
+RE_DIGITS = re.compile(r"^[0-9]+")
 
 
 @dataclass(slots=True)
@@ -79,7 +83,43 @@ class FilterContext:
         return self.context.env.to_int(obj, self.context, self.span)
 
     def to_numeric(self, obj: object, default: int | Decimal) -> float | int | Decimal:
+        if isinstance(obj, str):
+            try:
+                return int(obj)
+            except ValueError:
+                pass
+
+            try:
+                return float(obj)
+            except ValueError:
+                pass
+
+            # This is different than env.to_numeric
+            if match := RE_DIGITS.match(obj):
+                return int(match.group())
+
+            return default
+
         return self.context.env.to_numeric(obj, self.context, default)
+
+    def to_decimal(self, obj: object, default: Decimal | int) -> Decimal | int:
+        if self.is_nil(obj):
+            return default
+
+        if obj is True:
+            return default
+
+        if isinstance(obj, int):
+            return obj
+
+        try:
+            return Decimal(str(obj))
+        except (ValueError, TypeError, decimal.InvalidOperation):
+            if isinstance(obj, str):
+                match = RE_DIGITS.match(obj)
+                if match:
+                    return Decimal(match.group())
+            return default
 
     def to_str[T](self, obj: object, default: T) -> str | T:
         return (

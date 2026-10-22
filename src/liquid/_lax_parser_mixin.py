@@ -71,7 +71,7 @@ class LaxParserMixin(ABC, _LegacyParserProtocol):
                 tokens.TOKEN_TAG_END,
                 tokens.TOKEN_OUT_END,
             ):
-                self.pos += 1
+                self.pos += 1  # type: ignore
 
             return expressions.ErrorExpr(span(start_token, self.current()), err)
 

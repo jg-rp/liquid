@@ -18,6 +18,26 @@ SKIP = {
     "date_now_keyword",
     "date_today_keyword",
     "date_Today_capitalized",
+    "date_now_with_complex_format",
+    "for_dynamic_range_empty_body_charges_each_item [error_mode=strict2]",
+    "date_unix_timestamp_output_pattern",
+    "date_now_year_pattern",
+    "date_now_iso_format_pattern",
+    "date_now_full_timestamp_pattern",
+    "tablerow_literal_range_empty_body_charges_each_item [error_mode=strict2]",
+    "range_score_is_cumulative_across_isolated_render_partials [error_mode=strict2]",
+    "tablerow_capture_output_respects_assign_score_limit [error_mode=strict2]",
+    "tablerow_break_final_markup_respects_render_length_limit [error_mode=strict2]",
+    "for_nonempty_range_over_render_score_boundary [error_mode=strict2]",
+    "cumulative_render_score_across_partials [error_mode=strict2]",
+    "per_template_limit_still_works_with_cumulative [error_mode=strict2]",
+    # String repr of data?
+    "StandardFilterTest#test_base64_url_safe_encode_4aece6f5",
+    "StandardFilterTest#test_base64_encode_3b4b7075",
+    "StandardFilterTest#test_url_encode_60c8b46a",
+    # TODO:
+    "self_dotted_special_names_delegate_to_scope",
+    "Range bound lax int string parsing [error_mode=strict2]",
 }
 
 

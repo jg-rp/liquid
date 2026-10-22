@@ -6,7 +6,10 @@ from ..drops import Undefined
 
 
 def size(context: FilterContext, left: object) -> int:
-    if isinstance(left, (int, float, Decimal)):
+    if isinstance(left, (float, bool)):
+        return 0
+
+    if isinstance(left, (int, Decimal)):
         return 8
 
     if isinstance(left, Undefined):
