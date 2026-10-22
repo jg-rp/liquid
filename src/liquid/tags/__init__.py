@@ -21,6 +21,7 @@ from .render import RenderTag
 from .tablerow import TableRowTag
 from .template_comment import TemplateComment
 from .unless import UnlessTag
+from .with_ import WithTag
 
 __all__ = (
     "AssignTag",
@@ -48,4 +49,5 @@ __all__ = (
     "TableRowTag",
     "TemplateComment",
     "UnlessTag",
+    "WithTag",
 )

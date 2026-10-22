@@ -59,6 +59,10 @@ class Environment:
         "#": tags.InlineCommentTag,
     }
 
+    extra_tags: ClassVar[dict[str, Tag]] = {
+        "with": tags.WithTag,
+    }
+
     standard_filters: ClassVar[dict[str, Filter]] = {
         "abs": filters.abs_,
         "append": filters.append,
@@ -125,11 +129,14 @@ class Environment:
         "where": filters.where,
     }
 
+    extra_filters: ClassVar[dict[str, Filter]] = {}
+
     def __init__(
         self,
         *,
         autoescape: bool = False,
         conventional_operator_precedence: bool = False,
+        extra: bool = False,
         globals: Mapping[str, object] | None = None,
         iterable_strings: bool = False,
         loader: Loader | None = None,
@@ -171,11 +178,15 @@ class Environment:
 
         self.persistent_registers: list[str] = []
 
-        self.setup_tags_and_filters()
+        self.setup_tags_and_filters(extra=extra)
 
-    def setup_tags_and_filters(self) -> None:
+    def setup_tags_and_filters(self, *, extra: bool = False) -> None:
         self.tags.update(self.standard_tags)
         self.filters.update(self.standard_filters)
+
+        if extra:
+            self.tags.update(self.extra_tags)
+            self.filters.update(self.extra_filters)
 
     def get_template(
         self,
