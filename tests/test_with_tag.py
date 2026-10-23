@@ -37,7 +37,7 @@ with open("tests/with_tag.json", encoding="utf8") as fd:
     TEST_CASES,
     ids=operator.attrgetter("name"),
 )
-def test_filter(case: Case) -> None:
+def test_with_tag(case: Case) -> None:
     if case.name in SKIP:
         pytest.skip()
 
@@ -49,7 +49,7 @@ def test_filter(case: Case) -> None:
     TEST_CASES,
     ids=operator.attrgetter("name"),
 )
-def test_filter_async(case: Case) -> None:
+def test_with_tag_async(case: Case) -> None:
     if case.name in SKIP:
         pytest.skip()
 

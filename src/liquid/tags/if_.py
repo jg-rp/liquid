@@ -54,7 +54,6 @@ class IfTag:
                 blocks.append(cls.parse_else_if(parser))
             elif tag_name == "else":
                 name_token = parser.eat_tag("else")
-                print("**", name_token)
                 blocks.append(
                     ElseBlock(
                         name_token, parser.parse_block(("else", "elsif", "endif"))

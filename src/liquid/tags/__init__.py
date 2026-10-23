@@ -8,6 +8,7 @@ from .doc import DocTag
 from .echo import EchoTag
 from .else_ import ElseBlock
 from .error import ErrorNode
+from .extends import BlockTag, ExtendsTag
 from .for_ import BreakTag, ContinueTag, ForTag
 from .if_ import IfTag
 from .ifchanged import IfChangedTag
@@ -25,6 +26,7 @@ from .with_ import WithTag
 
 __all__ = (
     "AssignTag",
+    "BlockTag",
     "BreakTag",
     "CaptureTag",
     "CaseTag",
@@ -36,6 +38,7 @@ __all__ = (
     "EchoTag",
     "ElseBlock",
     "ErrorNode",
+    "ExtendsTag",
     "ForTag",
     "IfChangedTag",
     "IfTag",

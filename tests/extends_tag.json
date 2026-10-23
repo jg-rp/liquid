@@ -1,0 +1,207 @@
+{
+  "tests": [
+    {
+      "name": "no blocks",
+      "template": "{% extends 'a' %} this should not be rendered",
+      "data": { "you": "world" },
+      "templates": {
+        "a": "Hello, {{ you }}!"
+      },
+      "result": "Hello, world!"
+    },
+    {
+      "name": "no parent block",
+      "template": "{% extends 'a' %}{% block b %}this should not be rendered{% endblock %}",
+      "data": { "you": "world" },
+      "templates": {
+        "a": "Hello, {{ you }}!"
+      },
+      "result": "Hello, world!"
+    },
+    {
+      "name": "no child block",
+      "template": "{% extends 'a' %} this should not be rendered",
+      "data": { "you": "world" },
+      "templates": {
+        "a": "Hello, {% block b %}{{ you }}!{% endblock %}"
+      },
+      "result": "Hello, world!"
+    },
+    {
+      "name": "override parent block",
+      "template": "{% extends 'a' %}{% block b %}sue{% endblock %}",
+      "data": { "you": "world" },
+      "templates": {
+        "a": "Hello, {% block b %}{{ you }}{% endblock %}!"
+      },
+      "result": "Hello, sue!"
+    },
+    {
+      "name": "render base template directly",
+      "template": "Hello, {% block b %}{{ you }}{% endblock %}!",
+      "data": { "you": "world" },
+      "result": "Hello, world!"
+    },
+    {
+      "name": "output super block",
+      "template": "{% extends a %}{% block b %}{{ block.super }} and sue{% endblock %}",
+      "data": { "you": "world" },
+      "templates": {
+        "a": "Hello, {% block b %}{{ you }}{% endblock %}!"
+      },
+      "result": "Hello, world and sue!"
+    },
+    {
+      "name": "scoped",
+      "template": "{% extends a %}{% block b %}{{ greeting }}, {{ you }}!{% endblock %}",
+      "data": {},
+      "templates": {
+        "a": "{% assign greeting = 'Hello' %}{% block b %}{% endblock %}{% assign you = 'world' %}"
+      },
+      "result": "Hello, !"
+    },
+    {
+      "name": "block scope",
+      "template": "{% extends a %}{% block b %}{{ greeting }}, {{ x }}! {% endblock %}",
+      "data": {},
+      "templates": {
+        "a": "{% assign greeting = 'Hello' %}{% for x in (1..2) %}{% block b %}{% endblock %}{% endfor %}"
+      },
+      "result": "Hello, 1! Hello, 2! "
+    },
+    {
+      "name": "multiple",
+      "template": "{% extends a %}{% block b %}Hello, {{ you }}!{% endblock %}",
+      "data": {},
+      "templates": {
+        "a": "{% extends c %}",
+        "c": "{% assign you = 'world' %}{% block b %}{% endblock %}"
+      },
+      "result": "Hello, world!"
+    },
+    {
+      "name": "nested block scoped parent variables are in scope",
+      "template": "{% extends 'some' %}{% block baz %}Hello, {{ you }} {{ other }} {{ i }}:{{ x }} {% endblock %}",
+      "result": "Hello, world banana 1:1 Hello, world banana 1:2 Hello, world banana 2:1 Hello, world banana 2:2 ",
+      "data": {},
+      "templates": {
+        "base": "{% assign you = 'world' %}{% for i in (1..2) %}{% block bar %}hello, {{ you }}!{% endblock %}{% endfor %}",
+        "some": "{% extends 'base' %}{% block bar %}{% assign other = 'banana' %}{% for x in (1..2) %}{% block baz %}{% endblock %}{% endfor %}{% endblock %}"
+      }
+    },
+    {
+      "name": "child variables are out of scope",
+      "template": "{% extends 'foo' %}{% block bar %}{% assign something = '/other' %}goodbye, {{ you }}{% assign you = 'sue' %}{% endblock %}",
+      "result": "goodbye, world",
+      "data": {},
+      "templates": {
+        "foo": "{% assign you = 'world' %}{% block bar %}{% endblock %}{{ something }}"
+      }
+    },
+    {
+      "name": "nested outer block",
+      "template": "{% extends 'foo' %}{% block bar %}Goodbye{% endblock %}",
+      "result": "Goodbye!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}!"
+      }
+    },
+    {
+      "name": "override nested block",
+      "template": "{% extends 'foo' %}{% block greeting %}Goodbye{% endblock %}",
+      "result": "Goodbye, world!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}"
+      }
+    },
+    {
+      "name": "super nested blocks",
+      "template": "{% extends 'foo' %}{% block bar %}{{ block.super }}!!{% endblock %}",
+      "result": "Hello, world!!!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}"
+      }
+    },
+    {
+      "name": "override a parent's parent block",
+      "template": "{% extends 'bar' %}{% block greeting %}Goodbye,{% endblock %}",
+      "result": "Goodbye, world",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block greeting %}Hello{% endblock %} {{ you }}",
+        "bar": "{% extends 'foo' %}"
+      }
+    },
+    {
+      "name": "multi-level super",
+      "template": "{% extends 'baz' %}{% block bar %}{{ block.super }}!!{% endblock %}",
+      "result": "Hello, world!**!!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}",
+        "baz": "{% extends 'foo' %}{% block bar %}{{ block.super }}**{% endblock %}"
+      }
+    },
+    {
+      "name": "include an extended template",
+      "template": "{% include 'bar' %}",
+      "result": "foo bar",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}",
+        "bar": "{% extends 'foo' %}{% block bar %}foo bar{% endblock %}"
+      }
+    },
+    {
+      "name": "include in an overridden block",
+      "template": "{% extends 'foo' %}{% block greeting %}{% include 'bar' %}{% endblock %}",
+      "result": "I am included, world!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}",
+        "bar": "I am included"
+      }
+    },
+    {
+      "name": "render an extended template",
+      "template": "{% render 'bar' %}",
+      "result": "foo bar",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}",
+        "bar": "{% extends 'foo' %}{% block bar %}foo bar{% endblock %}"
+      }
+    },
+    {
+      "name": "render in an overridden block",
+      "template": "{% extends 'foo' %}{% block greeting %}{% render 'bar' %}{% endblock %}",
+      "result": "I am rendered, world!",
+      "data": {
+        "you": "world"
+      },
+      "templates": {
+        "foo": "{% block bar %}{% block greeting %}Hello{% endblock %}, {{ you }}!{% endblock %}",
+        "bar": "I am rendered"
+      }
+    }
+  ]
+}

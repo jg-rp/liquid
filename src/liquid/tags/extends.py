@@ -6,21 +6,31 @@ from typing import TYPE_CHECKING
 
 from .. import expressions
 from .._drop import AbstractDrop
-from .._markup import render_block, render_block_async
+from .._markup import SCOPE_INHERITED, Partial, render_block, render_block_async
+from .._nothing import NOTHING
 from ..exceptions import (
     LiquidArgumentError,
+    LiquidSyntaxError,
     NoSuchTemplateError,
     RequiredBlockError,
     TemplateInheritanceError,
     TemplateNotFoundError,
 )
 from ..expressions import Name
-from ..tokens import TOKEN_TAG_END
+from ..tokens import (
+    TOKEN_DOUBLE_QUOTE,
+    TOKEN_IDENT,
+    TOKEN_SINGLE_QUOTE,
+    TOKEN_TAG_END,
+    TOKEN_TAG_NAME,
+    TOKEN_TAG_START,
+    token_value,
+)
 
 if TYPE_CHECKING:
     from .._context import RenderContext
     from .._io import StringBuffer
-    from .._markup import Block, Expression, Markup, Partial
+    from .._markup import Block, Expression, Markup
     from .._parser import Parser
     from .._template import Template
     from ..tokens import Token
@@ -44,12 +54,30 @@ class ExtendsTag:
         return ExtendsTag(token, name)
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
-        # TODO:
-        raise NotImplementedError
+        stacks: defaultdict[str, list[ExtendsStackItem]] = context.get_register(
+            "extends", lambda: defaultdict(list)
+        )
+
+        base_template = self._stack_blocks(context, stacks)
+
+        with context.extend({}, template=base_template):
+            base_template.render_with_context(context, buffer)
+
+        stacks.clear()
+        context.interrupts.append("stop")
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
-        # TODO:
-        raise NotImplementedError
+        stacks: defaultdict[str, list[ExtendsStackItem]] = context.get_register(
+            "extends", lambda: defaultdict(list)
+        )
+
+        base_template = self._stack_blocks(context, stacks)
+
+        with context.extend({}, template=base_template):
+            await base_template.render_with_context_async(context, buffer)
+
+        stacks.clear()
+        context.interrupts.append("stop")
 
     def children(self) -> list[Markup]:
         return []
@@ -64,19 +92,36 @@ class ExtendsTag:
         return []
 
     def partials(self, context: RenderContext) -> list[Partial]:
-        # TODO:
-        raise NotImplementedError
+        template = context.env.get_template(
+            self.name.value, context=context, tag="extends"
+        )
+        return [
+            Partial(
+                template=template,
+                scope=SCOPE_INHERITED,
+                in_scope=[],
+                key=hash(self.name.value),
+            )
+        ]
 
     async def partials_async(self, context: RenderContext) -> list[Partial]:
-        # TODO:
-        raise NotImplementedError
-
-    def _blocks(self, context: RenderContext, template: Template) -> Template:
-        """Build a stack for each named block by visiting templates in the inheritance chain."""
-        stacks: defaultdict[str, list[ExtendsStackItem]] = context.get_register(
-            "extends", lambda: defaultdict(list)
+        template = await context.env.get_template_async(
+            self.name.value, context=context, tag="extends"
         )
 
+        return [
+            Partial(
+                template=template,
+                scope=SCOPE_INHERITED,
+                in_scope=[],
+                key=hash(self.name.value),
+            )
+        ]
+
+    def _stack_blocks(
+        self, context: RenderContext, stacks: defaultdict[str, list[ExtendsStackItem]]
+    ) -> Template:
+        """Build a stack for each named block by visiting templates in the inheritance chain."""
         seen_extends: set[str] = set()
 
         def visit(template_: Template) -> Template | None:
@@ -105,9 +150,10 @@ class ExtendsTag:
                     parent=None,
                 )
 
+                if stack:
+                    stack[-1].parent = stack_item
+
                 stack.append(stack_item)
-                if len(stack) > 1:
-                    stack[-2].parent = stack_item
 
             if not extends_nodes:
                 return None
@@ -145,7 +191,7 @@ class ExtendsTag:
                     name=template_.name,
                 )
 
-        next_template = visit(template)
+        next_template = visit(context.template)
         base = next_template
 
         while next_template:
@@ -197,7 +243,35 @@ class BlockTag:
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
         block = parser.parse_block(("endblock",))
-        parser.eat_empty_tag("endblock")
+
+        # Consume `{% endblock %}` with optional name: `{% endblock name %}`.
+        parser.eat(
+            TOKEN_TAG_START, message=f"expected tag 'endblock' for {name.value!r}"
+        )
+        parser.skip_whitespace_control()
+        token_ = parser.eat(TOKEN_TAG_NAME, message="expected 'endblock'")
+
+        if value := token_value(token_, parser.source) != "endblock":
+            raise LiquidSyntaxError(
+                f"expected endblock for {name!r}, found {value!r}",
+                token=token,
+                source=parser.source,
+                name=parser.template_name,
+            )
+
+        if parser.kind() in (TOKEN_IDENT, TOKEN_SINGLE_QUOTE, TOKEN_DOUBLE_QUOTE):
+            end_name = parser.parse_name()
+            if end_name.value != name.value:
+                raise TemplateInheritanceError(
+                    f"expected endblock for {name!r}, found {end_name.value!r}",
+                    token=end_name.span,
+                    source=parser.source,
+                    name=parser.template_name,
+                )
+
+        parser.carry_whitespace_control()
+        parser.eat(TOKEN_TAG_END, message="expected a closing tag delimiter")
+
         return BlockTag(token, name, block, required)
 
     @classmethod
@@ -232,7 +306,7 @@ class BlockTag:
         stack = stacks[self.name.value]
 
         if not stack:
-            # Tis is a base block being rendered directly
+            # This is a base block being rendered directly
             if self.required:
                 raise RequiredBlockError(
                     f"block {self.name.value!r} is required",
@@ -248,7 +322,7 @@ class BlockTag:
 
         itm = stack[0]
 
-        if itm.required:
+        if itm.block.required:
             raise RequiredBlockError(
                 f"block {self.name.value!r} is required",
                 token=self.name.span,
@@ -262,8 +336,41 @@ class BlockTag:
         context.render_score_cumulative += block_context.render_score
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
-        # TODO:
-        raise NotImplementedError
+        stacks: defaultdict[str, list[ExtendsStackItem]] = context.get_register(
+            "extends", lambda: defaultdict(list)
+        )
+
+        stack = stacks[self.name.value]
+
+        if not stack:
+            # This is a base block being rendered directly
+            if self.required:
+                raise RequiredBlockError(
+                    f"block {self.name.value!r} is required",
+                    token=self.name.span,
+                    source=context.template.source,
+                    name=context.template.name,
+                )
+
+            with context.extend({"block": BlockDrop(self.name.value)}):
+                await render_block_async(self.block, context, buffer)
+
+            return
+
+        itm = stack[0]
+
+        if itm.block.required:
+            raise RequiredBlockError(
+                f"block {self.name.value!r} is required",
+                token=self.name.span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        scope: dict[str, object] = {"block": BlockDrop(self.name.value, itm.parent)}
+        block_context = context.copy(scope, block_scope=True, template=itm.template)
+        await render_block_async(itm.block.block, block_context, buffer)
+        context.render_score_cumulative += block_context.render_score
 
     def children(self) -> list[Markup]:
         return [node for node in self.block if not isinstance(node, str)]
@@ -300,5 +407,43 @@ class BlockDrop(AbstractDrop):
         self.name = name
         self.parent = parent
 
-    def __contains__(self, item: object) -> bool:
-        return item == "super"
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name == "super"
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        if self.parent is None or name != "super":
+            return NOTHING
+
+        buffer = context.env.buffer_factory()
+
+        scope: dict[str, object] = {
+            "block": BlockDrop(self.parent.template.name, self.parent.parent)
+        }
+
+        with context.extend(scope, template=self.parent.template):
+            render_block(self.parent.block.block, context, buffer)
+
+        return buffer.getvalue()
+
+    async def __liquid_hasattr_async__(self, name: str, context: RenderContext) -> bool:
+        return name == "super"
+
+    async def __liquid_getattr_async__(
+        self, name: str, context: RenderContext
+    ) -> object:
+        if self.parent is None or name != "super":
+            return NOTHING
+
+        buffer = context.env.buffer_factory()
+
+        scope: dict[str, object] = {
+            "block": BlockDrop(self.parent.template.name, self.parent.parent)
+        }
+
+        with context.extend(scope, template=self.parent.template):
+            await render_block_async(self.parent.block.block, context, buffer)
+
+        return buffer.getvalue()
+
+    def __str__(self) -> str:
+        return f"BlockDrop({self.name})"

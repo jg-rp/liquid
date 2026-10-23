@@ -5,7 +5,14 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Awaitable, Callable, Generator, Mapping, Sequence
+from collections.abc import (
+    Awaitable,
+    Callable,
+    Collection,
+    Generator,
+    Mapping,
+    Sequence,
+)
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, ClassVar
 
@@ -60,6 +67,8 @@ class Environment:
     }
 
     extra_tags: ClassVar[dict[str, Tag]] = {
+        "block": tags.BlockTag,
+        "extends": tags.ExtendsTag,
         "with": tags.WithTag,
     }
 
@@ -176,7 +185,7 @@ class Environment:
 
         self.buffer_factory: Callable[[], StringBuffer] = StringBuffer
 
-        self.persistent_registers: list[str] = []
+        self.persistent_registers: Collection[str] = ("extends",)
 
         self.setup_tags_and_filters(extra=extra)
 
