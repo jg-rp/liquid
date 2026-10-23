@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import TYPE_CHECKING, Concatenate
 
-from ._drop import is_drop
+from ._drop import liquid_iterable
 from ._missing import MISSING
 from ._nothing import NOTHING
 from .exceptions import LiquidFilterError, LiquidFilterInterrupt
@@ -68,8 +68,8 @@ class FilterContext:
         if isinstance(obj, (list, tuple)):
             return _flatten(obj)  # pyright: ignore[reportUnknownArgumentType]
 
-        if is_drop(obj):
-            return list(obj)
+        if liquid_iterable(obj):
+            return list(obj.__liquid_iter__(0, None, False))
 
         return [obj]
 

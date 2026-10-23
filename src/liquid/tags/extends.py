@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .. import expressions
-from .._drop import Drop
+from .._drop import AbstractDrop
 from .._markup import render_block, render_block_async
 from ..exceptions import (
     LiquidArgumentError,
@@ -292,7 +292,7 @@ class ExtendsStackItem:
     parent: ExtendsStackItem | None
 
 
-class BlockDrop(Drop):
+class BlockDrop(AbstractDrop):
     __slots__ = ("name", "parent")
 
     def __init__(self, name: str, parent: ExtendsStackItem | None = None) -> None:

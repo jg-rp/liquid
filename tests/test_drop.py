@@ -3,7 +3,10 @@ from dataclasses import dataclass
 
 import pytest
 
-from liquid import ContextHint, Drop, Environment, RenderContext
+from liquid import AbstractDrop, ContextHint, Environment, RenderContext
+
+# TODO: test drop contains
+# TODO: test drop callable and awaitable
 
 
 @dataclass
@@ -14,13 +17,13 @@ class Case:
     expect: str
 
 
-class GenericDrop[T](Drop):
+class GenericDrop[T](AbstractDrop):
     """Mock generic drop that wraps a primitive value."""
 
     def __init__(self, val: T):
         self.val = val
 
-    def __liquid__(self, hint: ContextHint, context: RenderContext) -> T:
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         return self.val
 
     def __str__(self) -> str:
@@ -39,6 +42,17 @@ class IntDrop(GenericDrop[int]):
     def __init__(self, val: int):
         self.val = val
 
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "string":
+                return str(self.val)
+            case "data":
+                return self.val
+            case "numeric":
+                return self.val
+            case "boolean":
+                return bool(self.val)
+
     def __int__(self) -> int:
         return self.val
 
@@ -49,6 +63,8 @@ class IntDrop(GenericDrop[int]):
         return other == self.val
 
     def __lt__(self, other: object) -> bool:
+        if isinstance(other, IntDrop):
+            other = other.val
         return self.val < other if isinstance(other, (float, int)) else False
 
     def __gt__(self, other: object) -> bool:

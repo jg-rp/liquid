@@ -12,10 +12,10 @@ from unittest.mock import patch
 import pytest
 
 from liquid import (
+    AbstractDrop,
     CachingFileSystemLoader,
     ChoiceLoader,
     DictLoader,
-    Drop,
     Environment,
     FileSystemLoader,
     RenderContext,
@@ -221,7 +221,7 @@ def test_include_and_render_async(case: Case) -> None:
         assert result == case.expect
 
 
-class MockAsyncDrop(Drop):
+class MockAsyncDrop(AbstractDrop):
     def __init__(self, val: object) -> None:
         self.key = "foo"
         self.val = val
@@ -235,21 +235,26 @@ class MockAsyncDrop(Drop):
     def __iter__(self) -> Iterator[str]:  # pragma: no cover
         return iter([self.key])
 
-    def __getitem__(self, k: str) -> object:
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name == self.key
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
         self.call_count += 1
-        if k == self.key:
+        if name == self.key:
             return self.val
-        raise KeyError(k)  # pragma: no cover
+        raise KeyError(name)  # pragma: no cover
 
-    def __contains__(self, item: object) -> bool:
-        return item == self.key
+    async def __liquid_hasattr_async__(self, name: str, context: RenderContext) -> bool:
+        return name == self.key
 
-    async def __getitem_async__(self, k: str) -> object:
+    async def __liquid_getattr_async__(
+        self, name: str, context: RenderContext
+    ) -> object:
         # Do IO here
         self.await_count += 1
-        if k == self.key:
+        if name == self.key:
             return self.val
-        raise KeyError(k)  # pragma: no cover
+        raise KeyError(name)  # pragma: no cover
 
 
 def test_await_async_drop() -> None:

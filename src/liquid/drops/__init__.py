@@ -1,5 +1,5 @@
 from .forloop import ForLoop
-from .iterable import IterableDrop
+from .iterable import AsyncIterableDrop, IterableDrop
 from .range import Range
 from .tablerowloop import TableRowLoop
 from .undefined import BLANK, EMPTY, FalsyStrictUndefined, StrictUndefined, Undefined
@@ -7,6 +7,7 @@ from .undefined import BLANK, EMPTY, FalsyStrictUndefined, StrictUndefined, Unde
 __all__ = (
     "BLANK",
     "EMPTY",
+    "AsyncIterableDrop",
     "FalsyStrictUndefined",
     "ForLoop",
     "IterableDrop",

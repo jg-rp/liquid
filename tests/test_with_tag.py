@@ -14,7 +14,7 @@ from liquid.tags import WithTag
 class Case:
     name: str
     template: str
-    data: dict[str, Any] = field(default_factory=dict)  # type: ignore
+    data: dict[str, Any] = field(default_factory=dict)  # pyright: ignore[reportUnknownVariableType]
     result: str | None = None
 
 

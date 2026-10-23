@@ -9,7 +9,7 @@ from liquid.exceptions import (
 )
 
 
-def test_case_tag_raises_when_eof():
+def test_case_tag_raises_when_eof() -> None:
     # Before version 2.2.1 this would loop forever.
     with pytest.raises(LiquidSyntaxError):
         parse("{% case x %}")

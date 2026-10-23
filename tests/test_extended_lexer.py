@@ -224,7 +224,7 @@ def test_template_comment_wc() -> None:
 # See https://github.com/Shopify/liquid/blob/main/LICENSE
 
 
-def test_line_statements():
+def test_line_statements() -> None:
     source = """{% liquid
         if 1 != 1
         comment
@@ -257,7 +257,7 @@ def test_line_statements():
     ]
 
 
-def test_line_statements_nested():
+def test_line_statements_nested() -> None:
     source = """{% liquid
         if 1 != 1
         comment
@@ -295,7 +295,7 @@ def test_line_statements_nested():
     ]
 
 
-def test_complete_markup():
+def test_complete_markup() -> None:
     source = """{% comment %}
         {% if true %}
         {% if ... %}
@@ -321,7 +321,7 @@ def test_complete_markup():
     ]
 
 
-def test_incomplete_markup():
+def test_incomplete_markup() -> None:
     # NOTE: Shopify/liquid throws a SyntaxError here.
     source = """{% comment %}
           {% assign foo = "1"
@@ -338,7 +338,7 @@ def test_incomplete_markup():
     ]
 
 
-def test_start_delimiters():
+def test_start_delimiters() -> None:
     # NOTE: Shopify/liquid throws a SyntaxError here.
     source = """{% comment %}
         {% {{ {%- endcomment %}"""
@@ -355,7 +355,7 @@ def test_start_delimiters():
     ]
 
 
-def test_nested_comment_blocks_balanced():
+def test_nested_comment_blocks_balanced() -> None:
     source = """{% comment %}
         {% comment %}
           {% comment %}{%    endcomment     %}
@@ -376,7 +376,7 @@ def test_nested_comment_blocks_balanced():
     ]
 
 
-def test_nested_comment_blocks_unbalanced():
+def test_nested_comment_blocks_unbalanced() -> None:
     # NOTE: Shopify/liquid throws a SyntaxError here.
     source = """{% comment %}
           {% comment %}
@@ -395,7 +395,7 @@ def test_nested_comment_blocks_unbalanced():
     ]
 
 
-def test_raw_block_balanced():
+def test_raw_block_balanced() -> None:
     source = """{% comment %}
         {% raw %}
           {% endcomment %}
@@ -416,7 +416,7 @@ def test_raw_block_balanced():
     ]
 
 
-def test_raw_block_unbalanced():
+def test_raw_block_unbalanced() -> None:
     # NOTE: Shopify/liquid throws a SyntaxError here.
     source = """{% comment %}
           {% raw %}
@@ -434,7 +434,7 @@ def test_raw_block_unbalanced():
     ]
 
 
-def test_junk_between_nested_endcomment_and_delimiter():
+def test_junk_between_nested_endcomment_and_delimiter() -> None:
     source = """{% comment %}
           {% comment %}
           {% endcomment
@@ -456,7 +456,7 @@ def test_junk_between_nested_endcomment_and_delimiter():
     ]
 
 
-def test_junk_between_nested_comment_and_delimiter():
+def test_junk_between_nested_comment_and_delimiter() -> None:
     source = """{% comment %}
           {% comment
             {% assign foo = 1 %}
@@ -478,7 +478,7 @@ def test_junk_between_nested_comment_and_delimiter():
     ]
 
 
-def test_junk_between_endcomment_and_delimiter():
+def test_junk_between_endcomment_and_delimiter() -> None:
     source = "{% comment %}123{% endcomment\n   xyz  endcomment %}"
 
     assert tokenize(source) == [

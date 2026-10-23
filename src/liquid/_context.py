@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, TypeGuard, cast
 
 from ._chain_map import ReadOnlyChainMap
-from ._drop import Drop, is_async_map
+from ._drop import liquid_async_object, liquid_object, liquid_primitive
 from ._nothing import NOTHING
 from .exceptions import ResourceLimitError
 from .expressions import IntegerLiteral, Name
@@ -94,14 +94,14 @@ class RenderContext:
             else:
                 dotted = False
 
-            if isinstance(obj, Drop):
-                if isinstance(selector, Drop):
+            if liquid_object(obj):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("string", self)
 
-                # TODO: Drop.__liquid__("data", self) or `__getliquiditem__`
+                if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
+                    obj = obj.__liquid_getattr__(selector, self)
 
-                if selector in obj:
-                    obj = obj[selector]
+                    # TODO: liquid_callable
                 else:
                     obj = NOTHING
 
@@ -112,13 +112,13 @@ class RenderContext:
                     obj = resolve_string_selector(obj, selector)
 
             elif isinstance(obj, Sequence):
-                if isinstance(selector, Drop):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("numeric", self)
 
                 obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
-                if isinstance(selector, Drop):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("data", self)
                 obj = resolve_mapping_selector(obj, selector, dotted)
 
@@ -145,31 +145,38 @@ class RenderContext:
             else:
                 dotted = False
 
-            if isinstance(obj, Drop):
-                if isinstance(selector, Drop):
+            if liquid_async_object(obj):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("string", self)
 
-                if is_async_map(obj):
-                    try:
-                        obj = await obj.__getitem_async__(selector)
-                    except KeyError:
-                        obj = NOTHING
+                if isinstance(selector, str) and await obj.__liquid_hasattr_async__(
+                    selector, self
+                ):
+                    obj = await obj.__liquid_getattr_async__(selector, self)
+                    # TODO: liquid_awaitable
                 else:
-                    if selector in obj:
-                        obj = obj[selector]
-                    else:
-                        obj = NOTHING
+                    obj = NOTHING
+
+            elif liquid_object(obj):
+                if liquid_primitive(selector):
+                    selector = selector.__liquid__("string", self)
+
+                if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
+                    obj = obj.__liquid_getattr__(selector, self)
+                    # TODO: liquid_callable
+                else:
+                    obj = NOTHING
 
             elif isinstance(obj, str):
                 obj = resolve_string_selector(obj, selector)
 
             elif isinstance(obj, Sequence):
-                if isinstance(selector, Drop):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("numeric", self)
                 obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
-                if isinstance(selector, Drop):
+                if liquid_primitive(selector):
                     selector = selector.__liquid__("data", self)
                 obj = resolve_mapping_selector(obj, selector, dotted)
 

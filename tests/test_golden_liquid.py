@@ -15,12 +15,12 @@ from liquid.exceptions import LiquidError
 class Case:
     name: str
     template: str
-    data: dict[str, Any] = field(default_factory=dict)  # type: ignore
+    data: dict[str, Any] = field(default_factory=dict)  # pyright: ignore[reportUnknownVariableType]
     templates: dict[str, str] | None = None
     result: str | None = None
     results: list[str] | None = None
     invalid: bool | None = None
-    tags: list[str] = field(default_factory=list)  # type: ignore
+    tags: list[str] = field(default_factory=list)  # pyright: ignore[reportUnknownVariableType]
 
 
 FILENAME = "tests/golden_liquid/golden_liquid.json"

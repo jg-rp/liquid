@@ -326,7 +326,7 @@ def test_cache_capacity() -> None:
     assert list(loader.cache.keys()) == ["footer.liquid", "header.liquid"]
 
 
-def test_invalid_suffix():
+def test_invalid_suffix() -> None:
     with pytest.raises(ValueError, match=r"Invalid suffix"):
         FileSystemLoader(
             "tests/fixtures/001/templates/",

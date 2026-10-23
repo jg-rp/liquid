@@ -3,7 +3,7 @@ from typing import Any
 
 from ._base_tag import AbstractTag
 from ._context import RenderContext
-from ._drop import ContextHint, Drop
+from ._drop import AbstractDrop, ContextHint
 from ._io import StringBuffer
 from ._lax_parser_mixin import LaxParserMixin
 from ._lexer import Lexer
@@ -42,6 +42,7 @@ from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 
 __all__ = (
     "TOKEN_NAMES",
+    "AbstractDrop",
     "AbstractTag",
     "Block",
     "CachingChoiceLoader",
@@ -51,7 +52,6 @@ __all__ = (
     "ChoiceLoader",
     "ContextHint",
     "DictLoader",
-    "Drop",
     "Environment",
     "Expression",
     "ExtendedLexer",

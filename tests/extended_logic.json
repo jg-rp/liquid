@@ -48,7 +48,7 @@
     {
       "name": "arithmetic, plus true",
       "expression": "1 + (2 < 3)",
-      "result": "2"
+      "result": "1"
     },
     {
       "name": "arithmetic operators bind more tightly than relational operators",

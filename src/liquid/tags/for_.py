@@ -4,7 +4,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from .._drop import is_iterable_drop
+from .._drop import liquid_iterable
 from .._markup import is_blank_block, render_block, render_block_async
 from .._slice import slice_sequence
 from ..drops import ForLoop, Undefined
@@ -174,7 +174,7 @@ class ForTag:
 
         it: Iterable[object]
 
-        if is_iterable_drop(target):
+        if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
         else:
@@ -233,7 +233,9 @@ class ForTag:
 
         it: Iterable[object]
 
-        if is_iterable_drop(target):
+        # TODO: async iterable
+
+        if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
         else:

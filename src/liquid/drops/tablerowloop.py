@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
-from .._drop import Drop
+from .._drop import AbstractDrop
+
+if TYPE_CHECKING:
+    from .._context import RenderContext
 
 
-class TableRowLoop(Drop):
+class TableRowLoop(AbstractDrop):
     """Table row helper variables."""
 
     __slots__ = (
@@ -22,7 +28,62 @@ class TableRowLoop(Drop):
         self.index = 0
         self.row = 1
 
-    def __getitem__(self, key: object) -> int:
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name in (
+            "length",
+            "index",
+            "index0",
+            "rindex",
+            "rindex0",
+            "first",
+            "last",
+            "col",
+            "col0",
+            "col_first",
+            "col_last",
+            "row",
+        )
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        if name == "first":
+            return self.index == 0
+
+        if name == "index":
+            return self.index + 1
+
+        if name == "index0":
+            return self.index
+
+        if name == "last":
+            return self.index == self.length - 1
+
+        if name == "length":
+            return self.length
+
+        if name == "rindex":
+            return self.length - self.index
+
+        if name == "rindex0":
+            return self.length - self.index - 1
+
+        if name == "col":
+            return self.col
+
+        if name == "col_first":
+            return self.col == 1
+
+        if name == "col_last":
+            return self.col == self.cols
+
+        if name == "col0":
+            return self.col - 1
+
+        if name == "row":
+            return self.row
+
+        raise AttributeError
+
+    def __getitem__(self, key: str) -> int:
         if key == "first":
             return self.index == 0
 
@@ -80,22 +141,6 @@ class TableRowLoop(Drop):
                 "col_last",
                 "row",
             )
-        )
-
-    def __contains__(self, item: object) -> bool:
-        return item in (
-            "length",
-            "index",
-            "index0",
-            "rindex",
-            "rindex0",
-            "first",
-            "last",
-            "col",
-            "col0",
-            "col_first",
-            "col_last",
-            "row",
         )
 
     def __bool__(self) -> bool:

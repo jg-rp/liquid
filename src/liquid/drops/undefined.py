@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Never
 
-from .._drop import Drop
+from .._drop import AbstractDrop
 from .._nothing import Nothing
 from ..exceptions import UndefinedVariableError
 from .iterable import IterableDrop
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ..tokens import Token
 
 
-class Blank(Drop):
+class Blank(AbstractDrop):
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
             case "string":
@@ -49,7 +49,7 @@ class Blank(Drop):
 BLANK = Blank()
 
 
-class Empty(Drop):
+class Empty(AbstractDrop):
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
             case "string":
@@ -81,7 +81,7 @@ class Empty(Drop):
 EMPTY = Empty()
 
 
-class Undefined(Drop):
+class Undefined(AbstractDrop):
     __slots__ = ("path", "source", "template_name", "token")
 
     def __init__(
@@ -95,13 +95,13 @@ class Undefined(Drop):
     def poke(self) -> None:
         pass
 
-    def __getitem__(self, key: object) -> object:
-        if key in ("first", "last", "size"):
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        if name in ("first", "last", "size"):
             return self
-        raise KeyError
+        raise AttributeError
 
-    def __contains__(self, item: object) -> bool:
-        return item in ("first", "last", "size")
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name in ("first", "last", "size")
 
     def __len__(self) -> int:
         return 3
@@ -125,6 +125,12 @@ class StrictUndefined(Undefined):
         )
 
     def __iter__(self) -> Iterator[str]:
+        self._error()
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        self._error()
+
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
         self._error()
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
@@ -172,8 +178,8 @@ class FalsyStrictUndefined(StrictUndefined):
             return False
         self._error()
 
-    def __contains__(self, item: object) -> bool:
-        return False
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name in ("first", "last", "size")
 
     def __eq__(self, other: object) -> bool:
         return other is None or isinstance(other, (Undefined, Nothing, Blank))

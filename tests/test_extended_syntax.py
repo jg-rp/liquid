@@ -13,7 +13,7 @@ from liquid import Environment, ExtendedParser
 class Case:
     name: str
     expression: str
-    data: dict[str, Any] = field(default_factory=dict)  # type: ignore
+    data: dict[str, Any] = field(default_factory=dict)  # pyright: ignore[reportUnknownVariableType]
     result: str | None = None
 
 

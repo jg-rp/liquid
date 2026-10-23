@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from .._drop import is_iterable_drop
+from .._drop import liquid_iterable
 from .._markup import render_block, render_block_async
 from .._slice import slice_sequence
 from ..drops import TableRowLoop
@@ -111,7 +111,7 @@ class TableRowTag:
         if context.env.is_nil(target):
             return
 
-        if is_iterable_drop(target):
+        if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, False)
             length = len(it)
         else:
@@ -154,7 +154,7 @@ class TableRowTag:
         target = await self.expression.evaluate_async(context)
         it: Iterable[object]
 
-        if is_iterable_drop(target):
+        if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, False)
             length = len(it)
         else:

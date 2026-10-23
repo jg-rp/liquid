@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-from .._drop import Drop
+from .._drop import AbstractDrop
 from .._nothing import NOTHING
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .._drop import ContextHint
 
 
-class ForLoop(Drop):
+class ForLoop(AbstractDrop):
     __slots__ = ("index", "length", "name", "parent_loop")
 
     def __init__(self, name: str, length: int, parent_loop: ForLoop | None) -> None:
@@ -20,35 +20,48 @@ class ForLoop(Drop):
         self.parent_loop = parent_loop or NOTHING
         self.index = -1
 
-    def __getitem__(self, key: object) -> object:
-        if key == "first":
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name in (
+            "name",
+            "length",
+            "index",
+            "index0",
+            "rindex",
+            "rindex0",
+            "first",
+            "last",
+            "parentloop",
+        )
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        if name == "first":
             return self.index == 0
 
-        if key == "index":
+        if name == "index":
             return self.index + 1
 
-        if key == "index0":
+        if name == "index0":
             return self.index
 
-        if key == "last":
+        if name == "last":
             return self.index == self.length - 1
 
-        if key == "length":
+        if name == "length":
             return self.length
 
-        if key == "name":
+        if name == "name":
             return self.name
 
-        if key == "parentloop":
+        if name == "parentloop":
             return self.parent_loop
 
-        if key == "rindex":
+        if name == "rindex":
             return self.length - self.index
 
-        if key == "rindex0":
+        if name == "rindex0":
             return self.length - self.index - 1
 
-        raise KeyError(key)
+        raise AttributeError
 
     def __iter__(self) -> Iterator[str]:
         return iter(
@@ -63,19 +76,6 @@ class ForLoop(Drop):
                 "last",
                 "parentloop",
             )
-        )
-
-    def __contains__(self, item: object) -> bool:
-        return item in (
-            "name",
-            "length",
-            "index",
-            "index0",
-            "rindex",
-            "rindex0",
-            "first",
-            "last",
-            "parentloop",
         )
 
     def __len__(self) -> int:

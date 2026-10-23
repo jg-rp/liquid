@@ -13,7 +13,7 @@ import markupsafe
 
 from . import filters, tags
 from ._chain_map import ReadOnlyChainMap
-from ._drop import has_html_safe_string, is_drop
+from ._drop import liquid_html_safe, liquid_iterable, liquid_primitive
 from ._io import StringBuffer
 from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
@@ -251,7 +251,7 @@ class Environment:
 
     def serialize(self, obj: object, context: RenderContext, span: Token) -> str:
         """Stringify `obj` suitable for output."""
-        if self.autoescape and has_html_safe_string(obj):
+        if self.autoescape and liquid_html_safe(obj):
             return obj.__html__()
 
         if isinstance(obj, str):
@@ -278,23 +278,16 @@ class Environment:
         return text
 
     def truthy(self, obj: object, context: RenderContext) -> bool:
-        if is_drop(obj):
-            obj = bool(obj)
+        if liquid_primitive(obj):
+            return bool(obj.__liquid__("boolean", context))
 
         return not (obj is False or obj is None)
 
     def eq(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(right):
-            if is_drop(left):
-                return right == left.__liquid__("data", context)
-            return right == left
-
-        if is_drop(left):
-            if is_drop(right):
-                return left == right.__liquid__("data", context)
-            return left == right
+        if liquid_primitive(right):
+            right = right.__liquid__("data", context)
 
         if type(left) is bool and type(right) is int:
             return False
@@ -307,100 +300,70 @@ class Environment:
     def lt(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(left):
-            if is_drop(right):
-                try:
-                    return left < right.__liquid__("data", context)
-                except TypeError:
-                    return False
-
-            try:
+        if isinstance(left, str):
+            if isinstance(right, str):
                 return left < right
-            except TypeError:
-                return False
-
-        if is_drop(right):
-            if is_drop(left):
-                try:
-                    return right > left.__liquid__("data", context)
-                except TypeError:
-                    return False
-
-            try:
-                return right > left
-            except TypeError:
-                return False
-
-        if isinstance(left, str) and isinstance(right, str):
-            return left < right
+            if liquid_primitive(right):
+                return left < str(right.__liquid__("string", context))
 
         if type(left) is bool or type(right) is bool:
             return False
 
-        if isinstance(left, (int, float, Decimal)) and isinstance(
-            right, (int, float, Decimal)
-        ):
-            return left < right
+        if isinstance(left, (int, float, Decimal)):
+            if isinstance(right, (int, float, Decimal)):
+                return left < right
+            if liquid_primitive(right):
+                return left < float(str(right.__liquid__("numeric", context)))
 
         if self.is_nil(left) or self.is_nil(right):
             return False
 
-        raise LiquidTypeError(
-            f"{left.__class__.__name__} and {right.__class__.__name__} are not comparable",
-            token=span,
-            source=context.template.source,
-            name=context.template.name,
-        )
+        try:
+            return left < right  # type: ignore
+        except TypeError:
+            raise LiquidTypeError(
+                f"{left.__class__.__name__} and {right.__class__.__name__} are not comparable",
+                token=span,
+                source=context.template.source,
+                name=context.template.name,
+            )
 
     def le(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(right):
-            if is_drop(left):
-                try:
-                    return right >= left.__liquid__("data", context)
-                except TypeError:
-                    return False
-
-            try:
-                return right >= left
-            except TypeError:
-                return False
-
-        if is_drop(left):
-            if is_drop(right):
-                try:
-                    return left <= right.__liquid__("data", context)
-                except TypeError:
-                    return False
-
-            try:
+        if isinstance(left, str):
+            if isinstance(right, str):
                 return left <= right
-            except TypeError:
-                return False
-
-        if isinstance(left, str) and isinstance(right, str):
-            return left <= right
+            if liquid_primitive(right):
+                return left <= str(right.__liquid__("string", context))
 
         if type(left) is bool or type(right) is bool:
             return False
 
-        if isinstance(left, (int, float, Decimal)) and isinstance(
-            right, (int, float, Decimal)
-        ):
-            return left <= right
+        if isinstance(left, (int, float, Decimal)):
+            if isinstance(right, (int, float, Decimal)):
+                return left <= right
+            if liquid_primitive(right):
+                return left <= float(str(right.__liquid__("numeric", context)))
 
         if self.is_nil(left) or self.is_nil(right):
             return False
 
-        return self.eq(left, right, context, span)
+        try:
+            result = left < right  # type: ignore
+        except TypeError:
+            raise LiquidTypeError(
+                f"{left.__class__.__name__} and {right.__class__.__name__} are not comparable",
+                token=span,
+                source=context.template.source,
+                name=context.template.name,
+            )
+
+        return result or self.eq(left, right, context, span)
 
     def contains(
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
-        if is_drop(left):
-            return right in left
-
         if not (self.truthy(left, context) and self.truthy(right, context)):
             return False
 
@@ -462,7 +425,7 @@ class Environment:
             except ValueError:
                 return default
 
-        if is_drop(obj):
+        if liquid_primitive(obj):
             return obj.__liquid__("numeric", context)  # type: ignore
 
         return default
@@ -474,7 +437,7 @@ class Environment:
         if isinstance(obj, str):
             return obj
 
-        if is_drop(obj):
+        if liquid_primitive(obj):
             return str(obj)
             # return obj.__liquid__("string", context)
 
@@ -492,8 +455,8 @@ class Environment:
         if isinstance(obj, str) and not self.iterable_strings:
             return [] if not obj else [obj]
 
-        if is_drop(obj):
-            return list(obj)
+        if liquid_iterable(obj):
+            return list(obj.__liquid_iter__(0, None, False))
 
         if isinstance(obj, Sequence):
             return list(obj)  # pyright: ignore[reportUnknownArgumentType]
