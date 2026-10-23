@@ -98,6 +98,8 @@ class RenderContext:
                 if isinstance(selector, Drop):
                     selector = selector.__liquid__("string", self)
 
+                # TODO: Drop.__liquid__("data", self) or `__getliquiditem__`
+
                 if selector in obj:
                     obj = obj[selector]
                 else:

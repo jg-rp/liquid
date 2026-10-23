@@ -81,6 +81,10 @@ class LiquidValueError(LiquidError):
     pass
 
 
+class LiquidArgumentError(DetailedLiquidError):
+    pass
+
+
 class LiquidZeroDivisionError(DetailedLiquidError):
     pass
 
@@ -106,6 +110,14 @@ class UndefinedVariableError(DetailedLiquidError):
 
 
 class DisabledTagError(DetailedLiquidError):
+    pass
+
+
+class TemplateInheritanceError(DetailedLiquidError):
+    pass
+
+
+class RequiredBlockError(TemplateInheritanceError):
     pass
 
 
