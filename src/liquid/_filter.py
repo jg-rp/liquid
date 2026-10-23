@@ -63,6 +63,9 @@ class FilterContext:
         result, _ = self.context.resolve_path(obj, [key])  # pyright: ignore[reportUnknownArgumentType]
         return default if result == NOTHING else result
 
+    def resolve(self, name: object) -> object:
+        return self.context.resolve(name)
+
     def input_array(self, obj: object) -> list[object]:
         """Coerce `obj` to a list suitable for filters that expect an array input."""
         if isinstance(obj, (list, tuple)):
