@@ -7,7 +7,7 @@ from .tokens import TokenKind
 RE_COMMENT_SEGMENT = re.compile(
     r"\{%-?\s*(comment|raw|endcomment|endraw)(?:(?!-?%\})[\s\S])*-?%\}"
 )
-RE_END_DOC = re.compile(r"\{%-?\s*enddoc\s*-?%\}")
+RE_DOC_SEGMENT = re.compile(r"\{%-?\s*(doc|enddoc)(?:(?!-?%\})[\s\S])*-?%\}")
 RE_END_RAW = re.compile(r"\{%-?\s*endraw\s*-?%\}")
 RE_FLOAT = re.compile(r"-?\d+\.\d+")
 RE_IDENT = re.compile(r"[a-zA-Z_][a-zA-Z0-9_-]*\??")
@@ -341,18 +341,43 @@ class LegacyLexer(Lexer):
                 break
 
     def accept_doc_comment(self, limit: int) -> None:
-        self.accept_expression(limit)
         self.skip(RE_TRIVIA)
+        self.accept_expression(limit)
+        # Ignore everything up to the next delimiter.
+        self.pos = limit
         self.accept_whitespace_control()
-
         if self.source.startswith("%}", self.pos):
             self.pos += 2
             self.emit(TOKEN_TAG_END)
 
-        if self.scan_until(RE_END_DOC):
-            self.emit(TOKEN_COMMENT)
+        doc_depth = 1
 
-        # Leave `{% enddoc %}` for scan_markup.
+        # Find the matching `{% enddoc %}` while allowing fully-formed,
+        # nested doc blocks.
+        while 1:
+            match = self.skip_until(RE_DOC_SEGMENT)
+
+            if not match:
+                self.emit(TOKEN_UNKNOWN)
+                break
+
+            tag_name = match.group(1)
+
+            if tag_name == "doc":
+                doc_depth += 1
+                self.pos = match.end()
+
+            elif tag_name == "enddoc":
+                doc_depth -= 1
+
+                if doc_depth > 0:
+                    self.pos = match.end()
+                    continue
+
+                self.emit(TOKEN_COMMENT)
+
+                # Leave the `{% enddoc %}` for scan_markup.
+                break
 
     def accept_raw_tag(self, limit: int) -> None:
         self.accept_expression(limit)

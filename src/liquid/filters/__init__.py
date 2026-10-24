@@ -22,6 +22,7 @@ from .find import find, find_index, has
 from .first import first
 from .floor import floor
 from .join import join
+from .json_ import JSON
 from .last import last
 from .map import map_
 from .minus import minus
@@ -52,6 +53,7 @@ from .url import url_decode, url_encode
 from .where import where
 
 __all__ = (
+    "JSON",
     "Currency",
     "DateTime",
     "GetText",

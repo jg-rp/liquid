@@ -146,6 +146,7 @@ class Environment:
         "datetime": filters.DateTime(),
         "decimal": filters.Number(),
         "gettext": filters.GetText(),
+        "json": filters.JSON(),
         "money_with_currency": filters.Currency(default_format="¤#,##0.00 ¤¤"),
         "money_without_currency": filters.Currency(default_format="#,##0.00"),
         "money_without_trailing_zeros": filters.Currency(
@@ -424,6 +425,9 @@ class Environment:
     def to_int(self, obj: object, context: RenderContext, span: Token) -> int:
         if isinstance(obj, int | float | Decimal):
             return math.trunc(obj)
+
+        if self.is_nil(obj):
+            return 0
 
         try:
             return math.trunc(float(str(obj)))

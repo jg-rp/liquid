@@ -306,15 +306,19 @@ class Parser(ABC):
         else:
             self.whitespace_control_carry = None
 
-    def eat_tag(self, tag_name: str) -> Token:
+    # TODO: Make prefix a separate function
+    # TODO: Or make prefix the default
+    def eat_tag(self, tag_name: str, prefix: bool = False) -> Token:
         self.eat(TOKEN_TAG_START, message=f"expected tag {tag_name!r}")
 
         if self.kind() == TOKEN_WC:
             self.pos += 1
 
         token = self.eat(TOKEN_TAG_NAME, message=f"expected tag {tag_name!r}")
+        value = token_value(token, self.source)
+        match = value == tag_name if not prefix else value.startswith(tag_name)
 
-        if value := token_value(token, self.source) != tag_name:
+        if not match:
             raise LiquidSyntaxError(
                 f"unexpected tag {value!r}",
                 token=token,

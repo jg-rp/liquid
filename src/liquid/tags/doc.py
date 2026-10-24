@@ -28,7 +28,7 @@ class DocTag:
         parser.carry_whitespace_control()
         parser.eat(TOKEN_TAG_END)
         comment = parser.eat(TOKEN_COMMENT)
-        parser.eat_empty_tag("enddoc")
+        parser.eat_tag("enddoc", prefix=True)
         return DocTag(token, token_value(comment, parser.source))
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:

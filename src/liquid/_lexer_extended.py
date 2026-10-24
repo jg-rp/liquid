@@ -33,7 +33,7 @@ class ExtendedLexer(Lexer):
 
     __slots__ = (
         "re_comment_segment",
-        "re_end_doc",
+        "re_doc_segment",
         "re_end_raw",
         "re_markup_start",
     )
@@ -55,8 +55,12 @@ class ExtendedLexer(Lexer):
             rf"-?{re.escape(self.tag_end)}"
         )
 
-        self.re_end_doc = re.compile(
-            rf"{re.escape(self.tag_start)}-?\s*enddoc\s*-?{re.escape(self.tag_end)}"
+        self.re_doc_segment = re.compile(
+            rf"{re.escape(self.tag_start)}"
+            r"-?\s*"
+            r"(doc|enddoc)"
+            rf"(?:(?!-?{re.escape(self.tag_end)})[\s\S])*"
+            rf"-?{re.escape(self.tag_end)}"
         )
 
         self.re_end_raw = re.compile(
@@ -207,6 +211,7 @@ class ExtendedLexer(Lexer):
 
     def accept_doc_comment(self, limit: int) -> None:
         self.skip(RE_TRIVIA)
+        self.accept_expression(limit)
         self.pos = limit
         if self.start < self.pos:
             self.emit(TOKEN_UNKNOWN)
@@ -217,10 +222,33 @@ class ExtendedLexer(Lexer):
             self.pos += len(self.tag_end)
             self.emit(TOKEN_TAG_END)
 
-        if self.scan_until(self.re_end_doc):
-            self.emit(TOKEN_COMMENT)
+        doc_depth = 1
 
-        # Leave `{% enddoc %}` for scan_markup.
+        # Find the matching `{% enddoc %}` while allowing fully-formed,
+        # nested doc blocks.
+        while 1:
+            match = self.skip_until(self.re_doc_segment)
+
+            if not match:
+                self.emit(TOKEN_UNKNOWN)
+                break
+
+            tag_name = match.group(1)
+
+            if tag_name == "doc":
+                doc_depth += 1
+                self.pos = match.end()
+
+            elif tag_name == "enddoc":
+                doc_depth -= 1
+
+                if doc_depth > 0:
+                    self.pos = match.end()
+                    continue
+
+                self.emit(TOKEN_COMMENT)
+                # Leave the `{% enddoc %}` for scan_markup.
+                break
 
     def accept_raw_tag(self, limit: int) -> None:
         self.skip(RE_TRIVIA)

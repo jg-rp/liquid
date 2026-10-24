@@ -1,6 +1,7 @@
 from collections.abc import Mapping, Sequence
 from decimal import Decimal
 
+from .._drop import liquid_iterable
 from .._filter import FilterContext
 from ..drops import Undefined
 
@@ -17,5 +18,8 @@ def size(context: FilterContext, left: object) -> int:
 
     if isinstance(left, (Sequence, Mapping)):
         return len(left)  # pyright: ignore[reportUnknownArgumentType]
+
+    if liquid_iterable(left):
+        return left.__liquid_iter__(0, None, False).length
 
     return 0

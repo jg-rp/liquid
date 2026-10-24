@@ -388,7 +388,7 @@ def resolve_mapping_selector(
 
 def resolve_unknown_selector(obj: object, selector: object) -> object:
     if selector == "size":
-        if isinstance(obj, (float, bool)):
+        if isinstance(obj, bool):
             return 0
 
         # Close enough, most of the time.

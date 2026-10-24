@@ -83,6 +83,13 @@ class FilterContext:
         return self.context.env.truthy(obj, self.context)
 
     def to_int(self, obj: object) -> int:
+        if self.is_nil(obj):
+            raise LiquidFilterError(
+                "invalid integer",
+                token=self.span,
+                source=self.context.template.source,
+                name=self.context.template.name,
+            )
         return self.context.env.to_int(obj, self.context, self.span)
 
     def to_numeric(self, obj: object, default: int | Decimal) -> float | int | Decimal:
