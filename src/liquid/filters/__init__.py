@@ -21,6 +21,8 @@ from .escape import escape, escape_once, escapejs, safe
 from .find import find, find_index, has
 from .first import first
 from .floor import floor
+from .html import script_tag, stylesheet_tag
+from .index import index
 from .join import join
 from .json_ import JSON
 from .last import last
@@ -37,7 +39,7 @@ from .reverse import reverse
 from .round import round_
 from .size import size
 from .slice import slice_
-from .sort import sort, sort_natural
+from .sort import sort, sort_natural, sort_numeric
 from .split import split
 from .squish import squish
 from .strip import lstrip, rstrip, strip
@@ -87,6 +89,7 @@ __all__ = (
     "first",
     "floor",
     "has",
+    "index",
     "join",
     "last",
     "lstrip",
@@ -107,15 +110,18 @@ __all__ = (
     "round_",
     "rstrip",
     "safe",
+    "script_tag",
     "size",
     "slice_",
     "sort",
     "sort_natural",
+    "sort_numeric",
     "split",
     "squish",
     "strip",
     "strip_html",
     "strip_newlines",
+    "stylesheet_tag",
     "sum_",
     "times",
     "truncate",

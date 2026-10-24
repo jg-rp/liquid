@@ -146,6 +146,7 @@ class Environment:
         "datetime": filters.DateTime(),
         "decimal": filters.Number(),
         "gettext": filters.GetText(),
+        "index": filters.index,
         "json": filters.JSON(),
         "money_with_currency": filters.Currency(default_format="¤#,##0.00 ¤¤"),
         "money_without_currency": filters.Currency(default_format="#,##0.00"),
@@ -156,6 +157,9 @@ class Environment:
         "ngettext": filters.NGetText(),
         "npgettext": filters.NPGetText(),
         "pgettext": filters.PGetText(),
+        "sort_numeric": filters.sort_numeric,
+        "script_tag": filters.script_tag,
+        "stylesheet_tag": filters.stylesheet_tag,
         "t": filters.Translate(),
         "unit": filters.Unit(),
     }
