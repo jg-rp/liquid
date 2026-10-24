@@ -384,7 +384,7 @@ class LegacyParser(Parser):
         return expressions.StringLiteral(
             token,
             token_value(self.eat_one_of(self.STRING_LITERAL_KINDS), self.source),
-            self.eat(token[0]),
+            span(token, self.eat(token[0])),
         )
 
     def parse_path(self) -> expressions.Variable:
@@ -664,7 +664,9 @@ class LegacyParser(Parser):
 
         if kind in (TOKEN_SINGLE_QUOTE, TOKEN_DOUBLE_QUOTE):
             expr = self.parse_string_literal()
-            return expressions.Name(expr.token, expr.value)
+            result = expressions.Name(expr.token, expr.value)
+            result.span = expr.span
+            return result
 
         raise LiquidSyntaxError(
             "expected string or identifier",
@@ -763,3 +765,47 @@ class LegacyParser(Parser):
                 self.pos += 1
 
         return args
+
+    def parse_parameters(
+        self, require_commas: bool = True
+    ) -> list[expressions.Parameter]:
+        params: list[expressions.Parameter] = []
+
+        while 1:
+            kind = self.kind()
+
+            if kind in TERMINATE_EXPRESSION:
+                break
+
+            if kind in self.PATH_NAME_KINDS:
+                name = self.parse_identifier()
+
+                if self.kind() in self.KEYWORD_ARGUMENT_DELIMITERS:
+                    self.next()
+                    params.append(
+                        expressions.Parameter(
+                            name.token,
+                            name,
+                            self.parse_expression(PRECEDENCE_LOWEST, infix=False),
+                        )
+                    )
+
+                else:
+                    params.append(expressions.Parameter(name.token, name, None))
+
+            else:
+                raise LiquidSyntaxError(
+                    "expected a parameter list",
+                    token=self.current(),
+                    source=self.source,
+                    name=self.template_name,
+                )
+
+            kind = self.kind()
+
+            if require_commas and kind not in TERMINATE_EXPRESSION:
+                self.eat(TOKEN_COMMA)
+            elif kind == TOKEN_COMMA:
+                self.pos += 1
+
+        return params

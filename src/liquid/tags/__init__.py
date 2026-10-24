@@ -16,6 +16,7 @@ from .include import IncludeTag
 from .increment import IncrementTag
 from .inline_comment import InlineCommentTag
 from .liquid import LiquidTag
+from .macro import CallTag, MacroTag
 from .output import OutputStatement
 from .raw import RawTag
 from .render import RenderTag
@@ -29,6 +30,7 @@ __all__ = (
     "AssignTag",
     "BlockTag",
     "BreakTag",
+    "CallTag",
     "CaptureTag",
     "CaseTag",
     "CommentTag",
@@ -47,6 +49,7 @@ __all__ = (
     "IncrementTag",
     "InlineCommentTag",
     "LiquidTag",
+    "MacroTag",
     "OutputStatement",
     "RawTag",
     "RenderTag",

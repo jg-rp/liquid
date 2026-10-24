@@ -68,7 +68,9 @@ class Environment:
 
     extra_tags: ClassVar[dict[str, Tag]] = {
         "block": tags.BlockTag,
+        "call": tags.CallTag,
         "extends": tags.ExtendsTag,
+        "macro": tags.MacroTag,
         "translate": tags.TranslateTag,
         "with": tags.WithTag,
     }

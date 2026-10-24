@@ -5,7 +5,7 @@ from collections.abc import Collection
 from typing import TYPE_CHECKING, Literal
 
 from .exceptions import LiquidSyntaxError
-from .expressions import KeywordArgument, Name, StringLiteral
+from .expressions import KeywordArgument, Name, Parameter, StringLiteral
 from .tokens import *
 from .tokens import TOKEN_NAMES, span, token_value
 
@@ -193,6 +193,20 @@ class Parser(ABC):
         self, require_commas: bool = True
     ) -> list[Expression]:
         """Parse zero or more positional arguments from the token stream.
+
+        Assumes any leading commas have been consumed by the caller, if they are allowed.
+
+        Parameters
+        ----------
+        require_commas
+            When true, throw a syntax error if arguments are not separated by a comma.
+        """
+
+    @abstractmethod
+    def parse_parameters(self, require_commas: bool = True) -> list[Parameter]:
+        """Parse zero or more parameters from the token stream.
+
+        A parameter is a Name with an optional default expression.
 
         Assumes any leading commas have been consumed by the caller, if they are allowed.
 

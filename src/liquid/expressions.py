@@ -1101,6 +1101,20 @@ class KeywordArgument:
         self.span = span(self.token, self.expr.token)
 
 
+@dataclass(slots=True)
+class Parameter:
+    token: Token
+    name: Name
+    expr: Expression | None
+    span: Token = field(init=False)
+
+    def __post_init__(self) -> None:
+        if self.expr:
+            self.span = span(self.token, self.expr.token)
+        else:
+            self.span = self.token
+
+
 type PathSegment = (
     Name | NameSegment | IndexSegment | IntegerLiteral | VariableSegment | RangeLiteral
 )
