@@ -69,6 +69,7 @@ class Environment:
     extra_tags: ClassVar[dict[str, Tag]] = {
         "block": tags.BlockTag,
         "extends": tags.ExtendsTag,
+        "translate": tags.TranslateTag,
         "with": tags.WithTag,
     }
 
@@ -140,14 +141,19 @@ class Environment:
 
     extra_filters: ClassVar[dict[str, Filter]] = {
         "currency": filters.Currency(),
-        "money": filters.Currency(),
+        "datetime": filters.DateTime(),
+        "decimal": filters.Number(),
+        "gettext": filters.GetText(),
         "money_with_currency": filters.Currency(default_format="¤#,##0.00 ¤¤"),
         "money_without_currency": filters.Currency(default_format="#,##0.00"),
         "money_without_trailing_zeros": filters.Currency(
             default_format="¤#,###", currency_digits=False
         ),
-        "datetime": filters.DateTime(),
-        "decimal": filters.Number(),
+        "money": filters.Currency(),
+        "ngettext": filters.NGetText(),
+        "npgettext": filters.NPGetText(),
+        "pgettext": filters.PGetText(),
+        "t": filters.Translate(),
         "unit": filters.Unit(),
     }
 
@@ -252,7 +258,9 @@ class Environment:
     def render(self, source: str, data: Mapping[str, object] | None = None) -> str:
         return self.parse(source).render(data)
 
-    async def render_async(self, source: str, data: Mapping[str, object]) -> str:
+    async def render_async(
+        self, source: str, data: Mapping[str, object] | None = None
+    ) -> str:
         return await self.parse(source).render_async(data)
 
     def tokenize(self, source: str) -> list[Token]:

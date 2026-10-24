@@ -21,6 +21,7 @@ from .raw import RawTag
 from .render import RenderTag
 from .tablerow import TableRowTag
 from .template_comment import TemplateComment
+from .translate import TranslateTag
 from .unless import UnlessTag
 from .with_ import WithTag
 
@@ -51,6 +52,7 @@ __all__ = (
     "RenderTag",
     "TableRowTag",
     "TemplateComment",
+    "TranslateTag",
     "UnlessTag",
     "WithTag",
 )

@@ -69,6 +69,10 @@ class LiquidSyntaxError(DetailedLiquidError):
     pass
 
 
+class TranslationSyntaxError(LiquidSyntaxError):
+    pass
+
+
 class LiquidNameError(DetailedLiquidError):
     pass
 

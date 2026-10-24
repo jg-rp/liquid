@@ -44,6 +44,7 @@ from .strip_html import strip_html
 from .strip_newlines import strip_newlines
 from .sum import sum_
 from .times import times
+from .translate import GetText, NGetText, NPGetText, PGetText, Translate
 from .truncate import truncate, truncate_words
 from .uniq import uniq
 from .upcase import upcase
@@ -53,7 +54,12 @@ from .where import where
 __all__ = (
     "Currency",
     "DateTime",
+    "GetText",
+    "NGetText",
+    "NPGetText",
     "Number",
+    "PGetText",
+    "Translate",
     "Unit",
     "abs_",
     "append",

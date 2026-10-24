@@ -39,6 +39,9 @@ class Blank(AbstractDrop):
 
         return False
 
+    def __lt__(self, other: object) -> bool:
+        return False
+
     def __str__(self) -> str:
         return ""
 
@@ -69,6 +72,9 @@ class Empty(AbstractDrop):
         if isinstance(other, (list, tuple, dict, str)):
             return not other
 
+        return False
+
+    def __lt__(self, other: object) -> bool:
         return False
 
     def __str__(self) -> str:

@@ -17,6 +17,7 @@ from .tags import CommentTag, DocTag, ErrorNode, InlineCommentTag, TemplateComme
 if TYPE_CHECKING:
     from ._markup import Block, Expression, Node
     from .environment import Environment
+    from .tokens import Token
 
 
 class Template:
@@ -52,6 +53,26 @@ class Template:
             self._lines = lines
 
         return self._lines
+
+    def line_col(self, token: Token) -> tuple[int, int]:
+        """Return the line and column number of `token` in this template."""
+        index = token[1]
+        cumulative_length = 0
+        target_line_index = -1
+
+        for i, line in enumerate(self.lines):
+            cumulative_length += len(line)
+            if index < cumulative_length:
+                target_line_index = i
+                break
+
+        if target_line_index == -1:
+            raise LiquidError("index out of bounds")
+
+        line_number = target_line_index + 1
+        line = self.lines[target_line_index]
+        column_number = index - (cumulative_length - len(line))
+        return line_number, column_number
 
     def render(self, data: Mapping[str, object] | None = None) -> str:
         buffer: StringBuffer = StringBuffer()
