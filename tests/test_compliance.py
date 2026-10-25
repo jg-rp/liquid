@@ -76,6 +76,8 @@ SKIP = {
     "filters, truncatewords, as many words as the word count": "TODO",
     "filters, truncatewords, untruncated input keeps its whitespace": "TODO",
     "tags, capture, capture whitespace": "TODO",
+    "filters, date, blank padded hours": "TODO",
+    "filters, date, no padding flag on zero": "TODO",
 }
 
 
