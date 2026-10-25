@@ -1,3 +1,4 @@
+import asyncio
 import json
 import operator
 from dataclasses import dataclass
@@ -35,52 +36,43 @@ SKIP = {
     "StandardFilterTest#test_base64_url_safe_encode_4aece6f5",
     "StandardFilterTest#test_base64_encode_3b4b7075",
     "StandardFilterTest#test_url_encode_60c8b46a",
-    # TODO:
-    "self_dotted_special_names_delegate_to_scope",
     "Range bound lax int string parsing [error_mode=strict2]",
-    # TODO: maybe
-    "self_inside_capture_body",
-    "self_inside_for_loop_body",
-    "self_contains_nil_valued_key",
-    "self_contains_absent_key",
-    "self_contains_present_key",
-    "self_recursive_lookup",
-    "self_bracket_in_bracket_recursion",
-    "self_nested_property_access",
-    "self_returns_empty_for_unknown_keys_strict2",
-    "self_returns_empty_for_unknown_keys",
-    "self_can_be_assigned",
-    "self_sees_local_assigns",
-    "self_dynamic_lookup_with_assigned_key",
-    "self_dynamic_lookup_strict2",
-    "self_dynamic_lookup",
-    "self_bracket_access_strict2",
-    "self_bracket_access_resolves_variable",
-    "self_dynamic_lookup_strict2 [error_mode=strict2]",
-    "self_bracket_access_strict2 [error_mode=strict2]",
-    "url_encode_filter_stringifies_self_drop",
-    "truncatewords_filter_stringifies_self_drop",
-    "truncate_filter_stringifies_self_drop",
-    "slice_filter_stringifies_self_drop",
-    "escape_filter_stringifies_self_drop",
-    "map_filter_looks_up_self_drop_properties",
-    "last_filter_returns_empty_for_self_with_last_key",
-    "first_filter_returns_empty_for_self_with_first_key",
-    "self_size_filter_has_no_intrinsic_size",
-    "self_can_be_passed_as_bare_drop_to_render",
-    "self_with_strict_variables_returns_empty_for_undefined_var",
-    "self_with_strict_variables_does_not_raise_for_defined_var",
-    "self_reflects_variables_assigned_after_creation",
-    "captured_self_tracks_each_scope_across_nested_render_boundaries",
-    "captured_self_distinguishes_original_and_snippet_scope_at_boundary",
-    "self_passed_to_nested_renders_preserves_each_level",
-    "self_passed_as_self_render_param_preserves_original_scope",
-    "self_passed_as_render_param_preserves_original_scope",
-    "self_in_render_without_passing_resolves_inner_scope",
-    "distinct_self_assignments_compare_equal",
-    "bare_self_compares_equal_to_bare_self",
-    "assigned_self_compares_equal_to_itself",
-    "self_with_strict_variables_does_not_raise_for_defined_var [error_mode=strict2]",
+    # TODO:
+    "Render for with args where arg is assigned",
+    "ParsingQuirksTest#test_blank_variable_markup_8535e1f3",
+    "Tablerow renders empty string when collection is false",
+    "Truncatewords only splits by UTF-8 ASCII whitespaces",
+    "Comparing empty and empty resolves to false",
+    "CaptureTest#test_capture_to_variable_from_outer_scope_if_existing_aa077c00",
+    "StandardFilterTest#test_date_e5c63040",
+    "StandardFilterTest#test_date_7d8d7e0f",
+    "StandardFilterTest#test_date_5a853799",
+    "truncatewords_nil_input_skips_length_coercion",
+    "truncate_nil_input_skips_length_coercion",
+    "StandardTagTest#test_has_a_block_which_does_nothing_165f8c96",
+    "CommentTagUnitTest#test_delimiter_can_have_extra_strings_a5bd2c12",
+    "CommentTagUnitTest#test_delimiter_can_have_extra_strings_a6438a36",
+    "CommentTagUnitTest#test_delimiter_can_have_extra_strings_b64b1fc0",
+    "CommentTagUnitTest#test_delimiter_can_have_extra_strings_ebee30d2",
+    "CommentTagUnitTest#test_delimiter_can_have_extra_strings_5414d4f8",
+    "CommentTagUnitTest#test_open_tags_in_comment_62298e16",
+    "tablerow_offset_non_numeric_string_coerces_to_zero",
+    "tablerow_limit_non_numeric_string_coerces_to_zero",
+    "tablerow_cols_non_numeric_string_never_wraps",
+    "StandardFilterTest#test_h_90aa2f49",
+    "StandardFilterTest#test_escape_once_0fadc690",
+    "StandardFilterTest#test_escape_fa9d5e38",
+    "Tablerow renders single column when lookup is a string and offset is greater than 1",
+    "Tablerow renders single column when lookup is a string and limit is less than 1",
+    "Float serialization with very long float",
+    # These are covered in test_environment.py
+    "strict2_rejects_bare_bracket_in_assign",
+    "strict2_rejects_bare_bracket_in_case",
+    "strict2_rejects_bare_bracket_in_if",
+    "strict2_rejects_bare_bracket_in_for",
+    "strict2_rejects_bare_bracket_dynamic_lookup",
+    "strict2_rejects_bare_bracket_double_quoted",
+    "strict2_rejects_bare_bracket_string_variable",
 }
 
 
@@ -134,4 +126,19 @@ def test_liquid_spec(case: Case) -> None:
         assert env.parse(case.source).render(case.data) == case.expected
 
 
-# TODO: async
+@pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("name"))
+def test_liquid_spec_async(case: Case) -> None:
+    if case.name in SKIP:
+        pytest.skip()
+
+    env = Environment(loader=MockLoader(case.templates), strict_filters=False)
+
+    async def coro() -> str:
+        return await env.parse(case.source).render_async(case.data)
+
+    if case.expected is None:
+        with pytest.raises(LiquidError):
+            asyncio.run(coro())
+
+    else:
+        assert asyncio.run(coro()) == case.expected

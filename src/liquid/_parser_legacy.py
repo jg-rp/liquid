@@ -26,8 +26,6 @@ if TYPE_CHECKING:
     from .environment import Environment
     from .tokens import Token
 
-# TODO: mark string literals as HTML safe
-
 LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
     TOKEN_AND: PRECEDENCE_LOGICAL_RIGHT,
     TOKEN_OR: PRECEDENCE_LOGICAL_RIGHT,
@@ -404,6 +402,14 @@ class LegacyParser(Parser):
 
         else:
             lbracket_token = self.eat(TOKEN_LBRACKET)
+
+            if not self.env.allow_bare_brackets:
+                raise LiquidSyntaxError(
+                    "bare brackets are not allowed, use 'self[...]' instead",
+                    token=lbracket_token,
+                    source=self.source,
+                    name=self.template_name,
+                )
 
             if self.kind() in self.PATH_NAME_KINDS:
                 # TODO: limit recursion

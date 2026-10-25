@@ -9,6 +9,7 @@ from collections.abc import (
     Awaitable,
     Callable,
     Collection,
+    Container,
     Generator,
     Mapping,
     Sequence,
@@ -168,6 +169,7 @@ class Environment:
         self,
         *,
         autoescape: bool = False,
+        bare_brackets: bool = True,
         conventional_operator_precedence: bool = False,
         extra: bool = False,
         globals: Mapping[str, object] | None = None,
@@ -184,6 +186,7 @@ class Environment:
         self.globals = globals
         self.undefined_type = undefined
 
+        self.allow_bare_brackets = bare_brackets
         self.strict_filters = strict_filters
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
@@ -402,8 +405,11 @@ class Environment:
             except ValueError:
                 return False
 
-        if isinstance(left, Mapping):
-            return right in left
+        if isinstance(left, Container):
+            try:
+                return right in left
+            except TypeError:
+                return False
 
         raise LiquidTypeError(
             f"{left.__class__.__name__} is not a container",

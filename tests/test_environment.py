@@ -153,3 +153,24 @@ def test_enable_assign_argument_separator() -> None:
         )
         == "12"
     )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "{% assign x = ['product'] %}",
+        "{% case ['product'] %}{% when 'a' %}hello{% endcase %}",
+        "{% if ['product'] == true %}hello{% endif %}",
+        "{% for item in ['collection'] %}{{ item }}{% endfor %}",
+        "{{ [key] }}",
+        '{{ ["product"] }}',
+        "{{ ['product'] }}",
+    ],
+)
+def test_reject_bare_brackets(source: str) -> None:
+    env = Environment()
+    env.parse(source)
+
+    env.allow_bare_brackets = False
+    with pytest.raises(LiquidSyntaxError):
+        env.parse(source)

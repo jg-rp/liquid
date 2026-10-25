@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import TYPE_CHECKING, Concatenate
 
-from ._drop import liquid_iterable
+from ._drop import liquid_iterable, liquid_object
 from ._missing import MISSING
 from ._nothing import NOTHING
 from .exceptions import LiquidFilterError, LiquidFilterInterrupt
@@ -52,7 +52,7 @@ class FilterContext:
                 name=self.context.template.name,
             )
 
-        if not isinstance(obj, Mapping):
+        if not (isinstance(obj, Mapping) or liquid_object(obj)):
             raise LiquidFilterError(
                 f"can't read property {obj}[{key}]",
                 token=self.span,

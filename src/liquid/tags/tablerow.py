@@ -118,10 +118,6 @@ class TableRowTag:
             a = context.env.to_array(target, context, self.expression.span)
             it, length = slice_sequence(a, offset, limit, False)
 
-        # if not length:
-        #     # An empty iterable renders nothing.
-        #     return
-
         cols = _to_int(self.cols, context, length, 0)
         tablerowloop = TableRowLoop(length, cols)
 
@@ -154,16 +150,15 @@ class TableRowTag:
         target = await self.expression.evaluate_async(context)
         it: Iterable[object]
 
+        if context.env.is_nil(target):
+            return
+
         if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, False)
             length = len(it)
         else:
             a = context.env.to_array(target, context, self.expression.span)
             it, length = slice_sequence(a, offset, limit, False)
-
-        # if not length:
-        #     # An empty iterable renders nothing.
-        #     return
 
         cols = await _to_int_async(self.cols, context, length, 0)
         tablerowloop = TableRowLoop(length, cols)

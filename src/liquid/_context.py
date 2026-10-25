@@ -18,6 +18,7 @@ from ._drop import (
     liquid_primitive,
 )
 from ._nothing import NOTHING
+from .drops import Self
 from .exceptions import ResourceLimitError
 from .expressions import IntegerLiteral, Name
 
@@ -45,7 +46,9 @@ class RenderContext:
         self.globals = globals or {}
         self.locals: dict[str, object] = {}
         self.counters: dict[str, int] = {}
-        self.scope = ReadOnlyChainMap(self.locals, self.counters, self.globals)
+        self.scope = ReadOnlyChainMap(
+            self.locals, self.counters, self.globals, {"self": Self(self)}
+        )
 
         self.registers: dict[str, object] = {}
 

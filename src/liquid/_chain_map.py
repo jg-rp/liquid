@@ -33,6 +33,12 @@ class ReadOnlyChainMap(Mapping[str, object]):
     def __len__(self) -> int:
         return sum(len(_map) for _map in self._maps)
 
+    def __contains__(self, key: object) -> bool:
+        for mapping in self._maps:
+            if key in mapping:
+                return True
+        return False
+
     def size(self) -> int:
         return len(self._maps)
 

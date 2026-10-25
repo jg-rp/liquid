@@ -5,6 +5,7 @@ from liquid.exceptions import ResourceLimitError
 
 # TODO: test render score
 # TODO: test render score cumulative
+# TODO: cover async
 
 
 def test_recursive_render() -> None:
