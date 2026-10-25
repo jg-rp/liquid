@@ -19,7 +19,7 @@ from ._drop import (
 )
 from ._nothing import NOTHING
 from .drops import Self
-from .exceptions import ResourceLimitError
+from .exceptions import DetailedLiquidError, ResourceLimitError
 from .expressions import IntegerLiteral, Name
 
 if TYPE_CHECKING:
@@ -28,11 +28,34 @@ if TYPE_CHECKING:
 
 
 class RenderContext:
+    __slots__ = (
+        "assign_score",
+        "assign_score_cumulative",
+        "capture_errors",
+        "context_depth",
+        "counters",
+        "disabled_tags",
+        "env",
+        "errors",
+        "globals",
+        "interrupts",
+        "limits",
+        "locals",
+        "loop_iteration_carry",
+        "loops",
+        "registers",
+        "render_score",
+        "render_score_cumulative",
+        "scope",
+        "template",
+    )
+
     def __init__(
         self,
         template: Template,
         *,
         globals: Mapping[str, object] | None = None,
+        capture_errors: bool = False,
         disabled_tags: Sequence[str] | None = None,
         context_depth: int = 1,
         assign_score_carry: int = 0,
@@ -62,6 +85,9 @@ class RenderContext:
         self.assign_score_cumulative = assign_score_carry
         self.render_score_cumulative = render_score_carry
         self.loop_iteration_carry = loop_iteration_carry
+
+        self.capture_errors = capture_errors
+        self.errors: list[DetailedLiquidError] = []
 
     def assign(self, name: str, value: object) -> None:
         if self.limits.max_assign_score or self.limits.max_assign_score_cumulative:

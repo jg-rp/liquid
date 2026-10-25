@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, Protocol
 
 from ._io import StringBuffer
-from .exceptions import DisabledTagError, ResourceLimitError
+from .exceptions import DetailedLiquidError, DisabledTagError, ResourceLimitError
 
 if TYPE_CHECKING:
     from ._context import RenderContext
@@ -175,7 +175,14 @@ def render_block(block: Block, context: RenderContext, buffer: StringBuffer) -> 
                     name=context.template.name,
                 )
 
-            node.render(context, buffer)
+            try:
+                node.render(context, buffer)
+            except DetailedLiquidError as err:
+                if context.capture_errors:
+                    buffer.write(f"\n{err}\n")
+                    context.errors.append(err)
+                else:
+                    raise
 
             if context.interrupts:
                 if context.interrupts[-1] == "stop":
@@ -219,7 +226,14 @@ async def render_block_async(
                     name=context.template.name,
                 )
 
-            await node.render_async(context, buffer)
+            try:
+                await node.render_async(context, buffer)
+            except DetailedLiquidError as err:
+                if context.capture_errors:
+                    buffer.write(f"\n{err}\n")
+                    context.errors.append(err)
+                else:
+                    raise
 
         if context.interrupts:
             if context.interrupts[-1] == "stop":

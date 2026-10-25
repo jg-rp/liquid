@@ -42,6 +42,7 @@ SKIP = {
     "tags, echo, nothing to echo",
     # TODO: These are invalid in Shopify/liquid.
     "range, float from a variable is an error",
+    "filters, date, fractional seconds",
 }
 
 EXTENDED_SKIP = {

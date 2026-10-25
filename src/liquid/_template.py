@@ -10,7 +10,7 @@ from ._context import RenderContext
 from ._io import StringBuffer
 from ._markup import render_block, render_block_async
 from ._static_analysis import Segments, TemplateAnalysis, analyze, analyze_async
-from .exceptions import LiquidError
+from .exceptions import DetailedLiquidError, LiquidError
 from .expressions import ErrorExpr
 from .tags import CommentTag, DocTag, ErrorNode, InlineCommentTag, TemplateComment
 
@@ -93,6 +93,26 @@ class Template:
         self, context: RenderContext, buffer: StringBuffer
     ) -> None:
         await render_block_async(self.nodes, context, buffer)
+
+    def render_with_error_capture(
+        self, data: Mapping[str, object] | None = None
+    ) -> tuple[str, list[DetailedLiquidError]]:
+        buffer: StringBuffer = StringBuffer()
+        context = RenderContext(
+            self, globals=self.make_globals(data), capture_errors=True
+        )
+        self.render_with_context(context, buffer)
+        return buffer.getvalue(), context.errors
+
+    async def render_with_error_capture_async(
+        self, data: Mapping[str, object] | None = None
+    ) -> tuple[str, list[DetailedLiquidError]]:
+        buffer: StringBuffer = StringBuffer()
+        context = RenderContext(
+            self, globals=self.make_globals(data), capture_errors=True
+        )
+        await self.render_with_context_async(context, buffer)
+        return buffer.getvalue(), context.errors
 
     def make_globals(
         self, data: Mapping[str, object] | None
