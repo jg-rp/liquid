@@ -335,3 +335,35 @@ def test_invalid_suffix():
             "tests/fixtures/001/templates/",
             ext="0",
         )
+
+
+def test_cache_templates_with_a_namespaced_cache_key() -> None:
+    env = Environment(
+        loader=CachingFileSystemLoader(
+            "tests/fixtures/001/templates/",
+            namespace_key="namespace",
+        )
+    )
+
+    template = env.get_template("index.liquid")
+    assert isinstance(template, BoundTemplate)
+    assert template.name == "index.liquid"
+    assert (
+        str(template.path).replace("\\", "/")
+        == "tests/fixtures/001/templates/index.liquid"
+    )
+    assert template.is_up_to_date() is True
+
+    another_template = env.get_template("index.liquid")
+    assert template is another_template
+
+    assert env.get_template("index.liquid", namespace="mock") is not template
+    assert env.get_template("index.liquid") is template
+
+    async def coro(namespace: str | None = None) -> BoundTemplate:
+        if namespace is not None:
+            return await env.get_template_async("index.liquid", namespace=namespace)
+        return await env.get_template_async("index.liquid")
+
+    assert asyncio.run(coro(namespace="mock")) is not template
+    assert asyncio.run(coro()) is template

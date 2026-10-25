@@ -2,127 +2,73 @@ from __future__ import annotations
 
 import json
 import timeit
-from dataclasses import dataclass
-from dataclasses import field
 from pathlib import Path
 
 from liquid import DictLoader
 from liquid import Environment
+from liquid import StrictUndefined
 from liquid.lex import get_lexer
-from liquid.undefined import StrictUndefined
 
 tokenize = get_lexer()
 
+FIXTURE = "performance/fixtures/002"
+NUMBER = 10000
+REPEAT = 3
 
-@dataclass
-class Fixture:
-    """Benchmark fixture data and templates."""
+fixture = Path(FIXTURE)
+templates = {f.name: f.read_text() for f in (fixture / "templates").glob("*liquid")}
 
-    name: str
-    data: dict[str, object]
-    templates: dict[str, str] = field(default_factory=dict)
+with (fixture / "data.json").open() as fd:
+    data = json.load(fd)
 
-    @staticmethod
-    def load(path: Path) -> Fixture:
-        """Load a benchmark fixture from _path_."""
-        templates: dict[str, str] = {}
+env = Environment(
+    loader=DictLoader(templates),
+    undefined=StrictUndefined,
+)
 
-        for input_file in (path / "templates").glob("*liquid"):
-            templates[input_file.name] = input_file.read_text()
+source = templates["index.liquid"]
+template = env.get_template("index.liquid")
 
-        with (path / "data.json").open() as fd:
-            data = json.load(fd)
-
-        return Fixture(name=path.parts[-1], data=data, templates=templates)
-
-    def env(self) -> Environment:
-        """Return a new Liquid environment for this fixture."""
-        return Environment(
-            loader=DictLoader(self.templates),
-            undefined=StrictUndefined,
-            globals=self.data,
-        )
-
-
-def print_result(
-    name: str, times: list[float], n_iterations: int, n_templates: int
-) -> None:
-    best = min(times)
-    n_calls = n_iterations * n_templates
-    per_sec = round(n_calls / best, 2)
-
-    per_i = best / n_iterations
-    i_per_s = 1 / per_i
-
-    print(f"{name:>31}: {best:.2}s ({per_sec:.2f} ops/s, {i_per_s:.2f} i/s)")
+benchmarks: dict[str, tuple[str, str]] = {
+    "tokenize": (
+        "",
+        "list(tokenize(source))",
+    ),
+    "parse": (
+        "",
+        "env.parse(source)",
+    ),
+    "render": (
+        "",
+        "template.render(**data)",
+    ),
+    "parse and render": (
+        "",
+        "env.render(source, **data)",
+    ),
+}
 
 
-def benchmark(path: str, number: int = 1000, repeat: int = 5) -> None:
-    fixture = Fixture.load(Path(path))
-    env = fixture.env()
+title = f"Benchmark {fixture.parts[-1]} ({NUMBER:,} times)"
+print(f"{title:<35} | {'Min (s)':<10} | {'Mean (s)':<10}")
+print("-" * 62)
 
-    source = fixture.templates["index.liquid"]
-    template = env.get_template("index.liquid")
-
-    print(
-        f"({fixture.name}) Best of {repeat} rounds with {number} iterations per round."
+for bench_name, (setup, stmt) in benchmarks.items():
+    times = timeit.repeat(
+        stmt=stmt,
+        setup=setup,
+        globals={
+            "source": source,
+            "template": template,
+            "env": env,
+            "data": data,
+            "tokenize": tokenize,
+        },
+        repeat=REPEAT,
+        number=NUMBER,
     )
 
-    print_result(
-        "scan template",
-        timeit.repeat(
-            "list(tokenize(template))",
-            globals={
-                "template": source,
-                "tokenize": tokenize,
-            },
-            number=number,
-            repeat=repeat,
-        ),
-        number,
-        1,
-    )
+    min_time = min(times)
+    mean_time = sum(times) / len(times)
 
-    print_result(
-        "parse template",
-        timeit.repeat(
-            "env.from_string(template)",
-            globals={
-                "template": source,
-                "env": env,
-            },
-            number=number,
-            repeat=repeat,
-        ),
-        number,
-        1,
-    )
-
-    print_result(
-        "render templates",
-        timeit.repeat(
-            "template.render()",
-            globals={
-                "template": template,
-            },
-            number=number,
-            repeat=repeat,
-        ),
-        number,
-        1,
-    )
-
-
-def main() -> None:
-    fixtures = [
-        "performance/fixtures/001",
-        "performance/fixtures/002",
-    ]
-
-    for fixture in fixtures:
-        benchmark(fixture)
-        print()
-
-
-if __name__ == "__main__":
-    main()
+    print(f"{bench_name:<35} | {min_time:<10.4f} | {mean_time:<10.4f}")

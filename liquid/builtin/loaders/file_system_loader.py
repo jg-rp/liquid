@@ -6,6 +6,7 @@ import asyncio
 import os
 from functools import partial
 from pathlib import Path
+from pathlib import PurePath
 from typing import TYPE_CHECKING
 from typing import Iterable
 from typing import Optional
@@ -62,7 +63,9 @@ class FileSystemLoader(BaseLoader):
         _template_name_ exists. If none of the search paths contain _template_name_, a
         _TemplateNotFound_ exception is raised.
         """
-        template_path = Path(template_name)
+        template_path = PurePath(template_name)
+        if template_path.anchor:
+            template_path = PurePath(*template_path.parts[1:])
 
         if not template_path.name:
             raise TemplateNotFoundError(template_name)
@@ -74,26 +77,24 @@ class FileSystemLoader(BaseLoader):
             raise TemplateNotFoundError(template_name)
 
         for base in self.search_path:
-            source_path = base.joinpath(template_path)
+            base_resolved = base.resolve()
+            source_path = (base_resolved / template_path).resolve()
 
-            try:
-                if not source_path.exists() or not source_path.is_file():
-                    continue
-            except OSError:
-                # "File name too long", for example
+            if not source_path.is_relative_to(base_resolved):
                 continue
 
             if self.reject_symlinks:
-                try:
-                    resolved = source_path.resolve(strict=False)
-                    base_resolved = base.resolve(strict=False)
-                except OSError:
-                    continue
+                current = base_resolved
+                for part in template_path.parts:
+                    current /= part
+                    if current.is_symlink():
+                        continue
 
-                if not resolved.is_relative_to(base_resolved):
-                    continue
+            if not source_path.is_file() or source_path.is_dir():
+                continue
 
-            return source_path
+            # We don't want to expose a fully qualified path in error messages.
+            return base / template_path
 
         raise TemplateNotFoundError(template_name)
 
