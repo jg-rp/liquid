@@ -26,6 +26,7 @@ from ._messages import MessageTuple, Translations, extract_from_template
 from ._parser import Parser
 from ._parser_extended import ExtendedParser
 from ._parser_legacy import LegacyParser
+from ._resource_limits import ResourceLimits
 from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
 from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
@@ -74,6 +75,7 @@ __all__ = (
     "Parser",
     "Partial",
     "RenderContext",
+    "ResourceLimits",
     "Scope",
     "Segments",
     "StrictUndefined",

@@ -5,7 +5,7 @@ from timeit import repeat
 def build_list(chunks: list[str]) -> str:
     parts: list[str] = []
     for chunk in chunks:
-        parts.append(chunk)
+        parts.append(chunk)  # noqa: PERF402
     return "".join(parts)
 
 

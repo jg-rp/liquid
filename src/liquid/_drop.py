@@ -189,7 +189,7 @@ class LiquidAwaitable(Protocol):
         ...
 
 
-def liquid_awaitable(obj: object) -> TypeGuard[LiquidCallable]:
+def liquid_awaitable(obj: object) -> TypeGuard[LiquidAwaitable]:
     return hasattr(obj, "__liquid_awaitable__")
 
 

@@ -109,6 +109,7 @@ class RenderTag:
             scope,
             disabled_tags=("include",),
             block_scope=False,
+            carry_loop_iterations=True,
             template=template,
         )
 
@@ -157,6 +158,7 @@ class RenderTag:
             scope,
             disabled_tags=("include",),
             block_scope=False,
+            carry_loop_iterations=True,
             template=template,
         )
 

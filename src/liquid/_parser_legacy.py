@@ -26,8 +26,6 @@ if TYPE_CHECKING:
     from .environment import Environment
     from .tokens import Token
 
-# TODO: limit expression depth
-# TODO: limit block depth
 # TODO: mark string literals as HTML safe
 
 LEGACY_PRECEDENCES: dict[TokenKind, Precedence] = {
@@ -136,10 +134,11 @@ class LegacyParser(Parser):
 
     def parse_block(self, end: Collection[str]) -> Block:
         nodes: Block = []
-        self.block_depth += 1
 
-        if self.block_depth > self.env.max_block_depth:
-            raise ResourceLimitError("maximum recursion depth exceeded")
+        if self.block_depth > self.env.resource_limits.max_block_depth:
+            raise ResourceLimitError("maximum block depth exceeded")
+
+        self.block_depth += 1
 
         while 1:
             token = self.next()
@@ -256,9 +255,14 @@ class LegacyParser(Parser):
     def parse_primary_expression(
         self, precedence: Precedence = PRECEDENCE_LOWEST, *, infix: bool = False
     ) -> Expression:
+        self.expression_depth += 1
+        if self.expression_depth > self.env.resource_limits.max_expression_depth:
+            raise ResourceLimitError("maximum expression depth exceeded")
+
         left = self.parse_basic_expression()
 
         if not infix:
+            self.expression_depth -= 1
             return left
 
         while 1:
@@ -272,6 +276,7 @@ class LegacyParser(Parser):
 
             left = self.parse_infix(left)
 
+        self.expression_depth -= 1
         return left
 
     def parse_basic_expression(self) -> Expression:
@@ -562,6 +567,12 @@ class LegacyParser(Parser):
 
             if kind == TOKEN_TAG_START:
                 self.pos += 1
+
+                if self.block_depth > self.env.resource_limits.max_block_depth:
+                    raise ResourceLimitError("maximum recursion depth exceeded")
+
+                self.block_depth += 1
+
                 nodes.append(self.parse_tag())
 
             elif kind in (TOKEN_WC, TOKEN_TAG_END):

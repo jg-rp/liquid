@@ -1,12 +1,10 @@
+import asyncio
 import operator
 from dataclasses import dataclass
 
 import pytest
 
 from liquid import AbstractDrop, ContextHint, Environment, RenderContext
-
-# TODO: test drop contains
-# TODO: test drop callable and awaitable
 
 
 @dataclass
@@ -80,6 +78,29 @@ class ConfusedDrop(GenericDrop[bool]):
 
     def __str__(self) -> str:
         return "yay" if self.val else "nay"
+
+
+class CallableDrop(AbstractDrop):
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name in ("func", "coro")
+
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        return getattr(self, name)
+
+    def __liquid_callable__(self, name: str) -> bool:
+        return name == "func"
+
+    def __liquid_awaitable__(self, name: str) -> bool:
+        return name == "coro"
+
+    def func(self) -> str:
+        return "CALLED"
+
+    def secret(self) -> str:
+        return "SECRET"
+
+    async def coro(self) -> str:
+        return "CORO"
 
 
 TEST_CASES = [
@@ -173,12 +194,50 @@ TEST_CASES = [
         data={"drop": ConfusedDrop(False)},
         expect="",
     ),
+    Case(
+        description="call callable method",
+        template=r"{{ drop.func }}",
+        data={"drop": CallableDrop()},
+        expect="CALLED",
+    ),
+    Case(
+        description="don't call un-callable method",
+        template=r"{{ drop.secret }}",
+        data={"drop": CallableDrop()},
+        expect="",
+    ),
+    Case(
+        description="don't call coroutine method in sync context",
+        template=r"{{ drop.coro }}",
+        data={"drop": CallableDrop()},
+        expect="",
+    ),
 ]
 
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
-def test_to_liquid(case: Case) -> None:
+def test_drop_api(case: Case) -> None:
     env = Environment()
     template = env.parse(case.template)
     result = template.render(case.data)
     assert result == case.expect
+
+
+def test_awaitable_drop() -> None:
+    env = Environment()
+    template = env.parse("{{ drop.coro }}")
+
+    async def coro() -> str:
+        return await template.render_async({"drop": CallableDrop()})
+
+    assert asyncio.run(coro()) == "CORO"
+
+
+def test_callable_drop_in_async_context() -> None:
+    env = Environment()
+    template = env.parse("{{ drop.func }}")
+
+    async def coro() -> str:
+        return await template.render_async({"drop": CallableDrop()})
+
+    assert asyncio.run(coro()) == "CALLED"

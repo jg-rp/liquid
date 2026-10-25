@@ -148,17 +148,17 @@ class Partial:
 
 
 def render_block(block: Block, context: RenderContext, buffer: StringBuffer) -> None:
-    if context.env.max_render_score or context.env.max_render_score_cumulative:
+    if context.limits.max_render_score or context.limits.max_render_score_cumulative:
         context.render_score += len(block)
         context.render_score_cumulative += len(block)
 
         if (
-            context.env.max_render_score
-            and context.render_score > context.env.max_render_score
+            context.limits.max_render_score
+            and context.render_score > context.limits.max_render_score
         ) or (
-            context.env.max_render_score_cumulative
+            context.limits.max_render_score_cumulative
             and context.render_score_cumulative
-            > context.env.max_render_score_cumulative
+            > context.limits.max_render_score_cumulative
         ):
             raise ResourceLimitError("memory limits reached")
 
@@ -182,24 +182,27 @@ def render_block(block: Block, context: RenderContext, buffer: StringBuffer) -> 
                     context.interrupts.pop()
                 break
 
-        if context.env.max_render_size and len(buffer) > context.env.max_render_size:
+        if (
+            context.limits.max_render_size
+            and len(buffer) > context.limits.max_render_size
+        ):
             raise ResourceLimitError("memory limits exceeded")
 
 
 async def render_block_async(
     block: Block, context: RenderContext, buffer: StringBuffer
 ) -> None:
-    if context.env.max_render_score or context.env.max_render_score_cumulative:
+    if context.limits.max_render_score or context.limits.max_render_score_cumulative:
         context.render_score += len(block)
         context.render_score_cumulative += len(block)
 
         if (
-            context.env.max_render_score
-            and context.render_score > context.env.max_render_score
+            context.limits.max_render_score
+            and context.render_score > context.limits.max_render_score
         ) or (
-            context.env.max_render_score_cumulative
+            context.limits.max_render_score_cumulative
             and context.render_score_cumulative
-            > context.env.max_render_score_cumulative
+            > context.limits.max_render_score_cumulative
         ):
             raise ResourceLimitError("memory limits reached")
 
@@ -223,7 +226,10 @@ async def render_block_async(
                 context.interrupts.pop()
             break
 
-        if context.env.max_render_size and len(buffer) > context.env.max_render_size:
+        if (
+            context.limits.max_render_size
+            and len(buffer) > context.limits.max_render_size
+        ):
             raise ResourceLimitError("memory limits exceeded")
 
 

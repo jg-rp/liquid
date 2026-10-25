@@ -1,7 +1,9 @@
 import io
 
 from babel.messages import Catalog
-from babel.messages.extract import extract as babel_extract  # pyright: ignore[reportUnknownVariableType]
+from babel.messages.extract import (
+    extract as babel_extract,  # pyright: ignore[reportUnknownVariableType]
+)
 
 from liquid import Environment, ExtendedLexer, extract_liquid
 from liquid._messages import (

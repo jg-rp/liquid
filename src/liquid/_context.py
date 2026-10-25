@@ -3,13 +3,20 @@
 
 from __future__ import annotations
 
+import inspect
 import math
 from collections.abc import Callable, Generator, Mapping, Sequence
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, TypeGuard, cast
 
 from ._chain_map import ReadOnlyChainMap
-from ._drop import liquid_async_object, liquid_object, liquid_primitive
+from ._drop import (
+    liquid_async_object,
+    liquid_awaitable,
+    liquid_callable,
+    liquid_object,
+    liquid_primitive,
+)
 from ._nothing import NOTHING
 from .exceptions import ResourceLimitError
 from .expressions import IntegerLiteral, Name
@@ -26,13 +33,14 @@ class RenderContext:
         *,
         globals: Mapping[str, object] | None = None,
         disabled_tags: Sequence[str] | None = None,
-        context_depth: int = 0,
+        context_depth: int = 1,
         assign_score_carry: int = 0,
         render_score_carry: int = 0,
-        loop_iteration_carry: int = 0,
+        loop_iteration_carry: int = 1,
     ) -> None:
         self.template = template
         self.env = template.env
+        self.limits = self.env.resource_limits
 
         self.globals = globals or {}
         self.locals: dict[str, object] = {}
@@ -53,17 +61,18 @@ class RenderContext:
         self.loop_iteration_carry = loop_iteration_carry
 
     def assign(self, name: str, value: object) -> None:
-        if self.env.max_assign_score or self.env.max_assign_score_cumulative:
+        if self.limits.max_assign_score or self.limits.max_assign_score_cumulative:
             score = assign_score_of(value)
             self.assign_score += score
             self.assign_score_cumulative += score
 
             if (
-                self.env.max_assign_score
-                and self.assign_score > self.env.max_assign_score
+                self.limits.max_assign_score
+                and self.assign_score > self.limits.max_assign_score
             ) or (
-                self.env.max_assign_score_cumulative
-                and self.assign_score_cumulative > self.env.max_assign_score_cumulative
+                self.limits.max_assign_score_cumulative
+                and self.assign_score_cumulative
+                > self.limits.max_assign_score_cumulative
             ):
                 raise ResourceLimitError("memory limit exceeded")
 
@@ -99,9 +108,19 @@ class RenderContext:
                     selector = selector.__liquid__("string", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
-                    obj = obj.__liquid_getattr__(selector, self)
+                    val = obj.__liquid_getattr__(selector, self)
 
-                    # TODO: liquid_callable
+                    if callable(val):
+                        if liquid_callable(obj) and obj.__liquid_callable__(selector):
+                            try:
+                                val = val()
+                            except Exception:  # noqa: BLE001
+                                val = NOTHING
+
+                        else:
+                            val = NOTHING
+
+                    obj = val
                 else:
                     obj = NOTHING
 
@@ -152,8 +171,26 @@ class RenderContext:
                 if isinstance(selector, str) and await obj.__liquid_hasattr_async__(
                     selector, self
                 ):
-                    obj = await obj.__liquid_getattr_async__(selector, self)
-                    # TODO: liquid_awaitable
+                    val = await obj.__liquid_getattr_async__(selector, self)
+
+                    if callable(val):
+                        if liquid_awaitable(obj) and obj.__liquid_awaitable__(selector):
+                            try:
+                                val = val()
+                                if inspect.isawaitable(val):
+                                    val = await val
+                            except Exception:  # noqa: BLE001
+                                val = NOTHING
+                        elif liquid_callable(obj) and obj.__liquid_callable__(selector):
+                            try:
+                                val = val()
+                            except Exception:  # noqa: BLE001
+                                val = NOTHING
+
+                        else:
+                            val = NOTHING
+
+                    obj = val
                 else:
                     obj = NOTHING
 
@@ -162,8 +199,26 @@ class RenderContext:
                     selector = selector.__liquid__("string", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
-                    obj = obj.__liquid_getattr__(selector, self)
-                    # TODO: liquid_callable
+                    val = obj.__liquid_getattr__(selector, self)
+
+                    if callable(val):
+                        if liquid_awaitable(obj) and obj.__liquid_awaitable__(selector):
+                            try:
+                                val = val()
+                                if inspect.isawaitable(val):
+                                    val = await val
+                            except Exception:  # noqa: BLE001
+                                val = NOTHING
+                        elif liquid_callable(obj) and obj.__liquid_callable__(selector):
+                            try:
+                                val = val()
+                            except Exception:  # noqa: BLE001
+                                val = NOTHING
+
+                        else:
+                            val = NOTHING
+
+                    obj = val
                 else:
                     obj = NOTHING
 
@@ -211,9 +266,19 @@ class RenderContext:
         *,
         template: Template | None = None,
         disabled_tags: Sequence[str] | None = None,
+        carry_loop_iterations: bool = False,
         block_scope: bool = False,
     ) -> RenderContext:
         self.raise_for_context_depth()
+
+        if carry_loop_iterations:
+            loop_iteration_carry = (
+                math.prod(loop.length for loop in self.loops)
+                * self.loop_iteration_carry
+            )
+
+        else:
+            loop_iteration_carry = 1
 
         globals_ = (
             ReadOnlyChainMap(namespace, self.scope)
@@ -228,6 +293,7 @@ class RenderContext:
             context_depth=self.context_depth + 1,
             assign_score_carry=self.assign_score_cumulative,
             render_score_carry=self.render_score_cumulative,
+            loop_iteration_carry=loop_iteration_carry,
         )
 
         for register in self.env.persistent_registers:
@@ -284,17 +350,17 @@ class RenderContext:
         return None
 
     def raise_for_context_depth(self) -> None:
-        if self.context_depth + 1 > self.env.max_context_depth:
+        if self.context_depth + 1 > self.limits.max_context_depth:
             raise ResourceLimitError(
                 "maximum context depth reached, possible recursive render"
             )
 
     def raise_for_loop_limit(self, length: int) -> None:
         if (
-            self.env.max_loop_iterations
+            self.limits.max_loop_iterations
             and math.prod(loop.length for loop in self.loops)
-            + length * self.loop_iteration_carry
-            > self.env.max_loop_iterations
+            * (length * self.loop_iteration_carry)
+            > self.limits.max_loop_iterations
         ):
             raise ResourceLimitError("loop iteration limit reached")
 
@@ -303,19 +369,46 @@ def is_forloop(loop: ForLoop | TableRowLoop) -> TypeGuard[ForLoop]:
     return hasattr(loop, "parent_loop")
 
 
-def assign_score_of(obj: object) -> int:
-    if isinstance(obj, str):
-        return len(obj)
+def assign_score_of(obj: object, max_nodes: int = 1_000_000) -> int:
+    stack: list[object] = [obj]
+    seen: set[int] = set()
+    count = 0
 
-    # TODO: handle circular data
+    score = 0
 
-    if isinstance(obj, Sequence):
-        return sum(assign_score_of(item) for item in obj)
+    while stack:
+        if count > max_nodes:
+            raise ResourceLimitError("maximum data depth reached")
 
-    if isinstance(obj, Mapping):
-        return sum(assign_score_of(k) + assign_score_of(v) for k, v in obj.items())
+        node = stack.pop()
+        count += 1
 
-    return 1
+        if isinstance(node, str):
+            score += len(node)
+
+        elif isinstance(node, Sequence):
+            id_ = id(node)
+            if id_ in seen:
+                continue
+
+            seen.add(id_)
+            score += 1
+            stack.extend(node)
+
+        elif isinstance(node, Mapping):
+            id_ = id(node)
+            if id_ in seen:
+                continue
+
+            seen.add(id_)
+            score += 1
+            stack.extend(node.keys())
+            stack.extend(node.values())
+
+        else:
+            score += 1
+
+    return score
 
 
 def resolve_string_selector(obj: str, selector: object) -> object:

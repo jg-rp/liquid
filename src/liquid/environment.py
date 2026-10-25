@@ -26,6 +26,7 @@ from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
 from ._nothing import Nothing
 from ._parser_legacy import LegacyParser
+from ._resource_limits import ResourceLimits
 from ._template import Template
 from .drops import Undefined
 from .exceptions import LiquidTypeError
@@ -37,7 +38,6 @@ if TYPE_CHECKING:
     from ._loader import Loader
     from ._markup import Tag
     from ._parser import Parser
-    from ._resource_limits import ResourceLimits
     from .tokens import Token
 
 
@@ -188,21 +188,12 @@ class Environment:
         self.autoescape = autoescape
         self.iterable_strings = iterable_strings
         self.shorthand_indexes = shorthand_indexes
+        self.conventional_operator_precedence = conventional_operator_precedence
 
         self.tokenizer = tokenizer
         self.parser = parser
 
-        self.conventional_operator_precedence = conventional_operator_precedence
-
-        # TODO: Update to use ResourceLimits
-        self.max_assign_score: int | None = None
-        self.max_assign_score_cumulative: int | None = None
-        self.max_render_score: int | None = None
-        self.max_render_score_cumulative: int | None = None
-        self.max_render_size: int | None = None
-        self.max_context_depth: int = 30
-        self.max_loop_iterations: int | None = None
-        self.max_block_depth: int = 30
+        self.resource_limits = resource_limits or ResourceLimits()
 
         self.tags: dict[str, Tag] = {}
         self.filters: dict[str, Filter] = {}
