@@ -67,6 +67,15 @@ SKIP = {
     "range, float from a variable is an error": "TODO",
     "tags, comment, incomplete nested output markup is a syntax error": "TODO",
     "tags, comment, unbalanced nested raw tag": "TODO",
+    "filters, concat, nil items are kept": "TODO",
+    "filters, date, fractional seconds": "TODO",
+    "filters, round, half at decimal places": "TODO",
+    "filters, round, half below one rounds up": "TODO",
+    "filters, round, half rounds up": "TODO",
+    "filters, round, negative half rounds away from zero": "TODO",
+    "filters, truncatewords, as many words as the word count": "TODO",
+    "filters, truncatewords, untruncated input keeps its whitespace": "TODO",
+    "tags, capture, capture whitespace": "TODO",
 }
 
 

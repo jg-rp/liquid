@@ -150,12 +150,12 @@ class CachingLoaderMixin(ABC, _CachingLoaderProtocol):
         cache_key = self.cache_key(name, context, kwargs)
         return await self._check_cache_async(
             env,
-            name,
+            cache_key,
             globals,
             partial(
                 super().load_async,  # type: ignore
                 env,
-                cache_key,
+                name,
                 globals=globals,
                 context=context,
                 **kwargs,

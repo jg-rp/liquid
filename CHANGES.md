@@ -1,5 +1,13 @@
 # Python Liquid Change Log
 
+## Version 2.3.6 (unreleased)
+
+**Fixes**
+
+- Fixed a bug with `CachingLoaderMixin` where it would use an incorrect cache key when given a namespace and loading files asynchronously.
+
+- Fixed `FileSystemLoader` path resolution. On Windows we would fail to stay in the search path in some cases given a malicious absolute path.
+
 ## Version 2.3.5
 
 Fixed a bug with the `date` filter. Previously we were caching the result of applying `date` to the special inputs `"now"` and `"today"`, along with all other inputs. Now `"now"` and `"today"` are handled without caching. See [#230](https://github.com/jg-rp/liquid/pull/230).
