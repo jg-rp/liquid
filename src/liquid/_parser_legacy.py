@@ -370,7 +370,12 @@ class LegacyParser(Parser):
             span(token, self.eat(token[0])),
         )
 
-    def parse_path(self) -> expressions.Variable:
+    def parse_path(self, depth: int = 0) -> expressions.Variable:
+        # Arbitrary limit. It's hard to imagine a legitimate case where there's more
+        # than a couple of nested variables.
+        if depth > 20:
+            raise ResourceLimitError("maximum variable depth reached")
+
         token = self.current()
         kind = token[0]
 
@@ -392,8 +397,7 @@ class LegacyParser(Parser):
                 )
 
             if self.kind() in self.PATH_NAME_KINDS:
-                # TODO: limit recursion
-                var = self.parse_path()
+                var = self.parse_path(depth=depth + 1)
                 root = expressions.VariableSegment(
                     lbracket_token, var, span(lbracket_token, self.eat(TOKEN_RBRACKET))
                 )
@@ -406,18 +410,18 @@ class LegacyParser(Parser):
                 )
 
         if self.kind() in (TOKEN_LBRACKET, TOKEN_DOT):
-            return expressions.Variable(token, root, self.parse_path_selectors())
+            return expressions.Variable(token, root, self.parse_path_selectors(depth))
 
         return expressions.Variable(token, root, None)
 
-    def parse_path_selectors(self) -> list[expressions.PathSegment]:
+    def parse_path_selectors(self, depth: int) -> list[expressions.PathSegment]:
         selectors: list[expressions.PathSegment] = []
 
         while 1:
             kind = self.kind()
 
             if kind == TOKEN_LBRACKET:
-                selectors.append(self.parse_bracketed_segment())
+                selectors.append(self.parse_bracketed_segment(depth))
 
             elif kind == TOKEN_DOT:
                 self.pos += 1
@@ -455,7 +459,7 @@ class LegacyParser(Parser):
 
         return selectors
 
-    def parse_bracketed_segment(self) -> expressions.PathSegment:
+    def parse_bracketed_segment(self, depth: int) -> expressions.PathSegment:
         lbracket_token = self.eat(TOKEN_LBRACKET)
         token = self.next()
         kind = token[0]
@@ -469,7 +473,7 @@ class LegacyParser(Parser):
 
         if kind in self.PATH_NAME_KINDS:
             self.pos -= 1
-            var = self.parse_path()
+            var = self.parse_path(depth=depth + 1)
             return expressions.VariableSegment(
                 lbracket_token, var, span(lbracket_token, self.eat(TOKEN_RBRACKET))
             )

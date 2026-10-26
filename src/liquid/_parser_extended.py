@@ -228,7 +228,7 @@ class ExtendedParser(LegacyParser):
         segments: list[expressions.PathSegment] | None = None
 
         if self.kind() in self.PATH_PUNCTUATION:
-            segments = self.parse_path_selectors()
+            segments = self.parse_path_selectors(depth=1)
 
         return expressions.Group(token, expr, segments, closing_token)
 

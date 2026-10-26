@@ -356,3 +356,10 @@ def test_max_expression_depth() -> None:
 
     with pytest.raises(ResourceLimitError):
         env.render(source)
+
+
+def test_very_nested_variable_path() -> None:
+    source = "{{ a[c[d[e[f[g[h[i[j[k[l[m[n[o[p[q[r[s[t[u[v[w]]]]]]]]]]]]]]]]]]]]] }}"
+
+    with pytest.raises(ResourceLimitError):
+        Environment().parse(source)
