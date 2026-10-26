@@ -307,7 +307,7 @@ class ExtendedLexer(Lexer):
 
             ch = self.source[self.pos]
 
-            if _is_trivia(ord(ch)):  # XXX: is_lint_trivia?
+            if _is_trivia(ord(ch)):  # XXX: is_line_trivia?
                 self.skip(trivia)
 
             elif ch == ",":

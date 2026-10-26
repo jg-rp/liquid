@@ -308,9 +308,7 @@ class Parser(ABC):
         else:
             self.whitespace_control_carry = None
 
-    # TODO: Make prefix a separate function
-    # TODO: Or make prefix the default
-    def eat_tag(self, tag_name: str, prefix: bool = False) -> Token:
+    def eat_tag(self, tag_name: str) -> Token:
         self.eat(TOKEN_TAG_START, message=f"expected tag {tag_name!r}")
 
         if self.kind() == TOKEN_WC:
@@ -318,9 +316,33 @@ class Parser(ABC):
 
         token = self.eat(TOKEN_TAG_NAME, message=f"expected tag {tag_name!r}")
         value = token_value(token, self.source)
-        match = value == tag_name if not prefix else value.startswith(tag_name)
 
-        if not match:
+        if not value == tag_name:
+            raise LiquidSyntaxError(
+                f"unexpected tag {value!r}",
+                token=token,
+                source=self.source,
+                name=self.template_name,
+            )
+
+        # Ignore everything between the tag name and the closing tag delimiter.
+        while self.kind() not in TERMINATE_EXPRESSION:
+            self.pos += 1
+
+        self.carry_whitespace_control()
+        self.eat(TOKEN_TAG_END, message="expected a closing tag delimiter")
+        return token
+
+    def eat_tag_prefix(self, prefix: str) -> Token:
+        self.eat(TOKEN_TAG_START, message=f"expected tag {prefix!r}")
+
+        if self.kind() == TOKEN_WC:
+            self.pos += 1
+
+        token = self.eat(TOKEN_TAG_NAME, message=f"expected tag {prefix!r}")
+        value = token_value(token, self.source)
+
+        if not value.startswith(prefix):
             raise LiquidSyntaxError(
                 f"unexpected tag {value!r}",
                 token=token,

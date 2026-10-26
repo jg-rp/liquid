@@ -61,6 +61,22 @@ See built-in filter implementation for examples.
 - Bumped minimum `babel` version to 2.12.0.
 - Added `tzdata` dependency.
 
+## Version 2.3.6
+
+**Fixes**
+
+- Fixed a bug with `CachingLoaderMixin` where it would use an incorrect cache key when given a namespace and loading files asynchronously.
+
+- Fixed `FileSystemLoader` path resolution. On Windows we would fail to stay in the search path in some cases given a malicious absolute path.
+
+## Version 2.3.5
+
+Fixed a bug with the `date` filter. Previously we were caching the result of applying `date` to the special inputs `"now"` and `"today"`, along with all other inputs. Now `"now"` and `"today"` are handled without caching. See [#230](https://github.com/jg-rp/liquid/pull/230).
+
+## Version 2.3.4
+
+Fixed a bug introduced in version 2.3.3 where we would fail to compare values for equality when using `<=` and `>=` operators in some cases. See [#228](https://github.com/jg-rp/liquid/issues/228).
+
 ## Version 2.3.3
 
 **Fixes**
