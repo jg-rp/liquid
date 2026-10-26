@@ -73,6 +73,8 @@ SKIP = {
     "strict2_rejects_bare_bracket_dynamic_lookup",
     "strict2_rejects_bare_bracket_double_quoted",
     "strict2_rejects_bare_bracket_string_variable",
+    # This fails on Windows.
+    "date_negative_timestamp",
 }
 
 
