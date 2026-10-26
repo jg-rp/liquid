@@ -343,10 +343,11 @@ class Parser(ABC):
             self.pos += 1
 
         token = self.eat(TOKEN_TAG_NAME, message=f"expected tag {tag_name!r}")
+        value = token_value(token, self.source)
 
-        if value := token_value(token, self.source) != tag_name:
+        if value != tag_name:
             raise LiquidSyntaxError(
-                f"unexpected tag {value!r}",
+                f"expected tag {tag_name!r}, found {value!r}",
                 token=token,
                 source=self.source,
                 name=self.template_name,

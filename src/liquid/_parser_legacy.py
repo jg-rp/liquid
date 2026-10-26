@@ -167,24 +167,6 @@ class LegacyParser(Parser):
             elif kind == TOKEN_COMMENT_START:
                 nodes.append(TemplateComment.parse(token, self))
 
-            elif kind == TOKEN_TAG_NAME:
-                tag_name = token_value(token, self.source)
-
-                if tag_name.startswith("end") and end:
-                    raise LiquidSyntaxError(
-                        f"expected {', '.join(repr(n) for n in end)}, found {tag_name!r}",
-                        token=token,
-                        source=self.source,
-                        name=self.template_name,
-                    )
-
-                else:
-                    raise LiquidSyntaxError(
-                        f"unexpected tag {tag_name!r}",
-                        token=token,
-                        source=self.source,
-                        name=self.template_name,
-                    )
             else:
                 raise LiquidSyntaxError(
                     f"unexpected {TOKEN_NAMES[kind]}",
@@ -214,14 +196,12 @@ class LegacyParser(Parser):
         return OutputStatement(token, expr)
 
     def parse_tag(self) -> Markup:
-        pos = self.pos
         self.skip_whitespace_control()
         token = self.eat(TOKEN_TAG_NAME, message="missing tag name")
         name = token_value(token, self.source)
         tag = self.env.tags.get(name)
 
         if tag is None:
-            self.pos = pos - 1
             raise LiquidSyntaxError(
                 f"unexpected tag {name!r}",
                 token=token,

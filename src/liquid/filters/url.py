@@ -15,4 +15,4 @@ def url_encode(context: FilterContext, left: object) -> str:
 
 
 def url_decode(context: FilterContext, left: object) -> str:
-    return urllib.parse.unquote_plus(context.to_str(left, ""))
+    return urllib.parse.unquote_plus(context.to_str(left, ""), errors="strict")

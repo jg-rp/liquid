@@ -26,10 +26,12 @@ class ErrorNode:
         return self.err.detailed_message()
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
-        return None
+        if context.capture_errors:
+            raise self.err
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
-        return None
+        if context.capture_errors:
+            raise self.err
 
     def children(self) -> list[Markup]:
         return []

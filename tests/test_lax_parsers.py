@@ -50,5 +50,5 @@ def test_wrong_end_tag(parser: type[Parser]) -> None:
     errors = template.errors()
 
     assert len(errors) == 1
-    assert "expected 'else', 'elsif', 'endif', found 'endfor'" in str(errors[0])
+    assert "expected tag 'endif'" in str(errors[0])
     assert template.render() == ""

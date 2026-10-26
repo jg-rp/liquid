@@ -94,7 +94,7 @@ class Template:
     ) -> None:
         await render_block_async(self.nodes, context, buffer)
 
-    def render_with_error_capture(
+    def render_with_errors(
         self, data: Mapping[str, object] | None = None
     ) -> tuple[str, list[DetailedLiquidError]]:
         buffer: StringBuffer = StringBuffer()
@@ -104,7 +104,7 @@ class Template:
         self.render_with_context(context, buffer)
         return buffer.getvalue(), context.errors
 
-    async def render_with_error_capture_async(
+    async def render_with_errors_async(
         self, data: Mapping[str, object] | None = None
     ) -> tuple[str, list[DetailedLiquidError]]:
         buffer: StringBuffer = StringBuffer()

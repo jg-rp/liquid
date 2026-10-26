@@ -1,7 +1,7 @@
 import datetime
 
+import dateutil
 import markupsafe
-from dateutil import parser
 
 from .._filter import FilterContext
 from .._strftime import ruby_strftime
@@ -14,6 +14,8 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
     if context.is_nil(fmt) or fmt == "":
         return context.to_str(obj, "")
 
+    # TODO: env.to_date
+
     if isinstance(obj, str):
         if obj in ("now", "today", "Today"):
             date_ = datetime.datetime.now()
@@ -25,8 +27,9 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
 
         else:
             try:
-                date_ = parser.parse(obj)
-            except parser.ParserError:
+                # TODO: Cache this?
+                date_ = dateutil.parser.parse(obj)
+            except dateutil.parser.ParserError:
                 # Input is returned unchanged. This is consistent
                 # with the reference implementation.
                 return obj

@@ -1132,10 +1132,12 @@ class ErrorExpr:
         self.span = self.token
 
     def evaluate(self, context: RenderContext) -> object:
-        return None
+        if context.capture_errors:
+            raise self.error
 
     async def evaluate_async(self, context: RenderContext) -> object:
-        return None
+        if context.capture_errors:
+            raise self.error
 
     def children(self) -> list[Expression]:
         return []
