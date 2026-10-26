@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import TYPE_CHECKING, ClassVar
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import pytz
 from babel import Locale, UnknownLocaleError, dates, numbers, units
 from dateutil import parser
 
@@ -205,13 +205,13 @@ class DateTime:
         default_input_timezone: str = "UTC",
     ) -> None:
         self.timezone_var = timezone_var
-        self.default_timezone = pytz.timezone(default_timezone)
+        self.default_timezone = ZoneInfo(default_timezone)
         self.locale_var = locale_var
         self.default_locale = Locale.parse(default_locale)
         self.format_var = format_var
         self.default_format = self.formats.get(default_format, default_format)
         self.input_timezone_var = input_timezone_var
-        self.default_input_timezone = pytz.timezone(default_input_timezone)
+        self.default_input_timezone = ZoneInfo(default_input_timezone)
 
     def __call__(
         self,
@@ -264,16 +264,16 @@ class DateTime:
         self,
         context: FilterContext,
         timezone_var: str,
-        default: pytz.BaseTzInfo,
-    ) -> pytz.BaseTzInfo:
+        default: ZoneInfo,
+    ) -> ZoneInfo:
         _tz = context.resolve(timezone_var)
 
         if context.is_nil(_tz):
             timezone = default
         elif isinstance(_tz, str):
             try:
-                timezone = pytz.timezone(_tz)
-            except pytz.UnknownTimeZoneError:
+                timezone = ZoneInfo(_tz)
+            except ZoneInfoNotFoundError:
                 timezone = default
         else:
             raise context.error(f"expected a string argument, found {_tz}")
@@ -292,7 +292,7 @@ def _parse_number(val: str) -> int | float:
 def _parse_datetime(
     context: FilterContext,
     val: object,
-    default_timezone: pytz.BaseTzInfo,
+    default_timezone: ZoneInfo,
 ) -> date | time | datetime | int | float | None:
     if isinstance(val, str):
         # `date.format_datetime` will use the current timestamp if

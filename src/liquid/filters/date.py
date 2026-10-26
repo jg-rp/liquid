@@ -28,7 +28,7 @@ def date(context: FilterContext, obj: object, fmt: str) -> str:
         else:
             try:
                 # TODO: Cache this?
-                date_ = dateutil.parser.parse(obj)
+                date_ = dateutil.parser.parse(obj, fuzzy=True)
             except dateutil.parser.ParserError:
                 # Input is returned unchanged. This is consistent
                 # with the reference implementation.

@@ -1134,10 +1134,12 @@ class ErrorExpr:
     def evaluate(self, context: RenderContext) -> object:
         if context.capture_errors:
             raise self.error
+        return None
 
     async def evaluate_async(self, context: RenderContext) -> object:
         if context.capture_errors:
             raise self.error
+        return None
 
     def children(self) -> list[Expression]:
         return []

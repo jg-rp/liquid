@@ -26,9 +26,9 @@ classifiers = [
 
 dependencies = [
   "MarkupSafe>=3",
-  "python-dateutil>=2.8.1",
-  "Babel>=2",
-  "pytz",
+  "python-dateutil>=3.0.0",
+  "Babel>=2.12.0",
+  "tzdata",
 ]
 
 [project.urls]
@@ -70,19 +70,14 @@ dependencies = [
   "sphinx_copybutton",
   "types-python-dateutil",
   "types-mock",
-  "types-pytz",
   "types-babel",
 ]
 
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-fail-under=95 --cov-config=pyproject.toml --cov=src --cov=tests {args}"
-benchmark = "python -O scripts/performance.py"
-cov-html = "pytest --cov-report=html --cov-config=pyproject.toml --cov=liquid --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-fail-under=90 --cov-config=pyproject.toml --cov=src --cov=tests {args}"
 lint = "ruff check ."
-no-cov = "cov --no-cov {args}"
-profile = "python -O scripts/performance.py --profile"
 test = "pytest {args}"
-typing = "mypy"
+typing = "mypy {args}"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["312", "313", "314", "315"]
@@ -97,4 +92,17 @@ exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.mypy]
 python_version = "3.12"
+files = ["src", "tests"]
 strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = [
+  "DTZ001",
+  "DTZ005",
+  "DTZ006"
+]

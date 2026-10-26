@@ -54,6 +54,13 @@ Instances of `FilterContext` also have convenient methods for coercing objects t
 
 See built-in filter implementation for examples.
 
+**Other changes**
+
+- Removed the `pytz` dependency. We now use Python's `zoneinfo` package.
+- Bumped minimum `dateutil` version to 3.0.0.
+- Bumped minimum `babel` version to 2.12.0.
+- Added `tzdata` dependency.
+
 ## Version 2.3.3
 
 **Fixes**

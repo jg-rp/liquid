@@ -1,7 +1,7 @@
 import datetime
+from zoneinfo import ZoneInfoNotFoundError
 
 import pytest
-import pytz
 from babel import UnknownLocaleError
 
 from liquid import Environment
@@ -89,7 +89,7 @@ def test_unknown_timezone_falls_back_to_default() -> None:
 
 def test_unknown_default_timezone() -> None:
     env = Environment(extra=True)
-    with pytest.raises(pytz.UnknownTimeZoneError):
+    with pytest.raises(ZoneInfoNotFoundError):
         env.filters["datetime"] = DateTime(default_timezone="foo")
 
 
