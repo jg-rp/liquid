@@ -225,7 +225,7 @@ TOKEN_NAMES = (
     "'='",
     "BLANK",
     "':'",
-    "':'",
+    "','",
     "COMMENT_END",
     "COMMENT_START",
     "COMMENT",

@@ -172,16 +172,16 @@ TEST_CASES = [
         template=r"{% capture foo.bar %}{% endcapture %}",
         expect_msg="expected an identifier, found a path",
     ),
-    # Case(
-    #     description="consecutive commas in keyword argument list",
-    #     template=r"{% with you='world',, some='thing' %}Hello, {{ you }}!{% endwith %}",
-    #     expect_msg="expected an argument name, found comma",
-    # ),
-    # Case(
-    #     description="consecutive commas in positional argument list",
-    #     template=r"{% call macro a,, b %}",
-    #     expect_msg="expected a primitive expression, found comma",
-    # ),
+    Case(
+        description="consecutive commas in keyword argument list",
+        template=r"{% with you='world',, some='thing' %}Hello, {{ you }}!{% endwith %}",
+        expect_msg="unexpected ','",
+    ),
+    Case(
+        description="consecutive commas in positional argument list",
+        template=r"{% call macro a,, b %}",
+        expect_msg="expected a basic expression, found ','",
+    ),
     Case(
         description="path, empty brackets",
         template=r"{{ a.b[] }}",
@@ -195,28 +195,10 @@ TEST_CASES = [
 ]
 
 
-ENV = Environment(parser=ExtendedParser)
+ENV = Environment(parser=ExtendedParser, extra=True)
 
 
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_syntax_errors(case: Case) -> None:
     with pytest.raises(LiquidSyntaxError, match=case.expect_msg):
         ENV.parse(case.template).render()
-
-
-# TODO:
-# LAX_ENV = MockEnv(tolerance=Mode.LAX)
-
-# SKIP = [
-#     "missing output closing bracket",
-#     "missing tag closing percent",
-#     "missing tag closing bracket",
-#     "missing tag name",
-# ]
-
-# LAX_TEST_CASES = [case for case in TEST_CASES if case.description not in SKIP]
-
-
-# @pytest.mark.parametrize("case", LAX_TEST_CASES, ids=operator.attrgetter("description"))
-# def test_syntax_errors_in_lax_mode(case: Case) -> None:
-#     assert isinstance(LAX_ENV.from_string(case.template).render(), str)

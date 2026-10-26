@@ -1,5 +1,3 @@
-# TODO: pretty names
-
 TOKEN_DEFINITIONS = {
     "ADD": "'+'",
     "AND": "'and'",
@@ -8,7 +6,7 @@ TOKEN_DEFINITIONS = {
     "ASSIGN": "'='",
     "BLANK": "BLANK",
     "COLON": "':'",
-    "COMMA": "':'",
+    "COMMA": "','",
     "COMMENT_END": "COMMENT_END",
     "COMMENT_START": "COMMENT_START",
     "COMMENT": "COMMENT",
