@@ -1,5 +1,11 @@
 # Python Liquid Change Log
 
+## Version 2.3.7 (unreleased)
+
+**Fixes**
+
+- Fixed `<` and `>` comparing Boolean operands as integers, or raising `LiquidTypeError`, since version 2.3.3. They now evaluate to `false`, like `<=` and `>=`.
+
 ## Version 2.3.6
 
 **Fixes**
