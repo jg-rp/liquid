@@ -295,24 +295,23 @@ def _parse_datetime(
     default_timezone: ZoneInfo,
 ) -> date | time | datetime | int | float | None:
     if isinstance(val, str):
-        # `date.format_datetime` will use the current timestamp if
-        # given `None`.
-        if val in ("now", "today"):
+        if val.lower() in ("now", "today"):
+            # `date.format_datetime` will use the current timestamp if
+            # given `None`.
             return None
 
         # String representations of ints and floats need to be cast
-        # to an int or float, but not passed to the fuzzy parser.
+        # to an int or float and not passed to the fuzzy parser.
         try:
             return _parse_number(val)
         except ValueError:
             pass
 
-        # Fuzzy parsing using dateutil.
         try:
-            _dt = parser.parse(val)
-            if _dt.tzinfo is None:
-                return _dt.replace(tzinfo=default_timezone)
-            return _dt
+            date_ = parser.parse(val)
+            if date_.tzinfo is None:
+                return date_.replace(tzinfo=default_timezone)
+            return date_
         except parser.ParserError as err:
             raise context.error(str(err)) from err
 

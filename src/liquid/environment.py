@@ -3,6 +3,7 @@
 # pyright: reportReturnType=false
 from __future__ import annotations
 
+import datetime as dt
 import json
 import math
 from collections.abc import (
@@ -17,6 +18,7 @@ from collections.abc import (
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, ClassVar
 
+import dateutil
 import markupsafe
 
 from . import filters, tags
@@ -503,6 +505,48 @@ class Environment:
             return []
 
         return [obj]
+
+    def to_date(
+        self, obj: object, context: RenderContext, span: Token
+    ) -> dt.datetime | None:
+        """Return `obj` coerced to a datetime, or ``None`` on failure.
+
+        Parameters
+        ----------
+        obj
+            The object to convert to a datetime.
+        context
+            The active render context.
+        span
+            A token suitable for use with error messages.
+        """
+        if isinstance(obj, dt.datetime):
+            return obj
+
+        if isinstance(obj, str):
+            if not obj:
+                return None
+
+            if obj.lower() in ("now", "today"):
+                return dt.datetime.now()
+
+            if obj.isdigit():
+                return dt.datetime.fromtimestamp(int(obj))
+
+            try:
+                return dateutil.parser.parse(obj)
+            except dateutil.parser.ParserError:
+                return None
+
+        if isinstance(obj, int):
+            try:
+                return dt.datetime.fromtimestamp(obj)
+            except (OverflowError, OSError):
+                # Testing on Windows shows that it can't handle some
+                # negative integers.
+                return None
+
+        return None
 
     def is_nil(self, obj: object) -> bool:
         return obj == None or isinstance(obj, (Undefined, Nothing))

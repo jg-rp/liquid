@@ -34,7 +34,7 @@
 
 **Custom tag API changes**
 
-Custom tags must now implement the `Tag` protocol with a static `parse(token, parser)` method producing instances of a class implementing the `Markup` protocol. It's usually convenient to implement both protocols with a single class.
+Custom tags must now implement the `Tag` protocol with a static/class `parse(token, parser)` method producing instances of a class implementing the `Markup` protocol. It's usually convenient to implement both protocols with a single class.
 
 Python Liquid version 3 uses single-pass tokenizers that scan tag expressions as well as markup delimiters in on go (this is necessary to for proper parsing of string literals).
 

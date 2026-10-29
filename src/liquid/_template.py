@@ -165,7 +165,7 @@ class Template:
         Parameters
         ----------
         include_partials
-            If `True`, we will try to load partial templates and analyze those templates too.
+            If ``True``, we will try to load partial templates and analyze those templates too.
         """
         return analyze(self, include_partials=include_partials)
 
@@ -183,11 +183,11 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
-            A list of distinct _root segments_ for variables in this template.
+            A list of distinct root segments for variables in this template.
         """
         return list(self.analyze(include_partials=include_partials).variables)
 
@@ -201,11 +201,11 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
-            A list of distinct _root segments_ for variables in this template.
+            A list of distinct root segments for variables in this template.
         """
         return list(
             (await self.analyze_async(include_partials=include_partials)).variables
@@ -221,7 +221,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -242,7 +242,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -263,7 +263,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -286,7 +286,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -305,11 +305,11 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
-            A list of distinct _root segments_ for variables in this template.
+            A list of distinct root segments for variables in this template.
         """
         return list(self.analyze(include_partials=include_partials).globals)
 
@@ -323,11 +323,11 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
-            A list of distinct _root segments_ for variables in this template.
+            A list of distinct root segments for variables in this template.
         """
         return list(
             (await self.analyze_async(include_partials=include_partials)).globals
@@ -341,7 +341,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -362,7 +362,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -383,7 +383,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:
@@ -404,7 +404,7 @@ class Template:
 
         Parameters
         ----------
-        include_partials: If `True`, will try to load and find variables in
+        include_partials: If ``True``, will try to load and find variables in
                 included/rendered templates too.
 
         Returns:

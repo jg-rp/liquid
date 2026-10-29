@@ -150,9 +150,6 @@ class ForTag:
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         target = self.expression.evaluate(context)
 
-        # TODO: optimize for no offset or limit or reversed
-        # TODO: optimize for small ranges
-
         offsets = context.get_register("loop_offset", default=register_factory)
 
         if self.offset:
@@ -179,7 +176,11 @@ class ForTag:
             length = len(it)
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            it, length = slice_sequence(a, offset, limit, self.reversed)
+            if not offset and not limit:
+                it = a if not self.reversed else reversed(a)
+                length = len(a)
+            else:
+                it, length = slice_sequence(a, offset, limit, self.reversed)
 
         offsets[self.offset_key] = offset + length
 
@@ -240,7 +241,11 @@ class ForTag:
             length = len(it)
         else:
             a = context.env.to_array(target, context, self.expression.span)
-            it, length = slice_sequence(a, offset, limit, self.reversed)
+            if not offset and not limit:
+                it = a if not self.reversed else reversed(a)
+                length = len(a)
+            else:
+                it, length = slice_sequence(a, offset, limit, self.reversed)
 
         offsets[self.offset_key] = offset + length
 

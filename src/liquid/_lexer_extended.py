@@ -94,7 +94,6 @@ class ExtendedLexer(Lexer):
             ):
                 self.accept_template_comment()
 
-            # TODO: try min(source.find)
             elif self.scan_until(self.re_markup_start):
                 self.emit(TOKEN_TEXT)
 

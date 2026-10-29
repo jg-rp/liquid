@@ -96,8 +96,10 @@ class IncludeTag:
             for arg in self.args:
                 scope[arg.name.value] = arg.expr.evaluate(context)
 
+            # TODO: support __liquid_iter__ too?
             if isinstance(bind_value, list):
-                # TODO: raise for loop iterations
+                context.raise_for_loop_limit(len(bind_value))  # pyright: ignore[reportUnknownArgumentType]
+
                 for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                     scope[bind_key] = item
                     template.render_with_context(context, buffer)
@@ -139,8 +141,10 @@ class IncludeTag:
             for arg in self.args:
                 scope[arg.name.value] = await arg.expr.evaluate_async(context)
 
+            # TODO: support __liquid_iter__ too?
             if isinstance(bind_value, list):
-                # TODO: raise for loop iterations
+                context.raise_for_loop_limit(len(bind_value))  # pyright: ignore[reportUnknownArgumentType]
+
                 for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                     scope[bind_key] = item
                     await template.render_with_context_async(context, buffer)

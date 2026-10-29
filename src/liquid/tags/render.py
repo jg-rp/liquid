@@ -114,8 +114,11 @@ class RenderTag:
         )
 
         if self.loop and isinstance(bind_value, list):
+            ctx.raise_for_loop_limit(len(bind_value))  # pyright: ignore[reportUnknownArgumentType]
+
             forloop = ForLoop(bind_key, len(bind_value), None)  # pyright: ignore[reportUnknownArgumentType]
             scope["forloop"] = forloop
+
             for item in bind_value:  # pyright: ignore[reportUnknownVariableType]
                 scope[bind_key] = item
                 forloop.step()
@@ -163,6 +166,8 @@ class RenderTag:
         )
 
         if self.loop and isinstance(bind_value, list):
+            ctx.raise_for_loop_limit(len(bind_value))  # pyright: ignore[reportUnknownArgumentType]
+
             forloop = ForLoop(bind_key, len(bind_value), None)  # pyright: ignore[reportUnknownArgumentType]
             scope["forloop"] = forloop
             for item in bind_value:  # pyright: ignore[reportUnknownVariableType]

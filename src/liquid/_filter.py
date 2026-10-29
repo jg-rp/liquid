@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import decimal
 import re
 from collections.abc import Callable, Generator, Iterable, Mapping
@@ -137,6 +138,9 @@ class FilterContext:
             if obj is None
             else self.context.env.to_str(obj, self.context, self.span)
         )
+
+    def to_date(self, obj: object) -> dt.datetime | None:
+        return self.env.to_date(obj, self.context, self.span)
 
     def error(self, message: str) -> LiquidFilterError:
         return LiquidFilterError(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from typing import TYPE_CHECKING, Never
 
 from .._drop import AbstractDrop
@@ -120,6 +120,9 @@ class Undefined(AbstractDrop):
     def __eq__(self, other: object) -> bool:
         return other is None or isinstance(other, (Undefined, Nothing, Blank))
 
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.path})"
+
 
 class StrictUndefined(Undefined):
     def _error(self) -> Never:
@@ -177,6 +180,18 @@ class StrictUndefined(Undefined):
     def __bool__(self) -> bool:  # noqa: PLE0304
         self._error()
 
+    def __int__(self) -> int:
+        self._error()
+
+    def __hash__(self) -> int:  # noqa: PLE0309
+        self._error()
+
+    def __reversed__(self) -> Iterable[object]:
+        self._error()
+
+    def poke(self) -> None:
+        self._error()
+
 
 class FalsyStrictUndefined(StrictUndefined):
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
@@ -189,3 +204,6 @@ class FalsyStrictUndefined(StrictUndefined):
 
     def __eq__(self, other: object) -> bool:
         return other is None or isinstance(other, (Undefined, Nothing, Blank))
+
+    def __bool__(self) -> bool:
+        return False

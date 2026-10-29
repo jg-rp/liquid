@@ -141,3 +141,10 @@ def test_issue_228() -> None:
     assert render("{% if true >= false %}true{% else %}false{% endif %}", {}) == "false"
     assert render("{% if true <= false %}true{% else %}false{% endif %}", {}) == "false"
     assert render("{% if true <= true %}true{% else %}false{% endif %}", {}) == "false"
+
+
+def test_lt_and_gt_with_booleans() -> None:
+    # Versions 2.3.3 to 2.3.6 compared booleans as integers with `<` and `>`.
+    assert render("{% if true > false %}true{% else %}false{% endif %}") == "false"
+    assert render("{% if true < 2 %}true{% else %}false{% endif %}") == "false"
+    assert render("{% if 0 < true %}true{% else %}false{% endif %}") == "false"
