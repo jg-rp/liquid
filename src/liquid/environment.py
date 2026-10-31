@@ -45,6 +45,60 @@ if TYPE_CHECKING:
 
 
 class Environment:
+    """Liquid template parsing an rendering configuration.
+
+    Parameters
+    ----------
+    autoescape
+        When ``True``, apply HTML-escaping to variables before writing them to the output
+        buffer.
+    bare_brackets
+        When ``True``, allow variables to start with a bracketed segment `[var]`.
+    conventional_operator_precedence
+        When ``True``, give logical `and` and `or` operators conventional precedence
+        (`and` binds tighter than `or`) instead of legacy Liquid's right-associative
+        behavior.
+    extra
+        Enable all built-in, non-standard tags and filters.
+    globals
+        A mapping of variables that will be attached to the Liquid environment. These
+        variables will be available to all templates rendered from the environment.
+    iterable_strings
+        When ``True``, allow strings to be iterated with the `{% for %}` tag.
+    loader
+        A template loader used by `get_template`, the `{% render %}` tag and any other
+        tags that need to load templates.
+    parser
+        The parser to use. Built-in parsers are :class:`liquid.LegacyParser`,
+        :class:`liquid.ExtendedParser`, :class:`liquid.LaxLegacyParser` and
+        :class:`liquid.LaxExtendedParser`.
+    resource_limits
+        Limits used during template parsing an rendering to prevent malicious template
+        authors from consuming to much memory or too many CPU cycles.
+    shorthand_indexes
+        When ``True``, allow dotted indexes in variable paths. `a.1` as well as `a[1]`.
+    strict_filters
+        When ``True``, raise an exception if a filter is unknown or is given unacceptable
+        arguments. Otherwise silently ignore the filter invocation.
+    tokenizer
+        The tokenizer to use. Built-in tokenizers are :class:`liquid.LegacyLexer` and
+        :class:`ExtendedLexer`.
+    undefined
+        The class used to represent undefined template variables. Could be one of
+        :class:`liquid.Undefined`, :class:`liquid.StrictUndefined` or
+        :class:`liquid.FalsyUndefined`.
+
+    Attributes
+    ----------
+    tags : dict[str, Tag]
+        A mapping of tag names to tag implementations. It's OK to update this dictionary
+        after instantiating an environment, or override `setup_tags_and_filters`.
+    filters : dict[str, Filter]
+        A mapping of filter names to filter implementations. It's OK to update this
+        dictionary after instantiating an environment, or override
+        `setup_tags_and_filters`.
+    """
+
     standard_tags: ClassVar[dict[str, Tag]] = {
         "assign": tags.AssignTag,
         "break": tags.BreakTag,
@@ -225,6 +279,29 @@ class Environment:
         context: RenderContext | None = None,
         **kwargs: object,
     ) -> Template:
+        """Load and parse the template identified by `name` using the configured loader.
+
+        Parameters
+        ----------
+        name
+            The template's name or identifier. The template loader is responsible for
+            interpreting `name`. It could be the name of a file on the file system or
+            the value in a field in a database.
+        globals
+            A mapping of variables that will be attached to the resulting template.
+        context
+            The current render context, if one is available.
+        kwargs
+            Arbitrary arguments passed to the template loader that can be used to narrow
+            the template search space.
+
+        Raises
+        ------
+        LiquidSyntaxError
+            If the template source text contains invalid Liquid markup.
+        TemplateNotFoundError
+            If `name` is not known to the configured template loader.
+        """
         return self.loader.load(self, name, globals, context, **kwargs)
 
     async def get_template_async(
@@ -235,6 +312,29 @@ class Environment:
         context: RenderContext | None = None,
         **kwargs: object,
     ) -> Template:
+        """Load and parse the template identified by `name` using the configured loader.
+
+        Parameters
+        ----------
+        name
+            The template's name or identifier. The template loader is responsible for
+            interpreting `name`. It could be the name of a file on the file system or
+            the value in a field in a database.
+        globals
+            A mapping of variables that will be attached to the resulting template.
+        context
+            The current render context, if one is available.
+        kwargs
+            Arbitrary arguments passed to the template loader that can be used to narrow
+            the template search space.
+
+        Raises
+        ------
+        LiquidSyntaxError
+            If the template source text contains invalid Liquid markup.
+        TemplateNotFoundError
+            If `name` is not known to the configured template loader.
+        """
         return await self.loader.load_async(self, name, globals, context, **kwargs)
 
     def parse(
@@ -247,6 +347,27 @@ class Environment:
         matter: Mapping[str, object] | None = None,
         up_to_date: Callable[[], bool | Awaitable[bool]] | None = None,
     ) -> Template:
+        """Parse `source` as a Liquid template.
+
+        Parameters
+        ----------
+        source
+            Liquid template source code.
+        name
+            An optional name for the template. This name will appear in exception
+            messages.
+        path
+            An optional path to `name`, if `source` represents a file or other resource
+            with a path.
+        globals
+            A mapping of variables that will be attached to the resulting template.
+        matter
+            A mapping of variables associated with `source`. This could be front matter
+            or meta data read from a database, for example.
+        up_to_date
+            A function use by the resulting template to determine if it needs to be
+            loaded again after consulting a template cache.
+        """
         return Template(
             self,
             source,

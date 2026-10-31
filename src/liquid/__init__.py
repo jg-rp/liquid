@@ -4,7 +4,7 @@ from typing import Any, TextIO
 from ._base_tag import AbstractTag
 from ._context import RenderContext
 from ._drop import AbstractDrop, ContextHint
-from ._filter import FilterContext
+from ._filter import Filter, FilterContext
 from ._io import StringBuffer
 from ._lax_parser_mixin import LaxParserMixin
 from ._lexer import Lexer
@@ -61,6 +61,7 @@ __all__ = (
     "ExtendedParser",
     "FalsyStrictUndefined",
     "FileSystemLoader",
+    "Filter",
     "FilterContext",
     "LaxExtendedParser",
     "LaxLegacyParser",
