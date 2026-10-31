@@ -55,8 +55,8 @@ class Environment:
     bare_brackets
         When ``True``, allow variables to start with a bracketed segment `[var]`.
     conventional_operator_precedence
-        When ``True``, give logical `and` and `or` operators conventional precedence
-        (`and` binds tighter than `or`) instead of legacy Liquid's right-associative
+        When ``True``, give logical ``and`` and ``or`` operators conventional precedence
+        (``and`` binds tighter than ``or``) instead of legacy Liquid's right-associative
         behavior.
     extra
         Enable all built-in, non-standard tags and filters.
@@ -64,7 +64,7 @@ class Environment:
         A mapping of variables that will be attached to the Liquid environment. These
         variables will be available to all templates rendered from the environment.
     iterable_strings
-        When ``True``, allow strings to be iterated with the `{% for %}` tag.
+        When ``True``, allow strings to be iterated with the ``{% for %}`` tag.
     loader
         A template loader used by `get_template`, the `{% render %}` tag and any other
         tags that need to load templates.
@@ -76,13 +76,14 @@ class Environment:
         Limits used during template parsing an rendering to prevent malicious template
         authors from consuming to much memory or too many CPU cycles.
     shorthand_indexes
-        When ``True``, allow dotted indexes in variable paths. `a.1` as well as `a[1]`.
+        When ``True``, allow dotted indexes in variable paths. ``a.1`` as well as
+        ``a[1]``.
     strict_filters
         When ``True``, raise an exception if a filter is unknown or is given unacceptable
         arguments. Otherwise silently ignore the filter invocation.
     tokenizer
         The tokenizer to use. Built-in tokenizers are :class:`liquid.LegacyLexer` and
-        :class:`ExtendedLexer`.
+        :class:`liquid.ExtendedLexer`.
     undefined
         The class used to represent undefined template variables. Could be one of
         :class:`liquid.Undefined`, :class:`liquid.StrictUndefined` or

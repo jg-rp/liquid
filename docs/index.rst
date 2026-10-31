@@ -82,7 +82,7 @@ then load and render templates from that.
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents
 
    configure.rst
