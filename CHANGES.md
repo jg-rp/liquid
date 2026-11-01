@@ -5,6 +5,7 @@
 **Fixes**
 
 - Fixed `<` and `>` comparing Boolean operands as integers, or raising `LiquidTypeError`, since version 2.3.3. They now evaluate to `false`, like `<=` and `>=`.
+- Fixed `reject` and `where` filter truthiness. Previously we were treating `0` as `False`.
 
 ## Version 2.3.6
 

@@ -73,7 +73,7 @@ def first(left: Any, *, environment: Environment) -> object:
         return None
 
     if isinstance(left, dict):
-        left = list(islice(left.items(), 1))
+        return next(islice(left.items(), 1), None)  # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]
 
     try:
         return getitem(left, 0)
@@ -101,17 +101,18 @@ def last(obj: Sequence[Any], *, environment: Environment) -> object:
 
 
 @sequence_filter
-def concat(sequence: ArrayT, second_array: ArrayT) -> ArrayT:
+def concat(sequence: ArrayT, second_array: object) -> ArrayT:
     """Return the concatenation of _sequence_ and _second_array_."""
     if not isinstance(second_array, (list, tuple)):
         raise FilterArgumentError(
-            f"concat expected an array, found {type(second_array).__name__}"
+            f"concat expected an array, found {type(second_array).__name__}",
+            token=None,
         )
 
     if is_undefined(sequence):
-        return second_array
+        return second_array  # pyright: ignore[reportUnknownVariableType]
 
-    return list(chain(sequence, second_array))
+    return list(chain(sequence, second_array))  # pyright: ignore[reportUnknownArgumentType]
 
 
 @sequence_filter
@@ -166,7 +167,7 @@ def where(sequence: ArrayT, attr: object, value: object = None) -> list[object]:
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) == value]
 
-    return [itm for itm in sequence if _getitem(itm, attr) not in (False, None)]
+    return [itm for itm in sequence if _truthy(_getitem(itm, attr))]
 
 
 @sequence_filter
@@ -178,7 +179,7 @@ def reject(sequence: ArrayT, attr: object, value: object = None) -> list[object]
     if value is not None and not is_undefined(value):
         return [itm for itm in sequence if _getitem(itm, attr) != value]
 
-    return [itm for itm in sequence if _getitem(itm, attr) in (False, None)]
+    return [itm for itm in sequence if not _truthy(_getitem(itm, attr))]
 
 
 @sequence_filter
@@ -187,9 +188,7 @@ def find(sequence: ArrayT, attr: object, value: object = None) -> object:
     if value is not None and not is_undefined(value):
         return next((itm for itm in sequence if _getitem(itm, attr) == value), None)
 
-    return next(
-        (itm for itm in sequence if _getitem(itm, attr) not in (False, None)), None
-    )
+    return next((itm for itm in sequence if _truthy(_getitem(itm, attr))), None)
 
 
 @sequence_filter
@@ -224,30 +223,11 @@ def has(sequence: ArrayT, attr: object, value: object = None) -> bool:
 @sequence_filter
 def uniq(sequence: ArrayT, key: object = None) -> list[object]:
     """Return a copy of _sequence_ with duplicate elements removed."""
-    # Note that we're not using a dict or set for deduplication because we need
-    # to handle sequences containing unhashable objects, like dictionaries.
+    if _nil(key):
+        return [obj for i, obj in enumerate(sequence) if sequence.index(obj) == i]
 
-    # This is probably quite slow.
-    if key is not None:
-        keys = []
-        result = []
-        for obj in sequence:
-            try:
-                item = obj[key]
-            except KeyError:
-                item = MISSING
-            except TypeError as err:
-                raise FilterArgumentError(
-                    f"can't read property '{key}' of {obj}", token=None
-                ) from err
-
-            if item not in keys:
-                keys.append(item)
-                result.append(obj)
-
-        return result
-
-    return [obj for i, obj in enumerate(sequence) if sequence.index(obj) == i]
+    keys = [_getitem(obj, key) for obj in sequence]
+    return [sequence[i] for i, key in enumerate(keys) if keys.index(key) == i]
 
 
 @sequence_filter
@@ -327,3 +307,13 @@ class _Null:
 
 
 _NULL = _Null()
+
+
+def _nil(obj: object) -> bool:
+    # Liquid nullish-ness
+    return obj is None or is_undefined(obj) or obj is _NULL
+
+
+def _truthy(obj: object) -> bool:
+    # Liquid truthiness. 0 is truthy.
+    return obj is not False and obj is not None and not is_undefined(obj)
