@@ -11,7 +11,7 @@ def reject(
 
     def _filter(obj: object) -> bool:
         val = context.get_item(obj, prop)
-        return context.is_nil(val) or val == False
+        return not context.truthy(val)
 
     if context.is_nil(value):
         return list(filter(_filter, left))
