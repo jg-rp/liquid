@@ -67,6 +67,39 @@ configuration with extra tags and filters enabled, start with this.
         undefined=StrictUndefined,
     )
 
+When `extra` is ``True``, the following tags and filters will be registered with the
+environment.
+
+Extra tags
+^^^^^^^^^^
+
+* ``{% extends %}`` and ``{% block %}``
+* ``{% macro %}`` and ``{% call %}``
+* ``{% translate %}``
+* ``{% with %}``
+
+Extra filters
+^^^^^^^^^^^^^
+
+* ``currency``
+* ``datetime``
+* ``decimal``
+* ``gettext``
+* ``index``
+* ``json``
+* ``money_with_currency``
+* ``money_without_currency``
+* ``money_without_trailing_zeros``
+* ``money``
+* ``ngettext``
+* ``npgettext``
+* ``pgettext``
+* ``sort_numeric``
+* ``script_tag``
+* ``stylesheet_tag``
+* ``t``
+* ``unit``
+
 Tokenizers and parsers
 ----------------------
 
@@ -247,7 +280,8 @@ We can pin or attach global variables to instances of :class:`liquid.Environment
 variables passed to :meth:`liquid.Template.render` and added to the template scope.
 
 By default, if there's a name conflict, globals variables attached to a template take
-priority over global variables attached to the environment.
+priority over global variables attached to the environment, and data passed to
+``render()`` takes priority over both.
 
 .. code-block:: python
 
@@ -275,10 +309,78 @@ priority over global variables attached to the environment.
 HTML auto escape
 ----------------
 
-TODO:
+When ``autoescape=True``, all template variables are automatically escaped to produce
+HTML-safe output. This protects against injection attacks by escaping characters that
+could be interpreted as HTML when inserted into a page.
+
+Autoescaping replaces the following characters with their HTML-safe equivalents:
+
+* ``&`` -> ``&amp;``
+* ``<`` -> ``&lt;``
+* ``>`` -> ``&gt;``
+* ``'`` -> ``&#39;``
+* ``"`` -> ``&#34;``
+
+This escaping is equivalent to applying the :ref:`escape-filter` filter to every
+variable, unless the variable is explicitly marked as safe.
+
+.. warning::
+
+    Auto escape and the :ref:`escape-filter` filter do **not** make strings safe for use
+    in JavaScript, including in ``<script>`` blocks, inline event handler attributes
+    (e.g. ``onerror``), or other JavaScript contexts. For those cases, see the
+    :ref:`escapejs-filter` filter instead.
 
 Resource limits
 ---------------
 
-TODO:
+Resource limits are used to prevent template authors from consuming too much memory or
+too many CPU cycles. Limits are set by passing an instance of
+:class:`liquid.ResourceLimits` to the `resource_limits` argument of the
+:class:`liquid.Environment` constructor.
+
+This example is equivalent to the default resource limits.
+
+.. code-block:: python
+
+    from liquid import Environment, ResourceLimits
+
+    env = Environment(
+        resource_limits=ResourceLimits(
+            max_assign_score=None,
+            max_assign_score_cumulative=None,
+            max_render_score=None,
+            max_render_score_cumulative=None,
+            max_render_size=None,
+            max_context_depth=30,
+            max_loop_iterations=None,
+            max_block_depth=30,
+            max_expression_depth=100,
+        )
+    )
+
+Scores are non-specific measures of usage modelled after Shopify/liquid's resource
+limits. It might take some trial and error to find the best limits for your use case.
+
+This example sets a very low `max_block_depth` for demonstration purposes.
+
+.. code-block:: python
+
+    from liquid import Environment, ResourceLimits
+
+    env = Environment(resource_limits=ResourceLimits(max_block_depth=3))
+
+    source = """\
+    {% if true %}
+      {% if true %}
+        {% if true %}
+          {% if true %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    """
+
+    template = env.parse(source)
+    # liquid.exceptions.ResourceLimitError: maximum block depth exceeded
 

@@ -33,6 +33,8 @@ API Docs
 
 .. autoclass:: liquid.LaxExtendedParser
     :show-inheritance:
+
+.. autoclass:: liquid.ResourceLimits
     
 
 Exceptions
@@ -59,6 +61,9 @@ Tag API
     :show-inheritance:
 
 .. autoclass:: liquid.Parser
+    :members:
+
+.. autoclass:: liquid.StringBuffer
     :members:
 
 Filter API
