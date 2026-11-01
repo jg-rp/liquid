@@ -16,6 +16,12 @@ API Docs
 .. autoclass:: liquid.Template
     :members:
 
+.. autoclass:: liquid.LegacyLexer
+    :show-inheritance:
+
+.. autoclass:: liquid.ExtendedLexer
+    :show-inheritance:
+
 .. autoclass:: liquid.LegacyParser
     :show-inheritance:
 

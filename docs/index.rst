@@ -86,4 +86,6 @@ then load and render templates from that.
    :caption: Contents
 
    configure.rst
+   tags.rst
+   filters.rst
    api.rst
