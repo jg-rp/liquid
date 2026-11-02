@@ -32,7 +32,9 @@ class Loader(ABC):
         name: str,
         context: RenderContext | None = None,
         **kwargs: object,
-    ) -> TemplateSource: ...
+    ) -> TemplateSource:
+        """Return template source text and meta data identified by `name`."""
+        ...
 
     async def get_source_async(
         self,
@@ -41,6 +43,7 @@ class Loader(ABC):
         context: RenderContext | None = None,
         **kwargs: object,
     ) -> TemplateSource:
+        """Return template source text and meta data identified by `name`."""
         return self.get_source(env, name, context, **kwargs)
 
     def load(
