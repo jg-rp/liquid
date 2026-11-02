@@ -49,6 +49,8 @@ class IntDrop(GenericDrop[int]):
                 return self.val
             case "boolean":
                 return bool(self.val)
+            case "array":
+                return []
 
     def __int__(self) -> int:
         return self.val

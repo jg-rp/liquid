@@ -29,7 +29,13 @@ from ._parser_legacy import LegacyParser
 from ._resource_limits import ResourceLimits
 from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
-from .drops import FalsyStrictUndefined, StrictUndefined, Undefined
+from .drops import (
+    AsyncIterableDrop,
+    FalsyStrictUndefined,
+    IterableDrop,
+    StrictUndefined,
+    Undefined,
+)
 from .environment import Environment
 from .loaders import (
     CachingChoiceLoader,
@@ -46,6 +52,7 @@ from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 __all__ = (
     "TOKEN_NAMES",
     "AbstractTag",
+    "AsyncIterableDrop",
     "Block",
     "CachingChoiceLoader",
     "CachingDictLoader",
@@ -62,6 +69,7 @@ __all__ = (
     "FileSystemLoader",
     "Filter",
     "FilterContext",
+    "IterableDrop",
     "LaxExtendedParser",
     "LaxLegacyParser",
     "LaxParserMixin",

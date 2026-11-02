@@ -63,6 +63,9 @@ class Range:
                 return self
             case "boolean":
                 return len(self) > 0
+            case "array":
+                # TODO: raise if very big range
+                return list(self.__liquid_iter__(0, None, False))
             case _:
                 return NOTHING
 

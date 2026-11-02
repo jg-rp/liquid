@@ -4,10 +4,10 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from .._drop import liquid_iterable
+from .._drop import liquid_async_iterable, liquid_iterable
 from .._markup import is_blank_block, render_block, render_block_async
 from .._slice import slice_sequence
-from ..drops import ForLoop, Undefined
+from ..drops import AsyncIterableDrop, ForLoop, Undefined
 from ..exceptions import LiquidSyntaxError
 from ..expressions import KeywordArgument, Name, Variable
 from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
@@ -159,6 +159,7 @@ class ForTag:
                 offset = offsets[self.offset_key]
             else:
                 offset = context.env.to_int(offset_, context, self.offset.span)
+
         else:
             offset = 0
 
@@ -174,11 +175,13 @@ class ForTag:
         if liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
+
         else:
             a = context.env.to_array(target, context, self.expression.span)
             if not offset and not limit:
                 it = a if not self.reversed else reversed(a)
                 length = len(a)
+
             else:
                 it, length = slice_sequence(a, offset, limit, self.reversed)
 
@@ -232,13 +235,16 @@ class ForTag:
         else:
             limit = None
 
-        it: Iterable[object]
+        it: Iterable[object] | AsyncIterableDrop[object]
 
-        # TODO: async iterable
+        if liquid_async_iterable(target):
+            it = await target.__liquid_iter_async__(offset, limit, self.reversed)
+            length = len(it)
 
-        if liquid_iterable(target):
+        elif liquid_iterable(target):
             it = target.__liquid_iter__(offset, limit, self.reversed)
             length = len(it)
+
         else:
             a = context.env.to_array(target, context, self.expression.span)
             if not offset and not limit:
@@ -261,19 +267,35 @@ class ForTag:
         namespace: dict[str, object] = {"forloop": forloop}
 
         with context.loop(namespace, forloop):
-            for obj in it:
-                namespace[name] = obj
-                forloop.step()
-                await render_block_async(self.block, context, buffer)
+            if isinstance(it, AsyncIterableDrop):
+                async for obj in it:
+                    namespace[name] = obj
+                    forloop.step()
+                    await render_block_async(self.block, context, buffer)
 
-                if context.interrupts:
-                    interrupt = context.interrupts.pop()
-                    if interrupt == "break":
-                        break
-                    elif interrupt == "continue":
-                        continue
-                    else:
-                        context.interrupts.append(interrupt)
+                    if context.interrupts:
+                        interrupt = context.interrupts.pop()
+                        if interrupt == "break":
+                            break
+                        elif interrupt == "continue":
+                            continue
+                        else:
+                            context.interrupts.append(interrupt)
+
+            else:
+                for obj in it:
+                    namespace[name] = obj
+                    forloop.step()
+                    await render_block_async(self.block, context, buffer)
+
+                    if context.interrupts:
+                        interrupt = context.interrupts.pop()
+                        if interrupt == "break":
+                            break
+                        elif interrupt == "continue":
+                            continue
+                        else:
+                            context.interrupts.append(interrupt)
 
     def children(self) -> list[Markup]:
         result: list[Markup] = [

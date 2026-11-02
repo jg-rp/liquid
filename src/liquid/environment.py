@@ -23,7 +23,7 @@ import markupsafe
 
 from . import filters, tags
 from ._chain_map import ReadOnlyChainMap
-from ._drop import liquid_html_safe, liquid_iterable, liquid_primitive
+from ._drop import liquid_html_safe, liquid_primitive
 from ._io import StringBuffer
 from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
@@ -596,10 +596,6 @@ class Environment:
         if isinstance(obj, str):
             return obj
 
-        if liquid_primitive(obj):
-            return str(obj)
-            # return obj.__liquid__("string", context)
-
         if isinstance(obj, Mapping | Sequence):
             return self._inspect(obj, context)
 
@@ -611,12 +607,14 @@ class Environment:
     def to_array(
         self, obj: object, context: RenderContext, span: Token
     ) -> list[object]:
+        if liquid_primitive(obj):
+            obj = obj.__liquid__("array", context)
+
+        if isinstance(obj, list):
+            return obj
+
         if isinstance(obj, str) and not self.iterable_strings:
             return [] if not obj else [obj]
-
-        # TODO: replace this with __liquid__(hint="array")
-        if liquid_iterable(obj):
-            return list(obj.__liquid_iter__(0, None, False))
 
         if isinstance(obj, Sequence):
             return list(obj)  # pyright: ignore[reportUnknownArgumentType]

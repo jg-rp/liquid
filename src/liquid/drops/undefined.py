@@ -118,6 +118,8 @@ class Undefined:
                 return 0
             case "boolean":
                 return False
+            case "array":
+                return []
 
     def __str__(self) -> str:
         return ""

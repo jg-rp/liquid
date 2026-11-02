@@ -21,6 +21,8 @@ class Nothing:
                 return 0
             case "boolean":
                 return False
+            case "array":
+                return []
 
 
 NOTHING = Nothing()

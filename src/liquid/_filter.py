@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import TYPE_CHECKING, Concatenate
 
-from ._drop import liquid_iterable, liquid_object
+from ._drop import liquid_object, liquid_primitive
 from ._missing import MISSING
 from ._nothing import NOTHING
 from .exceptions import LiquidFilterError, LiquidFilterInterrupt
@@ -69,12 +69,11 @@ class FilterContext:
 
     def input_array(self, obj: object) -> list[object]:
         """Coerce `obj` to a list suitable for filters that expect an array input."""
+        if liquid_primitive(obj):
+            obj = obj.__liquid__("array", self.context)
+
         if isinstance(obj, (list, tuple)):
             return _flatten(obj)  # pyright: ignore[reportUnknownArgumentType]
-
-        # TODO: replace this with __liquid__(hint="array")
-        if liquid_iterable(obj):
-            return list(obj.__liquid_iter__(0, None, False))
 
         return [obj]
 

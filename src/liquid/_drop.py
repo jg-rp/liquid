@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from ._context import RenderContext
     from .drops import AsyncIterableDrop, IterableDrop
 
-type ContextHint = Literal["string", "data", "numeric", "boolean"]
+type ContextHint = Literal["string", "array", "data", "numeric", "boolean"]
 
 
 class LiquidObject(Protocol):
@@ -77,7 +77,7 @@ def liquid_iterable(obj: object) -> TypeGuard[LiquidIterable]:
 class LiquidAsyncIterable(Protocol):
     async def __liquid_iter_async__(
         self, offset: int, limit: int | None, reversed_: bool
-    ) -> AsyncIterableDrop[object]:
+    ) -> IterableDrop[object] | AsyncIterableDrop[object]:
         """Return a asynchronous Liquid iterable."""
         ...
 
