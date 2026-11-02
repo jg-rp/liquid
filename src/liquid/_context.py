@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import inspect
 import math
 from collections.abc import Callable, Generator, Mapping, Sequence
 from contextlib import contextmanager
@@ -12,8 +11,6 @@ from typing import TYPE_CHECKING, TypeGuard, cast
 from ._chain_map import ReadOnlyChainMap
 from ._drop import (
     liquid_async_object,
-    liquid_awaitable,
-    liquid_callable,
     liquid_object,
     liquid_primitive,
 )
@@ -137,19 +134,7 @@ class RenderContext:
                     selector = selector.__liquid__("string", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
-                    val = obj.__liquid_getattr__(selector, self)
-
-                    if callable(val):
-                        if liquid_callable(obj) and obj.__liquid_callable__(selector):
-                            try:
-                                val = val()
-                            except Exception:  # noqa: BLE001
-                                val = NOTHING
-
-                        else:
-                            val = NOTHING
-
-                    obj = val
+                    obj = obj.__liquid_getattr__(selector, self)
                 else:
                     obj = NOTHING
 
@@ -200,26 +185,7 @@ class RenderContext:
                 if isinstance(selector, str) and await obj.__liquid_hasattr_async__(
                     selector, self
                 ):
-                    val = await obj.__liquid_getattr_async__(selector, self)
-
-                    if callable(val):
-                        if liquid_awaitable(obj) and obj.__liquid_awaitable__(selector):
-                            try:
-                                val = val()
-                                if inspect.isawaitable(val):
-                                    val = await val
-                            except Exception:  # noqa: BLE001
-                                val = NOTHING
-                        elif liquid_callable(obj) and obj.__liquid_callable__(selector):
-                            try:
-                                val = val()
-                            except Exception:  # noqa: BLE001
-                                val = NOTHING
-
-                        else:
-                            val = NOTHING
-
-                    obj = val
+                    obj = await obj.__liquid_getattr_async__(selector, self)
                 else:
                     obj = NOTHING
 
@@ -228,26 +194,7 @@ class RenderContext:
                     selector = selector.__liquid__("string", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
-                    val = obj.__liquid_getattr__(selector, self)
-
-                    if callable(val):
-                        if liquid_awaitable(obj) and obj.__liquid_awaitable__(selector):
-                            try:
-                                val = val()
-                                if inspect.isawaitable(val):
-                                    val = await val
-                            except Exception:  # noqa: BLE001
-                                val = NOTHING
-                        elif liquid_callable(obj) and obj.__liquid_callable__(selector):
-                            try:
-                                val = val()
-                            except Exception:  # noqa: BLE001
-                                val = NOTHING
-
-                        else:
-                            val = NOTHING
-
-                    obj = val
+                    obj = obj.__liquid_getattr__(selector, self)
                 else:
                     obj = NOTHING
 

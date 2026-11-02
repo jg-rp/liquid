@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-from .._drop import AbstractDrop
+from .._nothing import NOTHING
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._drop import ContextHint
 
 
-class TableRowLoop(AbstractDrop):
+class TableRowLoop:
     """Table row helper variables."""
 
     __slots__ = (
@@ -122,26 +122,12 @@ class TableRowLoop(AbstractDrop):
 
         raise KeyError(key)
 
-    def __len__(self) -> int:
-        return 12
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(
-            (
-                "length",
-                "index",
-                "index0",
-                "rindex",
-                "rindex0",
-                "first",
-                "last",
-                "col",
-                "col0",
-                "col_first",
-                "col_last",
-                "row",
-            )
-        )
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "string" | "data":
+                return str(self)
+            case _:
+                return NOTHING
 
     def __bool__(self) -> bool:
         return True

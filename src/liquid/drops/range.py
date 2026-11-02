@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-from .._drop import AbstractDrop
 from .._nothing import NOTHING
 from .._slice import slice_range
 from .iterable import IterableDrop
@@ -13,7 +12,7 @@ if TYPE_CHECKING:
     from .._drop import ContextHint
 
 
-class Range(AbstractDrop):
+class Range:
     __slots__ = ("start", "stop")
 
     def __init__(self, start: int, stop: int) -> None:

@@ -72,6 +72,7 @@ class FilterContext:
         if isinstance(obj, (list, tuple)):
             return _flatten(obj)  # pyright: ignore[reportUnknownArgumentType]
 
+        # TODO: replace this with __liquid__(hint="array")
         if liquid_iterable(obj):
             return list(obj.__liquid_iter__(0, None, False))
 

@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .. import expressions
-from .._drop import AbstractDrop
 from .._markup import SCOPE_INHERITED, Partial, render_block, render_block_async
 from .._nothing import NOTHING
 from ..exceptions import (
@@ -399,7 +398,7 @@ class ExtendsStackItem:
     parent: ExtendsStackItem | None
 
 
-class BlockDrop(AbstractDrop):
+class BlockDrop:
     __slots__ = ("name", "parent")
 
     def __init__(self, name: str, parent: ExtendsStackItem | None = None) -> None:

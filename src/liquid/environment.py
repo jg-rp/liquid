@@ -614,6 +614,7 @@ class Environment:
         if isinstance(obj, str) and not self.iterable_strings:
             return [] if not obj else [obj]
 
+        # TODO: replace this with __liquid__(hint="array")
         if liquid_iterable(obj):
             return list(obj.__liquid_iter__(0, None, False))
 

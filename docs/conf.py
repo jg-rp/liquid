@@ -42,8 +42,8 @@ _link_color_light = "#024bb0"
 _link_color_dark = "#5192d2"
 
 html_theme_options = {  # type: ignore
-    # "light_logo": "logo_light.png",
-    # "dark_logo": "logo_dark.png",
+    "light_logo": "logo_light.png",
+    "dark_logo": "logo_dark.png",
     "light_css_variables": {
         "color-brand-primary": "black",
         "color-brand-content": _link_color_light,

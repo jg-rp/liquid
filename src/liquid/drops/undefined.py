@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterable, Iterator
 from typing import TYPE_CHECKING, Never
 
-from .._drop import AbstractDrop
 from .._nothing import Nothing
 from ..exceptions import UndefinedVariableError
 from .iterable import IterableDrop
@@ -14,7 +13,7 @@ if TYPE_CHECKING:
     from ..tokens import Token
 
 
-class Blank(AbstractDrop):
+class Blank:
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
             case "string":
@@ -52,7 +51,7 @@ class Blank(AbstractDrop):
 BLANK = Blank()
 
 
-class Empty(AbstractDrop):
+class Empty:
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
             case "string":
@@ -87,7 +86,7 @@ class Empty(AbstractDrop):
 EMPTY = Empty()
 
 
-class Undefined(AbstractDrop):
+class Undefined:
     __slots__ = ("path", "source", "template_name", "token")
 
     def __init__(
@@ -108,6 +107,23 @@ class Undefined(AbstractDrop):
 
     def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
         return name in ("first", "last", "size")
+
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "string":
+                return ""
+            case "data":
+                return None
+            case "numeric":
+                return 0
+            case "boolean":
+                return False
+
+    def __str__(self) -> str:
+        return ""
+
+    def __bool__(self) -> bool:
+        return False
 
     def __len__(self) -> int:
         return 3

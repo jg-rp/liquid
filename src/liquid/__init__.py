@@ -3,7 +3,7 @@ from typing import Any, TextIO
 
 from ._base_tag import AbstractTag
 from ._context import RenderContext
-from ._drop import AbstractDrop, ContextHint
+from ._drop import ContextHint, LiquidAsyncObject, LiquidObject
 from ._filter import Filter, FilterContext
 from ._io import StringBuffer
 from ._lax_parser_mixin import LaxParserMixin
@@ -45,7 +45,6 @@ from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 
 __all__ = (
     "TOKEN_NAMES",
-    "AbstractDrop",
     "AbstractTag",
     "Block",
     "CachingChoiceLoader",
@@ -69,6 +68,8 @@ __all__ = (
     "LegacyLexer",
     "LegacyParser",
     "Lexer",
+    "LiquidAsyncObject",
+    "LiquidObject",
     "Loader",
     "Markup",
     "Node",

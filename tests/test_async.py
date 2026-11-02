@@ -12,7 +12,6 @@ from unittest.mock import patch
 import pytest
 
 from liquid import (
-    AbstractDrop,
     CachingFileSystemLoader,
     ChoiceLoader,
     DictLoader,
@@ -221,7 +220,7 @@ def test_include_and_render_async(case: Case) -> None:
         assert result == case.expect
 
 
-class MockAsyncDrop(AbstractDrop):
+class MockAsyncDrop:
     def __init__(self, val: object) -> None:
         self.key = "foo"
         self.val = val

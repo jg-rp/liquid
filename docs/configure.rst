@@ -306,6 +306,11 @@ priority over global variables attached to the environment, and data passed to
     print(template.render({"greeting": "Goodbye"}))  # Goodbye, World!
     print(template.render({"name": "Liquid", "punctuation": "."}))  # Hello, Liquid.
 
+Undefined variables
+-------------------
+
+TODO:
+
 HTML auto escape
 ----------------
 

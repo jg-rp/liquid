@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-from .._drop import AbstractDrop
 from .._nothing import NOTHING
 
 if TYPE_CHECKING:
@@ -11,7 +9,7 @@ if TYPE_CHECKING:
     from .._drop import ContextHint
 
 
-class ForLoop(AbstractDrop):
+class ForLoop:
     __slots__ = ("index", "length", "name", "parent_loop")
 
     def __init__(self, name: str, length: int, parent_loop: ForLoop | None) -> None:
@@ -62,24 +60,6 @@ class ForLoop(AbstractDrop):
             return self.length - self.index - 1
 
         raise AttributeError
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(
-            (
-                "name",
-                "length",
-                "index",
-                "index0",
-                "rindex",
-                "rindex0",
-                "first",
-                "last",
-                "parentloop",
-            )
-        )
-
-    def __len__(self) -> int:
-        return 9
 
     def step(self) -> None:
         self.index += 1
