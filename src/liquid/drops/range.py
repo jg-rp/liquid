@@ -57,9 +57,9 @@ class Range:
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string":
+            case "output" | "string":
                 return str(self)
-            case "data":
+            case "index" | "property" | "object":
                 return self
             case "boolean":
                 return len(self) > 0

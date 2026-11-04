@@ -13,9 +13,9 @@ class Nothing:
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string":
+            case "output" | "string":
                 return ""
-            case "data":
+            case "index" | "property" | "object":
                 return None
             case "numeric":
                 return 0

@@ -124,7 +124,7 @@ class TableRowLoop:
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string" | "data":
+            case "output" | "string" | "object":
                 return str(self)
             case _:
                 return NOTHING

@@ -137,13 +137,15 @@ class CallTag:
 
         if not macro:
             buffer.write(
-                str(
+                context.env.serialize(
                     context.env.undefined(
                         self.name.value,
                         self.name.span,
                         context.template.source,
                         context.template.name,
-                    )
+                    ),
+                    context,
+                    self.name.span,
                 )
             )
             return
@@ -179,13 +181,15 @@ class CallTag:
 
         if not macro:
             buffer.write(
-                str(
+                context.env.serialize(
                     context.env.undefined(
                         self.name.value,
                         self.name.span,
                         context.template.source,
                         context.template.name,
-                    )
+                    ),
+                    context,
+                    self.name.span,
                 )
             )
             return

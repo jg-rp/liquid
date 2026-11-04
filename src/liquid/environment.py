@@ -23,7 +23,7 @@ import markupsafe
 
 from . import filters, tags
 from ._chain_map import ReadOnlyChainMap
-from ._drop import liquid_html_safe, liquid_primitive
+from ._drop import liquid_primitive
 from ._io import StringBuffer
 from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
@@ -404,15 +404,17 @@ class Environment:
 
     def serialize(self, obj: object, context: RenderContext, span: Token) -> str:
         """Stringify `obj` suitable for output."""
-        if self.autoescape and liquid_html_safe(obj):
-            return obj.__html__()
+        if liquid_primitive(obj):
+            obj = obj.__liquid__("output", context)
 
         if isinstance(obj, str):
             result = obj
+
         elif isinstance(obj, Sequence):
             result = (markupsafe.Markup("") if self.autoescape else "").join(
                 self.to_str(item, context, span) for item in _flatten(obj)
             )
+
         else:
             result = self.to_str(obj, context, span)
 
@@ -440,7 +442,7 @@ class Environment:
         self, left: object, right: object, context: RenderContext, span: Token
     ) -> bool:
         if liquid_primitive(right):
-            right = right.__liquid__("data", context)
+            right = right.__liquid__("object", context)
 
         if type(left) is bool and type(right) is int:
             return False
@@ -456,8 +458,7 @@ class Environment:
         if isinstance(left, str):
             if isinstance(right, str):
                 return left < right
-            if liquid_primitive(right):
-                return left < str(right.__liquid__("string", context))
+            return left < self.to_str(right, context, span)
 
         if type(left) is bool or type(right) is bool:
             return False
@@ -466,7 +467,7 @@ class Environment:
             if isinstance(right, (int, float, Decimal)):
                 return left < right
             if liquid_primitive(right):
-                return left < float(str(right.__liquid__("numeric", context)))
+                return left < self.to_numeric(right, context, 0)
 
         if self.is_nil(left) or self.is_nil(right):
             return False
@@ -488,7 +489,7 @@ class Environment:
             if isinstance(right, str):
                 return left <= right
             if liquid_primitive(right):
-                return left <= str(right.__liquid__("string", context))
+                return left <= self.to_str(right, context, span)
 
         if type(left) is bool or type(right) is bool:
             return False
@@ -497,7 +498,7 @@ class Environment:
             if isinstance(right, (int, float, Decimal)):
                 return left <= right
             if liquid_primitive(right):
-                return left <= float(str(right.__liquid__("numeric", context)))
+                return left <= self.to_numeric(right, context, 0)
 
         if self.is_nil(left) or self.is_nil(right):
             return False
@@ -567,6 +568,9 @@ class Environment:
     def to_numeric(
         self, obj: object, context: RenderContext, default: int | Decimal = 0
     ) -> float | int | Decimal:
+        if liquid_primitive(obj):
+            obj = obj.__liquid__("numeric", context)
+
         if type(obj) is bool:
             return default
 
@@ -584,12 +588,12 @@ class Environment:
             except ValueError:
                 return default
 
-        if liquid_primitive(obj):
-            return obj.__liquid__("numeric", context)  # type: ignore
-
         return default
 
     def to_str(self, obj: object, context: RenderContext, span: Token) -> str:
+        if liquid_primitive(obj):
+            obj = obj.__liquid__("string", context)
+
         if obj is None:
             return ""
 

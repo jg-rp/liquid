@@ -6,7 +6,16 @@ if TYPE_CHECKING:
     from ._context import RenderContext
     from .drops import AsyncIterableDrop, IterableDrop
 
-type ContextHint = Literal["string", "array", "data", "numeric", "boolean"]
+type ContextHint = Literal[
+    "array",  # to_array
+    "boolean",  # to_bool
+    "index",  # Sequence index during path resolution
+    "numeric",  # to_numeric and right hand side of ordering
+    "object",  # Right hand side of equality
+    "output",  # serialize for output
+    "property",  # Mapping key or object property during path resolution
+    "string",  # to_str
+]
 
 
 class LiquidObject(Protocol):
@@ -97,13 +106,3 @@ class LiquidPrimitive(Protocol):
 
 def liquid_primitive(obj: object) -> TypeGuard[LiquidPrimitive]:
     return hasattr(obj, "__liquid__")
-
-
-class LiquidHTMLSafe(Protocol):
-    def __html__(self) -> str:
-        """Return an HTML-safe string representation of this Drop."""
-        ...
-
-
-def liquid_html_safe(obj: object) -> TypeGuard[LiquidHTMLSafe]:
-    return hasattr(obj, "__html__")

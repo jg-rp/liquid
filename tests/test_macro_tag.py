@@ -2,7 +2,14 @@ import asyncio
 
 import pytest
 
-from liquid import Environment, ExtendedParser, Undefined
+from liquid import (
+    NOTHING,
+    ContextHint,
+    Environment,
+    ExtendedParser,
+    RenderContext,
+    Undefined,
+)
 from liquid.exceptions import LiquidSyntaxError
 
 ENV = Environment(extra=True, parser=ExtendedParser)
@@ -143,8 +150,12 @@ def test_excess_keyword_arguments() -> None:
 
 
 class MockUndefined(Undefined):
-    def __str__(self) -> str:
-        return "UNDEFINED"
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "output" | "string":
+                return "UNDEFINED"
+            case _:
+                return NOTHING
 
 
 def test_missing_argument_is_undefined() -> None:

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import pytest
 from markupsafe import Markup
 
-from liquid import Environment, render
+from liquid import NOTHING, ContextHint, Environment, RenderContext, render
 
 
 @dataclass
@@ -22,9 +22,15 @@ class SafeHTMLDrop:
     def __str__(self) -> str:
         return "SafeHTMLDrop"
 
-    def __html__(self) -> str:
-        lis = "\n".join(f"<li>{item}</li>" for item in self.items)
-        return f"<ul>\n{lis}\n</ul>"
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        if hint == "output":
+            list_ = "\n".join(f"<li>{item}</li>" for item in self.items)
+            return Markup(f"<ul>\n{list_}\n</ul>")
+
+        if hint == "string":
+            return str(self)
+
+        return NOTHING
 
 
 TEST_CASES: list[Case] = [
@@ -62,7 +68,7 @@ TEST_CASES: list[Case] = [
         ),
     ),
     Case(
-        description="drops with __html__ are safe",
+        description="drops Markup are safe",
         template=(r"{{ foo }}"),
         data={"foo": SafeHTMLDrop([1, 2, 3])},
         expect="<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n</ul>",
@@ -434,7 +440,7 @@ TEST_CASES: list[Case] = [
         expect="&lt;p&gt;test&lt;/p&gt;&lt;p&gt;test&lt;/p&gt;",
     ),
     Case(
-        description="filter, escape __html__",
+        description="filter, escape safe string",
         template=r"{{ some | escape }}",
         data={"some": SafeHTMLDrop([1, 2, 3])},
         expect="SafeHTMLDrop",
@@ -655,10 +661,6 @@ def test_auto_escape_is_disabled_by_default() -> None:
         render("{{ name }}", {"name": '<script>alert("XSS!");</script>'})
         == '<script>alert("XSS!");</script>'
     )
-
-
-def test_special_html_method_is_ignored_by_default() -> None:
-    assert render("{{ name }}", {"name": SafeHTMLDrop([1, 2, 3])}) == "SafeHTMLDrop"
 
 
 def test_safe_filter_is_noop_by_default() -> None:

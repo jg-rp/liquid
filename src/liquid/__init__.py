@@ -3,7 +3,14 @@ from typing import Any, TextIO
 
 from ._base_tag import AbstractTag
 from ._context import RenderContext
-from ._drop import ContextHint, LiquidAsyncObject, LiquidObject
+from ._drop import (
+    ContextHint,
+    LiquidAsyncIterable,
+    LiquidAsyncObject,
+    LiquidIterable,
+    LiquidObject,
+    LiquidPrimitive,
+)
 from ._filter import Filter, FilterContext
 from ._io import StringBuffer
 from ._lax_parser_mixin import LaxParserMixin
@@ -23,10 +30,12 @@ from ._markup import (
     render_block_async,
 )
 from ._messages import MessageTuple, Translations, extract_from_template
+from ._nothing import NOTHING
 from ._parser import Parser
 from ._parser_extended import ExtendedParser
 from ._parser_legacy import LegacyParser
 from ._resource_limits import ResourceLimits
+from ._slice import slice_range, slice_sequence
 from ._static_analysis import Segments, TemplateAnalysis
 from ._template import Template
 from .drops import (
@@ -50,6 +59,7 @@ from .loaders import (
 from .tokens import TOKEN_NAMES, Token, TokenKind, span, token_value
 
 __all__ = (
+    "NOTHING",
     "TOKEN_NAMES",
     "AbstractTag",
     "AsyncIterableDrop",
@@ -76,8 +86,11 @@ __all__ = (
     "LegacyLexer",
     "LegacyParser",
     "Lexer",
+    "LiquidAsyncIterable",
     "LiquidAsyncObject",
+    "LiquidIterable",
     "LiquidObject",
+    "LiquidPrimitive",
     "Loader",
     "Markup",
     "Node",
@@ -100,6 +113,8 @@ __all__ = (
     "Undefined",
     "render_block",
     "render_block_async",
+    "slice_range",
+    "slice_sequence",
     "span",
     "token_value",
 )

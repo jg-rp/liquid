@@ -96,6 +96,11 @@ Drop interface
     :special-members: __liquid_iter_async__
     :show-inheritance:
 
+.. autoclass:: liquid.LiquidPrimitive
+    :members:
+    :special-members: __liquid__
+    :show-inheritance:
+
 Exceptions
 ----------
 

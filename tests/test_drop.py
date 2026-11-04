@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from liquid import ContextHint, Environment, RenderContext
+from liquid import NOTHING, ContextHint, Environment, RenderContext
 
 
 @dataclass
@@ -41,9 +41,11 @@ class IntDrop(GenericDrop[int]):
 
     def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
         match hint:
-            case "string":
+            case "output":
+                return str(self)
+            case "string" | "property":
                 return str(self.val)
-            case "data":
+            case "index" | "object":
                 return self.val
             case "numeric":
                 return self.val
@@ -80,6 +82,17 @@ class ConfusedDrop(GenericDrop[bool]):
     def __str__(self) -> str:
         return "yay" if self.val else "nay"
 
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "output" | "string":
+                return str(self)
+            case "index" | "property" | "object" | "boolean":
+                return self.val
+            case "array":
+                return [self.val]
+            case "numeric":
+                return NOTHING
+
 
 TEST_CASES = [
     Case(
@@ -97,7 +110,7 @@ TEST_CASES = [
     Case(
         description="int drop as hash key",
         template=r"{{ foo[drop] }}",
-        data={"foo": {1: "a", 2: "b"}, "drop": IntDrop(1)},
+        data={"foo": {"1": "a", "2": "b"}, "drop": IntDrop(1)},
         expect="a",
     ),
     Case(
@@ -128,7 +141,7 @@ TEST_CASES = [
         description="boolean drop",
         template=r"{{ drop }}",
         data={"drop": GenericDrop[bool](False)},
-        expect="False",
+        expect="false",
     ),
     Case(
         description="bool drop in boolean expression",

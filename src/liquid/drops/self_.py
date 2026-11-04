@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .._nothing import NOTHING
+
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._drop import ContextHint
 
 
 class Self:
@@ -21,10 +24,18 @@ class Self:
         # Argument context is not necessarily the same as instance context.
         return self.context.resolve(name)
 
+    def __liquid__(self, hint: ContextHint, context: RenderContext) -> object:
+        match hint:
+            case "output" | "string":
+                return str(self)
+            case "object":
+                return self
+            case "array":
+                return [self]
+            case _:
+                return NOTHING
+
     def __eq__(self, other: object) -> bool:
-        print("**", other.__class__.__name__)
-        if isinstance(other, Self):
-            print("!!!", id(self.context) == id(other.context))
         return isinstance(other, Self) and self.context is other.context
 
     def __str__(self) -> str:

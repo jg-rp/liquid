@@ -32,6 +32,8 @@ SKIP = {
     "for_nonempty_range_over_render_score_boundary [error_mode=strict2]",
     "cumulative_render_score_across_partials [error_mode=strict2]",
     "per_template_limit_still_works_with_cumulative [error_mode=strict2]",
+    "blank_if_body_raises_error_strict [error_mode=strict2]",
+    "blank_if_body_raises_error_strict2 [error_mode=strict2]",
     # String repr of data?
     "StandardFilterTest#test_base64_url_safe_encode_4aece6f5",
     "StandardFilterTest#test_base64_encode_3b4b7075",

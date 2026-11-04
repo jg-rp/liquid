@@ -109,7 +109,7 @@ class RenderContext:
 
         Returns
         -------
-        The special value `NOTHING` is `name` can not be resolved.
+        The special value `NOTHING` if `name` can not be resolved.
         """
         if not isinstance(name, str):
             return NOTHING
@@ -131,7 +131,7 @@ class RenderContext:
 
             if liquid_object(obj):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("string", self)
+                    selector = selector.__liquid__("property", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
                     obj = obj.__liquid_getattr__(selector, self)
@@ -146,13 +146,13 @@ class RenderContext:
 
             elif isinstance(obj, Sequence):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("numeric", self)
+                    selector = selector.__liquid__("index", self)
 
                 obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("data", self)
+                    selector = selector.__liquid__("property", self)
                 obj = resolve_mapping_selector(obj, selector, dotted)
 
             else:
@@ -180,7 +180,7 @@ class RenderContext:
 
             if liquid_async_object(obj):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("string", self)
+                    selector = selector.__liquid__("property", self)
 
                 if isinstance(selector, str) and await obj.__liquid_hasattr_async__(
                     selector, self
@@ -191,7 +191,7 @@ class RenderContext:
 
             elif liquid_object(obj):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("string", self)
+                    selector = selector.__liquid__("property", self)
 
                 if isinstance(selector, str) and obj.__liquid_hasattr__(selector, self):
                     obj = obj.__liquid_getattr__(selector, self)
@@ -203,12 +203,12 @@ class RenderContext:
 
             elif isinstance(obj, Sequence):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("numeric", self)
+                    selector = selector.__liquid__("index", self)
                 obj = resolve_sequence_selector(obj, selector, dotted)
 
             elif isinstance(obj, Mapping):
                 if liquid_primitive(selector):
-                    selector = selector.__liquid__("data", self)
+                    selector = selector.__liquid__("property", self)
                 obj = resolve_mapping_selector(obj, selector, dotted)
 
             else:
