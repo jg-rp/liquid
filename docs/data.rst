@@ -117,7 +117,7 @@ Type coercion
 ^^^^^^^^^^^^^
 
 Liquid applies automatic type coercion when an object passed to a filter or tag is not
-of the expected type. If and object implements
+of the expected type. If an object implements
 :meth:`__liquid__() <liquid.LiquidPrimitive.__liquid__>`, it will be called during type
 coercion with a context hint indicating which type is needed.
 
@@ -194,9 +194,69 @@ Also note that Liquid will not use ``__str__`` for serializing objects for outpu
 Output representation
 ^^^^^^^^^^^^^^^^^^^^^
 
-TODO: 
+When rendered with the output statement (``{{ obj }}``), if an objects implements
+:meth:`__liquid__() <liquid.LiquidPrimitive.__liquid__>`, Liquid will call ``__liquid__``
+with the ``"output"`` hint and serialize the result according to
+:meth:`liquid.Environment.serialize`.
 
-Equality and ordering
-^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: python
 
-TODO:
+    from liquid import NOTHING, render
+
+    class MyObject:
+        def __liquid__(self, hint, context):
+            if hint == "output":
+                return "Hi 👋"
+
+            if hint == "string":
+                return "some string"
+
+            return NOTHING
+
+        def __str__(self) -> str:
+            return "MyObject"
+
+
+    source = """\
+    {{ x }}
+    {{ x | upcase }}
+    """
+
+    print(render(source, {"x": MyObject()}))
+    # Hi 👋
+    # SOME STRING
+
+If HTML auto escaping is enabled and the result of ``__liquid__("output")`` contains
+markup that you don't want to be escaped, wrap the result in ``markupsafe.Markup``.
+
+.. code-block:: python
+
+    import markupsafe
+
+    from liquid import NOTHING, Environment
+
+
+    class MyHTMLSafeObject:
+        def __liquid__(self, hint, context):
+            if hint == "output":
+                return markupsafe.Markup('<script>alert("Hi 👋")</scipt>')
+            return NOTHING
+
+
+    class MyUnsafeObject:
+        def __liquid__(self, hint, context):
+            if hint == "output":
+                return '<script>alert("Hi 👋")</scipt>'
+            return NOTHING
+
+
+    env = Environment(autoescape=True)
+
+    source = """\
+    {{ safe }}
+    {{ unsafe }}
+    """
+
+    print(env.render(source, {"safe": MyHTMLSafeObject(), "unsafe": MyUnsafeObject()}))
+    # <script>alert("Hi 👋")</scipt>
+    # &lt;script&gt;alert(&#34;Hi 👋&#34;)&lt;/scipt&gt;

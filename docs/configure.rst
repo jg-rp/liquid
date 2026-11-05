@@ -309,7 +309,24 @@ priority over global variables attached to the environment, and data passed to
 Undefined variables
 -------------------
 
-TODO:
+At render time, if a variable can not be resolved, an instance of :class:`liquid.Undefined`
+is used instead. Pass one of :class:`liquid.Undefined`, :class:`liquid.StrictUndefined` or
+:class:`liquid.FalsyUndefined` to the `undefined` argument of the :class:`liquid.Environment`.
+constructor to control how Liquid handles undefined variables.
+
+.. code-block:: python
+
+    from liquid import Environment, StrictUndefined
+
+    env = Environment(undefined=StrictUndefined)
+
+    print(env.render("{{ nosuchthing }}"))
+    # liquid.exceptions.UndefinedVariableError: nosuchthing is undefined
+    #   -> '' 1:3
+    #   |
+    # 1 | {{ nosuchthing }}
+    #   |    ^^^^^^^^^^^ nosuchthing is undefined
+
 
 HTML auto escape
 ----------------
