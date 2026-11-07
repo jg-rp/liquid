@@ -176,6 +176,8 @@ In this example we use square brackets instead of braces in all delimiters.
     #   * 2
     #   * 3
 
+.. _lax-parsing:
+
 Lax parsing
 ^^^^^^^^^^^
 

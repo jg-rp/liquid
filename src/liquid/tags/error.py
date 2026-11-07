@@ -16,22 +16,22 @@ class ErrorNode:
     blank = True
     tag = ""
 
-    __slots__ = ("err", "token")
+    __slots__ = ("error", "token")
 
     def __init__(self, token: Token, err: LiquidSyntaxError) -> None:
         self.token = token
-        self.err = err
+        self.error = err
 
     def __str__(self) -> str:
-        return self.err.detailed_message()
+        return self.error.detailed_message()
 
     def render(self, context: RenderContext, buffer: StringBuffer) -> None:
         if context.capture_errors:
-            raise self.err
+            raise self.error
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         if context.capture_errors:
-            raise self.err
+            raise self.error
 
     def children(self) -> list[Markup]:
         return []
