@@ -92,4 +92,6 @@ then load and render templates from that.
    static.rst
    tags.rst
    filters.rst
+   extra.rst
+   expressions.rst
    api.rst
