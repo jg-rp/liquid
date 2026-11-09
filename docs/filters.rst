@@ -226,7 +226,7 @@ compact
 
    <array> | compact[: <string>]
 
-Remove ``nil``/``null`` (or ``None`` in Python) values from an array-like object. If
+Remove ``nil`` or ``null`` (or ``None`` in Python) values from an array-like object. If
 given, the argument should be the name of a property that exists on each item (hash, dict
 etc.) in the array-like sequence.
 
@@ -672,7 +672,31 @@ argument, equal to the value given as the second argument. If no such item exist
 
 In this example we select the first page in the “Programming” category.
 
-``json title="data" {   "pages": [     {       "id": 1,       "title": "Introduction to Cooking",       "category": "Cooking",       "tags": ["recipes", "beginner", "cooking techniques"]     },     {       "id": 2,       "title": "Top 10 Travel Destinations in Europe",       "category": "Travel",       "tags": ["Europe", "destinations", "travel tips"]     },     {       "id": 3,       "title": "Mastering JavaScript",       "category": "Programming",       "tags": ["JavaScript", "web development", "coding"]     }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "pages": [
+        {
+          "id": 1,
+          "title": "Introduction to Cooking",
+          "category": "Cooking",
+          "tags": ["recipes", "beginner", "cooking techniques"]
+        },
+        {
+          "id": 2,
+          "title": "Top 10 Travel Destinations in Europe",
+          "category": "Travel",
+          "tags": ["Europe", "destinations", "travel tips"]
+        },
+        {
+          "id": 3,
+          "title": "Mastering JavaScript",
+          "category": "Programming",
+          "tags": ["JavaScript", "web development", "coding"]
+        }
+      ]
+    }
 
 .. code-block:: liquid2
 
@@ -693,7 +717,31 @@ exists, ``null`` is returned.
 
 In this example we find the index for the first page in the “Programming” category.
 
-``json title="data" {   "pages": [     {       "id": 1,       "title": "Introduction to Cooking",       "category": "Cooking",       "tags": ["recipes", "beginner", "cooking techniques"]     },     {       "id": 2,       "title": "Top 10 Travel Destinations in Europe",       "category": "Travel",       "tags": ["Europe", "destinations", "travel tips"]     },     {       "id": 3,       "title": "Mastering JavaScript",       "category": "Programming",       "tags": ["JavaScript", "web development", "coding"]     }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "pages": [
+        {
+          "id": 1,
+          "title": "Introduction to Cooking",
+          "category": "Cooking",
+          "tags": ["recipes", "beginner", "cooking techniques"]
+        },
+        {
+          "id": 2,
+          "title": "Top 10 Travel Destinations in Europe",
+          "category": "Travel",
+          "tags": ["Europe", "destinations", "travel tips"]
+        },
+        {
+          "id": 3,
+          "title": "Mastering JavaScript",
+          "category": "Programming",
+          "tags": ["JavaScript", "web development", "coding"]
+        }
+      ]
+    }
 
 .. code-block:: liquid2
 
@@ -747,7 +795,11 @@ number before the filter is applied.
 .. code-block:: text
     :caption: output
 
-    1 2 183 -6 3
+    1
+    2
+    183
+    -6
+    3
 
 If the input can't be converted to a number, ``0`` is returned.
 
@@ -764,7 +816,31 @@ returned if none of the items in the input array contain such a property/value.
 
 In this example we test to see if any pages are in the “Programming” category.
 
-``json title="data" {   "pages": [     {       "id": 1,       "title": "Introduction to Cooking",       "category": "Cooking",       "tags": ["recipes", "beginner", "cooking techniques"]     },     {       "id": 2,       "title": "Top 10 Travel Destinations in Europe",       "category": "Travel",       "tags": ["Europe", "destinations", "travel tips"]     },     {       "id": 3,       "title": "Mastering JavaScript",       "category": "Programming",       "tags": ["JavaScript", "web development", "coding"]     }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "pages": [
+        {
+          "id": 1,
+          "title": "Introduction to Cooking",
+          "category": "Cooking",
+          "tags": ["recipes", "beginner", "cooking techniques"]
+        },
+        {
+          "id": 2,
+          "title": "Top 10 Travel Destinations in Europe",
+          "category": "Travel",
+          "tags": ["Europe", "destinations", "travel tips"]
+        },
+        {
+          "id": 3,
+          "title": "Mastering JavaScript",
+          "category": "Programming",
+          "tags": ["JavaScript", "web development", "coding"]
+        }
+      ]
+    }
 
 .. code-block:: liquid2
 
@@ -855,13 +931,24 @@ map
 
 .. code-block:: text
 
-   <array> | map: <string | lambda expression>
+   <array> | map: <string>
 
 Extract properties from an array of objects into a new array.
 
 For example, if ``pages`` is an array of objects with a ``category`` property:
 
-``json title="data" {   "pages": [     { "category": "business" },     { "category": "celebrities" },     { "category": "lifestyle" },     { "category": "sports" },     { "category": "technology" }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "pages": [
+        { "category": "business" },
+        { "category": "celebrities" },
+        { "category": "lifestyle" },
+        { "category": "sports" },
+        { "category": "technology" }
+      ]
+    }
 
 .. code-block:: liquid2
 
@@ -874,7 +961,11 @@ For example, if ``pages`` is an array of objects with a ``category`` property:
 .. code-block:: text
     :caption: output
 
-    - business - celebrities - lifestyle - sports - technology
+    - business
+    - celebrities
+    - lifestyle
+    - sports
+    - technology
 
 minus
 -----
@@ -897,7 +988,10 @@ are not a number, Liquid will try to convert them to a number. If that conversio
 .. code-block:: text
     :caption: output
 
-    2 12 171.157 -10
+    2
+    12
+    171.157
+    -10
 
 modulo
 ------
@@ -917,7 +1011,9 @@ Return the remainder from the division of the input by the argument.
 .. code-block:: text
     :caption: output
 
-    1 3 3.357
+    1
+    3
+    3.357
 
 If either the input or argument are not an integer or float, Liquid will try to convert
 them to an integer or float. If the input can't be converted, ``0`` will be used instead.
@@ -944,7 +1040,9 @@ Return the input string with ``\n`` and ``\r\n`` replaced with ``<br />\n``.
 .. code-block:: text
     :caption: output
 
-    Hello there
+    <br />
+    Hello<br />
+    there<br />
 
 plus
 ----
@@ -1000,7 +1098,8 @@ before concatenation.
 .. code-block:: text
     :caption: output
 
-    7.542 World!
+    7.542
+    World!
 
 reject
 ------
@@ -1014,7 +1113,17 @@ with the first argument, **that is not equal to** a value, given as the second a
 If a second argument is not given, only elements with the named property that are falsy
 will be included.
 
-``json title="data" {   "products": [     { "title": "Vacuum", "type": "house", "available": true },     { "title": "Spatula", "type": "kitchen", "available": false },     { "title": "Television", "type": "lounge", "available": true },     { "title": "Garlic press", "type": "kitchen", "available": true }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "products": [
+        { "title": "Vacuum", "type": "house", "available": true },
+        { "title": "Spatula", "type": "kitchen", "available": false },
+        { "title": "Television", "type": "lounge", "available": true },
+        { "title": "Garlic press", "type": "kitchen", "available": true }
+      ]
+    }
 
 .. code-block:: liquid2
 
@@ -1040,7 +1149,16 @@ will be included.
 .. code-block:: text
     :caption: output
 
-    All products: - Vacuum - Spatula - Television - Garlic press Non kitchen products: - Vacuum - Television Unavailable products: - Spatula
+    All products:
+    - Vacuum
+    - Spatula
+    - Television
+    - Garlic press
+    Non kitchen products:
+    - Vacuum
+    - Television
+    Unavailable products:
+    - Spatula
 
 remove
 ------
@@ -1214,7 +1332,9 @@ digits defaults to ``0``.
 .. code-block:: text
     :caption: output
 
-    1 3 183.36
+    1
+    3
+    183.36
 
 If either the filter input or its optional argument are not an integer or float, they will
 be converted to an integer or float before rounding.
@@ -1250,14 +1370,25 @@ input is not a string, it will be converted to an HTML-safe string.
 
 With auto-escape enabled and the following global variables:
 
-``json title="data" {   "username": "Sally",   "greeting": "</p><script>alert('XSS!');</script>" }``
+.. code-block:: json
+    :caption: data
 
-``liquid2 title="template" <p>{{ greeting }}, {{ username }}</p> <p>{{ greeting | safe }}, {{ username }}</p>``
+    {
+      "username": "Sally",
+      "greeting": "</p><script>alert('XSS!');</script>"
+    }
+
+.. code-block:: liquid2
+    :caption: template
+
+    <p>{{ greeting }}, {{ username }}</p>
+    <p>{{ greeting | safe }}, {{ username }}</p>
 
 .. code-block:: text
     :caption: output
 
-    <p>&lt;/p&gt;&lt;script&gt;alert(&#34;XSS!&#34;);&lt;/script&gt;, Sally</p> <p></p><script>alert('XSS!');</script>, Sally</p>
+    <p>&lt;/p&gt;&lt;script&gt;alert(&#34;XSS!&#34;);&lt;/script&gt;, Sally</p>
+    <p></p><script>alert('XSS!');</script>, Sally</p>
 
 size
 ----
@@ -1276,7 +1407,8 @@ Return the size of the input object. Works on strings, arrays and hashes.
 .. code-block:: text
     :caption: output
 
-    28 4
+    28
+    4
 
 slice
 -----
@@ -1300,7 +1432,10 @@ sequence, which defaults to ``1``.
 .. code-block:: text
     :caption: output
 
-    L q quid Paul George
+    L
+    q
+    quid
+    Paul George
 
 If the first argument is negative, the start index is counted from the end of the
 sequence.
@@ -1315,7 +1450,9 @@ sequence.
 .. code-block:: text
     :caption: output
 
-    u ui George Ringo
+    u
+    ui
+    George Ringo
 
 sort
 ----
@@ -1323,11 +1460,12 @@ sort
 .. code-block:: text
 
    <array> | sort[: <string>]
-   ``
 
-   Return a copy of the input array with its elements sorted.
 
-   ```liquid
+Return a copy of the input array with its elements sorted.
+
+.. code-block:: liquid2
+
    {% assign my_array = "zebra, octopus, giraffe, Sally Snake" | split: ", " -%}
    {{ my_array | sort | join: ", " }}
 
@@ -1339,14 +1477,33 @@ sort
 The optional argument is a sort key. If given, it should be the name of a property and the
 filter's input should be an array of objects.
 
-``json title="data" {   "collection": {     "products": [       { "title": "A Shoe", "price": "9.95" },       { "title": "A Tie", "price": "0.50" },       { "title": "A Hat", "price": "2.50" }     ]   } }``
+.. code-block:: json
+    :caption: data
 
-``liquid2 title="template" {% assign products_by_price = collection.products | sort: "price" -%} {% for product in products_by_price %}   <h4>{{ product.title }}</h4> {% endfor %}``
+    {
+      "collection": {
+        "products": [
+          { "title": "A Shoe", "price": "9.95" },
+          { "title": "A Tie", "price": "0.50" },
+          { "title": "A Hat", "price": "2.50" }
+        ]
+      }
+    }
+
+.. code-block:: liquid2
+    :caption: template
+
+    {% assign products_by_price = collection.products | sort: "price" -%}
+    {% for product in products_by_price %}
+      <h4>{{ product.title }}</h4>
+    {% endfor %}
 
 .. code-block:: text
     :caption: output
 
-    <h4>A Tie</h4> <h4>A Hat</h4> <h4>A Shoe</h4>
+    <h4>A Tie</h4>
+    <h4>A Hat</h4>
+    <h4>A Shoe</h4>
 
 sort_natural
 ------------
@@ -1372,14 +1529,33 @@ The optional argument is a sort key. If given, it should be the name of a proper
 filter's input should be an array of objects. Array elements are compared using the
 lowercase string representation of that property.
 
-``json title="data" {   "collection": {     "products": [       { "title": "A Shoe", "company": "Cool Shoes" },       { "title": "A Tie", "company": "alpha Ties" },       { "title": "A Hat", "company": "Beta Hats" }     ]   } }``
+.. code-block:: json
+    :caption: data
 
-``liquid2 title="template" {% assign products_by_company = collection.products | sort_natural: "company" %} {% for product in products_by_company %}   <h4>{{ product.title }}</h4> {% endfor %}``
+    {
+      "collection": {
+        "products": [
+          { "title": "A Shoe", "company": "Cool Shoes" },
+          { "title": "A Tie", "company": "alpha Ties" },
+          { "title": "A Hat", "company": "Beta Hats" }
+        ]
+      }
+    }
+
+.. code-block:: liquid2
+    :caption: template
+
+    {% assign products_by_company = collection.products | sort_natural: "company" %}
+    {% for product in products_by_company %}
+      <h4>{{ product.title }}</h4>
+    {% endfor %}
 
 .. code-block:: text
     :caption: output
 
-    <h4>A Tie</h4> <h4>A Hat</h4> <h4>A Shoe</h4>
+    <h4>A Tie</h4>
+    <h4>A Hat</h4>
+    <h4>A Shoe</h4>
 
 split
 -----
@@ -1402,7 +1578,10 @@ string.
 .. code-block:: text
     :caption: output
 
-    John Paul George Ringo
+    John
+    Paul
+    George
+    Ringo
 
 If the argument is undefined or an empty string, the input will be split at every
 character.
@@ -1540,7 +1719,9 @@ are not a number, Liquid will try to convert them to a number. If that conversio
 .. code-block:: text
     :caption: output
 
-    6 168 2200.284
+    6
+    168
+    2200.284
 
 truncate
 --------
@@ -1565,7 +1746,9 @@ the second argument appended.
 .. code-block:: text
     :caption: output
 
-    Ground control to... Ground control, and so on Ground control to Ma
+    Ground control to...
+    Ground control, and so on
+    Ground control to Ma
 
 truncatewords
 -------------
@@ -1590,7 +1773,9 @@ unchanged.
 .. code-block:: text
     :caption: output
 
-    Ground control to... Ground control to-- Ground control to
+    Ground control to...
+    Ground control to--
+    Ground control to
 
 uniq
 ----
@@ -1614,14 +1799,35 @@ Return a copy of the input array with duplicate elements removed.
 If an argument is given, it should be the name of a property and the filter's input should
 be an array of objects.
 
-``json title="data" {   "collection": {     "products": [       { "title": "A Shoe", "company": "Cool Shoes" },       { "title": "A Tie", "company": "alpha Ties" },       { "title": "Another Tie", "company": "alpha Ties" },       { "title": "A Hat", "company": "Beta Hats" }     ]   } }``
+.. code-block:: json
+    :caption: data
 
-``liquid2 title="template" {% assign one_product_from_each_company = collections.products | uniq: "company" -%} {% for product in one_product_from_each_company -%}   - product.title {% endfor %}``
+    {
+      "collection": {
+        "products": [
+          { "title": "A Shoe", "company": "Cool Shoes" },
+          { "title": "A Tie", "company": "alpha Ties" },
+          { "title": "Another Tie", "company": "alpha Ties" },
+          { "title": "A Hat", "company": "Beta Hats" }
+        ]
+      }
+    }
+
+
+.. code-block:: liquid2
+    :caption: template
+
+    {% assign one_product_from_each_company = collections.products | uniq: "company" -%}
+    {% for product in one_product_from_each_company -%}
+      - product.title
+    {% endfor %}
 
 .. code-block:: text
     :caption: output
 
-    - A Shoe - A Tie - A Hat
+    - A Shoe
+    - A Tie
+    - A Hat
 
 upcase
 ------
@@ -1691,7 +1897,17 @@ with the first argument, equal to a value, given as the second argument. If a se
 argument is not given, only elements with the named property that are truthy will be
 included.
 
-``json title="data" {   "products": [     { "title": "Vacuum", "type": "house", "available": true },     { "title": "Spatula", "type": "kitchen", "available": false },     { "title": "Television", "type": "lounge", "available": true },     { "title": "Garlic press", "type": "kitchen", "available": true }   ] }``
+.. code-block:: json
+    :caption: data
+
+    {
+      "products": [
+        { "title": "Vacuum", "type": "house", "available": true },
+        { "title": "Spatula", "type": "kitchen", "available": false },
+        { "title": "Television", "type": "lounge", "available": true },
+        { "title": "Garlic press", "type": "kitchen", "available": true }
+      ]
+    }
 
 .. code-block:: liquid2
 
