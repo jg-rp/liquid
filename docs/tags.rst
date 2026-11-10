@@ -1,11 +1,11 @@
-Tag reference
+Standard tags
 =============
 
 .. note::
 
     This page describes "standard" tags. Python Liquid also has some extra tags and
-    extended expression syntax that are disabled by default. See :doc:`extra` and
-    :doc:`expressions` for documentation on non-standard features.
+    extended expression syntax that are disabled by default. See :doc:`extra_tags`
+    and :doc:`expressions` for documentation on non-standard features.
 
 Comments
 --------
@@ -535,6 +535,8 @@ automatically and initialized to zero, which is output **before** adding ``1``.
    {% increment some %}
    {% increment thing %}
    {% increment thing %}
+
+.. _liquid-tag:
 
 liquid
 ------

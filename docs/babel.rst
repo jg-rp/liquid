@@ -2,17 +2,17 @@ Internationalization and localization
 =====================================
 
 This page covers i18n and l10n filter and tag configuration, and how we support
-translations and translation message catalogs.
+translations and translation message catalogs. See :doc:`extra_filters` for usage
+examples.
 
 Currency
 --------
 
-The ``currency`` filter returns the input number formatted as currency for the current
-locale. For usage examples see ```currency`` <optional_filters.md#currency>`__ in the
-filter reference.
+The :ref:`currency-filter` filter returns the input number formatted as currency for
+the current locale.
 
-Options
-^^^^^^^
+.. autoclass:: liquid.filters.Currency
+   :no-index:
 
 ``currency`` defaults to looking for a locale in a render context variable called
 ``locale``, and a currency code in a render context variable called ``currency_code``. It
@@ -35,15 +35,12 @@ context variables don't exist.
    £100,457.99
    100.457,99 CA$
 
-To configure ``currency``, register a new instance of
-```Currency`` <api/extra.md#liquid.extra.Currency>`__ with an
-```Environment`` <environment.md#managing-tags-and-filters>`__, then render your templates
-from that. See `the API reference <api/extra.md#liquid.extra.Currency>`__ for details of
-all arguments accepted by ``Currency``.
+To configure ``currency``, register a new instance of ``liquid.filters.Currency`` with an
+:class:`liquid.Environment`, then render your templates from that. 
 
 .. code-block:: python
 
-   from liquid.extra import Currency
+   from liquid.filters import Currency
    from liquid import Environment
 
    env = Environment()
@@ -52,9 +49,9 @@ all arguments accepted by ``Currency``.
 Money
 ^^^^^
 
-For convenience, some “money” filters are defined that mimic Shopify's money filter
-behavior. These are instances of ```Currency()`` <api/extra.md#liquid.extra.Currency>`__
-with specific default formats. All other currency options are set to their defaults.
+For convenience, some :ref:`money-filter` filters are defined that mimic Shopify's money
+filter behavior. These are instances of `Currency`_ with specific default formats. All
+other currency options are set to their defaults.
 
 .. code-block:: python
 
@@ -79,14 +76,11 @@ with specific default formats. All other currency options are set to their defau
 DateTime
 --------
 
-The ``datetime`` filter returns the input *datetime* formatted for the current locale. For
-usage examples see ```datetime`` <optional_filters.md#datetime>`__ in the filter
-reference.
+The :ref:`datetime-filter` filter returns the input :class:`datetime.datetime` formatted
+for the current locale.
 
-.. _options-1:
-
-Options
-^^^^^^^
+.. autoclass:: liquid.filters.DateTime
+   :no-index:
 
 ``datetime`` defaults to looking for a timezone in a render context variable called
 ``timezone``, a locale in a render context variable called ``locale`` and a datetime
@@ -108,15 +102,12 @@ format in a render context variable called ``datetime_format``.
    1. April 2007 um 15:30:00 UTC
    01.04.07, 17:30
 
-To configure ``datetime``, register a new instance of
-```DateTime`` <api/extra.md#liquid.extra.DateTime>`__ with an
-```Environment`` <environment.md#managing-tags-and-filters>`__, then render your templates
-from that. See `the API reference <api/extra.md#liquid.extra.DateTime>`__ for details of
-all arguments accepted by ``DateTime``.
+To configure ``datetime``, register a new instance of ``liquid.filters.DateTime`` with an
+instance of :class:`liquid.Environment`, then render your templates from that.
 
 .. code-block:: python
 
-   from liquid.extra import DateTime
+   from liquid.filters import DateTime
    from liquid import Environment
 
    env = Environment()
@@ -125,14 +116,11 @@ all arguments accepted by ``DateTime``.
 Decimal
 -------
 
-The ``decimal`` filter returns the input number formatted as a decimal for the current
-locale. For usage examples see ```decimal`` <optional_filters.md#decimal>`__ in the filter
-reference.
+The :ref:`decimal-filter` filter returns the input number formatted as a decimal for the
+current locale.
 
-.. _options-2:
-
-Options
-^^^^^^^
+.. autoclass:: liquid.filters.Number
+   :no-index:
 
 ``decimal`` defaults to looking for a locale in a render context variable called
 ``locale``. It uses the locale's standard format and falls back to ``en_US`` if that
@@ -159,14 +147,12 @@ variable does not exist.
    10,000.23
    10000.23
 
-To configure ``decimal``, register a new instance of
-```Number`` <api/extra.md#liquid.extra.Number>`__ with an
-```Environment`` <environment.md#managing-tags-and-filters>`__, then render your templates
-from that.
+To configure ``decimal``, register a new instance of ``liquid.filters.Number`` with an
+instance of :class:`liquid.Environment`, then render your templates from that.
 
 .. code-block:: python
 
-   from liquid.extra import Number
+   from liquid.filters import Number
    from liquid import Environment
 
    env = Environment()
@@ -175,14 +161,11 @@ from that.
 Unit
 ----
 
-The ``unit`` filter returns he input number formatted with the given units according to
-the current locale. For usage examples see ```unit`` <optional_filters.md#unit>`__ in the
-filter reference.
+The :ref:`unit-filter` filter returns he input number formatted with the given units
+according to the current locale. 
 
-.. _options-3:
-
-Options
-^^^^^^^
+.. autoclass:: liquid.filters.Unit
+   :no-index:
 
 ``unit`` defaults to looking for a locale in a render context variable called ``locale``,
 a length in a render context variable called ``unit_length``, and a decimal format in a
@@ -208,14 +191,12 @@ render context variable called ``unit_format``.
    12,00 Meter
    150 Kilowatt pro Stunde
 
-To configure ``unit``, register a new instance of
-```Unit`` <api/extra.md#liquid.extra.Unit>`__ with an
-```Environment`` <environment.md#managing-tags-and-filters>`__, then render your templates
-from that.
+To configure ``unit``, register a new instance of ``liquid.filters.Unit`` with an
+instance of :class:`liquid.Environment`, then render your templates from that.
 
 .. code-block:: python
 
-   from liquid.extra import Unit
+   from liquid.filters import Unit
    from liquid import Environment
 
    env = Environment()
@@ -224,40 +205,33 @@ from that.
 Translations
 ------------
 
-Liquid Babel includes ```gettext`` <optional_filters.md#gettext>`__,
-```ngettext`` <optional_filters.md#ngettext>`__,
-```pgettext`` <optional_filters.md#pgettext>`__ and
-```npgettext`` <optional_filters.md#npgettext>`__ filter equivalents to the functions
-found in `Python's gettext
-module <https://docs.python.org/3.10/library/gettext.html#gnu-gettext-api>`__. Application
-developers can choose to use any of these filters, possibly using more user friendly
-filter names, and/or the more general ```t (translate)`` <optional_filters.md#t>`__
-filter.
+Python Liquid includes :ref:`gettext-filter`, :ref:`ngettext-filter`,
+:ref:`pgettext-filter` and :ref:`npgettext-filter` filters equivalent to the functions
+found in Python's `gettext`_ module.
 
-The ```t`` <optional_filters.md#t>`__ filter can behave like any of the \*gettext filters,
-depending on the arguments it is given. Where the \*gettext filters require positional
-arguments for ``context``, ``count`` and ``plural``, ``t`` reserves optional ``count`` and
-``plural`` keyword arguments.
+.. _gettext: https://docs.python.org/3/library/gettext.html
 
-Liquid Babel also offers a ```{% translate %}`` <optional_tags.md#translate>`__ tag. This
-is similar to the
-```{% trans %}`` <https://jinja.palletsprojects.com/en/3.1.x/templates/#i18n>`__ tag found
-in Jinja or the
-```{% blocktranslate %}`` <https://docs.djangoproject.com/en/4.1/topics/i18n/translation/#blocktranslate-template-tag>`__
-tag found in Django's template language. Again, application developers can configure and
-customize the included ``translate`` tag to suit an application's needs.
+Additionally there's the :ref:`t-filter` filter which can behave like any of the
+\*gettext filters depending on its arguments. Where the \*gettext filters require
+positional arguments for ``context``, ``count`` and ``plural``, ``t`` reserves optional
+``count`` and ``plural`` keyword arguments.
+
+Liquid Babel also offers a :ref:`translate-tag` tag. This is similar to the
+``{% trans %}`` tag found in `Jinja`_ or the ``{% blocktranslate %}`` tag found in
+`Django`_'s template language.
+
+.. _Jinja: https://jinja.palletsprojects.com/en/3.1.x/templates/#i18n
+.. _Django: https://docs.djangoproject.com/en/4.1/topics/i18n/translation/#blocktranslate-template-tag
 
 Filters
 ^^^^^^^
 
-```gettext`` <optional_filters.md#gettext>`__,
-```ngettext`` <optional_filters.md#ngettext>`__,
-```npgettext`` <optional_filters.md#npgettext>`__,
-```pgettext`` <optional_filters.md#pgettext>`__ and ```t`` <optional_filters.md#t>`__
-filters all default to looking for `translations <#message-catalogs>`__ in a render
-context variable called ``translations``, falling back to an instance of
-```NullTranslations`` <https://docs.python.org/3.10/library/gettext.html#the-nulltranslations-class>`__
-if ``translations`` can not be resolved.
+:ref:`gettext-filter`, :ref:`ngettext-filter`, :ref:`pgettext-filter` and
+:ref:`npgettext-filter` filters all default to looking for :ref:`message-catalogs` in a
+render context variable called ``translations``, falling back to an instance of
+`NullTranslations`_ if ``translations`` can not be resolved.
+
+.. _NullTranslations: https://docs.python.org/3/library/gettext.html#gettext.NullTranslations
 
 .. code-block:: python
 
@@ -270,19 +244,7 @@ if ``translations`` can not be resolved.
    template = parse("{{ 'Hello, World!' | t }}")
    print(template.render(translations=translations))  # Hallo Welt!
 
-To configure ```gettext`` <optional_filters.md#gettext>`__,
-```ngettext`` <optional_filters.md#ngettext>`__,
-```npgettext`` <optional_filters.md#npgettext>`__,
-```pgettext`` <optional_filters.md#pgettext>`__ or ```t`` <optional_filters.md#t>`__,
-register a new instance of ```GetText`` <api/extra.md#liquid.extra.GetText>`__,
-```NGetText`` <api/extra.md#liquid.extra.NGetText>`__,
-```NPGetText`` <api/extra.md#liquid.extra.NPGetText>`__,
-```PGetText`` <api/extra.md#liquid.extra.PGetText>`__ or
-```Translate`` <api/extra.md#liquid.extra.Translate>`__ with an
-```Environment`` <environment.md#managing-tags-and-filters>`__, then render your templates
-from that. All of these classes inherit from
-```BaseTranslateFilter`` <api/extra.md#liquid.extra.BaseTranslateFilter>`__ and accept the
-same constructor arguments.
+.. _message-catalogs:
 
 Message catalogs
 ^^^^^^^^^^^^^^^^
@@ -293,9 +255,7 @@ protocol. It is the application developer's responsibility to provide a ``Transl
 object, being the interface between Liquid and a message catalog.
 
 The ``Translations`` protocol is defined as follows. It is simply a subset of the
-```NullTranslations`` <https://docs.python.org/3.10/library/gettext.html#gettext.NullTranslations>`__
-class found in the `gettext
-module <https://docs.python.org/3.10/library/gettext.html#gnu-gettext-api>`__.
+`NullTranslations`_ class found in the `gettext`_ module.
 
 .. code-block:: python
 
@@ -308,12 +268,11 @@ module <https://docs.python.org/3.10/library/gettext.html#gnu-gettext-api>`__.
 
        def npgettext(self, context: str, singular: str, plural: str, n: int) -> str: ...
 
-It could be a
-```GNUTranslations`` <https://docs.python.org/3.10/library/gettext.html#the-gnutranslations-class>`__
-instance, a `Babel
-``Translations`` <https://babel.pocoo.org/en/latest/support.html#extended-translations-class>`__
-instance, or any object implementing ``gettext``, ``ngettext``, ``pgettext`` and
-``npgettext`` methods.
+It could be a `GNUTranslations`_ instance, a `Babel Translations`_ instance, or any
+object implementing ``gettext``, ``ngettext``, ``pgettext`` and ``npgettext`` methods.
+
+.. _GNUTranslations: https://docs.python.org/3/library/gettext.html#gettext.GNUTranslations
+.. _Babel Translations: https://babel.pocoo.org/en/latest/support.html#extended-translations-class
 
 Message variables
 ^^^^^^^^^^^^^^^^^
@@ -336,9 +295,9 @@ inside message variables.
 
    {{ "Hello, %(you)s!" | t: you: user.name }}
 
-The ```translate`` <optional_tags.md#translate>`__ block tag recognizes simplified Liquid
-output statements as translation message variables. These variables must be valid
-identifiers without dotted or bracketed property/attribute access, and no filters.
+The :ref:`translate-tag` block tag recognizes simplified Liquid output statements as
+translation message variables. These variables must be valid identifiers without dotted
+or bracketed property/attribute access, and no filters.
 
 .. code-block:: liquid2
 
@@ -346,9 +305,8 @@ identifiers without dotted or bracketed property/attribute access, and no filter
        Hello, {{ you }}!
    {% endtranslate %}
 
-Keyword arguments passed to the ```translate`` <optional_tags.md#translate>`__ tag will be
-merged with the current render context before being used to replace variables in message
-text.
+Keyword arguments passed to the :ref:`translate-tag` tag will be merged with the current
+render context before being used to replace variables in message text.
 
 .. code-block:: liquid2
 
@@ -361,12 +319,12 @@ text.
 Message Extraction
 ^^^^^^^^^^^^^^^^^^
 
-Use the ```extract_from_templates()`` <api/messages.md#liquid.extract_from_template>`__
-function to build a message
-`catalog <https://babel.pocoo.org/en/latest/api/messages/catalog.html#catalogs>`__ from
-one or more templates. You are then free to make use of `Babel's PO file
-features <https://babel.pocoo.org/en/latest/api/messages/pofile.html>`__, or convert the
-catalog to a more convenient internal representation.
+Use the :func:`liquid.extract_from_template` function to build a message `catalog`_ from
+one or more templates. You are then free to make use of Babel's `PO file`_ features, or
+convert the catalog to a more convenient internal representation.
+
+.. _catalog: https://babel.pocoo.org/en/latest/api/messages/catalog.html#catalogs
+.. _PO file: https://babel.pocoo.org/en/latest/api/messages/pofile.html
 
 .. code-block:: python
 
@@ -374,8 +332,7 @@ catalog to a more convenient internal representation.
 
    from babel.messages.pofile import write_po
 
-   from liquid import parse
-   from liquid.messages import extract_from_templates
+   from liquid import extract_from_templates, parse
 
    source = """
    {% # Translators: some comment %}
@@ -416,14 +373,12 @@ Translator Comments
 When a Liquid comment tag immediately precedes a translatable filter or tag, and the
 comment starts with a string in ``comment_tags``, that comment will be included as a
 translator comment with the message. Use the ``comment_tags`` argument to
-```extract_liquid()`` <api/convenience.md#liquid.extract_liquid>`__, or
-```extract_from_templates()`` <api/messages.md#liquid.extract_from_template>`__ to change
+:func:`liquid.extract_liquid`, or :func:`liquid.extract_from_templates` to change
 translator comment prefixes. The default is ``["Translators:"]``.
 
 .. code-block:: python
 
-   from liquid import parse
-   from liquid.messages import extract_from_templates
+   from liquid import extract_from_templates, parse
 
    source = """
    {% # Translators: some comment %}

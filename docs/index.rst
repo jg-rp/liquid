@@ -83,15 +83,32 @@ then load and render templates from that.
 .. toctree::
    :hidden:
    :maxdepth: 3
-   :caption: Contents
+   :caption: Docs
 
    configure.rst
    loaders.rst
    data.rst
-   babel.rst
    static.rst
-   tags.rst
-   filters.rst
-   extra.rst
    expressions.rst
+   babel.rst
+
+.. toctree::
+   :hidden:
+   :caption: API
+   
    api.rst
+
+
+.. toctree::
+   :hidden:
+   :caption: Tag reference
+
+   tags.rst
+   extra_tags.rst
+
+.. toctree::
+   :hidden:
+   :caption: Filter reference
+
+   filters.rst
+   extra_filters.rst

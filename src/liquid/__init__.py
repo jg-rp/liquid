@@ -29,7 +29,12 @@ from ._markup import (
     render_block,
     render_block_async,
 )
-from ._messages import MessageTuple, Translations, extract_from_template
+from ._messages import (
+    MessageTuple,
+    Translations,
+    extract_from_template,
+    extract_from_templates,
+)
 from ._nothing import NOTHING
 from ._parser import Parser
 from ._parser_extended import ExtendedParser
@@ -111,6 +116,7 @@ __all__ = (
     "TokenKind",
     "Translations",
     "Undefined",
+    "extract_from_templates",
     "render_block",
     "render_block_async",
     "slice_range",

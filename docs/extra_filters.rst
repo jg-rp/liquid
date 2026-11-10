@@ -1,8 +1,12 @@
-Extra tags and filters
-======================
+Extra filters
+=============
 
-TODO: intro
+The filters described on this page are **not** enabled by default. You can enable all
+:ref:`extra-features`, or import and register just the filters you need individually (see
+:ref:`managing-tags-and-filters`).
 
+
+.. _currency-filter:
 
 currency
 --------
@@ -12,7 +16,7 @@ currency
    <number> | currency[: group_separator: <boolean>] -> <string>
 
 Currency (aka money) formatting. Return the input number formatted as currency for the
-current locale. See also ```money`` <#money>`__.
+current locale. See also `money`_.
 
 .. code-block:: liquid2
 
@@ -22,7 +26,7 @@ current locale. See also ```money`` <#money>`__.
 
    $100,457.99
 
-Use the ``group_separator`` argument to control the output of the current locale’s group
+Use the ``group_separator`` argument to control the output of the current locale's group
 separators.
 
 .. code-block:: liquid2
@@ -45,6 +49,8 @@ If the input number is a string, it will be parsed to a decimal according to the
 .. code-block:: text
 
    US$100,457.99
+
+.. _datetime-filter:
 
 datetime
 --------
@@ -90,6 +96,8 @@ If the input *datetime* is a string, it will be parsed to a datetime object.
 
    01/04/2007, 19:30
 
+.. _decimal-filter:
+
 decimal
 -------
 
@@ -108,7 +116,7 @@ locale.
 
    10,000.233
 
-Use the ``group_separator`` argument to control the output of the current locale’s group
+Use the ``group_separator`` argument to control the output of the current locale's group
 separators.
 
 .. code-block:: liquid2
@@ -131,6 +139,8 @@ If the input number is a string, it will be parsed to a decimal according to the
 .. code-block:: text
 
    100,457
+
+.. _gettext-filter:
 
 gettext
 -------
@@ -160,6 +170,8 @@ Any keyword arguments are used to populate message variables. If ``user.name`` i
 .. code-block:: text
 
    Hallo Sue!
+
+.. _json-filter:
 
 json
 ----
@@ -204,28 +216,32 @@ should be applied to a formatted JSON representation of the input object.
      "name": "Football"
    }
 
+.. _money-filter:
+
 money
 -----
 
-``money`` is an alias for ```currency`` <#currency>`__.
+``money`` is an alias for `currency`_.
 
 money_with_currency
 -------------------
 
-``money_with_currency`` is an alias for ```currency`` <#currency>`__ with the default
+``money_with_currency`` is an alias for `currency`_ with the default
 format set to ``"¤#,##0.00 ¤¤"``.
 
 money_without_currency
 ----------------------
 
-``money_without_currency`` is an alias for ```currency`` <#currency>`__ with the default
+``money_without_currency`` is an alias for `currency`_ with the default
 format set to ``"#,##0.00¤"``.
 
 money_without_trailing_zeros
 ----------------------------
 
-``money_without_trailing_zeros`` is an alias for ```currency`` <#currency>`__ with the
+``money_without_trailing_zeros`` is an alias for `currency`_ with the
 default format set to ``"¤#,###"`` and ``currency_digits`` set to ``False``.
+
+.. _ngettext-filter:
 
 ngettext
 --------
@@ -257,6 +273,8 @@ Any keyword arguments are used to populate message variables. If ``user.name`` i
 .. code-block:: text
 
    Hallo Sue!
+
+.. _npgettext-filter:
 
 npgettext
 ---------
@@ -291,6 +309,8 @@ Any keyword arguments are used to populate message variables. If ``user.name`` i
 
    Hallo Sue!
 
+.. _pgettext-filter:
+
 pgettext
 --------
 
@@ -320,6 +340,8 @@ Any keyword arguments are used to populate message variables. If ``user.name`` i
 .. code-block:: text
 
    Hallo Sue!
+
+.. _sort-numeric-filter:
 
 sort_numeric
 ------------
@@ -360,6 +382,8 @@ and/or Decimals, but will be slower than using standard ``sort``.
 If an input sequence contains strings (or arbitrary objects that get stringified) that do
 not have numeric characters, they will be pushed to the end of the resulting list,
 probably in the same order as in the input sequence.
+
+.. _t-filter:
 
 t
 -
@@ -404,6 +428,8 @@ The remaining keyword arguments are used to populate translatable message variab
 
    Hallo Sue!
 
+.. _unit-filter:
+
 unit
 ----
 
@@ -429,7 +455,7 @@ measurement unit
    12 meters
 
 length
-------
+^^^^^^
 
 ``length`` can be one of “short”, “long” or “narrow”, defaulting to “long”.
 

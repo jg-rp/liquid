@@ -1,10 +1,10 @@
-Filter reference
+Standard filters
 ================
 
 .. note::
 
     This page describes "standard" filters. Python Liquid also has some extra filters and
-    extended expression syntax that are disabled by default. See :doc:`extra` and
+    extended expression syntax that are disabled by default. See :doc:`extra_filters` and
     :doc:`expressions` for documentation on non-standard features.
 
 abs

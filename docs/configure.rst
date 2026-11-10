@@ -39,8 +39,11 @@ any arguments is equivalent to the following.
         undefined=Undefined,
     )
 
-All features
-------------
+
+.. _extra-features:
+
+Extra features
+--------------
 
 If you're not concerned with Shopify/liquid compatibility and want a reasonable
 configuration with extra tags and filters enabled, start with this.
@@ -216,6 +219,8 @@ After parsing with a lax parser, a list of errors can be retrieved using
 
 This can be useful for discovering multiple errors in one go, but it's usually best
 to keep template parsing an rendering as strict as possible so errors don't go unnoticed.
+
+.. _managing-tags-and-filters:
 
 Managing tags and filters
 -------------------------

@@ -9,6 +9,8 @@ API Docs
 
 .. autofunction:: liquid.extract_liquid
 
+.. autofunction:: liquid.extract_from_templates
+
 
 .. autoclass:: liquid.Environment
     :members:

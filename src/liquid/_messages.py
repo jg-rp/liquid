@@ -137,7 +137,7 @@ def extract_from_templates(
     keywords
         A Babel compatible mapping of translatable "function" names to argument specs.
         The included translation filters and tag transform their messages into typical
-        *gettext format, regardless of their names.
+        \\*gettext format, regardless of their names.
     comment_tags
         A list of translator tags to search for and include in extracted messages.
     strip_comment_tags
