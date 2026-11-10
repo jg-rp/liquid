@@ -1,5 +1,5 @@
-Internationalization and localization
-=====================================
+Babel
+=====
 
 This page covers i18n and l10n filter and tag configuration, and how we support
 translations and translation message catalogs. See :doc:`extra_filters` for usage

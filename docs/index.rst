@@ -90,14 +90,18 @@ then load and render templates from that.
    data.rst
    static.rst
    expressions.rst
-   babel.rst
 
 .. toctree::
    :hidden:
-   :caption: API
+   :caption: Python API
    
    api.rst
-
+   loader_api.rst
+   drop_api.rst
+   babel.rst
+   tag_api.rst
+   filter_api.rst
+   exceptions.rst
 
 .. toctree::
    :hidden:

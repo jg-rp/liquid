@@ -26,6 +26,8 @@ RE_DIGITS = re.compile(r"^[0-9]+")
 
 @dataclass(slots=True)
 class FilterContext:
+    """Liquid config, state and utilities for filter implementations."""
+
     context: RenderContext
     span: Token
 
@@ -37,6 +39,7 @@ class FilterContext:
         self.env = self.context.env
 
     def get_item(self, obj: object, key: object, default: object = MISSING) -> object:
+        """Get `key` from `obj` with Shopify/liquid semantics."""
         if isinstance(obj, str) and isinstance(key, str):
             return key if key in obj else None
 
@@ -78,12 +81,15 @@ class FilterContext:
         return [obj]
 
     def is_nil(self, obj: object) -> bool:
+        """Return true if `obj` is Liquid nullish."""
         return self.context.env.is_nil(obj)
 
     def truthy(self, obj: object) -> bool:
+        """Return true if `obj` is Liquid truthy."""
         return self.context.env.truthy(obj, self.context)
 
     def to_int(self, obj: object) -> int:
+        """Coerce `obj` to an integer."""
         if self.is_nil(obj):
             raise LiquidFilterError(
                 "invalid integer",
@@ -94,6 +100,7 @@ class FilterContext:
         return self.context.env.to_int(obj, self.context, self.span)
 
     def to_numeric(self, obj: object, default: int | Decimal) -> float | int | Decimal:
+        """Coerce `obj` to an integer, float or Decimal."""
         if isinstance(obj, str):
             try:
                 return int(obj)
@@ -133,6 +140,7 @@ class FilterContext:
             return default
 
     def to_str[T](self, obj: object, default: T) -> str | T:
+        """Coerce `obj` to a string."""
         return (
             default
             if obj is None
@@ -140,9 +148,11 @@ class FilterContext:
         )
 
     def to_date(self, obj: object) -> dt.datetime | None:
+        """Coerce `obj` to a datatime, or ``None`` if `obj` can not be interpreted as a datetime."""
         return self.env.to_date(obj, self.context, self.span)
 
     def error(self, message: str) -> LiquidFilterError:
+        """Return a Liquid exception with suitable error context data."""
         return LiquidFilterError(
             message,
             token=self.span,

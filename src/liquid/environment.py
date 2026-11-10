@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
 
 class Environment:
-    """Liquid template parsing an rendering configuration.
+    """Liquid template parsing and rendering configuration.
 
     Parameters
     ----------

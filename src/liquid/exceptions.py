@@ -2,11 +2,23 @@ from .tokens import Token, token_value
 
 
 class LiquidError(Exception):
-    pass
+    """The base class for all Liquid exceptions."""
 
 
 class DetailedLiquidError(LiquidError):
-    """A Liquid exception with contextual information."""
+    """A Liquid exception with contextual information.
+
+    Parameters
+    ----------
+    msg
+        The error message.
+    token
+        A token pointing to the cause of the error in `source`.
+    source
+        Template source text.
+    name
+        Template name.
+    """
 
     def __init__(self, msg: str, *, token: Token, source: str, name: str) -> None:
         super().__init__(msg)
@@ -20,7 +32,7 @@ class DetailedLiquidError(LiquidError):
     def detailed_message(self) -> str:
         """Return an error message formatted with extra context info."""
         span = token_value(self.token, self.source)
-        line, col, current_line = self._error_context(self.source, self.token[1])
+        line, col, current_line = self.error_context(self.source, self.token[1])
 
         pad = " " * len(str(line))
         length = len(span)
@@ -41,7 +53,8 @@ class DetailedLiquidError(LiquidError):
             return self.args[0]
         return None
 
-    def _error_context(self, source: str, index: int) -> tuple[int, int, str]:
+    def error_context(self, source: str, index: int) -> tuple[int, int, str]:
+        """Return (line number, column number, line text) pointed to by this exception's token."""
         lines = source.splitlines(keepends=True)
         cumulative_length = 0
         target_line_index = -1
