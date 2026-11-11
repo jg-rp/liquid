@@ -194,7 +194,7 @@ Also note that Liquid will not use ``__str__`` for serializing objects for outpu
 Output representation
 ^^^^^^^^^^^^^^^^^^^^^
 
-When rendered with the output statement (``{{ obj }}``), if an objects implements
+When rendered with the output statement (``{{ obj }}``), if an object implements
 :meth:`__liquid__() <liquid.LiquidPrimitive.__liquid__>`, Liquid will call ``__liquid__``
 with the ``"output"`` hint and serialize the result according to
 :meth:`liquid.Environment.serialize`.

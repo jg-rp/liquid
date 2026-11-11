@@ -220,6 +220,8 @@ Keyword arguments are used to add (or shadow existing) variables.
       Hello, {{ you }}!
     {% endtranslate %}
 
+.. _with-tag:
+
 with
 ----
 

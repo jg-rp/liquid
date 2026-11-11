@@ -103,6 +103,8 @@ Extra filters
 * ``t``
 * ``unit``
 
+.. _tokenizers-and-parsers:
+
 Tokenizers and parsers
 ----------------------
 
@@ -127,8 +129,7 @@ The extended lexer:
 
 The extended parser:
 
-* Adds a logical ``not`` operator.
-* Adds parentheses for grouping terms.
+* Adds a logical ``not`` operator and parentheses for grouping terms.
 * Adds Python-style ternary expressions (``a if b else c``).
 * Adds arithmetic operators (``+``, ``-``, ``*``, ``/`` and ``%``).
 * Allows ``=`` as well as ``:`` between names and values in named tag and filter arguments.
@@ -187,7 +188,7 @@ Lax parsing
 Python Liquid's lax parsers, :class:`liquid.LaxLegacyParser` and
 :class:`liquid.LaxExtendedParser`, suppress syntax errors and attempt to continue
 parsing template source text. In some cases an earlier error can lead to confusing or
-misleading errors messages later on.
+misleading error messages later on.
 
 After parsing with a lax parser, a list of errors can be retrieved using
 :meth:`liquid.Template.errors`.
@@ -318,7 +319,7 @@ Undefined variables
 
 At render time, if a variable can not be resolved, an instance of :class:`liquid.Undefined`
 is used instead. Pass one of :class:`liquid.Undefined`, :class:`liquid.StrictUndefined` or
-:class:`liquid.FalsyUndefined` to the `undefined` argument of the :class:`liquid.Environment`.
+:class:`liquid.FalsyUndefined` to the `undefined` argument of the :class:`liquid.Environment`
 constructor to control how Liquid handles undefined variables.
 
 .. code-block:: python

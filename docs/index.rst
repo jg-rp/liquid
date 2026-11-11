@@ -6,7 +6,7 @@ language. We follow `Shopify/liquid`_ closely and test against `Shopify/liquid-s
 
 .. note::
 
-   This is the documentation for the Python Liquid version 3 (GitHub_). Archived
+   This is the documentation for Python Liquid version 3 (GitHub_). Archived
    documentation for versions 1 and 2 can be found 
    `here <https://jg-rp.github.io/python-liquid-docs-archive/>`_ and
    `here <https://github.com/jg-rp/liquid/blob/v2.3.6/docs/index.md>`_, respectively.
@@ -90,18 +90,7 @@ then load and render templates from that.
    data.rst
    static.rst
    expressions.rst
-
-.. toctree::
-   :hidden:
-   :caption: Python API
-   
-   api.rst
-   loader_api.rst
-   drop_api.rst
-   babel.rst
-   tag_api.rst
-   filter_api.rst
-   exceptions.rst
+   migration.rst
 
 .. toctree::
    :hidden:
@@ -116,3 +105,15 @@ then load and render templates from that.
 
    filters.rst
    extra_filters.rst
+
+.. toctree::
+   :hidden:
+   :caption: API Docs
+   
+   api.rst
+   loader_api.rst
+   drop_api.rst
+   babel.rst
+   tag_api.rst
+   filter_api.rst
+   exceptions.rst

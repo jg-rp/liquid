@@ -55,7 +55,7 @@ dependencies = [
   "furo",
   "ghp-import",
   "hypothesis",
-  "pygments-liquid2",
+  "pygments-liquid2>=0.3.0",
   "pytest",
   "pytest-cov",
   "pytest-mock",
