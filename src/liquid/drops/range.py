@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from .._nothing import NOTHING
 from .._slice import slice_range
+from ..exceptions import ResourceLimitError
 from .iterable import IterableDrop
 
 if TYPE_CHECKING:
@@ -64,7 +65,8 @@ class Range:
             case "boolean":
                 return len(self) > 0
             case "array":
-                # TODO: raise if very big range
+                if len(self) > 1_000_000:  # XXX: arbitrary limit
+                    raise ResourceLimitError("range limit reached")
                 return list(self.__liquid_iter__(0, None, False))
             case _:
                 return NOTHING

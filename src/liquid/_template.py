@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 
 class Template:
+    """A compiled template ready to be rendered."""
+
     def __init__(
         self,
         env: Environment,
@@ -75,12 +77,14 @@ class Template:
         return line_number, column_number
 
     def render(self, data: Mapping[str, object] | None = None) -> str:
+        """Render this template with variables from `data`."""
         buffer: StringBuffer = StringBuffer()
         context = RenderContext(self, globals=self.make_globals(data))
         self.render_with_context(context, buffer)
         return buffer.getvalue()
 
     async def render_async(self, data: Mapping[str, object] | None = None) -> str:
+        """Render this template asynchronously with variables from `data`."""
         buffer: StringBuffer = StringBuffer()
         context = RenderContext(self, globals=self.make_globals(data))
         await self.render_with_context_async(context, buffer)
@@ -97,6 +101,12 @@ class Template:
     def render_with_errors(
         self, data: Mapping[str, object] | None = None
     ) -> tuple[str, list[DetailedLiquidError]]:
+        """Render this template with error capture and rendering.
+
+        Returns
+        -------
+            Rendered text and a list of :class:`liquid.exceptions.DetailedLiquidError`.
+        """
         buffer: StringBuffer = StringBuffer()
         context = RenderContext(
             self, globals=self.make_globals(data), capture_errors=True
@@ -107,6 +117,12 @@ class Template:
     async def render_with_errors_async(
         self, data: Mapping[str, object] | None = None
     ) -> tuple[str, list[DetailedLiquidError]]:
+        """Render this template asynchronously with error capture and rendering.
+
+        Returns
+        -------
+            Rendered text and a list of :class:`liquid.exceptions.DetailedLiquidError`.
+        """
         buffer: StringBuffer = StringBuffer()
         context = RenderContext(
             self, globals=self.make_globals(data), capture_errors=True
@@ -177,7 +193,7 @@ class Template:
         """Return a list of variables used in this template without path segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See also [global_variables][liquid.BoundTemplate.global_variables].
 
@@ -195,7 +211,7 @@ class Template:
         """Return a list of variables used in this template without path segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See also [global_variables][liquid.BoundTemplate.global_variables].
 
@@ -215,7 +231,7 @@ class Template:
         """Return a list of variables used in this template including all path segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See also [global_variable_paths][liquid.BoundTemplate.global_variable_paths].
 
@@ -236,7 +252,7 @@ class Template:
         """Return a list of variables used in this template including all path segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See also [global_variable_paths][liquid.BoundTemplate.global_variable_paths].
 
@@ -257,7 +273,7 @@ class Template:
         """Return a list of variables used in this template, each as a list of segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See [global_variable_segments][liquid.BoundTemplate.global_variable_segments].
 
@@ -280,7 +296,7 @@ class Template:
         """Return a list of variables used in this template, each as a list of segments.
 
         Includes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         See [global_variable_segments][liquid.BoundTemplate.global_variable_segments].
 
@@ -301,7 +317,7 @@ class Template:
         """Return a list of variables used in this template without path segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------
@@ -319,7 +335,7 @@ class Template:
         """Return a list of variables used in this template without path segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------
@@ -337,7 +353,7 @@ class Template:
         """Return a list of variables used in this template including all path segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------
@@ -358,7 +374,7 @@ class Template:
         """Return a list of variables used in this template including all path segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------
@@ -379,7 +395,7 @@ class Template:
         """Return a list of variables used in this template, each as a list of segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------
@@ -400,7 +416,7 @@ class Template:
         """Return a list of variables used in this template, each as a list of segments.
 
         Excludes variables that are _local_ to the template, like those crated with
-        `{% assign %}` and `{% capture %}`.
+        ``{% assign %}`` and ``{% capture %}``.
 
         Parameters
         ----------

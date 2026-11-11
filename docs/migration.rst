@@ -64,6 +64,9 @@ implemented in Ruby or Python Liquid.
 New template engine features
 ----------------------------
 
+Drops
+^^^^^
+
 The *Drop interface* (developer defined types for templates) has been redesigned to:
 
 * Give drop methods access to context data and environment config at render time.
@@ -72,6 +75,51 @@ The *Drop interface* (developer defined types for templates) has been redesigned
 
 See :doc:`drop_api`.
 
+
+Lax parsing
+^^^^^^^^^^^
+
+The new lax parsers, :class:`liquid.LaxLegacyParser` and :class:`liquid.LaxExtendedParser`,
+suppress syntax errors and attempt to continue parsing template source text. In some cases
+an earlier error can lead to confusing or misleading error messages later on.
+
+After parsing with a lax parser, a list of errors can be retrieved using
+:meth:`liquid.Template.errors`.
+
+.. code-block:: python
+
+    from liquid import Environment, LaxLegacyParser
+
+    env = Environment(parser=LaxLegacyParser)
+
+    # Typo in the `if` expression.
+    template = env.parse(
+        "{% if a =! b %}TRUE{% else %}FALSE{% endif %}",
+        name="some_template",
+
+    )
+
+    for error in template.errors():
+        print(error)
+
+.. code-block:: text
+    :caption: output
+
+    unknown or missing operator
+      -> 'some_template' 1:8
+      |
+    1 | {% if a =! b %}TRUE{% else %}FALSE{% endif %}
+      |         ^ unknown or missing operator
+
+This can be useful for discovering multiple errors in one go, but it's usually best
+to keep template parsing an rendering as strict as possible so errors don't go unnoticed.
+
+Error capture and rendering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A list of (potentially many) render time exceptions can now be retrieved using
+:meth:`liquid.Template.render_with_errors`. It returns a ``(rendered string, error list)``
+tuple, with error messages written to the output string at the point they occurred.
 
 API changes
 -----------

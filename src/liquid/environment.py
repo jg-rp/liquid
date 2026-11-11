@@ -381,11 +381,29 @@ class Environment:
         )
 
     def render(self, source: str, data: Mapping[str, object] | None = None) -> str:
+        """Parse and render `source` with variables from `data`
+
+        Parameters
+        ----------
+        source
+            Template source code.
+        data
+            Template variables.
+        """
         return self.parse(source).render(data)
 
     async def render_async(
         self, source: str, data: Mapping[str, object] | None = None
     ) -> str:
+        """Parse and render `source` asynchronously with variables from `data`.
+
+        Parameters
+        ----------
+        source
+            Template source code.
+        data
+            Template variables.
+        """
         return await self.parse(source).render_async(data)
 
     def tokenize(self, source: str) -> list[Token]:
