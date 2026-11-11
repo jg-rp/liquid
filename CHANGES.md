@@ -2,64 +2,37 @@
 
 ## Version 3.0.0 (unreleased)
 
-**Breaking API changes**
+This major release improves compatibility with Shopify/liquid, improves template parsing performance, adds a few opt-in template language features and makes several breaking API changes.
 
-- Renamed `BoundTemplate` to `Template`.
+See the migration guide (TODO) for details.
+
+**Python versions and dependencies**
+
+- Dropped support for Python version 3.9, 3.10 and 3.11.
+- Removed the `pytz` dependency. We now use Python's `zoneinfo` package.
+- Added the `tzdata` dependency.
+
+**Notable API Changes**
 
 - `Template(source)` can no longer be used to parse a template from a string. Use package level `parse(source)` or `Environment.parse(source)` instead.
 
-- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a dict (or any mapping) instead of keyword arguments.
-
 - Removed `Environment.from_string()`. Use package level `parse()` or `Environment.parse()` instead.
 
-- Renamed `UnknownFilterError` to `LiquidNameError`.
+- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a dict (or any mapping) instead of keyword arguments.
 
-- Replaced `Environment` options `logical_not_operator`, `logical_parentheses`, `ternary_expressions` and `keyword_assignment` with a single `parser` constructor argument. When `parser=ExtendedParser`, the `not` operator, grouping terms with parentheses and ternary expression are enabled in all contexts. Additionally:
-  - `and` and `or` are allowed in all contexts with short circuit, last value semantics.
-  - Filter application with `|` is available in all contexts and `|` plays nicely with parentheses.
-  - Grouped expressions can have trailing path segments. Like `{{ (a or b).c }}`.
-  - Arithmetic operators are enabled.
+- Renamed class `BoundTemplate` to `Template`.
 
-- Replaced `Environment` options `string_sequences` with a `iterable_strings` constructor argument.
+- Removed `Environment` class variables in favour of constructor arguments. See TODO.
 
-- Removed `Environment.string_first_and_last`. String always respond to `.first`, `.last`, `| first` and `| last`.
+- Renamed several `Environment` constructor arguments. See TODO.
 
-- Removed `Environment.suppress_blank_control_flow_blocks`. Blank control flow blocks are now always suppressed.
+## Version 2.3.7
 
-- `shorthand_indexes` is now an `Environment` constructor argument instead of a class variable.
+**Fixes**
 
-- Changed the "drop protocol" so that drops appearing in equality and comparison expressions, and when tested for truthiness, make better use of Python's magic methods...
+- Fixed operators `<` and `>` where they would compare Boolean operands as integers, or raising `LiquidTypeError` in some cases. They now evaluate to `false`, like `<=` and `>=`.
 
-- Removed environment variable `LIQUIDINTMAXSTRDIGITS`. It was a workaround in the absence of `sys.get_int_max_str_digits()`, added in Python 3.11.
-
-**Custom tag API changes**
-
-Custom tags must now implement the `Tag` protocol with a static/class `parse(token, parser)` method producing instances of a class implementing the `Markup` protocol. It's usually convenient to implement both protocols with a single class.
-
-Python Liquid version 3 uses single-pass tokenizers that scan tag expressions as well as markup delimiters in on go (this is necessary to for proper parsing of string literals).
-
-This means that tags are not passed expressions as text to tokenize and parse themselves. Instead tags have access to already scanned tokens via an instance of `Parser`. Where possible, you are encouraged to use methods on `Parser` to parse the stream of recognized tokens. When predefined tokens wont do, `Parser.raw_expression()` returns source text up to the next closing delimiter.
-
-See built-in tag implementations for examples.
-
-**Custom filter API changes**
-
-We no longer use decorators to coerce filter inputs to acceptable types. Nor do we use decorators to indicate that a filter accepts the active render context or environment.
-
-Instead we define filters as `type Filter = Callable[Concatenate[FilterContext, object, ...], object]`. The first argument is always an instance of `FilterContext`, which has access to the render context and active environment.
-
-The second argument is the result of evaluating the left hand side of the filter expression, and remaining arguments are defined by the filter.
-
-Instances of `FilterContext` also have convenient methods for coercing objects to primitive types, and methods for testing objects for Liquid truthiness and nullish-ness.
-
-See built-in filter implementation for examples.
-
-**Other changes**
-
-- Removed the `pytz` dependency. We now use Python's `zoneinfo` package.
-- Bumped minimum `dateutil` version to 3.0.0.
-- Bumped minimum `babel` version to 2.12.0.
-- Added `tzdata` dependency.
+- Fixed `reject` and `where` filter truthiness. Previously we were treating `0` as `False`.
 
 ## Version 2.3.6
 

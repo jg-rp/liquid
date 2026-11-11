@@ -12,7 +12,13 @@ if TYPE_CHECKING:
 
 
 class DictLoader(Loader):
-    """A template loader that reads source text from a dictionary."""
+    """A template loader that reads source text from a dictionary.
+
+    Parameters
+    ----------
+    templates
+        A mapping of template names to template source code.
+    """
 
     def __init__(self, templates: dict[str, str]) -> None:
         super().__init__()
