@@ -397,6 +397,12 @@ class LegacyLexer(Lexer):
         while self.pos < limit:
             self.skip(RE_TRIVIA)
 
+            if self.source.startswith("%}", self.pos) or (
+                self.source.startswith("-", self.pos)
+                and self.source.startswith("%}", self.pos + 1)
+            ):
+                break
+
             line_limit = self.source.find("\n", self.pos)
             if line_limit == -1:
                 line_limit = limit
@@ -433,6 +439,8 @@ class LegacyLexer(Lexer):
             elif tag_name is None:
                 # Remove empty TAG_START
                 self.tokens.pop()
+                self.pos = line_limit
+                self.emit(TOKEN_UNKNOWN)
 
             else:
                 self.emit(TOKEN_TAG_NAME)

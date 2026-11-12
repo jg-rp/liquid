@@ -26,6 +26,9 @@ For example, this is the complete implementation of the built-in ``append`` filt
     def append(context: FilterContext, left: object, right: object) -> str:
         return context.to_str(left, "") + context.to_str(right, "")
 
+See `built-in filters <https://github.com/jg-rp/liquid/tree/main/src/liquid/filters>`_
+for many more examples.
+
 API
 ---
 

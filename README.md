@@ -131,4 +131,4 @@ See [docs](https://jg-rp.github.io/liquid/).
 
 ## Contributing
 
-Please see [Contributing to Python Liquid](https://github.com/jg-rp/liquid/blob/main/contributing.md).
+Please see [Contributing to Python Liquid](https://github.com/jg-rp/liquid/blob/main/CONTRIBUTING.md).

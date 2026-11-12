@@ -64,7 +64,7 @@ TOKEN_DEFINITIONS = {
     "TEXT": "TEXT",
     "TRIPLE_DOT": "'...'",
     "TRUE": "'true'",
-    "UNKNOWN": "symbol",
+    "UNKNOWN": "unknown",
     "WC": "WHITESPACE_CONTROL",
     "WITH": "'with'",
 }

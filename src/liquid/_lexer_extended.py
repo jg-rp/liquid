@@ -24,6 +24,7 @@ class ExtendedLexer(Lexer):
 
     comment_start: str = "{#"
     comment_end: str = "#}"
+    line_comment_start: str = "#"
 
     out_start: str = "{{"
     out_end: str = "}}"
@@ -475,8 +476,15 @@ class ExtendedLexer(Lexer):
 
             line_limit = min(line_limit, limit)
 
-            self.emit(TOKEN_TAG_START)
+            if self.source.startswith(self.line_comment_start, self.pos):
+                self.pos += len(self.line_comment_start)
+                self.emit(TOKEN_COMMENT_START)
+                self.pos = line_limit
+                self.emit(TOKEN_COMMENT)
+                self.emit(TOKEN_COMMENT_END)
+                continue
 
+            self.emit(TOKEN_TAG_START)
             tag_name = self.scan(RE_TAG_NAME)
 
             if tag_name == "#":
@@ -505,6 +513,8 @@ class ExtendedLexer(Lexer):
             elif tag_name is None:
                 # Remove empty TAG_START
                 self.tokens.pop()
+                self.pos = line_limit
+                self.emit(TOKEN_UNKNOWN)
 
             else:
                 self.emit(TOKEN_TAG_NAME)

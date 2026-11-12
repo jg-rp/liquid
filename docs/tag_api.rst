@@ -53,7 +53,10 @@ tag, at which point the tag should write output text to the provided buffer.
 
     It's often convenient to implement :class:`liquid.Tag` and :class:`liquid.Markup`
     with a single class, where ``Tag.parse()`` is a static or class method. All built-in
-    filters do this.
+    tags do this.
+
+See `built-in tags <https://github.com/jg-rp/liquid/tree/main/src/liquid/tags>`_ for lots
+of examples.
 
 API
 ---
