@@ -5,32 +5,9 @@ Python Liquid is a Python engine for <a href="https://shopify.github.io/liquid/"
 <br>
 We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely and test against the <a href="https://github.com/jg-rp/golden-liquid">Golden Liquid</a> test suite.
 </p>
-<p align="center">
-  <a href="https://pypi.org/project/python-liquid/">
-    <img src="https://img.shields.io/pypi/v/python-liquid.svg?style=flat-square" alt="PyPi - Version">
-  </a>
-  <a href="https://anaconda.org/conda-forge/python-liquid">
-    <img src="https://img.shields.io/conda/vn/conda-forge/python-liquid?style=flat-square" alt="conda-forge">
-  </a>
-  <a href="https://pypi.org/project/python-liquid/">
-    <img src="https://img.shields.io/pypi/pyversions/python-liquid.svg?style=flat-square" alt="Python versions">
-  </a>
-  <br>
-  <a href="https://github.com/jg-rp/liquid/actions/workflows/tests.yaml">
-    <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/tests.yaml?branch=main&label=tests&style=flat-square" alt="Tests">
-  </a>
-  <a href="https://github.com/jg-rp/liquid/actions/workflows/coverage.yaml">
-    <img src="https://img.shields.io/github/actions/workflow/status/jg-rp/liquid/coverage.yaml?branch=main&label=coverage&style=flat-square" alt="Coverage">
-  </a>
-  <br>
-  <a href="https://pypi.org/project/python-liquid/">
-    <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/python-liquid?style=flat-square">
-  </a>
-  <br>
-  <a href="https://github.com/jg-rp/liquid/blob/main/LICENSE">
-    <img src="https://img.shields.io/pypi/l/python-liquid.svg?style=flat-square" alt="License">
-  </a>
-</p>
+
+> [!WARNING]
+> This is the v2 branch of Python Liquid.
 
 ---
 
