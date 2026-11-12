@@ -97,7 +97,7 @@ TEST_CASES = [
     Case(
         description="bad conditional expression in unless block",
         template="{% unless true %}ok{% elsif £$! %}{% endunless %}",
-        expect_msg="expected a basic expression, found symbol",
+        expect_msg="expected a basic expression, found unknown",
     ),
     Case(
         description="unknown symbol",

@@ -165,7 +165,8 @@ Whereas before you'd implement ``__getitem__(self, key)`` and possibly
 ``__getitem_async__(self, key)``, now you'd implement the :class:`liquid.LiquidObject`
 protocol and the :class:`liquid.LiquidAsyncObject` protocol.
 
-See :doc:`data`.
+See :doc:`data` and `built-in drops <https://github.com/jg-rp/liquid/tree/main/src/liquid/drops>`_
+for examples.
 
 Tags
 ^^^^
@@ -184,7 +185,8 @@ If built-in tokens and expressions will not do and you need to parse expression 
 yourself, use :meth:`liquid.Parser.raw_expression`. It returns source text up to the
 next end tag delimiter.
 
-See :doc:`tag_api`.
+See :doc:`tag_api` and `built-in tags <https://github.com/jg-rp/liquid/tree/main/src/liquid/tags>`_.
+for examples.
 
 Filters
 ^^^^^^^
@@ -207,4 +209,5 @@ expression, and remaining arguments are defined by the filter.
 Instances of ``FilterContext`` also have convenient methods for coercing objects to
 primitive types, and methods for testing objects for Liquid truthiness and nullish-ness.
 
-See :doc:`filter_api`.
+See :doc:`filter_api` and `built-in filters <https://github.com/jg-rp/liquid/tree/main/src/liquid/filters>`_
+for examples.

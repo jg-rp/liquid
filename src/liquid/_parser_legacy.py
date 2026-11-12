@@ -566,6 +566,12 @@ class LegacyParser(Parser):
 
                 nodes.append(self.parse_tag())
 
+            elif kind == TOKEN_COMMENT_START:
+                self.pos += 1
+                text = token_value(self.eat(TOKEN_COMMENT), self.source)
+                self.eat(TOKEN_COMMENT_END)
+                nodes.append(TemplateComment(token, text))
+
             elif kind in (TOKEN_WC, TOKEN_TAG_END):
                 break
 
