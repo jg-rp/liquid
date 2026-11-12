@@ -110,7 +110,7 @@ class LiquidFilterError(DetailedLiquidError):
     pass
 
 
-class LiquidFilterInterrupt(LiquidFilterError):
+class LiquidFilterInterrupt(LiquidFilterError):  # noqa: N818
     pass
 
 

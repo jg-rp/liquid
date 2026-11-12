@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import html
+from typing import TYPE_CHECKING
 
 import markupsafe
 
-from .._filter import FilterContext
+if TYPE_CHECKING:
+    from .._filter import FilterContext
 
 
 def stylesheet_tag(context: FilterContext, left: object) -> str:

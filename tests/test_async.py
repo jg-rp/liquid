@@ -4,9 +4,9 @@ import asyncio
 import operator
 import tempfile
 import time
-from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 import pytest
@@ -23,6 +23,9 @@ from liquid import (
     parse,
 )
 from liquid.exceptions import TemplateNotFoundError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass

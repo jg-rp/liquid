@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import importlib.resources
-from collections.abc import Iterable
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
@@ -10,6 +9,7 @@ from .._loader import Loader, TemplateSource
 from ..exceptions import TemplateNotFoundError
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from types import ModuleType
 
     from .._context import RenderContext

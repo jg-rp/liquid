@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any, cast
 from markupsafe import Markup
 
 from .. import expressions
-from .._markup import Expression
 from .._messages import MESSAGES, MessageText, TranslatableFilter, Translations
 
 if TYPE_CHECKING:
     from .._filter import FilterContext
+    from .._markup import Expression
 
 
 class BaseTranslateFilter:
@@ -66,7 +66,7 @@ class BaseTranslateFilter:
         result = context.resolve(self.translations_var)
         if context.is_nil(result):
             return self.default_translations
-        return cast(Translations, result)
+        return cast("Translations", result)
 
 
 class Translate(BaseTranslateFilter, TranslatableFilter):

@@ -97,7 +97,7 @@ class LegacyLexer(Lexer):
         while self.pos < limit:
             ch = self.source[self.pos]
 
-            if _is_trivia(ord(ch)):
+            if ch in {" ", "\t", "\n", "\x0c", "\r"}:
                 self.skip(trivia)
 
             elif ch == ",":
@@ -480,7 +480,7 @@ class LegacyLexer(Lexer):
                 return
 
             else:
-                assert False  # unreachable
+                raise AssertionError("unreachable")
 
     def accept_line_doc_comment(self, limit: int) -> None:
         # Shopify/liquid always raises a syntax error for `doc` in `{% liquid %}`.
@@ -526,7 +526,3 @@ def _is_name_first_ch(ch: int) -> bool:
 
 def _is_number_ch(ch: int) -> bool:
     return ch == 45 or (ch >= 48 and ch <= 57)
-
-
-def _is_trivia(ch: int) -> bool:
-    return ch == 32 or ch == 9 or ch == 10 or ch == 12 or ch == 13

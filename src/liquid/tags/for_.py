@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from .._drop import liquid_async_iterable, liquid_iterable
@@ -13,6 +12,8 @@ from ..expressions import KeywordArgument, Name, Variable
 from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .._context import RenderContext
     from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
@@ -208,10 +209,11 @@ class ForTag:
                     interrupt = context.interrupts.pop()
                     if interrupt == "break":
                         break
-                    elif interrupt == "continue":
+
+                    if interrupt == "continue":
                         continue
-                    else:
-                        context.interrupts.append(interrupt)
+
+                    context.interrupts.append(interrupt)
 
     async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
         target = await self.expression.evaluate_async(context)
@@ -277,10 +279,11 @@ class ForTag:
                         interrupt = context.interrupts.pop()
                         if interrupt == "break":
                             break
-                        elif interrupt == "continue":
+
+                        if interrupt == "continue":
                             continue
-                        else:
-                            context.interrupts.append(interrupt)
+
+                        context.interrupts.append(interrupt)
 
             else:
                 for obj in it:
@@ -292,10 +295,11 @@ class ForTag:
                         interrupt = context.interrupts.pop()
                         if interrupt == "break":
                             break
-                        elif interrupt == "continue":
+
+                        if interrupt == "continue":
                             continue
-                        else:
-                            context.interrupts.append(interrupt)
+
+                        context.interrupts.append(interrupt)
 
     def children(self) -> list[Markup]:
         result: list[Markup] = [

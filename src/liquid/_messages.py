@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -17,6 +16,8 @@ from . import expressions
 from .tags import CommentTag, InlineCommentTag, TemplateComment
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+
     from ._markup import Expression, Markup
     from ._template import Template
     from .environment import Environment

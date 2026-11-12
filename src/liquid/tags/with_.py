@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .._io import StringBuffer
 from .._markup import is_blank_block, render_block, render_block_async
 from ..tokens import TOKEN_COMMA, TOKEN_TAG_END
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from ..expressions import KeywordArgument, Name

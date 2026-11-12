@@ -91,7 +91,7 @@ class RenderTag:
                 token=self.name.span,
                 source=context.template.source,
                 name=context.template.name,
-            )
+            ) from None
 
         bind_key = self.alias.value if self.alias else template.name.split(".", 1)[0]
         bind_value: object
@@ -141,7 +141,7 @@ class RenderTag:
                 token=self.name.span,
                 source=context.template.source,
                 name=context.template.name,
-            )
+            ) from None
 
         bind_key = self.alias.value if self.alias else template.name.split(".", 1)[0]
         bind_value: object

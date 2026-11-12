@@ -11,7 +11,7 @@ DT_NOON = dt.datetime(2026, 1, 1, 12, 0, 0)
 
 
 @pytest.mark.parametrize(
-    "date,fmt,want",
+    ("date", "fmt", "want"),
     [
         pytest.param(DT, r"%s", "1792276020", id="unix_timestamp"),
         pytest.param(DT, r"%C", "20", id="century"),

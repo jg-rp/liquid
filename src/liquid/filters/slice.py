@@ -36,4 +36,4 @@ def _to_integer(context: FilterContext, obj: object) -> int:
     try:
         return int(context.to_str(obj, "").lstrip())
     except ValueError:
-        raise context.error("invalid integer")
+        raise context.error("invalid integer") from None

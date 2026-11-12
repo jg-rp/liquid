@@ -188,7 +188,7 @@ class ExtendsTag:
                     token=extends_node.name.span,
                     source=template_.source,
                     name=template_.name,
-                )
+                ) from None
 
         next_template = visit(context.template)
         base = next_template

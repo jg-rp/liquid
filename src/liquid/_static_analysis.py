@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
 from typing import TYPE_CHECKING, TypedDict
@@ -14,6 +13,8 @@ from .exceptions import LiquidError
 from .tokens import span, token_value
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from ._markup import Expression, Markup
     from ._template import Template
     from .tokens import Token
@@ -116,11 +117,7 @@ class _StaticScope:
         self.stack[0].add(name)
 
     def __contains__(self, key: str) -> bool:
-        for scope in self.stack:
-            if key in scope:
-                return True
-
-        return False
+        return any(key in scope for scope in self.stack)
 
     def pop(self) -> set[str] | None:
         return self.stack.pop() if self.stack else None
@@ -194,8 +191,8 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
     filters: defaultdict[str, list[_Location]] = defaultdict(list)
     tags: defaultdict[str, list[_Location]] = defaultdict(list)
 
-    template_Scope: set[str] = set()
-    root_scope = _StaticScope(template_Scope)
+    template_scope: set[str] = set()
+    root_scope = _StaticScope(template_scope)
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
@@ -268,7 +265,7 @@ def analyze(template: Template, *, include_partials: bool) -> TemplateAnalysis:
                 # we might want to visit it again but only capture globals.
                 just_globals_ = template_name in seen
 
-                if not partial.key in seen[template_name]:
+                if partial.key not in seen[template_name]:
                     seen[template_name].add(partial.key)
                     partial_globals = {n.value for n in partial.in_scope}
 
@@ -313,8 +310,8 @@ async def analyze_async(
     filters: defaultdict[str, list[_Location]] = defaultdict(list)
     tags: defaultdict[str, list[_Location]] = defaultdict(list)
 
-    template_Scope: set[str] = set()
-    root_scope = _StaticScope(template_Scope)
+    template_scope: set[str] = set()
+    root_scope = _StaticScope(template_scope)
     static_context = RenderContext(template)
 
     # Names of partial templates that have already been analyzed.
@@ -387,7 +384,7 @@ async def analyze_async(
                 # we might want to visit it again but only capture globals.
                 just_globals_ = temlate_name in seen
 
-                if not partial.key in seen[temlate_name]:
+                if partial.key not in seen[temlate_name]:
                     seen[temlate_name].add(partial.key)
                     partial_globals = {n.value for n in partial.in_scope}
 
@@ -484,20 +481,20 @@ def to_locations(d: defaultdict[str, list[_Location]]) -> Locations:
     for k, v in d.items():
         a: list[Loc] = []
 
-        for l in v:
-            ((start_line, start_column), (end_line, end_column)) = l.span()
+        for location in v:
+            ((start_line, start_column), (end_line, end_column)) = location.span()
 
             a.append(
                 {
-                    "start_index": l.token[1],
-                    "end_index": l.token[2],
+                    "start_index": location.token[1],
+                    "end_index": location.token[2],
                     "start_line": start_line,
                     "start_column": start_column,
                     "end_line": end_line,
                     "end_column": end_column,
-                    "value": l.value(),
-                    "template_name": l.template.name,
-                    "template_path": l.template.path,
+                    "value": location.value(),
+                    "template_name": location.template.name,
+                    "template_path": location.template.path,
                 }
             )
 

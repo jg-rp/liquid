@@ -15,7 +15,7 @@ class MockTokenizer(ExtendedLexer):
 
 
 @pytest.mark.parametrize(
-    "source,data,want",
+    ("source", "data", "want"),
     [
         ("Hello, [[ you ]]!", {"you": "World"}, "Hello, World!"),
         ("[% if false %]FALSE[% else %]TRUE[% endif %]", {}, "TRUE"),
@@ -46,7 +46,7 @@ class AnotherMockTokenizer(ExtendedLexer):
 
 
 @pytest.mark.parametrize(
-    "source,data,want",
+    ("source", "data", "want"),
     [
         ("Hello, [[( you )]]!", {"you": "World"}, "Hello, World!"),
         ("[(% if false %)]FALSE[(% else %)]TRUE[(% endif %)]", {}, "TRUE"),

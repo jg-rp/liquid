@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime as dt
 import decimal
 import re
 from collections.abc import Callable, Generator, Iterable, Mapping
@@ -14,6 +13,8 @@ from ._nothing import NOTHING
 from .exceptions import LiquidFilterError, LiquidFilterInterrupt
 
 if TYPE_CHECKING:
+    import datetime as dt
+
     from ._context import RenderContext
     from .environment import Environment
     from .tokens import Token

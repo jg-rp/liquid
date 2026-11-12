@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from zoneinfo import ZoneInfoNotFoundError
 
 import pytest
@@ -8,7 +8,7 @@ from liquid import Environment
 from liquid.exceptions import LiquidFilterError
 from liquid.filters import DateTime
 
-DT = dt = datetime.datetime(2007, 4, 1, 15, 30)
+DT = dt.datetime(2007, 4, 1, 15, 30)
 
 render = Environment(extra=True).render
 
@@ -151,13 +151,13 @@ def test_garbage_string_left_value() -> None:
 
 def test_now() -> None:
     assert render("{{ 'now' | datetime }}", {"datetime_format": "yyyy"}) == str(
-        datetime.datetime.now().year
+        dt.datetime.now().year
     )
 
 
 def test_today() -> None:
     assert render("{{ 'today' | datetime }}", {"datetime_format": "yyyy"}) == str(
-        datetime.datetime.now().year
+        dt.datetime.now().year
     )
 
 

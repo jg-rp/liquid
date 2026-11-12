@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from .._nothing import NOTHING
@@ -9,6 +8,8 @@ from ..exceptions import ResourceLimitError
 from .iterable import IterableDrop
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from .._context import RenderContext
     from .._drop import ContextHint
 

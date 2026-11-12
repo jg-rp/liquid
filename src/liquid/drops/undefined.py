@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
 from typing import TYPE_CHECKING, Never
 
 from .._nothing import Nothing
@@ -8,6 +7,8 @@ from ..exceptions import UndefinedVariableError
 from .iterable import IterableDrop
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+
     from .._context import RenderContext
     from .._drop import ContextHint
     from ..tokens import Token

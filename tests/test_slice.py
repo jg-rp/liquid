@@ -6,7 +6,7 @@ from liquid._slice import slice_range, slice_sequence
 
 
 @pytest.mark.parametrize(
-    "it,offset,limit,want",
+    ("it", "offset", "limit", "want"),
     [
         (range(10), 0, None, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
         (range(10), 2, 5, [2, 3, 4, 5, 6]),
@@ -29,7 +29,7 @@ def test_dodgy_slice(
 
 
 @pytest.mark.parametrize(
-    "it,offset,limit,want",
+    ("it", "offset", "limit", "want"),
     [
         (list(range(11)), 0, None, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
         (list(range(12)), 2, 5, [2, 3, 4, 5, 6]),

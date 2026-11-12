@@ -223,7 +223,7 @@ class RenderContext:
         if key not in self.registers:
             self.registers[key] = default()
 
-        return cast(T, self.registers[key])
+        return cast("T", self.registers[key])
 
     def decrement(self, name: str) -> int:
         i = self.counters.get(name, 0)

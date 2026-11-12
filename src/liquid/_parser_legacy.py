@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Collection
 from typing import TYPE_CHECKING
 
 from . import expressions
-from ._markup import Block, Expression, Markup
 from ._parser import (
     PRECEDENCE_COMPARISON,
     PRECEDENCE_FILTER_ARG,
@@ -23,6 +21,9 @@ from .tokens import *
 from .tokens import TOKEN_NAMES, TokenKind, span, token_value
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
+
+    from ._markup import Block, Expression, Markup
     from .environment import Environment
     from .tokens import Token
 

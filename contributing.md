@@ -60,7 +60,7 @@ Then open `htmlcov/index.html` in your browser.
 
 ## Documentation
 
-[Documentation](https://jg-rp.github.io/liquid/) is built using [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/getting-started/). Find the source in the `docs` folder of this repository.
+[Documentation](https://jg-rp.github.io/liquid/) is built using Sphinx. Find the source in the `docs` folder of this repository.
 
 ## Style Guides
 
@@ -71,5 +71,3 @@ There are no hard rules for git commit messages, although you might like to indi
 ### Python Style
 
 All Python files are formatted using [Ruff](https://github.com/astral-sh/ruff), configured in `pyproject.toml`
-
-Docstrings must use [Google style docstrings](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).

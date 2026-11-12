@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from itertools import zip_longest
 from typing import TYPE_CHECKING, Any
 
-from .._io import StringBuffer
 from .._markup import (
     SCOPE_ISOLATED,
     Partial,
@@ -16,6 +15,7 @@ from ..tokens import TOKEN_COMMA, TOKEN_TAG_END, span
 
 if TYPE_CHECKING:
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup
     from .._parser import Parser
     from ..tokens import Token
@@ -148,7 +148,7 @@ class CallTag:
                     self.name.span,
                 )
             )
-            return
+            return None
 
         args, excess_args, excess_kwargs = self._args(macro)
         scope: dict[str, Any] = {"args": [], "kwargs": {}}
@@ -192,7 +192,7 @@ class CallTag:
                     self.name.span,
                 )
             )
-            return
+            return None
 
         args, excess_args, excess_kwargs = self._args(macro)
         scope: dict[str, Any] = {"args": [], "kwargs": {}}
@@ -235,7 +235,7 @@ class CallTag:
 
         for param, expr in zip_longest(macro.params, positional_args, fillvalue=None):
             if param is None:
-                assert expr is not None
+                assert expr is not None  # noqa: S101
                 excess_args.append(expr)
                 continue
 

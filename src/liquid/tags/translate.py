@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
 from dataclasses import dataclass
 from gettext import NullTranslations
 from typing import TYPE_CHECKING, cast
@@ -9,7 +8,6 @@ from typing import TYPE_CHECKING, cast
 import markupsafe
 
 from .. import expressions
-from .._io import StringBuffer
 from .._messages import MESSAGES, MessageText, Translations
 from ..exceptions import TranslationSyntaxError
 from ..expressions import Name
@@ -17,7 +15,10 @@ from ..tokens import TOKEN_COMMA, TOKEN_TAG_END
 from .output import OutputStatement
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .._context import RenderContext
+    from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
     from .._template import Template
@@ -163,7 +164,7 @@ class TranslateTag:
         if context.env.is_nil(t):
             return self.default_translations
 
-        return cast(Translations, t)
+        return cast("Translations", t)
 
     def resolve_count(
         self,

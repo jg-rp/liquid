@@ -229,7 +229,7 @@ def test_falsy_undefined_with_default_filter() -> None:
 
 
 @pytest.mark.parametrize(
-    "template,want",
+    ("template", "want"),
     [
         ("{% if nosuchthing %}TRUE{% else %}FALSE{% endif %}", "FALSE"),
         ("{% unless nosuchthing %}TRUE{% else %}FALSE{% endunless %}", "TRUE"),

@@ -27,14 +27,15 @@ def sort(context: FilterContext, left: object, key: object = None) -> list[objec
         try:
             if a < b:  # type: ignore
                 return -1
-            elif a > b:  # type: ignore
+
+            if a > b:  # type: ignore
                 return 1
-            else:
-                return 0
+
+            return 0
         except TypeError:
             raise context.error(
                 f"comparison with {type(a).__class__!r} and {type(b).__class__!r} failed"
-            )
+            ) from None
 
     if context.is_nil(key):
         return sorted(context.input_array(left), key=cmp_to_key(compare))
@@ -72,10 +73,11 @@ def sort_natural(
 
         if a < b:
             return -1
-        elif a > b:
+
+        if a > b:
             return 1
-        else:
-            return 0
+
+        return 0
 
     if context.is_nil(key):
         return sorted(context.input_array(left), key=cmp_to_key(compare))
@@ -105,14 +107,15 @@ def sort_numeric(
         try:
             if a < b:
                 return -1
-            elif a > b:
+
+            if a > b:
                 return 1
-            else:
-                return 0
+
+            return 0
         except TypeError:
             raise context.error(
                 f"comparison with {type(a).__class__!r} and {type(b).__class__!r} failed"
-            )
+            ) from None
 
     if context.is_nil(key):
         return sorted(context.input_array(left), key=cmp_to_key(compare))

@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Collection
 from typing import TYPE_CHECKING, Literal
 
 from .exceptions import LiquidSyntaxError
-from .expressions import KeywordArgument, Name, Parameter, StringLiteral
 from .tokens import *
 from .tokens import TOKEN_NAMES, span, token_value
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
+
     from ._markup import Block, Expression
     from .environment import Environment
+    from .expressions import KeywordArgument, Name, Parameter, StringLiteral
     from .tokens import Token, TokenKind
 
 PRECEDENCE_LOWEST: Literal[1] = 1

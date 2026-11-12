@@ -9,7 +9,7 @@ def find(
     if context.is_nil(value):
         for obj in left:
             val = context.get_item(obj, prop)
-            if not context.is_nil(val) and not val is False:
+            if not context.is_nil(val) and val is not False:
                 return obj
         return None
 
@@ -28,7 +28,7 @@ def find_index(
     if context.is_nil(value):
         for i, obj in enumerate(left):
             val = context.get_item(obj, prop)
-            if not context.is_nil(val) and not val is False:
+            if not context.is_nil(val) and val is not False:
                 return i
 
         return None
@@ -48,13 +48,9 @@ def has(
     if context.is_nil(value):
         for obj in left:
             val = context.get_item(obj, prop)
-            if not context.is_nil(val) and not val is False:
+            if not context.is_nil(val) and val is not False:
                 return True
 
         return False
 
-    for obj in left:
-        if context.get_item(obj, prop) == value:
-            return True
-
-    return False
+    return any(context.get_item(obj, prop) == value for obj in left)

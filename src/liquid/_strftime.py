@@ -56,10 +56,7 @@ def ruby_strftime(date: dt.datetime, fmt: str) -> str:
 
     # Handle timezone abbreviation (%Z)
     tzname = date.tzname()
-    if tzname and tzname[0] in "+-":
-        tz_Z = ""
-    else:
-        tz_Z = tzname or ""
+    tz_z = "" if tzname and tzname[0] in "+-" else tzname or ""
 
     # Handle timezone offset components (%z, %:z)
     if date.tzinfo is not None and date.utcoffset() is not None:
@@ -148,7 +145,7 @@ def ruby_strftime(date: dt.datetime, fmt: str) -> str:
         elif conversion == "p":
             res = "AM" if date.hour < 12 else "PM"
         elif conversion == "Z":
-            res = tz_Z
+            res = tz_z
         elif conversion == "z":
             if date.tzinfo is None or date.utcoffset() is None:
                 res = ""

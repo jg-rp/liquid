@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC
-from collections.abc import Awaitable, Callable, Mapping
 from contextlib import suppress
 from functools import partial
 from typing import TYPE_CHECKING, Protocol
@@ -9,6 +8,8 @@ from typing import TYPE_CHECKING, Protocol
 from .._lru_cache import LRUCache, ThreadSafeLRUCache
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable, Mapping
+
     from .._context import RenderContext
     from .._template import Template
     from ..environment import Environment

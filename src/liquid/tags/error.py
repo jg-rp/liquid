@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ..exceptions import LiquidSyntaxError
-
 if TYPE_CHECKING:
     from .._context import RenderContext
     from .._io import StringBuffer
     from .._markup import Expression, Markup, Partial
+    from ..exceptions import LiquidSyntaxError
     from ..expressions import Name
     from ..tokens import Token
 

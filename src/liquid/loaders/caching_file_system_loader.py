@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from .file_system_loader import FileSystemLoader
 from .mixins import CachingLoaderMixin
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
 
 

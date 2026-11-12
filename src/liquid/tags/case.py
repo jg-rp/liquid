@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from .._markup import is_blank_block, render_block, render_block_async
@@ -15,6 +14,8 @@ from ..tokens import (
 from .else_ import ElseBlock
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .._context import RenderContext
     from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial

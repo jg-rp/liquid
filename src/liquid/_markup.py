@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Protocol
 
-from ._io import StringBuffer
 from .exceptions import DetailedLiquidError, DisabledTagError, ResourceLimitError
 
 if TYPE_CHECKING:
     from ._context import RenderContext
+    from ._io import StringBuffer
     from ._parser import Parser
     from ._template import Template
     from .expressions import Name

@@ -25,7 +25,6 @@ from . import filters, tags
 from ._chain_map import ReadOnlyChainMap
 from ._drop import liquid_primitive
 from ._io import StringBuffer
-from ._lexer import Lexer
 from ._lexer_legacy import LegacyLexer
 from ._nothing import Nothing
 from ._parser_legacy import LegacyParser
@@ -38,6 +37,7 @@ from .loaders import DictLoader
 if TYPE_CHECKING:
     from ._context import RenderContext
     from ._filter import Filter
+    from ._lexer import Lexer
     from ._loader import Loader
     from ._markup import Tag
     from ._parser import Parser
@@ -692,7 +692,7 @@ class Environment:
         return None
 
     def is_nil(self, obj: object) -> bool:
-        return obj == None or isinstance(obj, (Undefined, Nothing))
+        return obj is None or isinstance(obj, (Undefined, Nothing))
 
     def _inspect(
         self,

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from .._drop import liquid_iterable
@@ -8,14 +7,16 @@ from .._markup import render_block, render_block_async
 from .._slice import slice_sequence
 from ..drops import TableRowLoop
 from ..exceptions import LiquidSyntaxError
-from ..expressions import Name
 from ..tokens import TOKEN_COMMA, TOKEN_IN, TOKEN_TAG_END
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .._context import RenderContext
     from .._io import StringBuffer
     from .._markup import Block, Expression, Markup, Partial
     from .._parser import Parser
+    from ..expressions import Name
     from ..tokens import Token
 
 
