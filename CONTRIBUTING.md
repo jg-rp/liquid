@@ -7,13 +7,14 @@ Your contributions and questions are always welcome. Feel free to ask questions,
 - [Development](#development)
 - [Documentation](#documentation)
 - [Style Guides](#style-guides)
+- [Branches](#branches)
 
 ## Development
 
 The [Golden Liquid Test Suite](https://github.com/jg-rp/golden-liquid) is included as a Git [submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules). Clone the Python Liquid Git repository and initialize the Golden Liquid submodule like this.
 
 ```shell
-$ git@github.com:jg-rp/liquid.git
+$ git clone git@github.com:jg-rp/liquid.git
 $ cd liquid
 $ git submodule update --init
 ```
@@ -62,6 +63,12 @@ Then open `htmlcov/index.html` in your browser.
 
 [Documentation](https://jg-rp.github.io/liquid/) is built using Sphinx. Find the source in the `docs` folder of this repository.
 
+Build HTML docs to the `site` directory.
+
+```shell
+$ hatch run docs-build
+```
+
 ## Style Guides
 
 ### Git Commit Messages
@@ -71,3 +78,9 @@ There are no hard rules for git commit messages, although you might like to indi
 ### Python Style
 
 All Python files are formatted using [Ruff](https://github.com/astral-sh/ruff), configured in `pyproject.toml`
+
+### Branches
+
+The `main` branch is for the latest version of Python Liquid.
+
+Python Liquid version 2.x lives on the `v2` branch.

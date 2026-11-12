@@ -44,28 +44,37 @@ We follow <a href="https://github.com/Shopify/liquid">Shopify/Liquid</a> closely
 
 ## Install
 
-Install Python Liquid using [Pipenv](https://pipenv.pypa.io/en/latest/):
+Install `python-liquid` from [PyPi](https://pypi.org/project/python-liquid) using your favorite package manager.
+
+**pip**
 
 ```shell
-$ pipenv install -u python-liquid
+pip install python-liquid
 ```
 
-Or [pip](https://pip.pypa.io/en/stable/getting-started/):
+**uv**
 
 ```shell
-$ pip install python-liquid
+uv add python-liquid
 ```
 
-Or from [conda-forge](https://anaconda.org/conda-forge/python-liquid):
+**pipenv**
 
 ```shell
-$ conda install -c conda-forge python-liquid
+pipenv install -u python-liquid
+```
+
+**conda**
+
+```shell
+conda install -c conda-forge python-liquid
 ```
 
 ## Links
 
 - Documentation: https://jg-rp.github.io/liquid/
 - Documentation for Python Liquid version 1.x: https://jg-rp.github.io/python-liquid-docs-archive/
+- Documentation for Python Liquid version 2.x: https://github.com/jg-rp/liquid/blob/v2.3.6/docs/index.md
 - Change Log: https://github.com/jg-rp/liquid/blob/main/CHANGES.md
 - PyPi: https://pypi.org/project/python-liquid/
 - Source Code: https://github.com/jg-rp/liquid
@@ -82,18 +91,17 @@ $ conda install -c conda-forge python-liquid
 
 ### `render()`
 
-This example renders a template from a string of text with the package-level `render()` function. The template has just one placeholder variable `you`, which we've given the value `"World"`.
+Use the package-level `liquid.render()` function to render a template with Liquid's default configuration. The first argument is template source code and the second is a dictionary of template variables.
 
 ```python
-from liquid import render
+import liquid
 
-print(render("Hello, {{ you }}!", you="World"))
-# Hello, World!
+print(liquid.render("Hello, {{ you }}!", {"you": "World"}))  # Hello, World!
 ```
 
 ### `parse()`
 
-Often you'll want to render the same template several times with different variables. We can parse source text without immediately rendering it using the `parse()` function. `parse()` returns a `BoundTemplate` instance with a `render()` method.
+Use `liquid.parse()` to get an instance of `liquid.Template`, which can be rendered multiple times with different data.
 
 ```python
 from liquid import parse
@@ -105,32 +113,21 @@ print(template.render(you="Liquid"))  # Hello, Liquid!
 
 ### Configure
 
-Both `parse()` and `render()` are convenience functions that use the default Liquid environment. For all but the simplest cases, you'll want to configure an instance of `Environment`, then load and render templates from that.
+You'll need to create an instance of `liquid.Environment` to configure Liquid, then load and render templates from that.
 
 ```python
-from liquid import CachingFileSystemLoader
-from liquid import Environment
+from liquid import Environment, CachingFileSystemLoader
 
 env = Environment(
-    autoescape=True,
-    loader=CachingFileSystemLoader("./templates"),
+  autoescape=True,
+  loader=CachingFileSystemLoader("./templates")
 )
+
+template = env.get_template("index.liquid")
+another_template = env.parse("{% render 'greeting' %}, World!")
 ```
 
-Then, using `env.parse()` or `env.get_template()`, we can create a `BoundTemplate` from a string or read from the file system, respectively.
-
-```python
-# ... continued from above
-template = env.parse("Hello, {{ you }}!")
-print(template.render(you="World"))  # Hello, World!
-
-# Try to load "./templates/index.html"
-another_template = env.get_template("index.html")
-data = {"some": {"thing": [1, 2, 3]}}
-result = another_template.render(**data)
-```
-
-Unless you happen to have a relative folder called `templates` with a file called `index.html` within it, we would expect a `TemplateNotFoundError` to be raised when running the example above.
+See [docs](https://jg-rp.github.io/liquid/).
 
 ## Contributing
 
