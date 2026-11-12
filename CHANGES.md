@@ -1,10 +1,37 @@
 # Python Liquid Change Log
 
+## Version 3.0.0 (unreleased)
+
+This major release improves compatibility with Shopify/liquid, improves template parsing performance, adds a few opt-in template language features and makes several breaking API changes.
+
+See the migration guide (TODO) for details.
+
+**Python versions and dependencies**
+
+- Dropped support for Python version 3.9, 3.10 and 3.11.
+- Removed the `pytz` dependency. We now use Python's `zoneinfo` package.
+- Added the `tzdata` dependency.
+
+**Notable API Changes**
+
+- `Template(source)` can no longer be used to parse a template from a string. Use package level `parse(source)` or `Environment.parse(source)` instead.
+
+- Removed `Environment.from_string()`. Use package level `parse()` or `Environment.parse()` instead.
+
+- Changed `render()`, `Environment.render()` and `Template.render()` to accept data as a dict (or any mapping) instead of keyword arguments.
+
+- Renamed class `BoundTemplate` to `Template`.
+
+- Removed `Environment` class variables in favour of constructor arguments. See TODO.
+
+- Renamed several `Environment` constructor arguments. See TODO.
+
 ## Version 2.3.7 (unreleased)
 
 **Fixes**
 
-- Fixed `<` and `>` comparing Boolean operands as integers, or raising `LiquidTypeError`, since version 2.3.3. They now evaluate to `false`, like `<=` and `>=`.
+- Fixed comparison operators `<` and `>`. Since version 2.3.3 they would compare Boolean operands as integers, or raise a `LiquidTypeError` in some cases. Now they evaluate to `false` when given a Boolean operand, like `<=` and `>=`.
+
 - Fixed `reject` and `where` filter truthiness. Previously we were treating `0` as `False`.
 
 ## Version 2.3.6

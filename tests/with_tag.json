@@ -1,0 +1,59 @@
+{
+  "tests": [
+    {
+      "name": "no arguments",
+      "template": "{% with %}?{% endwith %}",
+      "result": "?"
+    },
+    {
+      "name": "block scope",
+      "template": "{% with x=1 %}{{ x }}{% endwith %}{{ x }}",
+      "result": "1"
+    },
+    {
+      "name": "assign scope",
+      "template": "{% with x=1 %}{% assign y = x + 1 %}{% endwith %}{{ y }}",
+      "result": "2"
+    },
+    {
+      "name": "shadow",
+      "template": "{% assign x = 99 %}{{ x }}{% with x=1 %} {{ x }}{% endwith %} {{ x }}",
+      "result": "99 1 99"
+    },
+    {
+      "name": "multiple arguments",
+      "template": "{% with x=1, y=2 %}{{ x }},{{ y }}{% endwith %}",
+      "result": "1,2"
+    },
+    {
+      "name": "colon separated",
+      "template": "{% with x:1, y:2 %}{{ x }},{{ y }}{% endwith %}",
+      "result": "1,2"
+    },
+    {
+      "name": "extra whitespace",
+      "template": "{% with\n  x=1,\n  y=2\n%}{{ x }},{{ y }}{% endwith %}",
+      "result": "1,2"
+    },
+    {
+      "name": "later arguments can use earlier arguments",
+      "template": "{% with x = 1, y = x + 2 %}{{ x }},{{ y }}{% endwith %}",
+      "result": "1,3"
+    },
+    {
+      "name": "short circuit logical or",
+      "template": "{% with x = foo or 1, y = x + 2 %}{{ x }},{{ y }}{% endwith %}",
+      "result": "1,3"
+    },
+    {
+      "name": "filtered argument",
+      "template": "{% assign x = 'foo' %}{% with y = x | upcase %}{{ y }}{%- endwith -%}{{ x }}",
+      "result": "FOOfoo"
+    },
+    {
+      "name": "nested",
+      "template": "{% with x = 1 %}{% with y = 2 %}{{ x }} {{ y }}{% endwith %}{% endwith %}",
+      "result": "1 2"
+    }
+  ]
+}

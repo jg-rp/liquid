@@ -1,17 +1,14 @@
-"""Test cases for `extends` and `block` tags."""
-
 import asyncio
 
 import pytest
 
-from liquid import BoundTemplate
-from liquid import Environment
-from liquid.builtin import DictLoader
-from liquid.exceptions import LiquidSyntaxError
-from liquid.exceptions import RequiredBlockError
-from liquid.exceptions import TemplateInheritanceError
-from liquid.exceptions import UndefinedError
-from liquid.undefined import StrictUndefined
+from liquid import DictLoader, Environment, StrictUndefined, Template
+from liquid.exceptions import (
+    LiquidSyntaxError,
+    RequiredBlockError,
+    TemplateInheritanceError,
+    UndefinedVariableError,
+)
 
 
 def test_missing_required_block() -> None:
@@ -19,11 +16,11 @@ def test_missing_required_block() -> None:
     source = "{% extends 'foo' %}{% block baz %}{% endblock %}"
     partials = {"foo": "{% block bar required %}{% endblock %}"}
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(RequiredBlockError):
         template.render()
@@ -40,11 +37,11 @@ def test_missing_required_block_long_stack() -> None:
         "bar": "{% extends 'foo' %}{% block some %}hello{% endblock %}",
     }
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(RequiredBlockError):
         template.render()
@@ -59,11 +56,11 @@ def test_immediate_override_required_block() -> None:
     partials = {"foo": "{% block bar required %}{% endblock %}"}
     expect = "hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -79,11 +76,11 @@ def test_override_required_block_in_leaf() -> None:
     }
     expect = "hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -99,11 +96,11 @@ def test_override_required_block_in_stack() -> None:
     }
     expect = "hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -119,11 +116,11 @@ def test_override_required_block_not_in_base() -> None:
     }
     expect = "hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -138,11 +135,11 @@ def test_missing_required_block_not_in_base() -> None:
         "bar": "{% extends 'foo' %}{% block content required %}{% endblock %}",
     }
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(RequiredBlockError):
         template.render()
@@ -155,13 +152,13 @@ def test_override_required_block_directly() -> None:
     """Test that we raise an exception if rendering a required block directly."""
     source = "{% block foo required %}{% endblock %}"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(
         extra=True,
     )
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(RequiredBlockError):
         template.render()
@@ -174,13 +171,13 @@ def test_too_many_extends() -> None:
     """Test that we raise an exception if more than one `extends` tag exists."""
     source = "{% extends 'foo' %}{% extends 'bar' %}"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(
         extra=True,
     )
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(TemplateInheritanceError):
         template.render()
@@ -196,11 +193,11 @@ def test_invalid_block_name() -> None:
         "foo": "{% block 47 %}{% endblock %}",
     }
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(LiquidSyntaxError):
         template.render()
@@ -217,18 +214,18 @@ def test_block_drop_properties() -> None:
     )
     partials = {"foo": "hello, {% block bar %}{{ you }}{% endblock %}"}
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(
         extra=True, loader=DictLoader(partials), undefined=StrictUndefined
     )
-    template = env.from_string(source)
+    template = env.parse(source)
 
-    with pytest.raises(UndefinedError):
+    with pytest.raises(UndefinedVariableError):
         template.render()
 
-    with pytest.raises(UndefinedError):
+    with pytest.raises(UndefinedVariableError):
         asyncio.run(coro(template))
 
 
@@ -236,16 +233,16 @@ def test_block_no_super_block() -> None:
     """Test that we handle undefined block.super."""
     source = "hello, {% block bar %}{{ block.super }}{{ you }}{% endblock %}"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, undefined=StrictUndefined)
-    template = env.from_string(source)
+    template = env.parse(source)
 
-    with pytest.raises(UndefinedError):
+    with pytest.raises(UndefinedVariableError):
         template.render()
 
-    with pytest.raises(UndefinedError):
+    with pytest.raises(UndefinedVariableError):
         asyncio.run(coro(template))
 
 
@@ -256,11 +253,11 @@ def test_duplicate_block_names() -> None:
     )
     partials = {"foo": "{% block bar %}{% endblock %}"}
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(TemplateInheritanceError):
         template.render()
@@ -275,11 +272,11 @@ def test_endblock_name() -> None:
     partials = {"foo": "{% block baz %}hello{% endblock baz %}"}
     expect = "hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -291,11 +288,11 @@ def test_mismatched_endblock_name() -> None:
     source = "{% extends 'foo' %}"
     partials = {"foo": "{% block baz %}hello{% endblock something %}"}
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     with pytest.raises(TemplateInheritanceError):
         template.render()
@@ -304,7 +301,7 @@ def test_mismatched_endblock_name() -> None:
         asyncio.run(coro(template))
 
     with pytest.raises(TemplateInheritanceError):
-        env.from_string(partials["foo"])
+        env.parse(partials["foo"])
 
 
 def test_override_nested_block_and_outer_block() -> None:
@@ -314,6 +311,7 @@ def test_override_nested_block_and_outer_block() -> None:
         "{% block title %}Home{% endblock %}"
         "{% block head %}{{ block.super }}Hello{% endblock %}"
     )
+
     partials = {
         "foo": (
             "{% block head %}"
@@ -321,13 +319,14 @@ def test_override_nested_block_and_outer_block() -> None:
             "{% endblock %}"
         )
     }
+
     expect = "<title>Home - Welcome</title>Hello"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=DictLoader(partials))
-    template = env.from_string(source)
+    template = env.parse(source)
 
     result = template.render()
     assert result == expect
@@ -343,7 +342,7 @@ def test_recursive_extends() -> None:
         }
     )
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=loader)
@@ -378,7 +377,7 @@ def test_overridden_block_to_many_blocks() -> None:
     )
     expect = "Hello - Welcome:foo! - bar"
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     env = Environment(extra=True, loader=loader)

@@ -4,12 +4,7 @@ import json
 import timeit
 from pathlib import Path
 
-from liquid import DictLoader
-from liquid import Environment
-from liquid import StrictUndefined
-from liquid.lex import get_lexer
-
-tokenize = get_lexer()
+from liquid import DictLoader, Environment, StrictUndefined
 
 FIXTURE = "performance/fixtures/002"
 NUMBER = 10000
@@ -31,8 +26,8 @@ template = env.get_template("index.liquid")
 
 benchmarks: dict[str, tuple[str, str]] = {
     "tokenize": (
-        "",
-        "list(tokenize(source))",
+        "from liquid._lexer_legacy import LegacyLexer",
+        "LegacyLexer.tokenize(env, source)",
     ),
     "parse": (
         "",
@@ -40,11 +35,11 @@ benchmarks: dict[str, tuple[str, str]] = {
     ),
     "render": (
         "",
-        "template.render(**data)",
+        "template.render(data)",
     ),
     "parse and render": (
         "",
-        "env.render(source, **data)",
+        "env.render(source, data)",
     ),
 }
 
@@ -57,13 +52,7 @@ for bench_name, (setup, stmt) in benchmarks.items():
     times = timeit.repeat(
         stmt=stmt,
         setup=setup,
-        globals={
-            "source": source,
-            "template": template,
-            "env": env,
-            "data": data,
-            "tokenize": tokenize,
-        },
+        globals={"source": source, "template": template, "env": env, "data": data},
         repeat=REPEAT,
         number=NUMBER,
     )

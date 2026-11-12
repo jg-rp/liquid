@@ -1,85 +1,52 @@
-"""Test liquid environment options."""
-
 import pytest
 
-from liquid import Environment
+from liquid import Environment, ExtendedParser
 from liquid.exceptions import LiquidSyntaxError
 
 
 def test_default_string_sequences() -> None:
     """Test that strings are not sequences by default."""
     env = Environment()
-    template = env.from_string("{% for x in y %}{{ x }},{% endfor %}{{ y[0] }}")
-    assert template.render(y="hello") == "hello,"
+    template = env.parse("{% for x in y %}{{ x }},{% endfor %}{{ y[0] }}")
+    assert template.render({"y": "hello"}) == "hello,"
 
 
 def test_enable_string_sequences() -> None:
-    class MockEnv(Environment):
-        string_sequences = True
-
-    env = MockEnv()
-    template = env.from_string("{% for x in y %}{{ x }},{% endfor %}{{ y[0] }}")
-    assert template.render(y="hello") == "h,e,l,l,o,h"
+    env = Environment(iterable_strings=True)
+    template = env.parse("{% for x in y %}{{ x }},{% endfor %}{{ y[0] }}")
+    assert template.render({"y": "hello"}) == "h,e,l,l,o,h"
 
 
-def test_default_string_first_and_last() -> None:
-    """Test that strings do not respond to first and last by default."""
+def test_string_first_and_last() -> None:
+    """Test that strings respond to first and last by default."""
     env = Environment()
-    template = env.from_string("{{ y.first }}{{ y.last }}")
-    assert template.render(y="hello") == ""
-
-
-def test_enable_string_first_and_last() -> None:
-    class MockEnv(Environment):
-        string_first_and_last = True
-
-    env = MockEnv()
-    template = env.from_string("{{ y.first }}{{ y.last }}")
-    assert template.render(y="hello") == "ho"
-
-
-class FirstAndLastEnv(Environment):
-    string_first_and_last = True
-
-
-def test_default_string_first_and_last_filters() -> None:
-    """The `first`/`last` filters ignore strings by default."""
-    env = Environment()
-    template = env.from_string("{{ y | first }}{{ y | last }}")
-    assert template.render(y="hello") == ""
-
-
-def test_enable_string_first_and_last_filters() -> None:
-    """With the flag on, the filters return the first/last character."""
-    env = FirstAndLastEnv()
-    template = env.from_string("{{ y | first }}{{ y | last }}")
-    assert template.render(y="hello") == "ho"
+    template = env.parse("{{ y.first }}{{ y.last }}")
+    assert template.render({"y": "hello"}) == "ho"
+    template = env.parse("{{ y |first }}{{ y | last }}")
+    assert template.render({"y": "hello"}) == "ho"
 
 
 @pytest.mark.parametrize("obj", ["hello", "", ["a", "b"], [], 5])
 def test_first_last_filter_property_parity(obj: object) -> None:
-    class MockEnv(Environment):
-        pass
-
-    env = MockEnv(globals={"x": obj})
+    env = Environment(globals={"x": obj})
 
     def render(source: str) -> str:
-        return env.from_string(source).render()
+        return env.parse(source).render()
 
-    env.string_first_and_last = False
+    env.iterable_strings = False
     assert render("{{ x.first }}") == render("{{ x | first }}")
     assert render("{{ x.last }}") == render("{{ x | last }}")
 
-    env.string_first_and_last = True
+    env.iterable_strings = True
     assert render("{{ x.first }}") == render("{{ x | first }}")
     assert render("{{ x.last }}") == render("{{ x | last }}")
 
 
-def test_string_first_and_last_filter_empty_string() -> None:
+def test_iterable_strings_filter_empty_string() -> None:
     """An empty string yields nothing, matching the property path."""
-    env = FirstAndLastEnv()
-    template = env.from_string("{{ y | first }}{{ y | last }}")
-    assert template.render(y="") == ""
+    env = Environment(iterable_strings=True)
+    template = env.parse("{{ y | first }}{{ y | last }}")
+    assert template.render({"y": ""}) == ""
 
 
 def test_default_logical_not_operator() -> None:
@@ -91,11 +58,8 @@ def test_default_logical_not_operator() -> None:
 
 
 def test_enable_logical_not_operator() -> None:
-    class MockEnv(Environment):
-        logical_not_operator = True
-
-    env = MockEnv()
-    assert env.render("{% if not false %}TRUE{% else %}FALSE{% endif %}") == "TRUE"
+    env = Environment(parser=ExtendedParser)
+    assert env.render("{% if not false %}TRUE{% else %}FALSE{% endif %}", {}) == "TRUE"
 
 
 def test_default_logical_parentheses() -> None:
@@ -116,10 +80,7 @@ def test_default_logical_parentheses() -> None:
 
 
 def test_enable_logical_parentheses() -> None:
-    class MockEnv(Environment):
-        logical_parentheses = True
-
-    env = MockEnv()
+    env = Environment(parser=ExtendedParser)
 
     # Without parens
     assert (
@@ -147,10 +108,7 @@ def test_default_ternary_expressions() -> None:
 
 
 def test_enable_ternary_expressions() -> None:
-    class MockEnv(Environment):
-        ternary_expressions = True
-
-    env = MockEnv()
+    env = Environment(parser=ExtendedParser)
     assert env.parse("{{ 'TRUE' if true else 'FALSE' }}").render() == "TRUE"
 
 
@@ -161,21 +119,13 @@ def test_default_shorthand_indexes() -> None:
         env.parse("{{ a.1 }}")
 
 
-def test_enable_shorthand_indexes() -> None:
-    class MockEnv(Environment):
-        shorthand_indexes = True
-
-    env = MockEnv()
-    assert env.parse("{{ a.1 }}").render(a=["foo", "bar"]) == "bar"
-
-
 def test_default_argument_separator() -> None:
     env = Environment()
 
     # With a colon
     assert (
         env.parse("{% for x in y limit:2 %}{{ x }}{% endfor %}").render(
-            y=[1, 2, 3, 4, 5]
+            {"y": [1, 2, 3, 4, 5]}
         )
         == "12"
     )
@@ -186,21 +136,41 @@ def test_default_argument_separator() -> None:
 
 
 def test_enable_assign_argument_separator() -> None:
-    class MockEnv(Environment):
-        keyword_assignment = True
-
-    env = MockEnv()
+    env = Environment(parser=ExtendedParser)
 
     # With a colon
     assert (
         env.parse("{% for x in y limit:2 %}{{ x }}{% endfor %}").render(
-            y=[1, 2, 3, 4, 5]
+            {"y": [1, 2, 3, 4, 5]}
         )
         == "12"
     )
 
     # With a `=`
     assert (
-        env.parse("{% for x in y limit=2 %}{{x}}{% endfor %}").render(y=[1, 2, 3, 4, 5])
+        env.parse("{% for x in y limit=2 %}{{x}}{% endfor %}").render(
+            {"y": [1, 2, 3, 4, 5]}
+        )
         == "12"
     )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "{% assign x = ['product'] %}",
+        "{% case ['product'] %}{% when 'a' %}hello{% endcase %}",
+        "{% if ['product'] == true %}hello{% endif %}",
+        "{% for item in ['collection'] %}{{ item }}{% endfor %}",
+        "{{ [key] }}",
+        '{{ ["product"] }}',
+        "{{ ['product'] }}",
+    ],
+)
+def test_reject_bare_brackets(source: str) -> None:
+    env = Environment()
+    env.parse(source)
+
+    env.allow_bare_brackets = False
+    with pytest.raises(LiquidSyntaxError):
+        env.parse(source)

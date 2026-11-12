@@ -6,17 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from liquid import BoundTemplate
-from liquid import CachingFileSystemLoader
-from liquid import Environment
-from liquid import FileSystemLoader
-from liquid.exceptions import TemplateNotFoundError
+from liquid import CachingFileSystemLoader, Environment, FileSystemLoader, Template
+from liquid.exceptions import NoSuchTemplateError, TemplateNotFoundError
 
 
 def test_load_template() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -27,11 +24,11 @@ def test_load_template() -> None:
 def test_load_template_async() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
 
-    async def coro() -> BoundTemplate:
+    async def coro() -> Template:
         return await env.get_template_async("index.liquid")
 
     template = asyncio.run(coro())
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -48,7 +45,7 @@ def test_template_not_found() -> None:
 def test_template_not_found_async() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
 
-    async def coro() -> BoundTemplate:
+    async def coro() -> Template:
         return await env.get_template_async("nosuchthing.liquid")
 
     with pytest.raises(TemplateNotFoundError):
@@ -72,7 +69,7 @@ def test_list_of_search_paths() -> None:
     )
 
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -80,7 +77,7 @@ def test_list_of_search_paths() -> None:
     )
 
     template = env.get_template("featured_content.html")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "featured_content.html"
     assert (
         str(template.path).replace("\\", "/")
@@ -91,7 +88,7 @@ def test_list_of_search_paths() -> None:
 def test_default_file_extension() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -107,7 +104,7 @@ def test_set_default_file_extension() -> None:
         loader=FileSystemLoader("tests/fixtures/001/templates/", ext=".liquid")
     )
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -115,7 +112,7 @@ def test_set_default_file_extension() -> None:
     )
 
     template = env.get_template("index")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -142,8 +139,8 @@ def test_reject_absolute_paths() -> None:
         with pytest.raises(TemplateNotFoundError):
             env.get_template(str(private_file))
 
-        with pytest.raises(TemplateNotFoundError):
-            env.render(f"{{% render '{private_file}' %}}")
+        with pytest.raises(NoSuchTemplateError):
+            env.render(f"{{% render '{private_file}' %}}", {})
 
 
 @pytest.mark.skipif(
@@ -173,14 +170,14 @@ def test_reject_symlink_outside_search_path() -> None:
             env.get_template("link.liquid")
 
         # Attempt to render via the render tag
-        with pytest.raises(TemplateNotFoundError):
-            env.render("{% render 'link.liquid' %}")
+        with pytest.raises(NoSuchTemplateError):
+            env.render("{% render 'link.liquid' %}", {})
 
 
 def test_dont_cache_templates() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -195,7 +192,7 @@ def test_dont_cache_templates() -> None:
 def test_cache_templates() -> None:
     env = Environment(loader=CachingFileSystemLoader("tests/fixtures/001/templates/"))
     template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
+    assert isinstance(template, Template)
     assert template.name == "index.liquid"
     assert (
         str(template.path).replace("\\", "/")
@@ -250,7 +247,7 @@ def test_auto_reload_cached_templates_async() -> None:
             assert same_template is template
 
             # Update template source
-            time.sleep(0.01)
+            time.sleep(0.01)  # noqa: ASYNC251
             path.touch()
 
             assert await template.is_up_to_date_async() is False
@@ -303,7 +300,7 @@ def test_dont_auto_reload_cached_templates_async() -> None:
             assert same_template is template
 
             # Update template source
-            time.sleep(0.01)
+            time.sleep(0.01)  # noqa: ASYNC251
             path.touch()
 
             assert await template.is_up_to_date_async() is False
@@ -329,41 +326,9 @@ def test_cache_capacity() -> None:
     assert list(loader.cache.keys()) == ["footer.liquid", "header.liquid"]
 
 
-def test_invalid_suffix():
+def test_invalid_suffix() -> None:
     with pytest.raises(ValueError, match=r"Invalid suffix"):
         FileSystemLoader(
             "tests/fixtures/001/templates/",
             ext="0",
         )
-
-
-def test_cache_templates_with_a_namespaced_cache_key() -> None:
-    env = Environment(
-        loader=CachingFileSystemLoader(
-            "tests/fixtures/001/templates/",
-            namespace_key="namespace",
-        )
-    )
-
-    template = env.get_template("index.liquid")
-    assert isinstance(template, BoundTemplate)
-    assert template.name == "index.liquid"
-    assert (
-        str(template.path).replace("\\", "/")
-        == "tests/fixtures/001/templates/index.liquid"
-    )
-    assert template.is_up_to_date() is True
-
-    another_template = env.get_template("index.liquid")
-    assert template is another_template
-
-    assert env.get_template("index.liquid", namespace="mock") is not template
-    assert env.get_template("index.liquid") is template
-
-    async def coro(namespace: str | None = None) -> BoundTemplate:
-        if namespace is not None:
-            return await env.get_template_async("index.liquid", namespace=namespace)
-        return await env.get_template_async("index.liquid")
-
-    assert asyncio.run(coro(namespace="mock")) is not template
-    assert asyncio.run(coro()) is template

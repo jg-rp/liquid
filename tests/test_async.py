@@ -1,30 +1,31 @@
-"""Test Python Liquid's async API."""
-
 from __future__ import annotations
 
 import asyncio
 import operator
 import tempfile
 import time
-from collections import abc
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
-from typing import Optional
+from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
-from mock import patch
 
-from liquid import CachingFileSystemLoader
-from liquid import ChoiceLoader
-from liquid import DictLoader
-from liquid import Environment
-from liquid import FileSystemLoader
-from liquid import RenderContext
-from liquid import Template
+from liquid import (
+    CachingFileSystemLoader,
+    ChoiceLoader,
+    DictLoader,
+    Environment,
+    FileSystemLoader,
+    RenderContext,
+    Template,
+    TemplateSource,
+    parse,
+)
 from liquid.exceptions import TemplateNotFoundError
-from liquid.loader import TemplateSource
-from liquid.template import BoundTemplate
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass
@@ -40,7 +41,7 @@ class Case:
 
 
 def test_basic_async() -> None:
-    template = Template("{% for x in (1..3) %}{{x}}-{% endfor %}")
+    template = parse("{% for x in (1..3) %}{{x}}-{% endfor %}")
 
     async def coro() -> str:
         return await template.render_async()
@@ -53,7 +54,7 @@ def test_load_template_async() -> None:
 
     async def coro() -> None:
         template = await env.get_template_async("index.liquid")
-        assert isinstance(template, BoundTemplate)
+        assert isinstance(template, Template)
 
     asyncio.run(coro())
 
@@ -61,7 +62,7 @@ def test_load_template_async() -> None:
 def test_template_not_found_async() -> None:
     env = Environment(loader=FileSystemLoader("tests/fixtures/001/templates/"))
 
-    async def coro() -> BoundTemplate:
+    async def coro() -> Template:
         return await env.get_template_async("nosuchthing.liquid")
 
     with pytest.raises(TemplateNotFoundError):
@@ -72,7 +73,7 @@ def test_cached_template_async() -> None:
     """Test that async loaded templates are cached."""
     env = Environment(loader=CachingFileSystemLoader("tests/fixtures/001/templates/"))
 
-    async def coro() -> BoundTemplate:
+    async def coro() -> Template:
         return await env.get_template_async("index.liquid")
 
     template = asyncio.run(coro())
@@ -94,12 +95,12 @@ def test_async_up_to_date() -> None:
 
         async def coro() -> None:
             template = await env.get_template_async("some.liquid")
-            assert isinstance(template, BoundTemplate)
+            assert isinstance(template, Template)
             up_to_date = await template.is_up_to_date_async()
             assert up_to_date is True
 
             # Update template content.
-            time.sleep(0.01)  # Make sure some time has passed.
+            time.sleep(0.01)  # Make sure some time has passed.  # noqa: ASYNC251
             template_path.touch()
 
             # Template is not up to date.
@@ -107,7 +108,7 @@ def test_async_up_to_date() -> None:
             assert up_to_date is False
 
             template_ = await env.get_template_async("some.liquid")
-            assert isinstance(template_, BoundTemplate)
+            assert isinstance(template_, Template)
             assert template_ is not template
 
             # Template is up to date.
@@ -120,32 +121,30 @@ def test_async_up_to_date() -> None:
 def test_nested_include_async() -> None:
     """Test that nested includes are rendered asynchronously."""
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
     with patch(
-        "liquid.builtin.loaders.dict_loader.DictLoader.get_source_async", autospec=True
+        "liquid.loaders.dict_loader.DictLoader.get_source_async", autospec=True
     ) as source:
         source.side_effect = [
             TemplateSource(
-                "{% include 'bar' %}",
-                "bar",
-                None,
+                text="{% include 'bar' %}",
+                name="bar",
             ),
             TemplateSource(
-                "{% for x in (1..3) %}{{x}}-{% endfor %}",
-                "foo",
-                None,
+                text="{% for x in (1..3) %}{{x}}-{% endfor %}",
+                name="foo",
             ),
         ]
 
         env = Environment()
-        template = env.from_string("{% include 'foo' %}")
+        template = env.parse("{% include 'foo' %}")
 
         result = asyncio.run(coro(template))
 
         source.assert_awaited()
-        assert source.await_count == 2  # noqa: PLR2004
+        assert source.await_count == 2
         assert result == "1-2-3-"
 
 
@@ -204,17 +203,18 @@ TEST_CASES: list[Case] = [
 @pytest.mark.parametrize("case", TEST_CASES, ids=operator.attrgetter("description"))
 def test_include_and_render_async(case: Case) -> None:
     env = Environment()
-    template = env.from_string(case.template, globals=case.context)
+    template = env.parse(case.template, globals=case.context)
 
-    async def coro(template: BoundTemplate) -> str:
+    async def coro(template: Template) -> str:
         return await template.render_async()
 
-    with patch("liquid.builtin.DictLoader.get_source_async", autospec=True) as source:
+    with patch(
+        "liquid.loaders.dict_loader.DictLoader.get_source_async", autospec=True
+    ) as source:
         source.side_effect = [
             TemplateSource(
-                "{% for x in (1..3) %}{{x}}-{% endfor %}",
-                "foo",
-                None,
+                text="{% for x in (1..3) %}{{x}}-{% endfor %}",
+                name="foo",
             )
         ]
 
@@ -223,7 +223,7 @@ def test_include_and_render_async(case: Case) -> None:
         assert result == case.expect
 
 
-class MockAsyncDrop(abc.Mapping[str, object]):
+class MockAsyncDrop:
     def __init__(self, val: object) -> None:
         self.key = "foo"
         self.val = val
@@ -237,27 +237,35 @@ class MockAsyncDrop(abc.Mapping[str, object]):
     def __iter__(self) -> Iterator[str]:  # pragma: no cover
         return iter([self.key])
 
-    def __getitem__(self, k: str) -> object:
-        self.call_count += 1
-        if k == self.key:
-            return self.val
-        raise KeyError(k)  # pragma: no cover
+    def __liquid_hasattr__(self, name: str, context: RenderContext) -> bool:
+        return name == self.key
 
-    async def __getitem_async__(self, k: str) -> object:
+    def __liquid_getattr__(self, name: str, context: RenderContext) -> object:
+        self.call_count += 1
+        if name == self.key:
+            return self.val
+        raise KeyError(name)  # pragma: no cover
+
+    async def __liquid_hasattr_async__(self, name: str, context: RenderContext) -> bool:
+        return name == self.key
+
+    async def __liquid_getattr_async__(
+        self, name: str, context: RenderContext
+    ) -> object:
         # Do IO here
         self.await_count += 1
-        if k == self.key:
+        if name == self.key:
             return self.val
-        raise KeyError(k)  # pragma: no cover
+        raise KeyError(name)  # pragma: no cover
 
 
 def test_await_async_drop() -> None:
     env = Environment()
-    template = env.from_string(r"{{ drop.foo }}")
+    template = env.parse(r"{{ drop.foo }}")
     drop = MockAsyncDrop("hello")
 
     async def coro() -> str:
-        return await template.render_async(drop=drop)
+        return await template.render_async({"drop": drop})
 
     result = asyncio.run(coro())
 
@@ -269,9 +277,9 @@ def test_await_async_drop() -> None:
 def test_call_async_drop() -> None:
     """Test that __getitem_async__ is not called when rendering synchronously."""
     env = Environment()
-    template = env.from_string(r"{{ drop.foo }}")
+    template = env.parse(r"{{ drop.foo }}")
     drop = MockAsyncDrop("hello")
-    result = template.render(drop=drop)
+    result = template.render({"drop": drop})
 
     assert result == "hello"
     assert drop.await_count == 0
@@ -289,22 +297,21 @@ class AsyncMatterDictLoader(DictLoader):
 
     async def get_source_async(
         self,
-        env: Environment,  # noqa: ARG002
-        template_name: str,
-        *,
-        context: Optional[RenderContext] = None,  # noqa: ARG002
-        **kwargs: object,  # noqa: ARG002
+        env: Environment,
+        name: str,
+        context: RenderContext | None = None,
+        **kwargs: object,
     ) -> TemplateSource:
         try:
-            source = self.templates[template_name]
+            source = self.templates[name]
         except KeyError as err:
-            raise TemplateNotFoundError(template_name) from err
+            raise TemplateNotFoundError(name) from err
 
         return TemplateSource(
             text=source,
-            name=template_name,
-            uptodate=None,
-            matter=self.matter.get(template_name),
+            name=name,
+            up_to_date=None,
+            matter=self.matter.get(name),
         )
 
 
@@ -364,7 +371,7 @@ def test_matter_local_priority() -> None:
 
     async def coro() -> None:
         template = await env.get_template_async("some")
-        assert await template.render_async(you="John") == "Hello, John!"
+        assert await template.render_async({"you": "John"}) == "Hello, John!"
 
     asyncio.run(coro())
 
@@ -387,7 +394,7 @@ def test_choose_between_loaders() -> None:
 
     async def coro() -> None:
         template = await env.get_template_async("a")
-        assert await template.render_async(you="World") == "Hello, World!"
+        assert await template.render_async({"you": "World"}) == "Hello, World!"
 
         template = await env.get_template_async("b")
         assert await template.render_async() == "the quick brown fox"

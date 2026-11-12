@@ -1,16 +1,11 @@
-"""Resource limit test cases."""
-
-import platform
-
 import pytest
 
-from liquid import DictLoader
-from liquid import Environment
-from liquid.exceptions import BlockNestingError
-from liquid.exceptions import ContextDepthError
-from liquid.exceptions import LocalNamespaceLimitError
-from liquid.exceptions import LoopIterationLimitError
-from liquid.exceptions import OutputStreamLimitError
+from liquid import DictLoader, Environment, ExtendedParser
+from liquid.exceptions import ResourceLimitError
+
+# TODO: test render score
+# TODO: test render score cumulative
+# TODO: cover async
 
 
 def test_recursive_render() -> None:
@@ -23,8 +18,8 @@ def test_recursive_render() -> None:
             }
         )
     )
-    template = env.from_string("{% render 'foo' %}")
-    with pytest.raises(ContextDepthError):
+    template = env.parse("{% render 'foo' %}")
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
@@ -38,8 +33,8 @@ def test_recursive_include() -> None:
             }
         )
     )
-    template = env.from_string("{% include 'foo' %}")
-    with pytest.raises(ContextDepthError):
+    template = env.parse("{% include 'foo' %}")
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
@@ -54,16 +49,13 @@ def test_set_context_depth_limit_render() -> None:
             }
         )
     )
-    template = env.from_string("{% render 'foo' %}")
-    result = template.render()
-    assert result == "Hello"
 
-    class MockEnv(Environment):
-        context_depth_limit = 3
+    template = env.parse("{% render 'foo' %}")
+    assert template.render() == "Hello"
 
-    env_ = MockEnv()
-    template = env_.from_string("{% render 'foo' %}")
-    with pytest.raises(ContextDepthError):
+    env.resource_limits.max_context_depth = 3
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
@@ -78,23 +70,20 @@ def test_set_context_depth_limit_include() -> None:
             }
         )
     )
-    template = env.from_string("{% include 'foo' %}")
-    result = template.render()
-    assert result == "Hello"
 
-    class MockEnv(Environment):
-        context_depth_limit = 3
+    template = env.parse("{% include 'foo' %}")
+    assert template.render() == "Hello"
 
-    env_ = MockEnv()
-    template = env_.from_string("{% include 'foo' %}")
-    with pytest.raises(ContextDepthError):
+    env.resource_limits.max_context_depth = 3
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
 def test_default_loop_iteration_limit() -> None:
     """Test (effectively) that the default loop limit is None."""
     env = Environment()
-    template = env.from_string(
+    template = env.parse(
         "{% for i in (1..100) %}{% for j in (1..100) %}x{% endfor %}{% endfor %}"
     )
 
@@ -103,12 +92,10 @@ def test_default_loop_iteration_limit() -> None:
 
 def test_set_loop_iteration_limit() -> None:
     """Test that we can set the loop iteration limit."""
+    env = Environment()
+    env.resource_limits.max_loop_iterations = 10_000
 
-    class MockEnv(Environment):
-        loop_iteration_limit = 10000
-
-    env = MockEnv()
-    env.from_string(
+    env.parse(
         "{% for i in (1..100) %}"
         "{% for j in (1..100) %}"
         "{{ i }},{{ j }}"
@@ -116,7 +103,7 @@ def test_set_loop_iteration_limit() -> None:
         "{% endfor %}"
     ).render()
 
-    template = env.from_string(
+    template = env.parse(
         "{% for i in (1..101) %}"
         "{% for j in (1..100) %}"
         "{{ i }},{{ j }}"
@@ -124,17 +111,13 @@ def test_set_loop_iteration_limit() -> None:
         "{% endfor %}"
     )
 
-    with pytest.raises(LoopIterationLimitError):
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
 def test_render_carries_loop_count() -> None:
     """Test that a `render`ed template carries the loop count from its parent."""
-
-    class MockEnv(Environment):
-        loop_iteration_limit = 3000
-
-    env = MockEnv(
+    env = Environment(
         loader=DictLoader(
             {
                 "foo": (
@@ -147,19 +130,17 @@ def test_render_carries_loop_count() -> None:
             }
         )
     )
-    template = env.from_string("{% for i in (1..10) %}{% render 'foo' %}{% endfor %}")
 
-    with pytest.raises(LoopIterationLimitError):
+    env.resource_limits.max_loop_iterations = 3000
+    template = env.parse("{% for i in (1..10) %}{% render 'foo' %}{% endfor %}")
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
 def test_nested_renders_carry_loop_count() -> None:
     """Test that multiple, nested renders carry the loop count."""
-
-    class MockEnv(Environment):
-        loop_iteration_limit = 3000
-
-    env = MockEnv(
+    env = Environment(
         loader=DictLoader(
             {
                 "foo": ("{% for i in (1..50) %}{% render 'bar' %}{% endfor %}"),
@@ -167,19 +148,18 @@ def test_nested_renders_carry_loop_count() -> None:
             }
         )
     )
-    template = env.from_string("{% for i in (1..10) %}{% render 'foo' %}{% endfor %}")
 
-    with pytest.raises(LoopIterationLimitError):
+    env.resource_limits.max_loop_iterations = 3000
+
+    template = env.parse("{% for i in (1..10) %}{% render 'foo' %}{% endfor %}")
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
 def test_include_contributes_to_count() -> None:
     """Test that `included`ed templates contribute to the loop count."""
-
-    class MockEnv(Environment):
-        loop_iteration_limit = 3000
-
-    env = MockEnv(
+    env = Environment(
         loader=DictLoader(
             {
                 "foo": (
@@ -192,20 +172,21 @@ def test_include_contributes_to_count() -> None:
             }
         )
     )
-    template = env.from_string("{% for i in (1..10) %}{% include 'foo' %}{% endfor %}")
 
-    with pytest.raises(LoopIterationLimitError):
+    env.resource_limits.max_loop_iterations = 3000
+
+    template = env.parse("{% for i in (1..10) %}{% include 'foo' %}{% endfor %}")
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
 def test_tablerow_contributes_to_count() -> None:
     """Test that the tablerow tag contributes to the loop count."""
+    env = Environment()
+    env.resource_limits.max_loop_iterations = 99
 
-    class MockEnv(Environment):
-        loop_iteration_limit = 99
-
-    env = MockEnv()
-    template = env.from_string(
+    template = env.parse(
         "{% for i in (1..10) %}"
         "{% tablerow i in (1..10) cols:2 %}"
         "{{ i }}"
@@ -213,7 +194,7 @@ def test_tablerow_contributes_to_count() -> None:
         "{% endfor %}"
     )
 
-    with pytest.raises(LoopIterationLimitError):
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
@@ -233,12 +214,10 @@ def test_nested_tablerow_loop_limit() -> None:
         "{% endtablerow %}"
     )
 
-    class MockEnv(Environment):
-        loop_iteration_limit = 1000
+    env = Environment()
+    env.resource_limits.max_loop_iterations = 1000
 
-    env = MockEnv()
-
-    with pytest.raises(LoopIterationLimitError):
+    with pytest.raises(ResourceLimitError):
         env.render(source)
 
 
@@ -248,26 +227,18 @@ def test_mixed_loop_limit() -> None:
         "{% for _ in(1..45) %}{% tablerow _ in (1..45) %}x{% endtablerow %}{% endfor %}"
     )
 
-    class MockEnv(Environment):
-        loop_iteration_limit = 1000
+    env = Environment()
+    env.resource_limits.max_loop_iterations = 1000
 
-    env = MockEnv()
-
-    with pytest.raises(LoopIterationLimitError):
+    with pytest.raises(ResourceLimitError):
         env.render(source)
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy", reason="no sys.getsizeof"
-)
-def test_set_local_namespace_limit() -> None:
-    """Test that we can set the local namespace limit."""
+def test_set_max_assign_score() -> None:
+    env = Environment()
+    env.resource_limits.max_assign_score = 5
 
-    class MockEnv(Environment):
-        local_namespace_limit = 140
-
-    env = MockEnv()
-    env.from_string(
+    env.parse(
         "{% assign a = 1 %}"
         "{% assign b = 2 %}"
         "{% assign c = 3 %}"
@@ -275,7 +246,7 @@ def test_set_local_namespace_limit() -> None:
         "{% assign e = 5 %}"
     ).render()
 
-    template = env.from_string(
+    template = env.parse(
         "{% assign a = 1 %}"
         "{% assign b = 2 %}"
         "{% assign c = 3 %}"
@@ -284,18 +255,12 @@ def test_set_local_namespace_limit() -> None:
         "{% assign f = 6 %}"
     )
 
-    with pytest.raises(LocalNamespaceLimitError):
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
-def test_copied_context_carries_parent_length() -> None:
-    """Test that copied render context object cary the length of their parent
-    context's local namespace."""
-
-    class MockEnv(Environment):
-        local_namespace_limit = 5
-
-    env = MockEnv(
+def test_max_cumulative_assign_score() -> None:
+    env = Environment(
         loader=DictLoader(
             {
                 "foo": (
@@ -304,94 +269,97 @@ def test_copied_context_carries_parent_length() -> None:
                     "{% assign c = 3 %}"
                     "{% assign d = 4 %}"
                     "{% assign e = 5 %}"
-                    "{% assign e = 'five' %}"
                 )
             }
         )
     )
 
-    template = env.from_string("{% assign f = 6 %}{% render 'foo' %}")
+    env.resource_limits.max_assign_score_cumulative = 6
 
-    with pytest.raises(LocalNamespaceLimitError):
+    template = env.parse("{% assign f = 6 %}{% assign g = 7 %}{% render 'foo' %}")
+
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
-def test_sizeof_local_namespace_with_unhashable_values() -> None:
-    """Test that we can calculate the size of a local namespace when it contains
-    unhashable objects."""
+def test_set_max_render_size() -> None:
+    env = Environment()
+    env.resource_limits.max_render_size = 5
 
-    class MockEnv(Environment):
-        local_namespace_limit = 200
-
-    env = MockEnv()
-    env.from_string("{% assign foo = bar %}").render(bar=[1, 2, 3, 4])
-
-    env.from_string(
-        '{% assign beatles = "John, Paul, George, Ringo" | split: ", " %}'
-    ).render()
-
-
-def test_set_output_stream_limit() -> None:
-    """Test that we can set an output stream limit."""
-
-    class MockEnv(Environment):
-        output_stream_limit = 5
-
-    env = MockEnv()
-    env.from_string(
+    env.parse(
         "{% if false %}some literal that is longer then the limit{% endif %}hello"
     ).render()
 
-    template = env.from_string(
+    template = env.parse(
         "{% if true %}some literal that is longer then the limit{% endif %}hello"
     )
 
-    with pytest.raises(OutputStreamLimitError):
+    with pytest.raises(ResourceLimitError):
         template.render()
 
 
-def test_block_nesting_limit() -> None:
-    """Test that we handle excessive block nesting before hitting the recursion
-    limit."""
+def test_max_block_depth() -> None:
+    env = Environment()
+    env.resource_limits.max_block_depth = 3
 
-    class MockEnv(Environment):
-        block_nesting_limit = 3
-
-    env = MockEnv()
-
-    env.from_string("{% if true %}{% endif %}")
-    env.from_string("{% if true %}{% if true %}{% endif %}{% endif %}")
-    env.from_string(
+    env.parse("{% if true %}{% endif %}")
+    env.parse("{% if true %}{% if true %}{% endif %}{% endif %}")
+    env.parse(
         "{% if true %}{% if true %}{% if true %}{% endif %}{% endif %}{% endif %}"
     )
+    env.parse(
+        "{% if true %}{% if true %}{% if true %}{% endif %}{% endif %}{% endif %}{% if true %}{% endif %}"
+    )
 
-    with pytest.raises(BlockNestingError):
-        env.from_string(
-            (
-                "{% if true %}"
-                "  {% if true %}"
-                "    {% if true %}"
-                "      {% if true %}"
-                "      {% endif %}"
-                "    {% endif %}"
-                "  {% endif %}"
-                "{% endif %}"
-            )
+    with pytest.raises(ResourceLimitError):
+        env.parse(
+            "{% if true %}"
+            "  {% if true %}"
+            "    {% if true %}"
+            "      {% if true %}"
+            "      {% endif %}"
+            "    {% endif %}"
+            "  {% endif %}"
+            "{% endif %}"
         )
 
 
-def test_block_nesting_limit_with_liquid_tag() -> None:
-    class MockEnv(Environment):
-        block_nesting_limit = 3
+def test_max_block_depth_with_liquid_tag() -> None:
+    env = Environment()
+    env.resource_limits.max_block_depth = 3
 
-    env = MockEnv()
+    env.parse("{% if true %}{% endif %}")
+    env.parse("{% if true %}{% liquid liquid echo 1 %}{% endif %}")
+    env.parse("{% liquid liquid liquid echo 1 %}")
 
-    env.from_string("{% if true %}{% endif %}")
-    env.from_string("{% if true %}{% liquid liquid echo 1 %}{% endif %}")
-    env.from_string("{% liquid liquid liquid echo 1 %}")
+    with pytest.raises(ResourceLimitError):
+        env.parse("{% if true %}{% liquid liquid liquid echo 1 %}{% endif %}")
 
-    with pytest.raises(BlockNestingError):
-        env.from_string("{% if true %}{% liquid liquid liquid echo 1 %}{% endif %}")
+    with pytest.raises(ResourceLimitError):
+        env.parse("{% liquid liquid liquid liquid echo 1 %}")
 
-    with pytest.raises(BlockNestingError):
-        env.from_string("{% liquid liquid liquid liquid echo 1 %}")
+
+def test_max_expression_depth() -> None:
+    env = Environment()
+    source = "{{ " + " and ".join(["true"] * 21) + " }}"
+    assert env.render(source) == "true"
+
+    env.resource_limits.max_expression_depth = 20
+
+    with pytest.raises(ResourceLimitError):
+        env.render(source)
+
+    env = Environment(parser=ExtendedParser)
+    assert env.render(source) == "true"
+
+    env.resource_limits.max_expression_depth = 20
+
+    with pytest.raises(ResourceLimitError):
+        env.render(source)
+
+
+def test_very_nested_variable_path() -> None:
+    source = "{{ a[c[d[e[f[g[h[i[j[k[l[m[n[o[p[q[r[s[t[u[v[w]]]]]]]]]]]]]]]]]]]]] }}"
+
+    with pytest.raises(ResourceLimitError):
+        Environment().parse(source)

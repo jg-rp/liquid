@@ -1,15 +1,18 @@
 import io
 
 from babel.messages import Catalog
-from babel.messages.extract import extract as babel_extract
+from babel.messages.extract import (
+    extract as babel_extract,  # pyright: ignore[reportUnknownVariableType]
+)
 
-from liquid import Environment
-from liquid import extract_liquid
-from liquid.messages import DEFAULT_KEYWORDS
-from liquid.messages import extract_from_template
-from liquid.messages import extract_from_templates
+from liquid import Environment, ExtendedLexer, extract_liquid
+from liquid._messages import (
+    DEFAULT_KEYWORDS,
+    extract_from_template,
+    extract_from_templates,
+)
 
-parse = Environment(extra=True, template_comments=True).parse
+parse = Environment(extra=True, tokenizer=ExtendedLexer).parse
 
 
 def test_gettext_filter() -> None:
@@ -575,4 +578,4 @@ def test_strip_comment_tags() -> None:
     )
 
     catalog = extract_from_templates(template, strip_comment_tags=True)
-    assert catalog.get("Hello, World!").auto_comments[0] == "some comment"
+    assert catalog.get("Hello, World!").auto_comments[0] == "some comment"  # pyright: ignore[reportUnknownMemberType]

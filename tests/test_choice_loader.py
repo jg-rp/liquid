@@ -2,10 +2,7 @@ import asyncio
 
 import pytest
 
-from liquid import CachingChoiceLoader
-from liquid import ChoiceLoader
-from liquid import DictLoader
-from liquid import Environment
+from liquid import CachingChoiceLoader, ChoiceLoader, DictLoader, Environment
 from liquid.exceptions import TemplateNotFoundError
 
 
@@ -24,7 +21,7 @@ def test_choose_between_loaders() -> None:
 
     env = Environment(loader=loader)
     template = env.get_template("a")
-    assert template.render(you="World") == "Hello, World!"
+    assert template.render({"you": "World"}) == "Hello, World!"
     template = env.get_template("b")
     assert template.render() == "the quick brown fox"
 
@@ -49,7 +46,7 @@ def test_choose_between_loaders_async() -> None:
 
     async def coro() -> None:
         template = await env.get_template_async("a")
-        assert await template.render_async(you="World") == "Hello, World!"
+        assert await template.render_async({"you": "World"}) == "Hello, World!"
         template = await env.get_template_async("b")
         assert await template.render_async() == "the quick brown fox"
 
@@ -75,11 +72,11 @@ def test_caching_choice_loader() -> None:
     env = Environment(loader=loader)
     assert len(loader.cache) == 0
     template = env.get_template("a")
-    assert template.render(you="World") == "Hello, World!"
+    assert template.render({"you": "World"}) == "Hello, World!"
     assert len(loader.cache) == 1
     template = env.get_template("b")
     assert template.render() == "the quick brown fox"
-    assert len(loader.cache) == 2  # noqa: PLR2004
+    assert len(loader.cache) == 2
 
     with pytest.raises(TemplateNotFoundError):
         env.get_template("c")

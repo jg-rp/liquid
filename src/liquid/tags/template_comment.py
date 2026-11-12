@@ -1,0 +1,56 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ..tokens import TOKEN_COMMENT, TOKEN_COMMENT_END, token_value
+
+if TYPE_CHECKING:
+    from .._context import RenderContext
+    from .._io import StringBuffer
+    from .._markup import Expression, Markup, Partial
+    from .._parser import Parser
+    from ..expressions import Name
+    from ..tokens import Token
+
+
+class TemplateComment:
+    blank = True
+    tag = ""
+
+    __slots__ = ("text", "token")
+
+    def __init__(self, token: Token, text: str) -> None:
+        self.token = token
+        self.text = text
+
+    @staticmethod
+    def parse(token: Token, parser: Parser) -> Markup:
+        parser.carry_whitespace_control()
+        comment = parser.eat(TOKEN_COMMENT)
+        parser.carry_whitespace_control()
+        parser.eat(TOKEN_COMMENT_END)
+        return TemplateComment(token, token_value(comment, parser.source))
+
+    def render(self, context: RenderContext, buffer: StringBuffer) -> None:
+        return None
+
+    async def render_async(self, context: RenderContext, buffer: StringBuffer) -> None:
+        return None
+
+    def children(self) -> list[Markup]:
+        return []
+
+    def expressions(self) -> list[Expression]:
+        return []
+
+    def block_scope(self) -> list[Name]:
+        return []
+
+    def template_scope(self) -> list[Name]:
+        return []
+
+    def partials(self, context: RenderContext) -> list[Partial]:
+        return []
+
+    async def partials_async(self, context: RenderContext) -> list[Partial]:
+        return []

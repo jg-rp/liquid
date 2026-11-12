@@ -1,7 +1,6 @@
 import asyncio
 
-from liquid import parse
-from liquid.static_analysis import Segments
+from liquid import Segments, parse
 
 SOURCE = """\
 Hello, {{ you }}!
@@ -51,11 +50,11 @@ def test_get_paths_async() -> None:
 def test_get_segments() -> None:
     assert sorted(TEMPLATE.variable_segments()) == sorted(
         [
-            ["you"],
-            ["x"],
-            ["ch"],
-            ["you", "first_name"],
-            ["you", "last_name"],
+            ("you",),
+            ("x",),
+            ("ch",),
+            ("you", "first_name"),
+            ("you", "last_name"),
         ]
     )
 
@@ -66,11 +65,11 @@ def test_get_segments_async() -> None:
 
     assert sorted(asyncio.run(coro())) == sorted(
         [
-            ["you"],
-            ["x"],
-            ["ch"],
-            ["you", "first_name"],
-            ["you", "last_name"],
+            ("you",),
+            ("x",),
+            ("ch",),
+            ("you", "first_name"),
+            ("you", "last_name"),
         ]
     )
 
@@ -108,9 +107,9 @@ def test_get_global_paths_async() -> None:
 def test_get_global_segments() -> None:
     assert sorted(TEMPLATE.global_variable_segments()) == sorted(
         [
-            ["you"],
-            ["you", "first_name"],
-            ["you", "last_name"],
+            ("you",),
+            ("you", "first_name"),
+            ("you", "last_name"),
         ]
     )
 
@@ -121,9 +120,9 @@ def test_get_global_segments_async() -> None:
 
     assert sorted(asyncio.run(coro())) == sorted(
         [
-            ["you"],
-            ["you", "first_name"],
-            ["you", "last_name"],
+            ("you",),
+            ("you", "first_name"),
+            ("you", "last_name"),
         ]
     )
 
@@ -165,7 +164,7 @@ A template with comments.
     template = parse(source)
     nodes = template.comments()
     comment_strings = [node.text for node in nodes]
-    assert comment_strings == ["a", "b", "c", "d", "e"]
+    assert comment_strings == ["a", "b", " c ", "d", " e "]
 
 
 def test_get_doc_nodes() -> None:

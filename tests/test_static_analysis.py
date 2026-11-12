@@ -1,199 +1,226 @@
-"""Template static analysis test cases."""
-
-from __future__ import annotations
-
-import asyncio
-import itertools
-from typing import TYPE_CHECKING
-
 import pytest
 
-from liquid import Environment
-from liquid.builtin import DictLoader
+from liquid import DictLoader, Environment, parse
+from liquid._static_analysis import Locations, Segments, Vars
 from liquid.exceptions import TemplateNotFoundError
-from liquid.extra import SnippetTag
-from liquid.span import Span
-from liquid.static_analysis import Variable
 
-if TYPE_CHECKING:
-    from liquid import BoundTemplate
-    from liquid.static_analysis import TemplateAnalysis
+type Vars_ = dict[str, list[tuple[Segments, str]]]
+type Locations_ = dict[str, list[str]]
 
 
-class MockEnv(Environment):
-    ternary_expressions = True
+def assert_vars(got: Vars, want: Vars_) -> None:
+    for k, v in want.items():
+        got_ = got.get(k, [])
+
+        for i, (segments, value) in enumerate(v):
+            assert got_[i]["value"] == value
+            assert got_[i]["segments"] == segments
+
+        assert len(got_) == len(v)
+
+    assert len(got) == len(want)
 
 
-@pytest.fixture
-def env() -> Environment:  # noqa: D103
-    _env = MockEnv(extra=True)
-    _env.add_tag(SnippetTag)  # Experimental tag
-    return _env
+def assert_locations(got: Locations, want: Locations_) -> None:
+    for k, v in want.items():
+        got_ = got.get(k, [])
+
+        for i, w in enumerate(v):
+            assert got_[i]["value"] == w
+
+        assert len(got_) == len(v)
+
+    assert len(got) == len(want)
 
 
-def _assert(
-    template: BoundTemplate,
-    *,
-    locals: dict[str, list[Variable]],  # noqa: A002
-    globals: dict[str, list[Variable]],  # noqa: A002
-    variables: dict[str, list[Variable]] | None = None,
-    filters: dict[str, list[Span]] | None = None,
-    tags: dict[str, list[Span]] | None = None,
-) -> None:
-    variables = {**globals} if variables is None else variables
+def test_output() -> None:
+    source = "{{ x | default: y, allow_false: z }}"
+    analysis = parse(source).analyze()
 
-    async def coro() -> TemplateAnalysis:
-        return await template.analyze_async()
+    locals: Vars_ = {}
 
-    def _assert_refs(got: TemplateAnalysis) -> None:
-        assert got.locals == locals
-        assert got.globals == globals
-        assert got.variables == variables
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+        "z": [(("z",), "z")],
+    }
 
-        if filters:
-            assert got.filters == filters
-        else:
-            assert len(got.filters) == 0
+    variables: Vars_ = globals
 
-        if tags:
-            assert got.tags == tags
-        else:
-            assert len(got.tags) == 0
+    filters: Locations_ = {
+        "default": ["default: y, allow_false: z"],
+    }
 
-    _assert_refs(template.analyze())
-    _assert_refs(asyncio.run(coro()))
+    tags: Locations_ = {}
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_output(env: Environment) -> None:
-    source = r"{{ x | default: y, allow_false: z }}"
+def test_bracket_notation() -> None:
+    source = "{{ x['y'].title }}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 3))],
-            "y": [Variable(["y"], Span("", 16))],
-            "z": [Variable(["z"], Span("", 32))],
-        },
-        filters={
-            "default": [Span("", 7)],
-        },
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "x": [(("x", "y", "title"), "x['y'].title")],
+    }
 
-def test_bracketed_query_notation(env: Environment) -> None:
-    source = r"{{ x['y'].title }}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={"x": [Variable(["x", "y", "title"], Span("", 3))]},
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_quoted_name_notation(env: Environment) -> None:
-    source = r"{{ some['foo.bar'] }}"
+def test_quoted_name_notation() -> None:
+    source = "{{ some['foo.bar'] }}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={"some": [Variable(["some", "foo.bar"], Span("", 3))]},
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "some": [(("some", "foo.bar"), "some['foo.bar']")],
+    }
 
-def test_nested_queries(env: Environment) -> None:
-    source = r"{{ x[y.z].title }}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x", ["y", "z"], "title"], Span("", 3))],
-            "y": [Variable(["y", "z"], Span("", 5))],
-        },
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_nested_root_query(env: Environment) -> None:
-    source = r"{{ [a.b] }}"
+def test_quoted_nested_vaariables() -> None:
+    source = "{{ x[y.z].title }}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "['a', 'b']": [Variable([["a", "b"]], Span("", 3))],
-            "a": [Variable(["a", "b"], Span("", 4))],
-        },
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "x": [(("x", ("y", "z"), "title"), "x[y.z].title")],
+        "y": [(("y", "z"), "y.z")],
+    }
 
-def test_analyze_ternary(env: Environment) -> None:
-    source = r"{{ a if b.c else d }}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "a": [Variable(["a"], Span("", 3))],
-            "b": [Variable(["b", "c"], Span("", 8))],
-            "d": [Variable(["d"], Span("", 17))],
-        },
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_ternary_filters(env: Environment) -> None:
-    source = r"{{ a | upcase if b.c else d | default: 'x' || append: y }}"
+def test_dynamic_root_query() -> None:
+    source = "{{ [a.b] }}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "a": [Variable(["a"], Span("", 3))],
-            "b": [Variable(["b", "c"], Span("", 17))],
-            "d": [Variable(["d"], Span("", 26))],
-            "y": [Variable(["y"], Span("", 54))],
-        },
-        filters={
-            "upcase": [Span("", 7)],
-            "default": [Span("", 30)],
-            "append": [Span("", 46)],
-        },
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "a.b": [((("a", "b"),), "[a.b]")],
+        "a": [(("a", "b"), "a.b")],
+    }
 
-def test_analyze_assign(env: Environment) -> None:
-    source = r"{% assign x = y | append: z %}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
 
-    _assert(
-        env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 10))]},
-        globals={
-            "y": [Variable(["y"], Span("", 14))],
-            "z": [Variable(["z"], Span("", 26))],
-        },
-        filters={"append": [Span("", 18)]},
-        tags={"assign": [Span("", 3)]},
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_capture(env: Environment) -> None:
-    source = r"{% capture x %}{% if y %}z{% endif %}{% endcapture %}"
+def test_variable_segments() -> None:
+    source = "{{ a['b.c'] }}{{ d[e.f][4] }}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 11))]},
-        globals={
-            "y": [Variable(["y"], Span("", 21))],
-        },
-        tags={
-            "capture": [Span("", 3)],
-            "if": [Span("", 18)],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "a": [(("a", "b.c"), "a['b.c']")],
+        "d": [(("d", ("e", "f"), 4), "d[e.f][4]")],
+        "e": [(("e", "f"), "e.f")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {}
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_case(env: Environment) -> None:
-    source = "\n".join(
+def test_assign() -> None:
+    source = "{% assign x = y | append: z %}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    globals: Vars_ = {
+        "y": [(("y",), "y")],
+        "z": [(("z",), "z")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {"append": ["append: z"]}
+    tags: Locations_ = {"assign": ["assign"]}
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_capture() -> None:
+    source = "{% capture x %}{% if y %}z{% endif %}{% endcapture %}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    globals: Vars_ = {
+        "y": [(("y",), "y")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "capture": ["capture"],
+        "if": ["if"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_case() -> None:
+    source = "".join(  # noqa: FLY002
         [
             "{% case x %}",
             "{% when y %}",
@@ -205,142 +232,212 @@ def test_analyze_case(env: Environment) -> None:
             "{% endcase %}",
         ]
     )
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 8))],
-            "y": [Variable(["y"], Span("", 21))],
-            "a": [Variable(["a"], Span("", 31))],
-            "z": [Variable(["z"], Span("", 44))],
-            "b": [Variable(["b"], Span("", 54))],
-            "c": [Variable(["c"], Span("", 75))],
-        },
-        tags={"case": [Span("", 3)]},
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+        "a": [(("a",), "a")],
+        "z": [(("z",), "z")],
+        "b": [(("b",), "b")],
+        "c": [(("c",), "c")],
+    }
 
-def test_analyze_cycle(env: Environment) -> None:
-    source = r"{% cycle x: a, b %}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "case": ["case"],
+        "when": ["when", "when"],
+        "else": ["else"],
+    }
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "a": [Variable(["a"], Span("", 12))],
-            "b": [Variable(["b"], Span("", 15))],
-            "x": [Variable(["x"], Span("", 9))],
-        },
-        tags={"cycle": [Span("", 3)]},
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_decrement(env: Environment) -> None:
-    source = r"{% decrement x %}"
+def test_cycle() -> None:
+    source = "{% cycle x: a, b %}"
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 13))]},
-        globals={},
-        tags={"decrement": [Span("", 3)]},
-    )
+    locals: Vars_ = {}
 
+    globals: Vars_ = {
+        "a": [(("a",), "a")],
+        "b": [(("b",), "b")],
+        "x": [(("x",), "x")],
+    }
 
-def test_analyze_echo(env: Environment) -> None:
-    source = r"{% echo x | default: y, allow_false: z %}"
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "cycle": ["cycle"],
+    }
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 8))],
-            "y": [Variable(["y"], Span("", 21))],
-            "z": [Variable(["z"], Span("", 37))],
-        },
-        filters={
-            "default": [Span("", 12)],
-        },
-        tags={"echo": [Span("", 3)]},
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_for(env: Environment) -> None:
-    source = "\n".join(
+def test_decrement() -> None:
+    source = "{% decrement x %}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    globals: Vars_ = {}
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "decrement": ["decrement"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_echo() -> None:
+    source = "{% echo x | default: y, allow_false: z %}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+        "z": [(("z",), "z")],
+    }
+    variables: Vars_ = globals
+
+    filters: Locations_ = {
+        "default": ["default: y, allow_false: z"],
+    }
+    tags: Locations_ = {
+        "echo": ["echo"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_for() -> None:
+    source = "".join(  # noqa: FLY002
         [
-            r"{% for x in (1..y) %}",
-            r"  {{ x }}",
-            r"{% break %}",
-            r"{% else %}",
-            r"  {{ z }}",
-            r"{% continue %}",
-            r"{% endfor %}",
+            "{% for x in (1..y) %}",
+            "  {{ x }}",
+            "{% break %}",
+            "{% else %}",
+            "  {{ z }}",
+            "{% continue %}",
+            "{% endfor %}",
         ]
     )
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "y": [Variable(["y"], Span("", 16))],
-            "z": [Variable(["z"], Span("", 60))],
-        },
-        variables={
-            "y": [Variable(["y"], Span("", 16))],
-            "x": [Variable(["x"], Span("", 27))],
-            "z": [Variable(["z"], Span("", 60))],
-        },
-        filters={},
-        tags={
-            "for": [Span("", 3)],
-            "break": [Span("", 35)],
-            "continue": [Span("", 68)],
-        },
-    )
+    locals: Vars_ = {}
+    globals: Vars_ = {
+        "y": [(("y",), "y")],
+        "z": [(("z",), "z")],
+    }
+
+    variables: Vars_ = {
+        "y": [(("y",), "y")],
+        "x": [(("x",), "x")],
+        "z": [(("z",), "z")],
+    }
+
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "for": ["for"],
+        "break": ["break"],
+        "continue": ["continue"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_if(env: Environment) -> None:
-    source = "\n".join(
+def test_if() -> None:
+    source = "".join(  # noqa: FLY002
         [
-            r"{% if x %}",
-            r"  {{ a }}",
-            r"{% elsif y %}",
-            r"  {{ b }}",
-            r"{% else %}",
-            r"  {{ c }}",
-            r"{% endif %}",
+            "{% if x %}",
+            "  {{ a }}",
+            "{% elsif y %}",
+            "  {{ b }}",
+            "{% else %}",
+            "  {{ c }}",
+            "{% endif %}",
         ]
     )
+    analysis = parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 6))],
-            "a": [Variable(["a"], Span("", 16))],
-            "y": [Variable(["y"], Span("", 30))],
-            "b": [Variable(["b"], Span("", 40))],
-            "c": [Variable(["c"], Span("", 61))],
-        },
-        filters={},
-        tags={
-            "if": [Span("", 3)],
-        },
-    )
+    locals: Vars_ = {}
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "a": [(("a",), "a")],
+        "y": [(("y",), "y")],
+        "b": [(("b",), "b")],
+        "c": [(("c",), "c")],
+    }
 
+    variables: Vars_ = globals
 
-def test_analyze_increment(env: Environment) -> None:
-    source = r"{% increment x %}"
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "if": ["if"],
+        "elsif": ["elsif"],
+        "else": ["else"],
+    }
 
-    _assert(
-        env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 13))]},
-        globals={},
-        tags={"increment": [Span("", 3)]},
-    )
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_liquid(env: Environment) -> None:
+def test_increment() -> None:
+    source = "{% increment x %}"
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    globals: Vars_ = {}
+    variables: Vars_ = globals
+
+    filters: Locations_ = {}
+    tags: Locations_ = {
+        "increment": ["increment"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
+
+
+def test_liquid() -> None:
     source = """\
 {% liquid
 if product.title
@@ -353,29 +450,41 @@ for i in (0..5)
     echo i
 endfor %}"""
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "product": [Variable(["product", "title"], Span("", 13))],
-            "foo": [Variable(["foo"], Span("", 36))],
-        },
-        variables={
-            "product": [Variable(["product", "title"], Span("", 13))],
-            "foo": [Variable(["foo"], Span("", 36))],
-            "i": [Variable(["i"], Span("", 116))],
-        },
-        filters={"upcase": [Span("", 42), Span("", 77)]},
-        tags={
-            "liquid": [Span("", 3)],
-            "echo": [Span("", 31), Span("", 58), Span("", 111)],
-            "for": [Span("", 91)],
-            "if": [Span("", 10)],
-        },
-    )
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "product": [(("product", "title"), "product.title")],
+        "foo": [(("foo",), "foo")],
+    }
+
+    variables: Vars_ = {
+        "product": [(("product", "title"), "product.title")],
+        "foo": [(("foo",), "foo")],
+        "i": [(("i",), "i")],
+    }
+
+    filters: Locations_ = {
+        "upcase": ["upcase", "upcase"],
+    }
+
+    tags: Locations_ = {
+        "liquid": ["liquid"],
+        "echo": ["echo", "echo", "echo"],
+        "for": ["for"],
+        "if": ["if"],
+        "else": ["else"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_unless(env: Environment) -> None:
+def test_unless() -> None:
     source = """\
 {% unless x %}
   {{ a }}
@@ -385,628 +494,463 @@ def test_analyze_unless(env: Environment) -> None:
   {{ c }}
 {% endunless %}"""
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 10))],
-            "a": [Variable(["a"], Span("", 20))],
-            "y": [Variable(["y"], Span("", 34))],
-            "b": [Variable(["b"], Span("", 44))],
-            "c": [Variable(["c"], Span("", 65))],
-        },
-        tags={
-            "unless": [Span("", 3)],
-        },
-    )
+    analysis = parse(source).analyze()
+
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "a": [(("a",), "a")],
+        "y": [(("y",), "y")],
+        "b": [(("b",), "b")],
+        "c": [(("c",), "c")],
+    }
+
+    variables: Vars_ = globals
+
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "unless": ["unless"],
+        "elsif": ["elsif"],
+        "else": ["else"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include() -> None:
-    loader = DictLoader({"a": "{{ x }}"})
-    env = Environment(loader=loader)
+def test_include() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}"}))
     source = "{% include 'a' %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        tags={
-            "include": [Span("", 3)],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = globals
+
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "include": ["include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_included_assign() -> None:
-    loader = DictLoader({"a": "{{ x }}{% assign y = 42 %}"})
-    env = Environment(loader=loader)
+def test_include_assign() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}{% assign y = 42 %}"}))
     source = "{% include 'a' %}{{ y }}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={
-            "y": [Variable(["y"], Span("a", 17))],
-        },
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        variables={
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("", 20))],
-        },
-        tags={
-            "include": [Span("", 3)],
-            "assign": [Span("a", 10)],
-        },
-    )
+    locals: Vars_ = {
+        "y": [(("y",), "y")],
+    }
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "include": ["include"],
+        "assign": ["assign"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_once() -> None:
-    loader = DictLoader({"a": "{{ x }}"})
-    env = Environment(loader=loader)
+def test_include_twice() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}"}))
     source = "{% include 'a' %}{% include 'a' %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        tags={
-            "include": [Span("", 3), Span("", 20)],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "include": ["include", "include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_recursive() -> None:
-    loader = DictLoader({"a": "{{ x }}{% include 'a' %}"})
-    env = Environment(loader=loader)
+def test_include_recirsive() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}{% include 'a' %}"}))
     source = "{% include 'a' %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        tags={
-            "include": [
-                Span("", 3),
-                Span("a", 10),
-            ],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "include": ["include", "include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_with_bound_variable() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}{{ a }}"})
-    env = Environment(loader=loader)
+def test_include_with_bound_variable() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}{{ a }}"}))
     source = "{% include 'a' with z %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "z": [Variable(["z"], Span("", 20))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-        },
-        variables={
-            "z": [Variable(["z"], Span("", 20))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-            "a": [Variable(["a"], Span("a", 22))],
-        },
-        tags={"include": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    variables: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+        "a": [(("a",), "a")],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "include": ["include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_with_bound_alias() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}"})
-    env = Environment(loader=loader)
+def test_include_with_bound_alias() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% include 'a' with z as y %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "z": [Variable(["z"], Span("", 20))],
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        variables={
-            "z": [Variable(["z"], Span("", 20))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-        },
-        tags={"include": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "include": ["include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_with_arguments() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}"})
-    env = Environment(loader=loader)
+def test_include_with_arguments() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% include 'a', x:y, z:42 %}{{ x }}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "y": [
-                Variable(["y"], Span("", 18)),
-                Variable(["y"], Span("a", 15)),
-            ],
-            "x": [Variable(["x"], Span("", 31))],
-        },
-        variables={
-            "y": [
-                Variable(["y"], Span("", 18)),
-                Variable(["y"], Span("a", 15)),
-            ],
-            "x": [
-                Variable(["x"], Span("a", 3)),
-                Variable(["x"], Span("", 31)),
-            ],
-        },
-        tags={"include": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "y": [
+            (("y",), "y"),
+            (("y",), "y"),
+        ],
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = {
+        "y": [
+            (("y",), "y"),
+            (("y",), "y"),
+        ],
+        "x": [
+            (("x",), "x"),
+            (("x",), "x"),
+        ],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "include": ["include"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_include_with_variable_name(env: Environment) -> None:
+def test_include_with_dynamic_name() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% include b %}{{ x }}"
-    template = env.from_string(source)
 
     with pytest.raises(TemplateNotFoundError):
-        template.analyze()
+        env.parse(source).analyze()
 
 
-def test_analyze_include_string_template_not_found(env: Environment) -> None:
+def test_include_template_not_found() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% include 'nosuchthing' %}{{ x }}"
-    template = env.from_string(source)
 
     with pytest.raises(TemplateNotFoundError):
-        template.analyze()
+        env.parse(source).analyze()
 
 
-def test_analyze_render_assign() -> None:
-    loader = DictLoader({"a": "{{ x }}{% assign y = 42 %}"})
-    env = Environment(loader=loader)
+def test_render_assign() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}{% assign y = 42 %}"}))
     source = "{% render 'a' %}{{ y }}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={
-            "y": [Variable(["y"], Span("a", 17))],
-        },
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("", 19))],
-        },
-        tags={
-            "render": [Span("", 3)],
-            "assign": [Span("a", 10)],
-        },
-    )
+    locals: Vars_ = {
+        "y": [(("y",), "y")],
+    }
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    variables: Vars_ = {
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "render": ["render"],
+        "assign": ["assign"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_once() -> None:
-    loader = DictLoader({"a": "{{ x }}"})
-    env = Environment(loader=loader)
+def test_render_twice() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}"}))
     source = "{% render 'a' %}{% render 'a' %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        tags={
-            "render": [Span("", 3), Span("", 19)],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "render": ["render", "render"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_recursive() -> None:
-    loader = DictLoader({"a": "{{ x }}{% render 'a' %}"})
-    env = Environment(loader=loader)
+def test_render_recirsive() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x }}{% render 'a' %}"}))
     source = "{% render 'a' %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        tags={
-            "render": [
-                Span("", 3),
-                Span("a", 10),
-            ],
-        },
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = globals
+    filters: Locations_ = {}
+
+    tags: Locations_ = {
+        "render": ["render", "render"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_with_bound_variable() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}{{ a }}"})
-    env = Environment(loader=loader)
+def test_render_with_bound_variable() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}{{ a }}"}))
     source = "{% render 'a' with z %}"
+    analysis = env.parse(source).analyze()
 
-    # Defaults to binding the value at `z` to the rendered template's name.
+    locals: Vars_ = {}
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "z": [Variable(["z"], Span("", 19))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-        },
-        variables={
-            "z": [Variable(["z"], Span("", 19))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-            "a": [Variable(["a"], Span("a", 22))],
-        },
-        tags={"render": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    globals: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    variables: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+        "a": [(("a",), "a")],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "render": ["render"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_with_bound_alias() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}"})
-    env = Environment(loader=loader)
+def test_render_with_bound_alias() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% render 'a' with z as y %}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "z": [Variable(["z"], Span("", 19))],
-            "x": [Variable(["x"], Span("a", 3))],
-        },
-        variables={
-            "z": [Variable(["z"], Span("", 19))],
-            "x": [Variable(["x"], Span("a", 3))],
-            "y": [Variable(["y"], Span("a", 15))],
-        },
-        tags={"render": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = {
+        "z": [(("z",), "z")],
+        "x": [(("x",), "x")],
+        "y": [(("y",), "y")],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "render": ["render"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_with_arguments() -> None:
-    loader = DictLoader({"a": "{{ x | append: y }}"})
-    env = Environment(loader=loader)
+def test_render_with_arguments() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% render 'a', x:y, z:42 %}{{ x }}"
+    analysis = env.parse(source).analyze()
 
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "x": [Variable(["x"], Span("", 30))],
-            "y": [
-                Variable(["y"], Span("", 17)),
-                Variable(["y"], Span("a", 15)),
-            ],
-        },
-        variables={
-            "x": [
-                Variable(["x"], Span("a", 3)),
-                Variable(["x"], Span("", 30)),
-            ],
-            "y": [
-                Variable(["y"], Span("", 17)),
-                Variable(["y"], Span("a", 15)),
-            ],
-        },
-        tags={"render": [Span("", 3)]},
-        filters={"append": [Span("a", 7)]},
-    )
+    locals: Vars_ = {}
+
+    globals: Vars_ = {
+        "y": [
+            (("y",), "y"),
+            (("y",), "y"),
+        ],
+        "x": [(("x",), "x")],
+    }
+
+    variables: Vars_ = {
+        "y": [
+            (("y",), "y"),
+            (("y",), "y"),
+        ],
+        "x": [
+            (("x",), "x"),
+            (("x",), "x"),
+        ],
+    }
+
+    filters: Locations_ = {
+        "append": ["append: y"],
+    }
+
+    tags: Locations_ = {
+        "render": ["render"],
+    }
+
+    assert_vars(analysis.locals, locals)
+    assert_vars(analysis.globals, globals)
+    assert_vars(analysis.variables, variables)
+    assert_locations(analysis.filters, filters)
+    assert_locations(analysis.tags, tags)
 
 
-def test_analyze_render_template_not_found(env: Environment) -> None:
+def test_render_template_not_found() -> None:
+    env = Environment(loader=DictLoader({"a": "{{ x | append: y }}"}))
     source = "{% render 'nosuchthing' %}{{ x }}"
-    template = env.from_string(source)
 
     with pytest.raises(TemplateNotFoundError):
-        template.analyze()
-
-
-def test_variable_segments(env: Environment) -> None:
-    source = "{{ a['b.c'] }}{{ d[e.f][4] }}"
-
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={
-            "a": [Variable(["a", "b.c"], Span("", 3))],
-            "d": [Variable(["d", ["e", "f"], 4], Span("", 17))],
-            "e": [Variable(["e", "f"], Span("", 19))],
-        },
-    )
-
-    analysis = env.from_string(source).analyze()
-    variables = list(itertools.chain.from_iterable(analysis.variables.values()))
-    assert len(variables) == 3  # noqa: PLR2004
-    assert variables[0].segments == ["a", "b.c"]
-    assert variables[1].segments == ["d", ["e", "f"], 4]
-    assert variables[2].segments == ["e", "f"]
-    assert str(analysis.globals["a"][0]) == "a['b.c']"
-    assert str(analysis.globals["d"][0]) == "d[e.f][4]"
-
-
-def test_analyze_inheritance_chain() -> None:
-    loader = DictLoader(
-        {
-            "base": (
-                "Hello, "
-                "{% assign x = 'foo' %}"
-                "{% block content %}{{ x | upcase }}{% endblock %}!"
-                "{% block foo %}{% endblock %}!"
-            ),
-            "other": (
-                "{% extends 'base' %}"
-                "{% block content %}{{ x | downcase }}{% endblock %}"
-                "{% block foo %}{% assign z = 7 %}{% endblock %}"
-            ),
-            "some": (
-                "{% extends 'other' %}{{ y | append: x }}{% block foo %}{% endblock %}"
-            ),
-        }
-    )
-
-    env = Environment(extra=True, loader=loader)
-
-    _assert(
-        env.get_template("some"),
-        locals={
-            "x": [Variable(["x"], Span("base", 17))],
-            "z": [Variable(["z"], Span("other", 96))],
-        },
-        globals={
-            "y": [Variable(["y"], Span("some", 24))],
-        },
-        variables={
-            "x": [
-                Variable(["x"], Span("base", 51)),
-                Variable(["x"], Span("other", 42)),
-                Variable(["x"], Span("some", 36)),
-            ],
-            "y": [Variable(["y"], Span("some", 24))],
-        },
-        tags={
-            "assign": [
-                Span("base", 10),
-                Span("other", 89),
-            ],
-            "extends": [
-                Span("some", 3),
-                Span("other", 3),
-            ],
-            "block": [
-                Span("base", 32),
-                Span("base", 82),
-                Span("other", 23),
-                Span("other", 74),
-                Span("some", 43),
-            ],
-        },
-        filters={
-            "append": [Span("some", 28)],
-            "downcase": [Span("other", 46)],
-            "upcase": [Span("base", 55)],
-        },
-    )
-
-
-def test_analyze_recursive_extends() -> None:
-    loader = DictLoader(
-        {
-            "some": "{% extends 'other' %}",
-            "other": "{% extends 'some' %}",
-        }
-    )
-    env = Environment(extra=True, loader=loader)
-    template = env.get_template("some")
-
-    _assert(
-        template,
-        locals={},
-        globals={},
-        tags={
-            "extends": [
-                Span("some", 3),
-                Span("other", 3),
-            ],
-        },
-    )
-
-
-def test_analyze_super() -> None:
-    loader = DictLoader(
-        {
-            "base": "Hello, {% block content %}{{ foo | upcase }}{% endblock %}!",
-            "some": (
-                "{% extends 'base' %}"
-                "{% block content %}{{ block.super }}!{% endblock %}"
-            ),
-        }
-    )
-
-    env = Environment(extra=True, loader=loader)
-
-    _assert(
-        env.get_template("some"),
-        locals={},
-        globals={
-            "foo": [Variable(["foo"], Span("base", 29))],
-        },
-        variables={
-            "foo": [Variable(["foo"], Span("base", 29))],
-            "block": [Variable(["block", "super"], Span("some", 42))],
-        },
-        tags={
-            "extends": [
-                Span("some", 3),
-            ],
-            "block": [
-                Span("base", 10),
-                Span("some", 23),
-            ],
-        },
-        filters={
-            "upcase": [Span("base", 35)],
-        },
-    )
-
-
-def test_analyze_macro_and_call(env: Environment) -> None:
-    source = (
-        r"{% macro 'foo', you: 'World', arg: n %}"
-        r"Hello, {{ you }}!"
-        r"{{ args.size }}"
-        r"{% endmacro %}"
-        r"{% call 'foo' %}"
-        r"{% assign x = 'you' %}"
-        r"{% call 'foo', you: x %}"
-    )
-
-    n = [Variable(["n"], Span("", 35))]
-    you = [Variable(["you"], Span("", 49))]
-
-    _assert(
-        env.from_string(source),
-        locals={"x": [Variable(["x"], Span("", 111))]},
-        globals={"n": n},
-        variables={
-            "n": n,
-            "you": you,
-            "args": [Variable(["args", "size"], Span("", 59))],
-            "x": [Variable(["x"], Span("", 143))],
-        },
-        tags={
-            "macro": [Span("", 3)],
-            "call": [Span("", 88), Span("", 126)],
-            "assign": [Span("", 104)],
-        },
-    )
-
-
-def test_span_line_and_col(env: Environment) -> None:
-    source = "\n".join(
-        [
-            r"{% for x in (1..y) %}",
-            r"  {{ x }}",
-            r"{% break %}",
-            r"{% else %}",
-            r"  {{ z }}",
-            r"{% continue %}",
-            r"{% endfor %}",
-        ]
-    )
-
-    analysis = env.from_string(source).analyze()
-    assert analysis.globals["y"][0].span.line_col(source) == (1, 16)
-    assert analysis.variables["x"][0].span.line_col(source) == (2, 5)
-
-
-def test_analyze_translate(env: Environment) -> None:
-    source = (
-        "{%- translate, context: 'greeting', you: someone, count: 2 -%}"
-        "    Hello, {{ you }}!"
-        "{%- plural -%}"
-        "    Hello, {{ you }}s!"
-        "{%- endtranslate -%}"
-    )
-
-    someone = [Variable(["someone"], Span("", 41))]
-
-    _assert(
-        env.from_string(source),
-        locals={},
-        globals={"someone": someone},
-        variables={
-            "someone": someone,
-            "you": [
-                Variable(["you"], Span("", 76)),
-                Variable(["you"], Span("", 111)),
-            ],
-        },
-        tags={
-            "translate": [Span("", 4)],
-        },
-    )
-
-
-def test_analyze_snippet(env: Environment) -> None:
-    source = "\n".join(
-        [
-            "{% snippet foo %}",
-            "  Hi!",
-            "  {{ bar }}",
-            "  {{ baz }}",
-            "{% endsnippet %}",
-            "",
-            "{% render foo, bar: '42' %}",
-        ]
-    )
-
-    _assert(
-        env.from_string(source, name="x"),
-        locals={"foo": [Variable(["foo"], Span("x", 11))]},
-        globals={
-            "baz": [Variable(["baz"], Span("x", 41))],
-        },
-        variables={
-            "baz": [Variable(["baz"], Span("x", 41))],
-            "bar": [Variable(["bar"], Span("x", 29))],
-        },
-        tags={
-            "snippet": [Span("x", 3)],
-            "render": [Span("x", 69)],
-        },
-    )
-
-
-def test_analyze_snippet_rendered_twice(env: Environment) -> None:
-    # `baz` is out of scope the first time we render `foo` but in scope
-    # the second time.
-    source = "\n".join(
-        [
-            "{% snippet foo %}",
-            "  Hi!",
-            "  {{ bar }}",
-            "  {{ baz }}",
-            "{% endsnippet %}",
-            "",
-            "{% render foo, bar: '42' %}",
-            "{% render foo, baz: 99 %}",
-        ]
-    )
-
-    _assert(
-        env.from_string(source, name="x"),
-        locals={
-            "foo": [
-                Variable(["foo"], Span("x", 11)),
-            ]
-        },
-        globals={
-            "baz": [Variable(["baz"], Span("x", 41))],
-            "bar": [Variable(["bar"], Span("x", 29))],
-        },
-        variables={
-            "baz": [Variable(["baz"], Span("x", 41))],
-            "bar": [Variable(["bar"], Span("x", 29))],
-        },
-        tags={
-            "snippet": [Span("x", 3)],
-            "render": [
-                Span("x", 69),
-                Span("x", 97),
-            ],
-        },
-    )
+        env.parse(source).analyze()

@@ -1,0 +1,142 @@
+from .tokens import Token, token_value
+
+
+class LiquidError(Exception):
+    """The base class for all Liquid exceptions."""
+
+
+class DetailedLiquidError(LiquidError):
+    """A Liquid exception with contextual information.
+
+    Parameters
+    ----------
+    msg
+        The error message.
+    token
+        A token pointing to the cause of the error in `source`.
+    source
+        Template source text.
+    name
+        Template name.
+    """
+
+    def __init__(self, msg: str, *, token: Token, source: str, name: str) -> None:
+        super().__init__(msg)
+        self.token = token
+        self.source = source
+        self.name = name
+
+    def __str__(self) -> str:
+        return self.detailed_message()
+
+    def detailed_message(self) -> str:
+        """Return an error message formatted with extra context info."""
+        span = token_value(self.token, self.source)
+        line, col, current_line = self.error_context(self.source, self.token[1])
+
+        pad = " " * len(str(line))
+        length = len(span)
+        pointer = (" " * col) + ("^" * max(length, 1))
+
+        return (
+            f"{self.message}\n"
+            f"{pad} -> {self.name!r} {line}:{col}\n"
+            f"{pad} |\n"
+            f"{line} | {current_line}\n"
+            f"{pad} | {pointer} {self.message}\n"
+        )
+
+    @property
+    def message(self) -> object:
+        """The exception's error message if one was given."""
+        if self.args:
+            return self.args[0]
+        return None
+
+    def error_context(self, source: str, index: int) -> tuple[int, int, str]:
+        """Return (line number, column number, line text) pointed to by this exception's token."""
+        lines = source.splitlines(keepends=True)
+        cumulative_length = 0
+        target_line_index = -1
+
+        for i, line in enumerate(lines):
+            cumulative_length += len(line)
+            if index < cumulative_length:
+                target_line_index = i
+                break
+
+        if target_line_index == -1:
+            # Point to end of input
+            return len(lines), len(lines[-1]), lines[-1].rstrip()
+
+        # Line number (1-based)
+        line_number = target_line_index + 1
+        # Column number within the line
+        column_number = index - (cumulative_length - len(lines[target_line_index]))
+
+        current_line = lines[target_line_index].rstrip()
+        return line_number, column_number, current_line
+
+
+class LiquidSyntaxError(DetailedLiquidError):
+    pass
+
+
+class TranslationSyntaxError(LiquidSyntaxError):
+    pass
+
+
+class LiquidNameError(DetailedLiquidError):
+    pass
+
+
+class LiquidTypeError(DetailedLiquidError):
+    pass
+
+
+class LiquidValueError(LiquidError):
+    pass
+
+
+class LiquidArgumentError(DetailedLiquidError):
+    pass
+
+
+class LiquidZeroDivisionError(DetailedLiquidError):
+    pass
+
+
+class LiquidFilterError(DetailedLiquidError):
+    pass
+
+
+class LiquidFilterInterrupt(LiquidFilterError):  # noqa: N818
+    pass
+
+
+class TemplateNotFoundError(LiquidError):
+    pass
+
+
+class NoSuchTemplateError(DetailedLiquidError):
+    pass
+
+
+class UndefinedVariableError(DetailedLiquidError):
+    pass
+
+
+class DisabledTagError(DetailedLiquidError):
+    pass
+
+
+class TemplateInheritanceError(DetailedLiquidError):
+    pass
+
+
+class RequiredBlockError(TemplateInheritanceError):
+    pass
+
+
+class ResourceLimitError(LiquidError):
+    pass

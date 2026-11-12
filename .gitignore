@@ -52,6 +52,7 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 site/
+.doctrees
 
 # PyBuilder
 target/
@@ -82,3 +83,5 @@ ENV/
 # Dev utils
 dev.py
 dump_golden.py
+pr.md
+pr.rst

@@ -1,5 +1,4 @@
-from liquid import CachingDictLoader
-from liquid import Environment
+from liquid import CachingDictLoader, Environment
 
 
 def test_caching_choice_loader() -> None:
@@ -11,12 +10,12 @@ def test_caching_choice_loader() -> None:
     )
 
     env = Environment(loader=loader)
+
     assert len(loader.cache) == 0
     template = env.get_template("a")
-    assert template.render(you="World") == "Hello, World!"
+    assert template.render({"you": "World"}) == "Hello, World!"
     assert len(loader.cache) == 1
     template = env.get_template("b")
     assert template.render() == "the quick brown fox"
     assert len(loader.cache) == 2
-
     assert env.get_template("b") is template

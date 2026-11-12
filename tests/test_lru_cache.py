@@ -1,7 +1,6 @@
 import pytest
 
-from liquid.utils.lru_cache import LRUCache
-from liquid.utils.lru_cache import ThreadSafeLRUCache
+from liquid._lru_cache import LRUCache, ThreadSafeLRUCache
 
 
 def test_negative_cache_capacity() -> None:
