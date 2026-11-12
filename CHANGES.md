@@ -26,11 +26,11 @@ See the migration guide (TODO) for details.
 
 - Renamed several `Environment` constructor arguments. See TODO.
 
-## Version 2.3.7
+## Version 2.3.7 (unreleased)
 
 **Fixes**
 
-- Fixed operators `<` and `>` where they would compare Boolean operands as integers, or raising `LiquidTypeError` in some cases. They now evaluate to `false`, like `<=` and `>=`.
+- Fixed comparison operators `<` and `>`. Since version 2.3.3 they would compare Boolean operands as integers, or raise a `LiquidTypeError` in some cases. Now they evaluate to `false` when given a Boolean operand, like `<=` and `>=`.
 
 - Fixed `reject` and `where` filter truthiness. Previously we were treating `0` as `False`.
 
