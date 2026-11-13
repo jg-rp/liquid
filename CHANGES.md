@@ -1,6 +1,6 @@
 # Python Liquid Change Log
 
-## Version 2.3.7 (unreleased)
+## Version 2.3.7
 
 **Fixes**
 
