@@ -1,10 +1,10 @@
 # Python Liquid Change Log
 
-## Version 3.0.0 (unreleased)
+## Version 3.0.0
 
 This major release improves compatibility with Shopify/liquid, improves template parsing performance, adds a few opt-in template language features and makes several breaking API changes.
 
-See the migration guide (TODO) for details.
+See the [migration guide](https://jg-rp.github.io/liquid/migration.html) for details.
 
 **Python versions and dependencies**
 
@@ -22,11 +22,11 @@ See the migration guide (TODO) for details.
 
 - Renamed class `BoundTemplate` to `Template`.
 
-- Removed `Environment` class variables in favour of constructor arguments. See TODO.
+- Removed `Environment` class variables in favour of constructor arguments. See [configuration docs](https://jg-rp.github.io/liquid/configure.html).
 
-- Renamed several `Environment` constructor arguments. See TODO.
+- Renamed several `Environment` constructor arguments. See [API docs](https://jg-rp.github.io/liquid/api.html#liquid.Environment).
 
-## Version 2.3.7 (unreleased)
+## Version 2.3.7
 
 **Fixes**
 
