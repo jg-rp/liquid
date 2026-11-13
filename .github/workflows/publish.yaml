@@ -5,8 +5,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   build:
@@ -50,12 +48,10 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/python-liquid/
+      url: https://pypi.org/project/python-liquid/
 
     permissions:
-      contents: read
       id-token: write
-      attestations: write
       
 
     steps:
@@ -64,11 +60,6 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-
-      - name: Generate build provenance
-        uses: actions/attest-build-provenance@v4
-        with:
-          subject-path: "dist/*"
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
