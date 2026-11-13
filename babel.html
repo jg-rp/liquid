@@ -1,0 +1,828 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Tag" href="tag_api.html"><link rel="prev" title="Drop" href="drop_api.html">
+        <link rel="prefetch" href="_static/logo_light.png" as="image">
+        <link rel="prefetch" href="_static/logo_dark.png" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>Babel - liquid 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: black;
+  --color-brand-content: #024bb0;
+  --color-foreground-muted: #808080;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #ffffcc;
+  --color-sidebar-link-text: black;
+  --color-sidebar-link-text--top-level: black;
+  --color-link: #024bb0;
+  --color-link--hover: #024bb0;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #024bb0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">liquid 3.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/logo_light.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/logo_dark.png" alt="Dark Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configure.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loaders.html">Template loaders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Liquid data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Extended expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migration guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tag reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tags.html">Standard tags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_tags.html">Extra tags</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Filter reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Standard filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_filters.html">Extra filters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loader_api.html">Loader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drop_api.html">Drop</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Babel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag_api.html">Tag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter_api.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/babel.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="babel">
+<h1>Babel<a class="headerlink" href="#babel" title="Link to this heading">¶</a></h1>
+<p>This page covers i18n and l10n filter and tag configuration, and how we support
+translations and translation message catalogs. See <a class="reference internal" href="extra_filters.html"><span class="doc">Extra filters</span></a> for usage
+examples.</p>
+<section id="currency">
+<h2>Currency<a class="headerlink" href="#currency" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="extra_filters.html#currency-filter"><span class="std std-ref">currency</span></a> filter returns the input number formatted as currency for
+the current locale.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">liquid.filters.</span></span><span class="sig-name descname"><span class="pre">Currency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency_code_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'currency_code'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_currency_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'USD'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'currency_format'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">currency_digits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'input_locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_input_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A Liquid filter for formatting currency values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>currency_code_var</strong> – The name of a render context variable that resolves to the current currency code.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;currency_code&quot;</span></code>.</p></li>
+<li><p><strong>default_currency_code</strong> – A fallback currency code if <cite>currency_code_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;USD&quot;</span></code>.</p></li>
+<li><p><strong>locale_var</strong> – The name of a render context variable that resolves to the current locale.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code>.</p></li>
+<li><p><strong>default_locale</strong> – A fallback locale to use if <cite>locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+<li><p><strong>format_var</strong> – The name of a render context variable that resolves to the current currency
+format string. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;currency_format&quot;</span></code>.</p></li>
+<li><p><strong>default_format</strong> – A fallback currency format that is used if <cite>format_var</cite> can not be resolved.
+Defaults to <cite>None</cite>, which means the standard format for the current locale will
+be used.</p></li>
+<li><p><strong>currency_digits</strong> – Indicates if the format should override locale specific trailing digit behavior.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>input_locale_var</strong> – The name of a render context variable that resolves to a locale suitable for
+parsing input strings to decimals. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;input_locale&quot;</span></code>.</p></li>
+<li><p><strong>default_input_locale</strong> – A fallback locale to use if <cite>input_locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">currency</span></code> defaults to looking for a locale in a render context variable called
+<code class="docutils literal notranslate"><span class="pre">locale</span></code>, and a currency code in a render context variable called <code class="docutils literal notranslate"><span class="pre">currency_code</span></code>. It
+outputs in the locale’s standard format and falls back to <code class="docutils literal notranslate"><span class="pre">en_US</span></code> and <code class="docutils literal notranslate"><span class="pre">USD</span></code> if those
+context variables don’t exist.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"{{ 100457.99 | currency }}"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">currency_code</span><span class="o">=</span><span class="s2">"GBP"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">,</span> <span class="n">currency_code</span><span class="o">=</span><span class="s2">"CAD"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$100,457.99
+£100,457.99
+100.457,99 CA$
+</pre></div>
+</div>
+<p>To configure <code class="docutils literal notranslate"><span class="pre">currency</span></code>, register a new instance of <code class="docutils literal notranslate"><span class="pre">liquid.filters.Currency</span></code> with an
+<a class="reference internal" href="api.html#liquid.Environment" title="liquid.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">liquid.Environment</span></code></a>, then render your templates from that.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Currency</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"currency"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Currency</span><span class="p">(</span><span class="n">default_locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="money">
+<h3>Money<a class="headerlink" href="#money" title="Link to this heading">¶</a></h3>
+<p>For convenience, some <a class="reference internal" href="extra_filters.html#money-filter"><span class="std std-ref">money</span></a> filters are defined that mimic Shopify’s money
+filter behavior. These are instances of <a class="reference internal" href="#currency">Currency</a> with specific default formats. All
+other currency options are set to their defaults.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">{</span><span class="si">% a</span><span class="s2">ssign amount = 10 %}</span>
+<span class="s2">{{ amount | money }}</span>
+<span class="s2">{{ amount | money_with_currency }}</span>
+<span class="s2">{{ amount | money_without_currency }}</span>
+<span class="s2">{{ amount | money_without_trailing_zeros }}"""</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">currency_code</span><span class="o">=</span><span class="s2">"CAD"</span><span class="p">,</span> <span class="n">locale</span><span class="o">=</span><span class="s2">"en_CA"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$10.00
+$10.00 CAD
+10.00
+$10
+</pre></div>
+</div>
+</section>
+</section>
+<section id="datetime">
+<h2>DateTime<a class="headerlink" href="#datetime" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="extra_filters.html#datetime-filter"><span class="std std-ref">datetime</span></a> filter returns the input <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a> formatted
+for the current locale.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">liquid.filters.</span></span><span class="sig-name descname"><span class="pre">DateTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'timezone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'UTC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datetime_format'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'medium'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_timezone_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'input_timezone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_input_timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'UTC'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A Liquid filter for formatting datetime objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timezone_var</strong> – The name of a render context variable that resolves to a timezone. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;timezone&quot;</span></code>.</p></li>
+<li><p><strong>default_timezone</strong> – A fallback timezone to use if <cite>timezone_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;UTC&quot;</span></code>.</p></li>
+<li><p><strong>locale_var</strong> – The name of a render context variable that resolves to the current locale.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code>.</p></li>
+<li><p><strong>default_locale</strong> – A fallback locale to use if <cite>locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+<li><p><strong>format_var</strong> – The name of a render context variable that resolves to the current datetime
+format string. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;datetime_format&quot;</span></code>.</p></li>
+<li><p><strong>default_format</strong> – A fallback datetime format that is used if <cite>format_var</cite> can not be resolved.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;medium&quot;</span></code>.</p></li>
+<li><p><strong>input_timezone_var</strong> – The name of a render context variable that resolves to a timezone for parsing
+datetimes entered as strings. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;input_timezone&quot;</span></code>.</p></li>
+<li><p><strong>default_input_timezone</strong> – A fallback timezone to use if <cite>input_timezone_var</cite> can not be resolved. Defaults
+to <code class="docutils literal notranslate"><span class="pre">&quot;UTC&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">datetime</span></code> defaults to looking for a timezone in a render context variable called
+<code class="docutils literal notranslate"><span class="pre">timezone</span></code>, a locale in a render context variable called <code class="docutils literal notranslate"><span class="pre">locale</span></code> and a datetime
+format in a render context variable called <code class="docutils literal notranslate"><span class="pre">datetime_format</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"{{ 'Apr 1, 2007, 3:30:00 PM' | datetime }}"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">,</span> <span class="n">datetime_format</span><span class="o">=</span><span class="s2">"long"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">"CET"</span><span class="p">,</span> <span class="n">datetime_format</span><span class="o">=</span><span class="s2">"short"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Apr 1, 2007, 3:30:00 PM
+1. April 2007 um 15:30:00 UTC
+01.04.07, 17:30
+</pre></div>
+</div>
+<p>To configure <code class="docutils literal notranslate"><span class="pre">datetime</span></code>, register a new instance of <code class="docutils literal notranslate"><span class="pre">liquid.filters.DateTime</span></code> with an
+instance of <a class="reference internal" href="api.html#liquid.Environment" title="liquid.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">liquid.Environment</span></code></a>, then render your templates from that.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DateTime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"datetime"</span><span class="p">]</span> <span class="o">=</span> <span class="n">DateTime</span><span class="p">(</span><span class="n">timezone_var</span><span class="o">=</span><span class="s2">"tz"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="decimal">
+<h2>Decimal<a class="headerlink" href="#decimal" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="extra_filters.html#decimal-filter"><span class="std std-ref">decimal</span></a> filter returns the input number formatted as a decimal for the
+current locale.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">liquid.filters.</span></span><span class="sig-name descname"><span class="pre">Number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimal_quantization_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'decimal_quantization'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_decimal_quantization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'decimal_format'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'input_locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_input_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A Liquid filter for formatting decimal values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decimal_quantization_var</strong> – The name of a render context variable that resolves to the decimal quantization
+to be used. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;decimal_quantization&quot;</span></code>.</p></li>
+<li><p><strong>default_decimal_quantization</strong> – A fallback decimal quantization if <cite>decimal_quantization_var</cite> can not be
+resolved. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>locale_var</strong> – The name of a render context variable that resolves to the current locale.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code>.</p></li>
+<li><p><strong>default_locale</strong> – A fallback locale to use if <cite>locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+<li><p><strong>format_var</strong> – The name of a render context variable that resolves to the current decimal format
+string. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;decimal_format&quot;</span></code>.</p></li>
+<li><p><strong>default_format</strong> – A fallback decimal format that is used if <cite>format_var</cite> can not be resolved.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>, which means the standard format for the current locale will
+be used.</p></li>
+<li><p><strong>input_locale_var</strong> – The name of a render context variable that resolves to a locale suitable for
+parsing input strings to decimals. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;input_locale&quot;</span></code>.</p></li>
+<li><p><strong>default_input_locale</strong> – A fallback locale to use if <cite>input_locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">decimal</span></code> defaults to looking for a locale in a render context variable called
+<code class="docutils literal notranslate"><span class="pre">locale</span></code>. It uses the locale’s standard format and falls back to <code class="docutils literal notranslate"><span class="pre">en_US</span></code> if that
+variable does not exist.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="c1"># Parse a number from a string in the default (en_US) input locale.</span>
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">{{ '10,000.23' | decimal }}</span>
+<span class="s2">{{ '10,000.23' | decimal: group_separator: false }}</span>
+<span class="s2">"""</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"en_GB"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>10.000,23
+10000,23
+
+10,000.23
+10000.23
+</pre></div>
+</div>
+<p>To configure <code class="docutils literal notranslate"><span class="pre">decimal</span></code>, register a new instance of <code class="docutils literal notranslate"><span class="pre">liquid.filters.Number</span></code> with an
+instance of <a class="reference internal" href="api.html#liquid.Environment" title="liquid.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">liquid.Environment</span></code></a>, then render your templates from that.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"decimal"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Number</span><span class="p">(</span><span class="n">default_locale</span><span class="o">=</span><span class="s2">"en_GB"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="unit">
+<h2>Unit<a class="headerlink" href="#unit" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="extra_filters.html#unit-filter"><span class="std std-ref">unit</span></a> filter returns he input number formatted with the given units
+according to the current locale.</p>
+<dl class="py class">
+<dt class="sig sig-object py">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">liquid.filters.</span></span><span class="sig-name descname"><span class="pre">Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unit_length'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'long'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unit_format'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_locale_var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'input_locale'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_input_locale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'en_US'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>A Liquid filter for formatting units of measurement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locale_var</strong> – The name of a render context variable that resolves to the current locale.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;locale&quot;</span></code>.</p></li>
+<li><p><strong>default_locale</strong> – A fallback locale to use if <cite>locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+<li><p><strong>length_var</strong> – The name of a render context variable that resolves to a unit format length.
+Should be one of <code class="docutils literal notranslate"><span class="pre">&quot;short&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;long&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;narrow&quot;</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;long&quot;</span></code>.</p></li>
+<li><p><strong>default_length</strong> – A fallback format length to use if <cite>length_var</cite> can not be resolved.</p></li>
+<li><p><strong>format_var</strong> – The name of a render context variable that resolves to a decimal format string.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;unit_format&quot;</span></code>.</p></li>
+<li><p><strong>default_format</strong> – A fallback decimal format to use if <cite>format_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning the locale’s standard decimal format is used.</p></li>
+<li><p><strong>input_locale_var</strong> – The name of a render context variable that resolves to a locale suitable for
+parsing input strings to decimals. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;input_locale&quot;</span></code>.</p></li>
+<li><p><strong>default_input_locale</strong> – A fallback locale to use if <cite>input_locale_var</cite> can not be resolved. Defaults to
+<code class="docutils literal notranslate"><span class="pre">&quot;en_US&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">unit</span></code> defaults to looking for a locale in a render context variable called <code class="docutils literal notranslate"><span class="pre">locale</span></code>,
+a length in a render context variable called <code class="docutils literal notranslate"><span class="pre">unit_length</span></code>, and a decimal format in a
+render context variable called <code class="docutils literal notranslate"><span class="pre">unit_format</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"""</span><span class="se">\</span>
+<span class="s2">{{ 12 | unit: 'length-meter', format: '#,##0.00' }}</span>
+<span class="s2">{{ 150 | unit: 'kilowatt', denominator_unit: 'hour' }}</span>
+<span class="s2">"""</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">unit_length</span><span class="o">=</span><span class="s2">"long"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">,</span> <span class="n">unit_length</span><span class="o">=</span><span class="s2">"long"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>12.00 meters
+150 kilowatts per hour
+
+12,00 Meter
+150 Kilowatt pro Stunde
+</pre></div>
+</div>
+<p>To configure <code class="docutils literal notranslate"><span class="pre">unit</span></code>, register a new instance of <code class="docutils literal notranslate"><span class="pre">liquid.filters.Unit</span></code> with an
+instance of <a class="reference internal" href="api.html#liquid.Environment" title="liquid.Environment"><code class="xref py py-class docutils literal notranslate"><span class="pre">liquid.Environment</span></code></a>, then render your templates from that.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s2">"unit"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Unit</span><span class="p">(</span><span class="n">locale_var</span><span class="o">=</span><span class="s2">"_locale"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="translations">
+<h2>Translations<a class="headerlink" href="#translations" title="Link to this heading">¶</a></h2>
+<p>Python Liquid includes <a class="reference internal" href="extra_filters.html#gettext-filter"><span class="std std-ref">gettext</span></a>, <a class="reference internal" href="extra_filters.html#ngettext-filter"><span class="std std-ref">ngettext</span></a>,
+<a class="reference internal" href="extra_filters.html#pgettext-filter"><span class="std std-ref">pgettext</span></a> and <a class="reference internal" href="extra_filters.html#npgettext-filter"><span class="std std-ref">npgettext</span></a> filters equivalent to the functions
+found in Python’s <a class="reference external" href="https://docs.python.org/3/library/gettext.html">gettext</a> module.</p>
+<p>Additionally there’s the <a class="reference internal" href="extra_filters.html#t-filter"><span class="std std-ref">t</span></a> filter which can behave like any of the
+*gettext filters depending on its arguments. Where the *gettext filters require
+positional arguments for <code class="docutils literal notranslate"><span class="pre">context</span></code>, <code class="docutils literal notranslate"><span class="pre">count</span></code> and <code class="docutils literal notranslate"><span class="pre">plural</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code> reserves optional
+<code class="docutils literal notranslate"><span class="pre">count</span></code> and <code class="docutils literal notranslate"><span class="pre">plural</span></code> keyword arguments.</p>
+<p>Liquid Babel also offers a <a class="reference internal" href="extra_tags.html#translate-tag"><span class="std std-ref">translate</span></a> tag. This is similar to the
+<code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">trans</span> <span class="pre">%}</span></code> tag found in <a class="reference external" href="https://jinja.palletsprojects.com/en/3.1.x/templates/#i18n">Jinja</a> or the <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">blocktranslate</span> <span class="pre">%}</span></code> tag found in
+<a class="reference external" href="https://docs.djangoproject.com/en/4.1/topics/i18n/translation/#blocktranslate-template-tag">Django</a>’s template language.</p>
+<section id="filters">
+<h3>Filters<a class="headerlink" href="#filters" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="extra_filters.html#gettext-filter"><span class="std std-ref">gettext</span></a>, <a class="reference internal" href="extra_filters.html#ngettext-filter"><span class="std std-ref">ngettext</span></a>, <a class="reference internal" href="extra_filters.html#pgettext-filter"><span class="std std-ref">pgettext</span></a> and
+<a class="reference internal" href="extra_filters.html#npgettext-filter"><span class="std std-ref">npgettext</span></a> filters all default to looking for <a class="reference internal" href="#message-catalogs"><span class="std std-ref">Message catalogs</span></a> in a
+render context variable called <code class="docutils literal notranslate"><span class="pre">translations</span></code>, falling back to an instance of
+<a class="reference external" href="https://docs.python.org/3/library/gettext.html#gettext.NullTranslations">NullTranslations</a> if <code class="docutils literal notranslate"><span class="pre">translations</span></code> can not be resolved.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+
+<span class="c1"># You'll need to load an appropriate Translations object.</span>
+<span class="c1"># `get_translations()` is defined elsewhere.</span>
+<span class="n">translations</span> <span class="o">=</span> <span class="n">get_translations</span><span class="p">(</span><span class="n">locale</span><span class="o">=</span><span class="s2">"de"</span><span class="p">)</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"{{ 'Hello, World!' | t }}"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">translations</span><span class="o">=</span><span class="n">translations</span><span class="p">))</span>  <span class="c1"># Hallo Welt!</span>
+</pre></div>
+</div>
+</section>
+<section id="message-catalogs">
+<span id="id1"></span><h3>Message catalogs<a class="headerlink" href="#message-catalogs" title="Link to this heading">¶</a></h3>
+<p>By default, all translation filters and tags will look for a render context variable
+called <code class="docutils literal notranslate"><span class="pre">translations</span></code>, which must be an object implementing the <code class="docutils literal notranslate"><span class="pre">Translations</span></code>
+protocol. It is the application developer’s responsibility to provide a <code class="docutils literal notranslate"><span class="pre">Translations</span></code>
+object, being the interface between Liquid and a message catalog.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Translations</span></code> protocol is defined as follows. It is simply a subset of the
+<a class="reference external" href="https://docs.python.org/3/library/gettext.html#gettext.NullTranslations">NullTranslations</a> class found in the <a class="reference external" href="https://docs.python.org/3/library/gettext.html">gettext</a> module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Translations</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gettext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ngettext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">singular</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plural</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pgettext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">npgettext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">singular</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plural</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>It could be a <a class="reference external" href="https://docs.python.org/3/library/gettext.html#gettext.GNUTranslations">GNUTranslations</a> instance, a <a class="reference external" href="https://babel.pocoo.org/en/latest/support.html#extended-translations-class">Babel Translations</a> instance, or any
+object implementing <code class="docutils literal notranslate"><span class="pre">gettext</span></code>, <code class="docutils literal notranslate"><span class="pre">ngettext</span></code>, <code class="docutils literal notranslate"><span class="pre">pgettext</span></code> and <code class="docutils literal notranslate"><span class="pre">npgettext</span></code> methods.</p>
+</section>
+<section id="message-variables">
+<h3>Message variables<a class="headerlink" href="#message-variables" title="Link to this heading">¶</a></h3>
+<p>Translatable message text can contain placeholders for variables. When using variables in
+strings to be translated by filters, variables are defined using percent-style formatting.
+Only the <code class="docutils literal notranslate"><span class="pre">s</span></code> modifier is supported and every variable must have a name. In this example
+<code class="docutils literal notranslate"><span class="pre">you</span></code> is the variable name.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Hello, %(you)s!"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">t</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<p>Filter keyword arguments are merged with the current render context before being used to
+replace variables in message text. All variables are converted to their string
+representation before substitution. Dotted property/attribute access is not supported
+inside message variables.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Hello, %(you)s!"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">t</span><span class="p">:</span><span class="w"> </span><span class="na">you</span><span class="p">:</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="extra_tags.html#translate-tag"><span class="std std-ref">translate</span></a> block tag recognizes simplified Liquid output statements as
+translation message variables. These variables must be valid identifiers without dotted
+or bracketed property/attribute access, and no filters.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">translate</span><span class="w"> </span><span class="p">%}</span>
+    Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtranslate</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Keyword arguments passed to the <a class="reference internal" href="extra_tags.html#translate-tag"><span class="std std-ref">translate</span></a> tag will be merged with the current
+render context before being used to replace variables in message text.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">translate</span><span class="w"> </span><span class="na">you</span><span class="p">:</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="na">count</span><span class="p">:</span><span class="w"> </span><span class="nx">users</span><span class="p">.</span><span class="nx">size</span><span class="w"> </span><span class="p">%}</span>
+    Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+<span class="p">{%</span><span class="w"> </span><span class="nt">plural</span><span class="w"> </span><span class="p">%}</span>
+    Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>s!
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtranslate</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="message-extraction">
+<h3>Message Extraction<a class="headerlink" href="#message-extraction" title="Link to this heading">¶</a></h3>
+<p>Use the <code class="xref py py-func docutils literal notranslate"><span class="pre">liquid.extract_from_template()</span></code> function to build a message <a class="reference external" href="https://babel.pocoo.org/en/latest/api/messages/catalog.html#catalogs">catalog</a> from
+one or more templates. You are then free to make use of Babel’s <a class="reference external" href="https://babel.pocoo.org/en/latest/api/messages/pofile.html">PO file</a> features, or
+convert the catalog to a more convenient internal representation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">babel.messages.pofile</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_po</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_from_templates</span><span class="p">,</span> <span class="n">parse</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">{% # Translators: some comment %}</span>
+<span class="s2">{{ 'Hello, World!' | t }}</span>
+<span class="s2">{</span><span class="si">% c</span><span class="s2">omment %}Translators: other comment{</span><span class="si">% e</span><span class="s2">ndcomment %}</span>
+<span class="s2">{% translate count: 2 %}</span>
+<span class="s2">    Hello, {{ you }}!</span>
+<span class="s2">{% plural %}</span>
+<span class="s2">    Hello, all!</span>
+<span class="s2">{</span><span class="si">% e</span><span class="s2">ndtranslate %}</span>
+<span class="s2">"""</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"something.liquid"</span><span class="p">)</span>
+<span class="n">catalog</span> <span class="o">=</span> <span class="n">extract_from_templates</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+<span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+<span class="n">write_po</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">catalog</span><span class="p">,</span> <span class="n">omit_header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#. Translators: some comment
+#: something.liquid:3
+msgid "Hello, World!"
+msgstr ""
+
+#. Translators: other comment
+#: something.liquid:5
+#, python-format
+msgid "Hello, %(you)s!"
+msgid_plural "Hello, all!"
+msgstr[0] ""
+msgstr[1] ""
+</pre></div>
+</div>
+</section>
+<section id="translator-comments">
+<h3>Translator Comments<a class="headerlink" href="#translator-comments" title="Link to this heading">¶</a></h3>
+<p>When a Liquid comment tag immediately precedes a translatable filter or tag, and the
+comment starts with a string in <code class="docutils literal notranslate"><span class="pre">comment_tags</span></code>, that comment will be included as a
+translator comment with the message. Use the <code class="docutils literal notranslate"><span class="pre">comment_tags</span></code> argument to
+<a class="reference internal" href="api.html#liquid.extract_liquid" title="liquid.extract_liquid"><code class="xref py py-func docutils literal notranslate"><span class="pre">liquid.extract_liquid()</span></code></a>, or <a class="reference internal" href="api.html#liquid.extract_from_templates" title="liquid.extract_from_templates"><code class="xref py py-func docutils literal notranslate"><span class="pre">liquid.extract_from_templates()</span></code></a> to change
+translator comment prefixes. The default is <code class="docutils literal notranslate"><span class="pre">[&quot;Translators:&quot;]</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">liquid</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_from_templates</span><span class="p">,</span> <span class="n">parse</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">{% # Translators: some comment %}</span>
+<span class="s2">{{ 'Hello, World!' | t }}</span>
+<span class="s2">{</span><span class="si">% c</span><span class="s2">omment %}Translators: other comment{</span><span class="si">% e</span><span class="s2">ndcomment %}</span>
+<span class="s2">{% translate count: 2 %}</span>
+<span class="s2">    Hello, {{ you }}!</span>
+<span class="s2">{% plural %}</span>
+<span class="s2">    Hello, all!</span>
+<span class="s2">{</span><span class="si">% e</span><span class="s2">ndtranslate %}</span>
+<span class="s2">"""</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"something.liquid"</span><span class="p">)</span>
+<span class="n">catalog</span> <span class="o">=</span> <span class="n">extract_from_templates</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">strip_comment_tags</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">message</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Hello, World!"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">auto_comments</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># some comment</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="tag_api.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Tag</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="drop_api.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Drop</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, James Prior
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/jg-rp/liquid" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Babel</a><ul>
+<li><a class="reference internal" href="#currency">Currency</a><ul>
+<li><a class="reference internal" href="#money">Money</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#datetime">DateTime</a></li>
+<li><a class="reference internal" href="#decimal">Decimal</a></li>
+<li><a class="reference internal" href="#unit">Unit</a></li>
+<li><a class="reference internal" href="#translations">Translations</a><ul>
+<li><a class="reference internal" href="#filters">Filters</a></li>
+<li><a class="reference internal" href="#message-catalogs">Message catalogs</a></li>
+<li><a class="reference internal" href="#message-variables">Message variables</a></li>
+<li><a class="reference internal" href="#message-extraction">Message Extraction</a></li>
+<li><a class="reference internal" href="#translator-comments">Translator Comments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=acc74ff5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

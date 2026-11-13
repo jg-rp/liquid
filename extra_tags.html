@@ -1,0 +1,603 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Standard filters" href="filters.html"><link rel="prev" title="Standard tags" href="tags.html">
+        <link rel="prefetch" href="_static/logo_light.png" as="image">
+        <link rel="prefetch" href="_static/logo_dark.png" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>Extra tags - liquid 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: black;
+  --color-brand-content: #024bb0;
+  --color-foreground-muted: #808080;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #ffffcc;
+  --color-sidebar-link-text: black;
+  --color-sidebar-link-text--top-level: black;
+  --color-link: #024bb0;
+  --color-link--hover: #024bb0;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #024bb0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">liquid 3.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/logo_light.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/logo_dark.png" alt="Dark Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configure.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loaders.html">Template loaders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Liquid data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Extended expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migration guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tag reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tags.html">Standard tags</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Extra tags</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Filter reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Standard filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_filters.html">Extra filters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loader_api.html">Loader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drop_api.html">Drop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babel.html">Babel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag_api.html">Tag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter_api.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/extra_tags.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="extra-tags">
+<h1>Extra tags<a class="headerlink" href="#extra-tags" title="Link to this heading">¶</a></h1>
+<p>The tags described on this page are <strong>not</strong> enabled by default. You can enable all
+<a class="reference internal" href="configure.html#extra-features"><span class="std std-ref">Extra features</span></a>, or import and register just the tags you need individually (see
+<a class="reference internal" href="configure.html#managing-tags-and-filters"><span class="std std-ref">Managing tags and filters</span></a>).</p>
+<p>If we were to register all extra tags manually, it would look like this.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">liquid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">liquid.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockTag</span><span class="p">,</span> <span class="n">CallTag</span><span class="p">,</span> <span class="n">ExtendsTag</span><span class="p">,</span> <span class="n">MacroTag</span><span class="p">,</span> <span class="n">TranslateTag</span><span class="p">,</span> <span class="n">WithTag</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">liquid</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"block"</span><span class="p">]</span> <span class="o">=</span> <span class="n">BlockTag</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"call"</span><span class="p">]</span> <span class="o">=</span> <span class="n">CallTag</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"extends"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExtendsTag</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"macro"</span><span class="p">]</span> <span class="o">=</span> <span class="n">MacroTag</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"translate"</span><span class="p">]</span> <span class="o">=</span> <span class="n">TranslateTag</span>
+<span class="n">env</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">"with"</span><span class="p">]</span> <span class="o">=</span> <span class="n">WithTag</span>
+</pre></div>
+</div>
+<section id="extends">
+<h2>extends<a class="headerlink" href="#extends" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% extends &lt;template name&gt; %}
+</pre></div>
+</div>
+<p>Together with the <code class="docutils literal notranslate"><span class="pre">`block</span></code> &lt;#block&gt;`__ tag, the <code class="docutils literal notranslate"><span class="pre">extends</span></code> tag allows you to inherit
+content and Liquid markup from parent templates and define blocks that can be overridden
+by child templates.</p>
+<p>In this example <code class="docutils literal notranslate"><span class="pre">page.html</span></code> inherits from <code class="docutils literal notranslate"><span class="pre">base.html</span></code> and overrides the <code class="docutils literal notranslate"><span class="pre">content</span></code>
+block. As <code class="docutils literal notranslate"><span class="pre">page.html</span></code> does not define a <code class="docutils literal notranslate"><span class="pre">footer</span></code> block, the footer from <code class="docutils literal notranslate"><span class="pre">base.html</span></code>
+is used.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">base.html</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;body&gt;
+  &lt;div id="content"&gt;<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="nx">required</span><span class="w"> </span><span class="p">%}{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>&lt;/div&gt;
+  &lt;div id="footer"&gt;<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">footer</span><span class="w"> </span><span class="p">%}</span>Default footer<span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>&lt;/div&gt;
+&lt;/body&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">page.html</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">extends</span><span class="w"> </span><span class="s1">'base.html'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="p">%}</span>Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!<span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<section id="block">
+<h3>block<a class="headerlink" href="#block" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% block &lt;name&gt; [required] %} &lt;Liquid markup&gt; {% endblock [&lt;name&gt;] %}
+</pre></div>
+</div>
+<p>Every <code class="docutils literal notranslate"><span class="pre">block</span></code> tag must have a name that is unique to the template. <code class="docutils literal notranslate"><span class="pre">endblock</span></code> tags can
+include a name too. If given, the <code class="docutils literal notranslate"><span class="pre">endblock</span></code> name must match the name given at the start
+of the block.</p>
+<p>If the optional <code class="docutils literal notranslate"><span class="pre">required</span></code> argument is given, the block must be overridden by a child
+template, otherwise a <code class="docutils literal notranslate"><span class="pre">RequiredBlockError</span></code> will be raised.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;body&gt;
+  &lt;div id="content"&gt;
+    <span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="p">%}</span>
+      <span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="p">%}</span>
+        &lt;h1&gt;Some Title&lt;/h1&gt;
+      <span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="nx">title</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="p">%}</span>
+  &lt;/div&gt;
+  &lt;div id="footer"&gt;
+    <span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">footer</span><span class="w"> </span><span class="p">%}</span>
+      Default footer
+    <span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="nx">footer</span><span class="w"> </span><span class="p">%}</span>
+  &lt;/div&gt;
+&lt;/body&gt;
+</pre></div>
+</div>
+<section id="super-blocks">
+<h4>Super blocks<a class="headerlink" href="#super-blocks" title="Link to this heading">¶</a></h4>
+<p>A <code class="docutils literal notranslate"><span class="pre">block</span></code> object is available inside every <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">block</span> <span class="pre">%}</span></code> tag. It has just one
+property, <code class="docutils literal notranslate"><span class="pre">super</span></code>. If a <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">block</span> <span class="pre">%}</span></code> is overriding a parent block,
+<code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">block.super</span> <span class="pre">}}</span></code> will render the parent’s implementation of that block.</p>
+<p>In this example we use <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">block.super</span> <span class="pre">}}</span></code> in the <code class="docutils literal notranslate"><span class="pre">footer</span></code> block to output the base
+template’s footer with a year appended to it.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">base</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;head&gt;
+  <span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">head</span><span class="w"> </span><span class="p">%}{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>
+&lt;head&gt;
+&lt;body&gt;
+  &lt;div id="content"&gt;<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="nx">required</span><span class="w"> </span><span class="p">%}{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>&lt;/div&gt;
+  &lt;div id="footer"&gt;<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">footer</span><span class="w"> </span><span class="p">%}</span>Default footer<span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>&lt;/div&gt;
+&lt;/body&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">child</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">extends</span><span class="w"> </span><span class="s2">"base"</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="p">%}</span>Hello, World!<span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">block</span><span class="w"> </span><span class="nx">footer</span><span class="w"> </span><span class="p">%}{{</span><span class="w"> </span><span class="nx">block</span><span class="p">.</span><span class="nx">super</span><span class="w"> </span><span class="p">}}</span> - 2025<span class="p">{%</span><span class="w"> </span><span class="nt">endblock</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">"content"</span><span class="p">&gt;</span>Hello, World!<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">"footer"</span><span class="p">&gt;</span>Default footer - 2025<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="macro-and-call">
+<h2>macro and call<a class="headerlink" href="#macro-and-call" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% macro &lt;name&gt; [[,] [ &lt;identifier&gt;[: &lt;expression&gt;]] ... ] %}
+  &lt;liquid markup&gt;
+{% endmacro %}
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% call &lt;name&gt; [[,] [ &lt;identifier&gt;[: &lt;expression&gt;]] ... ] %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">macro</span></code> tag defines a parameterized block that can later be called using the
+<code class="docutils literal notranslate"><span class="pre">call</span></code> tag.</p>
+<p>A macro is like defining a function. You define a parameter list, possibly with default
+values, that are expected to be provided by a <code class="docutils literal notranslate"><span class="pre">call</span></code> tag. A macro tag’s block has its
+own scope including its arguments and template global variables.</p>
+<p>Note that argument defaults are bound late. They are evaluated when a call expression is
+evaluated, not when the macro is defined.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">macro</span><span class="w"> </span><span class="s1">'price'</span><span class="w"> </span><span class="nx">product</span><span class="p">,</span><span class="w"> </span><span class="na">on_sale</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">%}</span>
+  &lt;div class="price-wrapper"&gt;
+  <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">on_sale</span><span class="w"> </span><span class="p">%}</span>
+    &lt;p&gt;Was <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">regular_price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="s1">'$'</span><span class="w"> </span><span class="p">}}</span>&lt;/p&gt;
+    &lt;p&gt;Now <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="s1">'$'</span><span class="w"> </span><span class="p">}}</span>&lt;/p&gt;
+  <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+    &lt;p&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="s1">'$'</span><span class="w"> </span><span class="p">}}</span>&lt;/p&gt;
+  <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+  &lt;/div&gt;
+<span class="p">{%</span><span class="w"> </span><span class="nt">endmacro</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">call</span><span class="w"> </span><span class="s1">'price'</span><span class="w"> </span><span class="nx">products</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="na">on_sale</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">call</span><span class="w"> </span><span class="s1">'price'</span><span class="w"> </span><span class="nx">products</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Excess arguments passed to <code class="docutils literal notranslate"><span class="pre">call</span></code> are collected into variables called <code class="docutils literal notranslate"><span class="pre">args</span></code> and
+<code class="docutils literal notranslate"><span class="pre">kwargs</span></code>, so variadic macros a possible too.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">macro</span><span class="w"> </span><span class="s1">'foo'</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">arg</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">arg</span><span class="w"> </span><span class="p">}}</span>
+  <span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+  <span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">arg</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">kwargs</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">arg</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="p">}}</span> =&gt; <span class="p">{{</span><span class="w"> </span><span class="nx">arg</span><span class="p">.</span><span class="mi">1</span><span class="w"> </span><span class="p">}}</span>
+  <span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endmacro</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">call</span><span class="w"> </span><span class="s1">'foo'</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">,</span><span class="w"> </span><span class="na">a</span><span class="p">:</span><span class="w"> </span><span class="mf">3.14</span><span class="p">,</span><span class="w"> </span><span class="na">b</span><span class="p">:</span><span class="w"> </span><span class="mf">2.71828</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="translate">
+<span id="translate-tag"></span><h2>translate<a class="headerlink" href="#translate" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% translate
+    [context: &lt;string&gt;]
+    [, count: &lt;number&gt;]
+    [, &lt;identifier&gt;: &lt;object&gt; ] ... %}
+  &lt;text,variable&gt; ...
+[ {% plural %} &lt;text,variable&gt; ... ]
+{% endtranslate %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">translate</span></code> tag defines text to be translated into another language. Said text can
+contain placeholders for variables. These placeholders look like Liquid output statements,
+but can’t use dotted or bracketed property syntax or filters.</p>
+<p>If a German translations object is found in the current render context, this example would
+output <code class="docutils literal notranslate"><span class="pre">Hallo</span> <span class="pre">Welt!</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">translate</span><span class="w"> </span><span class="p">%}</span>
+  Hello, World!
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtranslate</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>If a <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">plural</span> <span class="pre">%}</span></code> block follows the message text and the special <code class="docutils literal notranslate"><span class="pre">count</span></code> argument is
+considered plural, the <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">plural</span> <span class="pre">%}</span></code> block will be rendered instead. Again, with a
+German translations object, this example would render <code class="docutils literal notranslate"><span class="pre">Hallo</span> <span class="pre">Welten!</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">translate</span><span class="w"> </span><span class="na">count</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+  Hello, World!
+<span class="p">{%</span><span class="w"> </span><span class="nt">plural</span><span class="w"> </span><span class="p">%}</span>
+  Hello, Worlds!
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtranslate</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Keyword arguments are used to add (or shadow existing) variables.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">translate</span><span class="w"> </span><span class="na">you</span><span class="p">:</span><span class="w"> </span><span class="s1">'Sue'</span><span class="w"> </span><span class="p">%}</span>
+  Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtranslate</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="with">
+<span id="with-tag"></span><h2>with<a class="headerlink" href="#with" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% with &lt;identifier&gt;: &lt;expression&gt; [, &lt;identifier&gt;: &lt;expression&gt; ... ] %}
+  &lt;liquid markup&gt;
+{% endwith %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">with</span></code> tag extends the template namespace with block scoped variables. These
+variables have the potential to shadow global variables or variables assigned with
+<code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">assign</span> <span class="pre">%}</span></code> and <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">capture</span> <span class="pre">%}</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">with</span><span class="w"> </span><span class="na">p</span><span class="p">:</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endwith</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">with</span><span class="w"> </span><span class="na">a</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="na">b</span><span class="p">:</span><span class="w"> </span><span class="mf">3.4</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="p">}}</span> + <span class="p">{{</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="p">}}</span> = <span class="p">{{</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endwith</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="filters.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Standard filters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="tags.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Standard tags</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, James Prior
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/jg-rp/liquid" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Extra tags</a><ul>
+<li><a class="reference internal" href="#extends">extends</a><ul>
+<li><a class="reference internal" href="#block">block</a><ul>
+<li><a class="reference internal" href="#super-blocks">Super blocks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#macro-and-call">macro and call</a></li>
+<li><a class="reference internal" href="#translate">translate</a></li>
+<li><a class="reference internal" href="#with">with</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=acc74ff5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

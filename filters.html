@@ -1,0 +1,2228 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Extra filters" href="extra_filters.html"><link rel="prev" title="Extra tags" href="extra_tags.html">
+        <link rel="prefetch" href="_static/logo_light.png" as="image">
+        <link rel="prefetch" href="_static/logo_dark.png" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>Standard filters - liquid 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: black;
+  --color-brand-content: #024bb0;
+  --color-foreground-muted: #808080;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #ffffcc;
+  --color-sidebar-link-text: black;
+  --color-sidebar-link-text--top-level: black;
+  --color-link: #024bb0;
+  --color-link--hover: #024bb0;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #024bb0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">liquid 3.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/logo_light.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/logo_dark.png" alt="Dark Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configure.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loaders.html">Template loaders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Liquid data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Extended expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migration guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tag reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tags.html">Standard tags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_tags.html">Extra tags</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Filter reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Standard filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_filters.html">Extra filters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loader_api.html">Loader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drop_api.html">Drop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babel.html">Babel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag_api.html">Tag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter_api.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/filters.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="standard-filters">
+<h1>Standard filters<a class="headerlink" href="#standard-filters" title="Link to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page describes “standard” filters. Python Liquid also has some extra filters and
+extended expression syntax that are disabled by default. See <a class="reference internal" href="extra_filters.html"><span class="doc">Extra filters</span></a> and
+<a class="reference internal" href="expressions.html"><span class="doc">Extended expressions</span></a> for documentation on non-standard features.</p>
+</div>
+<section id="abs">
+<h2>abs<a class="headerlink" href="#abs" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | abs
+</pre></div>
+</div>
+<p>Return the absolute value of a number. Works on integers, floats and string
+representations of integers or floats.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">-42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">abs</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">7.5</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">abs</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s1">'42.0'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">abs</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>42
+7.5
+42.0
+</pre></div>
+</div>
+</div>
+<p>Given a value that can’t be cast to an integer or float, <code class="docutils literal notranslate"><span class="pre">0</span></code> will be returned.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'hello'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">abs</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">nosuchthing</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">abs</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0
+0
+</pre></div>
+</div>
+</div>
+</section>
+<section id="append">
+<h2>append<a class="headerlink" href="#append" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | append: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return the input value concatenated with the argument value.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'Hello, '</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="s1">'World!'</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Hello, World!
+</pre></div>
+</div>
+</div>
+<p>If either the input value or argument are not a string, they will be coerced to a string
+before concatenation.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">a_number</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">7.5</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="nx">a_number</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">nosuchthing</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="s1">'World!'</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>427.5
+World!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="at-least">
+<h2>at_least<a class="headerlink" href="#at-least" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | at_least: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the maximum of the filter’s input value and its argument. If either input value or
+argument are string representations of an integer or float, they will be cast to an
+integer or float prior to comparison.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mf">-5.1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_least</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_least</span><span class="p">:</span><span class="w"> </span><span class="s1">'5'</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>8
+8
+</pre></div>
+</div>
+</div>
+<p>If either input value or argument can not be cast to an integer or float, <code class="docutils literal notranslate"><span class="pre">0</span></code> will be
+used instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_least</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_least</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_least</span><span class="p">:</span><span class="w"> </span><span class="s2">"abc"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2
+0
+0
+</pre></div>
+</div>
+</div>
+</section>
+<section id="at-most">
+<h2>at_most<a class="headerlink" href="#at-most" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | at_most: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the minimum of the filter’s input value and its argument. If either input value or
+argument are string representations of an integer or float, they will be cast to an
+integer or float prior to comparison.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_most</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s1">'8'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_most</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>5
+5
+</pre></div>
+</div>
+</div>
+<p>If either input value or argument can not be cast to an integer or float, <code class="docutils literal notranslate"><span class="pre">0</span></code> will be
+used instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_most</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_most</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">-1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">at_most</span><span class="p">:</span><span class="w"> </span><span class="s2">"abc"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0
+-2
+-1
+</pre></div>
+</div>
+</div>
+</section>
+<section id="capitalize">
+<h2>capitalize<a class="headerlink" href="#capitalize" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | capitalize
+</pre></div>
+</div>
+<p>Return the input string with the first character in upper case and the rest lowercase.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'heLLO, World!'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Hello, world!
+</pre></div>
+</div>
+</div>
+<p>If the input value is not a string, it will be converted to a string.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>42
+</pre></div>
+</div>
+</div>
+</section>
+<section id="ceil">
+<h2>ceil<a class="headerlink" href="#ceil" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | ceil
+</pre></div>
+</div>
+<p>Round the input value up to the nearest whole number. The input value will be converted to
+a number if it is not an integer or float.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mf">5.1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">5.0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s1">'5.4'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>6
+5
+5
+5
+</pre></div>
+</div>
+</div>
+<p>If the input is undefined or can’t be converted to a number, <code class="docutils literal notranslate"><span class="pre">0</span></code> is returned.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'hello'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">nosuchthing</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">ceil</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0
+0
+</pre></div>
+</div>
+</div>
+</section>
+<section id="compact">
+<h2>compact<a class="headerlink" href="#compact" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | compact[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Remove <code class="docutils literal notranslate"><span class="pre">nil</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code> (or <code class="docutils literal notranslate"><span class="pre">None</span></code> in Python) values from an array-like object. If
+given, the argument should be the name of a property that exists on each item (hash, dict
+etc.) in the array-like sequence.</p>
+<p>For example, if <code class="docutils literal notranslate"><span class="pre">pages</span></code> is an array of objects, some of which have a <code class="docutils literal notranslate"><span class="pre">category</span></code>
+property:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"pages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"business"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"celebrities"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lifestyle"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sports"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"technology"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">compact</span></code>, iterating those categories will include <code class="docutils literal notranslate"><span class="pre">nil</span></code> / <code class="docutils literal notranslate"><span class="pre">null</span></code> values.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">map</span><span class="p">:</span><span class="w"> </span><span class="s2">"category"</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">categories</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%-</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id14" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- business
+- celebrities
+-
+- lifestyle
+- sports
+-
+- technology
+</pre></div>
+</div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">compact</span></code>, we can remove those missing categories before the loop.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">map</span><span class="p">:</span><span class="w"> </span><span class="s2">"category"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">compact</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">categories</span><span class="w"> </span><span class="p">%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- business
+- celebrities
+- lifestyle
+- sports
+- technology
+</pre></div>
+</div>
+</div>
+<p>Using the optional argument to <code class="docutils literal notranslate"><span class="pre">compact</span></code>, we could avoid using <code class="docutils literal notranslate"><span class="pre">map</span></code> and create an
+array of pages with a <code class="docutils literal notranslate"><span class="pre">category</span></code> property, rather than an array of categories.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">pages_with_category</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">compact</span><span class="p">:</span><span class="w"> </span><span class="s2">"category"</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">pages_with_category</span><span class="w"> </span><span class="p">%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">category</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- business
+- celebrities
+- lifestyle
+- sports
+- technology
+</pre></div>
+</div>
+</div>
+</section>
+<section id="concat">
+<h2>concat<a class="headerlink" href="#concat" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | concat: &lt;array&gt;
+</pre></div>
+</div>
+<p>Create a new array by joining one array-like object with another.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">fruits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"apples, oranges, peaches"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">vegetables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"carrots, turnips, potatoes"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">everything</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fruits</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">concat</span><span class="p">:</span><span class="w"> </span><span class="nx">vegetables</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">everything</span><span class="w"> </span><span class="p">%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id17" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- apples
+- oranges
+- peaches
+- carrots
+- turnips
+- potatoes
+</pre></div>
+</div>
+</div>
+<p>If the input value is not array-like, it will be converted to an array. No conversion is
+attempted for the argument value.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">fruits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"apples, oranges, peaches"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">things</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">concat</span><span class="p">:</span><span class="w"> </span><span class="nx">fruits</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">things</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id18">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id18" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- h
+- e
+- l
+- l
+- o
+- apples
+- oranges
+- peaches
+</pre></div>
+</div>
+</div>
+<p>If the input is a nested array, it will be flattened before concatenation. The argument is
+not flattened.</p>
+<div class="literal-block-wrapper docutils container" id="id19">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id19" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">"a"</span><span class="p">,</span><span class="w"> </span><span class="s2">"x"</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">"b"</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">"y"</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">"z"</span><span class="p">]]]</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"b"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"c"</span><span class="p">,</span><span class="w"> </span><span class="s2">"d"</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">concat</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s1">'#'</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id20">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id20" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>a#x#b#y#z#c#d
+</pre></div>
+</div>
+</div>
+</section>
+<section id="date">
+<h2>date<a class="headerlink" href="#date" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;datetime&gt; | date: &lt;string&gt;
+</pre></div>
+</div>
+<p>Format a date and/or time according the the given format string. The input can be a
+string, in which case the string will be parsed as a date/time before formatting.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"March 14, 2016"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">date</span><span class="p">:</span><span class="w"> </span><span class="s2">"%b %d, %y"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id21">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id21" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Mar 14, 16
+</pre></div>
+</div>
+</div>
+<p>The special <code class="docutils literal notranslate"><span class="pre">'now'</span></code> or <code class="docutils literal notranslate"><span class="pre">'today'</span></code> input values can be used to get the current
+timestamp. <code class="docutils literal notranslate"><span class="pre">'today'</span></code> is an alias for <code class="docutils literal notranslate"><span class="pre">'now'</span></code>. Both include time information.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"now"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">date</span><span class="p">:</span><span class="w"> </span><span class="s2">"%Y-%m-%d %H:%M"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id22">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id22" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2021-12-02 10:17
+</pre></div>
+</div>
+</div>
+<p>If the input is undefined, an empty string is returned.</p>
+</section>
+<section id="default">
+<h2>default<a class="headerlink" href="#default" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;expression&gt; | default[: &lt;object&gt;[, allow_false:&lt;bool&gt;]]
+</pre></div>
+</div>
+<p>Return a default value if the input is undefined, <code class="docutils literal notranslate"><span class="pre">nil</span></code>, <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">false</span></code> or empty,
+or return the input unchanged otherwise.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="nx">product_price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="mf">2.99</span><span class="w"> </span><span class="p">}}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">product_price</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">product_price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="mf">2.99</span><span class="w"> </span><span class="p">}}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">product_price</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.99</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">product_price</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="mf">2.99</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id23">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id23" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2.99
+2.99
+4.99
+</pre></div>
+</div>
+</div>
+<p>If the optional <code class="docutils literal notranslate"><span class="pre">allow_false</span></code> argument is <code class="docutils literal notranslate"><span class="pre">true</span></code>, an input of <code class="docutils literal notranslate"><span class="pre">false</span></code> will not
+return the default. <code class="docutils literal notranslate"><span class="pre">allow_false</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">product_reduced</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">product_reduced</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="na">allow_false</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id24">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id24" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>false
+</pre></div>
+</div>
+</div>
+<p>If no argument is given, the default value will be an empty string.</p>
+<p>Empty strings, arrays and objects all cause the default value to be returned. <code class="docutils literal notranslate"><span class="pre">0</span></code> does
+not.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">default</span><span class="p">:</span><span class="w"> </span><span class="mi">99</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id25">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id25" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hello
+0
+</pre></div>
+</div>
+</div>
+</section>
+<section id="divided-by">
+<h2>divided_by<a class="headerlink" href="#divided-by" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | divided_by: &lt;number&gt;
+</pre></div>
+</div>
+<p>Divide a number by another number. The result is rounded down to the nearest integer if
+the divisor is an integer.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id26">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id26" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>4
+1
+</pre></div>
+</div>
+</div>
+<p>If you divide by a float, the result will be a float.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="mf">7.0</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id27">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id27" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2
+2.857142857142857
+</pre></div>
+</div>
+</div>
+<p>If either the input or argument are not an integer or float, Liquid will try to convert
+them to an integer or float. If the input can’t be converted, <code class="docutils literal notranslate"><span class="pre">0</span></code> will be used instead.
+If the argument can’t be converted, an exception is raised.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"20"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="s2">"7"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">divided_by</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id28">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id28" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2
+0
+</pre></div>
+</div>
+</div>
+</section>
+<section id="downcase">
+<h2>downcase<a class="headerlink" href="#downcase" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | downcase
+</pre></div>
+</div>
+<p>Return the input string with all characters in lowercase.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'Hello, World!'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">downcase</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id29">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id29" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hello, world!
+</pre></div>
+</div>
+</div>
+<p>If the input is not a string, Liquid will convert it to a string before forcing characters
+to lowercase.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">downcase</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id30">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id30" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>5
+</pre></div>
+</div>
+</div>
+<p>If the input is undefined, an empty string is returned.</p>
+</section>
+<section id="escape">
+<span id="escape-filter"></span><h2>escape<a class="headerlink" href="#escape" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | escape
+</pre></div>
+</div>
+<p>Escape special characters in a string for safe use in HTML.</p>
+<p>This filter replaces the characters <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">'</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;</span></code> with their
+corresponding HTML-safe sequences:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&amp;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;amp;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;lt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&gt;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;#39;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;#34;</span></code></p></li>
+</ul>
+<p>This helps prevent HTML injection when rendering untrusted content in HTML element bodies
+or attributes.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This filter does <strong>not</strong> make strings safe for use in JavaScript, including in
+<code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> blocks, inline event handler attributes (e.g. <code class="docutils literal notranslate"><span class="pre">onerror</span></code>), or other
+JavaScript contexts. For those cases, use the <a class="reference internal" href="#escapejs">escapejs</a> filter instead.</p>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Have you read 'James &amp; the Giant Peach'?"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">escape</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id31">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id31" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Have you read &amp;#39;James &amp;amp; the Giant Peach&amp;#39;?
+</pre></div>
+</div>
+</div>
+</section>
+<section id="escapejs">
+<span id="escapejs-filter"></span><h2>escapejs<a class="headerlink" href="#escapejs" title="Link to this heading">¶</a></h2>
+<p><strong>New in version 2.1.0</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | escapejs
+</pre></div>
+</div>
+<p>Escape characters for safe use in JavaScript string literals.</p>
+<p>This filter escapes a string for embedding inside <strong>JavaScript string literals</strong>, using
+either single or double quotes (e.g. <code class="docutils literal notranslate"><span class="pre">'...'</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;...&quot;</span></code>). It replaces control
+characters and potentially dangerous symbols with their corresponding Unicode escape
+sequences.</p>
+<p>Escaped characters include:</p>
+<ul class="simple">
+<li><p>ASCII control characters (U+0000 to U+001F)</p></li>
+<li><p>Characters like quotes, angle brackets, ampersands, equals signs - Line/paragraph
+separators (U+2028, U+2029)</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This filter does <strong>not</strong> make strings safe for use in JavaScript template literals
+(backtick strings), or in raw JavaScript expressions. Use it only when placing data
+inside quoted JS strings within inline <code class="docutils literal notranslate"><span class="pre">&lt;script&gt;</span></code> blocks or event handlers.</p>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">some_string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"&lt;script&gt;alert('x')&lt;/script&gt;"</span><span class="w"> </span><span class="p">%}</span>
+&lt;img src="" onerror="<span class="p">{{</span><span class="w"> </span><span class="nx">some_string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">escapejs</span><span class="w"> </span><span class="p">}}</span>" /&gt;
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id32">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id32" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;img src="" onerror="\u003Cscript\u003Ealert(\u0027x\u0027)\u003C/script\u003E" /&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="escape-once">
+<h2>escape_once<a class="headerlink" href="#escape-once" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | escape_once
+</pre></div>
+</div>
+<p>Escape a string for HTML, but avoid double-escaping existing entities.</p>
+<p>Converts characters like <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> to their HTML-safe sequences, but leaves
+existing HTML entities untouched (e.g., <code class="docutils literal notranslate"><span class="pre">&amp;amp;</span></code> stays <code class="docutils literal notranslate"><span class="pre">&amp;amp;</span></code>).</p>
+<p>This is useful when escaping content that may already be partially escaped.</p>
+<p>See the <a class="reference internal" href="#escape">escape</a> filter for details and limitations.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Have you read 'James &amp;amp; the Giant Peach'?"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">escape_once</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id33">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id33" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Have you read &amp;#39;James &amp;amp; the Giant Peach&amp;#39;?
+</pre></div>
+</div>
+</div>
+</section>
+<section id="find">
+<h2>find<a class="headerlink" href="#find" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | find: &lt;string&gt;[, &lt;object&gt;]
+</pre></div>
+</div>
+<p>Return the first item in the input array that contains a property, given as the first
+argument, equal to the value given as the second argument. If no such item exists,
+<code class="docutils literal notranslate"><span class="pre">null</span></code> is returned.</p>
+<p>In this example we select the first page in the “Programming” category.</p>
+<div class="literal-block-wrapper docutils container" id="id34">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id34" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"pages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Introduction to Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"recipes"</span><span class="p">,</span><span class="w"> </span><span class="s2">"beginner"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cooking techniques"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Top 10 Travel Destinations in Europe"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Travel"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Europe"</span><span class="p">,</span><span class="w"> </span><span class="s2">"destinations"</span><span class="p">,</span><span class="w"> </span><span class="s2">"travel tips"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Mastering JavaScript"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Programming"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"JavaScript"</span><span class="p">,</span><span class="w"> </span><span class="s2">"web development"</span><span class="p">,</span><span class="w"> </span><span class="s2">"coding"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">find</span><span class="p">:</span><span class="w"> </span><span class="s1">'category'</span><span class="p">,</span><span class="w"> </span><span class="s1">'Programming'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id35">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id35" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Mastering JavaScript
+</pre></div>
+</div>
+</div>
+</section>
+<section id="find-index">
+<h2>find_index<a class="headerlink" href="#find-index" title="Link to this heading">¶</a></h2>
+<p>Return the index of the first item in the input array that contains a property, given as
+the first argument, equal to the value given as the second argument. If no such item
+exists, <code class="docutils literal notranslate"><span class="pre">null</span></code> is returned.</p>
+<p>In this example we find the index for the first page in the “Programming” category.</p>
+<div class="literal-block-wrapper docutils container" id="id36">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id36" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"pages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Introduction to Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"recipes"</span><span class="p">,</span><span class="w"> </span><span class="s2">"beginner"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cooking techniques"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Top 10 Travel Destinations in Europe"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Travel"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Europe"</span><span class="p">,</span><span class="w"> </span><span class="s2">"destinations"</span><span class="p">,</span><span class="w"> </span><span class="s2">"travel tips"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Mastering JavaScript"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Programming"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"JavaScript"</span><span class="p">,</span><span class="w"> </span><span class="s2">"web development"</span><span class="p">,</span><span class="w"> </span><span class="s2">"coding"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">find_index</span><span class="p">:</span><span class="w"> </span><span class="s2">"category"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Programming"</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">pages</span><span class="p">[</span><span class="nx">index</span><span class="p">][</span><span class="s2">"title"</span><span class="p">]</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id37">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id37" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Mastering JavaScript
+</pre></div>
+</div>
+</div>
+</section>
+<section id="first">
+<h2>first<a class="headerlink" href="#first" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;sequence&gt; | first
+</pre></div>
+</div>
+<p>Return the first item of the input sequence. The input could be array-like or a mapping,
+but not a string.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">" "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">first</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id38">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id38" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Ground
+</pre></div>
+</div>
+</div>
+<p>If the input sequence is undefined, empty or not a sequence, <code class="docutils literal notranslate"><span class="pre">nil</span></code> is returned.</p>
+</section>
+<section id="floor">
+<h2>floor<a class="headerlink" href="#floor" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | floor
+</pre></div>
+</div>
+<p>Return the input down to the nearest whole number. Liquid tries to convert the input to a
+number before the filter is applied.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mf">1.2</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">floor</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">floor</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">floor</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">-5.4</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">floor</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"3.5"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">floor</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id39">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id39" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1
+2
+183
+-6
+3
+</pre></div>
+</div>
+</div>
+<p>If the input can’t be converted to a number, <code class="docutils literal notranslate"><span class="pre">0</span></code> is returned.</p>
+</section>
+<section id="has">
+<h2>has<a class="headerlink" href="#has" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | has: &lt;string&gt;[, &lt;object&gt;]
+</pre></div>
+</div>
+<p>Return <code class="docutils literal notranslate"><span class="pre">true</span></code> if the input array contains an object with a property identified by the
+first argument that is equal to the object given as the second argument. <code class="docutils literal notranslate"><span class="pre">false</span></code> is
+returned if none of the items in the input array contain such a property/value.</p>
+<p>In this example we test to see if any pages are in the “Programming” category.</p>
+<div class="literal-block-wrapper docutils container" id="id40">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id40" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"pages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Introduction to Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cooking"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"recipes"</span><span class="p">,</span><span class="w"> </span><span class="s2">"beginner"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cooking techniques"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Top 10 Travel Destinations in Europe"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Travel"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Europe"</span><span class="p">,</span><span class="w"> </span><span class="s2">"destinations"</span><span class="p">,</span><span class="w"> </span><span class="s2">"travel tips"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Mastering JavaScript"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Programming"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"JavaScript"</span><span class="p">,</span><span class="w"> </span><span class="s2">"web development"</span><span class="p">,</span><span class="w"> </span><span class="s2">"coding"</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">has_programming_page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">has</span><span class="p">:</span><span class="w"> </span><span class="s1">'category'</span><span class="p">,</span><span class="w"> </span><span class="s1">'Programming'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">has_programming_page</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id41">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id41" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>true
+</pre></div>
+</div>
+</div>
+</section>
+<section id="join">
+<h2>join<a class="headerlink" href="#join" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | join[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return the items in the input array as a single string, separated by the argument string.
+If the input is not an array, Liquid will convert it to one. If input array items are not
+strings, they will be converted to strings before joining.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">beatles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"John, Paul, George, Ringo"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">beatles</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">" and "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id42">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id42" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>John and Paul and George and Ringo
+</pre></div>
+</div>
+</div>
+<p>If an argument string is not given, it defaults to a single space.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">beatles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"John, Paul, George, Ringo"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">beatles</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id43">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id43" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>John Paul George Ringo
+</pre></div>
+</div>
+</div>
+</section>
+<section id="last">
+<h2>last<a class="headerlink" href="#last" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | last
+</pre></div>
+</div>
+<p>Return the last item in the array-like input.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">" "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">last</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id44">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id44" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Tom.
+</pre></div>
+</div>
+</div>
+<p>If the input is undefined, empty, string or a number, <code class="docutils literal notranslate"><span class="pre">nil</span></code> will be returned.</p>
+</section>
+<section id="lstrip">
+<h2>lstrip<a class="headerlink" href="#lstrip" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | lstrip
+</pre></div>
+</div>
+<p>Return the input string with all leading whitespace removed. If the input is not a string,
+it will be converted to a string before stripping whitespace.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"          So much room for activities          "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">lstrip</span><span class="w"> </span><span class="p">}}</span>!
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id45">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id45" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>So much room for activities          !
+</pre></div>
+</div>
+</div>
+</section>
+<section id="map">
+<h2>map<a class="headerlink" href="#map" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | map: &lt;string&gt;
+</pre></div>
+</div>
+<p>Extract properties from an array of objects into a new array.</p>
+<p>For example, if <code class="docutils literal notranslate"><span class="pre">pages</span></code> is an array of objects with a <code class="docutils literal notranslate"><span class="pre">category</span></code> property:</p>
+<div class="literal-block-wrapper docutils container" id="id46">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id46" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"pages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"business"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"celebrities"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lifestyle"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sports"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="s2">"technology"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pages</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">map</span><span class="p">:</span><span class="w"> </span><span class="s2">"category"</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">categories</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">category</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%-</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id47">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id47" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- business
+- celebrities
+- lifestyle
+- sports
+- technology
+</pre></div>
+</div>
+</div>
+</section>
+<section id="minus">
+<h2>minus<a class="headerlink" href="#minus" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | minus: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the result of subtracting one number from another. If either the input or argument
+are not a number, Liquid will try to convert them to a number. If that conversion fails,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> is used instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">minus</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"16"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">minus</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">minus</span><span class="p">:</span><span class="w"> </span><span class="mf">12.2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"hello"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">minus</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id48">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id48" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2
+12
+171.157
+-10
+</pre></div>
+</div>
+</div>
+</section>
+<section id="modulo">
+<h2>modulo<a class="headerlink" href="#modulo" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | modulo: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the remainder from the division of the input by the argument.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">modulo</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"24"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">modulo</span><span class="p">:</span><span class="w"> </span><span class="s2">"7"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">modulo</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id49">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id49" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1
+3
+3.357
+</pre></div>
+</div>
+</div>
+<p>If either the input or argument are not an integer or float, Liquid will try to convert
+them to an integer or float. If the input can’t be converted, <code class="docutils literal notranslate"><span class="pre">0</span></code> will be used instead.
+If the argument can’t be converted, an exception is raised.</p>
+</section>
+<section id="newline-to-br">
+<h2>newline_to_br<a class="headerlink" href="#newline-to-br" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | newline_to_br
+</pre></div>
+</div>
+<p>Return the input string with <code class="docutils literal notranslate"><span class="pre">\n</span></code> and <code class="docutils literal notranslate"><span class="pre">\r\n</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">&lt;br</span> <span class="pre">/&gt;\n</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">capture</span><span class="w"> </span><span class="nx">string_with_newlines</span><span class="w"> </span><span class="p">%}</span>
+Hello
+there
+<span class="p">{%</span><span class="w"> </span><span class="nt">endcapture</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">string_with_newlines</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">newline_to_br</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id50">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id50" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;br /&gt;
+Hello&lt;br /&gt;
+there&lt;br /&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="plus">
+<h2>plus<a class="headerlink" href="#plus" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | plus: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the result of adding one number to another. If either the input or argument are
+not a number, Liquid will try to convert them to a number. If that conversion fails,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> is used instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"16"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="s2">"4"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id51">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id51" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>6
+20
+195.357
+</pre></div>
+</div>
+</div>
+</section>
+<section id="prepend">
+<h2>prepend<a class="headerlink" href="#prepend" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | prepend: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return the argument concatenated with the filter input.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"apples, oranges, and bananas"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="s2">"Some fruit: "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id52">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id52" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Some fruit: apples, oranges, and bananas
+</pre></div>
+</div>
+</div>
+<p>If either the input value or argument are not a string, they will be coerced to a string
+before concatenation.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">a_number</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">7.5</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="nx">a_number</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">nosuchthing</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">prepend</span><span class="p">:</span><span class="w"> </span><span class="s1">'World!'</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id53">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id53" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>7.542
+World!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="reject">
+<h2>reject<a class="headerlink" href="#reject" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | reject: &lt;string&gt;[, &lt;object&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input array including only those objects that have a property, named
+with the first argument, <strong>that is not equal to</strong> a value, given as the second argument.
+If a second argument is not given, only elements with the named property that are falsy
+will be included.</p>
+<div class="literal-block-wrapper docutils container" id="id54">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id54" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vacuum"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"house"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Spatula"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Television"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lounge"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Garlic press"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>All products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">kitchen_products</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">reject</span><span class="p">:</span><span class="w"> </span><span class="s2">"type"</span><span class="p">,</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="w"> </span><span class="p">-%}</span>
+
+Non kitchen products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">kitchen_products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">unavailable_products</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">reject</span><span class="p">:</span><span class="w"> </span><span class="s2">"available"</span><span class="w"> </span><span class="p">-%}</span>
+
+Unavailable products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">unavailable_products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id55">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id55" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>All products:
+- Vacuum
+- Spatula
+- Television
+- Garlic press
+Non kitchen products:
+- Vacuum
+- Television
+Unavailable products:
+- Spatula
+</pre></div>
+</div>
+</div>
+</section>
+<section id="remove">
+<h2>remove<a class="headerlink" href="#remove" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | remove: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return the input with all occurrences of the argument string removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"I strained to see the train through the rain"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">remove</span><span class="p">:</span><span class="w"> </span><span class="s2">"rain"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id56">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id56" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>I sted to see the t through the
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before substring removal.</p>
+</section>
+<section id="remove-first">
+<h2>remove_first<a class="headerlink" href="#remove-first" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | remove_first: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return a copy of the input string with the first occurrence of the argument string
+removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"I strained to see the train through the rain"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">remove_first</span><span class="p">:</span><span class="w"> </span><span class="s2">"rain"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id57">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id57" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>I sted to see the train through the rain
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before substring removal.</p>
+</section>
+<section id="remove-last">
+<h2>remove_last<a class="headerlink" href="#remove-last" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | remove_last: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return a copy of the input string with the last occurrence of the argument string removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"I strained to see the train through the rain"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">remove_last</span><span class="p">:</span><span class="w"> </span><span class="s2">"rain"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id58">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id58" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>I strained to see the train through the
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before substring removal.</p>
+</section>
+<section id="replace">
+<h2>replace<a class="headerlink" href="#replace" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | replace: &lt;string&gt;[, &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return the input with all occurrences of the first argument replaced with the second
+argument. If the second argument is omitted, it will default to an empty string, making
+<code class="docutils literal notranslate"><span class="pre">replace</span></code> behave like <code class="docutils literal notranslate"><span class="pre">remove</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Take my protein pills and put my helmet on"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">replace</span><span class="p">:</span><span class="w"> </span><span class="s2">"my"</span><span class="p">,</span><span class="w"> </span><span class="s2">"your"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id59">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id59" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Take your protein pills and put your helmet on
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before replacement.</p>
+</section>
+<section id="replace-first">
+<h2>replace_first<a class="headerlink" href="#replace-first" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | replace_first: &lt;string&gt;[, &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input string with the first occurrence of the first argument replaced
+with the second argument. If the second argument is omitted, it will default to an empty
+string, making <code class="docutils literal notranslate"><span class="pre">replace_first</span></code> behave like <code class="docutils literal notranslate"><span class="pre">remove_first</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Take my protein pills and put my helmet on"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">replace_first</span><span class="p">:</span><span class="w"> </span><span class="s2">"my"</span><span class="p">,</span><span class="w"> </span><span class="s2">"your"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id60">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id60" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Take your protein pills and put my helmet on
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before replacement.</p>
+</section>
+<section id="replace-last">
+<h2>replace_last<a class="headerlink" href="#replace-last" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | replace_last: &lt;string&gt;, &lt;string&gt;
+</pre></div>
+</div>
+<p>Return a copy of the input string with the last occurrence of the first argument replaced
+with the second argument.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Take my protein pills and put my helmet on"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">replace_first</span><span class="p">:</span><span class="w"> </span><span class="s2">"my"</span><span class="p">,</span><span class="w"> </span><span class="s2">"your"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id61">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id61" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Take my protein pills and put your helmet on
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or argument are not a string, they will be coerced to a string
+before replacement.</p>
+</section>
+<section id="reverse">
+<h2>reverse<a class="headerlink" href="#reverse" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | reverse
+</pre></div>
+</div>
+<p>Return a copy of the input array with the items in reverse order. If the filter input is a
+string, <code class="docutils literal notranslate"><span class="pre">reverse</span></code> will return the string unchanged.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">my_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"apples, oranges, peaches, plums"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">my_array</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">reverse</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id62">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id62" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>plums, peaches, oranges, apples
+</pre></div>
+</div>
+</div>
+</section>
+<section id="round">
+<h2>round<a class="headerlink" href="#round" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | round[: &lt;number&gt;]
+</pre></div>
+</div>
+<p>Return the input number rounded to the given number of decimal places. The number of
+digits defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mf">1.2</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">round</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">2.7</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">round</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">round</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id63">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id63" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>1
+3
+183.36
+</pre></div>
+</div>
+</div>
+<p>If either the filter input or its optional argument are not an integer or float, they will
+be converted to an integer or float before rounding.</p>
+</section>
+<section id="rstrip">
+<h2>rstrip<a class="headerlink" href="#rstrip" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | rstrip
+</pre></div>
+</div>
+<p>Return the input string with all trailing whitespace removed. If the input is not a
+string, it will be converted to a string before stripping whitespace.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"          So much room for activities          "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">rstrip</span><span class="w"> </span><span class="p">}}</span>!
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id64">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id64" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>          So much room for activities!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="safe">
+<h2>safe<a class="headerlink" href="#safe" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | safe
+</pre></div>
+</div>
+<p>Return the input string marked as safe to use in an HTML or XML document. If the filter
+input is not a string, it will be converted to an HTML-safe string.</p>
+<p>With auto-escape enabled and the following global variables:</p>
+<div class="literal-block-wrapper docutils container" id="id65">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id65" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sally"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"greeting"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;/p&gt;&lt;script&gt;alert('XSS!');&lt;/script&gt;"</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id66">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id66" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;p&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="p">}}</span>, <span class="p">{{</span><span class="w"> </span><span class="nx">username</span><span class="w"> </span><span class="p">}}</span>&lt;/p&gt;
+&lt;p&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">safe</span><span class="w"> </span><span class="p">}}</span>, <span class="p">{{</span><span class="w"> </span><span class="nx">username</span><span class="w"> </span><span class="p">}}</span>&lt;/p&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id67">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id67" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;p&gt;&amp;lt;/p&amp;gt;&amp;lt;script&amp;gt;alert(&amp;#34;XSS!&amp;#34;);&amp;lt;/script&amp;gt;, Sally&lt;/p&gt;
+&lt;p&gt;&lt;/p&gt;&lt;script&gt;alert('XSS!');&lt;/script&gt;, Sally&lt;/p&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="size">
+<h2>size<a class="headerlink" href="#size" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;object&gt; | size
+</pre></div>
+</div>
+<p>Return the size of the input object. Works on strings, arrays and hashes.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">size</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"apples, oranges, peaches, plums"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">size</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id68">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id68" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>28
+4
+</pre></div>
+</div>
+</div>
+</section>
+<section id="slice">
+<h2>slice<a class="headerlink" href="#slice" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;sequence&gt; | slice: &lt;int&gt;[, &lt;int&gt;]
+</pre></div>
+</div>
+<p>Return a substring or subsequence of the input string or array. The first argument is the
+zero-based start index. The second, optional argument is the length of the substring or
+sequence, which defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Liquid"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Liquid"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Liquid"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">beatles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"John, Paul, George, Ringo"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">beatles</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">" "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id69">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id69" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>L
+q
+quid
+Paul George
+</pre></div>
+</div>
+</div>
+<p>If the first argument is negative, the start index is counted from the end of the
+sequence.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Liquid"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">-3</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Liquid"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">beatles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"John, Paul, George, Ringo"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">beatles</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">slice</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">" "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id70">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id70" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>u
+ui
+George Ringo
+</pre></div>
+</div>
+</div>
+</section>
+<section id="sort">
+<h2>sort<a class="headerlink" href="#sort" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | sort[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input array with its elements sorted.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">my_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"zebra, octopus, giraffe, Sally Snake"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">my_array</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">sort</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id71">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id71" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Sally Snake, giraffe, octopus, zebra
+</pre></div>
+</div>
+</div>
+<p>The optional argument is a sort key. If given, it should be the name of a property and the
+filter’s input should be an array of objects.</p>
+<div class="literal-block-wrapper docutils container" id="id72">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id72" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"collection"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Shoe"</span><span class="p">,</span><span class="w"> </span><span class="nt">"price"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9.95"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Tie"</span><span class="p">,</span><span class="w"> </span><span class="nt">"price"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.50"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Hat"</span><span class="p">,</span><span class="w"> </span><span class="nt">"price"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2.50"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id73">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id73" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">products_by_price</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">sort</span><span class="p">:</span><span class="w"> </span><span class="s2">"price"</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">products_by_price</span><span class="w"> </span><span class="p">%}</span>
+  &lt;h4&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>&lt;/h4&gt;
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id74">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id74" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;h4&gt;A Tie&lt;/h4&gt;
+&lt;h4&gt;A Hat&lt;/h4&gt;
+&lt;h4&gt;A Shoe&lt;/h4&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="sort-natural">
+<h2>sort_natural<a class="headerlink" href="#sort-natural" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | sort_natural[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input array with its elements sorted case-insensitively. Array items
+will be compared by their string representations, forced to lowercase.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">my_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"zebra, octopus, giraffe, Sally Snake"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">my_array</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">sort_natural</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id75">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id75" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>giraffe, octopus, Sally Snake, zebra
+</pre></div>
+</div>
+</div>
+<p>The optional argument is a sort key. If given, it should be the name of a property and the
+filter’s input should be an array of objects. Array elements are compared using the
+lowercase string representation of that property.</p>
+<div class="literal-block-wrapper docutils container" id="id76">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id76" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"collection"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Shoe"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cool Shoes"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Tie"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha Ties"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Hat"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Beta Hats"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id77">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id77" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">products_by_company</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">sort_natural</span><span class="p">:</span><span class="w"> </span><span class="s2">"company"</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">products_by_company</span><span class="w"> </span><span class="p">%}</span>
+  &lt;h4&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>&lt;/h4&gt;
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id78">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id78" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;h4&gt;A Tie&lt;/h4&gt;
+&lt;h4&gt;A Hat&lt;/h4&gt;
+&lt;h4&gt;A Shoe&lt;/h4&gt;
+</pre></div>
+</div>
+</div>
+</section>
+<section id="split">
+<h2>split<a class="headerlink" href="#split" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | split: &lt;string&gt;
+</pre></div>
+</div>
+<p>Return an array of strings that are the input string split on the filter’s argument
+string.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">beatles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"John, Paul, George, Ringo"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">member</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">beatles</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{-</span><span class="w"> </span><span class="nx">member</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id79">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id79" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>John
+Paul
+George
+Ringo
+</pre></div>
+</div>
+</div>
+<p>If the argument is undefined or an empty string, the input will be split at every
+character.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Hello there"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="nx">nosuchthing</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">"#"</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id80">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id80" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>H#e#l#l#o# #t#h#e#r#e
+</pre></div>
+</div>
+</div>
+</section>
+<section id="squish">
+<h2>squish<a class="headerlink" href="#squish" title="Link to this heading">¶</a></h2>
+<p><strong>New in version 2.2.0</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | squish
+</pre></div>
+</div>
+<p>Return the input string with all leading and trailing whitespace removed, and any other
+runs of whitespace replaced with a single space.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"    Hello, </span><span class="se">\n\t</span><span class="s2"> World! </span><span class="se">\r\n</span><span class="s2">"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">squish</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id81">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id81" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Hello, World!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="strip">
+<h2>strip<a class="headerlink" href="#strip" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | strip
+</pre></div>
+</div>
+<p>Return the input string with all leading and trailing whitespace removed. If the input is
+not a string, it will be converted to a string before stripping whitespace.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"          So much room for activities          "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">strip</span><span class="w"> </span><span class="p">}}</span>!
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id82">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id82" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>So much room for activities!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="strip-html">
+<h2>strip_html<a class="headerlink" href="#strip-html" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | strip_html
+</pre></div>
+</div>
+<p>Return the input string with all HTML tags removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Have &lt;em&gt;you&lt;/em&gt; read &lt;strong&gt;Ulysses&lt;/strong&gt;?"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">strip_html</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id83">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id83" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Have you read Ulysses?
+</pre></div>
+</div>
+</div>
+</section>
+<section id="strip-newlines">
+<h2>strip_newlines<a class="headerlink" href="#strip-newlines" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | strip_newlines
+</pre></div>
+</div>
+<p>Return the input string with <code class="docutils literal notranslate"><span class="pre">\n</span></code> and <code class="docutils literal notranslate"><span class="pre">\r\n</span></code> removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">capture</span><span class="w"> </span><span class="nx">string_with_newlines</span><span class="w"> </span><span class="p">%}</span>
+Hello
+there
+<span class="p">{%</span><span class="w"> </span><span class="nt">endcapture</span><span class="w"> </span><span class="p">-%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">string_with_newlines</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">strip_newlines</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id84">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id84" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Hellothere
+</pre></div>
+</div>
+</div>
+</section>
+<section id="sum">
+<h2>sum<a class="headerlink" href="#sum" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | sum[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return the sum of all numeric elements in an array.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'1,2,3'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s1">','</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">array</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">sum</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id85">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id85" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>6
+</pre></div>
+</div>
+</div>
+<p>If the optional string argument is given, it is assumed that array items are
+hash/dict/mapping-like, and the argument should be the name of a property/key. The values
+at <code class="docutils literal notranslate"><span class="pre">array[property]</span></code> will be summed.</p>
+</section>
+<section id="times">
+<h2>times<a class="headerlink" href="#times" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;number&gt; | times: &lt;number&gt;
+</pre></div>
+</div>
+<p>Return the product of the input number and the argument. If either the input or argument
+are not a number, Liquid will try to convert them to a number. If that conversion fails,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> is used instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">times</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"24"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">times</span><span class="p">:</span><span class="w"> </span><span class="s2">"7"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mf">183.357</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">times</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id86">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id86" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>6
+168
+2200.284
+</pre></div>
+</div>
+</div>
+</section>
+<section id="truncate">
+<h2>truncate<a class="headerlink" href="#truncate" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | truncate[: &lt;integer&gt;[, &lt;string&gt;]]
+</pre></div>
+</div>
+<p>Return a truncated version of the input string. The first argument, length, defaults to
+<code class="docutils literal notranslate"><span class="pre">50</span></code>. The second argument defaults to an ellipsis (<code class="docutils literal notranslate"><span class="pre">...</span></code>).</p>
+<p>If the length of the input string is less than the given length (first argument), the
+input string will be truncated to <code class="docutils literal notranslate"><span class="pre">length</span></code> minus the length of the second argument, with
+the second argument appended.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncate</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncate</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="s2">", and so on"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncate</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id87">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id87" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Ground control to...
+Ground control, and so on
+Ground control to Ma
+</pre></div>
+</div>
+</div>
+</section>
+<section id="truncatewords">
+<h2>truncatewords<a class="headerlink" href="#truncatewords" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | truncatewords[: &lt;integer&gt;[, &lt;string&gt;]]
+</pre></div>
+</div>
+<p>Return the input string truncated to the specified number of words, with the second
+argument appended. The number of words (first argument) defaults to <code class="docutils literal notranslate"><span class="pre">15</span></code>. The second
+argument defaults to an ellipsis (<code class="docutils literal notranslate"><span class="pre">...</span></code>).</p>
+<p>If the input string already has fewer than the given number of words, it is returned
+unchanged.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncatewords</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncatewords</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s2">"--"</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="s2">"Ground control to Major Tom."</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">truncatewords</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id88">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id88" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Ground control to...
+Ground control to--
+Ground control to
+</pre></div>
+</div>
+</div>
+</section>
+<section id="uniq">
+<h2>uniq<a class="headerlink" href="#uniq" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | uniq[: &lt;string&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input array with duplicate elements removed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">my_array</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"ants, bugs, bees, bugs, ants"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{{</span><span class="w"> </span><span class="nx">my_array</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">uniq</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">join</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id89">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id89" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ants, bugs, bees
+</pre></div>
+</div>
+</div>
+<p>If an argument is given, it should be the name of a property and the filter’s input should
+be an array of objects.</p>
+<div class="literal-block-wrapper docutils container" id="id90">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id90" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"collection"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Shoe"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cool Shoes"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Tie"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha Ties"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Another Tie"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alpha Ties"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A Hat"</span><span class="p">,</span><span class="w"> </span><span class="nt">"company"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Beta Hats"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id91">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id91" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">one_product_from_each_company</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">collections</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">uniq</span><span class="p">:</span><span class="w"> </span><span class="s2">"company"</span><span class="w"> </span><span class="p">-%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">one_product_from_each_company</span><span class="w"> </span><span class="p">-%}</span>
+  - product.title
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id92">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id92" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- A Shoe
+- A Tie
+- A Hat
+</pre></div>
+</div>
+</div>
+</section>
+<section id="upcase">
+<h2>upcase<a class="headerlink" href="#upcase" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | upcase
+</pre></div>
+</div>
+<p>Return the input string with all characters in uppercase.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s1">'Hello, World!'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id93">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id93" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>HELLO, WORLD!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="url-decode">
+<h2>url_decode<a class="headerlink" href="#url-decode" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | url_decode
+</pre></div>
+</div>
+<p>Return the input string with <code class="docutils literal notranslate"><span class="pre">%xx</span></code> escapes replaced with their single-character
+equivalents. Also replaces <code class="docutils literal notranslate"><span class="pre">'+'</span></code> with <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">'</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"My+email+address+is+bob%40example.com%21"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">url_decode</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id94">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id94" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>My email address is bob@example.com!
+</pre></div>
+</div>
+</div>
+</section>
+<section id="url-encode">
+<h2>url_encode<a class="headerlink" href="#url-encode" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;string&gt; | url_encode
+</pre></div>
+</div>
+<p>Return the input string with URL reserved characters %-escaped. Also replaces <code class="docutils literal notranslate"><span class="pre">'</span> <span class="pre">'</span></code> with
+<code class="docutils literal notranslate"><span class="pre">'+'</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="s2">"My email address is bob@example.com!"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">url_encode</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id95">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id95" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>My+email+address+is+bob%40example.com%21
+</pre></div>
+</div>
+</div>
+</section>
+<section id="where">
+<h2>where<a class="headerlink" href="#where" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;array&gt; | where: &lt;string&gt;[, &lt;object&gt;]
+</pre></div>
+</div>
+<p>Return a copy of the input array including only those objects that have a property, named
+with the first argument, equal to a value, given as the second argument. If a second
+argument is not given, only elements with the named property that are truthy will be
+included.</p>
+<div class="literal-block-wrapper docutils container" id="id96">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id96" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Vacuum"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"house"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Spatula"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Television"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lounge"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Garlic press"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="p">,</span><span class="w"> </span><span class="nt">"available"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>All products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">kitchen_products</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">where</span><span class="p">:</span><span class="w"> </span><span class="s2">"type"</span><span class="p">,</span><span class="w"> </span><span class="s2">"kitchen"</span><span class="w"> </span><span class="p">-%}</span>
+
+Kitchen products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">kitchen_products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%-</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">available_products</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">where</span><span class="p">:</span><span class="w"> </span><span class="s2">"available"</span><span class="w"> </span><span class="p">-%}</span>
+
+Available products:
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">available_products</span><span class="w"> </span><span class="p">-%}</span>
+- <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id97">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id97" title="Link to this code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>All products:
+- Vacuum
+- Spatula
+- Television
+- Garlic press
+
+Kitchen products:
+- Spatula
+- Garlic press
+
+Available product:
+- Vacuum
+- Television
+- Garlic press
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="extra_filters.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Extra filters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="extra_tags.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Extra tags</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, James Prior
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/jg-rp/liquid" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Standard filters</a><ul>
+<li><a class="reference internal" href="#abs">abs</a></li>
+<li><a class="reference internal" href="#append">append</a></li>
+<li><a class="reference internal" href="#at-least">at_least</a></li>
+<li><a class="reference internal" href="#at-most">at_most</a></li>
+<li><a class="reference internal" href="#capitalize">capitalize</a></li>
+<li><a class="reference internal" href="#ceil">ceil</a></li>
+<li><a class="reference internal" href="#compact">compact</a></li>
+<li><a class="reference internal" href="#concat">concat</a></li>
+<li><a class="reference internal" href="#date">date</a></li>
+<li><a class="reference internal" href="#default">default</a></li>
+<li><a class="reference internal" href="#divided-by">divided_by</a></li>
+<li><a class="reference internal" href="#downcase">downcase</a></li>
+<li><a class="reference internal" href="#escape">escape</a></li>
+<li><a class="reference internal" href="#escapejs">escapejs</a></li>
+<li><a class="reference internal" href="#escape-once">escape_once</a></li>
+<li><a class="reference internal" href="#find">find</a></li>
+<li><a class="reference internal" href="#find-index">find_index</a></li>
+<li><a class="reference internal" href="#first">first</a></li>
+<li><a class="reference internal" href="#floor">floor</a></li>
+<li><a class="reference internal" href="#has">has</a></li>
+<li><a class="reference internal" href="#join">join</a></li>
+<li><a class="reference internal" href="#last">last</a></li>
+<li><a class="reference internal" href="#lstrip">lstrip</a></li>
+<li><a class="reference internal" href="#map">map</a></li>
+<li><a class="reference internal" href="#minus">minus</a></li>
+<li><a class="reference internal" href="#modulo">modulo</a></li>
+<li><a class="reference internal" href="#newline-to-br">newline_to_br</a></li>
+<li><a class="reference internal" href="#plus">plus</a></li>
+<li><a class="reference internal" href="#prepend">prepend</a></li>
+<li><a class="reference internal" href="#reject">reject</a></li>
+<li><a class="reference internal" href="#remove">remove</a></li>
+<li><a class="reference internal" href="#remove-first">remove_first</a></li>
+<li><a class="reference internal" href="#remove-last">remove_last</a></li>
+<li><a class="reference internal" href="#replace">replace</a></li>
+<li><a class="reference internal" href="#replace-first">replace_first</a></li>
+<li><a class="reference internal" href="#replace-last">replace_last</a></li>
+<li><a class="reference internal" href="#reverse">reverse</a></li>
+<li><a class="reference internal" href="#round">round</a></li>
+<li><a class="reference internal" href="#rstrip">rstrip</a></li>
+<li><a class="reference internal" href="#safe">safe</a></li>
+<li><a class="reference internal" href="#size">size</a></li>
+<li><a class="reference internal" href="#slice">slice</a></li>
+<li><a class="reference internal" href="#sort">sort</a></li>
+<li><a class="reference internal" href="#sort-natural">sort_natural</a></li>
+<li><a class="reference internal" href="#split">split</a></li>
+<li><a class="reference internal" href="#squish">squish</a></li>
+<li><a class="reference internal" href="#strip">strip</a></li>
+<li><a class="reference internal" href="#strip-html">strip_html</a></li>
+<li><a class="reference internal" href="#strip-newlines">strip_newlines</a></li>
+<li><a class="reference internal" href="#sum">sum</a></li>
+<li><a class="reference internal" href="#times">times</a></li>
+<li><a class="reference internal" href="#truncate">truncate</a></li>
+<li><a class="reference internal" href="#truncatewords">truncatewords</a></li>
+<li><a class="reference internal" href="#uniq">uniq</a></li>
+<li><a class="reference internal" href="#upcase">upcase</a></li>
+<li><a class="reference internal" href="#url-decode">url_decode</a></li>
+<li><a class="reference internal" href="#url-encode">url_encode</a></li>
+<li><a class="reference internal" href="#where">where</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=acc74ff5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>

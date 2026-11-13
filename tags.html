@@ -1,0 +1,1292 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Extra tags" href="extra_tags.html"><link rel="prev" title="Migration guide" href="migration.html">
+        <link rel="prefetch" href="_static/logo_light.png" as="image">
+        <link rel="prefetch" href="_static/logo_dark.png" as="image">
+
+    <!-- Generated with Sphinx 9.2.0 and Furo 2025.12.19 -->
+        <title>Standard tags - liquid 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: black;
+  --color-brand-content: #024bb0;
+  --color-foreground-muted: #808080;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #ffffcc;
+  --color-sidebar-link-text: black;
+  --color-sidebar-link-text--top-level: black;
+  --color-link: #024bb0;
+  --color-link--hover: #024bb0;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #024bb0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ffffff;
+  --color-brand-content: #5192d2;
+  --color-highlight-on-target: inherit;
+  --color-highlighted-background: #333300;
+  --color-sidebar-link-text: #ffffffcc;
+  --color-sidebar-link-text--top-level: #ffffffcc;
+  --color-link: #5192d2;
+  --color-link--hover: #5192d2;
+  --color-link-underline: transparent;
+  --color-link-underline--hover: #5192d2;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">liquid 3.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/logo_light.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/logo_dark.png" alt="Dark Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configure.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loaders.html">Template loaders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Liquid data model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Extended expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migration guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tag reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Standard tags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_tags.html">Extra tags</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Filter reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="filters.html">Standard filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extra_filters.html">Extra filters</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loader_api.html">Loader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drop_api.html">Drop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="babel.html">Babel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag_api.html">Tag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter_api.html">Filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/tags.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="standard-tags">
+<h1>Standard tags<a class="headerlink" href="#standard-tags" title="Link to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page describes “standard” tags. Python Liquid also has some extra tags and
+extended expression syntax that are disabled by default. See <a class="reference internal" href="extra_tags.html"><span class="doc">Extra tags</span></a>
+and <a class="reference internal" href="expressions.html"><span class="doc">Extended expressions</span></a> for documentation on non-standard features.</p>
+</div>
+<section id="comments">
+<h2>Comments<a class="headerlink" href="#comments" title="Link to this heading">¶</a></h2>
+<p>Comments can be used to add documentation to your templates or “comment out” chunks of
+Liquid markup and text so that it wont be rendered.</p>
+<section id="block-comments">
+<h3>Block comments<a class="headerlink" href="#block-comments" title="Link to this heading">¶</a></h3>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span><span class="c"> ... </span><span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Block comments start with the <code class="docutils literal notranslate"><span class="pre">comment</span></code> tag and end with the <code class="docutils literal notranslate"><span class="pre">endcomment</span></code> tag. It is
+OK for comment text to contain matching <code class="docutils literal notranslate"><span class="pre">comment</span></code> / <code class="docutils literal notranslate"><span class="pre">endcomment</span></code> or <code class="docutils literal notranslate"><span class="pre">raw</span></code> /
+<code class="docutils literal notranslate"><span class="pre">endraw</span></code> pairs, but it’s a syntax error if <code class="docutils literal notranslate"><span class="pre">comment</span></code> or <code class="docutils literal notranslate"><span class="pre">raw</span></code> tags are unbalanced.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span><span class="c">This is a comment</span><span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">comment</span><span class="w"> </span><span class="p">%}</span>
+<span class="c">    Comments can</span>
+<span class="c">    span</span>
+<span class="c">    multiple lines</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endcomment</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="inline-comments">
+<h3>Inline comments<a class="headerlink" href="#inline-comments" title="Link to this heading">¶</a></h3>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="c"># ... </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>An inline comment is a tag named <code class="docutils literal notranslate"><span class="pre">#</span></code>. Everything after the hash up to the end tag
+delimiter (<code class="docutils literal notranslate"><span class="pre">%}</span></code>) is comment text. Text can span multiple lines, but each line must
+start with a <code class="docutils literal notranslate"><span class="pre">#</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="c"># This is a comment </span><span class="p">%}</span>
+<span class="p">{%-</span>
+<span class="w">  </span><span class="c"># Comments can span multiple lines,</span>
+<span class="c">  # but every line must start with a hash.</span>
+<span class="p">-%}</span>
+</pre></div>
+</div>
+<p>Inside <a class="reference internal" href="#liquid">liquid</a>, any line starting with a hash will be considered a comment.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+<span class="w">  </span><span class="c"># This is a comment</span>
+<span class="w">  </span><span class="nt">echo</span><span class="w"> </span><span class="s2">"Hello"</span>
+<span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="doc-comments">
+<h2>Doc comments<a class="headerlink" href="#doc-comments" title="Link to this heading">¶</a></h2>
+<p><strong>New in version 2.0.0</strong></p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">doc</span><span class="w"> </span><span class="p">%}</span> ... <span class="p">{%</span><span class="w"> </span><span class="nt">enddoc</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Like <a class="reference internal" href="#block-comments">Block comments</a>, doc comments are not rendered. Doc comments are designed to be
+read by tooling to improve Liquid template development.</p>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+<p>An expression surrounded by double curly braces (<code class="docutils literal notranslate"><span class="pre">{{</span></code> and <code class="docutils literal notranslate"><span class="pre">}}</span></code>) is an <em>output
+statement</em>. When rendered, the expression will be evaluated and the result inserted into
+the output text.</p>
+<p>In this example the expression is a variable, which will be resolved to a value and the
+value’s string representation will output, but output statements can contain any
+expression.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+</pre></div>
+</div>
+<section id="filters">
+<h3>Filters<a class="headerlink" href="#filters" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{{ &lt;expression&gt; | &lt;filter&gt; [| &lt;filter&gt; ...] }}
+</pre></div>
+</div>
+<p>Values can be modified prior to output using filters. Filters are applied to an
+expression using the pipe operator (<code class="docutils literal notranslate"><span class="pre">|</span></code>), followed by the filter’s name and, possibly,
+some filter arguments. Filter arguments appear after a colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) and are separated by
+commas (<code class="docutils literal notranslate"><span class="pre">,</span></code>).</p>
+<p>Multiple filters can be chained together, effectively piping the output of one filter
+into the input of another. See the <a class="reference internal" href="filters.html"><span class="doc">Standard filters</span></a> for details of all built-in filters.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span><span class="w"> </span><span class="nx">user_name</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">plus</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">modulo</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="assign">
+<h2>assign<a class="headerlink" href="#assign" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% assign &lt;identifier&gt; = &lt;expression&gt; %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">assign</span></code> tag is used to define and initialize variables, or reassign existing
+variables.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bar"</span><span class="w"> </span><span class="p">%}</span>
+foo is equal to <span class="p">{{</span><span class="w"> </span><span class="nx">foo</span><span class="w"> </span><span class="p">}}</span>.
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">%}</span>
+foo is now equal to <span class="p">{{</span><span class="w"> </span><span class="nx">foo</span><span class="w"> </span><span class="p">}}</span>.
+</pre></div>
+</div>
+<p>The expression on the right-hand side of the assignment operator (<code class="docutils literal notranslate"><span class="pre">=</span></code>) follows the
+syntax described in <a class="reference internal" href="#output">Output</a> above, including <a class="reference internal" href="#filters">Filters</a>.</p>
+</section>
+<section id="capture">
+<h2>capture<a class="headerlink" href="#capture" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">capture</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; <span class="p">{%</span><span class="w"> </span><span class="nt">endcapture</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">capture</span></code> tag evaluates the contents of its block and saves the resulting string as
+a new variable, or reassigns an existing variable, without immediately rendering it.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">capture</span><span class="w"> </span><span class="nx">welcome_message</span><span class="w"> </span><span class="p">%}</span>
+    Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">customer</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="p">}}</span>! Welcome to our store.
+<span class="p">{%</span><span class="w"> </span><span class="nt">endcapture</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{{</span><span class="w"> </span><span class="nx">welcome_message</span><span class="w"> </span><span class="p">}}</span>
+</pre></div>
+</div>
+</section>
+<section id="case">
+<h2>case<a class="headerlink" href="#case" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+    [ <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; ] ...
+    [ <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; ]
+<span class="p">{%</span><span class="w"> </span><span class="kr">endcase</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">case</span></code> tag evaluates an expression, matching the result against one or more
+<code class="docutils literal notranslate"><span class="pre">when</span></code> clauses. In the event of a match, the <code class="docutils literal notranslate"><span class="pre">when</span></code> block is rendered. The <code class="docutils literal notranslate"><span class="pre">else</span></code>
+clause is rendered if no <code class="docutils literal notranslate"><span class="pre">when</span></code> clauses match the <code class="docutils literal notranslate"><span class="pre">case</span></code> expression.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Monday"</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="nx">day</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">"Monday"</span><span class="w"> </span><span class="p">%}</span>
+        Start of the work week!
+    <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">"Friday"</span><span class="w"> </span><span class="p">%}</span>
+        It's almost the weekend!
+    <span class="p">{%</span><span class="w"> </span><span class="kr">when</span><span class="w"> </span><span class="s2">"Saturday"</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"Sunday"</span><span class="w"> </span><span class="p">%}</span>
+        Enjoy your weekend!
+    <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+        Just another weekday.
+<span class="p">{%</span><span class="w"> </span><span class="kr">endcase</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="cycle">
+<h2>cycle<a class="headerlink" href="#cycle" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% cycle [ &lt;string or identifier&gt;: ] &lt;expression&gt; [, &lt;expression&gt; ... ] %}
+</pre></div>
+</div>
+<p>Render the next item the argument list. When items are exhausted, the sequence starts
+again from the beginning.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>You can give <code class="docutils literal notranslate"><span class="pre">cycle</span></code> a name to further distinguish multiple iterators with the same
+items.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">cycle</span><span class="w"> </span><span class="na">inner</span><span class="p">:</span><span class="w"> </span><span class="s1">'odd'</span><span class="p">,</span><span class="w"> </span><span class="s1">'even'</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="decrement">
+<h2>decrement<a class="headerlink" href="#decrement" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">decrement</span></code> tag renders the next value in a named counter, reducing the count by one
+each time. If a counter with the given name does not already exist, it is created
+automatically and initialized to zero, before subtracting 1 and outputting <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">some</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">decrement</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="echo">
+<h2>echo<a class="headerlink" href="#echo" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">echo</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">echo</span></code> is the tag form of an output statement (an expression surrounded by <code class="docutils literal notranslate"><span class="pre">{{</span></code> and
+<code class="docutils literal notranslate"><span class="pre">}}</span></code>). It is mostly used inside <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">liquid</span> <span class="pre">%}</span></code> tags where output statements are not
+allowed.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>Hello, <span class="p">{%</span><span class="w"> </span><span class="nt">echo</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">%}</span>!
+Hello, <span class="p">{{</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="p">}}</span>!
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+<span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span>
+<span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span>
+<span class="w">  </span><span class="kr">endfor</span>
+<span class="p">%}</span>
+</pre></div>
+</div>
+<p>Just like output statements and the <a class="reference internal" href="#assign">assign</a> tag, the expression can include <a class="reference internal" href="#filters">filters</a>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">echo</span><span class="w"> </span><span class="s2">"bar"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">upcase</span><span class="w"> </span><span class="kc">if</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="kc">else</span><span class="w"> </span><span class="s2">"baz"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+<span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span>
+<span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">capitalize</span>
+<span class="w">  </span><span class="kr">endfor</span>
+<span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="for">
+<h2>for<a class="headerlink" href="#for" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% for &lt;identifier&gt; in &lt;expression&gt;
+    [ limit: &lt;expression&gt; ] [ offset: &lt;expression&gt; ] [ reversed ] %}
+  &lt;liquid markup&gt;
+  [ {% else %} &lt;liquid markup&gt; ]
+{% endfor %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">for</span></code> tag is a for-each loop. It renders its block once for each item in an
+iterable. If the iterable is empty and an <code class="docutils literal notranslate"><span class="pre">else</span></code> block given, the <code class="docutils literal notranslate"><span class="pre">else</span></code> block will
+be rendered instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+    No products available
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Range expression are often used with the <code class="docutils literal notranslate"><span class="pre">for</span></code> tag to loop over increasing integers.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">..</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{{</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<section id="limit">
+<h3>limit<a class="headerlink" href="#limit" title="Link to this heading">¶</a></h3>
+<p>If a <code class="docutils literal notranslate"><span class="pre">limit</span></code> argument is given, the loop will stop after the specified number of
+iterations.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="offset">
+<h3>offset<a class="headerlink" href="#offset" title="Link to this heading">¶</a></h3>
+<p>If an <code class="docutils literal notranslate"><span class="pre">offset</span></code> argument is given, it should be an integer specifying how many items to
+skip before starting the loop.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">offset</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">offset</span></code> can also be given the special value <code class="docutils literal notranslate"><span class="pre">&quot;continue&quot;</span></code>, in which case the loop will
+start from where a previous loop with the same iterable left off.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+
+<span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">offset</span><span class="p">:</span><span class="w"> </span><span class="s2">"continue"</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>!
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="reversed">
+<h3>reversed<a class="headerlink" href="#reversed" title="Link to this heading">¶</a></h3>
+<p>If the reversed flag is given, the target iterable will be iterated in reverse order.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="kc">reversed</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="break">
+<h3>break<a class="headerlink" href="#break" title="Link to this heading">¶</a></h3>
+<p>You can exit a loop early using the <code class="docutils literal notranslate"><span class="pre">break</span></code> tag.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Shirt"</span><span class="w"> </span><span class="p">%}</span>
+        <span class="p">{%</span><span class="w"> </span><span class="nt">break</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="continue">
+<h3>continue<a class="headerlink" href="#continue" title="Link to this heading">¶</a></h3>
+<p>You can skip all or part of a loop iteration with the <code class="docutils literal notranslate"><span class="pre">continue</span></code> tag.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Shirt"</span><span class="w"> </span><span class="p">%}</span>
+        <span class="p">{%</span><span class="w"> </span><span class="nt">continue</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+    - <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="forloop">
+<h3>forloop<a class="headerlink" href="#forloop" title="Link to this heading">¶</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">forloop</span></code> object is available inside every <code class="docutils literal notranslate"><span class="pre">for</span></code> tag block.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>The loop variable name and target identifier, separated by a
+hyphen.</p></td>
+<td><p>string</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p>The length of the sequence being iterated.</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">index</span></code></p></td>
+<td><p>The 1-base index of the current iteration.</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">index0</span></code></p></td>
+<td><p>The 0-base index of the current iteration.</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rindex</span></code></p></td>
+<td><p>The 1-base index of the current iteration counting from the end.</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rindex0</span></code></p></td>
+<td><p>The 0-base index of the current iteration counting from the end.</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">first</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the current iteration is the first, <code class="docutils literal notranslate"><span class="pre">false</span></code>
+otherwise.</p></td>
+<td><p>bool</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">last</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> is the current iteration is the last, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise.</p></td>
+<td><p>bool</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parentloop</span></code></p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">forloop</span></code> object of an enclosing <code class="docutils literal notranslate"><span class="pre">for</span></code> loop.</p></td>
+<td><p>forloop</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+      &lt;b&gt;<span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>&lt;/b&gt; - <span class="p">{{</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">index0</span><span class="w"> </span><span class="p">}}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+      <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span> - <span class="p">{{</span><span class="w"> </span><span class="nx">forloop</span><span class="p">.</span><span class="nx">index0</span><span class="w"> </span><span class="p">}}</span>
+    <span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="kr">endfor</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="if">
+<h2>if<a class="headerlink" href="#if" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+  &lt;liquid markup&gt;
+  [ <span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; [ <span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> ... ]]
+  [ <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; ... ]
+<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">if</span></code> tag renders its block if its expression is truthy. Any number of <code class="docutils literal notranslate"><span class="pre">elsif</span></code>
+blocks can be given to add alternative branches, and an <code class="docutils literal notranslate"><span class="pre">else</span></code> block is used as a
+default if no preceding conditions were truthy.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"OK Hat"</span><span class="w"> </span><span class="p">%}</span>
+  This hat is OK.
+<span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Rubbish Tie"</span><span class="w"> </span><span class="p">%}</span>
+  This tie is rubbish.
+<span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+  Not sure what this is.
+<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<section id="conditional-expressions">
+<h3>Conditional expressions<a class="headerlink" href="#conditional-expressions" title="Link to this heading">¶</a></h3>
+<p>Any primitive expression can be tested for truthiness, like <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">if</span> <span class="pre">some_variable</span> <span class="pre">%}</span></code>,
+or you can use a combination of the following operators. Only <code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">nil</span></code>,
+<code class="docutils literal notranslate"><span class="pre">null</span></code> and the special <em>undefined</em> object are falsy in Liquid.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Operator</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">==</span></code></p></td>
+<td><p>Equals</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">product.title</span> <span class="pre">==</span> <span class="pre">&quot;Nice</span> <span class="pre">Shoes&quot;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">!=</span></code></p></td>
+<td><p>Not equals</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">user.name</span> <span class="pre">!=</span> <span class="pre">&quot;anonymous&quot;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&gt;</span></code></p></td>
+<td><p>Greater than</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">product.was_price</span> <span class="pre">&gt;</span> <span class="pre">product.price</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;</span></code></p></td>
+<td><p>Less than</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">collection.products.size</span> <span class="pre">&lt;</span> <span class="pre">10</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span></code></p></td>
+<td><p>Greater than or equal to</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">user.age</span> <span class="pre">&gt;=</span> <span class="pre">18</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;=</span></code></p></td>
+<td><p>Less than or equal to</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">basket.size</span> <span class="pre">&lt;=</span> <span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">and</span></code></p></td>
+<td><p>Logical and</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">and</span> <span class="pre">y</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">or</span></code></p></td>
+<td><p>Logical or</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">or</span> <span class="pre">y</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="operator-precedence">
+<h3>Operator precedence<a class="headerlink" href="#operator-precedence" title="Link to this heading">¶</a></h3>
+<p>In Liquid, <code class="docutils literal notranslate"><span class="pre">and</span></code> and <code class="docutils literal notranslate"><span class="pre">or</span></code> operators are right associative. Where
+<code class="docutils literal notranslate"><span class="pre">true</span> <span class="pre">and</span> <span class="pre">false</span> <span class="pre">and</span> <span class="pre">false</span> <span class="pre">or</span> <span class="pre">true</span></code> is equivalent to
+<code class="docutils literal notranslate"><span class="pre">(true</span> <span class="pre">and</span> <span class="pre">(false</span> <span class="pre">and</span> <span class="pre">(false</span> <span class="pre">or</span> <span class="pre">true)))</span></code>, evaluating to <code class="docutils literal notranslate"><span class="pre">false</span></code>. Python, on the other
+hand, would parse the same expression as <code class="docutils literal notranslate"><span class="pre">(((true</span> <span class="pre">and</span> <span class="pre">false)</span> <span class="pre">and</span> <span class="pre">false)</span> <span class="pre">or</span> <span class="pre">true)</span></code>,
+evaluating to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+</section>
+<section id="include">
+<h2>include<a class="headerlink" href="#include" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% include &lt;template name&gt;
+    [ ( with | for ) &lt;expression&gt; [ as &lt;identifier&gt; ]]
+    [[,] &lt;identifier&gt;: &lt;expression&gt; [, [&lt;identifier&gt;: &lt;expression&gt; ... ]]]
+%}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">include</span></code> tag loads and renders a named template, inserting the result in its
+place. The name of the template to include can be a string literal or a variable
+resolving to a string. When rendered, the included template will share the same scope as
+the calling template.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">"snippets/header.html"</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<section id="with">
+<h3>with<a class="headerlink" href="#with" title="Link to this heading">¶</a></h3>
+<p>Using the optional <code class="docutils literal notranslate"><span class="pre">with</span></code> syntax, we can bind a value to a variable that will be in
+scope for the included template. By default, that variable will be the name of the
+included template. Alternatively we can specify the variable to use with the <code class="docutils literal notranslate"><span class="pre">as</span></code>
+keyword followed by an identifier.</p>
+<p>Here, the template named <code class="docutils literal notranslate"><span class="pre">greeting</span></code> will have access to a variable called <code class="docutils literal notranslate"><span class="pre">greeting</span></code>
+with the value <code class="docutils literal notranslate"><span class="pre">&quot;Hello&quot;</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Hello,Goodbye"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">","</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">"greeting"</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="nx">greetings</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="for-1">
+<span id="id1"></span><h3>for<a class="headerlink" href="#for-1" title="Link to this heading">¶</a></h3>
+<p>If an array-like object it given following the <code class="docutils literal notranslate"><span class="pre">for</span></code> keyword, the named template will be
+rendered once for each item in the array bound to variable named after the included
+template.</p>
+<p>In this example the template named <code class="docutils literal notranslate"><span class="pre">greeting</span></code> will be rendered once with the variable
+<code class="docutils literal notranslate"><span class="pre">greeting</span></code> set to <code class="docutils literal notranslate"><span class="pre">&quot;Hello&quot;</span></code> and once with the variable <code class="docutils literal notranslate"><span class="pre">greeting</span></code> set to
+<code class="docutils literal notranslate"><span class="pre">&quot;Goodbye&quot;</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Hello, Goodbye"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">"greeting"</span><span class="w"> </span><span class="kc">for</span><span class="w"> </span><span class="nx">greetings</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="keyword-arguments">
+<h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Link to this heading">¶</a></h3>
+<p>Additional keyword arguments given to the <code class="docutils literal notranslate"><span class="pre">include</span></code> tag will be added to the included
+template’s scope, then go out of scope after the included template has been rendered.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="s2">"partial_template"</span><span class="w"> </span><span class="na">greeting</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="na">num</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="na">skip</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="increment">
+<h2>increment<a class="headerlink" href="#increment" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">identifier</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">increment</span></code> tag renders the next value in a named counter, increasing the count by
+one each time. If a counter with the given name does not already exist, it is created
+automatically and initialized to zero, which is output <strong>before</strong> adding <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">some</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">increment</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="liquid">
+<span id="liquid-tag"></span><h2>liquid<a class="headerlink" href="#liquid" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+  &lt;tag name&gt; [&lt;expression&gt;]
+  [ &lt;tag name&gt; [&lt;expression&gt;]]
+  ...
+%}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">liquid</span></code> tag encloses <em>line statements</em>, where each line starts with a tag name and
+is followed by the tag’s expression. Expressions inside <code class="docutils literal notranslate"><span class="pre">liquid</span></code> tags <strong>must</strong> fit on
+one line as we use <code class="docutils literal notranslate"><span class="pre">\n</span></code> as a delimiter indicating the end of the expression.</p>
+<p>Note that output statement syntax (<code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">&lt;expression&gt;</span> <span class="pre">}}</span></code>) is not allowed inside
+<code class="docutils literal notranslate"><span class="pre">liquid</span></code> tags, so you must use the <a class="reference internal" href="#echo">echo</a> tag instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+<span class="w">  </span><span class="nt">assign</span><span class="w"> </span><span class="na">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Brian"</span>
+
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="nx">username</span>
+<span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="s2">"Hello, "</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">append</span><span class="p">:</span><span class="w"> </span><span class="nx">username</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="s2">"Hello, user"</span>
+<span class="w">  </span><span class="kr">endif</span>
+
+<span class="w">  </span><span class="kr">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">..</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="nt">echo</span><span class="w"> </span><span class="nx">i</span>
+<span class="w">  </span><span class="kr">endfor</span>
+<span class="p">%}</span>
+</pre></div>
+</div>
+<p>Also, inside <code class="docutils literal notranslate"><span class="pre">liquid</span></code> tags, any line starting with a hash will be considered a comment.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">liquid</span>
+<span class="w">  </span><span class="c"># This is a comment</span>
+<span class="w">  </span><span class="nt">echo</span><span class="w"> </span><span class="s2">"Hello"</span>
+<span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="raw">
+<h2>raw<a class="headerlink" href="#raw" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">raw</span><span class="w"> </span><span class="p">%}</span> &lt;text&gt; <span class="p">{%</span><span class="w"> </span><span class="nt">endraw</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>Any text between <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">raw</span> <span class="pre">%}</span></code> and <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endraw</span> <span class="pre">%}</span></code> will not be interpreted as Liquid
+markup, but output as plain text instead.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">raw</span><span class="w"> </span><span class="p">%}</span>
+  This will be rendered {{verbatim}}, with the curly brackets.
+<span class="p">{%</span><span class="w"> </span><span class="nt">endraw</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="render">
+<h2>render<a class="headerlink" href="#render" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% render &lt;string&gt;
+    [ ( with | for ) &lt;expression&gt; [ as &lt;identifier&gt; ]]
+    [[,] &lt;identifier&gt;: &lt;expression&gt; [, [&lt;identifier&gt;: &lt;expression&gt; ... ]]]
+%}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">render</span></code> tag loads and renders a named template, inserting the resulting text in its
+place. The name of the template to include <strong>must</strong> be a string literal. When rendered,
+the included template will have its onw scope, without variables define in the calling
+template.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">"snippets/header.html"</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<section id="with-1">
+<span id="id2"></span><h3>with<a class="headerlink" href="#with-1" title="Link to this heading">¶</a></h3>
+<p>Using the optional <code class="docutils literal notranslate"><span class="pre">with</span></code> syntax, we can bind a value to a variable that will be in
+scope for the rendered template. By default, that variable will be the name of the
+rendered template. Alternatively we can specify the variable to use with the <code class="docutils literal notranslate"><span class="pre">as</span></code>
+keyword followed by an identifier.</p>
+<p>Here, the template named <code class="docutils literal notranslate"><span class="pre">greeting</span></code> will have access to a variable called <code class="docutils literal notranslate"><span class="pre">greeting</span></code>
+with the value <code class="docutils literal notranslate"><span class="pre">&quot;Hello&quot;</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Hello,Goodbye"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">","</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">"greeting"</span><span class="w"> </span><span class="kc">with</span><span class="w"> </span><span class="nx">greetings</span><span class="p">.</span><span class="nx">first</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="for-2">
+<span id="id3"></span><h3>for<a class="headerlink" href="#for-2" title="Link to this heading">¶</a></h3>
+<p>If an array-like object is given following the <code class="docutils literal notranslate"><span class="pre">for</span></code> keyword, the named template will be
+rendered once for each item in the sequence and, like <code class="docutils literal notranslate"><span class="pre">with</span></code> above, the item value will
+be bound to a variable named after the rendered template.</p>
+<p>In this example the template named <code class="docutils literal notranslate"><span class="pre">greeting</span></code> will be rendered once with the variable
+<code class="docutils literal notranslate"><span class="pre">greeting</span></code> set to <code class="docutils literal notranslate"><span class="pre">&quot;Hello&quot;</span></code> and once with the variable <code class="docutils literal notranslate"><span class="pre">greeting</span></code> set to
+<code class="docutils literal notranslate"><span class="pre">&quot;Goodbye&quot;</span></code>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">assign</span><span class="w"> </span><span class="na">greetings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Hello, Goodbye"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">split</span><span class="p">:</span><span class="w"> </span><span class="s2">", "</span><span class="w"> </span><span class="p">%}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">"greeting"</span><span class="w"> </span><span class="kc">for</span><span class="w"> </span><span class="nx">greetings</span><span class="w"> </span><span class="kc">as</span><span class="w"> </span><span class="nx">greeting</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+<section id="keyword-arguments-1">
+<span id="id4"></span><h3>Keyword arguments<a class="headerlink" href="#keyword-arguments-1" title="Link to this heading">¶</a></h3>
+<p>Additional keyword arguments given to the <code class="docutils literal notranslate"><span class="pre">render</span></code> tag will be added to the rendered
+template’s scope, then go out of scope after the it has been rendered.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">render</span><span class="w"> </span><span class="s2">"partial_template"</span><span class="w"> </span><span class="na">greeting</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="p">,</span><span class="w"> </span><span class="na">num</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="na">skip</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="tablerow">
+<h2>tablerow<a class="headerlink" href="#tablerow" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% tablerow &lt;identifier&gt; in &lt;expression&gt;
+    [ cols: &lt;expression&gt; ] [ limit: &lt;expression&gt; ] [ offset: &lt;expression&gt; ] %}
+  &lt;liquid markup&gt;
+{% endtablerow %}
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">tablerow</span></code> tag renders HTML <code class="docutils literal notranslate"><span class="pre">&lt;tr&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;td&gt;</span></code> elements for each item in an
+iterable. Text inside <code class="docutils literal notranslate"><span class="pre">&lt;td&gt;</span></code> elements will be the result of rendering the tag’s block.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">data</span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"collection"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"products"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cool Shirt"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alien Poster"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Batman Poster"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bullseye Shirt"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Another Classic Vinyl"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Awesome Jeans"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;table&gt;
+<span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+&lt;/table&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col3"</span><span class="p">&gt;</span>Batman Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col4"</span><span class="p">&gt;</span>Bullseye Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col5"</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col6"</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<section id="cols">
+<h3>cols<a class="headerlink" href="#cols" title="Link to this heading">¶</a></h3>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">tablerow</span></code> will output one row with one column for each item in the
+sequence. Use the <code class="docutils literal notranslate"><span class="pre">cols</span></code> parameter to set the number of columns.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">cols</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row2"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Batman Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Bullseye Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row3"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id5">
+<h3>limit<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">limit</span></code> is specified, the <code class="docutils literal notranslate"><span class="pre">tablerow</span></code> loop will stop after the given number of
+iterations.</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;table&gt;
+<span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">limit</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+&lt;/table&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Cool Shirt<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Alien Poster<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id6">
+<h3>offset<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">offset</span></code> is specified, <cite>offset</cite> items will be skipped from the start of the target
+iterable.</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id14" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span>&lt;table&gt;
+<span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">offset</span><span class="p">:</span><span class="mi">4</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+&lt;/table&gt;
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Another Classic Vinyl<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Awesome Jeans<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="tablerowloop">
+<h3>tablerowloop<a class="headerlink" href="#tablerowloop" title="Link to this heading">¶</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">tablerowloop</span></code> object is available inside every <code class="docutils literal notranslate"><span class="pre">tablerow</span></code> block.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Property</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p>The length of the sequence being iterated</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">index</span></code></p></td>
+<td><p>The 1-base index of the current iteration</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">index0</span></code></p></td>
+<td><p>The 0-base index of the current iteration</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rindex</span></code></p></td>
+<td><p>The 1-base index of the current iteration counting from the end</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rindex0</span></code></p></td>
+<td><p>The 0-base index of the current iteration counting from the end</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">first</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the current iteration is the first, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise</p></td>
+<td><p>bool</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">last</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> is the current iteration is the last, <code class="docutils literal notranslate"><span class="pre">false</span></code> otherwise</p></td>
+<td><p>bool</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">col</span></code></p></td>
+<td><p>The 1-based column number</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">col0</span></code></p></td>
+<td><p>The 0-based column number</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">col_first</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the current column is the first column, <code class="docutils literal notranslate"><span class="pre">false</span></code>
+otherwise</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">col_last</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the current column is the last column, <code class="docutils literal notranslate"><span class="pre">false</span></code>
+otherwise</p></td>
+<td><p>integer</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">row</span></code></p></td>
+<td><p>The current row number of the table</p></td>
+<td><p>integer</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">template</span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="nt">tablerow</span><span class="w"> </span><span class="nx">product</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">collection</span><span class="p">.</span><span class="nx">products</span><span class="w"> </span><span class="na">cols</span><span class="p">:</span><span class="mi">2</span><span class="w"> </span><span class="p">%}</span>
+  <span class="p">{{</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="p">}}</span> - <span class="p">{{</span><span class="w"> </span><span class="nx">tablerowloop</span><span class="p">.</span><span class="nx">col0</span><span class="w"> </span><span class="p">}}</span>
+<span class="p">{%</span><span class="w"> </span><span class="nt">endtablerow</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">output</span><a class="headerlink" href="#id17" title="Link to this code">¶</a></div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Cool Shirt - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Alien Poster - 1<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row2"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Batman Poster - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Bullseye Shirt - 1<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">"row3"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col1"</span><span class="p">&gt;</span>Another Classic Vinyl - 0<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span> <span class="na">class</span><span class="o">=</span><span class="s">"col2"</span><span class="p">&gt;</span>Awesome Jeans - 1<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="unless">
+<h2>unless<a class="headerlink" href="#unless" title="Link to this heading">¶</a></h2>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">unless</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span>
+  &lt;liquid markup&gt;
+  [ <span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; [ <span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">expression</span><span class="o">&gt;</span><span class="w"> </span><span class="p">%}</span> ... ]]
+  [ <span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span> &lt;liquid markup&gt; ... ]
+<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">unless</span></code> tag renders its block if its expression is falsy. Otherwise <code class="docutils literal notranslate"><span class="pre">unless</span></code>
+behaves the same as <a class="reference internal" href="#if">if</a>. See <a class="reference internal" href="#conditional-expressions">Conditional expressions</a>.</p>
+<div class="highlight-liquid2 notranslate"><div class="highlight"><pre><span></span><span class="p">{%</span><span class="w"> </span><span class="kr">unless</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"OK Hat"</span><span class="w"> </span><span class="p">%}</span>
+  This hat is OK.
+<span class="p">{%</span><span class="w"> </span><span class="kr">elsif</span><span class="w"> </span><span class="nx">product</span><span class="p">.</span><span class="nx">title</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Rubbish Tie"</span><span class="w"> </span><span class="p">%}</span>
+  This tie is rubbish.
+<span class="p">{%</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">%}</span>
+  Not sure what this is.
+<span class="p">{%</span><span class="w"> </span><span class="kr">endif</span><span class="w"> </span><span class="p">%}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="extra_tags.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Extra tags</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="migration.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Migration guide</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, James Prior
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/jg-rp/liquid" aria-label="GitHub"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Standard tags</a><ul>
+<li><a class="reference internal" href="#comments">Comments</a><ul>
+<li><a class="reference internal" href="#block-comments">Block comments</a></li>
+<li><a class="reference internal" href="#inline-comments">Inline comments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#doc-comments">Doc comments</a></li>
+<li><a class="reference internal" href="#output">Output</a><ul>
+<li><a class="reference internal" href="#filters">Filters</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#assign">assign</a></li>
+<li><a class="reference internal" href="#capture">capture</a></li>
+<li><a class="reference internal" href="#case">case</a></li>
+<li><a class="reference internal" href="#cycle">cycle</a></li>
+<li><a class="reference internal" href="#decrement">decrement</a></li>
+<li><a class="reference internal" href="#echo">echo</a></li>
+<li><a class="reference internal" href="#for">for</a><ul>
+<li><a class="reference internal" href="#limit">limit</a></li>
+<li><a class="reference internal" href="#offset">offset</a></li>
+<li><a class="reference internal" href="#reversed">reversed</a></li>
+<li><a class="reference internal" href="#break">break</a></li>
+<li><a class="reference internal" href="#continue">continue</a></li>
+<li><a class="reference internal" href="#forloop">forloop</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#if">if</a><ul>
+<li><a class="reference internal" href="#conditional-expressions">Conditional expressions</a></li>
+<li><a class="reference internal" href="#operator-precedence">Operator precedence</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#include">include</a><ul>
+<li><a class="reference internal" href="#with">with</a></li>
+<li><a class="reference internal" href="#for-1">for</a></li>
+<li><a class="reference internal" href="#keyword-arguments">Keyword arguments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#increment">increment</a></li>
+<li><a class="reference internal" href="#liquid">liquid</a></li>
+<li><a class="reference internal" href="#raw">raw</a></li>
+<li><a class="reference internal" href="#render">render</a><ul>
+<li><a class="reference internal" href="#with-1">with</a></li>
+<li><a class="reference internal" href="#for-2">for</a></li>
+<li><a class="reference internal" href="#keyword-arguments-1">Keyword arguments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tablerow">tablerow</a><ul>
+<li><a class="reference internal" href="#cols">cols</a></li>
+<li><a class="reference internal" href="#id5">limit</a></li>
+<li><a class="reference internal" href="#id6">offset</a></li>
+<li><a class="reference internal" href="#tablerowloop">tablerowloop</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#unless">unless</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=acc74ff5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    </body>
+</html>
