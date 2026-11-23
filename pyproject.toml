@@ -44,7 +44,7 @@ path = "src/liquid/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 exclude = ["/**/.mypy_cache/"]
-packages = ["src/liquid"]
+only-include = ["src/liquid"]
 
 [tool.hatch.build.targets.wheel]
 exclude = ["/**/.mypy_cache/"]
